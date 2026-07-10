@@ -14,6 +14,7 @@ StockSage 是一个本地运行的 AI 投资研究助手，面向求职展示和
 
 - 对话式投研助手：`POST /api/chat/stream` 使用 JSON 请求体和 SSE 流式响应。
 - 多 Agent 分层调度：Coordinator 按问题复杂度分流到直接回答、行情、基本面、新闻或深度研究路径。
+- DEEP 后台研究（WS1）：聊天请求只负责受理与订阅，Redis Stream consumer group 驱动证据、辩论、综合和报告落库；MySQL checkpoint 支持按阶段/辩论轮接管，SSE 用 Redis entry id 断线回放。真实双实例数字仍待脚本验证。
 - 模型分层路由：FAST / STANDARD / STRONG / VISION 模型配置，前端展示最终回答模型。
 - 多模态输入：当前轮可上传或粘贴 PNG/JPG/WebP 图片，图片只用于本轮模型调用，不写入长期历史。
 - RAG 管线：SEC EDGAR 财报入库、Parent-Child 分块、向量检索、关键词检索、RRF 融合、DashScope rerank、引用溯源。
@@ -207,6 +208,23 @@ cd stocksage-backend
 .\mvnw.cmd test
 ```
 
+WS1 双实例验证入口（需要先启动共享 MySQL/Redis；可先只查看清单）：
+
+```powershell
+.\scripts\dual-instance-demo.ps1 -ChecklistOnly
+.\scripts\dual-instance-demo.ps1
+```
+
+脚本在 `8080` / `8081` 启动两个后端子进程，日志写到 `tmp/dual-instance/`，退出时只停止它启动的进程树。设计取舍和未完成的实测项见 [WS1 决策记录](docs/superpowers/specs/2026-07-09-ws1-decisions.md)。
+
+如果宿主机 `3306` 已被本地 MySQL 占用，可保持默认配置不变，仅为本次 Compose/脚本验证改用其他端口：
+
+```powershell
+$env:STOCKSAGE_MYSQL_PORT="3307"
+docker compose up -d mysql redis
+.\scripts\dual-instance-demo.ps1 -MySqlPort 3307
+```
+
 ## 架构概览
 
 ```text
@@ -226,11 +244,22 @@ ChatController -> ChatService
   |       +-> Fundamentals Agent -> SEC EDGAR / RAG / XBRL
   |       +-> Market Agent -> K-line / technical / IBKR read-only
   |       +-> News Agent -> web/news search
-  |       +-> Bull / Bear Researchers -> Research Manager
+  |       +-> DEEP submit -> MySQL ResearchTask -> Redis Stream consumer group
+  |                              |
+  |                              v
+  |                         background worker
+  |                              |
+  |                              +-> evidence -> Bull / Bear -> Research Manager
+  |                              +-> MySQL checkpoint / report / conversation message
+  |                              +-> per-trace Redis Stream
+  |                                         |
+  |                     Last-Event-ID replay + live relay
   |
   v
-SSE chunks: meta / thought / action / observation / chart / model / answer
+SSE chunks: meta / thought / action / observation / chart / model / answer / task-final
 ```
+
+DEEP 的消息体只在队列中携带 `taskId`，任务内容与终态以 MySQL 为事实源；DB 唯一键负责提交防重，租约负责消费防双跑，checkpoint 负责崩溃后的阶段幂等。Redis 不可用时提交与事件路径回退单实例同步执行/进程内直推，不承诺跨实例回放。
 
 ## 项目结构
 
@@ -256,6 +285,7 @@ StockSage/
 │  ├─ src/lib/
 │  └─ src/views/
 ├─ rag-eval/                   # RAG 检索和回答级评估
+├─ scripts/                    # 本地 smoke、双实例和后续故障演练入口
 ├─ sql/                        # 初始化脚本和迁移
 ├─ AGENTS.md
 ├─ CLAUDE.md
