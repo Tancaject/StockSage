@@ -41,11 +41,35 @@ class ResearchTaskServiceTest {
     }
 
     @Test
+    void submissionKeyDiffersByConversation() {
+        assertThat(service.buildSubmissionKey("u1", "AAPL", "q", 10L))
+                .isNotEqualTo(service.buildSubmissionKey("u1", "AAPL", "q", 11L));
+    }
+
+    @Test
     void submissionPayloadCarriesTraceContext() throws Exception {
         String payload = service.buildSubmissionPayload("AAPL", "q", "trace-1", 5L);
         JsonNode node = new ObjectMapper().readTree(payload);
         assertThat(node.path("traceId").asText()).isEqualTo("trace-1");
         assertThat(node.path("conversationId").asLong()).isEqualTo(5L);
+    }
+
+    @Test
+    void terminalTaskResetUsesDatabaseCasAndMovesTaskToTheNewConversation() {
+        ResearchTask task = researchTask(
+                "rt:nvda:terminal", ResearchTask.Status.SUCCEEDED, ResearchTask.Stage.COMPLETE, 2);
+        task.setId(9L);
+        String payload = service.buildSubmissionPayload("NVDA", "q", "trace-2", 20L);
+        when(repository.resetTerminalForResubmission(
+                eq(9L), eq(20L), eq(payload), any(LocalDateTime.class)))
+                .thenReturn(1);
+
+        ResearchTaskService.TaskReset reset = service.resetForResubmission(task, payload);
+
+        assertThat(reset.reset()).isTrue();
+        assertThat(reset.task().getConversationId()).isEqualTo(20L);
+        assertThat(reset.task().getStatus()).isEqualTo(ResearchTask.Status.PENDING);
+        assertThat(reset.task().getAttempts()).isZero();
     }
 
     @Test
@@ -86,8 +110,10 @@ class ResearchTaskServiceTest {
     @Test
     void startAttemptSeparatesRunningStatusFromPipelineStage() {
         ResearchTask task = researchTask("rt:nvda:v1", ResearchTask.Status.PENDING, ResearchTask.Stage.CREATED, 0);
-        when(repository.saveAndFlush(any(ResearchTask.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        task.setId(7L);
+        when(repository.startAttemptIfPending(
+                eq(7L), eq("lease-001"), eq("AGENT_DEBATE"), any(LocalDateTime.class)))
+                .thenReturn(1);
 
         ResearchTask running = service.startAttempt(task, "lease-001", ResearchTask.Stage.AGENT_DEBATE);
 
@@ -101,14 +127,76 @@ class ResearchTaskServiceTest {
     }
 
     @Test
+    void startAttemptRejectsSecondProcessWhenDatabaseFenceWasAlreadyClaimed() {
+        ResearchTask task = researchTask("rt:nvda:v1", ResearchTask.Status.PENDING, ResearchTask.Stage.CREATED, 0);
+        task.setId(7L);
+        when(repository.startAttemptIfPending(
+                eq(7L), eq("lease-b"), eq("DATA_PREFETCH"), any(LocalDateTime.class)))
+                .thenReturn(0);
+
+        assertThatThrownBy(() -> service.startAttempt(task, "lease-b", ResearchTask.Stage.DATA_PREFETCH))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("fencing");
+    }
+
+    @Test
+    void failedAttemptIsResetForRetryOnlyWhileTheLeaseStillOwnsTheRunningTask() {
+        ResearchTask task = researchTask(
+                "rt:nvda:retry", ResearchTask.Status.RUNNING, ResearchTask.Stage.AGENT_DEBATE, 1);
+        task.setId(8L);
+        task.setLeaseToken("lease-001");
+        task.setCompletedAt(LocalDateTime.now());
+        when(repository.resetRunningForRetryForOwner(
+                eq(8L), eq("lease-001"), eq("pipeline failed"), any(LocalDateTime.class)))
+                .thenReturn(1);
+
+        boolean reset = service.resetRunningForRetryForOwner(task, "lease-001", "pipeline failed");
+
+        assertThat(reset).isTrue();
+        assertThat(task.getStatus()).isEqualTo(ResearchTask.Status.PENDING);
+        assertThat(task.getStage()).isEqualTo(ResearchTask.Stage.CREATED);
+        assertThat(task.getAttempts()).isEqualTo(1);
+        assertThat(task.getLeaseToken()).isNull();
+        assertThat(task.getErrorMessage()).isEqualTo("pipeline failed");
+        assertThat(task.getCompletedAt()).isNull();
+        assertThat(task.getHeartbeatAt()).isNotNull();
+    }
+
+    @Test
+    void retryResetDoesNotMutateTaskWhenLeaseFenceRejectsTheOldOwner() {
+        ResearchTask task = researchTask(
+                "rt:nvda:retry", ResearchTask.Status.RUNNING, ResearchTask.Stage.REPORT_PERSIST, 2);
+        task.setId(8L);
+        task.setLeaseToken("new-owner");
+        when(repository.resetRunningForRetryForOwner(
+                eq(8L), eq("old-owner"), eq("late failure"), any(LocalDateTime.class)))
+                .thenReturn(0);
+
+        boolean reset = service.resetRunningForRetryForOwner(task, "old-owner", "late failure");
+
+        assertThat(reset).isFalse();
+        assertThat(task.getStatus()).isEqualTo(ResearchTask.Status.RUNNING);
+        assertThat(task.getStage()).isEqualTo(ResearchTask.Stage.REPORT_PERSIST);
+        assertThat(task.getAttempts()).isEqualTo(2);
+        assertThat(task.getLeaseToken()).isEqualTo("new-owner");
+        assertThat(task.getErrorMessage()).isNull();
+    }
+
+    @Test
     void recoverStaleRunningTasksRetriesBeforeAttemptLimitAndFailsAtLimit() {
         ResearchTask retryable = researchTask("rt:nvda:retry", ResearchTask.Status.RUNNING, ResearchTask.Stage.AGENT_DEBATE, 1);
+        retryable.setId(41L);
         retryable.setHeartbeatAt(LocalDateTime.now().minusMinutes(30));
         ResearchTask exhausted = researchTask("rt:nvda:failed", ResearchTask.Status.RUNNING, ResearchTask.Stage.REPORT_PERSIST, 3);
+        exhausted.setId(42L);
         exhausted.setHeartbeatAt(LocalDateTime.now().minusMinutes(30));
 
         when(repository.findByStatusAndHeartbeatAtBefore(eq(ResearchTask.Status.RUNNING), any(LocalDateTime.class)))
                 .thenReturn(List.of(retryable, exhausted));
+        when(repository.findByStatusAndErrorMessage(
+                ResearchTask.Status.PENDING,
+                "stale research task recovered for retry"
+        )).thenReturn(List.of());
         when(repository.saveAll(any()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -116,6 +204,7 @@ class ResearchTaskServiceTest {
 
         assertThat(result.retried()).isEqualTo(1);
         assertThat(result.failed()).isEqualTo(1);
+        assertThat(result.retriedTaskIds()).containsExactly(41L);
 
         assertThat(retryable.getStatus()).isEqualTo(ResearchTask.Status.PENDING);
         assertThat(retryable.getStage()).isEqualTo(ResearchTask.Stage.CREATED);
@@ -126,6 +215,31 @@ class ResearchTaskServiceTest {
         assertThat(exhausted.getStage()).isEqualTo(ResearchTask.Stage.FAILED);
         assertThat(exhausted.getErrorMessage()).contains("attempt limit");
         assertThat(exhausted.getCompletedAt()).isNotNull();
+    }
+
+    @Test
+    void recoveredPendingTaskRemainsDiscoverableForReenqueueOnNextRecoveryRound() {
+        ResearchTask recoveredPending = researchTask(
+                "rt:nvda:recovered",
+                ResearchTask.Status.PENDING,
+                ResearchTask.Stage.CREATED,
+                1
+        );
+        recoveredPending.setId(51L);
+        recoveredPending.setErrorMessage("stale research task recovered for retry");
+
+        when(repository.findByStatusAndHeartbeatAtBefore(eq(ResearchTask.Status.RUNNING), any(LocalDateTime.class)))
+                .thenReturn(List.of());
+        when(repository.findByStatusAndErrorMessage(
+                ResearchTask.Status.PENDING,
+                "stale research task recovered for retry"
+        )).thenReturn(List.of(recoveredPending));
+
+        ResearchTaskService.RecoveryResult result = service.recoverStaleRunningTasks(Duration.ofMinutes(15), 3);
+
+        assertThat(result.retried()).isEqualTo(1);
+        assertThat(result.failed()).isZero();
+        assertThat(result.retriedTaskIds()).containsExactly(51L);
     }
 
     @Test

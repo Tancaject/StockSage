@@ -21,15 +21,98 @@ public interface ResearchTaskRepository extends JpaRepository<ResearchTask, Long
             Collection<ResearchTask.Status> statuses
     );
 
+    long countByStatus(ResearchTask.Status status);
+
+    Optional<ResearchTask> findFirstByUserIdAndConversationIdAndStatusInOrderByCreatedAtDesc(
+            String userId,
+            Long conversationId,
+            Collection<ResearchTask.Status> statuses
+    );
+
+    Optional<ResearchTask> findByIdAndUserId(Long id, String userId);
+
     List<ResearchTask> findByStatusAndHeartbeatAtBefore(
             ResearchTask.Status status,
             LocalDateTime heartbeatBefore
+    );
+
+    List<ResearchTask> findByStatusAndErrorMessage(
+            ResearchTask.Status status,
+            String errorMessage
     );
 
     List<ResearchTask> findByUserIdAndTickerOrderByCreatedAtDesc(
             String userId,
             String ticker,
             Pageable pageable
+    );
+
+    @Modifying
+    @Query(value = """
+            UPDATE research_tasks
+               SET status = 'RUNNING',
+                   stage = :stage,
+                   attempts = attempts + 1,
+                   lease_token = :leaseToken,
+                   started_at = :startedAt,
+                   completed_at = NULL,
+                   heartbeat_at = :startedAt,
+                   error_message = NULL,
+                   updated_at = :startedAt
+             WHERE id = :id
+               AND status = 'PENDING'
+            """, nativeQuery = true)
+    int startAttemptIfPending(
+            @Param("id") Long id,
+            @Param("leaseToken") String leaseToken,
+            @Param("stage") String stage,
+            @Param("startedAt") LocalDateTime startedAt
+    );
+
+    @Modifying
+    @Query(value = """
+            UPDATE research_tasks
+               SET status = 'PENDING',
+                   stage = 'CREATED',
+                   lease_token = NULL,
+                   error_message = :errorMessage,
+                   completed_at = NULL,
+                   heartbeat_at = :resetAt,
+                   updated_at = :resetAt
+             WHERE id = :id
+               AND lease_token = :leaseToken
+               AND status = 'RUNNING'
+            """, nativeQuery = true)
+    int resetRunningForRetryForOwner(
+            @Param("id") Long id,
+            @Param("leaseToken") String leaseToken,
+            @Param("errorMessage") String errorMessage,
+            @Param("resetAt") LocalDateTime resetAt
+    );
+
+    @Modifying
+    @Query(value = """
+            UPDATE research_tasks
+               SET status = 'PENDING',
+                   stage = 'CREATED',
+                   attempts = 0,
+                   conversation_id = :conversationId,
+                   lease_token = NULL,
+                   payload_json = :payloadJson,
+                   error_message = NULL,
+                   result_report_version_id = NULL,
+                   started_at = NULL,
+                   completed_at = NULL,
+                   heartbeat_at = :resetAt,
+                   updated_at = :resetAt
+             WHERE id = :id
+               AND status IN ('SUCCEEDED', 'FAILED')
+            """, nativeQuery = true)
+    int resetTerminalForResubmission(
+            @Param("id") Long id,
+            @Param("conversationId") Long conversationId,
+            @Param("payloadJson") String payloadJson,
+            @Param("resetAt") LocalDateTime resetAt
     );
 
     default int advanceStageForOwner(

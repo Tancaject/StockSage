@@ -2,6 +2,7 @@ package com.stocksage.service;
 
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.InvestmentReport;
+import com.stocksage.model.entity.ResearchTask;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -11,6 +12,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ReportMarkdownRendererTest {
 
     private final ReportMarkdownRenderer renderer = new ReportMarkdownRenderer();
+
+    @Test
+    void taskAcceptedAnswerContainsTickerAndTaskNumber() {
+        ResearchTask task = new ResearchTask();
+        task.setId(42L);
+        task.setTicker("AAPL");
+
+        assertThat(renderer.buildTaskAcceptedAnswer(task))
+                .contains("AAPL", "42");
+    }
+
+    @Test
+    void quotaExceededAnswerContainsActiveAndMaximumCounts() {
+        assertThat(renderer.buildQuotaExceededAnswer(3, 5))
+                .contains("3", "5");
+    }
 
     @Test
     void normalizesFiveLevelRecommendationLabels() {

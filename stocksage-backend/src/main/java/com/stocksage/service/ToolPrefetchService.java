@@ -55,6 +55,7 @@ public class ToolPrefetchService {
     private final DeepResearchPipeline deepResearchPipeline;
     private final InvestmentReportVersionService investmentReportVersionService;
     private final ResearchTaskService researchTaskService;
+    private final ResearchTaskQueue researchTaskQueue;
     private final KnowledgeIngestionService knowledgeIngestionService;
     private final ChatStreamEmitter chatStreamEmitter;
     private final ObjectMapper objectMapper;
@@ -75,6 +76,9 @@ public class ToolPrefetchService {
 
     @Value("${stocksage.agent.prefetch.timeout-seconds:120}")
     private long agentPrefetchTimeoutSeconds;
+
+    @Value("${stocksage.research-task.user-max-active:3}")
+    private int userMaxActive = 3;
 
     /**
      * 在最终回答前执行 Coordinator 计划的证据收集步骤。
@@ -97,34 +101,21 @@ public class ToolPrefetchService {
         }
 
         List<PlanAction> actions = executionPlan.actions();
+        String primaryTicker = tickerResolutionService.resolvePrimaryTicker(userQuery, conversationId);
+        if (isDeepResearchPlan(actions)) {
+            return submitDeepResearch(
+                    userQuery, traceId, conversationId, userId, selectedModel, primaryTicker);
+        }
+
         StringBuilder context = new StringBuilder();
         String directAnswer = "";
-        String primaryTicker = tickerResolutionService.resolvePrimaryTicker(userQuery, conversationId);
         // 先放标的身份，便于下游提示词在股票代码/公司解析不确定时拒绝无关 RAG 或搜索片段。
         appendResolvedStockIdentity(context, primaryTicker);
 
         emitProgress(traceId, conversationId, "thought",
                 "正在执行深度分析预取：Fundamentals / Market / News / Bull-Bear Debate。");
 
-        AnalysisState agentState;
-        if (isDeepResearchPlan(actions)) {
-            DeepEvidenceCollector.EvidenceCollection evidence = deepEvidenceCollector.collect(
-                    primaryTicker, userQuery, traceId, conversationId);
-            context.append(evidence.contextMarkdown());
-            agentState = evidence.state();
-            // 最低证据门槛：财务/行情均无有效数据时不进入辩论，避免在数据缺失下输出投资评级。
-            if (!evidence.sufficientForRecommendation()) {
-                log.warn("DEEP recommendation gated: insufficient evidence, traceId={}, fundamentalsOk={}, marketOk={}, tickerResolved={}",
-                        traceId, evidence.fundamentalsOk(), evidence.marketOk(), evidence.tickerResolved());
-                emitProgress(traceId, conversationId, "observation",
-                        "关键证据源（财务 / 行情）本轮未取得有效数据，系统不会给出投资评级，改为说明数据缺口。");
-                return new PreparedToolContext(context.toString().trim(),
-                        reportRenderer.buildInsufficientEvidenceReport(primaryTicker,
-                                evidence.tickerResolved(), evidence.fundamentalsOk(), evidence.marketOk()));
-            }
-            investmentReportVersionService.prepareHashes(agentState);
-        } else {
-            agentState = AnalysisState.builder()
+        AnalysisState agentState = AnalysisState.builder()
                     .query(userQuery)
                     .primaryTicker(primaryTicker)
                     .build();
@@ -177,83 +168,13 @@ public class ToolPrefetchService {
                 appendContextSection(context, "News Agent", newsResult);
             }
             }
-        }
 
         // 阶段 2：顺序执行依赖分析师结果的步骤，
         // 或者需要按可预测顺序使用已解析股票代码/工具观测的步骤。
         for (PlanAction action : actions) {
             switch (action) {
                 case FUNDAMENTALS_AGENT, MARKET_AGENT, NEWS_AGENT -> { /* 已经在前面处理 */ }
-                case RESEARCH_MANAGER -> {
-                    Optional<InvestmentReport> reusableReport = investmentReportVersionService.findReusableReport(
-                            userId,
-                            conversationId,
-                            agentState
-                    );
-                    boolean reusedReport = reusableReport.isPresent();
-                    boolean researchTaskAlreadyRunning = false;
-                    if (reusedReport) {
-                        InvestmentReport report = reusableReport.get();
-                        agentState.setInvestmentReport(report);
-                        appendContextSection(context, "Research Manager", safeReportJson(report));
-                        emitProgress(traceId, conversationId, "observation",
-                                "Reused investment report version v" + report.getReportVersion()
-                                        + " because dataSnapshotHash and contextHash matched.");
-                    } else {
-                        String idempotencyKey = researchTaskService.buildInvestmentReportKey(
-                                userId,
-                                primaryTicker,
-                                agentState.getDataSnapshotHash(),
-                                agentState.getContextHash()
-                        );
-                        ResearchTaskService.TaskCreation taskCreation = researchTaskService.createIfAbsent(
-                                idempotencyKey,
-                                userId,
-                                conversationId,
-                                primaryTicker,
-                                ResearchTask.Stage.AGENT_DEBATE,
-                                researchTaskService.buildInvestmentReportPayload(
-                                        primaryTicker,
-                                        userQuery,
-                                        agentState.getDataSnapshotHash(),
-                                        agentState.getContextHash()
-                                )
-                        );
-                        ResearchTask task = taskCreation.task();
-                        Optional<ResearchTaskLeaseService.Lease> taskLease = researchTaskService.tryAcquire(task);
-                        if (taskLease.isEmpty()) {
-                            researchTaskAlreadyRunning = true;
-                            String runningAnswer = reportRenderer.buildResearchTaskAlreadyRunningAnswer(task);
-                            appendContextSection(context, "Research Manager", runningAnswer);
-                            directAnswer = runningAnswer;
-                            emitProgress(traceId, conversationId, "observation",
-                                    "A matching DEEP research task is already running; skipped duplicate Bull/Bear debate.");
-                        } else {
-                        emitProgress(traceId, conversationId, "thought",
-                                "开始 Bull/Bear 辩论，并由 Research Manager 综合裁决。");
-                        appendAgentObservation(context, "Research Manager", () -> deepResearchPipeline.runResearchDebateWithTask(
-                                traceId,
-                                conversationId,
-                                userId,
-                                agentState,
-                                selectedModel,
-                                task,
-                                taskLease.orElseThrow()
-                        ));
-                        }
-                    }
-                    if (agentState.getInvestmentReport() != null) {
-                        directAnswer = reportRenderer.buildFinalAnswerBrief(agentState);
-                    }
-                    if (researchTaskAlreadyRunning) {
-                        emitProgress(traceId, conversationId, "observation",
-                                "Matching research task is still running; starting final status answer generation.");
-                    } else
-                    emitProgress(traceId, conversationId, "observation",
-                            (reusedReport || researchTaskAlreadyRunning)
-                                    ? "报告历史版本复用完成，开始生成最终回答。"
-                                    : "Bull/Bear 辩论阶段结束，开始生成最终回答。");
-                }
+                case RESEARCH_MANAGER -> { /* DEEP plans return through submitDeepResearch above. */ }
                 case SEARCH_STOCKS -> appendToolObservation(context, "searchStocks",
                         () -> marketTools.searchStocks(userQuery, toolPrefetchMaxSearchResults));
                 case GET_FINANCIAL_REPORTS, GET_STRUCTURED_FINANCIALS -> appendToolObservation(
@@ -295,6 +216,187 @@ public class ToolPrefetchService {
             }
         }
         return new PreparedToolContext(context.toString().trim(), directAnswer);
+    }
+
+    /**
+     * Submit a DEEP request without collecting evidence or invoking analyst models on the request thread.
+     */
+    private PreparedToolContext submitDeepResearch(
+            String userQuery,
+            String traceId,
+            Long conversationId,
+            String userId,
+            Coordinator.SelectedModel selectedModel,
+            String primaryTicker
+    ) {
+        int active = researchTaskService.countActiveTasks(userId);
+        if (active >= Math.max(1, userMaxActive)) {
+            String answer = reportRenderer.buildQuotaExceededAnswer(active, Math.max(1, userMaxActive));
+            return new PreparedToolContext("", answer, null, traceId);
+        }
+
+        String submissionKey = researchTaskService.buildSubmissionKey(
+                userId, primaryTicker, userQuery, conversationId);
+        String payload = researchTaskService.buildSubmissionPayload(
+                primaryTicker, userQuery, traceId, conversationId);
+        ResearchTaskService.TaskCreation creation = researchTaskService.createIfAbsent(
+                submissionKey,
+                userId,
+                conversationId,
+                primaryTicker,
+                ResearchTask.Stage.CREATED,
+                payload
+        );
+        ResearchTask task = creation.task();
+        boolean activeTask = task.getStatus() == ResearchTask.Status.PENDING
+                || task.getStatus() == ResearchTask.Status.RUNNING;
+        if (!creation.created() && activeTask) {
+            String eventTraceId = taskTraceId(task, traceId);
+            emitProgress(traceId, conversationId, "observation",
+                    "匹配到进行中的深度研究任务，已切换为实时旁观。");
+            return new PreparedToolContext(
+                    "", reportRenderer.buildTaskAcceptedAnswer(task), task.getId(), eventTraceId);
+        }
+
+        if (!creation.created()) {
+            ResearchTaskService.TaskReset reset = researchTaskService.resetForResubmission(task, payload);
+            task = reset.task();
+            if (!reset.reset()) {
+                boolean resetWinnerActive = task.getStatus() == ResearchTask.Status.PENDING
+                        || task.getStatus() == ResearchTask.Status.RUNNING;
+                if (!resetWinnerActive) {
+                    throw new IllegalStateException("research task resubmission race did not produce an active task");
+                }
+                return new PreparedToolContext(
+                        "", reportRenderer.buildTaskAcceptedAnswer(task),
+                        task.getId(), taskTraceId(task, traceId));
+            }
+        }
+
+        try {
+            researchTaskQueue.enqueue(task.getId());
+            emitProgress(traceId, conversationId, "thought", "深度研究任务已受理，后台开始执行。");
+            return new PreparedToolContext(
+                    "", reportRenderer.buildTaskAcceptedAnswer(task), task.getId(), traceId);
+        } catch (ResearchTaskQueue.QueueUnavailableException error) {
+            log.warn("Task queue unavailable, falling back to inline DEEP execution: {}", error.getMessage());
+            try {
+                return runInlineDeepFallback(
+                        primaryTicker, userQuery, traceId, conversationId, userId, selectedModel, task);
+            } catch (RuntimeException inlineError) {
+                throw inlineError;
+            }
+        }
+    }
+
+    /**
+     * Preserve the former synchronous DEEP path for the explicit Redis queue outage fallback.
+     */
+    private PreparedToolContext runInlineDeepFallback(
+            String primaryTicker,
+            String userQuery,
+            String traceId,
+            Long conversationId,
+            String userId,
+            Coordinator.SelectedModel selectedModel,
+            ResearchTask task
+    ) {
+        StringBuilder context = new StringBuilder();
+        appendResolvedStockIdentity(context, primaryTicker);
+        emitProgress(traceId, conversationId, "thought",
+                "任务队列暂不可用，正在请求内同步完成深度研究。");
+        Optional<ResearchTaskLeaseService.Lease> lease = researchTaskService.tryAcquire(task);
+        if (lease.isEmpty()) {
+            return new PreparedToolContext(
+                    context.toString().trim(), reportRenderer.buildTaskAcceptedAnswer(task),
+                    task.getId(), taskTraceId(task, traceId));
+        }
+        ResearchTaskLeaseService.Lease acquired = lease.orElseThrow();
+        ResearchTask runningTask;
+        try {
+            runningTask = researchTaskService.startAttempt(
+                    task, acquired.token(), ResearchTask.Stage.DATA_PREFETCH);
+        } catch (RuntimeException error) {
+            researchTaskService.release(acquired);
+            throw error;
+        }
+        try {
+            DeepEvidenceCollector.EvidenceCollection evidence = deepEvidenceCollector.collect(
+                    primaryTicker, userQuery, traceId, conversationId);
+            context.append(evidence.contextMarkdown());
+            AnalysisState agentState = evidence.state();
+            if (!evidence.sufficientForRecommendation()) {
+                String answer = reportRenderer.buildInsufficientEvidenceReport(
+                        primaryTicker,
+                        evidence.tickerResolved(),
+                        evidence.fundamentalsOk(),
+                        evidence.marketOk()
+                );
+                researchTaskService.markSucceededForOwner(runningTask, acquired.token(), null);
+                return new PreparedToolContext(context.toString().trim(), answer, null, traceId);
+            }
+
+            investmentReportVersionService.prepareHashes(agentState);
+            Optional<InvestmentReport> reusableReport = investmentReportVersionService.findReusableReport(
+                    userId, conversationId, agentState);
+            if (reusableReport.isPresent()) {
+                InvestmentReport report = reusableReport.orElseThrow();
+                agentState.setInvestmentReport(report);
+                appendContextSection(context, "Research Manager", safeReportJson(report));
+                researchTaskService.markSucceededForOwner(runningTask, acquired.token(), null);
+                return new PreparedToolContext(
+                        context.toString().trim(), reportRenderer.buildFinalAnswerBrief(agentState), null, traceId);
+            }
+
+            emitProgress(traceId, conversationId, "thought",
+                    "开始 Bull/Bear 辩论，并由 Research Manager 综合裁决。");
+            String reportJson;
+            try {
+                reportJson = deepResearchPipeline.runResearchDebateWithTask(
+                        traceId,
+                        conversationId,
+                        userId,
+                        agentState,
+                        selectedModel,
+                        runningTask,
+                        acquired
+                );
+            } catch (Exception error) {
+                throw new IllegalStateException("inline DEEP research failed", error);
+            }
+            appendContextSection(context, "Research Manager", reportJson);
+            if (agentState.getInvestmentReport() == null && reportJson != null && !reportJson.isBlank()) {
+                try {
+                    agentState.setInvestmentReport(objectMapper.readValue(reportJson, InvestmentReport.class));
+                } catch (JsonProcessingException error) {
+                    log.warn("Inline DEEP report could not be deserialized for rendering: {}", error.getMessage());
+                }
+            }
+            String answer = agentState.getInvestmentReport() == null
+                    ? reportJson
+                    : reportRenderer.buildFinalAnswerBrief(agentState);
+            return new PreparedToolContext(context.toString().trim(), answer, null, traceId);
+        } catch (RuntimeException error) {
+            researchTaskService.markFailedForOwner(runningTask, acquired.token(), error.getMessage());
+            emitProgress(traceId, conversationId, "error", "同步深度研究执行失败：" + error.getMessage());
+            throw error;
+        } finally {
+            researchTaskService.release(acquired);
+        }
+    }
+
+    private String taskTraceId(ResearchTask task, String fallbackTraceId) {
+        if (task == null || task.getPayloadJson() == null || task.getPayloadJson().isBlank()) {
+            return fallbackTraceId;
+        }
+        try {
+            String storedTraceId = objectMapper.readTree(task.getPayloadJson()).path("traceId").asText("").trim();
+            return storedTraceId.isBlank() ? fallbackTraceId : storedTraceId;
+        } catch (JsonProcessingException error) {
+            log.warn("Unable to read traceId from research task payload, taskId={}: {}",
+                    task.getId(), error.getMessage());
+            return fallbackTraceId;
+        }
     }
 
     /**
@@ -525,10 +627,23 @@ public class ToolPrefetchService {
      * @param context 追加到最终提示词的工具/智能体观察
      * @param directAnswer 可以直接发送给用户的答案；为空时继续走模型生成
      */
-    public record PreparedToolContext(String context, String directAnswer) {
+    public record PreparedToolContext(
+            String context,
+            String directAnswer,
+            Long submittedTaskId,
+            String eventTraceId
+    ) {
+        public PreparedToolContext(String context, String directAnswer) {
+            this(context, directAnswer, null, null);
+        }
+
+        public PreparedToolContext(String context, String directAnswer, Long submittedTaskId) {
+            this(context, directAnswer, submittedTaskId, null);
+        }
+
         /** 空预取结果。 */
         static PreparedToolContext empty() {
-            return new PreparedToolContext("", "");
+            return new PreparedToolContext("", "", null, null);
         }
 
         /** 是否包含可直接返回的答案。 */

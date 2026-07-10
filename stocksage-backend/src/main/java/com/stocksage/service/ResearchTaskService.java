@@ -1,6 +1,7 @@
 package com.stocksage.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.repository.ResearchTaskRepository;
@@ -16,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HexFormat;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -28,6 +30,7 @@ import java.util.Optional;
 public class ResearchTaskService {
 
     private static final int MAX_ERROR_LENGTH = 4000;
+    private static final String RECOVERED_FOR_RETRY_MESSAGE = "stale research task recovered for retry";
 
     private final ResearchTaskRepository repository;
     private final ResearchTaskLeaseService leaseService;
@@ -91,16 +94,58 @@ public class ResearchTaskService {
             String leaseToken,
             ResearchTask.Stage stage
     ) {
+        if (task == null || task.getId() == null) {
+            throw new IllegalArgumentException("persisted research task is required to start an attempt");
+        }
         LocalDateTime now = LocalDateTime.now();
+        ResearchTask.Stage targetStage = stage == null ? ResearchTask.Stage.DATA_PREFETCH : stage;
+        String normalizedLeaseToken = normalizeText(leaseToken);
+        int updated = repository.startAttemptIfPending(
+                task.getId(), normalizedLeaseToken, targetStage.name(), now);
+        if (updated == 0) {
+            throw new IllegalStateException("research task is no longer pending; execution fencing rejected");
+        }
         task.setStatus(ResearchTask.Status.RUNNING);
-        task.setStage(stage == null ? ResearchTask.Stage.DATA_PREFETCH : stage);
+        task.setStage(targetStage);
         task.setAttempts(safeAttempts(task) + 1);
-        task.setLeaseToken(normalizeText(leaseToken));
+        task.setLeaseToken(normalizedLeaseToken);
         task.setStartedAt(now);
         task.setCompletedAt(null);
         task.setHeartbeatAt(now);
         task.setErrorMessage(null);
-        return repository.saveAndFlush(task);
+        return task;
+    }
+
+    @Transactional
+    public boolean resetRunningForRetryForOwner(
+            ResearchTask task,
+            String leaseToken,
+            String errorMessage
+    ) {
+        if (task == null || task.getId() == null) {
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        String retryMessage = truncate(normalizeText(errorMessage), MAX_ERROR_LENGTH);
+        if (retryMessage.isBlank()) {
+            retryMessage = "research task attempt failed; pending retry";
+        }
+        int updated = repository.resetRunningForRetryForOwner(
+                task.getId(),
+                normalizeText(leaseToken),
+                retryMessage,
+                now
+        );
+        if (updated == 0) {
+            return false;
+        }
+        task.setStatus(ResearchTask.Status.PENDING);
+        task.setStage(ResearchTask.Stage.CREATED);
+        task.setLeaseToken(null);
+        task.setErrorMessage(retryMessage);
+        task.setCompletedAt(null);
+        task.setHeartbeatAt(now);
+        return true;
     }
 
     @Transactional
@@ -221,8 +266,18 @@ public class ResearchTaskService {
                 ResearchTask.Status.RUNNING,
                 cutoff
         );
+        List<ResearchTask> pendingRecoveredTasks = repository.findByStatusAndErrorMessage(
+                ResearchTask.Status.PENDING,
+                RECOVERED_FOR_RETRY_MESSAGE
+        );
 
-        int retried = 0;
+        LinkedHashSet<Long> retriedTaskIds = new LinkedHashSet<>();
+        if (pendingRecoveredTasks != null) {
+            pendingRecoveredTasks.stream()
+                    .map(ResearchTask::getId)
+                    .filter(java.util.Objects::nonNull)
+                    .forEach(retriedTaskIds::add);
+        }
         int failed = 0;
         for (ResearchTask task : staleTasks) {
             task.setLeaseToken(null);
@@ -236,22 +291,37 @@ public class ResearchTaskService {
             } else {
                 task.setStatus(ResearchTask.Status.PENDING);
                 task.setStage(ResearchTask.Stage.CREATED);
-                task.setErrorMessage("stale research task recovered for retry");
-                retried++;
+                task.setErrorMessage(RECOVERED_FOR_RETRY_MESSAGE);
+                if (task.getId() != null) {
+                    retriedTaskIds.add(task.getId());
+                }
             }
         }
         if (!staleTasks.isEmpty()) {
             repository.saveAll(staleTasks);
         }
-        return new RecoveryResult(retried, failed);
+        List<Long> ids = List.copyOf(retriedTaskIds);
+        return new RecoveryResult(ids.size(), failed, ids);
     }
 
     public String buildSubmissionKey(String userId, String ticker, String userQuery) {
+        return buildSubmissionKey(userId, ticker, userQuery, null);
+    }
+
+    public String buildSubmissionKey(
+            String userId,
+            String ticker,
+            String userQuery,
+            Long conversationId
+    ) {
         String normalizedQuery = normalizeText(userQuery)
                 .toLowerCase(Locale.ROOT)
                 .replaceAll("\\s+", " ");
         return "deep-submit:" + sha256(String.join("|",
-                normalizeText(userId), normalizeTicker(ticker), normalizedQuery));
+                normalizeText(userId),
+                conversationId == null ? "no-conversation" : conversationId.toString(),
+                normalizeTicker(ticker),
+                normalizedQuery));
     }
 
     public int countActiveTasks(String userId) {
@@ -269,6 +339,45 @@ public class ResearchTaskService {
             return objectMapper.writeValueAsString(payload);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Unable to serialize submission payload", e);
+        }
+    }
+
+    @Transactional
+    public TaskReset resetForResubmission(ResearchTask task, String payloadJson) {
+        if (task == null || task.getId() == null) {
+            throw new IllegalArgumentException("persisted research task is required for resubmission");
+        }
+        String normalizedPayload = normalizePayload(payloadJson);
+        Long conversationId = submissionConversationId(normalizedPayload, task.getConversationId());
+        LocalDateTime now = LocalDateTime.now();
+        int updated = repository.resetTerminalForResubmission(
+                task.getId(), conversationId, normalizedPayload, now);
+        if (updated == 0) {
+            ResearchTask current = repository.findById(task.getId()).orElse(task);
+            return new TaskReset(current, false);
+        }
+        task.setStatus(ResearchTask.Status.PENDING);
+        task.setStage(ResearchTask.Stage.CREATED);
+        task.setAttempts(0);
+        task.setConversationId(conversationId);
+        task.setLeaseToken(null);
+        task.setPayloadJson(normalizedPayload);
+        task.setErrorMessage(null);
+        task.setResultReportVersionId(null);
+        task.setStartedAt(null);
+        task.setCompletedAt(null);
+        task.setHeartbeatAt(now);
+        return new TaskReset(task, true);
+    }
+
+    private Long submissionConversationId(String payloadJson, Long fallback) {
+        try {
+            JsonNode root = objectMapper.readTree(payloadJson);
+            return root.path("conversationId").canConvertToLong()
+                    ? root.path("conversationId").longValue()
+                    : fallback;
+        } catch (JsonProcessingException error) {
+            return fallback;
         }
     }
 
@@ -344,6 +453,13 @@ public class ResearchTaskService {
     public record TaskCreation(ResearchTask task, boolean created) {
     }
 
-    public record RecoveryResult(int retried, int failed) {
+    public record TaskReset(ResearchTask task, boolean reset) {
+    }
+
+    public record RecoveryResult(int retried, int failed, List<Long> retriedTaskIds) {
+
+        public RecoveryResult {
+            retriedTaskIds = retriedTaskIds == null ? List.of() : List.copyOf(retriedTaskIds);
+        }
     }
 }

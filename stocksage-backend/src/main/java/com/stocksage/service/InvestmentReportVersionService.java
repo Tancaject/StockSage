@@ -213,6 +213,16 @@ public class InvestmentReportVersionService {
                 });
     }
 
+    @Transactional(readOnly = true)
+    public Optional<String> findReportBrief(String userId, Long reportVersionId) {
+        if (userId == null || userId.isBlank() || reportVersionId == null) {
+            return Optional.empty();
+        }
+        return repository.findByIdAndUserId(reportVersionId, userId.trim())
+                .map(entity -> buildPreview(toReport(entity, false)))
+                .filter(brief -> !brief.isBlank());
+    }
+
     private void prepareHashesIfMissing(AnalysisState state) {
         if (state.getDataSnapshotHash() == null || state.getDataSnapshotHash().isBlank()
                 || state.getContextHash() == null || state.getContextHash().isBlank()) {

@@ -20,7 +20,7 @@ services:
     container_name: stocksage-mysql
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "${STOCKSAGE_MYSQL_PORT:-3306}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: "12345"
       MYSQL_DATABASE: stocksage

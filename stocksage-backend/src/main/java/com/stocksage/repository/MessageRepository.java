@@ -17,6 +17,14 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     /** 按时间正序查询会话的所有消息，用于加载完整对话历史。 */
     List<Message> findByConversationIdOrderByCreatedAtAsc(Long conversationId);
 
+    /** Prevent a resumed background task from inserting the same final report twice. */
+    boolean existsByConversationIdAndRoleAndTraceIdAndContent(
+            Long conversationId,
+            String role,
+            String traceId,
+            String content
+    );
+
     /** 删除某个会话下的全部消息，通常在删除会话时一起执行。 */
     @Transactional
     void deleteByConversationId(Long conversationId);

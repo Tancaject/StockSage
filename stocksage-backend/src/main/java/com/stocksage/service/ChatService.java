@@ -46,6 +46,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 对话编排服务。
@@ -117,8 +118,6 @@ public class ChatService {
 
         // 2. 注册按链路隔离的事件通道。@Tool 方法开始或完成时，
         // 工具调用切面会向该通道写入事件。
-        Flux<String> toolEvents = traceEventRelay.live(traceId, null)
-                .map(TraceEventStore.StoredEvent::chunkJson);
         ToolCallContext.register(traceId, conversationId, request.getMessage());
 
         // 3. 路由前先检索知识库上下文。命中数量可为 Coordinator 提供信号，
@@ -174,6 +173,10 @@ public class ChatService {
                         .build()));
 
         AtomicBoolean terminalRecorded = new AtomicBoolean(false);
+        AtomicBoolean backgroundTaskSubmitted = new AtomicBoolean(false);
+        AtomicBoolean relayFailed = new AtomicBoolean(false);
+        AtomicReference<String> eventTraceId = new AtomicReference<>(traceId);
+        Sinks.One<String> relayTraceReady = Sinks.one();
 
         // 心跳关闭信号：DEEP 路由的 Bull/Bear 辩论与最终答案首字延迟都是纯模型阶段，
         // 期间不产生任何 SSE 字节；前端 90s 静默即中断（chat.js STREAM_IDLE_TIMEOUT_MS）。
@@ -195,6 +198,29 @@ public class ChatService {
                     request.getUserId(),
                     selectedModel
             );
+            String preparedEventTraceId = preparedToolContext.eventTraceId();
+            if (preparedEventTraceId == null || preparedEventTraceId.isBlank()) {
+                preparedEventTraceId = traceId;
+            }
+            eventTraceId.set(preparedEventTraceId);
+            backgroundTaskSubmitted.set(preparedToolContext.submittedTaskId() != null);
+            relayTraceReady.tryEmitValue(preparedEventTraceId);
+
+            if (preparedContextOnly && preparedToolContext.hasDirectAnswer()) {
+                return streamPreparedDirectAnswer(
+                        preparedToolContext.directAnswer(),
+                        request,
+                        conversation,
+                        newConversation,
+                        traceId,
+                        conversationId,
+                        startTime,
+                        fullResponse,
+                        terminalRecorded,
+                        backgroundTaskSubmitted,
+                        heartbeatStop
+                );
+            }
             List<org.springframework.ai.chat.messages.Message> promptMessages =
                     buildPromptMessages(request.getUserId(), conversationId, preparedToolContext, retrievedDocs, imageMedia);
             Flux<String> modelStarted = Flux.just(toJson(ChatChunk.builder()
@@ -283,12 +309,77 @@ public class ChatService {
                         log.info("Chat cancelled, conversationId={}, traceId={}, responseLength={}",
                                 conversationId, traceId, fullResponse.length());
                     }
-                    ToolCallContext.unregister(traceId);
-                    chatStreamEmitter.emit(traceId, conversationId, "stream-end", "");
-                    toolCallEventBus.complete(traceId);
-                    heartbeatStop.tryEmitValue(Boolean.TRUE);
+                    if (!backgroundTaskSubmitted.get()) {
+                        ToolCallContext.unregister(traceId);
+                        chatStreamEmitter.emit(traceId, conversationId, "stream-end", "");
+                        toolCallEventBus.complete(traceId);
+                        heartbeatStop.tryEmitValue(Boolean.TRUE);
+                    }
                 }));
+        }).onErrorResume(error -> {
+            relayTraceReady.tryEmitValue(traceId);
+            if (terminalRecorded.compareAndSet(false, true)) {
+                long durationMs = System.currentTimeMillis() - startTime;
+                traceService.endTrace(traceId, "error", 0, durationMs);
+                log.error("Chat preparation failed, conversationId={}, traceId={}", conversationId, traceId, error);
+            }
+            if (!backgroundTaskSubmitted.get()) {
+                chatStreamEmitter.emit(traceId, conversationId, "stream-end", "");
+                heartbeatStop.tryEmitValue(Boolean.TRUE);
+            }
+            return Flux.just(toJson(ChatChunk.builder()
+                    .type("error")
+                    .content("服务暂时出错，请稍后重试。")
+                    .traceId(traceId)
+                    .conversationId(conversationId)
+                    .build()));
         }).subscribeOn(Schedulers.boundedElastic());
+
+        var switchToDifferentTrace = relayTraceReady.asMono().flatMap(nextTraceId ->
+                traceId.equals(nextTraceId)
+                        ? reactor.core.publisher.Mono.<String>never()
+                        : reactor.core.publisher.Mono.just(nextTraceId));
+        Flux<String> initialTraceEvents = traceEventRelay.live(traceId, null)
+                .map(TraceEventStore.StoredEvent::chunkJson)
+                .takeUntilOther(switchToDifferentTrace);
+        Flux<String> switchedTraceEvents = relayTraceReady.asMono()
+                .filter(nextTraceId -> !traceId.equals(nextTraceId))
+                .flatMapMany(nextTraceId -> traceEventRelay.live(nextTraceId, null)
+                        .map(TraceEventStore.StoredEvent::chunkJson));
+        Flux<String> toolEvents = Flux.merge(initialTraceEvents, switchedTraceEvents)
+                .timeout(Duration.ofMinutes(30))
+                .onErrorResume(error -> {
+                    relayFailed.set(true);
+                    log.warn("Trace event relay ended with an error, traceId={}, eventTraceId={}: {}",
+                            traceId, eventTraceId.get(), error.getMessage());
+                    return Flux.just(toJson(ChatChunk.builder()
+                            .type("error")
+                            .content("深度研究事件流等待超时或暂时不可用，请稍后从任务卡继续查看。")
+                            .traceId(eventTraceId.get())
+                            .conversationId(conversationId)
+                            .build()));
+                })
+                .doFinally(signalType -> {
+                    if (!backgroundTaskSubmitted.get()) {
+                        return;
+                    }
+                    long durationMs = System.currentTimeMillis() - startTime;
+                    if (terminalRecorded.compareAndSet(false, true)) {
+                        String status = relayFailed.get()
+                                ? "error"
+                                : signalType == SignalType.CANCEL ? "cancelled" : "success";
+                        traceService.endTrace(traceId, status, 0, durationMs);
+                    }
+                    ToolCallContext.unregister(traceId);
+                    if (signalType != SignalType.CANCEL) {
+                        toolCallEventBus.complete(traceId);
+                    }
+                    if (signalType != SignalType.CANCEL && traceId.equals(eventTraceId.get())) {
+                        ToolCallContext.unregister(eventTraceId.get());
+                        toolCallEventBus.complete(eventTraceId.get());
+                    }
+                    heartbeatStop.tryEmitValue(Boolean.TRUE);
+                });
 
         // 6. 心跳流：在 DEEP 辩论、最终答案首字延迟等纯模型静默阶段周期性补发轻量数据块，
         // 让前端的空闲计时器持续复位，避免把"还在工作"误判为"流已中断"。
@@ -308,6 +399,78 @@ public class ChatService {
         // 合并成一条 SSE 流发送给前端。
         return Flux.concat(conversationStarted, executionPlanStarted, retrievalObservation,
                 Flux.merge(toolEvents, heartbeat, answerStream));
+    }
+
+    private Flux<String> streamPreparedDirectAnswer(
+            String directAnswer,
+            ChatRequest request,
+            Conversation conversation,
+            boolean newConversation,
+            String traceId,
+            Long conversationId,
+            long startTime,
+            StringBuilder fullResponse,
+            AtomicBoolean terminalRecorded,
+            AtomicBoolean backgroundTaskSubmitted,
+            Sinks.One<Object> heartbeatStop
+    ) {
+        String assistantText = directAnswer == null ? "" : directAnswer.trim();
+        fullResponse.append(assistantText);
+        return Flux.just(toJson(ChatChunk.builder()
+                        .type("answer")
+                        .content(assistantText)
+                        .traceId(traceId)
+                        .conversationId(conversationId)
+                        .build()))
+                .doOnComplete(() -> {
+                    if (!assistantText.isBlank()) {
+                        saveMessage(conversationId, "assistant", assistantText, traceId);
+                        shortTermMemory.addMessage(conversationId, "assistant", assistantText);
+                        touchConversation(conversation);
+                        maybeGenerateConversationTitle(
+                                conversationId,
+                                request.getUserId(),
+                                request.getMessage(),
+                                newConversation,
+                                conversation.getOrigin()
+                        );
+                    }
+                    long durationMs = System.currentTimeMillis() - startTime;
+                    if (backgroundTaskSubmitted.get()) {
+                        traceService.addStep(traceId, AgentStep.builder()
+                                .thought("Accepted DEEP research task for background execution.")
+                                .durationMs(durationMs)
+                                .tokenCount(0)
+                                .build());
+                        log.info("Background research accepted, conversationId={}, traceId={}",
+                                conversationId, traceId);
+                        return;
+                    }
+                    if (terminalRecorded.compareAndSet(false, true)) {
+                        CompletableFuture.runAsync(() -> longTermMemory.extractAndUpdate(
+                                request.getUserId(), assistantText, request.getMessage()), agentTaskExecutor);
+                        traceService.endTrace(traceId, "success", 0, durationMs);
+                        log.info("Direct chat answer completed, conversationId={}, traceId={}, responseLength={}",
+                                conversationId, traceId, fullResponse.length());
+                    }
+                })
+                .doFinally(signalType -> {
+                    if (backgroundTaskSubmitted.get()) {
+                        return;
+                    }
+                    if (signalType == SignalType.CANCEL && terminalRecorded.compareAndSet(false, true)) {
+                        traceService.endTrace(
+                                traceId,
+                                "cancelled",
+                                0,
+                                System.currentTimeMillis() - startTime
+                        );
+                    }
+                    ToolCallContext.unregister(traceId);
+                    chatStreamEmitter.emit(traceId, conversationId, "stream-end", "");
+                    toolCallEventBus.complete(traceId);
+                    heartbeatStop.tryEmitValue(Boolean.TRUE);
+                });
     }
 
     public List<Conversation> listConversations(String userId) {

@@ -9,6 +9,8 @@ import java.util.Optional;
 
 public interface InvestmentReportVersionRepository extends JpaRepository<InvestmentReportVersion, Long> {
 
+    Optional<InvestmentReportVersion> findByIdAndUserId(Long id, String userId);
+
     Optional<InvestmentReportVersion> findByUserIdAndTickerAndDataSnapshotHashAndContextHash(
             String userId,
             String ticker,

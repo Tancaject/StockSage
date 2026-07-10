@@ -2,8 +2,10 @@ package com.stocksage.tool;
 
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
+import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -19,8 +21,10 @@ public class ToolCallEventBus {
 
     /** 注册一个新的事件通道，返回可订阅的 Flux */
     public Flux<String> register(String traceId) {
-        Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
-        sinks.put(traceId, sink);
+        Sinks.Many<String> sink = sinks.computeIfAbsent(
+                traceId,
+                ignored -> Sinks.many().replay().limit(512)
+        );
         return sink.asFlux();
     }
 
@@ -40,13 +44,15 @@ public class ToolCallEventBus {
         }
     }
 
-    /** 关闭并移除通道 */
+    /** 关闭通道并短暂保留回放，供 Redis 故障时的重连观察者读取终态。 */
     public void complete(String traceId) {
-        Sinks.Many<String> sink = sinks.remove(traceId);
+        Sinks.Many<String> sink = sinks.get(traceId);
         if (sink != null) {
             synchronized (sink) {
                 sink.tryEmitComplete();
             }
+            Mono.delay(Duration.ofMinutes(5))
+                    .subscribe(ignored -> sinks.remove(traceId, sink));
         }
     }
 }

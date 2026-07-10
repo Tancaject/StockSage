@@ -26,10 +26,16 @@ public class ConversationMessageService {
                 .filter(candidate -> candidate.getUserId().equals(userId))
                 .orElseThrow(() -> new ResourceNotFoundException("Conversation not found"));
 
+        String content = text == null ? "" : text;
+        if (messageRepository.existsByConversationIdAndRoleAndTraceIdAndContent(
+                conversationId, "assistant", traceId, content)) {
+            return;
+        }
+
         Message message = new Message();
         message.setConversationId(conversationId);
         message.setRole("assistant");
-        message.setContent(text == null ? "" : text);
+        message.setContent(content);
         message.setTraceId(traceId);
         message.setModelTier(ModelTier.STRONG.name());
         messageRepository.save(message);

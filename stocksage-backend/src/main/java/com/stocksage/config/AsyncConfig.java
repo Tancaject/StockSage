@@ -3,6 +3,7 @@ package com.stocksage.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -41,5 +42,23 @@ public class AsyncConfig {
         scheduler.setDaemon(true);
         scheduler.setWaitForTasksToCompleteOnShutdown(false);
         return scheduler;
+    }
+
+    /**
+     * Redis Stream 研究任务由固定 worker 线程长期阻塞消费，独立线程池避免占用分析师预取资源。
+     */
+    @Bean("researchWorkerExecutor")
+    public ThreadPoolTaskExecutor researchWorkerExecutor(
+            @Value("${stocksage.research-task.worker-threads:2}") int workerThreads) {
+        int size = Math.max(1, workerThreads);
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(size);
+        executor.setMaxPoolSize(size);
+        executor.setQueueCapacity(size);
+        executor.setThreadNamePrefix("research-worker-");
+        executor.setDaemon(true);
+        executor.setWaitForTasksToCompleteOnShutdown(false);
+        executor.setPhase(Integer.MAX_VALUE - 100);
+        return executor;
     }
 }

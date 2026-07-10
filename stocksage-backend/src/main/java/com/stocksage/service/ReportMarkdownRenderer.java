@@ -19,6 +19,33 @@ import java.util.Locale;
 @Component
 public class ReportMarkdownRenderer {
 
+    /** Render the immediate acknowledgement returned after a DEEP task enters the background queue. */
+    public String buildTaskAcceptedAnswer(ResearchTask task) {
+        String ticker = task == null || task.getTicker() == null || task.getTicker().isBlank()
+                ? "UNKNOWN"
+                : task.getTicker().trim();
+        String taskId = task == null || task.getId() == null ? "unknown" : task.getId().toString();
+        String stage = task == null || task.getStage() == null ? "CREATED" : task.getStage().name();
+        return """
+                ## 深度研究任务已受理
+
+                - 标的：%s
+                - 任务号：%s
+                - 当前阶段：%s
+
+                研究将在后台继续执行；本页面会实时展示进度，完成后自动返回完整报告。
+                """.formatted(ticker, taskId, stage).trim();
+    }
+
+    /** Render a deterministic response when one user has exhausted the active-task quota. */
+    public String buildQuotaExceededAnswer(int activeCount, int maxActive) {
+        return """
+                ## 深度研究并发额度已满
+
+                当前已有 %d 个进行中的深度研究任务，账户上限为 %d 个。请等待其中一个任务完成后再提交。
+                """.formatted(Math.max(0, activeCount), Math.max(1, maxActive)).trim();
+    }
+
     /**
      * 构造最终回答顶部摘要（含面向用户的输出要求）。
      */

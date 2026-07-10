@@ -19,10 +19,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
 @SpringBootTest(
         classes = AuthIntegrationTestApplication.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -35,15 +32,20 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 )
 abstract class AuthIntegrationTestBase {
 
-    @Container
     static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8.0.36")
             .withDatabaseName("stocksage_it")
             .withUsername("stocksage")
             .withPassword("stocksage");
 
-    @Container
     static final GenericContainer<?> REDIS = new GenericContainer<>("redis:7-alpine")
             .withExposedPorts(6379);
+
+    static {
+        // All subclasses share one cached Spring context, so their backing containers must
+        // have the same JVM-wide lifecycle instead of being restarted for every test class.
+        MYSQL.start();
+        REDIS.start();
+    }
 
     @Autowired
     protected TestRestTemplate rest;

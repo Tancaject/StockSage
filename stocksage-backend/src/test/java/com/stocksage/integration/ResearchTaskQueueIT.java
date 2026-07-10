@@ -1,6 +1,7 @@
 package com.stocksage.integration;
 
 import com.stocksage.config.AsyncConfig;
+import com.stocksage.config.ResearchTaskMetricsConfig;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.repository.ResearchTaskRepository;
 import com.stocksage.service.DeepResearchPipeline;
@@ -8,6 +9,7 @@ import com.stocksage.service.ResearchTaskLeaseService;
 import com.stocksage.service.ResearchTaskQueue;
 import com.stocksage.service.ResearchTaskService;
 import com.stocksage.service.ResearchTaskWorker;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,6 +94,9 @@ class ResearchTaskQueueIT {
 
     @Autowired
     private StringRedisTemplate redis;
+
+    @Autowired
+    private MeterRegistry meterRegistry;
 
     @MockBean
     private DeepResearchPipeline deepResearchPipeline;
@@ -201,6 +206,20 @@ class ResearchTaskQueueIT {
                 .isEqualTo(ResearchTask.Status.SUCCEEDED);
     }
 
+    @Test
+    void exposesQueueDlqAndRunningTaskDepthMetrics() {
+        ResearchTask task = createPendingTask("AMD");
+        queue.enqueue(task.getId());
+        queue.enqueueToDlq(task.getId(), "metrics-probe");
+        task.setStatus(ResearchTask.Status.RUNNING);
+        task.setStage(ResearchTask.Stage.DATA_PREFETCH);
+        researchTaskRepository.saveAndFlush(task);
+
+        assertThat(meterRegistry.get("stocksage.research.queue.depth").gauge().value()).isEqualTo(1);
+        assertThat(meterRegistry.get("stocksage.research.queue.dlq.depth").gauge().value()).isEqualTo(1);
+        assertThat(meterRegistry.get("stocksage.research.tasks.running").gauge().value()).isEqualTo(1);
+    }
+
     private ResearchTask createPendingTask(String ticker) {
         String traceId = "trace-" + UUID.randomUUID();
         String payload = researchTaskService.buildSubmissionPayload(ticker, "research " + ticker, traceId, null);
@@ -248,6 +267,7 @@ class ResearchTaskQueueIT {
     @Import({
             AsyncConfig.class,
             ResearchTaskQueue.class,
+            ResearchTaskMetricsConfig.class,
             ResearchTaskWorker.class,
             ResearchTaskService.class,
             ResearchTaskLeaseService.class

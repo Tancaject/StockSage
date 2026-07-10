@@ -46,17 +46,21 @@ public class DeepResearchPipeline {
 
     /** 整条 DEEP 管线在 worker 内运行，请求线程只负责创建任务和订阅事件。 */
     public void runFullPipeline(ResearchTask task, ResearchTaskLeaseService.Lease lease) {
-        SubmissionPayload payload = parsePayload(task);
-        Optional<ResearchTaskCheckpointService.CheckpointState> checkpoint = checkpointService.load(task.getId());
+        SubmissionPayload payload = null;
         ResearchTask runningTask = task;
-        AnalysisState workingState = checkpoint.map(ResearchTaskCheckpointService.CheckpointState::state).orElse(null);
+        AnalysisState workingState = null;
         ScheduledFuture<?> heartbeat = null;
+        boolean attemptStarted = false;
 
         try {
+            payload = parsePayload(task);
+            Optional<ResearchTaskCheckpointService.CheckpointState> checkpoint = checkpointService.load(task.getId());
+            workingState = checkpoint.map(ResearchTaskCheckpointService.CheckpointState::state).orElse(null);
             ResearchTask.Stage resumeStage = checkpoint
                     .map(ResearchTaskCheckpointService.CheckpointState::stageCompleted)
                     .orElse(ResearchTask.Stage.DATA_PREFETCH);
             runningTask = researchTaskService.startAttempt(task, lease.token(), resumeStage);
+            attemptStarted = true;
             heartbeat = startResearchTaskHeartbeat(runningTask, lease);
 
             int roundsDone = checkpoint
@@ -123,9 +127,20 @@ public class DeepResearchPipeline {
             checkpointService.deleteForTask(task.getId());
             chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "task-final", brief);
         } catch (Exception error) {
-            Optional<String> fallback = tryPersistOfflineFallbackReport(
-                    task.getUserId(), payload.conversationId(), workingState,
-                    runningTask, lease, error);
+            if (!attemptStarted) {
+                researchTaskService.markFailed(task, error.getMessage());
+                if (payload != null) {
+                    chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "error",
+                            "深度研究任务执行失败：" + safeError(error));
+                }
+                return;
+            }
+
+            Optional<String> fallback = payload == null
+                    ? Optional.empty()
+                    : tryPersistOfflineFallbackReport(
+                            task.getUserId(), payload.conversationId(), workingState,
+                            runningTask, lease, error);
             if (fallback.isPresent()) {
                 String brief = reportRenderer.buildFinalAnswerBrief(workingState);
                 String text = brief == null || brief.isBlank() ? fallback.get() : brief;
@@ -138,8 +153,10 @@ public class DeepResearchPipeline {
 
             boolean failed = researchTaskService.markFailedForOwner(
                     runningTask, lease.token(), error.getMessage());
-            chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "error",
-                    "深度研究任务执行失败：" + safeError(error));
+            if (payload != null) {
+                chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "error",
+                        "深度研究任务执行失败：" + safeError(error));
+            }
             if (!failed) {
                 throw new IllegalStateException("research task lost ownership before failure update", error);
             }
@@ -204,11 +221,15 @@ public class DeepResearchPipeline {
         ResearchTask runningTask = null;
         ScheduledFuture<?> heartbeat = null;
         try {
-            runningTask = researchTaskService.startAttempt(
-                    task,
-                    lease.token(),
-                    ResearchTask.Stage.AGENT_DEBATE
-            );
+            boolean alreadyOwned = task.getStatus() == ResearchTask.Status.RUNNING
+                    && lease.token().equals(task.getLeaseToken());
+            runningTask = alreadyOwned
+                    ? task
+                    : researchTaskService.startAttempt(
+                            task,
+                            lease.token(),
+                            ResearchTask.Stage.AGENT_DEBATE
+                    );
             heartbeat = startResearchTaskHeartbeat(runningTask, lease);
             AnalysisState completed = researchDebateService.runDebate(traceId, conversationId, agentState);
             researchTaskService.markStageForOwner(runningTask, lease.token(), ResearchTask.Stage.REPORT_PERSIST);
