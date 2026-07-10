@@ -1,0 +1,165 @@
+{
+  "stocks": [
+    {
+      "ticker": "NVDA",
+      "chart": {
+        "chartType": "candlestick",
+        "sourceTool": "offlineDemoSample",
+        "title": "NVDA 离线演示 K 线",
+        "symbol": "NVDA",
+        "period": "daily",
+        "provider": "StockSage 离线样本",
+        "generatedAt": "2026-06-05T10:00:00",
+        "points": [
+          {
+            "date": "2026-05-20",
+            "open": 112.4,
+            "high": 115.2,
+            "low": 111.7,
+            "close": 114.8,
+            "volume": 428000000
+          },
+          {
+            "date": "2026-05-21",
+            "open": 115.1,
+            "high": 118.6,
+            "low": 113.9,
+            "close": 117.3,
+            "volume": 461000000
+          },
+          {
+            "date": "2026-05-22",
+            "open": 117.0,
+            "high": 119.8,
+            "low": 116.2,
+            "close": 118.9,
+            "volume": 389000000
+          },
+          {
+            "date": "2026-05-26",
+            "open": 119.2,
+            "high": 121.5,
+            "low": 117.8,
+            "close": 120.4,
+            "volume": 412000000
+          },
+          {
+            "date": "2026-05-27",
+            "open": 120.0,
+            "high": 123.7,
+            "low": 119.5,
+            "close": 122.9,
+            "volume": 436000000
+          },
+          {
+            "date": "2026-05-28",
+            "open": 123.1,
+            "high": 124.4,
+            "low": 120.9,
+            "close": 121.8,
+            "volume": 398000000
+          },
+          {
+            "date": "2026-05-29",
+            "open": 122.0,
+            "high": 125.9,
+            "low": 121.4,
+            "close": 124.7,
+            "volume": 455000000
+          },
+          {
+            "date": "2026-06-01",
+            "open": 124.3,
+            "high": 127.2,
+            "low": 123.6,
+            "close": 126.5,
+            "volume": 472000000
+          },
+          {
+            "date": "2026-06-02",
+            "open": 126.1,
+            "high": 128.4,
+            "low": 124.7,
+            "close": 125.6,
+            "volume": 421000000
+          },
+          {
+            "date": "2026-06-03",
+            "open": 126.0,
+            "high": 129.6,
+            "low": 125.3,
+            "close": 128.8,
+            "volume": 489000000
+          },
+          {
+            "date": "2026-06-04",
+            "open": 129.0,
+            "high": 131.2,
+            "low": 127.5,
+            "close": 130.1,
+            "volume": 501000000
+          },
+          {
+            "date": "2026-06-05",
+            "open": 130.4,
+            "high": 132.8,
+            "low": 128.9,
+            "close": 131.6,
+            "volume": 477000000
+          }
+        ]
+      },
+      "report": {
+        "recommendation": "HOLD",
+        "dataSnapshotHash": "9f3ac2e15b7d480a6c21d94e8f05b3a7c4e6d2189b0f5a3c7e1d4b86a2f90c35",
+        "contextHash": "4b86a2f90c359f3ac2e15b7d480a6c21d94e8f05b3a7c4e6d2189b0f5a3c7e1d",
+        "generatedAt": "2026-06-05T10:00:00",
+        "userQuery": "离线演示：NVDA 当前值得买入吗？",
+        "preview": "演示结论：NVDA 维持观察级 HOLD——样本区间趋势向好，但估值与最新披露未经实时数据核验，仅用于展示驾驶舱链路。",
+        "rationale": [
+          "离线样本 K 线呈现连续收高、量能放大的形态，足以演示驾驶舱的图表与证据联动。",
+          "回退报告为确定性输出，刻意保守：未调用实时行情、SEC 与模型 API。"
+        ],
+        "riskFactors": [
+          "本数据为演示样本，不可视为当前市场数据。",
+          "离线模式下未核验实时估值、客户集中度与供应链证据。"
+        ],
+        "citations": [
+          "[离线样本] NVDA 演示 K 线与证据包，生成于 2026-06-05",
+          "[离线样本] StockSage 确定性回退报告夹具"
+        ],
+        "evidenceItems": [
+          {
+            "dimension": "价格趋势",
+            "evidence": "样本区间收盘价自 114.8 升至 131.6，呈连续上行。",
+            "implication": "无需实时行情即可演示图表优先的驾驶舱形态。",
+            "source": "离线样本"
+          },
+          {
+            "dimension": "数据边界",
+            "evidence": "样本不依赖外部 API，不包含实时 SEC 与 DashScope 调用。",
+            "implication": "支持克隆即运行的演示，同时明确标注降级状态。",
+            "source": "离线样本"
+          }
+        ],
+        "bullFactors": [
+          "样本趋势向上，克隆后即可体验完整的 K 线交互。",
+          "回退报告保留了溯源字段与证据行，便于演示讲解。"
+        ],
+        "bearFactors": [
+          "离线模式不包含实时估值、披露、客户与宏观证据。",
+          "配置好 API 后，正式链路仍应走完整的多空辩论。"
+        ],
+        "suitableFor": [
+          "无需配置外部服务、希望直接查看 StockSage 驾驶舱的演示场景。"
+        ],
+        "notSuitableFor": [
+          "任何真实交易或组合决策。"
+        ],
+        "unknowns": [
+          "最新披露变化、当前市场价格与实时新闻在样本边界之外。"
+        ]
+      }
+    }
+  ]
+}

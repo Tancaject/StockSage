@@ -1,0 +1,5 @@
+{"name":"aapl_risk_factors","query":"AAPL risk factors","expected":["aapl","risk"],"relevance":["risk"]}
+{"name":"amzn_operating_segments","query":"AMZN operating segments","expected":["amzn","operating"],"relevance":["operating"]}
+{"name":"nvda_supply_chain_risk","query":"NVDA supply chain risk","expected":["nvda","supply"],"relevance":["supply"]}
+{"name":"xom_capital_expenditures","query":"XOM capital expenditures","expected":["xom","capital"],"relevance":["capital"]}
+{"name":"jnj_litigation_risk","query":"JNJ litigation risk","expected":["jnj","litigation"],"relevance":["litigation"]}

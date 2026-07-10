@@ -1,0 +1,52 @@
+# === IDE ===
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# === Java / Maven ===
+stocksage-backend/target/
+.m2/
+*.class
+*.jar
+*.war
+*.args
+
+# === Python ===
+stocksage-data-service/.venv/
+.venv-rag-eval/
+**/__pycache__/
+**/*.py[cod]
+*$py.class
+rag-eval/results/
+
+# === Node / Vue ===
+stocksage-frontend/node_modules/
+stocksage-frontend/dist/
+
+# === Environment & Secrets ===
+.env
+*.env.local
+stocksage-backend/src/main/resources/application-local.yml
+stocksage-backend/src/main/resources/application-local.properties
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Logs ===
+*.log
+*.out
+*.err
+logs/
+
+# === AI 工具工作目录与产物(不属于项目源码) ===
+.agents/
+.codex/
+.codex_tmp/
+.codex-external/
+.claude/
+.superpowers/
+tmp/
+progress.md
+feature_list.json

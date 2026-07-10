@@ -1,0 +1,14 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+baostock==0.8.8
+# akshare 靠解析东方财富等站点，版本间常有破坏性变更；锁定为当前运行环境实际安装版本。
+akshare==1.18.60
+pandas==2.2.3
+numpy==2.2.1
+pydantic==2.10.4
+python-dotenv==1.0.1
+duckduckgo-search==7.5.3
+PyMuPDF==1.25.3
+python-multipart==0.0.20
+httpx==0.28.1
+beautifulsoup4==4.13.4

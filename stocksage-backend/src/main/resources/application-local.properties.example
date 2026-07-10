@@ -1,0 +1,11 @@
+# Copy this file to application-local.properties for local development.
+# application-local.properties is gitignored and can contain local secrets.
+
+# ===== Local Secrets =====
+spring.ai.dashscope.api-key=your-dashscope-api-key
+spring.datasource.username=root
+spring.datasource.password=your-mysql-password
+
+# Optional overrides:
+# spring.datasource.url=jdbc:mysql://localhost:3306/stocksage?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+# stocksage.debug.chat-test-enabled=true

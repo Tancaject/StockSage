@@ -1,0 +1,24 @@
+# Keep repository-wide text/code scans focused on source and docs.
+.git/
+.idea/
+.vscode/
+.m2/
+
+# Build output and local dependency trees
+stocksage-backend/target/
+stocksage-frontend/node_modules/
+stocksage-frontend/dist/
+
+# Python environments, caches, and generated eval output
+.venv-rag-eval/
+stocksage-data-service/.venv/
+rag-eval/results/
+**/__pycache__/
+**/*.py[cod]
+*$py.class
+
+# Runtime logs and local compile scratch files
+*.log
+*.out
+*.err
+*.args
