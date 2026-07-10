@@ -160,8 +160,26 @@
           </div>
         </div>
 
-        <!-- 右栏：市场新闻（替代原冗余的"分析执行舱"，复用 data-service 新闻管线） -->
-        <NewsPanel :ticker="selectedTicker" class="terminal-right-column" />
+        <!-- 右栏：后台研究任务与市场新闻 -->
+        <div class="terminal-right-column terminal-right-stack">
+          <section v-if="cockpit.taskTimeline.length" class="panel task-monitor-panel">
+            <div class="panel-header">
+              <div>
+                <h2>研究任务进度</h2>
+              </div>
+            </div>
+            <div class="task-list">
+              <div v-for="task in cockpit.taskTimeline" :key="task.id" class="task-row">
+                <span class="status-pill" :class="task.tone">{{ task.statusLabel }}</span>
+                <strong>{{ task.stageLabel }}</strong>
+                <small>{{ task.attempts }} 次尝试 · {{ formatDate(task.timeLabel) }}</small>
+                <p v-if="task.errorMessage">{{ task.errorMessage }}</p>
+                <p v-if="task.deadLettered" class="task-dlq-hint">{{ task.recoveryHint }}</p>
+              </div>
+            </div>
+          </section>
+          <NewsPanel :ticker="selectedTicker" />
+        </div>
       </section>
 
       <CompareDesk v-else-if="activeTab === 'compare'" @start-compare="handleCompare" />
@@ -2090,6 +2108,32 @@ function handleSearchSelect(raw) {
   height: 100%;
   overflow-y: auto;
   align-self: stretch;
+}
+
+.terminal-right-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.terminal-right-stack :deep(.news-panel) {
+  flex: 1 0 280px;
+}
+
+.task-monitor-panel {
+  flex: 0 0 auto;
+  padding: 14px;
+}
+
+.task-monitor-panel .panel-header {
+  margin-bottom: 10px;
+}
+
+.task-dlq-hint {
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: var(--negative-soft);
+  font-weight: 650;
 }
 
 /* ==========================================================================

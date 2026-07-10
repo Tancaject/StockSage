@@ -48,6 +48,7 @@ const TASK_STAGE_LABELS = {
   RAG_RETRIEVAL: '检索证据',
   TOOL_PREFETCH: '读取数据',
   AGENT_DEBATE: '多空辩论',
+  REPORT_SYNTHESIS: '综合研究结论',
   REPORT_DRAFT: '生成报告',
   REPORT_PERSIST: '保存报告',
   COMPLETE: '完成',
@@ -564,6 +565,10 @@ export function summarizeTaskTimeline(items = []) {
   return (Array.isArray(items) ? items : []).map(item => {
     const status = String(item?.status || 'PENDING').toUpperCase()
     const stage = String(item?.stage || 'CREATED').toUpperCase()
+    const attempts = Number.isFinite(Number(item?.attempts)) ? Number(item.attempts) : 0
+    const errorMessage = item?.errorMessage || ''
+    const deadLettered = item?.deadLettered === true
+      || (status === 'FAILED' && /attempts? exhausted|max(?:imum)? attempts? exceeded|dead.?letter|\bdlq\b/i.test(errorMessage))
     return {
       id: item?.id ?? null,
       conversationId: item?.conversationId ?? null,
@@ -572,7 +577,7 @@ export function summarizeTaskTimeline(items = []) {
       stage,
       statusLabel: TASK_STATUS_LABELS[status] || status.replaceAll('_', ' '),
       stageLabel: TASK_STAGE_LABELS[stage] || stage.replaceAll('_', ' '),
-      attempts: Number.isFinite(Number(item?.attempts)) ? Number(item.attempts) : 0,
+      attempts,
       resultReportVersionId: item?.resultReportVersionId ?? null,
       startedAt: item?.startedAt || '',
       heartbeatAt: item?.heartbeatAt || '',
@@ -580,7 +585,9 @@ export function summarizeTaskTimeline(items = []) {
       createdAt: item?.createdAt || '',
       updatedAt: item?.updatedAt || '',
       timeLabel: item?.heartbeatAt || item?.completedAt || item?.startedAt || item?.createdAt || '',
-      errorMessage: item?.errorMessage || '',
+      errorMessage,
+      deadLettered,
+      recoveryHint: deadLettered ? '任务已转入死信队列，请检查依赖服务后重新提交。' : '',
       tone: taskTone(status),
     }
   })

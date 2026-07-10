@@ -489,12 +489,25 @@ test('summarizeTaskTimeline hides owner tokens and labels failed tasks', () => {
       stage: 'FAILED',
       attempts: 3,
       leaseToken: 'secret-token',
-      errorMessage: 'stale research task exceeded attempt limit',
+      errorMessage: 'attempts exhausted before execution',
     },
   ])
 
   assert.equal(rows[0].tone, 'danger')
   assert.equal(rows[0].stageLabel, '失败')
   assert.equal(rows[0].leaseToken, undefined)
-  assert.match(rows[0].errorMessage, /stale/)
+  assert.equal(rows[0].deadLettered, true)
+  assert.match(rows[0].recoveryHint, /死信队列/)
+})
+
+test('summarizeTaskTimeline labels report synthesis without claiming DLQ for ordinary failures', () => {
+  const rows = summarizeTaskTimeline([
+    { id: 10, status: 'RUNNING', stage: 'REPORT_SYNTHESIS', attempts: 1 },
+    { id: 11, status: 'FAILED', stage: 'FAILED', attempts: 1, errorMessage: 'provider timeout' },
+  ])
+
+  assert.equal(rows[0].stageLabel, '综合研究结论')
+  assert.equal(rows[0].deadLettered, false)
+  assert.equal(rows[1].deadLettered, false)
+  assert.equal(rows[1].recoveryHint, '')
 })

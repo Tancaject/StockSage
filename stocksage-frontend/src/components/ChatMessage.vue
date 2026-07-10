@@ -15,6 +15,21 @@
         </el-tooltip>
       </div>
 
+      <section v-if="task" class="task-card" :class="taskTone">
+        <div class="task-card-header">
+          <span class="task-status-dot"></span>
+          <strong>{{ task.ticker ? `${task.ticker} 后台研究` : '后台研究任务' }}</strong>
+          <span>{{ taskStatusLabel }}</span>
+        </div>
+        <div class="task-card-progress">
+          <span>当前阶段：{{ taskStageLabel }}</span>
+          <small v-if="task.taskId">任务 #{{ task.taskId }}</small>
+        </div>
+        <p v-if="task.connection === 'reconnecting'" class="task-connection-note">连接中断，正在从上次事件位置恢复…</p>
+        <p v-else-if="task.connection === 'paused'" class="task-connection-note">已停止观看，后台任务仍可继续运行。</p>
+        <p v-if="task.errorMessage" class="task-error">{{ task.errorMessage }}</p>
+      </section>
+
       <div v-if="assistantEvidence.visible" class="evidence-strip">
         <span
           v-for="badge in assistantEvidence.badges"
@@ -197,7 +212,10 @@ function submitEdit() {
   emit('edit', text)
 }
 
-const roleName = computed(() => props.message.role === 'user' ? '你' : 'StockSage')
+const roleName = computed(() => {
+  if (props.message.role === 'user') return '你'
+  return props.message.isTaskFinal ? 'StockSage · 研究报告' : 'StockSage'
+})
 const imageAttachments = computed(() => {
   if (!Array.isArray(props.message.images)) return []
   return props.message.images.filter(image => image?.dataUrl)
@@ -218,6 +236,29 @@ const modelTooltip = computed(() => {
 const showCopy = computed(() => props.message.role === 'assistant' && Boolean(props.message.content?.trim()))
 const messageCharts = computed(() => Array.isArray(props.message.charts) ? props.message.charts : [])
 const assistantEvidence = computed(() => buildAssistantEvidenceSummary(props.message))
+const task = computed(() => props.message.role === 'assistant' ? (props.message.task || null) : null)
+const taskStatusLabel = computed(() => ({
+  PENDING: '排队中',
+  RUNNING: '运行中',
+  SUCCEEDED: '已完成',
+  FAILED: '失败',
+  CANCELLED: '已取消',
+}[String(task.value?.status || '').toUpperCase()] || '处理中'))
+const taskStageLabel = computed(() => ({
+  CREATED: '已创建',
+  DATA_PREFETCH: '读取研究数据',
+  AGENT_DEBATE: '多空辩论',
+  REPORT_SYNTHESIS: '综合研究结论',
+  REPORT_PERSIST: '保存报告',
+  COMPLETE: '完成',
+  FAILED: '失败',
+}[String(task.value?.stage || '').toUpperCase()] || String(task.value?.stage || '准备中').replaceAll('_', ' ')))
+const taskTone = computed(() => {
+  const status = String(task.value?.status || '').toUpperCase()
+  if (status === 'FAILED') return 'danger'
+  if (status === 'SUCCEEDED') return 'positive'
+  return task.value?.connection === 'reconnecting' ? 'reconnecting' : 'running'
+})
 // Markdown 是模型生成内容，进入 v-html 前必须先消毒。
 const renderedContent = computed(() => DOMPurify.sanitize(
   marked.parse(normalizeMarkdownEmphasis(props.message.content || ''), { async: false }),
@@ -261,13 +302,13 @@ const researchTimeline = computed(() => buildResearchTimeline({
   traceSummary: traceSummary.value,
 }))
 
-// 流式推理（含多空辩论）首次到达、且最终答案尚未开始时，自动展开思考面板一次，
-// 让用户实时看着辩论展开；只触发一次，之后不再与用户的手动折叠较劲。
+// 流式推理（含多空辩论）首次到达时自动展开一次。后台任务可能先返回受理文本，
+// 因此不能用“回答尚未开始”作为展开条件。
 let reasoningAutoOpened = false
 watch(
   () => inlineReasoning.value.length,
   (len) => {
-    if (len > 0 && !reasoningAutoOpened && !props.message.content) {
+    if (len > 0 && !reasoningAutoOpened) {
       reasoningOpen.value = true
       reasoningAutoOpened = true
     }
@@ -483,6 +524,87 @@ function formatDuration(ms) {
   background: rgba(176, 106, 46, 0.13);
   color: #9a5d29;
 }
+
+.task-card {
+  display: grid;
+  gap: 7px;
+  margin: 0 0 12px;
+  padding: 11px 13px;
+  border: 1px solid rgba(36, 95, 157, 0.22);
+  border-radius: 10px;
+  background: var(--info-soft);
+}
+
+.task-card.reconnecting {
+  border-color: rgba(154, 101, 0, 0.28);
+  background: var(--warning-soft);
+}
+
+.task-card.positive {
+  border-color: rgba(8, 127, 91, 0.24);
+  background: var(--positive-soft);
+}
+
+.task-card.danger {
+  border-color: rgba(185, 55, 55, 0.25);
+  background: var(--negative-soft);
+}
+
+.task-card-header,
+.task-card-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-card-header strong {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.task-card-header > span:last-child {
+  margin-left: auto;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.task-status-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--info);
+  box-shadow: 0 0 0 4px rgba(36, 95, 157, 0.12);
+}
+
+.task-card.reconnecting .task-status-dot {
+  background: var(--warning);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.task-card.positive .task-status-dot { background: var(--positive); }
+.task-card.danger .task-status-dot { background: var(--danger); }
+
+.task-card-progress {
+  justify-content: space-between;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.task-card-progress small {
+  color: var(--text-muted);
+}
+
+.task-connection-note,
+.task-error {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.task-error { color: var(--danger); }
 
 .evidence-strip {
   display: flex;

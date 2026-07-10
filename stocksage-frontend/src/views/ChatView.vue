@@ -250,7 +250,7 @@
  *   - isStreaming: 是否正在接收流式回复（控制输入框禁用状态）
  *   - conversations: 左侧持久化会话列表
  */
-import { computed, markRaw, ref, nextTick, onMounted } from 'vue'
+import { computed, markRaw, ref, nextTick, onBeforeUnmount, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowDown, ChatDotRound, Coin, DataAnalysis, Delete as DeleteIcon, Download, EditPen, Loading, Menu as MenuIcon, Notebook, Plus, Search, SwitchButton, TrendCharts } from '@element-plus/icons-vue'
@@ -258,7 +258,9 @@ import ChatMessage from '../components/ChatMessage.vue'
 import ChatInput from '../components/ChatInput.vue'
 import { deleteConversation, getConversationMessages, listConversations, streamChat } from '../api/chat.js'
 import { getCurrentUser, logout } from '../api/auth.js'
+import { getActiveTask, openTaskEvents } from '../api/researchTasks.js'
 import { buildPrimaryNavItems, getReportSurfaceLabels } from '../lib/productUi.js'
+import { isTaskTerminal, latestEntryId } from '../lib/sse-cursor.mjs'
 import { buildReportMarkdown, normalizeTicker } from '../lib/workbench.js'
 
 const router = useRouter()
@@ -283,8 +285,18 @@ const messagesRef = ref(null)  // 消息容器节点引用，用于自动滚动
 const isNearBottom = ref(true)
 const shouldFollowOutput = ref(true)
 let abortController = null     // 当前 SSE 请求的 AbortController
+let taskEventController = null
+let taskReconnectTimer = null
+let activeTask = null
+let activeTaskConversationId = null
+let activeTaskLookup = null
+let activeTaskDiscoveryAttempted = false
+let lastStreamEntryId = ''
+let lastTaskEntryId = ''
+let taskStreamTerminal = false
 const reasoningChunkTypes = new Set(['thought', 'action', 'observation'])
 const BOTTOM_LOCK_DISTANCE = 120
+const TASK_RECONNECT_DELAY_MS = 1_200
 
 function withPrimaryNavIcon(item) {
   return {
@@ -336,6 +348,12 @@ onMounted(async () => {
   await loadConversations()
 })
 
+onBeforeUnmount(() => {
+  abortController?.abort()
+  abortController = null
+  cancelTaskWatch()
+})
+
 async function loadCurrentUser() {
   try {
     currentUser.value = await getCurrentUser()
@@ -358,6 +376,7 @@ async function handleLogout() {
 /** 新建对话：清空消息，conversationId 置 null 让后端创建 */
 function newConversation() {
   if (isStreaming.value) handleStop()
+  else cancelTaskWatch()
   currentConversationId.value = null
   messages.value = []
   resetScrollLock()
@@ -379,6 +398,7 @@ async function switchConversation(id, { stopStream = true } = {}) {
     return
   }
   if (stopStream && isStreaming.value) handleStop()
+  else if (stopStream) cancelTaskWatch()
 
   currentConversationId.value = id
   closeMobileSidebar()
@@ -386,6 +406,7 @@ async function switchConversation(id, { stopStream = true } = {}) {
   try {
     const history = await getConversationMessages(id)
     messages.value = history.map(toChatMessage)
+    await resumeActiveTask(id)
     scrollToBottom({ force: true })
   } catch (err) {
     messages.value = [{ role: 'assistant', content: err.message }]
@@ -424,6 +445,8 @@ function toChatMessage(message) {
     modelName: message.modelName,
     reasoning: message.reasoning || [],
     charts: message.charts || [],
+    task: message.task || null,
+    isTaskFinal: message.isTaskFinal === true,
   }
 }
 
@@ -439,6 +462,271 @@ function upsertConversation(conversationId, fallbackTitle) {
 function titleFromMessage(text) {
   const title = text?.trim() || '图片分析'
   return title.length > 20 ? title.substring(0, 20) + '...' : title
+}
+
+function normalizeActiveTask(task) {
+  if (!task) return null
+  const taskId = task.taskId ?? task.id
+  if (taskId === null || taskId === undefined) return null
+  return {
+    ...task,
+    taskId,
+    status: String(task.status || 'PENDING').toUpperCase(),
+    stage: String(task.stage || 'CREATED').toUpperCase(),
+  }
+}
+
+function findTaskAssistant(taskId) {
+  for (let index = messages.value.length - 1; index >= 0; index--) {
+    const message = messages.value[index]
+    if (message.role === 'assistant' && message.task?.taskId === taskId) return message
+  }
+  return null
+}
+
+function attachTaskToAssistant(task, connection = 'live') {
+  const normalized = normalizeActiveTask(task)
+  if (!normalized) return null
+  const assistantMessage = findTaskAssistant(normalized.taskId) || getOrCreateStreamingAssistant(null)
+  assistantMessage.task = {
+    ...(assistantMessage.task || {}),
+    ...normalized,
+    connection,
+  }
+  return assistantMessage
+}
+
+function clearTaskConnection() {
+  taskEventController?.abort()
+  taskEventController = null
+  if (taskReconnectTimer !== null) {
+    window.clearTimeout(taskReconnectTimer)
+    taskReconnectTimer = null
+  }
+}
+
+function cancelTaskWatch() {
+  clearTaskConnection()
+  activeTask = null
+  activeTaskConversationId = null
+  activeTaskLookup = null
+  activeTaskDiscoveryAttempted = false
+  lastStreamEntryId = ''
+  lastTaskEntryId = ''
+  taskStreamTerminal = false
+}
+
+async function resumeActiveTask(conversationId, { connect = true } = {}) {
+  if (conversationId === null || conversationId === undefined) return null
+  try {
+    const task = normalizeActiveTask(await getActiveTask(conversationId))
+    if (currentConversationId.value !== conversationId || !task) return null
+
+    if (activeTask?.taskId !== task.taskId) {
+      lastTaskEntryId = ''
+      taskStreamTerminal = false
+    }
+    activeTask = task
+    activeTaskConversationId = conversationId
+    lastTaskEntryId = latestEntryId(lastTaskEntryId, lastStreamEntryId)
+    attachTaskToAssistant(task)
+    isStreaming.value = true
+    if (connect) connectTaskEventStream(task)
+    return task
+  } catch (error) {
+    console.warn('Failed to inspect active research task', error)
+    return null
+  }
+}
+
+function discoverActiveTask() {
+  const conversationId = currentConversationId.value
+  if (activeTask || activeTaskLookup || activeTaskDiscoveryAttempted || conversationId === null) return
+  activeTaskDiscoveryAttempted = true
+  activeTaskLookup = resumeActiveTask(conversationId, { connect: false })
+    .finally(() => {
+      activeTaskLookup = null
+    })
+}
+
+function connectTaskEventStream(task, { reconnecting = false } = {}) {
+  const normalized = normalizeActiveTask(task)
+  const conversationId = activeTaskConversationId
+  if (!normalized || conversationId === null || currentConversationId.value !== conversationId) return
+
+  clearTaskConnection()
+  const taskMessage = attachTaskToAssistant(normalized, reconnecting ? 'reconnecting' : 'live')
+  // POST 对话流未必携带 Redis entry id。首次改走任务端点时用全量回放重建，
+  // 避免把已经看到的逐 token section 再追加一遍。
+  if (!lastTaskEntryId && taskMessage?.reasoning?.length) {
+    taskMessage.reasoning = []
+  }
+  isStreaming.value = true
+
+  taskEventController = openTaskEvents(
+    normalized.taskId,
+    lastTaskEntryId || null,
+    chunk => {
+      if (currentConversationId.value !== conversationId) return
+      if (chunk.entryId) {
+        const nextCursor = latestEntryId(lastTaskEntryId, chunk.entryId)
+        if (lastTaskEntryId && nextCursor === lastTaskEntryId) return
+        lastTaskEntryId = nextCursor
+      }
+
+      applyIncomingChunk(chunk, { taskReplay: true })
+      if (isTaskTerminal(chunk)) {
+        taskStreamTerminal = true
+      }
+    },
+    () => {
+      taskEventController = null
+      if (taskStreamTerminal) {
+        finishTaskWatch()
+      } else {
+        scheduleTaskReconnect(normalized)
+      }
+    },
+    () => {
+      taskEventController = null
+      scheduleTaskReconnect(normalized)
+    },
+  )
+}
+
+function scheduleTaskReconnect(task) {
+  const conversationId = activeTaskConversationId
+  if (conversationId === null || currentConversationId.value !== conversationId || taskStreamTerminal) return
+  attachTaskToAssistant(task, 'reconnecting')
+  if (taskReconnectTimer !== null) window.clearTimeout(taskReconnectTimer)
+  taskReconnectTimer = window.setTimeout(() => {
+    taskReconnectTimer = null
+    void recoverTaskEventStream(conversationId)
+  }, TASK_RECONNECT_DELAY_MS)
+}
+
+async function recoverTaskEventStream(conversationId) {
+  if (currentConversationId.value !== conversationId || taskStreamTerminal) return
+  try {
+    const task = normalizeActiveTask(await getActiveTask(conversationId))
+    if (currentConversationId.value !== conversationId) return
+    if (task) {
+      activeTask = task
+      attachTaskToAssistant(task, 'reconnecting')
+      connectTaskEventStream(task, { reconnecting: true })
+      return
+    }
+
+    finishTaskWatch()
+    await refreshConversationFromHistory(conversationId)
+  } catch {
+    scheduleTaskReconnect(activeTask)
+  }
+}
+
+async function refreshConversationFromHistory(conversationId) {
+  try {
+    const history = await getConversationMessages(conversationId)
+    if (currentConversationId.value !== conversationId) return
+    messages.value = history.map(toChatMessage)
+    scrollToBottom()
+  } catch (error) {
+    console.warn('Failed to refresh completed research task history', error)
+  }
+}
+
+function finishTaskWatch() {
+  clearTaskConnection()
+  const taskMessage = activeTask ? findTaskAssistant(activeTask.taskId) : null
+  if (taskMessage?.task) taskMessage.task.connection = 'complete'
+  activeTask = null
+  activeTaskConversationId = null
+  isStreaming.value = false
+  loadConversations()
+}
+
+function appendTaskFinalChunk(chunk) {
+  taskStreamTerminal = true
+  const taskMessage = activeTask ? findTaskAssistant(activeTask.taskId) : null
+  if (taskMessage?.task) {
+    taskMessage.task.status = 'SUCCEEDED'
+    taskMessage.task.stage = 'COMPLETE'
+    taskMessage.task.connection = 'complete'
+  }
+
+  const content = String(chunk.content || '').trim()
+  const lastMessage = messages.value[messages.value.length - 1]
+  if (content && !(lastMessage?.isTaskFinal && lastMessage.content === content)) {
+    messages.value.push({
+      role: 'assistant',
+      content,
+      traceId: chunk.traceId || taskMessage?.traceId || null,
+      modelTier: taskMessage?.modelTier || null,
+      modelName: taskMessage?.modelName || null,
+      reasoning: [],
+      charts: [],
+      isTaskFinal: true,
+    })
+  }
+  scrollToBottom()
+}
+
+function applyTaskErrorChunk(chunk, taskReplay) {
+  const errorText = chunk.content || '服务暂时出错，请稍后重试。'
+  if (taskReplay || activeTask) {
+    taskStreamTerminal = true
+    const taskMessage = activeTask
+      ? (findTaskAssistant(activeTask.taskId) || attachTaskToAssistant(activeTask))
+      : getOrCreateStreamingAssistant(chunk.traceId)
+    taskMessage.task = {
+      ...(taskMessage.task || {}),
+      status: 'FAILED',
+      stage: 'FAILED',
+      connection: 'complete',
+      errorMessage: errorText,
+    }
+  } else {
+    getOrCreateStreamingAssistant(chunk.traceId).content = errorText
+  }
+  ElMessage.error(errorText)
+  scrollToBottom()
+}
+
+function applyIncomingChunk(chunk, { taskReplay = false, fallbackTitle = '' } = {}) {
+  if (chunk.conversationId && currentConversationId.value !== chunk.conversationId) {
+    currentConversationId.value = chunk.conversationId
+    upsertConversation(chunk.conversationId, fallbackTitle || '研究任务')
+  }
+  if (!taskReplay && chunk.entryId) {
+    lastStreamEntryId = latestEntryId(lastStreamEntryId, chunk.entryId)
+  }
+
+  if (chunk.type === 'model') {
+    applyModelChunk(chunk)
+    return
+  }
+  if (reasoningChunkTypes.has(chunk.type)) {
+    appendReasoningChunk(chunk)
+    return
+  }
+  if (chunk.type === 'chart') {
+    appendChartChunk(chunk)
+    return
+  }
+  if (chunk.type === 'task-final') {
+    appendTaskFinalChunk(chunk)
+    return
+  }
+  if (chunk.type === 'error') {
+    applyTaskErrorChunk(chunk, taskReplay)
+    return
+  }
+  if (chunk.type === 'answer' && !taskReplay) {
+    const assistantMessage = getOrCreateStreamingAssistant(chunk.traceId)
+    assistantMessage.content += chunk.content || ''
+    scrollToBottom()
+    discoverActiveTask()
+  }
 }
 
 function sendQuickPrompt(text) {
@@ -665,12 +953,13 @@ function handleSend(payload, options = {}) {
   const text = outgoing.text || '请分析这张图片。'
   const images = outgoing.images
 
+  cancelTaskWatch()
+
   // 先把用户消息加入列表
   messages.value.push({ role: 'user', content: text, images })
   scrollToBottom({ force: true })
 
   isStreaming.value = true
-  let assistantContent = ''  // 累积 AI 回复的全文
 
   abortController = streamChat(
     {
@@ -681,60 +970,56 @@ function handleSend(payload, options = {}) {
     },
     {
       onChunk(chunk) {
-        // meta/thought/action/observation/chart/answer/error 类型的数据块都走这条路径。
-        // 第一个数据块通常携带后端创建的 conversationId。
-        if (chunk.conversationId && currentConversationId.value !== chunk.conversationId) {
-          currentConversationId.value = chunk.conversationId
-          upsertConversation(chunk.conversationId, titleFromMessage(text))
-        }
-
-        if (chunk.type === 'model') {
-          applyModelChunk(chunk)
-          return
-        }
-
-        if (reasoningChunkTypes.has(chunk.type)) {
-          appendReasoningChunk(chunk)
-          return
-        }
-
-        if (chunk.type === 'chart') {
-          appendChartChunk(chunk)
-          return
-        }
-
-        if (chunk.type === 'error') {
-          const assistantMessage = getOrCreateStreamingAssistant(chunk.traceId)
-          assistantMessage.content = chunk.content || '服务暂时出错，请稍后重试。'
-          ElMessage.error(assistantMessage.content)
-          scrollToBottom()
-          return
-        }
-
-        if (chunk.type === 'answer') {
-          // 逐块拼接回复内容
-          assistantContent += chunk.content
-          const assistantMessage = getOrCreateStreamingAssistant(chunk.traceId)
-          assistantMessage.content = assistantContent
-          scrollToBottom()
-        }
+        applyIncomingChunk(chunk, { fallbackTitle: titleFromMessage(text) })
       },
       onDone() {
-        isStreaming.value = false
-        abortController = null
-        loadConversations()
+        void handleOriginalStreamDone()
       },
       onError(err) {
-        isStreaming.value = false
-        abortController = null
-        const errorText = err?.message || '网络连接失败，请检查网络后重试。'
-        const assistantMessage = getOrCreateStreamingAssistant(null)
-        assistantMessage.content = errorText
-        ElMessage.error(errorText)
-        loadConversations()
+        void handleOriginalStreamError(err)
       },
     }
   )
+}
+
+async function handleOriginalStreamDone() {
+  abortController = null
+  if (taskStreamTerminal) {
+    finishTaskWatch()
+    return
+  }
+  if (activeTask) {
+    connectTaskEventStream(activeTask)
+    return
+  }
+
+  const conversationId = currentConversationId.value
+  const task = await resumeActiveTask(conversationId)
+  if (!task) {
+    isStreaming.value = false
+    loadConversations()
+  }
+}
+
+async function handleOriginalStreamError(error) {
+  abortController = null
+  if (taskStreamTerminal) {
+    finishTaskWatch()
+    return
+  }
+
+  const conversationId = currentConversationId.value
+  const task = activeTask || await resumeActiveTask(conversationId, { connect: false })
+  if (task) {
+    connectTaskEventStream(task, { reconnecting: true })
+    return
+  }
+
+  isStreaming.value = false
+  const errorText = error?.message || '网络连接失败，请检查网络后重试。'
+  getOrCreateStreamingAssistant(null).content = errorText
+  ElMessage.error(errorText)
+  loadConversations()
 }
 
 function normalizeOutgoingMessage(payload, options = {}) {
@@ -796,9 +1081,19 @@ function handleEdit(newText) {
 
 /** 停止当前流式生成 */
 function handleStop() {
+  let stopped = false
   if (abortController) {
     abortController.abort()
     abortController = null
+    stopped = true
+  }
+  if (taskEventController || taskReconnectTimer !== null || activeTask) {
+    const taskMessage = activeTask ? findTaskAssistant(activeTask.taskId) : null
+    if (taskMessage?.task) taskMessage.task.connection = 'paused'
+    cancelTaskWatch()
+    stopped = true
+  }
+  if (stopped || isStreaming.value) {
     isStreaming.value = false
     loadConversations()
   }

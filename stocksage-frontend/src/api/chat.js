@@ -13,6 +13,7 @@
  */
 
 import { BASE_URL, apiFetch, getJson, requestOk } from './http.js'
+import { readSseEvents } from '../lib/sse-stream.js'
 
 const STREAM_IDLE_TIMEOUT_MS = 90_000
 
@@ -20,7 +21,7 @@ const STREAM_IDLE_TIMEOUT_MS = 90_000
  * 发送对话消息，接收 SSE 流式回复。
  *
  * @param {Object} request       请求体：{ conversationId, message }
- * @param {Function} onChunk     每收到一个 SSE 数据块时的回调：(chunk: { type, content, modelTier, modelName, traceId }) => void
+ * @param {Function} onChunk     每收到一个 SSE 数据块时的回调：(chunk: { type, content, modelTier, modelName, traceId, entryId }) => void
  * @param {Function} onDone      流结束时的回调
  * @param {Function} onError     出错时的回调
  * @returns {AbortController}    返回控制器，调用 .abort() 可中断请求
@@ -48,7 +49,7 @@ export function streamChat(request, { onChunk, onDone, onError }) {
 
   apiFetch(`${BASE_URL}/chat/stream`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { Accept: 'text/event-stream', 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
     signal: controller.signal,
   })
@@ -62,37 +63,21 @@ export function streamChat(request, { onChunk, onDone, onError }) {
         throw new Error(message)
       }
 
-      // 通过 ReadableStream 逐块读取响应体
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''  // 缓冲区，处理跨数据块的不完整行
       resetIdleTimer()
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        resetIdleTimer()
-
-        // 将二进制数据解码为文本，stream: true 表示可能有后续数据
-        buffer += decoder.decode(value, { stream: true })
-
-        // SSE 协议以换行符分隔每条消息
-        const lines = buffer.split('\n')
-        buffer = lines.pop()  // 最后一行可能不完整，留在缓冲区
-
-        for (const line of lines) {
-          // SSE 数据行以 "data:" 开头
-          if (line.startsWith('data:')) {
-            const data = line.slice(5).trim()
-            if (data === '[DONE]') continue  // 流结束标记
-            try {
-              onChunk(JSON.parse(data))  // 解析 JSON 并回调
-            } catch (e) {
-              // 非 JSON 数据（如心跳），忽略
-            }
+      await readSseEvents(response.body, {
+        onActivity: resetIdleTimer,
+        onEvent(event) {
+          const data = event.data.trim()
+          if (!data || data === '[DONE]') return
+          try {
+            const chunk = JSON.parse(data)
+            // task-final 与其他业务 chunk 一样交给视图分发；SSE id 用于后台任务断点续传。
+            onChunk(event.id ? { ...chunk, entryId: event.id } : chunk)
+          } catch {
+            // 非 JSON 数据（如心跳），忽略
           }
-        }
-      }
+        },
+      })
       clearIdleTimer()
       onDone?.()
     })
