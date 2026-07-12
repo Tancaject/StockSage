@@ -48,6 +48,9 @@ class ResearchTaskWorkerTest {
                 "key-8", "token-8", ResearchTaskLeaseService.Backend.PROCESS);
         when(repository.findById(8L)).thenReturn(Optional.of(task));
         when(taskService.tryAcquire(task)).thenReturn(Optional.of(lease));
+        when(taskService.failStaleRunningAtAttemptLimit(
+                task, lease, 3, "research task exceeded attempt limit 3"))
+                .thenReturn(true);
         org.mockito.Mockito.doThrow(new ResearchTaskQueue.QueueUnavailableException(
                         "down", new RuntimeException("down")))
                 .when(queue).enqueueToDlq(8L, "max attempts exceeded");
@@ -55,6 +58,57 @@ class ResearchTaskWorkerTest {
 
         ReflectionTestUtils.invokeMethod(worker, "processRecord", record);
 
+        verify(taskService).release(lease);
+    }
+
+    @Test
+    void staleRunningRecordMustWinDatabaseTakeoverBeforePipelineRuns() {
+        ResearchTaskQueue queue = mock(ResearchTaskQueue.class);
+        ResearchTaskRepository repository = mock(ResearchTaskRepository.class);
+        ResearchTaskService taskService = mock(ResearchTaskService.class);
+        DeepResearchPipeline pipeline = mock(DeepResearchPipeline.class);
+        ResearchTaskWorker worker = worker(queue, repository, taskService, pipeline);
+        ResearchTask task = task(10L, 1);
+        task.setStatus(ResearchTask.Status.RUNNING);
+        task.setLeaseToken("old-token");
+        MapRecord<String, String, String> record = record(10L);
+        ResearchTaskLeaseService.Lease lease = new ResearchTaskLeaseService.Lease(
+                "key-10", "new-token", ResearchTaskLeaseService.Backend.REDIS);
+        when(repository.findById(10L)).thenReturn(Optional.of(task));
+        when(taskService.tryAcquire(task)).thenReturn(Optional.of(lease));
+        when(taskService.takeOverRunningAttempt(task, lease, 3)).thenReturn(true);
+        worker.start();
+
+        ReflectionTestUtils.invokeMethod(worker, "processRecord", record);
+
+        verify(taskService).takeOverRunningAttempt(task, lease, 3);
+        verify(pipeline).runFullPipeline(task, lease);
+        verify(queue).ack(record);
+        verify(taskService).release(lease);
+    }
+
+    @Test
+    void rejectedRunningTakeoverStaysPendingAndDoesNotRunPipeline() {
+        ResearchTaskQueue queue = mock(ResearchTaskQueue.class);
+        ResearchTaskRepository repository = mock(ResearchTaskRepository.class);
+        ResearchTaskService taskService = mock(ResearchTaskService.class);
+        DeepResearchPipeline pipeline = mock(DeepResearchPipeline.class);
+        ResearchTaskWorker worker = worker(queue, repository, taskService, pipeline);
+        ResearchTask task = task(11L, 1);
+        task.setStatus(ResearchTask.Status.RUNNING);
+        task.setLeaseToken("active-token");
+        MapRecord<String, String, String> record = record(11L);
+        ResearchTaskLeaseService.Lease lease = new ResearchTaskLeaseService.Lease(
+                "key-11", "contender-token", ResearchTaskLeaseService.Backend.REDIS);
+        when(repository.findById(11L)).thenReturn(Optional.of(task));
+        when(taskService.tryAcquire(task)).thenReturn(Optional.of(lease));
+        when(taskService.takeOverRunningAttempt(task, lease, 3)).thenReturn(false);
+        worker.start();
+
+        ReflectionTestUtils.invokeMethod(worker, "processRecord", record);
+
+        verify(pipeline, never()).runFullPipeline(task, lease);
+        verify(queue, never()).ack(record);
         verify(taskService).release(lease);
     }
 
@@ -82,6 +136,31 @@ class ResearchTaskWorkerTest {
 
         verify(taskService).resetRunningForRetryForOwner(
                 task, "token-9", "simulated pipeline failure");
+        verify(queue, never()).ack(record);
+        verify(taskService).release(lease);
+    }
+
+    @Test
+    void ownershipLossLeavesRecordPendingWithoutResettingOldOwner() {
+        ResearchTaskQueue queue = mock(ResearchTaskQueue.class);
+        ResearchTaskRepository repository = mock(ResearchTaskRepository.class);
+        ResearchTaskService taskService = mock(ResearchTaskService.class);
+        DeepResearchPipeline pipeline = mock(DeepResearchPipeline.class);
+        ResearchTaskWorker worker = worker(queue, repository, taskService, pipeline);
+        ResearchTask task = task(12L, 1);
+        MapRecord<String, String, String> record = record(12L);
+        ResearchTaskLeaseService.Lease lease = new ResearchTaskLeaseService.Lease(
+                "key-12", "token-12", ResearchTaskLeaseService.Backend.REDIS);
+        when(repository.findById(12L)).thenReturn(Optional.of(task));
+        when(taskService.tryAcquire(task)).thenReturn(Optional.of(lease));
+        doThrow(new DeepResearchPipeline.OwnershipLostException("simulated ownership loss"))
+                .when(pipeline).runFullPipeline(task, lease);
+        worker.start();
+
+        ReflectionTestUtils.invokeMethod(worker, "processRecord", record);
+
+        verify(taskService, never()).resetRunningForRetryForOwner(
+                task, "token-12", "simulated ownership loss");
         verify(queue, never()).ack(record);
         verify(taskService).release(lease);
     }

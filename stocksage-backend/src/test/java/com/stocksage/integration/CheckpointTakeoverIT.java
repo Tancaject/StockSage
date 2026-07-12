@@ -81,6 +81,8 @@ class CheckpointTakeoverIT {
                 .build();
         when(researchManager.synthesizeStreaming(any(), any(), any(), any()))
                 .thenReturn(Mono.just(report));
+        when(researchManager.synthesizeStreaming(any(), any(), any(), any(), any(Runnable.class)))
+                .thenReturn(Mono.just(report));
 
         ResearchDebateService debateService = spy(new ResearchDebateService(
                 bullResearcher,
@@ -93,6 +95,10 @@ class CheckpointTakeoverIT {
         ResearchTaskService researchTaskService = mock(ResearchTaskService.class);
         ResearchTaskLeaseService.Lease firstLease = lease("instance-a-token");
         ResearchTaskLeaseService.Lease takeoverLease = lease("instance-b-token");
+        when(researchTaskService.renewLease(takeoverLease)).thenReturn(true);
+        when(checkpointRepository.lockOwnedRunningTask(TASK_ID, takeoverLease.token()))
+                .thenReturn(Optional.of(TASK_ID));
+        when(checkpointRepository.lockSucceededTask(TASK_ID)).thenReturn(Optional.of(TASK_ID));
         AtomicReference<String> firstWorkerThread = new AtomicReference<>();
         AtomicReference<String> takeoverWorkerThread = new AtomicReference<>();
 
@@ -134,18 +140,15 @@ class CheckpointTakeoverIT {
             assertThat(checkpoint.state().getDebateTurns()).hasSize(4);
 
             ResearchTask task = pendingTask();
+            // ResearchTaskWorker performs the stale RUNNING owner-token CAS before entering the pipeline.
+            task.setStatus(ResearchTask.Status.RUNNING);
+            task.setLeaseToken(takeoverLease.token());
+            when(researchTaskService.heartbeatForOwner(task, takeoverLease.token())).thenReturn(true);
             DeepEvidenceCollector evidenceCollector = mock(DeepEvidenceCollector.class);
             InvestmentReportVersionService reportVersionService = mock(InvestmentReportVersionService.class);
             ReportMarkdownRenderer reportRenderer = mock(ReportMarkdownRenderer.class);
             ConversationMessageService conversationMessageService = mock(ConversationMessageService.class);
             ChatStreamEmitter streamEmitter = mock(ChatStreamEmitter.class);
-            when(researchTaskService.startAttempt(
-                    task, takeoverLease.token(), ResearchTask.Stage.AGENT_DEBATE))
-                    .thenAnswer(call -> {
-                        task.setStatus(ResearchTask.Status.RUNNING);
-                        task.setStage(ResearchTask.Stage.AGENT_DEBATE);
-                        return task;
-            });
             when(reportVersionService.persistReportVersionWithMetadata(
                     eq("u_001"), eq(20L), any(AnalysisState.class),
                     eq(ModelTier.STRONG.name()), eq(null)))
@@ -188,7 +191,8 @@ class CheckpointTakeoverIT {
             assertThat(persistedCheckpoint.get()).isNull();
             verify(evidenceCollector, never()).collect(any(), any(), any(), any());
             verify(debateService).runDebate(
-                    eq("trace-42"), eq(20L), any(AnalysisState.class), eq(3), eq(3), any());
+                    eq("trace-42"), eq(20L), any(AnalysisState.class), eq(3), eq(3),
+                    any(), any(Runnable.class));
             verify(bullResearcher, times(1)).argue(any(), eq(1));
             verify(bullResearcher, times(1)).argue(any(), eq(2));
             verify(bullResearcher, times(1)).argue(any(), eq(3));

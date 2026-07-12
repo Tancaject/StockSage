@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 深度研究任务的执行流水线。
@@ -51,17 +52,31 @@ public class DeepResearchPipeline {
         AnalysisState workingState = null;
         ScheduledFuture<?> heartbeat = null;
         boolean attemptStarted = false;
+        AtomicBoolean ownershipLost = new AtomicBoolean(false);
 
         try {
             payload = parsePayload(task);
-            Optional<ResearchTaskCheckpointService.CheckpointState> checkpoint = checkpointService.load(task.getId());
-            workingState = checkpoint.map(ResearchTaskCheckpointService.CheckpointState::state).orElse(null);
-            ResearchTask.Stage resumeStage = checkpoint
-                    .map(ResearchTaskCheckpointService.CheckpointState::stageCompleted)
-                    .orElse(ResearchTask.Stage.DATA_PREFETCH);
-            runningTask = researchTaskService.startAttempt(task, lease.token(), resumeStage);
+            // A PENDING task has no DB owner yet, so only the lease can be checked before startAttempt.
+            requireLeaseOwnership(task, lease, ownershipLost);
+            if (task.getStatus() == ResearchTask.Status.RUNNING) {
+                if (!lease.token().equals(task.getLeaseToken())) {
+                    ownershipLost.set(true);
+                    throw new OwnershipLostException(
+                            "RUNNING research task is not owned by the supplied lease");
+                }
+                runningTask = task;
+            } else {
+                runningTask = researchTaskService.startAttempt(
+                        task, lease.token(), ResearchTask.Stage.DATA_PREFETCH);
+            }
             attemptStarted = true;
-            heartbeat = startResearchTaskHeartbeat(runningTask, lease);
+            requireTaskOwnership(runningTask, lease, ownershipLost);
+            heartbeat = startResearchTaskHeartbeat(runningTask, lease, ownershipLost);
+
+            // Load only after the pending-start or RUNNING-takeover fence owns the task.
+            Optional<ResearchTaskCheckpointService.CheckpointState> checkpoint =
+                    checkpointService.load(task.getId());
+            workingState = checkpoint.map(ResearchTaskCheckpointService.CheckpointState::state).orElse(null);
 
             int roundsDone = checkpoint
                     .map(ResearchTaskCheckpointService.CheckpointState::debateRoundsCompleted)
@@ -71,6 +86,7 @@ public class DeepResearchPipeline {
                     .orElse(0);
 
             if (checkpoint.isEmpty()) {
+                requireTaskOwnership(runningTask, lease, ownershipLost);
                 chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "thought",
                         "开始收集深度研究证据……");
                 DeepEvidenceCollector.EvidenceCollection evidence = evidenceCollector.collect(
@@ -79,56 +95,67 @@ public class DeepResearchPipeline {
                 if (!evidence.sufficientForRecommendation()) {
                     String text = reportRenderer.buildInsufficientEvidenceReport(
                             payload.ticker(), evidence.tickerResolved(), evidence.fundamentalsOk(), evidence.marketOk());
-                    finishWithText(runningTask, lease, payload, text, null);
+                    finishWithText(runningTask, lease, payload, text, null, ownershipLost);
                     return;
                 }
 
+                requireTaskOwnership(runningTask, lease, ownershipLost);
                 investmentReportVersionService.prepareHashes(workingState);
                 Optional<InvestmentReport> reusable = investmentReportVersionService.findReusableReport(
                         task.getUserId(), payload.conversationId(), workingState);
                 if (reusable.isPresent()) {
                     workingState.setInvestmentReport(reusable.get());
                     finishWithText(runningTask, lease, payload,
-                            reportRenderer.buildFinalAnswerBrief(workingState), null);
+                            reportRenderer.buildFinalAnswerBrief(workingState), null, ownershipLost);
                     return;
                 }
 
-                checkpointService.saveEvidence(task.getId(), workingState);
-                researchTaskService.markStageForOwner(
-                        runningTask, lease.token(), ResearchTask.Stage.AGENT_DEBATE);
+                saveEvidenceForOwner(runningTask, lease, workingState, ownershipLost);
+                markStageForOwner(runningTask, lease, ResearchTask.Stage.AGENT_DEBATE, ownershipLost);
             } else {
+                requireTaskOwnership(runningTask, lease, ownershipLost);
                 chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "observation",
                         "从断点恢复研究任务：已完成 " + roundsDone + " 轮辩论。");
             }
 
             if (workingState.getInvestmentReport() == null) {
+                requireTaskOwnership(runningTask, lease, ownershipLost);
+                ResearchTask ownedTask = runningTask;
                 AnalysisState completed = researchDebateService.runDebate(
                         payload.traceId(), payload.conversationId(), workingState,
                         roundsDone + 1, plannedRounds,
-                        (state, rounds, planned) -> checkpointService.saveDebateRound(
-                                task.getId(), state, rounds, planned));
-                checkpointService.saveSynthesis(task.getId(), completed);
-                researchTaskService.markStageForOwner(
-                        runningTask, lease.token(), ResearchTask.Stage.REPORT_SYNTHESIS);
+                        (state, rounds, planned) -> saveDebateRoundForOwner(
+                                ownedTask, lease, state, rounds, planned, ownershipLost),
+                        ownershipGuard(ownedTask, ownershipLost));
+                saveSynthesisForOwner(runningTask, lease, completed, ownershipLost);
+                markStageForOwner(
+                        runningTask, lease, ResearchTask.Stage.REPORT_SYNTHESIS, ownershipLost);
                 workingState = completed;
             }
 
-            researchTaskService.markStageForOwner(
-                    runningTask, lease.token(), ResearchTask.Stage.REPORT_PERSIST);
+            markStageForOwner(runningTask, lease, ResearchTask.Stage.REPORT_PERSIST, ownershipLost);
+            requireTaskOwnership(runningTask, lease, ownershipLost);
             InvestmentReportVersionService.PersistedReportVersion persisted =
                     investmentReportVersionService.persistReportVersionWithMetadata(
                             task.getUserId(), payload.conversationId(), workingState,
                             ModelTier.STRONG.name(), null);
             String brief = reportRenderer.buildFinalAnswerBrief(workingState);
-            conversationMessageService.persistAssistantReport(
-                    payload.conversationId(), task.getUserId(), brief, payload.traceId());
-            researchTaskService.markSucceededForOwner(
-                    runningTask, lease.token(), persisted.reportVersionId());
-            checkpointService.deleteForTask(task.getId());
-            chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "task-final", brief);
+            finishWithText(
+                    runningTask, lease, payload, brief, persisted.reportVersionId(), ownershipLost);
+        } catch (OwnershipLostException error) {
+            log.info("Research task stopped after ownership loss, taskId={}, error={}",
+                    task == null ? null : task.getId(), error.getMessage());
+            throw error;
         } catch (Exception error) {
             if (!attemptStarted) {
-                researchTaskService.markFailed(task, error.getMessage());
+                boolean failed = researchTaskService.markFailedIfPending(task, error.getMessage());
+                if (!failed) {
+                    ownershipLost.set(true);
+                    throw new OwnershipLostException(
+                            "research task left pending state before pre-attempt failure update",
+                            error
+                    );
+                }
                 if (payload != null) {
                     chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "error",
                             "深度研究任务执行失败：" + safeError(error));
@@ -136,29 +163,32 @@ public class DeepResearchPipeline {
                 return;
             }
 
-            Optional<String> fallback = payload == null
+            requireTaskOwnership(runningTask, lease, ownershipLost);
+            Optional<PersistedFallback> fallback = payload == null
                     ? Optional.empty()
-                    : tryPersistOfflineFallbackReport(
+                    : persistOfflineFallbackReport(
                             task.getUserId(), payload.conversationId(), workingState,
-                            runningTask, lease, error);
+                            runningTask, lease, error, ownershipLost);
             if (fallback.isPresent()) {
                 String brief = reportRenderer.buildFinalAnswerBrief(workingState);
-                String text = brief == null || brief.isBlank() ? fallback.get() : brief;
-                conversationMessageService.persistAssistantReport(
-                        payload.conversationId(), task.getUserId(), text, payload.traceId());
-                checkpointService.deleteForTask(task.getId());
-                chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "task-final", text);
+                PersistedFallback persistedFallback = fallback.get();
+                String text = brief == null || brief.isBlank() ? persistedFallback.reportJson() : brief;
+                finishWithText(runningTask, lease, payload, text,
+                        persistedFallback.reportVersionId(), ownershipLost);
                 return;
             }
 
+            requireTaskOwnership(runningTask, lease, ownershipLost);
             boolean failed = researchTaskService.markFailedForOwner(
                     runningTask, lease.token(), error.getMessage());
-            if (payload != null) {
+            if (failed && payload != null) {
                 chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "error",
                         "深度研究任务执行失败：" + safeError(error));
             }
             if (!failed) {
-                throw new IllegalStateException("research task lost ownership before failure update", error);
+                ownershipLost.set(true);
+                throw new OwnershipLostException(
+                        "research task lost ownership before failure update", error);
             }
         } finally {
             if (heartbeat != null) {
@@ -173,13 +203,24 @@ public class DeepResearchPipeline {
             ResearchTaskLeaseService.Lease lease,
             SubmissionPayload payload,
             String text,
-            Long reportVersionId
+            Long reportVersionId,
+            AtomicBoolean ownershipLost
     ) {
+        requireTaskOwnership(task, lease, ownershipLost);
         conversationMessageService.persistAssistantReport(
                 payload.conversationId(), task.getUserId(), text, payload.traceId());
-        researchTaskService.markSucceededForOwner(task, lease.token(), reportVersionId);
-        checkpointService.deleteForTask(task.getId());
+        markSucceededForOwner(task, lease, reportVersionId, ownershipLost);
+        deleteCompletedCheckpointBestEffort(task);
         chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "task-final", text);
+    }
+
+    private void deleteCompletedCheckpointBestEffort(ResearchTask task) {
+        try {
+            checkpointService.deleteForCompletedTask(task.getId());
+        } catch (Exception error) {
+            log.warn("Completed research task checkpoint cleanup failed, taskId={}, error={}",
+                    task.getId(), error.getMessage());
+        }
     }
 
     private SubmissionPayload parsePayload(ResearchTask task) {
@@ -220,6 +261,7 @@ public class DeepResearchPipeline {
     ) throws Exception {
         ResearchTask runningTask = null;
         ScheduledFuture<?> heartbeat = null;
+        AtomicBoolean ownershipLost = new AtomicBoolean(false);
         try {
             boolean alreadyOwned = task.getStatus() == ResearchTask.Status.RUNNING
                     && lease.token().equals(task.getLeaseToken());
@@ -230,9 +272,13 @@ public class DeepResearchPipeline {
                             lease.token(),
                             ResearchTask.Stage.AGENT_DEBATE
                     );
-            heartbeat = startResearchTaskHeartbeat(runningTask, lease);
-            AnalysisState completed = researchDebateService.runDebate(traceId, conversationId, agentState);
-            researchTaskService.markStageForOwner(runningTask, lease.token(), ResearchTask.Stage.REPORT_PERSIST);
+            requireTaskOwnership(runningTask, lease, ownershipLost);
+            heartbeat = startResearchTaskHeartbeat(runningTask, lease, ownershipLost);
+            AnalysisState completed = researchDebateService.runDebate(
+                    traceId, conversationId, agentState, 1, 0, null,
+                    ownershipGuard(runningTask, ownershipLost));
+            markStageForOwner(runningTask, lease, ResearchTask.Stage.REPORT_PERSIST, ownershipLost);
+            requireTaskOwnership(runningTask, lease, ownershipLost);
             InvestmentReportVersionService.PersistedReportVersion persisted =
                     investmentReportVersionService.persistReportVersionWithMetadata(
                             userId,
@@ -244,29 +290,35 @@ public class DeepResearchPipeline {
             String reportJson = objectMapper.writeValueAsString(
                     persisted.report() == null ? completed.getInvestmentReport() : persisted.report()
             );
-            researchTaskService.markSucceededForOwner(runningTask, lease.token(), persisted.reportVersionId());
+            markSucceededForOwner(runningTask, lease, persisted.reportVersionId(), ownershipLost);
             return reportJson;
+        } catch (OwnershipLostException error) {
+            throw error;
         } catch (Exception e) {
-            Optional<String> fallbackReport = tryPersistOfflineFallbackReport(
+            ResearchTask failedTask = runningTask == null ? task : runningTask;
+            requireTaskOwnership(failedTask, lease, ownershipLost);
+            Optional<PersistedFallback> fallbackReport = persistOfflineFallbackReport(
                     userId,
                     conversationId,
                     agentState,
-                    runningTask == null ? task : runningTask,
+                    failedTask,
                     lease,
-                    e
+                    e,
+                    ownershipLost
             );
             if (fallbackReport.isPresent()) {
-                return fallbackReport.get();
+                PersistedFallback fallback = fallbackReport.get();
+                markSucceededForOwner(
+                        failedTask, lease, fallback.reportVersionId(), ownershipLost);
+                return fallback.reportJson();
             }
-            try {
-                researchTaskService.markFailedForOwner(
-                        runningTask == null ? task : runningTask,
-                        lease.token(),
-                        e.getMessage()
-                );
-            } catch (Exception taskError) {
-                log.warn("Failed to mark research task failed, taskId={}, error={}",
-                        task == null ? null : task.getId(), taskError.getMessage());
+            requireTaskOwnership(failedTask, lease, ownershipLost);
+            boolean failed = researchTaskService.markFailedForOwner(
+                    failedTask, lease.token(), e.getMessage());
+            if (!failed) {
+                ownershipLost.set(true);
+                throw new OwnershipLostException(
+                        "research task lost ownership before failure update", e);
             }
             throw e;
         } finally {
@@ -285,6 +337,34 @@ public class DeepResearchPipeline {
             ResearchTaskLeaseService.Lease lease,
             Exception sourceError
     ) {
+        AtomicBoolean ownershipLost = new AtomicBoolean(false);
+        Optional<PersistedFallback> persisted = persistOfflineFallbackReport(
+                userId,
+                conversationId,
+                agentState,
+                runningTask,
+                lease,
+                sourceError,
+                ownershipLost
+        );
+        if (persisted.isEmpty()) {
+            return Optional.empty();
+        }
+        PersistedFallback fallback = persisted.get();
+        markSucceededForOwner(
+                runningTask, lease, fallback.reportVersionId(), ownershipLost);
+        return Optional.of(fallback.reportJson());
+    }
+
+    private Optional<PersistedFallback> persistOfflineFallbackReport(
+            String userId,
+            Long conversationId,
+            AnalysisState agentState,
+            ResearchTask runningTask,
+            ResearchTaskLeaseService.Lease lease,
+            Exception sourceError,
+            AtomicBoolean ownershipLost
+    ) {
         if (agentState == null || runningTask == null || lease == null) {
             return Optional.empty();
         }
@@ -295,7 +375,9 @@ public class DeepResearchPipeline {
         try {
             InvestmentReport report = fallbackReport.get();
             agentState.setInvestmentReport(report);
-            researchTaskService.markStageForOwner(runningTask, lease.token(), ResearchTask.Stage.REPORT_PERSIST);
+            markStageForOwner(
+                    runningTask, lease, ResearchTask.Stage.REPORT_PERSIST, ownershipLost);
+            requireTaskOwnership(runningTask, lease, ownershipLost);
             InvestmentReportVersionService.PersistedReportVersion persisted =
                     investmentReportVersionService.persistReportVersionWithMetadata(
                             userId,
@@ -304,12 +386,15 @@ public class DeepResearchPipeline {
                             OfflineDemoSampleService.MODEL_TIER,
                             OfflineDemoSampleService.MODEL_NAME
                     );
-            researchTaskService.markSucceededForOwner(runningTask, lease.token(), persisted.reportVersionId());
             log.warn("Research debate failed, persisted offline fallback report for ticker={}, taskId={}, sourceError={}",
                     agentState.getPrimaryTicker(), runningTask.getId(), sourceError == null ? "" : sourceError.getMessage());
-            return Optional.of(objectMapper.writeValueAsString(
-                    persisted.report() == null ? report : persisted.report()
+            return Optional.of(new PersistedFallback(
+                    objectMapper.writeValueAsString(
+                            persisted.report() == null ? report : persisted.report()),
+                    persisted.reportVersionId()
             ));
+        } catch (OwnershipLostException ownershipError) {
+            throw ownershipError;
         } catch (Exception fallbackError) {
             log.warn("Offline fallback report failed after research debate error, taskId={}, sourceError={}, fallbackError={}",
                     runningTask.getId(),
@@ -321,19 +406,192 @@ public class DeepResearchPipeline {
 
     private ScheduledFuture<?> startResearchTaskHeartbeat(
             ResearchTask task,
-            ResearchTaskLeaseService.Lease lease
+            ResearchTaskLeaseService.Lease lease,
+            AtomicBoolean ownershipLost
     ) {
+        Duration heartbeatInterval = researchTaskService.leaseHeartbeatInterval();
+        if (heartbeatInterval == null || heartbeatInterval.isZero() || heartbeatInterval.isNegative()) {
+            heartbeatInterval = Duration.ofSeconds(60);
+        }
         return researchHeartbeatScheduler.scheduleAtFixedRate(() -> {
+            if (ownershipLost.get()) {
+                return;
+            }
             try {
-                boolean taskHeartbeat = researchTaskService.heartbeatForOwner(task, lease.token());
                 boolean leaseRenewed = researchTaskService.renewLease(lease);
-                if (!taskHeartbeat || !leaseRenewed) {
+                if (!leaseRenewed) {
+                    ownershipLost.set(true);
+                    log.warn("Research task heartbeat lost Redis ownership, taskId={}", task.getId());
+                    return;
+                }
+                boolean taskHeartbeat = researchTaskService.heartbeatForOwner(task, lease.token());
+                if (!taskHeartbeat) {
+                    ownershipLost.set(true);
                     log.warn("Research task heartbeat could not renew ownership, taskId={}, taskHeartbeat={}, leaseRenewed={}",
                             task.getId(), taskHeartbeat, leaseRenewed);
                 }
             } catch (Exception e) {
+                ownershipLost.set(true);
                 log.warn("Research task heartbeat failed, taskId={}, error={}", task.getId(), e.getMessage());
             }
-        }, Instant.now().plusSeconds(60), Duration.ofSeconds(60));
+        }, Instant.now().plus(heartbeatInterval), heartbeatInterval);
+    }
+
+    private void requireLeaseOwnership(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            AtomicBoolean ownershipLost
+    ) {
+        if (ownershipLost.get()) {
+            throw new OwnershipLostException(
+                    "research task ownership was already lost, taskId=" + task.getId());
+        }
+        boolean renewed;
+        try {
+            renewed = researchTaskService.renewLease(lease);
+        } catch (Exception error) {
+            ownershipLost.set(true);
+            throw new OwnershipLostException(
+                    "research task Redis ownership check failed, taskId=" + task.getId(), error);
+        }
+        if (!renewed) {
+            ownershipLost.set(true);
+            throw new OwnershipLostException(
+                    "research task Redis ownership was lost, taskId=" + task.getId());
+        }
+    }
+
+    /** Token 热路径只读取 heartbeat 已维护的本地标志，不触发 Redis 或数据库调用。 */
+    private Runnable ownershipGuard(ResearchTask task, AtomicBoolean ownershipLost) {
+        Long taskId = task == null ? null : task.getId();
+        return () -> {
+            if (ownershipLost.get()) {
+                throw new OwnershipLostException(
+                        "research task ownership was lost during model streaming, taskId=" + taskId);
+            }
+        };
+    }
+
+    private void requireTaskOwnership(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            AtomicBoolean ownershipLost
+    ) {
+        requireLeaseOwnership(task, lease, ownershipLost);
+        boolean taskHeartbeat;
+        try {
+            taskHeartbeat = researchTaskService.heartbeatForOwner(task, lease.token());
+        } catch (Exception error) {
+            ownershipLost.set(true);
+            throw new OwnershipLostException(
+                    "research task DB ownership check failed, taskId=" + task.getId(), error);
+        }
+        if (!taskHeartbeat) {
+            ownershipLost.set(true);
+            throw new OwnershipLostException(
+                    "research task DB ownership was lost, taskId=" + task.getId());
+        }
+    }
+
+    private void markStageForOwner(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            ResearchTask.Stage stage,
+            AtomicBoolean ownershipLost
+    ) {
+        requireTaskOwnership(task, lease, ownershipLost);
+        try {
+            researchTaskService.markStageForOwner(task, lease.token(), stage);
+        } catch (IllegalStateException error) {
+            ownershipLost.set(true);
+            throw new OwnershipLostException(
+                    "research task lost ownership before stage update, taskId=" + task.getId(), error);
+        }
+    }
+
+    private void markSucceededForOwner(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            Long reportVersionId,
+            AtomicBoolean ownershipLost
+    ) {
+        requireTaskOwnership(task, lease, ownershipLost);
+        try {
+            researchTaskService.markSucceededForOwner(task, lease.token(), reportVersionId);
+        } catch (IllegalStateException error) {
+            ownershipLost.set(true);
+            throw new OwnershipLostException(
+                    "research task lost ownership before completion, taskId=" + task.getId(), error);
+        }
+    }
+
+    private void saveEvidenceForOwner(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            AnalysisState state,
+            AtomicBoolean ownershipLost
+    ) {
+        requireTaskOwnership(task, lease, ownershipLost);
+        try {
+            checkpointService.saveEvidence(task.getId(), lease.token(), state);
+        } catch (ResearchTaskCheckpointService.OwnershipLostException error) {
+            throw checkpointOwnershipLost(task, ownershipLost, error);
+        }
+    }
+
+    private void saveDebateRoundForOwner(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            AnalysisState state,
+            int roundsCompleted,
+            int plannedRounds,
+            AtomicBoolean ownershipLost
+    ) {
+        requireTaskOwnership(task, lease, ownershipLost);
+        try {
+            checkpointService.saveDebateRound(
+                    task.getId(), lease.token(), state, roundsCompleted, plannedRounds);
+        } catch (ResearchTaskCheckpointService.OwnershipLostException error) {
+            throw checkpointOwnershipLost(task, ownershipLost, error);
+        }
+    }
+
+    private void saveSynthesisForOwner(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            AnalysisState state,
+            AtomicBoolean ownershipLost
+    ) {
+        requireTaskOwnership(task, lease, ownershipLost);
+        try {
+            checkpointService.saveSynthesis(task.getId(), lease.token(), state);
+        } catch (ResearchTaskCheckpointService.OwnershipLostException error) {
+            throw checkpointOwnershipLost(task, ownershipLost, error);
+        }
+    }
+
+    private OwnershipLostException checkpointOwnershipLost(
+            ResearchTask task,
+            AtomicBoolean ownershipLost,
+            ResearchTaskCheckpointService.OwnershipLostException error
+    ) {
+        ownershipLost.set(true);
+        return new OwnershipLostException(
+                "research task lost ownership before checkpoint update, taskId=" + task.getId(), error);
+    }
+
+    private record PersistedFallback(String reportJson, Long reportVersionId) {
+    }
+
+    /** Signals the worker that another execution owns the task and this attempt must stop silently. */
+    public static final class OwnershipLostException extends RuntimeException {
+
+        public OwnershipLostException(String message) {
+            super(message);
+        }
+
+        public OwnershipLostException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 }

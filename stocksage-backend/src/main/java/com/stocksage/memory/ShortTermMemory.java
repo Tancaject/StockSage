@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 基于 Redis 的滚动式会话记忆。
@@ -28,6 +29,7 @@ public class ShortTermMemory {
 
     private final StringRedisTemplate stringRedisTemplate;
     private final ChatClient memoryChatClient;
+    private final AtomicBoolean redisUnavailableWarned = new AtomicBoolean(false);
 
     @Value("${stocksage.memory.short-term-ttl-hours}")
     private int ttlHours;
@@ -64,11 +66,14 @@ public class ShortTermMemory {
      * 读取 Redis 中某个会话的可注入上下文列表。
      */
     public List<String> getContext(Long conversationId) {
-        List<String> raw = stringRedisTemplate.opsForList().range(key(conversationId), 0, -1);
-        if (raw == null) {
+        try {
+            List<String> raw = stringRedisTemplate.opsForList().range(key(conversationId), 0, -1);
+            markRedisAvailable();
+            return raw == null ? List.of() : raw;
+        } catch (Exception e) {
+            warnRedisUnavailable("read", conversationId, e);
             return List.of();
         }
-        return raw;
     }
 
     /**
@@ -80,12 +85,18 @@ public class ShortTermMemory {
      * @return 写入后的短期记忆快照
      */
     public MemoryContextDTO addMessage(Long conversationId, String role, String content) {
-        String value = normalizeRole(role) + ": " + content.trim();
-        String key = key(conversationId);
-        stringRedisTemplate.opsForList().rightPush(key, value);
-        refreshTtl(key);
-        compressIfNeeded(conversationId);
-        return getContextSnapshot(conversationId);
+        try {
+            String value = normalizeRole(role) + ": " + content.trim();
+            String key = key(conversationId);
+            stringRedisTemplate.opsForList().rightPush(key, value);
+            refreshTtl(key);
+            compressIfNeeded(conversationId);
+            markRedisAvailable();
+            return getContextSnapshot(conversationId);
+        } catch (Exception e) {
+            warnRedisUnavailable("append", conversationId, e);
+            return emptySnapshot(conversationId);
+        }
     }
 
     /**
@@ -130,7 +141,12 @@ public class ShortTermMemory {
      * 清空指定会话的短期记忆。
      */
     public void clear(Long conversationId) {
-        stringRedisTemplate.delete(key(conversationId));
+        try {
+            stringRedisTemplate.delete(key(conversationId));
+            markRedisAvailable();
+        } catch (Exception e) {
+            warnRedisUnavailable("clear", conversationId, e);
+        }
     }
 
     /**
@@ -156,12 +172,17 @@ public class ShortTermMemory {
      * <p>这里不做复杂事务控制，因为短期记忆只是提示词缓存，真实聊天历史仍由数据库保存。</p>
      */
     private void replaceContext(Long conversationId, List<String> messages) {
-        String key = key(conversationId);
-        stringRedisTemplate.delete(key);
-        if (!messages.isEmpty()) {
-            stringRedisTemplate.opsForList().rightPushAll(key, messages);
+        try {
+            String key = key(conversationId);
+            stringRedisTemplate.delete(key);
+            if (!messages.isEmpty()) {
+                stringRedisTemplate.opsForList().rightPushAll(key, messages);
+            }
+            refreshTtl(key);
+            markRedisAvailable();
+        } catch (Exception e) {
+            warnRedisUnavailable("replace", conversationId, e);
         }
-        refreshTtl(key);
     }
 
     /**
@@ -219,6 +240,28 @@ public class ShortTermMemory {
      */
     private void refreshTtl(String key) {
         stringRedisTemplate.expire(key, Duration.ofHours(ttlHours));
+    }
+
+    private MemoryContextDTO emptySnapshot(Long conversationId) {
+        return MemoryContextDTO.builder()
+                .conversationId(conversationId)
+                .messages(List.of())
+                .messageCount(0)
+                .maxContextMessages(maxContextMessages)
+                .ttlHours(ttlHours)
+                .build();
+    }
+
+    private void warnRedisUnavailable(String operation, Long conversationId, Exception error) {
+        if (redisUnavailableWarned.compareAndSet(false, true)) {
+            log.warn("Short-term memory Redis unavailable during {} for conversationId={}; "
+                            + "continuing with empty context: {}",
+                    operation, conversationId, error.getMessage());
+        }
+    }
+
+    private void markRedisAvailable() {
+        redisUnavailableWarned.set(false);
     }
 
     /**

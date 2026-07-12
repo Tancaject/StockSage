@@ -4,6 +4,7 @@ import com.stocksage.config.AsyncConfig;
 import com.stocksage.config.ResearchTaskMetricsConfig;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.repository.ResearchTaskRepository;
+import com.stocksage.repository.ResearchTaskCheckpointRepository;
 import com.stocksage.service.DeepResearchPipeline;
 import com.stocksage.service.ResearchTaskLeaseService;
 import com.stocksage.service.ResearchTaskQueue;
@@ -276,5 +277,8 @@ class ResearchTaskQueueIT {
     }
 
     interface TestResearchTaskRepository extends ResearchTaskRepository {
+    }
+
+    interface TestResearchTaskCheckpointRepository extends ResearchTaskCheckpointRepository {
     }
 }

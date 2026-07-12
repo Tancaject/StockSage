@@ -31,13 +31,12 @@ public class AsyncConfig {
         return executor;
     }
 
-    /**
-     * 深度研究任务的租约心跳调度器，对应原静态单线程 ScheduledExecutorService。
-     */
+    /** 深度研究任务的租约心跳调度器；线程数与 worker 并发一致，避免一次慢续租拖过其他任务 TTL。 */
     @Bean
-    public TaskScheduler researchHeartbeatScheduler() {
+    public TaskScheduler researchHeartbeatScheduler(
+            @Value("${stocksage.research-task.worker-threads:2}") int workerThreads) {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(1);
+        scheduler.setPoolSize(Math.max(1, workerThreads));
         scheduler.setThreadNamePrefix("research-task-heartbeat-");
         scheduler.setDaemon(true);
         scheduler.setWaitForTasksToCompleteOnShutdown(false);

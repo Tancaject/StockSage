@@ -34,6 +34,9 @@ import reactor.util.function.Tuple3;
 @RequiredArgsConstructor
 public class ResearchDebateService {
 
+    private static final Runnable NO_OP_EXECUTION_GUARD = () -> {
+    };
+
     @FunctionalInterface
     public interface RoundCheckpointer {
 
@@ -82,6 +85,27 @@ public class ResearchDebateService {
             int fixedPlannedRounds,
             RoundCheckpointer checkpointer
     ) {
+        return runDebate(
+                traceId, conversationId, state, startRound, fixedPlannedRounds,
+                checkpointer, null);
+    }
+
+    /**
+     * 从指定轮次继续辩论，并在每个流式 token 推送前检查当前执行权。
+     *
+     * <p>检查器必须是纯内存、非阻塞检查；抛出的异常会取消模型 token 流并原样传给调用方。
+     * 传 {@code null} 与旧重载行为一致。</p>
+     */
+    public AnalysisState runDebate(
+            String traceId,
+            Long conversationId,
+            AnalysisState state,
+            int startRound,
+            int fixedPlannedRounds,
+            RoundCheckpointer checkpointer,
+            Runnable executionGuard
+    ) {
+        Runnable guard = executionGuard == null ? NO_OP_EXECUTION_GUARD : executionGuard;
         AnalysisState workingState = state == null ? AnalysisState.builder().build() : state;
 
         int firstRound;
@@ -99,9 +123,9 @@ public class ResearchDebateService {
                     isPresent(workingState.getNewsReport()));
 
             Mono<String> bullRound1 = streamArgument(traceId, conversationId, true, 1,
-                    bullResearcher.argue(workingState, 1));
+                    bullResearcher.argue(workingState, 1), guard);
             Mono<String> bearRound1 = streamArgument(traceId, conversationId, false, 1,
-                    bearResearcher.argue(workingState, 1));
+                    bearResearcher.argue(workingState, 1), guard);
             Mono<DebateRoundPlanner.RoundDecision> plannerMono = Mono.fromCallable(
                             () -> debateRoundPlanner.decide(workingState, maxRounds))
                     .subscribeOn(Schedulers.boundedElastic());
@@ -136,9 +160,9 @@ public class ResearchDebateService {
             long roundStart = System.currentTimeMillis();
             log.info("Research Debate round started, traceId={}, round={}", traceId, round);
             Mono<String> bullN = streamArgument(traceId, conversationId, true, round,
-                    bullResearcher.argue(workingState, round));
+                    bullResearcher.argue(workingState, round), guard);
             Mono<String> bearN = streamArgument(traceId, conversationId, false, round,
-                    bearResearcher.argue(workingState, round));
+                    bearResearcher.argue(workingState, round), guard);
             Tuple2<String, String> roundResult = Mono.zip(bullN, bearN).block();
             applyRound(workingState, round, roundResult.getT1(), roundResult.getT2());
             if (checkpointer != null) {
@@ -153,9 +177,12 @@ public class ResearchDebateService {
         // 让用户在 Manager 思考期间持续看到中文综合判断生成而非静默等待。
         long managerStart = System.currentTimeMillis();
         log.info("Research Manager started (streaming), traceId={}", traceId);
-        InvestmentReport report = researchManager
-                .synthesizeStreaming(workingState, traceId, conversationId, chatStreamEmitter)
-                .block();
+        Mono<InvestmentReport> synthesis = executionGuard == null
+                ? researchManager.synthesizeStreaming(
+                        workingState, traceId, conversationId, chatStreamEmitter)
+                : researchManager.synthesizeStreaming(
+                        workingState, traceId, conversationId, chatStreamEmitter, guard);
+        InvestmentReport report = synthesis.block();
         workingState.setInvestmentReport(report);
         addTraceStep(traceId, "Research Manager", "Synthesize InvestmentReport",
                 report.getAnalystSummary(), managerStart);
@@ -171,13 +198,15 @@ public class ResearchDebateService {
      * 聚合成一个推理块——即便 Bull/Bear 的 token 在网络上交错到达也能各自归位。</p>
      */
     private Mono<String> streamArgument(String traceId, Long conversationId,
-                                        boolean bull, int round, Flux<String> tokens) {
+                                        boolean bull, int round, Flux<String> tokens,
+                                        Runnable executionGuard) {
         String section = "debate-" + (bull ? "bull" : "bear") + "-" + round;
         String label = (bull ? "看多方" : "看空方") + " · 第 " + round + " 轮";
         StringBuilder buffer = new StringBuilder();
         return tokens
                 .doOnNext(token -> {
                     if (token != null && !token.isEmpty()) {
+                        executionGuard.run();
                         buffer.append(token);
                         chatStreamEmitter.emitSection(traceId, conversationId, "thought",
                                 section, label, token);

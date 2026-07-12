@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,6 +18,8 @@ import java.util.concurrent.ConcurrentMap;
 public class ResearchTaskLeaseService {
 
     private static final String KEY_PREFIX = "lock:research-task:";
+    private static final long MAX_HEARTBEAT_INTERVAL_MILLIS = Duration.ofSeconds(60).toMillis();
+    private static final long MIN_HEARTBEAT_INTERVAL_MILLIS = 100;
     private static final DefaultRedisScript<String> ACQUIRE_SCRIPT = new DefaultRedisScript<>("""
             local current = redis.call('GET', KEYS[1])
             if current then
@@ -122,6 +125,25 @@ public class ResearchTaskLeaseService {
             return renewProcessLease(lease);
         }
         return false;
+    }
+
+    /**
+     * Returns a renewal cadence that stays comfortably inside the configured lease TTL.
+     *
+     * <p>The production lease is long enough to retain the historical 60-second cadence,
+     * while short-lived demo and test leases renew at one third of their TTL.</p>
+     */
+    public Duration heartbeatInterval() {
+        long ttlFractionMillis = Math.max(1, leaseTtlMillis / 3);
+        long intervalMillis = Math.max(
+                MIN_HEARTBEAT_INTERVAL_MILLIS,
+                Math.min(MAX_HEARTBEAT_INTERVAL_MILLIS, ttlFractionMillis)
+        );
+        return Duration.ofMillis(intervalMillis);
+    }
+
+    public Duration leaseTtl() {
+        return Duration.ofMillis(leaseTtlMillis);
     }
 
     private Optional<Lease> acquireProcessLease(String normalizedKey, String token) {

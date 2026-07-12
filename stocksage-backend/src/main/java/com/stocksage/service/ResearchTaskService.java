@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.model.entity.ResearchTask;
+import com.stocksage.repository.ResearchTaskCheckpointRepository;
 import com.stocksage.repository.ResearchTaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class ResearchTaskService {
     private static final String RECOVERED_FOR_RETRY_MESSAGE = "stale research task recovered for retry";
 
     private final ResearchTaskRepository repository;
+    private final ResearchTaskCheckpointRepository checkpointRepository;
     private final ResearchTaskLeaseService leaseService;
     private final ObjectMapper objectMapper;
 
@@ -88,6 +90,14 @@ public class ResearchTaskService {
         return leaseService.renew(lease);
     }
 
+    public Duration leaseHeartbeatInterval() {
+        return leaseService.heartbeatInterval();
+    }
+
+    public Duration leaseTtl() {
+        return leaseService.leaseTtl();
+    }
+
     @Transactional
     public ResearchTask startAttempt(
             ResearchTask task,
@@ -114,6 +124,149 @@ public class ResearchTaskService {
         task.setHeartbeatAt(now);
         task.setErrorMessage(null);
         return task;
+    }
+
+    @Transactional
+    public boolean takeOverRunningAttempt(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            int maxAttempts
+    ) {
+        if (!canUseRedisTakeover(task, lease)) {
+            return false;
+        }
+        String observedLeaseToken = normalizeText(task.getLeaseToken());
+        String newLeaseToken = normalizeText(lease.token());
+        if (observedLeaseToken.isBlank() || observedLeaseToken.equals(newLeaseToken)) {
+            return false;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        int effectiveMaxAttempts = Math.max(1, maxAttempts);
+        int updated = repository.takeOverStaleRunningAttempt(
+                task.getId(),
+                observedLeaseToken,
+                newLeaseToken,
+                now.minus(leaseService.leaseTtl()),
+                effectiveMaxAttempts,
+                now
+        );
+        if (updated == 0) {
+            return false;
+        }
+
+        task.setStatus(ResearchTask.Status.RUNNING);
+        task.setAttempts(safeAttempts(task) + 1);
+        task.setLeaseToken(newLeaseToken);
+        task.setStartedAt(now);
+        task.setCompletedAt(null);
+        task.setHeartbeatAt(now);
+        task.setUpdatedAt(now);
+        task.setErrorMessage(null);
+        return true;
+    }
+
+    @Transactional
+    public boolean failStaleRunningAtAttemptLimit(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            int maxAttempts,
+            String errorMessage
+    ) {
+        if (task == null || task.getId() == null) {
+            return false;
+        }
+        if (task.getStatus() == ResearchTask.Status.PENDING) {
+            return markFailedIfPending(task, errorMessage);
+        }
+        if (!canUseRedisTakeover(task, lease)) {
+            return false;
+        }
+        return failStaleRunningAtAttemptLimit(
+                task,
+                Math.max(1, maxAttempts),
+                errorMessage,
+                leaseService.leaseTtl()
+        );
+    }
+
+    @Transactional
+    public boolean resetStaleRunningForRetry(
+            ResearchTask task,
+            Duration staleAfter,
+            int maxAttempts,
+            String errorMessage
+    ) {
+        if (task == null || task.getId() == null || task.getStatus() != ResearchTask.Status.RUNNING) {
+            return false;
+        }
+        String observedLeaseToken = normalizeText(task.getLeaseToken());
+        if (observedLeaseToken.isBlank()) {
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        Duration effectiveStaleAfter = normalizePositiveDuration(staleAfter, leaseService.leaseTtl());
+        String retryMessage = truncate(normalizeText(errorMessage), MAX_ERROR_LENGTH);
+        if (retryMessage.isBlank()) {
+            retryMessage = RECOVERED_FOR_RETRY_MESSAGE;
+        }
+        int updated = repository.resetStaleRunningForRetry(
+                task.getId(),
+                observedLeaseToken,
+                now.minus(effectiveStaleAfter),
+                Math.max(1, maxAttempts),
+                retryMessage,
+                now
+        );
+        if (updated == 0) {
+            return false;
+        }
+        task.setStatus(ResearchTask.Status.PENDING);
+        task.setStage(ResearchTask.Stage.CREATED);
+        task.setLeaseToken(null);
+        task.setErrorMessage(retryMessage);
+        task.setCompletedAt(null);
+        task.setHeartbeatAt(now);
+        task.setUpdatedAt(now);
+        return true;
+    }
+
+    @Transactional
+    public boolean failStaleRunningAtAttemptLimit(
+            ResearchTask task,
+            Duration staleAfter,
+            int maxAttempts,
+            String errorMessage
+    ) {
+        if (task == null || task.getId() == null || task.getStatus() != ResearchTask.Status.RUNNING) {
+            return false;
+        }
+        return failStaleRunningAtAttemptLimit(
+                task,
+                Math.max(1, maxAttempts),
+                errorMessage,
+                normalizePositiveDuration(staleAfter, leaseService.leaseTtl())
+        );
+    }
+
+    @Transactional
+    public boolean markFailedIfPending(ResearchTask task, String errorMessage) {
+        if (task == null || task.getId() == null) {
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        String normalizedError = truncate(normalizeText(errorMessage), MAX_ERROR_LENGTH);
+        int updated = repository.failIfPending(task.getId(), normalizedError, now);
+        if (updated == 0) {
+            return false;
+        }
+        task.setStatus(ResearchTask.Status.FAILED);
+        task.setStage(ResearchTask.Stage.FAILED);
+        task.setErrorMessage(normalizedError);
+        task.setCompletedAt(now);
+        task.setHeartbeatAt(now);
+        task.setLeaseToken(null);
+        return true;
     }
 
     @Transactional
@@ -260,8 +413,7 @@ public class ResearchTaskService {
     public RecoveryResult recoverStaleRunningTasks(Duration staleAfter, int maxAttempts) {
         Duration effectiveStaleAfter = staleAfter == null ? Duration.ofMinutes(15) : staleAfter;
         int effectiveMaxAttempts = Math.max(1, maxAttempts);
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime cutoff = now.minus(effectiveStaleAfter);
+        LocalDateTime cutoff = LocalDateTime.now().minus(effectiveStaleAfter);
         List<ResearchTask> staleTasks = repository.findByStatusAndHeartbeatAtBefore(
                 ResearchTask.Status.RUNNING,
                 cutoff
@@ -280,25 +432,26 @@ public class ResearchTaskService {
         }
         int failed = 0;
         for (ResearchTask task : staleTasks) {
-            task.setLeaseToken(null);
-            task.setHeartbeatAt(now);
             if (safeAttempts(task) >= effectiveMaxAttempts) {
-                task.setStatus(ResearchTask.Status.FAILED);
-                task.setStage(ResearchTask.Stage.FAILED);
-                task.setCompletedAt(now);
-                task.setErrorMessage("stale research task exceeded attempt limit " + effectiveMaxAttempts);
-                failed++;
-            } else {
-                task.setStatus(ResearchTask.Status.PENDING);
-                task.setStage(ResearchTask.Stage.CREATED);
-                task.setErrorMessage(RECOVERED_FOR_RETRY_MESSAGE);
+                boolean closed = failStaleRunningAtAttemptLimit(
+                        task,
+                        effectiveStaleAfter,
+                        effectiveMaxAttempts,
+                        "stale research task exceeded attempt limit " + effectiveMaxAttempts
+                );
+                if (closed) {
+                    failed++;
+                }
+            } else if (resetStaleRunningForRetry(
+                    task,
+                    effectiveStaleAfter,
+                    effectiveMaxAttempts,
+                    RECOVERED_FOR_RETRY_MESSAGE
+            )) {
                 if (task.getId() != null) {
                     retriedTaskIds.add(task.getId());
                 }
             }
-        }
-        if (!staleTasks.isEmpty()) {
-            repository.saveAll(staleTasks);
         }
         List<Long> ids = List.copyOf(retriedTaskIds);
         return new RecoveryResult(ids.size(), failed, ids);
@@ -356,6 +509,10 @@ public class ResearchTaskService {
             ResearchTask current = repository.findById(task.getId()).orElse(task);
             return new TaskReset(current, false);
         }
+        // The terminal-row CAS and checkpoint invalidation share one transaction. This prevents a
+        // newly enqueued attempt from observing a stale REPORT_SYNTHESIS checkpoint after cleanup
+        // of the previous successful attempt failed or raced with resubmission.
+        checkpointRepository.deleteByTaskId(task.getId());
         task.setStatus(ResearchTask.Status.PENDING);
         task.setStage(ResearchTask.Stage.CREATED);
         task.setAttempts(0);
@@ -412,6 +569,64 @@ public class ResearchTaskService {
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Unable to serialize research task payload", e);
         }
+    }
+
+    private boolean failStaleRunningAtAttemptLimit(
+            ResearchTask task,
+            int maxAttempts,
+            String errorMessage,
+            Duration staleAfter
+    ) {
+        String observedLeaseToken = normalizeText(task.getLeaseToken());
+        if (observedLeaseToken.isBlank()) {
+            return false;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        String normalizedError = truncate(normalizeText(errorMessage), MAX_ERROR_LENGTH);
+        if (normalizedError.isBlank()) {
+            normalizedError = "stale research task exceeded attempt limit " + maxAttempts;
+        }
+        int updated = repository.failStaleRunningAtAttemptLimit(
+                task.getId(),
+                observedLeaseToken,
+                now.minus(staleAfter),
+                maxAttempts,
+                normalizedError,
+                now
+        );
+        if (updated == 0) {
+            return false;
+        }
+        task.setStatus(ResearchTask.Status.FAILED);
+        task.setStage(ResearchTask.Stage.FAILED);
+        task.setErrorMessage(normalizedError);
+        task.setCompletedAt(now);
+        task.setHeartbeatAt(now);
+        task.setUpdatedAt(now);
+        task.setLeaseToken(null);
+        return true;
+    }
+
+    private boolean canUseRedisTakeover(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease
+    ) {
+        if (task == null
+                || task.getId() == null
+                || task.getStatus() != ResearchTask.Status.RUNNING
+                || lease == null
+                || lease.backend() != ResearchTaskLeaseService.Backend.REDIS) {
+            return false;
+        }
+        return !normalizeText(lease.token()).isBlank()
+                && normalizeText(task.getIdempotencyKey()).equals(normalizeText(lease.idempotencyKey()));
+    }
+
+    private Duration normalizePositiveDuration(Duration value, Duration fallback) {
+        if (value == null || value.isZero() || value.isNegative()) {
+            return fallback;
+        }
+        return value;
     }
 
     private int safeAttempts(ResearchTask task) {

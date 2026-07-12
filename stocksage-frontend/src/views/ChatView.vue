@@ -345,7 +345,7 @@ const showBackToBottom = computed(() => messages.value.length > 0 && !isNearBott
 
 onMounted(async () => {
   await loadCurrentUser()
-  await loadConversations()
+  await loadConversations({ selectLatest: true })
 })
 
 onBeforeUnmount(() => {

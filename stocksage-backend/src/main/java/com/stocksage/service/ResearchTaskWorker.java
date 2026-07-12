@@ -177,13 +177,36 @@ public class ResearchTaskWorker implements SmartLifecycle {
 
         try {
             if (safeAttempts(task) >= maxAttempts) {
-                researchTaskService.markFailed(task, "research task exceeded attempt limit " + maxAttempts);
+                boolean failed = researchTaskService.failStaleRunningAtAttemptLimit(
+                        task,
+                        acquired,
+                        maxAttempts,
+                        "research task exceeded attempt limit " + maxAttempts
+                );
+                if (!failed) {
+                    log.debug("Research task attempt-limit fencing rejected; leaving queue record pending, taskId={}",
+                            task.getId());
+                    return;
+                }
                 queue.enqueueToDlq(task.getId(), "max attempts exceeded");
                 ackIfRunning(record);
                 return;
             }
+            if (task.getStatus() == ResearchTask.Status.RUNNING) {
+                boolean takenOver = researchTaskService.takeOverRunningAttempt(task, acquired, maxAttempts);
+                if (!takenOver) {
+                    log.debug("Research task takeover fencing rejected; leaving queue record pending, taskId={}",
+                            task.getId());
+                    return;
+                }
+                log.info("Research task stale attempt taken over, taskId={}, attempts={}",
+                        task.getId(), task.getAttempts());
+            }
             deepResearchPipeline.runFullPipeline(task, acquired);
             ackIfRunning(record);
+        } catch (DeepResearchPipeline.OwnershipLostException error) {
+            log.info("Research task worker stopped after ownership loss; leaving record pending, taskId={}, error={}",
+                    task.getId(), error.getMessage());
         } catch (Exception error) {
             boolean resetForRetry = researchTaskService.resetRunningForRetryForOwner(
                     task,

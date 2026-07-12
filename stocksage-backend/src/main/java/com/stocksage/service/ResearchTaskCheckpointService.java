@@ -48,17 +48,26 @@ public class ResearchTaskCheckpointService {
     }
 
     @Transactional
-    public void saveEvidence(Long taskId, AnalysisState state) {
+    public void saveEvidence(Long taskId, String leaseToken, AnalysisState state) {
+        requireOwnership(taskId, leaseToken);
         upsert(taskId, state, ResearchTask.Stage.DATA_PREFETCH, 0, 0);
     }
 
     @Transactional
-    public void saveDebateRound(Long taskId, AnalysisState state, int roundsCompleted, int plannedRounds) {
+    public void saveDebateRound(
+            Long taskId,
+            String leaseToken,
+            AnalysisState state,
+            int roundsCompleted,
+            int plannedRounds
+    ) {
+        requireOwnership(taskId, leaseToken);
         upsert(taskId, state, ResearchTask.Stage.AGENT_DEBATE, roundsCompleted, plannedRounds);
     }
 
     @Transactional
-    public void saveSynthesis(Long taskId, AnalysisState state) {
+    public void saveSynthesis(Long taskId, String leaseToken, AnalysisState state) {
+        requireOwnership(taskId, leaseToken);
         ResearchTaskCheckpoint existing = repository.findByTaskId(taskId).orElse(null);
         int rounds = existing == null ? 0 : safeInt(existing.getDebateRoundsCompleted());
         int planned = existing == null ? 0 : safeInt(existing.getPlannedRounds());
@@ -66,6 +75,54 @@ public class ResearchTaskCheckpointService {
     }
 
     @Transactional
+    public void deleteForTask(Long taskId, String leaseToken) {
+        requireOwnership(taskId, leaseToken);
+        repository.deleteByTaskId(taskId);
+    }
+
+    @Transactional
+    public void deleteForCompletedTask(Long taskId) {
+        if (repository.lockSucceededTask(taskId).isEmpty()) {
+            throw new CheckpointCleanupRejectedException(taskId);
+        }
+        repository.deleteByTaskId(taskId);
+    }
+
+    /**
+     * Test-fixture-only escape hatch for older in-memory tests without a task row.
+     * Production code must use the lease-token overload.
+     */
+    @Deprecated(forRemoval = true)
+    public void saveEvidence(Long taskId, AnalysisState state) {
+        upsert(taskId, state, ResearchTask.Stage.DATA_PREFETCH, 0, 0);
+    }
+
+    /**
+     * Test-fixture-only escape hatch for older in-memory tests without a task row.
+     * Production code must use the lease-token overload.
+     */
+    @Deprecated(forRemoval = true)
+    public void saveDebateRound(Long taskId, AnalysisState state, int roundsCompleted, int plannedRounds) {
+        upsert(taskId, state, ResearchTask.Stage.AGENT_DEBATE, roundsCompleted, plannedRounds);
+    }
+
+    /**
+     * Test-fixture-only escape hatch for older in-memory tests without a task row.
+     * Production code must use the lease-token overload.
+     */
+    @Deprecated(forRemoval = true)
+    public void saveSynthesis(Long taskId, AnalysisState state) {
+        ResearchTaskCheckpoint existing = repository.findByTaskId(taskId).orElse(null);
+        int rounds = existing == null ? 0 : safeInt(existing.getDebateRoundsCompleted());
+        int planned = existing == null ? 0 : safeInt(existing.getPlannedRounds());
+        upsert(taskId, state, ResearchTask.Stage.REPORT_SYNTHESIS, rounds, planned);
+    }
+
+    /**
+     * Test-fixture-only escape hatch for older in-memory tests without a task row.
+     * Production code must use the lease-token overload.
+     */
+    @Deprecated(forRemoval = true)
     public void deleteForTask(Long taskId) {
         repository.deleteByTaskId(taskId);
     }
@@ -100,10 +157,23 @@ public class ResearchTaskCheckpointService {
         try {
             Optional<ResearchTaskCheckpoint> existing = repository.findByTaskId(taskId);
             ResearchTaskCheckpoint entity = existing.orElseGet(ResearchTaskCheckpoint::new);
+            if (isRegression(entity, stage, roundsCompleted)) {
+                log.debug(
+                        "Ignoring stale checkpoint update, taskId={}, currentStage={}, incomingStage={}, "
+                                + "currentRounds={}, incomingRounds={}",
+                        taskId,
+                        entity.getStageCompleted(),
+                        stage,
+                        safeInt(entity.getDebateRoundsCompleted()),
+                        roundsCompleted
+                );
+                return;
+            }
             entity.setTaskId(taskId);
             entity.setStageCompleted(stage);
-            entity.setDebateRoundsCompleted(roundsCompleted);
-            entity.setPlannedRounds(plannedRounds);
+            entity.setDebateRoundsCompleted(Math.max(
+                    safeInt(entity.getDebateRoundsCompleted()), roundsCompleted));
+            entity.setPlannedRounds(Math.max(safeInt(entity.getPlannedRounds()), plannedRounds));
             entity.setPayloadJson(objectMapper.writeValueAsString(state));
             repository.save(entity);
         } catch (Exception e) {
@@ -111,7 +181,45 @@ public class ResearchTaskCheckpointService {
         }
     }
 
+    private void requireOwnership(Long taskId, String leaseToken) {
+        if (leaseToken == null || leaseToken.isBlank()
+                || repository.lockOwnedRunningTask(taskId, leaseToken).isEmpty()) {
+            throw new OwnershipLostException(taskId);
+        }
+    }
+
+    private boolean isRegression(
+            ResearchTaskCheckpoint existing,
+            ResearchTask.Stage incomingStage,
+            int incomingRounds
+    ) {
+        ResearchTask.Stage currentStage = existing.getStageCompleted();
+        if (currentStage == null) {
+            return false;
+        }
+        if (incomingStage.ordinal() < currentStage.ordinal()) {
+            return true;
+        }
+        return incomingStage == ResearchTask.Stage.AGENT_DEBATE
+                && currentStage == ResearchTask.Stage.AGENT_DEBATE
+                && incomingRounds < safeInt(existing.getDebateRoundsCompleted());
+    }
+
     private int safeInt(Integer value) {
         return value == null ? 0 : value;
+    }
+
+    public static final class OwnershipLostException extends IllegalStateException {
+
+        public OwnershipLostException(Long taskId) {
+            super("Research task checkpoint ownership lost, taskId=" + taskId);
+        }
+    }
+
+    public static final class CheckpointCleanupRejectedException extends IllegalStateException {
+
+        public CheckpointCleanupRejectedException(Long taskId) {
+            super("Research task checkpoint cleanup requires SUCCEEDED status, taskId=" + taskId);
+        }
     }
 }

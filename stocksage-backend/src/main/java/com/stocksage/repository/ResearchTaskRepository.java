@@ -72,6 +72,100 @@ public interface ResearchTaskRepository extends JpaRepository<ResearchTask, Long
     @Modifying
     @Query(value = """
             UPDATE research_tasks
+               SET lease_token = :newLeaseToken,
+                   attempts = attempts + 1,
+                   started_at = :takenOverAt,
+                   completed_at = NULL,
+                   heartbeat_at = :takenOverAt,
+                   error_message = NULL,
+                   updated_at = :takenOverAt
+             WHERE id = :id
+               AND status = 'RUNNING'
+               AND lease_token = :observedLeaseToken
+               AND heartbeat_at < :heartbeatBefore
+               AND attempts < :maxAttempts
+            """, nativeQuery = true)
+    int takeOverStaleRunningAttempt(
+            @Param("id") Long id,
+            @Param("observedLeaseToken") String observedLeaseToken,
+            @Param("newLeaseToken") String newLeaseToken,
+            @Param("heartbeatBefore") LocalDateTime heartbeatBefore,
+            @Param("maxAttempts") int maxAttempts,
+            @Param("takenOverAt") LocalDateTime takenOverAt
+    );
+
+    @Modifying
+    @Query(value = """
+            UPDATE research_tasks
+               SET status = 'FAILED',
+                   stage = 'FAILED',
+                   error_message = :errorMessage,
+                   completed_at = :failedAt,
+                   heartbeat_at = :failedAt,
+                   updated_at = :failedAt,
+                   lease_token = NULL
+             WHERE id = :id
+               AND status = 'RUNNING'
+               AND lease_token = :observedLeaseToken
+               AND heartbeat_at < :heartbeatBefore
+               AND attempts >= :maxAttempts
+            """, nativeQuery = true)
+    int failStaleRunningAtAttemptLimit(
+            @Param("id") Long id,
+            @Param("observedLeaseToken") String observedLeaseToken,
+            @Param("heartbeatBefore") LocalDateTime heartbeatBefore,
+            @Param("maxAttempts") int maxAttempts,
+            @Param("errorMessage") String errorMessage,
+            @Param("failedAt") LocalDateTime failedAt
+    );
+
+    @Modifying
+    @Query(value = """
+            UPDATE research_tasks
+               SET status = 'PENDING',
+                   stage = 'CREATED',
+                   lease_token = NULL,
+                   error_message = :errorMessage,
+                   completed_at = NULL,
+                   heartbeat_at = :resetAt,
+                   updated_at = :resetAt
+             WHERE id = :id
+               AND status = 'RUNNING'
+               AND lease_token = :observedLeaseToken
+               AND heartbeat_at < :heartbeatBefore
+               AND attempts < :maxAttempts
+            """, nativeQuery = true)
+    int resetStaleRunningForRetry(
+            @Param("id") Long id,
+            @Param("observedLeaseToken") String observedLeaseToken,
+            @Param("heartbeatBefore") LocalDateTime heartbeatBefore,
+            @Param("maxAttempts") int maxAttempts,
+            @Param("errorMessage") String errorMessage,
+            @Param("resetAt") LocalDateTime resetAt
+    );
+
+    @Modifying
+    @Query(value = """
+            UPDATE research_tasks
+               SET status = 'FAILED',
+                   stage = 'FAILED',
+                   error_message = :errorMessage,
+                   completed_at = :failedAt,
+                   heartbeat_at = :failedAt,
+                   updated_at = :failedAt,
+                   lease_token = NULL
+             WHERE id = :id
+               AND status = 'PENDING'
+            """, nativeQuery = true)
+    int failIfPending(
+            @Param("id") Long id,
+            @Param("errorMessage") String errorMessage,
+            @Param("failedAt") LocalDateTime failedAt
+    );
+
+    @Modifying
+    @Query(value = """
+            UPDATE research_tasks
                SET status = 'PENDING',
                    stage = 'CREATED',
                    lease_token = NULL,

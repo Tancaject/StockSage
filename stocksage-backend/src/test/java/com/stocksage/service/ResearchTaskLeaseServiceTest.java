@@ -2,11 +2,28 @@ package com.stocksage.service;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ResearchTaskLeaseServiceTest {
+
+    @Test
+    void heartbeatIntervalRenewsShortLeaseBeforeExpiry() {
+        ResearchTaskLeaseService service = new ResearchTaskLeaseService(Optional.empty(), 10_000);
+
+        assertThat(service.leaseTtl()).isEqualTo(Duration.ofSeconds(10));
+        assertThat(service.heartbeatInterval()).isEqualTo(Duration.ofMillis(3_333));
+        assertThat(service.heartbeatInterval()).isLessThan(Duration.ofSeconds(10));
+    }
+
+    @Test
+    void heartbeatIntervalRetainsSixtySecondProductionCap() {
+        ResearchTaskLeaseService service = new ResearchTaskLeaseService(Optional.empty(), 1_800_000);
+
+        assertThat(service.heartbeatInterval()).isEqualTo(Duration.ofSeconds(60));
+    }
 
     @Test
     void processFallbackLeaseAllowsOneHolderUntilTokenIsReleased() {

@@ -1,18 +1,6 @@
-# ================================================================
-# StockSage 本地开发基础设施 (docker-compose)
-#
-# 本文件只容器化基础设施（MySQL / Redis / Milvus / 可选 Ollama）。
-# Java (stocksage-backend) / Python (stocksage-data-service) / 前端
-# (stocksage-frontend) 仍按 README.md 说明在宿主机上直接运行，不在
-# 本 compose 中构建或启动。
-#
-# 启动基础设施：
-#   docker compose up -d
-#
-# Ollama 默认不启动（本机已装 Ollama 时无需重复容器化）；
-# 如需用容器跑 Ollama，显式加 profile：
-#   docker compose --profile ollama up -d
-# ================================================================
+# StockSage 自有基础设施：MySQL、Redis、Ollama。
+# 现有 D:\milvus Compose 和 attu 容器由 infra.ps1 统一调用，不在这里重复定义。
+# Java backend、Python data-service、Vue frontend 和 IBKR 继续在宿主机运行。
 
 services:
   mysql:
@@ -22,7 +10,7 @@ services:
     ports:
       - "${STOCKSAGE_MYSQL_PORT:-3306}:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: "12345"
+      MYSQL_ROOT_PASSWORD: "${STOCKSAGE_DB_PASSWORD:-12345}"
       MYSQL_DATABASE: stocksage
     command:
       - --character-set-server=utf8mb4
@@ -32,7 +20,7 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p12345"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -51,62 +39,6 @@ services:
       timeout: 5s
       retries: 10
 
-  etcd:
-    image: quay.io/coreos/etcd:v3.5.25
-    container_name: stocksage-milvus-etcd
-    restart: unless-stopped
-    environment:
-      ETCD_AUTO_COMPACTION_MODE: revision
-      ETCD_AUTO_COMPACTION_RETENTION: "1000"
-      ETCD_QUOTA_BACKEND_BYTES: "4294967296"
-      ETCD_SNAPSHOT_COUNT: "50000"
-    volumes:
-      - etcd-data:/etcd
-    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
-    healthcheck:
-      test: ["CMD", "etcdctl", "endpoint", "health"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
-
-  minio:
-    image: minio/minio:RELEASE.2024-12-18T13-15-44Z
-    container_name: stocksage-milvus-minio
-    restart: unless-stopped
-    environment:
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin
-    volumes:
-      - minio-data:/minio_data
-    command: minio server /minio_data --console-address ":9001"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
-
-  milvus-standalone:
-    image: milvusdb/milvus:v2.6.15
-    container_name: stocksage-milvus-standalone
-    restart: unless-stopped
-    command: ["milvus", "run", "standalone"]
-    environment:
-      ETCD_ENDPOINTS: etcd:2379
-      MINIO_ADDRESS: minio:9000
-    volumes:
-      - milvus-data:/var/lib/milvus
-    ports:
-      - "19530:19530"
-      - "9091:9091"
-    depends_on:
-      - etcd
-      - minio
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
-
   ollama:
     image: ollama/ollama
     container_name: stocksage-ollama
@@ -115,13 +47,26 @@ services:
       - "11434:11434"
     volumes:
       - ollama-data:/root/.ollama
-    profiles:
-      - ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  ollama-init:
+    image: ollama/ollama
+    container_name: stocksage-ollama-init
+    restart: "no"
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    volumes:
+      - ollama-data:/root/.ollama
+    depends_on:
+      ollama:
+        condition: service_healthy
+    command: ["pull", "${STOCKSAGE_EMBEDDING_OLLAMA_MODEL:-bge-m3}"]
 
 volumes:
   mysql-data:
   redis-data:
-  etcd-data:
-  minio-data:
-  milvus-data:
   ollama-data:

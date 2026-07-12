@@ -24,6 +24,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Service
 public class ResearchManager {
 
+    private static final Runnable NO_OP_EXECUTION_GUARD = () -> {
+    };
+
     private final ChatClient chatClient;
     private final ObjectMapper objectMapper;
 
@@ -65,6 +68,24 @@ public class ResearchManager {
      */
     public Mono<InvestmentReport> synthesizeStreaming(AnalysisState state, String traceId,
                                                      Long conversationId, ChatStreamEmitter emitter) {
+        return synthesizeStreaming(
+                state, traceId, conversationId, emitter, NO_OP_EXECUTION_GUARD);
+    }
+
+    /**
+     * 带本地执行权检查的流式综合版本。
+     *
+     * <p>检查器只应读取调用方已经维护的内存状态，不能在 token 热路径中访问 Redis、数据库或
+     * 其他远端服务。检查器抛出的异常会取消上游模型流，并原样传递给调用方。</p>
+     */
+    public Mono<InvestmentReport> synthesizeStreaming(
+            AnalysisState state,
+            String traceId,
+            Long conversationId,
+            ChatStreamEmitter emitter,
+            Runnable executionGuard
+    ) {
+        Runnable guard = executionGuard == null ? NO_OP_EXECUTION_GUARD : executionGuard;
         String section = "manager-synthesis";
         String label = "Research Manager · 综合判断";
         StringBuilder buffer = new StringBuilder();
@@ -78,6 +99,7 @@ public class ResearchManager {
         return tokens
                 .doOnNext(token -> {
                     if (token == null || token.isEmpty()) return;
+                    guard.run();
                     int prevLen = buffer.length();
                     buffer.append(token);
                     if (jsonStarted.get()) return;
@@ -94,6 +116,7 @@ public class ResearchManager {
 
                     if (jsonAt < 0 || jsonAt >= buffer.length()) {
                         // 仍在自然语言阶段：整 token 可见
+                        guard.run();
                         emitter.emitSection(traceId, conversationId, "thought",
                                 section, label, token);
                         return;
@@ -103,13 +126,17 @@ public class ResearchManager {
                     if (jsonAt > prevLen) {
                         String visiblePart = token.substring(0, jsonAt - prevLen);
                         if (!visiblePart.isEmpty()) {
+                            guard.run();
                             emitter.emitSection(traceId, conversationId, "thought",
                                     section, label, visiblePart);
                         }
                     }
                     jsonStarted.set(true);
                 })
-                .then(Mono.fromCallable(() -> parseReport(buffer.toString(), state)));
+                .then(Mono.fromCallable(() -> {
+                    guard.run();
+                    return parseReport(buffer.toString(), state);
+                }));
     }
 
     /**

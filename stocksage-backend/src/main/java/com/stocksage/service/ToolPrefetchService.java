@@ -20,16 +20,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Coordinator 计划的确定性预取编排。
@@ -61,6 +65,7 @@ public class ToolPrefetchService {
     private final ObjectMapper objectMapper;
     // 分析师/工具预取和后台记忆更新共用的工作线程池（AsyncConfig#agentTaskExecutor，6 线程 daemon）。
     private final AsyncTaskExecutor agentTaskExecutor;
+    private final TaskScheduler researchHeartbeatScheduler;
 
     @Value("${stocksage.chat.tool-prefetch.enabled:true}")
     private boolean toolPrefetchEnabled;
@@ -320,6 +325,8 @@ public class ToolPrefetchService {
             researchTaskService.release(acquired);
             throw error;
         }
+        AtomicBoolean ownershipLost = new AtomicBoolean(false);
+        ScheduledFuture<?> heartbeat = startInlineHeartbeat(runningTask, acquired, ownershipLost);
         try {
             DeepEvidenceCollector.EvidenceCollection evidence = deepEvidenceCollector.collect(
                     primaryTicker, userQuery, traceId, conversationId);
@@ -350,6 +357,14 @@ public class ToolPrefetchService {
 
             emitProgress(traceId, conversationId, "thought",
                     "开始 Bull/Bear 辩论，并由 Research Manager 综合裁决。");
+            if (heartbeat != null) {
+                heartbeat.cancel(false);
+                heartbeat = null;
+            }
+            if (ownershipLost.get()) {
+                throw new DeepResearchPipeline.OwnershipLostException(
+                        "inline research task ownership was lost before debate, taskId=" + runningTask.getId());
+            }
             String reportJson;
             try {
                 reportJson = deepResearchPipeline.runResearchDebateWithTask(
@@ -381,8 +396,41 @@ public class ToolPrefetchService {
             emitProgress(traceId, conversationId, "error", "同步深度研究执行失败：" + error.getMessage());
             throw error;
         } finally {
+            if (heartbeat != null) {
+                heartbeat.cancel(false);
+            }
             researchTaskService.release(acquired);
         }
+    }
+
+    /** inline 降级仍可能包含耗时的数据预取，因此在进入辩论流水线前也必须持续续租。 */
+    private ScheduledFuture<?> startInlineHeartbeat(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            AtomicBoolean ownershipLost
+    ) {
+        Duration interval = researchTaskService.leaseHeartbeatInterval();
+        if (interval == null || interval.isZero() || interval.isNegative()) {
+            interval = Duration.ofSeconds(60);
+        }
+        return researchHeartbeatScheduler.scheduleAtFixedRate(() -> {
+            if (ownershipLost.get()) {
+                return;
+            }
+            try {
+                boolean leaseRenewed = researchTaskService.renewLease(lease);
+                boolean taskRenewed = leaseRenewed
+                        && researchTaskService.heartbeatForOwner(task, lease.token());
+                if (!taskRenewed) {
+                    ownershipLost.set(true);
+                    log.warn("Inline research task heartbeat lost ownership, taskId={}", task.getId());
+                }
+            } catch (Exception error) {
+                ownershipLost.set(true);
+                log.warn("Inline research task heartbeat failed, taskId={}, error={}",
+                        task.getId(), error.getMessage());
+            }
+        }, Instant.now().plus(interval), interval);
     }
 
     private String taskTraceId(ResearchTask task, String fallbackTraceId) {

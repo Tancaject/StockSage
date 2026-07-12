@@ -3,6 +3,7 @@ package com.stocksage.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.model.entity.ResearchTask;
+import com.stocksage.repository.ResearchTaskCheckpointRepository;
 import com.stocksage.repository.ResearchTaskRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,8 +15,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -23,8 +26,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ResearchTaskServiceTest {
 
     private final ResearchTaskRepository repository = mock(ResearchTaskRepository.class);
+    private final ResearchTaskCheckpointRepository checkpointRepository =
+            mock(ResearchTaskCheckpointRepository.class);
     private final ResearchTaskLeaseService leaseService = new ResearchTaskLeaseService(Optional.empty(), 30_000);
-    private final ResearchTaskService service = new ResearchTaskService(repository, leaseService, new ObjectMapper());
+    private final ResearchTaskService service = new ResearchTaskService(
+            repository, checkpointRepository, leaseService, new ObjectMapper());
 
     @Test
     void submissionKeyIsStableAcrossQueryWhitespaceAndCase() {
@@ -70,6 +76,7 @@ class ResearchTaskServiceTest {
         assertThat(reset.task().getConversationId()).isEqualTo(20L);
         assertThat(reset.task().getStatus()).isEqualTo(ResearchTask.Status.PENDING);
         assertThat(reset.task().getAttempts()).isZero();
+        verify(checkpointRepository).deleteByTaskId(9L);
     }
 
     @Test
@@ -140,6 +147,46 @@ class ResearchTaskServiceTest {
     }
 
     @Test
+    void preAttemptFailureClosesTaskOnlyWhenItIsStillPending() {
+        ResearchTask task = researchTask(
+                "rt:nvda:invalid", ResearchTask.Status.PENDING, ResearchTask.Stage.CREATED, 0);
+        task.setId(9L);
+        when(repository.failIfPending(
+                eq(9L), eq("invalid payload"), any(LocalDateTime.class)))
+                .thenReturn(1);
+
+        boolean failed = service.markFailedIfPending(task, "invalid payload");
+
+        assertThat(failed).isTrue();
+        assertThat(task.getStatus()).isEqualTo(ResearchTask.Status.FAILED);
+        assertThat(task.getStage()).isEqualTo(ResearchTask.Stage.FAILED);
+        assertThat(task.getErrorMessage()).isEqualTo("invalid payload");
+        assertThat(task.getCompletedAt()).isNotNull();
+        assertThat(task.getHeartbeatAt()).isNotNull();
+        assertThat(task.getLeaseToken()).isNull();
+        verify(repository).failIfPending(
+                eq(9L), eq("invalid payload"), any(LocalDateTime.class));
+    }
+
+    @Test
+    void preAttemptFailureDoesNotMutateTaskAfterAnotherOwnerClaimedIt() {
+        ResearchTask task = researchTask(
+                "rt:nvda:claimed", ResearchTask.Status.PENDING, ResearchTask.Stage.CREATED, 0);
+        task.setId(10L);
+        when(repository.failIfPending(
+                eq(10L), eq("fencing rejected"), any(LocalDateTime.class)))
+                .thenReturn(0);
+
+        boolean failed = service.markFailedIfPending(task, "fencing rejected");
+
+        assertThat(failed).isFalse();
+        assertThat(task.getStatus()).isEqualTo(ResearchTask.Status.PENDING);
+        assertThat(task.getStage()).isEqualTo(ResearchTask.Stage.CREATED);
+        assertThat(task.getErrorMessage()).isNull();
+        assertThat(task.getCompletedAt()).isNull();
+    }
+
+    @Test
     void failedAttemptIsResetForRetryOnlyWhileTheLeaseStillOwnsTheRunningTask() {
         ResearchTask task = researchTask(
                 "rt:nvda:retry", ResearchTask.Status.RUNNING, ResearchTask.Stage.AGENT_DEBATE, 1);
@@ -186,9 +233,11 @@ class ResearchTaskServiceTest {
     void recoverStaleRunningTasksRetriesBeforeAttemptLimitAndFailsAtLimit() {
         ResearchTask retryable = researchTask("rt:nvda:retry", ResearchTask.Status.RUNNING, ResearchTask.Stage.AGENT_DEBATE, 1);
         retryable.setId(41L);
+        retryable.setLeaseToken("retry-owner");
         retryable.setHeartbeatAt(LocalDateTime.now().minusMinutes(30));
         ResearchTask exhausted = researchTask("rt:nvda:failed", ResearchTask.Status.RUNNING, ResearchTask.Stage.REPORT_PERSIST, 3);
         exhausted.setId(42L);
+        exhausted.setLeaseToken("failed-owner");
         exhausted.setHeartbeatAt(LocalDateTime.now().minusMinutes(30));
 
         when(repository.findByStatusAndHeartbeatAtBefore(eq(ResearchTask.Status.RUNNING), any(LocalDateTime.class)))
@@ -197,8 +246,14 @@ class ResearchTaskServiceTest {
                 ResearchTask.Status.PENDING,
                 "stale research task recovered for retry"
         )).thenReturn(List.of());
-        when(repository.saveAll(any()))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.resetStaleRunningForRetry(
+                eq(41L), eq("retry-owner"), any(LocalDateTime.class), eq(3),
+                eq("stale research task recovered for retry"), any(LocalDateTime.class)))
+                .thenReturn(1);
+        when(repository.failStaleRunningAtAttemptLimit(
+                eq(42L), eq("failed-owner"), any(LocalDateTime.class), eq(3),
+                eq("stale research task exceeded attempt limit 3"), any(LocalDateTime.class)))
+                .thenReturn(1);
 
         ResearchTaskService.RecoveryResult result = service.recoverStaleRunningTasks(Duration.ofMinutes(15), 3);
 
@@ -215,6 +270,34 @@ class ResearchTaskServiceTest {
         assertThat(exhausted.getStage()).isEqualTo(ResearchTask.Stage.FAILED);
         assertThat(exhausted.getErrorMessage()).contains("attempt limit");
         assertThat(exhausted.getCompletedAt()).isNotNull();
+    }
+
+    @Test
+    void recoveryDoesNotCountOrOverwriteTaskWhenOwnerCasWasRefreshed() {
+        ResearchTask raced = researchTask(
+                "rt:nvda:raced", ResearchTask.Status.RUNNING, ResearchTask.Stage.AGENT_DEBATE, 1);
+        raced.setId(43L);
+        raced.setLeaseToken("observed-owner");
+        raced.setHeartbeatAt(LocalDateTime.now().minusMinutes(30));
+        when(repository.findByStatusAndHeartbeatAtBefore(
+                eq(ResearchTask.Status.RUNNING), any(LocalDateTime.class)))
+                .thenReturn(List.of(raced));
+        when(repository.findByStatusAndErrorMessage(
+                ResearchTask.Status.PENDING, "stale research task recovered for retry"))
+                .thenReturn(List.of());
+        when(repository.resetStaleRunningForRetry(
+                eq(43L), eq("observed-owner"), any(LocalDateTime.class), eq(3),
+                eq("stale research task recovered for retry"), any(LocalDateTime.class)))
+                .thenReturn(0);
+
+        ResearchTaskService.RecoveryResult result = service.recoverStaleRunningTasks(
+                Duration.ofMinutes(15), 3);
+
+        assertThat(result.retried()).isZero();
+        assertThat(result.failed()).isZero();
+        assertThat(raced.getStatus()).isEqualTo(ResearchTask.Status.RUNNING);
+        assertThat(raced.getStage()).isEqualTo(ResearchTask.Stage.AGENT_DEBATE);
+        assertThat(raced.getLeaseToken()).isEqualTo("observed-owner");
     }
 
     @Test
@@ -240,6 +323,86 @@ class ResearchTaskServiceTest {
         assertThat(result.retried()).isEqualTo(1);
         assertThat(result.failed()).isZero();
         assertThat(result.retriedTaskIds()).containsExactly(51L);
+    }
+
+    @Test
+    void redisLeaseTakesOverOnlyThroughObservedRunningOwnerFence() {
+        ResearchTask task = researchTask(
+                "rt:nvda:takeover", ResearchTask.Status.RUNNING, ResearchTask.Stage.AGENT_DEBATE, 1);
+        task.setId(61L);
+        task.setLeaseToken("owner-a");
+        task.setHeartbeatAt(LocalDateTime.now().minusMinutes(1));
+        task.setErrorMessage("old attempt interrupted");
+        ResearchTaskLeaseService.Lease lease = new ResearchTaskLeaseService.Lease(
+                task.getIdempotencyKey(), "owner-b", ResearchTaskLeaseService.Backend.REDIS);
+        when(repository.takeOverStaleRunningAttempt(
+                eq(61L), eq("owner-a"), eq("owner-b"), any(LocalDateTime.class), eq(3),
+                any(LocalDateTime.class)))
+                .thenReturn(1);
+
+        boolean takenOver = service.takeOverRunningAttempt(task, lease, 3);
+
+        assertThat(takenOver).isTrue();
+        assertThat(task.getStatus()).isEqualTo(ResearchTask.Status.RUNNING);
+        assertThat(task.getStage()).isEqualTo(ResearchTask.Stage.AGENT_DEBATE);
+        assertThat(task.getAttempts()).isEqualTo(2);
+        assertThat(task.getLeaseToken()).isEqualTo("owner-b");
+        assertThat(task.getStartedAt()).isNotNull();
+        assertThat(task.getHeartbeatAt()).isEqualTo(task.getStartedAt());
+        assertThat(task.getErrorMessage()).isNull();
+    }
+
+    @Test
+    void processFallbackLeaseCannotTakeOverRunningDatabaseOwner() {
+        ResearchTask task = researchTask(
+                "rt:nvda:takeover", ResearchTask.Status.RUNNING, ResearchTask.Stage.AGENT_DEBATE, 1);
+        task.setId(62L);
+        task.setLeaseToken("owner-a");
+        ResearchTaskLeaseService.Lease lease = new ResearchTaskLeaseService.Lease(
+                task.getIdempotencyKey(), "owner-b", ResearchTaskLeaseService.Backend.PROCESS);
+
+        assertThat(service.takeOverRunningAttempt(task, lease, 3)).isFalse();
+
+        verify(repository, never()).takeOverStaleRunningAttempt(
+                any(), any(), any(), any(), anyInt(), any());
+    }
+
+    @Test
+    void attemptLimitFailureUsesStaleOwnerCasForRunningTask() {
+        ResearchTask task = researchTask(
+                "rt:nvda:exhausted", ResearchTask.Status.RUNNING, ResearchTask.Stage.AGENT_DEBATE, 3);
+        task.setId(63L);
+        task.setLeaseToken("owner-a");
+        ResearchTaskLeaseService.Lease lease = new ResearchTaskLeaseService.Lease(
+                task.getIdempotencyKey(), "owner-b", ResearchTaskLeaseService.Backend.REDIS);
+        when(repository.failStaleRunningAtAttemptLimit(
+                eq(63L), eq("owner-a"), any(LocalDateTime.class), eq(3), eq("attempt limit"),
+                any(LocalDateTime.class)))
+                .thenReturn(1);
+
+        boolean failed = service.failStaleRunningAtAttemptLimit(task, lease, 3, "attempt limit");
+
+        assertThat(failed).isTrue();
+        assertThat(task.getStatus()).isEqualTo(ResearchTask.Status.FAILED);
+        assertThat(task.getStage()).isEqualTo(ResearchTask.Stage.FAILED);
+        assertThat(task.getLeaseToken()).isNull();
+        assertThat(task.getCompletedAt()).isNotNull();
+    }
+
+    @Test
+    void attemptLimitFailureForPendingTaskUsesPendingCas() {
+        ResearchTask task = researchTask(
+                "rt:nvda:pending-limit", ResearchTask.Status.PENDING, ResearchTask.Stage.CREATED, 3);
+        task.setId(64L);
+        ResearchTaskLeaseService.Lease lease = new ResearchTaskLeaseService.Lease(
+                task.getIdempotencyKey(), "owner-b", ResearchTaskLeaseService.Backend.PROCESS);
+        when(repository.failIfPending(
+                eq(64L), eq("attempt limit"), any(LocalDateTime.class)))
+                .thenReturn(1);
+
+        assertThat(service.failStaleRunningAtAttemptLimit(task, lease, 3, "attempt limit")).isTrue();
+
+        verify(repository).failIfPending(eq(64L), eq("attempt limit"), any(LocalDateTime.class));
     }
 
     @Test

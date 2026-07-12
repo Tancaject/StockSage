@@ -231,7 +231,7 @@ public class ResearchTaskCheckpointService {
 Run: `.\mvnw.cmd test -Dtest=ResearchTaskCheckpointServiceTest`，然后 `.\mvnw.cmd test`
 Expected: 全绿（Flyway V3 在单测不跑 MySQL，不影响）。
 
-- [ ] **Step 6: Commit** — 阻塞：当前工作区 `.git` 元数据缺失。
+- [x] **Step 6: Commit** — 已完成(7/10)：T1–T7 实现随基线提交 `623ea1d` 落库（当时 .git 为空壳，无法分任务提交；相关后续修订并入 `83b14fb`）。
 
 ```bash
 git add stocksage-backend/src/main/resources/db/migration/V3__research_task_checkpoints.sql stocksage-backend/src/main/java/com/stocksage/model/entity/ResearchTaskCheckpoint.java stocksage-backend/src/main/java/com/stocksage/repository/ResearchTaskCheckpointRepository.java stocksage-backend/src/main/java/com/stocksage/service/ResearchTaskCheckpointService.java stocksage-backend/src/test/java/com/stocksage/service/ResearchTaskCheckpointServiceTest.java
@@ -325,7 +325,7 @@ public String buildSubmissionPayload(String ticker, String query, String traceId
 Run: `.\mvnw.cmd test -Dtest=ResearchTaskServiceTest`，再 `.\mvnw.cmd test`
 Expected: 全绿。
 
-- [ ] **Step 5: Commit** — 阻塞：当前工作区 `.git` 元数据缺失。
+- [x] **Step 5: Commit** — 已完成(7/10)：T1–T7 实现随基线提交 `623ea1d` 落库（当时 .git 为空壳，无法分任务提交；相关后续修订并入 `83b14fb`）。
 
 ```bash
 git add -A stocksage-backend/src
@@ -461,12 +461,12 @@ void appendedEventsAreRelayedInOrderAndReplayedAfterReconnect() {
 }
 ```
 
-- [ ] **Step 5: 跑测试通过** — 单测通过；阻塞：Docker daemon 不可用，`tcp://localhost:2375` 拒绝连接，`TraceEventBridgeIT` 无法启动 Redis 容器。
+- [x] **Step 5: 跑测试通过** — `TraceEventStoreTest` 3/3；启用 `-Pit` 后 `TraceEventBridgeIT` 1/1 通过。
 
-Run: `.\mvnw.cmd test -Dtest=TraceEventStoreTest` 和 `.\mvnw.cmd verify -Dit.test=TraceEventBridgeIT -DfailIfNoTests=false`
+Run: `.\mvnw.cmd test -Dtest=TraceEventStoreTest` 和 `.\mvnw.cmd verify -Pit -Dit.test=TraceEventBridgeIT -DfailIfNoTests=false`
 Expected: 全绿。
 
-- [ ] **Step 6: Commit** — 阻塞：当前工作区 `.git` 元数据缺失，无法创建提交。
+- [x] **Step 6: Commit** — 已完成(7/10)：T1–T7 实现随基线提交 `623ea1d` 落库（当时 .git 为空壳，无法分任务提交；相关后续修订并入 `83b14fb`）。
 
 ```bash
 git add stocksage-backend/src/main/java/com/stocksage/trace/TraceEventStore.java stocksage-backend/src/main/java/com/stocksage/trace/TraceEventRelay.java stocksage-backend/src/test
@@ -491,9 +491,9 @@ git commit -m "feat(ws1): per-trace Redis Stream event store with replay and liv
 
 - [x] **Step 1: 改 ChatStreamEmitter 与 ToolCallAspect**
 - [x] **Step 2: 改 ChatService 订阅端与终止信号**
-- [ ] **Step 3: 跑全量单测 + 集成** — 单测 118 个通过；阻塞：Docker daemon 不可用，启用 `-Pit` 后 Testcontainers 无法启动。
-- [ ] **Step 4: 手工冒烟（真实栈）**：compose + 后端 + 前端，发一条普通 MARKET 查询——进度/工具/答案流正常；`redis-cli KEYS "stream:trace-events:*"` 可见 trace stream；停 Redis 再发一条，聊天仍工作（降级直推）
-- [ ] **Step 5: Commit** — 阻塞：当前工作区 `.git` 元数据缺失，无法创建提交。
+- [x] **Step 3: 跑全量单测 + 集成** — 已完成(7/10 19:46)：完整 `verify -Pit` 单测 144/144 + IT 14/14 全绿（AuthFlow/CheckpointTakeover/CsrfAndAdmin/ResearchTaskEvents/ResearchTaskQueue/TenancyIsolation/TraceEventBridge），singleton containers 修复生效。
+- [x] **Step 4: 手工冒烟（真实栈）** — 已完成（7/11）：隔离 8083 实例 + 本机 MySQL/data-service + WSL Redis 下，正常 MARKET 8.33s 返回 `answer + stream-end`，并新增 `stream:trace-events:f19e390d-fd93-4175-a632-ed832eb7227a`；runtime mask Redis 后 MARKET 32.73s 仍由进程内直推完成；最终 Redis 已恢复为 `active / PONG`。证据：`tmp/ws1-redis-fallback-evidence.json`。
+- [x] **Step 5: Commit** — 已完成(7/10)：T1–T7 实现随基线提交 `623ea1d` 落库（当时 .git 为空壳，无法分任务提交；相关后续修订并入 `83b14fb`）。
 
 ```bash
 git add -A stocksage-backend/src
@@ -519,7 +519,7 @@ git commit -m "refactor(ws1): route all trace events through Redis event store w
 - [x] **Step 1: 建新类并搬方法**（Javadoc 写"为什么单独成类：请求内联降级与后台 worker 两个调用方"）
 - [x] **Step 2: ToolPrefetchService 改调用**
 - [x] **Step 3: 跑全量测试** — `.\mvnw.cmd test`，Expected: 全绿，无行为变化
-- [ ] **Step 4: Commit** — 阻塞：当前工作区 `.git` 元数据缺失，无法创建提交。
+- [x] **Step 4: Commit** — 已完成(7/10)：T1–T7 实现随基线提交 `623ea1d` 落库（当时 .git 为空壳，无法分任务提交；相关后续修订并入 `83b14fb`）。
 
 ```bash
 git add -A stocksage-backend/src
@@ -577,7 +577,7 @@ void freshRunStillPlansConcurrentlyWithRound1() {
 
 - [x] **Step 2: 跑失败 → 实现**：把"第 1 轮 + planner 并发"块包进 `if (startRound == 1 && fixedPlannedRounds <= 0)`；resume 分支 `rounds = fixedPlannedRounds`，循环 `for (round = startRound; ...)`；`applyRound` 后插 `if (checkpointer != null) checkpointer.onRoundCompleted(workingState, round, rounds);`
 - [x] **Step 3: 跑通过 + 全量** — `.\mvnw.cmd test -Dtest=ResearchDebateServiceResumeTest`，再 `.\mvnw.cmd test`
-- [ ] **Step 4: Commit** — 阻塞：当前工作区 `.git` 元数据缺失，无法创建提交。
+- [x] **Step 4: Commit** — 已完成(7/10)：T1–T7 实现随基线提交 `623ea1d` 落库（当时 .git 为空壳，无法分任务提交；相关后续修订并入 `83b14fb`）。
 
 ```bash
 git add -A stocksage-backend/src
@@ -686,8 +686,8 @@ public void runFullPipeline(ResearchTask task, ResearchTaskLeaseService.Lease le
 
 - [x] **Step 1: 扩展 DeepResearchPipelineTest 写失败用例**（三条：全新执行走完整管线并 emit task-final；证据不足走 SUCCEEDED-无版本路径且不辩论；有 2 轮 checkpoint 时 `runDebate` 收到 `startRound=3` 且 evidenceCollector 不被调用）
 - [x] **Step 2: 跑失败 → 实现 runFullPipeline + persistAssistantReport 平移**
-- [ ] **Step 3: 跑通过 + 全量** — `.\mvnw.cmd test`
-- [ ] **Step 4: Commit** — 阻塞：当前工作区 `.git` 元数据缺失，无法创建提交。
+- [x] **Step 3: 跑通过 + 全量** — `.\mvnw.cmd test`（当前全量单测 144/144 通过）
+- [x] **Step 4: Commit** — 已完成(7/10)：T1–T7 实现随基线提交 `623ea1d` 落库（当时 .git 为空壳，无法分任务提交；相关后续修订并入 `83b14fb`）。
 
 ```bash
 git add -A stocksage-backend/src
@@ -758,7 +758,7 @@ while (running.get()) {
 
 **Pending 清扫**（`@Scheduled` 每分钟）：`XPENDING` 取 idle > claim-min-idle-ms 的 entry → `XCLAIM` 到本 consumer → 与消费循环相同处理（attempts 检查 → DLQ 或重执行）。Spring Data Redis 用 `opsForStream().pending(...)` + `claim(...)`（不依赖 XAUTOCLAIM，版本兼容性更稳）。
 
-- [ ] **Step 1: 写 ResearchTaskQueueIT 失败用例**（Testcontainers MySQL+Redis + Spring 上下文，照 `AuthIntegrationTestBase` 容器模式；`DeepResearchPipeline` 用 `@MockBean` 记录执行）
+- [x] **Step 1: 写 ResearchTaskQueueIT 失败用例**（Testcontainers MySQL+Redis + Spring 上下文，照 `AuthIntegrationTestBase` 容器模式；`DeepResearchPipeline` 用 `@MockBean` 记录执行）
 
 ```java
 @Test
@@ -781,10 +781,10 @@ void failedExecutionIsReclaimedAndSentToDlqAfterMaxAttempts() {
 }
 ```
 
-- [ ] **Step 2: 跑失败 → 实现 Queue + Worker + AsyncConfig**
-- [ ] **Step 3: 优雅停机用例**（同 IT：mock pipeline 阻塞在 CountDownLatch 时调 `worker.stop()`，释放 latch，断言 stop 在 wait-seconds 内返回且消息未 ACK——`XPENDING` 数为 1，重启可接管）
-- [ ] **Step 4: 跑通过** — `.\mvnw.cmd verify -Dit.test=ResearchTaskQueueIT -DfailIfNoTests=false`，再全量 `.\mvnw.cmd verify`
-- [ ] **Step 5: Commit**
+- [x] **Step 2: 跑失败 → 实现 Queue + Worker + AsyncConfig**
+- [x] **Step 3: 优雅停机用例**（同 IT：mock pipeline 阻塞在 CountDownLatch 时调 `worker.stop()`，释放 latch，断言 stop 在 wait-seconds 内返回且消息未 ACK——`XPENDING` 数为 1，重启可接管）
+- [x] **Step 4: 跑通过** — 当前全量单测 144/144；启用 `-Pit` 后 `ResearchTaskQueueIT` 4/4 通过，覆盖防双跑、异常 reclaim/DLQ、优雅停机 pending 与指标。
+- [x] **Step 5: Commit** — 已完成(7/10)：随 `83b14fb` 落库（后端 T8–T11 合并提交）。
 
 ```bash
 git add -A stocksage-backend/src
@@ -847,11 +847,11 @@ case RESEARCH_MANAGER -> {
 
 注意：提交路径**零证据收集、零 LLM 调用**——原 evidence gate/prepareHashes/findReusableReport 全部只存在于 worker（Task 7）与 inline fallback 里。旁观模式（重复提交）下 relay 从 `Last-Event-ID=null` 回放，用户能看到任务已产生的全部过程。
 
-- [ ] **Step 1: 写失败测试**（`ToolPrefetchServiceSubmitTest` mock 全依赖，四条：正常提交→createIfAbsent(submission key)+enqueue+directAnswer 含受理文案+submittedTaskId 非空；配额满→不建任务不入队；重复提交活跃任务→不再 enqueue 但 submittedTaskId 指向旧任务；enqueue 抛 QueueUnavailableException→verify runResearchDebateWithTask 被调。`ReportMarkdownRendererTest` 两条：受理文案含 ticker 与任务号；配额文案含数字）
-- [ ] **Step 2: 跑失败 → 实现**
-- [ ] **Step 3: 跑通过 + 全量** — `.\mvnw.cmd test` + `.\mvnw.cmd verify`
-- [ ] **Step 4: 手工冒烟**：真实栈发"苹果值不值得投资"→ 秒级受理答复 → 辩论 token 持续流入 → task-final 后 SSE 结束、会话出现报告消息；期间并发发一条 MARKET 查询验证请求线程不被占；停 Redis 重发 → 走同步降级完整出报告
-- [ ] **Step 5: Commit**
+- [x] **Step 1: 写失败测试**（`ToolPrefetchServiceSubmitTest` mock 全依赖，四条：正常提交→createIfAbsent(submission key)+enqueue+directAnswer 含受理文案+submittedTaskId 非空；配额满→不建任务不入队；重复提交活跃任务→不再 enqueue 但 submittedTaskId 指向旧任务；enqueue 抛 QueueUnavailableException→verify runResearchDebateWithTask 被调。`ReportMarkdownRendererTest` 两条：受理文案含 ticker 与任务号；配额文案含数字）
+- [x] **Step 2: 跑失败 → 实现**
+- [x] **Step 3: 跑通过 + 全量** — `.\mvnw.cmd test` + `.\mvnw.cmd verify`（当前 144/144 单测通过，非容器 verify 构建成功）
+- [x] **Step 4: 手工冒烟** — 后台队列路径已由任务 #10 完成：4.39s 受理、辩论持续流入、并发 MARKET 6.59s、`task-final` 生成 1176 字报告；Redis-down 同步路径于 7/11 完成：10s 短租约下预取心跳持续续租，73.09s 完成两轮辩论与 Research Manager 汇总，以同步 `answer + stream-end` 返回 1379 字报告，响应体 18620 字符，Redis 随后恢复。证据：`tmp/ws1-ui-e2e-evidence.json`、`tmp/ws1-redis-fallback-evidence.json`、`tmp/ws1-backend-8083-heartbeat.log`。
+- [x] **Step 5: Commit** — 已完成(7/10)：随 `83b14fb` 落库（后端 T8–T11 合并提交）。
 
 ```bash
 git add -A stocksage-backend/src
@@ -872,10 +872,10 @@ git commit -m "feat(ws1): DEEP submits to background queue with quota, acceptanc
   - `GET /api/research-tasks/active?conversationId={id}` — 当前登录用户该会话的 PENDING/RUNNING 任务 `{taskId, status, stage, ticker, createdAt}`；无则 204。owner 校验沿用现有 controller 身份获取方式。
   - `GET /api/research-tasks/{taskId}/events`（`produces = MediaType.TEXT_EVENT_STREAM_VALUE`，返回 `Flux<ServerSentEvent<String>>`）— owner 校验（非 owner 一律 404，不泄露存在性）；taskId → payload.traceId → `relay.live(traceId, lastEventId)`；每事件 `ServerSentEvent.builder(chunkJson).id(entryId).build()`；`Last-Event-ID` 头缺省 null（全量回放）；任务已终态且 stream 过期 → 立即发一条 `task-final`（content 取任务 resultReportVersionId 对应报告 brief 或 errorMessage）并完成。
 
-- [ ] **Step 1: 写 IT 失败用例**（照 `AuthIntegrationTestBase`：非 owner 访问他人 taskId → 404；owner 访问 → 事先 `store.append` 三条事件 + task-final，断言 SSE 收到 4 条且每条带 id；带 `Last-Event-ID` = 第 2 条 id → 只收 2 条）
-- [ ] **Step 2: 跑失败 → 实现 controller**
-- [ ] **Step 3: 跑通过** — `.\mvnw.cmd verify -Dit.test=ResearchTaskEventsIT -DfailIfNoTests=false`
-- [ ] **Step 4: Commit**
+- [x] **Step 1: 写 IT 失败用例**（照 `AuthIntegrationTestBase`：非 owner 访问他人 taskId → 404；owner 访问 → 事先 `store.append` 三条事件 + task-final，断言 SSE 收到 4 条且每条带 id；带 `Last-Event-ID` = 第 2 条 id → 只收 2 条）
+- [x] **Step 2: 跑失败 → 实现 controller**
+- [x] **Step 3: 跑通过** — 当前全量单测 144/144；启用 `-Pit` 后 `ResearchTaskEventsIT` 4/4 通过，覆盖 owner 404、全量/游标回放、active endpoint 与终态 fallback。
+- [x] **Step 4: Commit** — 已完成(7/10)：随 `83b14fb` 落库（后端 T8–T11 合并提交）。
 
 ```bash
 git add -A stocksage-backend/src
@@ -892,9 +892,9 @@ git commit -m "feat(ws1): research task status and SSE replay endpoints with Las
 - Create: `stocksage-backend/src/main/java/com/stocksage/config/ResearchTaskMetricsConfig.java`（3 个 Gauge：`stocksage.research.queue.depth`、`stocksage.research.queue.dlq.depth`、`stocksage.research.tasks.running`；Redis 不可用 depth 返回 -1；仓储补 `long countByStatus(Status status)`）
 - Test: 扩展 `ResearchTaskServiceTest` + `ResearchTaskQueueIT`
 
-- [ ] **Step 1: 失败测试**（RecoveryResult 携带 id 列表；调度器对 retried 任务逐个 enqueue——mock queue verify）
-- [ ] **Step 2: 实现 → 测试通过** — `.\mvnw.cmd test`
-- [ ] **Step 3: Commit**
+- [x] **Step 1: 失败测试**（RecoveryResult 携带 id 列表；调度器对 retried 任务逐个 enqueue——mock queue verify）
+- [x] **Step 2: 实现 → 测试通过** — 目标测试 13/13、当前后端全量单测 144/144 通过
+- [x] **Step 3: Commit** — 已完成(7/10)：随 `83b14fb` 落库（后端 T8–T11 合并提交）。
 
 ```bash
 git add -A stocksage-backend/src
@@ -918,11 +918,11 @@ git commit -m "feat(ws1): recovery re-enqueue and queue depth metrics"
 3. ChatView 加载会话时调 `getActiveTask(conversationId)`：有活跃任务 → `openTaskEvents(taskId, null, ...)` 重建推理卡片并续流（`sse-cursor` 按 entryId 去重续传）。
 4. 断线（idle timeout / 网络错误）且本轮含活跃任务 → 用最后 entryId 重连 events 端点，而不是提示失败。
 
-- [ ] **Step 1: 写 sse-cursor 纯函数测试** — Run: `npm test` → 失败
-- [ ] **Step 2: 实现 lib + api + 视图接线**
-- [ ] **Step 3: `npm test` 通过 + `npm run build` 通过**
-- [ ] **Step 4: 手工验证（必须亲眼看 UI）**：提交 DEEP → 受理卡片 → 辩论 token 实时展开；刷新页面 → 推理卡片重建并继续；devtools offline 3s 再恢复 → 自动重连不丢 token；task-final → 报告消息出现；Workbench timeline 显示新 stage
-- [ ] **Step 5: Commit**
+- [x] **Step 1: 写 sse-cursor 纯函数测试** — 首次 `npm test` 75 通过、1 个预期失败
+- [x] **Step 2: 实现 lib + api + 视图接线**
+- [x] **Step 3: `npm test` 通过 + `npm run build` 通过** — 81/81 通过；构建通过（仅既有大 chunk 警告）
+- [x] **Step 4: 手工验证（必须亲眼看 UI）** — 已完成（7/11）：隔离 8082 实例 + 本地 OpenAI-compatible SSE 验收桩下，任务 #10 在 4.39s 内受理；辩论 token 实时展开；刷新后 RUNNING / DATA_PREFETCH 卡片与推理流恢复；offline 3s 后自动继续；并发 MARKET 6.59s 返回；task-final 后生成 1176 字报告；Workbench timeline 显示 COMPLETE；浏览器 console error 0。证据：`tmp/ws1-ui-e2e-evidence.json`。验收中发现并修复 `ChatView` 首次挂载未选择最新会话、导致刷新后无法调用 active-task 恢复的缺陷。
+- [x] **Step 5: Commit** — 已完成(7/10)：随 `e91d011` 落库（前端 T12）。
 
 ```bash
 git add -A stocksage-frontend/src
@@ -939,7 +939,7 @@ git commit -m "feat(ws1): frontend task card, reconnect with Last-Event-ID, task
 - Create: `docs/superpowers/specs/2026-07-09-ws1-decisions.md`（短文档：问题 → 否掉的方案 → 取舍 → 实测数字）
 - Modify: `README.md`（架构章节补后台任务系统一段 + 双实例验证入口）
 
-- [ ] **Step 1: CheckpointTakeoverIT**（单 JVM 双 worker 线程模拟双实例）：
+- [x] **Step 1: CheckpointTakeoverIT**（单 JVM 双 worker 线程模拟双实例；定向 IT 1/1 通过）：
 
 ```java
 @Test
@@ -952,11 +952,11 @@ void workerCrashMidDebateIsResumedFromCheckpointWithoutRedoingRounds() {
 }
 ```
 
-- [ ] **Step 2: dual-instance-demo.ps1**：前置 docker compose 已起；`$env:SERVER_PORT=8080/8081` 各起一个 `.\mvnw.cmd spring-boot:run`（共享 MySQL/Redis）；打印四步人工验证清单（同任务不双跑 / kill -9 接管 / 跨实例流式 / 轮次不重烧），每步附 curl 命令与观察点（research_tasks 表、`redis-cli XPENDING`、SSE 输出）
-- [ ] **Step 3: 全量回归** — `.\mvnw.cmd verify` + `npm test` + `npm run build`
-- [ ] **Step 4: 按脚本实测双实例四步验证，结果（含接管耗时与省掉的辩论轮次）写入 ws1-decisions.md**
-- [ ] **Step 5: 决策文档定稿**：为什么 Redis Stream 而非 Kafka/RocketMQ/DB 轮询；两级幂等推导；checkpoint 粒度（stage + 辩论轮）取舍；单路径事件桥（同实例也过 Redis）权衡；实测数字
-- [ ] **Step 6: Commit**
+- [x] **Step 2: dual-instance-demo.ps1**：脚本、四步命令与观察点已落盘；AST 解析和 `-ChecklistOnly` 通过；支持 `-MySqlPort`，Compose MySQL 宿主端口也可用 `STOCKSAGE_MYSQL_PORT` 配置，默认行为不变。
+- [x] **Step 3: 全量回归** — 后端非容器回归 144/144；前端 `npm test` 81/81；`npm run build` 通过；`.\init.ps1 -Mode fast` 三阶段通过。
+- [ ] **Step 4: 按脚本实测双实例四步验证** — Compose MySQL/Redis 已启动（MySQL 映射 3307 以避让本机 `MySQL80`），但真实双实例四步尚未执行；当前 Docker 提权工具额度限制继续执行，接管耗时未编造。
+- [ ] **Step 5: 决策文档定稿** — 架构取舍已落盘；真实双实例的接管耗时与跨实例日志/DB/Redis 证据待补齐后才能完成。
+- [x] **Step 6: Commit** — 已完成(7/10)：随 `df64dfa` 落库（脚本+决策文档+README）。
 
 ```bash
 git add scripts/dual-instance-demo.ps1 stocksage-backend/src/test docs README.md
@@ -967,13 +967,13 @@ git commit -m "feat(ws1): dual-instance verification, checkpoint takeover IT, de
 
 ## WS1 验收清单（对照 spec）
 
-- [ ] 现有全部测试 + 新增测试绿（`.\mvnw.cmd verify` + `npm test` + `npm run build`）
-- [ ] DEEP 提交后请求线程不阻塞（Task 9 冒烟验证）
-- [ ] 断线/刷新恢复观看（Task 12 手工验证）
+- [x] 现有全部测试 + 新增测试绿 — 已完成(7/10)：`verify -Pit` 144 单测 + 14 IT 全绿；`npm test` 81/81；`npm run build` 成功。
+- [x] DEEP 提交后请求线程不阻塞（Task 9 冒烟验证）— 任务 #10 受理后后台运行，期间并发 MARKET 查询 6.59s 完成
+- [x] 断线/刷新恢复观看（Task 12 手工验证）— 任务 #10 刷新重建成功，offline 3s 恢复后继续到 task-final
 - [ ] kill worker 断点接管（Task 13 IT + 双实例实测）
 - [ ] 双实例四步验证通过（Task 13 脚本）
-- [ ] Redis 停机降级为同步内联执行验证（Task 9 冒烟）
-- [ ] 决策文档落盘（Task 13）
+- [x] Redis 停机降级为同步内联执行验证（Task 9 冒烟）— Redis-down MARKET 与完整 DEEP 均 200；DEEP 73.09s 完成并返回 `answer + stream-end`，Redis 已恢复 `PONG`
+- [x] 决策文档落盘（Task 13；真实双实例数字明确保留待验证）
 
 ## 后续
 

@@ -2,6 +2,7 @@ package com.stocksage.agent;
 
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.InvestmentReport;
+import com.stocksage.service.DeepResearchPipeline;
 import com.stocksage.tool.ChatStreamEmitter;
 import com.stocksage.trace.TraceService;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,13 +12,16 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,13 +31,14 @@ class ResearchDebateServiceResumeTest {
     private final BearResearcher bearResearcher = mock(BearResearcher.class);
     private final ResearchManager researchManager = mock(ResearchManager.class);
     private final DebateRoundPlanner debateRoundPlanner = mock(DebateRoundPlanner.class);
+    private final ChatStreamEmitter chatStreamEmitter = mock(ChatStreamEmitter.class);
     private final ResearchDebateService service = new ResearchDebateService(
             bullResearcher,
             bearResearcher,
             researchManager,
             debateRoundPlanner,
             mock(TraceService.class),
-            mock(ChatStreamEmitter.class)
+            chatStreamEmitter
     );
 
     @BeforeEach
@@ -76,6 +81,42 @@ class ResearchDebateServiceResumeTest {
         verify(bullResearcher).argue(any(), eq(2));
         assertThat(checkpoints).containsExactly(1, 2);
         assertThat(done.getDebateTurns()).hasSize(4);
+    }
+
+    @Test
+    void ownershipGuardCancelsArgumentStreamBeforeASecondTokenIsEmitted() {
+        AtomicBoolean ownershipLost = new AtomicBoolean(false);
+        AtomicBoolean upstreamCancelled = new AtomicBoolean(false);
+        Flux<String> tokens = Flux.<String, Integer>generate(
+                        () -> 0,
+                        (index, sink) -> {
+                            sink.next(index == 0 ? "first" : "second");
+                            return index + 1;
+                        })
+                .doOnCancel(() -> upstreamCancelled.set(true));
+        when(bullResearcher.argue(any(), eq(1))).thenReturn(tokens);
+        when(bearResearcher.argue(any(), eq(1))).thenReturn(Flux.never());
+        doAnswer(invocation -> {
+            if ("first".equals(invocation.getArgument(5, String.class))) {
+                ownershipLost.set(true);
+            }
+            return null;
+        }).when(chatStreamEmitter).emitSection(any(), any(), any(), any(), any(), any());
+
+        Runnable guard = () -> {
+            if (ownershipLost.get()) {
+                throw new DeepResearchPipeline.OwnershipLostException("lost");
+            }
+        };
+
+        assertThatThrownBy(() -> service.runDebate(
+                null, null, AnalysisState.builder().query("q").build(),
+                1, 1, null, guard))
+                .isInstanceOf(DeepResearchPipeline.OwnershipLostException.class);
+
+        verify(chatStreamEmitter).emitSection(any(), any(), any(), any(), any(), eq("first"));
+        verify(chatStreamEmitter, never()).emitSection(any(), any(), any(), any(), any(), eq("second"));
+        assertThat(upstreamCancelled).isTrue();
     }
 
     private AnalysisState stateWithCompletedRounds(int rounds) {

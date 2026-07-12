@@ -33,6 +33,37 @@ StockSage 是一个本地运行的 AI 投资研究助手，面向求职展示和
 
 ## 快速启动
 
+### 基础设施一键启动（推荐）
+
+Java backend、Python data-service、Vue frontend 和 IBKR 继续在宿主机手动运行。Docker 负责 MySQL、Redis、Ollama，并复用本机已有的 `D:\milvus\docker-compose.yml` 与 `attu` 容器，不会创建第二套 Milvus/Attu。
+
+统一入口：
+
+```powershell
+.\infra.ps1 up
+.\infra.ps1 status
+.\infra.ps1 logs
+.\infra.ps1 stop
+```
+
+`up` 会依次启动现有 Milvus 组、现有 Attu、StockSage MySQL/Redis/Ollama，并在首次运行时自动拉取 Ollama `bge-m3` 模型。Attu 地址为 [http://localhost:8800](http://localhost:8800)，Milvus 保持使用 `localhost:19530`。
+
+如果现有 Milvus Compose 文件以后移动了，可以显式指定：
+
+```powershell
+.\infra.ps1 up -MilvusComposePath "D:\new-path\docker-compose.yml"
+```
+
+Compose 参数可放在被 Git 忽略的根目录 `.env`：
+
+```powershell
+Copy-Item .env.example .env
+```
+
+如果宿主机 MySQL 已占用 `3306`，将 `.env` 中的 `STOCKSAGE_MYSQL_PORT` 改成 `3307`，并同步让本机 backend 使用对应数据库端口。
+
+### 应用服务手动启动
+
 以下命令假设仓库根目录为：
 
 ```powershell

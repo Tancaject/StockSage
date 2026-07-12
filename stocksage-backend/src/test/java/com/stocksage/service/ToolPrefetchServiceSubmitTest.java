@@ -21,10 +21,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -81,6 +86,8 @@ class ToolPrefetchServiceSubmitTest {
     private ObjectMapper objectMapper;
     @Mock
     private AsyncTaskExecutor agentTaskExecutor;
+    @Mock
+    private TaskScheduler researchHeartbeatScheduler;
 
     @InjectMocks
     private ToolPrefetchService service;
@@ -209,12 +216,27 @@ class ToolPrefetchServiceSubmitTest {
         )).thenReturn(new ResearchTaskService.TaskCreation(task, true));
         doThrow(new ResearchTaskQueue.QueueUnavailableException("Redis unavailable", new RuntimeException("down")))
                 .when(researchTaskQueue).enqueue(88L);
-        when(deepEvidenceCollector.collect(TICKER, QUERY, TRACE_ID, CONVERSATION_ID)).thenReturn(evidence);
         when(investmentReportVersionService.findReusableReport(USER_ID, CONVERSATION_ID, state))
                 .thenReturn(Optional.empty());
         when(researchTaskService.tryAcquire(task)).thenReturn(Optional.of(lease));
         when(researchTaskService.startAttempt(task, lease.token(), ResearchTask.Stage.DATA_PREFETCH))
                 .thenReturn(task);
+        when(researchTaskService.leaseHeartbeatInterval()).thenReturn(Duration.ofSeconds(3));
+        ScheduledFuture<?> heartbeat = org.mockito.Mockito.mock(ScheduledFuture.class);
+        AtomicReference<Runnable> heartbeatAction = new AtomicReference<>();
+        when(researchHeartbeatScheduler.scheduleAtFixedRate(
+                any(Runnable.class), any(Instant.class), any(Duration.class)))
+                .thenAnswer(invocation -> {
+                    heartbeatAction.set(invocation.getArgument(0));
+                    return heartbeat;
+                });
+        when(researchTaskService.renewLease(lease)).thenReturn(true);
+        when(researchTaskService.heartbeatForOwner(task, lease.token())).thenReturn(true);
+        when(deepEvidenceCollector.collect(TICKER, QUERY, TRACE_ID, CONVERSATION_ID))
+                .thenAnswer(invocation -> {
+                    heartbeatAction.get().run();
+                    return evidence;
+                });
         when(deepResearchPipeline.runResearchDebateWithTask(
                 TRACE_ID,
                 CONVERSATION_ID,
@@ -228,6 +250,9 @@ class ToolPrefetchServiceSubmitTest {
         prefetch();
 
         verify(deepEvidenceCollector).collect(TICKER, QUERY, TRACE_ID, CONVERSATION_ID);
+        verify(researchTaskService).renewLease(lease);
+        verify(researchTaskService).heartbeatForOwner(task, lease.token());
+        verify(heartbeat).cancel(false);
         verify(deepResearchPipeline).runResearchDebateWithTask(
                 TRACE_ID,
                 CONVERSATION_ID,
