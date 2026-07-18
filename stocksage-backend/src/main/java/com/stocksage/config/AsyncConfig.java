@@ -18,6 +18,26 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 public class AsyncConfig {
 
     /**
+     * Provides bounded threads for Spring MVC reactive/SSE response writes. Keeping this pool
+     * separate prevents slow Servlet clients from consuming agent or research-worker capacity.
+     */
+    @Bean("applicationTaskExecutor")
+    public ThreadPoolTaskExecutor applicationTaskExecutor(
+            @Value("${stocksage.mvc.async.core-pool-size:4}") int corePoolSize,
+            @Value("${stocksage.mvc.async.max-pool-size:16}") int maxPoolSize,
+            @Value("${stocksage.mvc.async.queue-capacity:32}") int queueCapacity) {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(corePoolSize);
+        executor.setMaxPoolSize(maxPoolSize);
+        executor.setQueueCapacity(queueCapacity);
+        executor.setKeepAliveSeconds(60);
+        executor.setAllowCoreThreadTimeOut(true);
+        executor.setThreadNamePrefix("mvc-stream-");
+        executor.setWaitForTasksToCompleteOnShutdown(false);
+        return executor;
+    }
+
+    /**
      * 分析师/工具预取与后台记忆更新共用的工作线程池，对应原静态 AGENT_EXECUTOR（6 线程）。
      */
     @Bean

@@ -1,10 +1,13 @@
 package com.stocksage.config;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Web 层配置。
@@ -13,10 +16,26 @@ import lombok.RequiredArgsConstructor;
  * 生产环境通过 nginx 反向代理，不需要 CORS，但开发阶段必须放行。
  */
 @Configuration
-@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
     private final AdminApiInterceptor adminApiInterceptor;
+    private final AsyncTaskExecutor mvcAsyncTaskExecutor;
+    private final long mvcAsyncTimeoutMs;
+
+    public WebConfig(
+            AdminApiInterceptor adminApiInterceptor,
+            @Qualifier("applicationTaskExecutor") AsyncTaskExecutor mvcAsyncTaskExecutor,
+            @Value("${stocksage.mvc.async.timeout-ms:1800000}") long mvcAsyncTimeoutMs) {
+        this.adminApiInterceptor = adminApiInterceptor;
+        this.mvcAsyncTaskExecutor = mvcAsyncTaskExecutor;
+        this.mvcAsyncTimeoutMs = mvcAsyncTimeoutMs;
+    }
+
+    @Override
+    public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+        configurer.setTaskExecutor(mvcAsyncTaskExecutor);
+        configurer.setDefaultTimeout(mvcAsyncTimeoutMs);
+    }
 
     /**
      * 配置开发环境前端访问后端 API 的跨域规则。
