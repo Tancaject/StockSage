@@ -114,78 +114,65 @@ export function buildAssistantEvidenceSummary(message = {}) {
   }
 }
 
-export function buildResearchTimeline({ reasoning = [], charts = [], traceSummary = null } = {}) {
-  const timeline = normalizeReasoningList(reasoning).map(item => {
-    if (item.type === 'action') {
-      const action = summarizeToolAction(item.content)
-      return {
-        kind: 'tool',
-        label: item.label || action.label,
-        detail: action.detail,
-        meta: formatDuration(item.durationMs),
-      }
-    }
-    if (item.type === 'observation') {
-      return {
-        kind: 'evidence',
-        label: item.label || '数据返回',
-        detail: normalizeObservationDetail(item.content),
-        meta: formatDuration(item.durationMs),
-      }
-    }
-    const calledTool = summarizeCalledTool(item.content)
-    return {
-      kind: 'plan',
-      label: item.label || (calledTool ? '准备读取数据' : '分析步骤'),
-      detail: calledTool?.label || item.content,
-      meta: formatDuration(item.durationMs),
-    }
-  })
+export function buildResearchTimeline({ reasoning = [], charts = [], hasAnswer = false } = {}) {
+  const items = normalizeReasoningList(reasoning)
+  const thoughts = items.filter(item => item.type === 'thought' && !summarizeCalledTool(item.content))
+  const actions = items.filter(item => item.type === 'action')
+  const observations = items.filter(item => item.type === 'observation')
+  const timeline = []
 
-  for (const chart of charts || []) {
+  const planThought = thoughts[0]
+  if (planThought) {
     timeline.push({
-      kind: 'chart',
-      label: '图表已生成',
-      detail: `${chart.symbol || '市场'} ${chart.period || ''} 图表已附加`.trim(),
-      meta: chart.sourceTool || '',
+      kind: 'plan',
+      label: '分析规划',
+      detail: summarizePlanStage(planThought.content),
+      meta: '',
     })
   }
 
-  if (traceSummary) {
+  if (actions.length > 0 || observations.length > 0) {
+    const dataStage = summarizeDataStage(actions, observations)
     timeline.push({
-      kind: 'trace',
-      label: '链路摘要',
-      detail: '已加载持久化执行链路',
-      meta: formatTraceMeta(traceSummary),
+      kind: 'evidence',
+      label: '数据获取',
+      detail: dataStage.detail,
+      meta: dataStage.meta,
+    })
+  }
+
+  if (actions.length > 0 || observations.length > 0 || thoughts.length > 1) {
+    timeline.push({
+      kind: 'analysis',
+      label: '综合分析',
+      detail: summarizeAnalysisStage(thoughts.slice(planThought ? 1 : 0)),
+      meta: '',
+    })
+  }
+
+  const chartList = Array.isArray(charts) ? charts : []
+  if (chartList.length > 0) {
+    const symbols = [...new Set(chartList.map(chart => chart?.symbol).filter(Boolean))]
+    timeline.push({
+      kind: 'chart',
+      label: '图表生成',
+      detail: symbols.length > 0
+        ? `已生成 ${symbols.slice(0, 3).join('、')} 图表。`
+        : `已生成 ${chartList.length} 张市场图表。`,
+      meta: '',
+    })
+  }
+
+  if (hasAnswer) {
+    timeline.push({
+      kind: 'conclusion',
+      label: '生成结论',
+      detail: '已形成研究结论与风险提示。',
+      meta: '',
     })
   }
 
   return timeline
-}
-
-export function buildReasoningActivity(item = {}) {
-  const normalized = normalizeReasoningItem(item)
-  if (!normalized.content) return null
-
-  if (normalized.type === 'action') {
-    const action = summarizeToolAction(normalized.content)
-    return {
-      type: 'action',
-      content: action.detail ? `${action.label}：${action.detail}` : action.label,
-    }
-  }
-
-  if (normalized.type === 'observation') {
-    return {
-      type: 'observation',
-      content: normalizeObservationDetail(normalized.content),
-    }
-  }
-
-  return {
-    type: normalized.type,
-    content: normalized.content,
-  }
 }
 
 export function buildTickerDossier({ ticker, watchlistItem = null } = {}) {
@@ -223,6 +210,58 @@ function normalizeReasoningItem(item = {}) {
     content: textFrom(item.content),
     durationMs: Number(item.durationMs || 0),
   }
+}
+
+function summarizePlanStage(content) {
+  const text = compactStageDetail(content)
+  if (/Coordinator\s*路由|计划步骤|分层路线|FUNDAMENTALS|MARKET|NEWS|DEEP/i.test(text)) {
+    return '已确定研究路线与所需数据范围。'
+  }
+  return text || '已确定本轮研究重点。'
+}
+
+function summarizeDataStage(actions, observations) {
+  const categories = [...new Set(actions.map(inferDataCategory).filter(Boolean))]
+  const visibleCategories = categories.slice(0, 4)
+  const detail = visibleCategories.length > 0
+    ? `已完成${visibleCategories.join('、')}${categories.length > visibleCategories.length ? '等' : ''}数据获取。`
+    : '已完成所需数据检索与读取。'
+  const warning = observations
+    .map(item => normalizeObservationDetail(item.content))
+    .find(item => /超时|失败|不可用|降级|部分|timeout|failed|unavailable/i.test(item))
+
+  return {
+    detail,
+    meta: warning ? compactStageDetail(warning, 56) : '',
+  }
+}
+
+function inferDataCategory(item) {
+  const action = summarizeToolAction(item.content)
+  const text = `${item.label || ''} ${action.label || ''} ${item.content || ''}`
+
+  if (/SEC|filing|company\s*reports?|financial\s*reports?|10-[KQ]|财报|年报/i.test(text)) return 'SEC 财报'
+  if (/financial|财务指标|结构化财务/i.test(text)) return '财务指标'
+  if (/knowledge|RAG|知识库/i.test(text)) return '知识库'
+  if (/news|新闻/i.test(text)) return '新闻'
+  if (/K\s*线|kline|technical|market|行情|技术指标/i.test(text)) return '行情'
+  if (/search\s*stocks?|resolve\s*stock|company|公司|标的/i.test(text)) return '公司资料'
+  return ''
+}
+
+function summarizeAnalysisStage(thoughts) {
+  const selected = thoughts.find(item => /深度分析|综合|预取|Fundamentals|Market|News|Bull|Bear|多空/i.test(item.content))
+  if (selected && /Fundamentals|Market|News|Bull|Bear|多空/i.test(selected.content)) {
+    return '正在综合基本面、市场、新闻与多空观点。'
+  }
+  if (selected) return compactStageDetail(selected.content)
+  return '正在交叉验证已获取的数据与证据。'
+}
+
+function compactStageDetail(content, maxLength = 88) {
+  const text = String(content || '').replace(/\s+/g, ' ').trim()
+  if (text.length <= maxLength) return text
+  return `${text.slice(0, maxLength - 1).trimEnd()}…`
 }
 
 function summarizeToolAction(content) {
@@ -396,20 +435,4 @@ function normalizeTicker(value) {
 function shortTraceId(traceId) {
   const text = String(traceId || '')
   return text.length > 10 ? `${text.slice(0, 6)}...${text.slice(-4)}` : text
-}
-
-function formatTraceMeta(summary) {
-  const parts = []
-  if (summary.steps > 0) parts.push(`${summary.steps} 步`)
-  const duration = formatDuration(summary.durationMs)
-  if (duration) parts.push(duration)
-  if (summary.tokens > 0) parts.push(`~${Number(summary.tokens).toLocaleString()} 令牌`)
-  return parts.join(' · ')
-}
-
-function formatDuration(ms) {
-  const number = Number(ms || 0)
-  if (!Number.isFinite(number) || number <= 0) return ''
-  if (number < 1000) return `${Math.round(number)}ms`
-  return `${(number / 1000).toFixed(1)}s`
 }

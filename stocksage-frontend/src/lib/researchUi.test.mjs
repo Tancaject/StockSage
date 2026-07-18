@@ -3,7 +3,6 @@ import assert from 'node:assert/strict'
 
 import {
   buildAssistantEvidenceSummary,
-  buildReasoningActivity,
   buildResearchStackStatus,
   buildResearchTimeline,
   buildTickerDossier,
@@ -41,27 +40,30 @@ test('buildAssistantEvidenceSummary exposes model, trace, charts, and source hin
   assert.equal(summary.badges[2].value, 'NVDA')
 })
 
-test('buildResearchTimeline turns reasoning chunks and charts into research stages', () => {
+test('buildResearchTimeline collapses detailed reasoning into key research stages', () => {
   const timeline = buildResearchTimeline({
     reasoning: [
-      { type: 'thought', content: 'Plan the valuation check.' },
+      { type: 'thought', content: 'Coordinator 路由：FUNDAMENTALS；计划步骤：财务、财报、知识库、最终回答。' },
       { type: 'action', content: 'getStockKLine: NVDA daily candles' },
       { type: 'observation', content: 'Retrieved 120 candles.' },
+      { type: 'action', label: '读取财报', content: 'getFinancialReports: ["NVDA"]' },
+      { type: 'observation', content: '部分 Analyst 预取超时，系统继续生成回答。' },
+      { type: 'thought', content: '正在执行深度分析预取：Fundamentals / Market / News / Bull-Bear Debate.' },
     ],
     charts: [{ symbol: 'NVDA', period: 'daily' }],
-    traceSummary: { steps: 3, durationMs: 2250, tokens: 1800 },
+    hasAnswer: true,
   })
 
-  assert.deepEqual(timeline.map(stage => stage.kind), ['plan', 'tool', 'evidence', 'chart', 'trace'])
-  assert.equal(timeline[0].label, '分析步骤')
-  assert.equal(timeline[1].label, '读取 K 线')
-  assert.equal(timeline[1].detail, 'NVDA daily candles')
-  assert.equal(timeline[2].label, '数据返回')
-  assert.equal(timeline[3].label, '图表已生成')
-  assert.equal(timeline.at(-1).meta, '3 步 · 2.3s · ~1,800 令牌')
+  assert.deepEqual(timeline.map(stage => stage.kind), ['plan', 'evidence', 'analysis', 'chart', 'conclusion'])
+  assert.deepEqual(timeline.map(stage => stage.label), ['分析规划', '数据获取', '综合分析', '图表生成', '生成结论'])
+  assert.equal(timeline[0].detail, '已确定研究路线与所需数据范围。')
+  assert.equal(timeline[1].detail, '已完成行情、SEC 财报数据获取。')
+  assert.match(timeline[1].meta, /预取超时/)
+  assert.equal(timeline[2].detail, '正在综合基本面、市场、新闻与多空观点。')
+  assert.equal(timeline[3].detail, '已生成 NVDA 图表。')
 })
 
-test('buildResearchTimeline hides tool function names and raw argument arrays', () => {
+test('buildResearchTimeline merges repeated tool calls and hides implementation details', () => {
   const timeline = buildResearchTimeline({
     reasoning: [
       { type: 'thought', content: 'Called tool: 获取K线数据' },
@@ -77,26 +79,12 @@ test('buildResearchTimeline hides tool function names and raw argument arrays', 
     ],
   })
 
-  assert.deepEqual(timeline.map(stage => stage.label), ['准备读取数据', '读取 K 线', '读取技术指标'])
-  assert.equal(timeline[0].detail, '读取 K 线')
-  assert.equal(timeline[1].detail, 'META · 日线 · 60 条')
-  assert.equal(timeline[2].detail, 'META · MA · MACD · RSI')
+  assert.deepEqual(timeline.map(stage => stage.label), ['数据获取', '综合分析'])
+  assert.equal(timeline[0].detail, '已完成行情数据获取。')
   assert.doesNotMatch(
     timeline.map(stage => `${stage.label} ${stage.detail}`).join('\n'),
     /getStockKLine|getTechnicalIndicators|\["meta/
   )
-})
-
-test('buildReasoningActivity summarizes live tool activity without implementation details', () => {
-  const activity = buildReasoningActivity({
-    type: 'action',
-    content: 'getFinancialMetrics: ["META"]',
-  })
-
-  assert.deepEqual(activity, {
-    type: 'action',
-    content: '读取财务指标：META',
-  })
 })
 
 test('buildTickerDossier creates a workbench-ready summary for the selected ticker', () => {

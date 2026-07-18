@@ -43,16 +43,6 @@
         </span>
       </div>
 
-      <!-- 实时工具调用状态（流式过程中自动展示） -->
-      <div v-if="toolActivities.length > 0" class="tool-activity">
-        <div v-for="(item, idx) in toolActivities" :key="idx" class="tool-activity-item">
-          <span class="tool-icon" :class="item.type">
-            <el-icon><Search v-if="item.type === 'action'" /><CircleCheck v-else /></el-icon>
-          </span>
-          <span class="tool-text">{{ item.content }}</span>
-        </div>
-      </div>
-
       <!-- 思考过程折叠面板（点击展开，显示完整链路） -->
       <section v-if="hasReasoning" class="reasoning-panel" :class="{ open: reasoningOpen }">
         <button class="reasoning-toggle" type="button" @click="toggleReasoning">
@@ -177,10 +167,10 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { ElMessage } from 'element-plus'
-import { ArrowRight, CircleCheck, DocumentCopy, EditPen, RefreshRight, Search, TrendCharts, UserFilled } from '@element-plus/icons-vue'
+import { ArrowRight, DocumentCopy, EditPen, RefreshRight, TrendCharts, UserFilled } from '@element-plus/icons-vue'
 import { getTrace } from '../api/chat.js'
 import { markdownToPlainText, normalizeMarkdownEmphasis } from '../lib/markdown.js'
-import { buildAssistantEvidenceSummary, buildReasoningActivity, buildResearchTimeline } from '../lib/researchUi.js'
+import { buildAssistantEvidenceSummary, buildResearchTimeline } from '../lib/researchUi.js'
 import KLineChart from './KLineChart.vue'
 
 const props = defineProps({
@@ -273,16 +263,6 @@ async function copyMarkdown() {
   }
 }
 
-// 实时工具调用状态：从 reasoning 数组中提取 action/observation 项。
-// 完整链路仍然放在折叠面板里，避免主对话被内部细节淹没。
-const toolActivities = computed(() => {
-  const items = props.message.reasoning || []
-  return items
-    .filter(item => item.type === 'action' || item.type === 'observation')
-    .map(buildReasoningActivity)
-    .filter(Boolean)
-})
-
 const reasoningOpen = ref(false)
 const reasoningLoading = ref(false)
 const reasoningError = ref(null)
@@ -299,7 +279,7 @@ const hasReasoning = computed(() => {
 const researchTimeline = computed(() => buildResearchTimeline({
   reasoning: displayReasoning.value,
   charts: messageCharts.value,
-  traceSummary: traceSummary.value,
+  hasAnswer: Boolean(String(props.message.content || '').trim()),
 }))
 
 // 流式推理（含多空辩论）首次到达时自动展开一次。后台任务可能先返回受理文本，
@@ -660,57 +640,6 @@ function formatDuration(ms) {
   background: var(--accent-soft);
 }
 
-/* 实时工具调用状态 */
-.tool-activity {
-  margin: 0 0 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--border-soft);
-  border-left: 3px solid var(--accent);
-  border-radius: 10px;
-  background: var(--surface);
-  box-shadow: var(--shadow-soft);
-  animation: tool-in 0.2s ease both;
-}
-
-.tool-activity-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  padding: 4px 0;
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--text-secondary);
-}
-
-.tool-activity-item + .tool-activity-item {
-  border-top: 1px solid var(--border-soft);
-  padding-top: 6px;
-  margin-top: 2px;
-}
-
-.tool-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 1px;
-  border-radius: 6px;
-  background: var(--accent-soft);
-  color: var(--accent-dark);
-  font-size: 12px;
-}
-
-.tool-icon.observation {
-  background: var(--positive-soft);
-  color: var(--positive);
-}
-
-.tool-text {
-  overflow-wrap: anywhere;
-}
-
 /* 思考过程面板 */
 .reasoning-panel {
   margin: 0 0 12px;
@@ -794,20 +723,16 @@ function formatDuration(ms) {
   box-shadow: 0 0 0 1px rgba(36, 95, 157, 0.22);
 }
 
-.timeline-row.tool .timeline-marker {
+.timeline-row.analysis .timeline-marker {
   background: var(--warning);
   box-shadow: 0 0 0 1px rgba(154, 101, 0, 0.24);
 }
 
 .timeline-row.evidence .timeline-marker,
-.timeline-row.chart .timeline-marker {
+.timeline-row.chart .timeline-marker,
+.timeline-row.conclusion .timeline-marker {
   background: var(--positive);
   box-shadow: 0 0 0 1px rgba(8, 127, 91, 0.22);
-}
-
-.timeline-row.trace .timeline-marker {
-  background: var(--text-primary);
-  box-shadow: 0 0 0 1px var(--border-strong);
 }
 
 .timeline-copy {
@@ -1149,11 +1074,6 @@ function formatDuration(ms) {
 
 .retry-button .el-icon {
   font-size: 14px;
-}
-
-@keyframes tool-in {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes reasoning-in {
