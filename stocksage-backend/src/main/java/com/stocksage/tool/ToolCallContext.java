@@ -2,6 +2,7 @@ package com.stocksage.tool;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Supplier;
 
 /**
  * 当前对话流的工具调用上下文。
@@ -12,6 +13,8 @@ import java.util.concurrent.ConcurrentMap;
 public final class ToolCallContext {
 
     private static final ThreadLocal<Context> CURRENT = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> OBSERVATION_SUPPRESSED =
+            ThreadLocal.withInitial(() -> false);
     private static final ConcurrentMap<String, Context> ACTIVE_CONTEXTS = new ConcurrentHashMap<>();
 
     /** 工具类不允许实例化。 */
@@ -84,6 +87,28 @@ public final class ToolCallContext {
      */
     public static void clear() {
         CURRENT.remove();
+        OBSERVATION_SUPPRESSED.remove();
+    }
+
+    /**
+     * Execute a local {@code @Tool} through CapabilityGateway without emitting a second AOP trace.
+     */
+    public static <T> T withoutObservation(Supplier<T> action) {
+        boolean previous = OBSERVATION_SUPPRESSED.get();
+        OBSERVATION_SUPPRESSED.set(true);
+        try {
+            return action.get();
+        } finally {
+            if (previous) {
+                OBSERVATION_SUPPRESSED.set(true);
+            } else {
+                OBSERVATION_SUPPRESSED.remove();
+            }
+        }
+    }
+
+    public static boolean isObservationSuppressed() {
+        return OBSERVATION_SUPPRESSED.get();
     }
 
     /**

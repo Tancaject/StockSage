@@ -10,6 +10,7 @@ import com.stocksage.agent.NewsAgent;
 import com.stocksage.agent.PlanAction;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.entity.ResearchTask;
+import com.stocksage.skill.SkillExecutionService;
 import com.stocksage.tool.ChatStreamEmitter;
 import com.stocksage.tool.FundamentalsTools;
 import com.stocksage.tool.MarketTools;
@@ -80,6 +81,8 @@ class ToolPrefetchServiceSubmitTest {
     private ResearchTaskQueue researchTaskQueue;
     @Mock
     private KnowledgeIngestionService knowledgeIngestionService;
+    @Mock
+    private SkillExecutionService skillExecutionService;
     @Mock
     private ChatStreamEmitter chatStreamEmitter;
     @Mock

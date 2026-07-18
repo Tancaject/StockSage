@@ -1,0 +1,25 @@
+id: local-latest-news
+version: 1
+displayName: 最新事件影响分析（本地）
+enabled: true
+routes: [NEWS]
+executionMode: INLINE_DETERMINISTIC
+minimumModelTier: STANDARD
+
+policy:
+  allowedRiskLevels: [READ_ONLY]
+  maxCapabilityCalls: 2
+  maxDurationSeconds: 20
+
+steps:
+  - type: CAPABILITY
+    capability: local.news.searchNews
+    required: false
+
+  - type: AGENT
+    role: NEWS_AGENT
+    allowedCapabilities: [local.news.searchNews]
+
+  - type: FINAL_ANSWER
+
+fallbackSkillIds: []

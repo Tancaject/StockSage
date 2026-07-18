@@ -82,6 +82,12 @@
             <artifactId>spring-ai-client-chat</artifactId>
         </dependency>
 
+        <!-- ===== Spring AI MCP Client (kept on the existing Spring AI 1.1.5 line) ===== -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-mcp-client</artifactId>
+        </dependency>
+
         <!-- ===== Spring AI - OpenAI-compatible client (DashScope compatible-mode chat) ===== -->
         <!-- qwen3.6 系列只在百炼 OpenAI 兼容接口上提供，因此 chat 走该客户端。 -->
         <dependency>
@@ -141,6 +147,10 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
 
         <!-- ===== Observability (Phoenix / OpenTelemetry) ===== -->

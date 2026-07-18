@@ -1,0 +1,26 @@
+id: latest-news-mcp
+version: 1
+displayName: 最新事件影响分析（MCP 优先）
+enabled: true
+routes: [NEWS]
+executionMode: INLINE_DETERMINISTIC
+minimumModelTier: STANDARD
+
+policy:
+  allowedRiskLevels: [READ_ONLY, EXTERNAL_READ]
+  maxCapabilityCalls: 3
+  maxDurationSeconds: 20
+
+steps:
+  - type: CAPABILITY
+    capability: mcp.news.search
+    required: false
+    fallbackCapability: local.news.searchNews
+
+  - type: AGENT
+    role: NEWS_AGENT
+    allowedCapabilities: [mcp.news.search, local.news.searchNews]
+
+  - type: FINAL_ANSWER
+
+fallbackSkillIds: [local-latest-news]

@@ -1,0 +1,18 @@
+capabilities:
+  - id: local.news.searchNews
+    providerType: LOCAL
+    providerId: local
+    nativeName: searchNews
+    riskLevel: READ_ONLY
+    timeoutMs: 8000
+    maxResultBytes: 262144
+    enabled: true
+
+  - id: mcp.news.search
+    providerType: MCP
+    providerId: news-mcp
+    nativeName: configured-news-search
+    riskLevel: EXTERNAL_READ
+    timeoutMs: 8000
+    maxResultBytes: 262144
+    enabled: true

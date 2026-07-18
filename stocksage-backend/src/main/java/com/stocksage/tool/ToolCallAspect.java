@@ -63,6 +63,9 @@ public class ToolCallAspect {
      */
     @Around("@annotation(org.springframework.ai.tool.annotation.Tool)")
     public Object interceptToolCall(ProceedingJoinPoint joinPoint) throws Throwable {
+        if (ToolCallContext.isObservationSuppressed()) {
+            return joinPoint.proceed();
+        }
         String traceId = ToolCallContext.getTraceId();
         if (traceId == null) {
             return joinPoint.proceed();

@@ -12,6 +12,7 @@ import com.stocksage.agent.NewsAgent;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.model.entity.ResearchTask;
+import com.stocksage.skill.SkillExecutionService;
 import com.stocksage.tool.ChatStreamEmitter;
 import com.stocksage.tool.FundamentalsTools;
 import com.stocksage.tool.MarketTools;
@@ -61,6 +62,7 @@ public class ToolPrefetchService {
     private final ResearchTaskService researchTaskService;
     private final ResearchTaskQueue researchTaskQueue;
     private final KnowledgeIngestionService knowledgeIngestionService;
+    private final SkillExecutionService skillExecutionService;
     private final ChatStreamEmitter chatStreamEmitter;
     private final ObjectMapper objectMapper;
     // 分析师/工具预取和后台记忆更新共用的工作线程池（AsyncConfig#agentTaskExecutor，6 线程 daemon）。
@@ -116,6 +118,18 @@ public class ToolPrefetchService {
         String directAnswer = "";
         // 先放标的身份，便于下游提示词在股票代码/公司解析不确定时拒绝无关 RAG 或搜索片段。
         appendResolvedStockIdentity(context, primaryTicker);
+
+        SkillExecutionService.ExecutionResult skillResult = skillExecutionService.executePrefetch(
+                executionPlan,
+                userQuery,
+                toolPrefetchMaxSearchResults,
+                traceId,
+                conversationId,
+                userId
+        );
+        if (!skillResult.context().isBlank()) {
+            context.append(skillResult.context()).append("\n\n");
+        }
 
         emitProgress(traceId, conversationId, "thought",
                 "正在执行深度分析预取：Fundamentals / Market / News / Bull-Bear Debate。");
@@ -204,9 +218,11 @@ public class ToolPrefetchService {
                         () -> withResolvedTicker(primaryTicker,
                                 this::getMarketTechnicalContext));
                 case SEARCH_NEWS -> {
-                    String result = appendToolObservation(context, "searchNews",
-                            () -> newsTools.searchNews(userQuery, toolPrefetchMaxSearchResults));
-                    asyncIngestSearchResults("searchNews", result, userQuery);
+                    if (!skillResult.handled(PlanAction.SEARCH_NEWS)) {
+                        String result = appendToolObservation(context, "searchNews",
+                                () -> newsTools.searchNews(userQuery, toolPrefetchMaxSearchResults));
+                        asyncIngestSearchResults("searchNews", result, userQuery);
+                    }
                 }
                 case WEB_SEARCH -> {
                     String result = appendToolObservation(context, "webSearch",
