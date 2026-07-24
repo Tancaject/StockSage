@@ -116,12 +116,13 @@ export function buildAssistantEvidenceSummary(message = {}) {
 
 export function buildResearchTimeline({ reasoning = [], charts = [], hasAnswer = false } = {}) {
   const items = normalizeReasoningList(reasoning)
+  const routeDecisions = items.filter(item => item.type === 'route_decision')
   const thoughts = items.filter(item => item.type === 'thought' && !summarizeCalledTool(item.content))
   const actions = items.filter(item => item.type === 'action')
   const observations = items.filter(item => item.type === 'observation')
   const timeline = []
 
-  const planThought = thoughts[0]
+  const planThought = routeDecisions[0] || thoughts[0]
   if (planThought) {
     timeline.push({
       kind: 'plan',
@@ -145,7 +146,7 @@ export function buildResearchTimeline({ reasoning = [], charts = [], hasAnswer =
     timeline.push({
       kind: 'analysis',
       label: '综合分析',
-      detail: summarizeAnalysisStage(thoughts.slice(planThought ? 1 : 0)),
+      detail: summarizeAnalysisStage(thoughts.slice(routeDecisions.length > 0 ? 0 : (planThought ? 1 : 0))),
       meta: '',
     })
   }
@@ -209,6 +210,7 @@ function normalizeReasoningItem(item = {}) {
     label: item.label || null,
     content: textFrom(item.content),
     durationMs: Number(item.durationMs || 0),
+    metadata: item.metadata || null,
   }
 }
 

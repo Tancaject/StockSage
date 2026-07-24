@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.AgentStep;
 import com.stocksage.agent.Coordinator;
 import com.stocksage.agent.ExecutionPlan;
+import com.stocksage.agent.RoutingDecisionMetadata;
+import com.stocksage.agent.RoutingDecisionObserver;
 import com.stocksage.memory.LongTermMemory;
 import com.stocksage.memory.ShortTermMemory;
 import com.stocksage.model.dto.ChatChunk;
@@ -87,6 +89,7 @@ public class ChatService {
     private final ImageAttachmentService imageAttachmentService;
     private final ToolPrefetchService toolPrefetchService;
     private final ConversationMessageService conversationMessageService;
+    private final RoutingDecisionObserver routingDecisionObserver;
 
     @Value("${stocksage.chat.stream.heartbeat-seconds:20}")
     private long streamHeartbeatSeconds;
@@ -141,13 +144,16 @@ public class ChatService {
         // 4. 让 Coordinator 选择路由。它可以使用 LLM，
         // 但在路由失败时会回退到确定性规则。
         ExecutionPlan executionPlan = coordinator.plan(request.getMessage(), retrievedDocs.size());
+        RoutingDecisionMetadata routingDecision = executionPlan.routingDecision();
+        routingDecisionObserver.record(routingDecision);
         traceService.addStep(traceId, AgentStep.builder()
                 .thought(executionPlan.thought())
                 .action("Coordinate Request")
                 .actionInput(request.getMessage())
                 .observation(executionPlan.observation())
-                .durationMs(0L)
+                .durationMs(routingDecision == null ? 0L : routingDecision.durationMs())
                 .tokenCount(0)
+                .attributes(routingDecision == null ? Map.of() : routingDecision.toAttributes())
                 .build());
 
         StringBuilder fullResponse = new StringBuilder();
@@ -163,6 +169,16 @@ public class ChatService {
                 .traceId(traceId)
                 .conversationId(conversationId)
                 .build()));
+        Flux<String> routeDecisionStarted = routingDecision == null
+                ? Flux.empty()
+                : Flux.just(toJson(ChatChunk.builder()
+                        .type("route_decision")
+                        .content("Route " + routingDecision.route().name()
+                                + " selected by " + routingDecision.decisionSource().name() + ".")
+                        .traceId(traceId)
+                        .conversationId(conversationId)
+                        .metadata(routingDecision.toAttributes())
+                        .build()));
         Flux<String> retrievalObservation = retrievedDocs.isEmpty()
                 ? Flux.empty()
                 : Flux.just(toJson(ChatChunk.builder()
@@ -397,7 +413,7 @@ public class ChatService {
 
         // 7. 将元数据、推理计划、检索提示、实时工具事件、心跳和最终回答令牌
         // 合并成一条 SSE 流发送给前端。
-        return Flux.concat(conversationStarted, executionPlanStarted, retrievalObservation,
+        return Flux.concat(conversationStarted, routeDecisionStarted, executionPlanStarted, retrievalObservation,
                 Flux.merge(toolEvents, heartbeat, answerStream));
     }
 

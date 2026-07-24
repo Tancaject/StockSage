@@ -63,6 +63,22 @@ test('buildResearchTimeline collapses detailed reasoning into key research stage
   assert.equal(timeline[3].detail, '已生成 NVDA 图表。')
 })
 
+test('buildResearchTimeline uses route decision as the plan stage', () => {
+  const timeline = buildResearchTimeline({
+    reasoning: [
+      {
+        type: 'route_decision',
+        content: 'Route FUNDAMENTALS selected by LEGACY_LLM.',
+        metadata: { route: 'FUNDAMENTALS', source: 'LEGACY_LLM' },
+      },
+      { type: 'thought', content: 'Preparing evidence.' },
+    ],
+  })
+
+  assert.equal(timeline[0].kind, 'plan')
+  assert.match(timeline[0].detail, /研究路线|Route FUNDAMENTALS/)
+})
+
 test('buildResearchTimeline merges repeated tool calls and hides implementation details', () => {
   const timeline = buildResearchTimeline({
     reasoning: [

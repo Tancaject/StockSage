@@ -17,6 +17,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 将每次用户请求路由到合适的研究路径。
@@ -72,6 +73,7 @@ public class Coordinator {
      * 向路由模型请求执行计划；如果模型、解析或网络任一环节失败，则回退到本地路由规则。
      */
     public ExecutionPlan plan(String userQuery, int ragHitCount) {
+        long startedNanos = System.nanoTime();
         try {
             String content = routingChatClient.prompt()
                     .user("""
@@ -80,10 +82,11 @@ public class Coordinator {
                             """.formatted(userQuery, ragHitCount))
                     .call()
                     .content();
-            return parsePlan(content, userQuery, ragHitCount);
+            return parsePlan(content, userQuery, ragHitCount, elapsedMillis(startedNanos));
         } catch (Exception e) {
-            log.warn("Coordinator LLM routing failed, using deterministic fallback: {}", e.getMessage());
-            return fallbackPlan(userQuery, ragHitCount);
+            log.warn("Coordinator LLM routing failed, using deterministic fallback. errorType={}",
+                    e.getClass().getSimpleName());
+            return fallbackPlan(userQuery, ragHitCount, "ROUTING_LLM_FAILED", startedNanos);
         }
     }
 
@@ -91,7 +94,7 @@ public class Coordinator {
      * 只使用本地规则生成计划，供回归测试和模型不可用时复用。
      */
     public ExecutionPlan planDeterministically(String userQuery, int ragHitCount) {
-        return fallbackPlan(userQuery, ragHitCount);
+        return fallbackPlan(userQuery, ragHitCount, "EXPLICIT_DETERMINISTIC", System.nanoTime());
     }
 
     /**
@@ -175,7 +178,7 @@ public class Coordinator {
      * 将模型返回的 JSON 归一化为稳定的执行计划。
      * 必要动作会在这里重新补齐，因为模型输出可能遗漏关键的数据查询步骤。
      */
-    private ExecutionPlan parsePlan(String content, String userQuery, int ragHitCount) throws Exception {
+    private ExecutionPlan parsePlan(String content, String userQuery, int ragHitCount, long durationMs) throws Exception {
         String json = extractJson(content);
         JsonNode root = objectMapper.readTree(json);
         PlanRoute route = PlanRoute.normalize(root.path("route").asText("DIRECT"));
@@ -214,13 +217,26 @@ public class Coordinator {
         String thought = "Coordinator 路由：识别为「" + taskType + "」；" + rationale;
         String observation = "分层路线：" + route + "；模型层级：" + modelTier + "；计划步骤："
                 + String.join(" -> ", actions.stream().map(PlanAction::label).toList());
-        return new ExecutionPlan(taskType, thought, actions, observation, modelTier);
+        RoutingDecisionMetadata routingDecision = new RoutingDecisionMetadata(
+                RoutingDecisionSource.LEGACY_LLM,
+                route.name(),
+                List.of(),
+                route,
+                List.of(),
+                ragHitCount,
+                "",
+                durationMs
+        );
+        return new ExecutionPlan(route, taskType, thought, actions, observation, modelTier, routingDecision);
     }
 
     /**
      * 本地路由选择，同时用于回归测试，也用于路由模型不可用时的运行时兜底。
      */
-    private ExecutionPlan fallbackPlan(String userQuery, int ragHitCount) {
+    private ExecutionPlan fallbackPlan(String userQuery,
+                                       int ragHitCount,
+                                       String fallbackReason,
+                                       long startedNanos) {
         String query = userQuery == null ? "" : userQuery.trim();
         String lower = query.toLowerCase(Locale.ROOT);
         boolean conceptQuestion = containsAny(lower, "what is", "什么是", "为什么", "解释", "概念");
@@ -254,7 +270,26 @@ public class Coordinator {
         ModelTier modelTier = selectDefaultModelTier(route, query, ragHitCount);
         String observation = "分层路线：" + route + "；模型层级：" + modelTier + "；计划步骤："
                 + String.join(" -> ", actions.stream().map(PlanAction::label).toList());
-        return new ExecutionPlan(taskType, thought, actions, observation, modelTier);
+        List<String> matchedSignals = new ArrayList<>();
+        matchedSignals.add(route.name().toLowerCase(Locale.ROOT) + "-rule");
+        if (ragHitCount > 0) {
+            matchedSignals.add("rag-hit");
+        }
+        RoutingDecisionMetadata routingDecision = new RoutingDecisionMetadata(
+                RoutingDecisionSource.DETERMINISTIC_FALLBACK,
+                route.name(),
+                List.of(),
+                route,
+                matchedSignals,
+                ragHitCount,
+                fallbackReason,
+                elapsedMillis(startedNanos)
+        );
+        return new ExecutionPlan(route, taskType, thought, actions, observation, modelTier, routingDecision);
+    }
+
+    private long elapsedMillis(long startedNanos) {
+        return TimeUnit.NANOSECONDS.toMillis(Math.max(0L, System.nanoTime() - startedNanos));
     }
 
     /**

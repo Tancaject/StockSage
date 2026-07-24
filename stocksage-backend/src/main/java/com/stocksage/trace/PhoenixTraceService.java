@@ -80,9 +80,32 @@ public class PhoenixTraceService {
                     .setAttribute(DURATION_MS, step.getDurationMs())
                     .setAttribute(TOKEN_COUNT, (long) step.getTokenCount())
                     .startSpan();
+            addRoutingAttributes(span, step);
             span.end();
         } catch (Exception e) {
             log.warn("Failed to add Phoenix trace step, traceId={}", traceId, e);
+        }
+    }
+
+    private void addRoutingAttributes(Span span, AgentStep step) {
+        if (step.getAttributes() == null
+                || !"routing-decision".equals(step.getAttributes().get("kind"))) {
+            return;
+        }
+        setStringAttribute(span, "stocksage.routing.source", step.getAttributes().get("source"));
+        setStringAttribute(span, "stocksage.routing.primary_intent", step.getAttributes().get("primaryIntent"));
+        setStringAttribute(span, "stocksage.routing.route", step.getAttributes().get("route"));
+        setStringAttribute(span, "stocksage.routing.outcome", step.getAttributes().get("outcome"));
+        setStringAttribute(span, "stocksage.routing.fallback_reason", step.getAttributes().get("fallbackReason"));
+        Object ragHitCount = step.getAttributes().get("ragHitCount");
+        if (ragHitCount instanceof Number number) {
+            span.setAttribute("stocksage.routing.rag_hit_count", number.longValue());
+        }
+    }
+
+    private void setStringAttribute(Span span, String key, Object value) {
+        if (value != null) {
+            span.setAttribute(key, String.valueOf(value));
         }
     }
 

@@ -71,7 +71,7 @@ export function applyChunk(run, chunk = {}) {
   }
 
   // observation / action / thought：追加 timeline 条目
-  if (type === 'observation' || type === 'action' || type === 'thought') {
+  if (type === 'route_decision' || type === 'observation' || type === 'action' || type === 'thought') {
     const entry = {
       kind: type,
       label: chunk.sectionLabel || chunk.section || '',

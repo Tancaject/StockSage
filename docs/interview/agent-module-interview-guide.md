@@ -23,12 +23,17 @@
 | RRF、Rerank | `RagService`、`DashScopeReranker` | 已实现 |
 | Query Rewrite | `QueryRewriter` | 已实现 |
 | RAG 评估 | Golden Set、MRR、Recall、Precision、RAGAS | 已实现 |
+| RAG Eval 接口 | `RagEvalService`、`/api/eval/rag` | 已实现 |
+| 路由与检索回归 | `CoordinatorRegressionService`、`RagRegressionService` | 已实现 |
 | Agent 与 Workflow | `Coordinator`、`ExecutionPlan` | 核心 |
 | 多 Agent 协作 | Fundamentals、Market、News、Bull、Bear、Manager | 已实现 |
 | Planning、终止条件 | 固定动作计划、动态辩论轮数、超时 | 已实现 |
 | Memory | Redis 短期记忆、MySQL 长期画像 | 已实现 |
 | Tool Calling | Spring AI `@Tool`、AOP Trace | 已实现 |
 | Agent 工具失败 | 超时、有限重试、缓存和降级 | 已实现 |
+| 持久化 Trace | `TraceService`、MySQL `AgentTrace` | 已实现 |
+| 实时 Trace | Redis Stream、`TraceEventRelay`、SSE 回放 | 已实现 |
+| 外部观测平台 | Phoenix + OpenTelemetry OTLP | 可选，默认关闭 |
 | MCP、Skill | Capability Gateway、NEWS walking skeleton | 部分实现 |
 | GraphRAG、Agentic RAG | 没有完整生产链路 | 不要声称已实现 |
 | 模型训练、微调 | 使用现成模型 | 不属于项目重点 |
@@ -506,7 +511,202 @@ DEEP 研究时间更长，因此后台化：
 
 ---
 
-## 4. 与 RAG、多 Agent 相关的其他模块
+## 4. Eval 与 Trace
+
+Eval 和 Trace 解决的是两个不同问题：
+
+- Eval：系统整体效果好不好，改动后有没有退化；
+- Trace：某一次请求实际经过了哪些步骤，为什么成功、失败或降级。
+
+面试时可以先用一句话概括：
+
+> Eval 是面向数据集和版本的质量验证，Trace 是面向单次请求的执行证据。Trace 帮助定位问题，Eval 帮助判断修改是否真的提升质量。
+
+### 4.1 RAG Eval
+
+后端通过 `/api/eval/rag` 暴露专用评估接口。`RagEvalService` 调用 `RagService.retrieveForEval`，返回：
+
+- 原始 Query 和改写 Query；
+- 向量召回候选；
+- 关键词召回候选；
+- RRF 融合候选；
+- Rerank 结果；
+- 最终父块上下文；
+- 基于上下文生成的回答；
+- 回答中的编号引用。
+
+这比普通聊天接口更适合评估，因为它保留了每个检索阶段，可以判断问题发生在哪一层。
+
+离线 `rag-eval` 模块包含：
+
+- `golden_set.jsonl`：带标准证据的评测集；
+- `run_retrieval_eval.py`：检索层评估；
+- `run_rag_eval.py`：回答、引用和上下文评估；
+- `run_ragas_eval.py`：RAGAS LLM-as-a-Judge；
+- `eval_summary.py`：汇总指标和质量门禁。
+
+主要指标：
+
+| 层次 | 指标 | 说明 |
+|---|---|---|
+| 检索 | Recall@K | 所需证据是否进入 Top-K |
+| 检索 | Precision@K | Top-K 中有多少真正相关 |
+| 检索 | MRR | 第一个相关证据排名是否靠前 |
+| 生成 | Faithfulness | 回答是否得到上下文支持 |
+| 生成 | Answer Relevancy | 回答是否切题 |
+| 引用 | Citation Precision | 引用是否真的支持对应结论 |
+| 引用 | Citation Recall | 关键结论是否都有引用覆盖 |
+
+`RAG_EVALUATION.md` 当前记录的初始门禁包括：
+
+- Recall@5 ≥ 0.85；
+- Precision@5 ≥ 0.50；
+- MRR ≥ 0.70。
+
+这些阈值是当前评测基线，不应该说成适用于所有业务的行业标准。
+
+### 4.2 Regression Eval
+
+项目还做了两类轻量回归：
+
+1. `RagRegressionService`
+   - 写入固定的 NVIDIA 知识样本；
+   - 正向 Query 应命中样本和关键术语；
+   - 负向 Query 不应错误命中；
+   - 用来发现索引、检索和配置的明显退化。
+
+2. `CoordinatorRegressionService`
+   - 使用确定性路由运行固定问题；
+   - 比较 ExecutionPlan 是否包含预期动作；
+   - 用来防止关键词规则或动作补齐逻辑发生回归。
+
+需要诚实说明：
+
+- 已有 RAG 检索、生成和路由回归；
+- 已有多 Agent 流程的单元及恢复测试；
+- 但还没有覆盖质量、成本、延迟和稳定性的完整 Agent Benchmark。
+
+### 4.3 持久化 Trace
+
+`TraceService` 为每次 Chat 创建 `traceId`，并将链路保存到 MySQL `AgentTrace`。
+
+生命周期：
+
+1. `startTrace`：记录用户、会话、问题和 running 状态；
+2. `addStep`：追加 AgentStep；
+3. `endTrace`：记录 success、error 或 cancelled，以及 Token 和耗时。
+
+每个 `AgentStep` 使用类似 ReAct 的观测结构：
+
+- Thought：为什么进行这一步；
+- Action：执行了什么动作或工具；
+- Action Input：输入参数；
+- Observation：执行结果或失败信息；
+- Duration：该步骤耗时。
+
+当前接入 Trace 的关键环节包括：
+
+- RAG 检索；
+- Coordinator 计划；
+- `@Tool` 工具调用；
+- Fundamentals、Market、News Agent；
+- Bull/Bear 辩论；
+- Research Manager；
+- Capability、Skill 和 MCP 调用；
+- 最终回答、取消和异常状态。
+
+`TraceController` 按当前登录用户读取 Trace，避免直接暴露其他用户的执行记录。
+
+### 4.4 实时 Trace 与断线回放
+
+持久化 Trace 用于事后查看；实时进度使用另一条事件链：
+
+```mermaid
+flowchart LR
+    A["Agent / Tool / Pipeline"] --> B["ChatStreamEmitter"]
+    B --> C["TraceEventStore"]
+    C --> D["Redis Stream"]
+    D --> E["TraceEventRelay"]
+    E --> F["SSE"]
+    F --> G["前端推理时间线"]
+```
+
+`TraceEventStore` 将 thought、action、observation、answer 和 terminal event 写入按 traceId 区分的 Redis Stream，并设置：
+
+- Max Length，避免事件无限增长；
+- TTL，自动清理过期 Trace；
+- Stream Entry ID，支持游标回放。
+
+浏览器断线重连时携带 `Last-Event-ID`：
+
+1. Controller 从该 Entry ID 之后回放；
+2. 再订阅新的实时事件；
+3. 如果最终事件丢失，则根据 MySQL ResearchTask 终态补发结果。
+
+Redis Stream 不可用时，`TraceEventStore` 和 `TraceEventRelay` 使用进程内 `ToolCallEventBus` 作为本地降级。该降级能支撑单实例当前连接，但不具备 Redis 的跨实例回放能力。
+
+### 4.5 Phoenix 与 Metrics
+
+项目还提供可选 Phoenix 链路：
+
+- `PhoenixTracingConfig` 构建独立 OpenTelemetry 管线；
+- 通过 OTLP HTTP 将 Span 导出到 Phoenix；
+- 根 Span 记录用户问题、状态、Token 和总耗时；
+- 子 Span 记录 Retrieval、Tool 和 Agent Step；
+- 使用 OpenInference 风格属性便于 AI 链路分析。
+
+Phoenix 默认关闭：
+
+```properties
+stocksage.phoenix.enabled=false
+```
+
+因此面试中应说“项目支持可选 Phoenix 导出”，而不是“所有本地运行都已经接入 Phoenix 平台”。
+
+Capability 调用和后台任务还通过 Micrometer 记录 Counter、Timer、队列长度、运行任务和 DLQ 等指标。Metric 适合看聚合趋势，Trace 适合看单次请求细节。
+
+### 4.6 Eval 与 Trace 如何配合
+
+典型排查流程：
+
+1. Eval 发现 Recall@5 下降；
+2. 对失败 Case 查看向量、FULLTEXT、RRF 和 Rerank 中间结果；
+3. 使用 Trace 检查线上相似问题的 Query Rewrite、工具调用和耗时；
+4. 修改 Chunk、参数或 Prompt；
+5. 重跑同一 Golden Set；
+6. 只有指标和失败案例都改善，才认为优化有效。
+
+反过来，单条 Trace 成功不能证明系统整体质量好；一次 Eval 通过也不能证明线上每个请求都没有异常。
+
+### 4.7 Eval 与 Trace 高频追问
+
+#### Q1：为什么需要 Eval，人工看几个回答不够吗？
+
+> 人工样例容易挑中成功案例，也无法稳定比较版本。Golden Set 和固定指标能让 Chunk、模型、Top-K 或 Prompt 改动具有可重复的回归证据。
+
+#### Q2：为什么要同时评估检索和生成？
+
+> 如果证据没有召回，问题在检索；如果证据正确但答案没有使用，问题在生成。只评最终答案无法定位故障层。
+
+#### Q3：Trace 和日志有什么区别？
+
+> 日志面向系统事件，通常按服务和时间查看；Trace 用统一 traceId 串联一次请求中的检索、计划、工具、Agent 和结果，更适合分析跨模块因果关系。
+
+#### Q4：Trace 会不会泄露思维链？
+
+> 项目展示的是工程步骤摘要、Action 和 Observation，不应该保存或暴露模型不可控的完整隐藏推理。生产中还应对用户输入、工具参数和外部结果做脱敏与长度限制。
+
+#### Q5：为什么同时保存 MySQL Trace 和 Redis Event Stream？
+
+> MySQL Trace 是事后审计和查询的持久化记录；Redis Stream 面向低延迟实时展示、跨实例传递和断线回放，职责不同。
+
+#### Q6：怎样控制 Trace 的存储成本？
+
+> Redis 事件设置 Max Length 和 TTL；持久化 Step 对输入输出截断；生产环境还可以采样、脱敏，并将聚合趋势交给 Metrics。
+
+---
+
+## 5. 与 RAG、多 Agent 相关的其他模块
 
 | 模块 | 与面试主线的关系 | 建议讲法 |
 |---|---|---|
@@ -528,7 +728,7 @@ MCP、Skill 简洁区分：
 
 ---
 
-## 5. 三分钟完整回答
+## 6. 三分钟完整回答
 
 > StockSage 最核心的两个模块是 RAG 和多 Agent。
 >
@@ -536,11 +736,11 @@ MCP、Skill 简洁区分：
 >
 > 多 Agent 方面，ChatService 先调用 Coordinator 生成受约束的 ExecutionPlan，而不是让模型无限 ReAct。普通请求并行执行 Fundamentals、Market 和 News Agent；深度研究形成统一证据状态，让 Bull 和 Bear 基于同一证据进行轮内并行、轮间串行的辩论，最后由 Research Manager 输出结构化报告。不同 Agent 使用独立 ChatClient 和最小工具集合，减少工具误选和角色污染。
 >
-> 工程可靠性上，模型路由、Query Rewrite、Rerank、Redis 和外部工具都有降级；Agent 和工具有超时；辩论最多 5 轮；DEEP 研究通过 Redis Stream、MySQL 状态、Lease、Fencing 和 Checkpoint 后台执行，并通过 SSE 和 Trace 展示进度。项目追求的不是完全自治，而是金融场景下可验证、可控制、可恢复的 Agent 系统。
+> 工程可靠性上，模型路由、Query Rewrite、Rerank、Redis 和外部工具都有降级；Agent 和工具有超时；辩论最多 5 轮；DEEP 研究通过 Redis Stream、MySQL 状态、Lease、Fencing 和 Checkpoint 后台执行。项目用 Golden Set、RAGAS 和 Regression Eval 验证版本质量，用 MySQL Trace、Redis 事件流和可选 Phoenix 解释单次执行过程。项目追求的不是完全自治，而是金融场景下可验证、可控制、可恢复的 Agent 系统。
 
 ---
 
-## 6. 面试时不要说错
+## 7. 面试时不要说错
 
 不要说：
 
@@ -563,7 +763,7 @@ MCP、Skill 简洁区分：
 
 ---
 
-## 7. 复习优先级
+## 8. 复习优先级
 
 必须能独立讲清楚：
 
@@ -588,7 +788,7 @@ MCP、Skill 简洁区分：
 
 ---
 
-## 8. 面试官可能怎样继续发散
+## 9. 面试官可能怎样继续发散
 
 这一章不是要求逐题背答案，而是训练你识别追问方向。面试官听到一个设计后，通常会沿五个维度继续问：
 
@@ -598,7 +798,7 @@ MCP、Skill 简洁区分：
 4. 如何证明有效？
 5. 数据量或业务复杂度增加后怎样扩展？
 
-### 8.1 从“我们使用 RAG”继续追问
+### 9.1 从“我们使用 RAG”继续追问
 
 | 可能的追问 | StockSage 回答锚点 |
 |---|---|
@@ -622,7 +822,7 @@ MCP、Skill 简洁区分：
 - 最新价格、结构化指标和刚发生的新闻应从工具获取；
 - 最终回答可以组合两类证据，但要区分数据时间。
 
-### 8.2 从“父子 Chunking”继续追问
+### 9.2 从“父子 Chunking”继续追问
 
 | 可能的追问 | 回答方向 |
 |---|---|
@@ -651,7 +851,7 @@ MCP、Skill 简洁区分：
 4. 使用统一评测集比较不同类型的 Recall、MRR 和引用质量；
 5. 不让所有来源共用同一个固定 Chunk Size。
 
-### 8.3 从“bge-m3 + Milvus”继续追问
+### 9.3 从“bge-m3 + Milvus”继续追问
 
 | 可能的追问 | 回答方向 |
 |---|---|
@@ -675,7 +875,7 @@ MCP、Skill 简洁区分：
 - 运维成本；
 - 与现有 Spring AI 的集成。
 
-### 8.4 从“混合检索 + RRF + Rerank”继续追问
+### 9.4 从“混合检索 + RRF + Rerank”继续追问
 
 | 可能的追问 | 回答方向 |
 |---|---|
@@ -706,7 +906,7 @@ MCP、Skill 简洁区分：
 6. 检查 Rerank 是否真正识别公司实体；
 7. 将该案例加入 Golden Set。
 
-### 8.5 从“我们使用 RAGAS 评估”继续追问
+### 9.5 从“我们使用 RAGAS 评估”继续追问
 
 | 可能的追问 | 回答方向 |
 |---|---|
@@ -734,7 +934,7 @@ MCP、Skill 简洁区分：
 - Rerank 或上下文排序改变；
 - 评测只衡量“召回到”，没有衡量生成是否使用正确。
 
-### 8.6 从“RAG 接入 Agent”继续追问
+### 9.6 从“RAG 接入 Agent”继续追问
 
 | 可能的追问 | 回答方向 |
 |---|---|
@@ -760,7 +960,7 @@ MCP、Skill 简洁区分：
 - 工具仍需 Allowlist、参数校验和风险策略；
 - 金融写操作应默认禁止或需要人工确认。
 
-### 8.7 从“Coordinator + ExecutionPlan”继续追问
+### 9.7 从“Coordinator + ExecutionPlan”继续追问
 
 | 可能的追问 | 回答方向 |
 |---|---|
@@ -783,7 +983,7 @@ MCP、Skill 简洁区分：
 
 StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 
-### 8.8 从“多 Agent 辩论”继续追问
+### 9.8 从“多 Agent 辩论”继续追问
 
 | 可能的追问 | 回答方向 |
 |---|---|
@@ -814,7 +1014,7 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 6. 缓存确定性工具结果；
 7. 用质量、延迟和成本联合决定是否保留某个 Agent。
 
-### 8.9 从“Tool Calling”继续追问
+### 9.9 从“Tool Calling”继续追问
 
 | 可能的追问 | 回答方向 |
 |---|---|
@@ -842,7 +1042,7 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 - 执行层应区分硬依赖与可选证据；当前 `ExecutionPlan` 还没有显式的 optional 标志；
 - 最终回答必须披露缺失证据，不能假装所有数据齐全。
 
-### 8.10 从“Memory”继续追问
+### 9.10 从“Memory”继续追问
 
 | 可能的追问 | 回答方向 |
 |---|---|
@@ -868,7 +1068,7 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 - 区分长期偏好与当前策略；
 - 新信息可以覆盖旧信息，也可以在不确定时向用户确认。
 
-### 8.11 从“后台任务、SSE 和可恢复性”继续追问
+### 9.11 从“后台任务、SSE 和可恢复性”继续追问
 
 | 可能的追问 | 回答方向 |
 |---|---|
@@ -896,7 +1096,7 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 
 这些问题回答时要先说明项目实际使用了什么，再谈通用原理。
 
-### 8.12 综合系统设计题
+### 9.12 综合系统设计题
 
 下面的问题最能检验你是否真正理解项目，而不是只背模块。
 
@@ -982,7 +1182,7 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 
 ---
 
-## 9. 关键代码导航
+## 10. 关键代码导航
 
 ### RAG
 
@@ -1010,3 +1210,18 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 - `stocksage-backend/src/main/java/com/stocksage/agent/BearResearcher.java`
 - `stocksage-backend/src/main/java/com/stocksage/agent/ResearchManager.java`
 - `stocksage-backend/src/main/java/com/stocksage/service/DeepResearchPipeline.java`
+
+### Eval 与 Trace
+
+- `stocksage-backend/src/main/java/com/stocksage/controller/RagEvalController.java`
+- `stocksage-backend/src/main/java/com/stocksage/service/RagEvalService.java`
+- `stocksage-backend/src/main/java/com/stocksage/rag/RagRetrievalEvaluation.java`
+- `stocksage-backend/src/main/java/com/stocksage/rag/RagRegressionService.java`
+- `stocksage-backend/src/main/java/com/stocksage/agent/CoordinatorRegressionService.java`
+- `stocksage-backend/src/main/java/com/stocksage/trace/TraceService.java`
+- `stocksage-backend/src/main/java/com/stocksage/trace/TraceEventStore.java`
+- `stocksage-backend/src/main/java/com/stocksage/trace/TraceEventRelay.java`
+- `stocksage-backend/src/main/java/com/stocksage/trace/PhoenixTraceService.java`
+- `stocksage-backend/src/main/java/com/stocksage/config/PhoenixTracingConfig.java`
+- `rag-eval/`
+- `RAG_EVALUATION.md`

@@ -51,6 +51,7 @@ public class CoordinatorRegressionService {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("name", regressionCase.name());
         result.put("query", regressionCase.query());
+        result.put("route", plan.route());
         result.put("taskType", plan.taskType());
         result.put("modelTier", plan.modelTier());
         result.put("expectedActions", regressionCase.expectedActions());

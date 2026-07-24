@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 /**
  * 智能体推理的一个步骤。
  *
@@ -43,4 +45,7 @@ public class AgentStep {
 
     /** 本步骤消耗的令牌数（提示词 + 补全文本） */
     private int tokenCount;
+
+    /** Optional structured metadata. Values must be safe for persistence and observability. */
+    private Map<String, Object> attributes;
 }

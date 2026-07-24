@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 /**
  * SSE 推送给前端的单个数据块。
  *
@@ -47,4 +49,7 @@ public class ChatChunk {
 
     /** 流式分组的展示标题，例如“看多方 · 第 1 轮” */
     private String sectionLabel;
+
+    /** Optional structured metadata for non-token events such as route decisions. */
+    private Map<String, Object> metadata;
 }

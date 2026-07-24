@@ -294,7 +294,7 @@ let activeTaskDiscoveryAttempted = false
 let lastStreamEntryId = ''
 let lastTaskEntryId = ''
 let taskStreamTerminal = false
-const reasoningChunkTypes = new Set(['thought', 'action', 'observation'])
+const reasoningChunkTypes = new Set(['route_decision', 'thought', 'action', 'observation'])
 const BOTTOM_LOCK_DISTANCE = 120
 const TASK_RECONNECT_DELAY_MS = 1_200
 
@@ -788,6 +788,7 @@ function appendReasoningChunk(chunk) {
     section: chunk.section || null,
     label: chunk.sectionLabel || null,
     content: chunk.content || '',
+    metadata: chunk.metadata || null,
   })
   scrollToBottom()
 }

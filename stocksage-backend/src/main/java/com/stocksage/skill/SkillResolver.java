@@ -21,7 +21,7 @@ public class SkillResolver {
     }
 
     public Optional<SkillDefinition> resolve(ExecutionPlan executionPlan) {
-        if (executionPlan == null || PlanRoute.normalize(executionPlan.taskType()) != PlanRoute.NEWS) {
+        if (executionPlan == null || executionPlan.route() != PlanRoute.NEWS) {
             return Optional.empty();
         }
         Optional<SkillDefinition> selected = registry.find(defaultNewsSkill)

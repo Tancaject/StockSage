@@ -66,7 +66,8 @@ class SkillExecutionServiceTest {
                 List.of("local-latest-news")
         );
         plan = new ExecutionPlan(
-                "NEWS", "news", List.of(PlanAction.SEARCH_NEWS), "", ModelTier.STANDARD);
+                PlanRoute.NEWS, "NEWS", "news",
+                List.of(PlanAction.SEARCH_NEWS), "", ModelTier.STANDARD);
         when(resolver.resolve(plan)).thenReturn(Optional.of(skill));
     }
 

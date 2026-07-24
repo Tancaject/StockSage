@@ -335,6 +335,7 @@ function normalizeReasoning(items) {
       // 多空辩论流式块带有展示标题（如“看多方 · 第 1 轮”），优先于按 type 推断的通用标签。
       label: item.label || null,
       content: textFrom(item.content),
+      metadata: item.metadata || null,
     }))
     .filter(item => item.content)
 }
@@ -351,6 +352,15 @@ function traceToReasoning(trace) {
   return steps.flatMap((step) => {
     const rows = []
     const dur = step.durationMs || 0
+    if (step.attributes?.kind === 'routing-decision') {
+      rows.push({
+        type: 'route_decision',
+        content: `Route ${step.attributes.route} selected by ${step.attributes.source}.`,
+        metadata: step.attributes,
+        durationMs: dur,
+      })
+      return rows
+    }
     if (step.thought) rows.push({ type: 'thought', content: textFrom(step.thought), durationMs: 0 })
     if (step.action) rows.push({ type: 'action', content: formatAction(step), durationMs: dur })
     if (step.observation) rows.push({ type: 'observation', content: textFrom(step.observation), durationMs: 0 })

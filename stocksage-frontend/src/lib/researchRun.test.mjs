@@ -105,6 +105,19 @@ test('applyChunk pushes a thought chunk into the timeline', () => {
   assert.equal(result.timeline[0].label, 'Plan')
 })
 
+test('applyChunk pushes a structured route decision into the timeline', () => {
+  const run = createInitialRun()
+  const result = applyChunk(run, {
+    type: 'route_decision',
+    content: 'Route NEWS selected by LEGACY_LLM.',
+    metadata: { route: 'NEWS', source: 'LEGACY_LLM' },
+  })
+
+  assert.equal(result.timeline.length, 1)
+  assert.equal(result.timeline[0].kind, 'route_decision')
+  assert.equal(result.timeline[0].detail, 'Route NEWS selected by LEGACY_LLM.')
+})
+
 test('applyChunk accumulates multiple timeline entries in order', () => {
   let run = createInitialRun()
   run = applyChunk(run, { type: 'thought', sectionLabel: 'Step 1', content: 'Planning' })

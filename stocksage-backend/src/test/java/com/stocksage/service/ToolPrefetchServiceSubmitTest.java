@@ -8,6 +8,7 @@ import com.stocksage.agent.MarketAgent;
 import com.stocksage.agent.ModelTier;
 import com.stocksage.agent.NewsAgent;
 import com.stocksage.agent.PlanAction;
+import com.stocksage.agent.PlanRoute;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.skill.SkillExecutionService;
@@ -96,6 +97,7 @@ class ToolPrefetchServiceSubmitTest {
     private ToolPrefetchService service;
 
     private final ExecutionPlan deepPlan = new ExecutionPlan(
+            PlanRoute.DEEP,
             "DEEP_RESEARCH",
             "research",
             List.of(PlanAction.RESEARCH_MANAGER),
