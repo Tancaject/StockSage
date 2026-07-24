@@ -273,11 +273,11 @@
 
 ### F1（P0）：路由决策可解释性与 Trace
 
-- [x] 新增 `RoutingDecisionMetadata`：`decisionSource / primaryIntent / secondaryIntents / route / matchedSignals / ragHitCount / fallbackReason / durationMs`
-- [x] 决策来源使用稳定枚举：`LEGACY_LLM / INTENT_LLM / DETERMINISTIC_FALLBACK`
+- [x] 新增详细 `RoutingDecisionMetadata`：`decisionSource / rawRoute / route / intentSummary / rationale / confidence / matchedSignals / ragHitCount / fallbackReason / durationMs`
+- [x] 决策来源使用稳定枚举：`ROUTING_LLM / DETERMINISTIC_FALLBACK`
 - [x] `ExecutionPlan` 携带脱敏后的决策元数据；不记录完整 prompt、模型原始思维链或用户私密正文
 - [x] 扩展 `AgentStep` 的可选结构化 attributes，保持旧 Trace JSON 可反序列化
-- [x] 增加 `route_decision` SSE/Trace 展示：意图、最终 route、决策来源、是否降级、耗时
+- [x] 增加 `route_decision` SSE/Trace 展示：LLM 理解的意图、原始/最终 route、依据、confidence、RAG 命中、决策来源、是否降级、耗时
 - [x] 增加低基数指标：按 `source/route/outcome` 记录次数、失败和耗时；禁止使用 userId、ticker、query、traceId 作为指标标签
 
 验收：
@@ -286,49 +286,48 @@
 - [x] Trace 持久化并在重启后可读取；旧 Trace 不因新增字段解析失败
 - [x] 响应、日志、SSE 和指标中不出现密钥、MCP URL、完整 prompt 或原始异常栈
 
-### F2（P0）：独立的混合 LLM Intent Recognizer（先 shadow）
+### F2（P0）：单一 LLM 路由决策器
 
-- [x] 新增 `IntentType`，首期覆盖：知识解释、行情、技术分析、基本面、新闻事件、比较研究、组合诊断、深度投研、未知
-- [x] 新增 `IntentRecognitionRequest`：当前问题、最多 4 条近期上下文、RAG 命中数、是否有图片、已识别 ticker 候选
-- [x] 新增 `IntentDecision`：主/次意图、实体、时间范围、是否需要新鲜数据/RAG/深度研究、建议 route、简短依据和模型自报 confidence
-- [x] 新增 `IntentRecognitionService`，使用独立的 fast-model ChatClient 和严格结构化输出；先验证当前 Spring AI Alibaba 的实际 API，再决定是否使用 converter
-- [x] Intent 专用配置与回答模型解耦：低温度、较小输出预算和明确超时；不复用当前全局 `0.7 / 4096 tokens`
-- [x] 新增结果校验器：未知枚举、非法实体、空 route、越权动作和解析失败都进入确定性 fallback
-- [x] 保留现有规则作为可用性和安全兜底，不再让关键词规则承担主语义识别
-- [x] 增加 `stocksage.agent.intent.mode=LEGACY|SHADOW|ACTIVE`，默认先保持 `LEGACY`
-- [x] `SHADOW` 模式只记录新旧意图与 route 差异，旧 Coordinator 仍是唯一执行结果；不得额外调用工具
-- [x] 抽出确定性 `IntentPlanAssembler`：只把合法 Intent 映射到现有 `PlanRoute/PlanAction/ModelTier`
-- [x] 复合意图通过次意图表达，Action 只能从现有白名单取并继续执行必要动作补全；DEEP 固定证据工作流不交给 LLM 改写
+- [x] 只保留一个 fast-model Coordinator 路由调用，输入为当前用户问题、RAG 命中数和最多 3 条受限检索摘要
+- [x] 路由模型先用自然语言概括 `intent`，再输出 `route / rationale / confidence`；不引入第二套 typed Intent，route 固定为 `DIRECT / MARKET / FUNDAMENTALS / NEWS / DEEP`
+- [x] `PlanAction / ModelTier / taskType` 全部由后端按 route 固定映射，模型不能生成工具名、Agent 或模型名
+- [x] 路由专用配置使用低温度和 256 token 小预算，不复用最终回答模型的全局生成参数
+- [x] 未知 route 安全归一化为 DIRECT；空响应、非法 JSON、网络或 provider 异常进入确定性 fallback
+- [x] 保留关键词规则作为可用性和安全兜底，不再承担正常请求的主语义识别
+- [x] 删除独立 `IntentType/IntentRecognitionService/IntentPlanAssembler` 以及 `LEGACY/SHADOW/ACTIVE` 双轨架构
+- [x] DEEP 等执行工作流仍由后端动作白名单决定，不交给 LLM 改写
 
 验收：
 
 - [x] 模型超时、空响应、围栏 JSON、未知枚举和网络异常均能稳定 fallback
-- [x] “分析 NVDA 最新财报以及市场反应”等复合问题能同时识别基本面与新闻意图
-- [x] “那它最新一季呢”等追问能利用受限近期上下文恢复意图，但不会读取其他用户会话
-- [x] SHADOW 开关关闭后不产生第二次路由模型调用；切回 LEGACY 不影响聊天、RAG 或工具链
+- [x] 用户问题和 RAG 摘要只触发一次路由模型调用
+- [x] 模型输出额外的 `actions/modelTier` 字段也不会改变后端固定执行计划
+- [x] Trace 能区分 `ROUTING_LLM` 与 `DETERMINISTIC_FALLBACK`
 
 ### F3（P0）：统一 Agent Eval、基线和切换门禁
 
 - [x] 新增 typed `PlannerEvalCase/Request/Result/Response`，断言使用 `PlanRoute/PlanAction`，不再比较展示文案
-- [x] 新增 `POST /api/eval/agent/planner`，支持 `DETERMINISTIC / LIVE_COORDINATOR / INTENT_SHADOW`（F2 落地前 `INTENT_SHADOW` 明确返回 `not_run`）
+- [x] 新增 `POST /api/eval/agent/planner`，支持 `DETERMINISTIC / LIVE_COORDINATOR`
 - [x] 让现有 4 条 `CoordinatorRegressionService` 用例委托给 typed evaluator；保留旧 `/api/chat/regression/**` 兼容入口
-- [x] 新建 `rag-eval/agent_golden_set.jsonl`，至少 100 例，覆盖五条现有 route、复合意图、上下文追问、中英混合、模糊请求、无 ticker 和 prompt injection
-- [x] 每例保存：期望主/次意图、route、requiredActions、forbiddenActions、是否 critical；不得收录真实用户隐私
+- [x] 新建 `rag-eval/agent_golden_set.jsonl`，至少 100 例，覆盖五条现有 route、复合问题、上下文追问、中英混合、模糊请求、无 ticker 和 prompt injection
+- [x] 每例只保存：expectedRoute、requiredActions、forbiddenActions、是否 critical；不得收录真实用户隐私
 - [x] 新增 `run_agent_eval.py / agent_eval_summary.py / agent_eval_gates.json`，统一输出 `agent_eval_v1`
+- [x] 参考 EchoMind `EndToEndEvaluator`：新增 route Macro-F1、逐 route Precision/Recall/F1、逐例 intent/confidence/reasoning，并输出可操作优化建议
+- [x] 为 EchoMind 式单轮/多轮回答质量评测保留 `end_to_end` 分区；未提供 LLM-as-Judge 报告时必须明确标记 `not_run`
 - [x] 统一报告聚合 Planner、既有 RAG、可选 Trace 完整性、延迟和基线 delta；未运行的分区必须标为 `not_run`
 - [x] `EvalDesk` 兼容导入旧 RAG JSON 和新统一报告，展示失败用例、缺失/多余 Action 与基线变化
 - [x] LLM Judge 只作补充指标，不作为唯一质量门禁
 
-Intent 从 SHADOW 切换到 ACTIVE 的首期门禁：
+路由模型上线与持续回归门禁：
 
 - [ ] route accuracy `>= 0.95`
 - [ ] required action recall `>= 0.98`
 - [ ] forbidden action rate `= 0`
 - [ ] critical 用例误路由 `= 0`
-- [ ] 相比 legacy 的关键指标下降不超过 `0.02`
+- [ ] 相比确定性基线的关键指标下降不超过 `0.02`
 - [ ] 结构化输出经校验后的可执行率 `= 1.00`
-- [ ] ACTIVE 模式路由 P95 不超过 legacy 基线的 `1.2x`
-- [ ] 任一门禁失败时 CLI 以非零退出码结束，运行时继续保持 SHADOW/LEGACY
+- [ ] LIVE_COORDINATOR 路由 P95 不超过既有线上基线的 `1.2x`
+- [ ] 任一门禁失败时 CLI 以非零退出码结束；运行时 provider 失败继续走确定性 fallback
 
 ### F4（P0–P1）：只读 Skill / Capability / MCP 管理与监控
 

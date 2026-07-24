@@ -148,6 +148,8 @@ test('summarizeEvalResult imports agent_eval_v1 failures and optional sections',
     planner: {
       total_cases: 2,
       route_accuracy: 0.5,
+      macro_f1: 0.4,
+      per_route: { NEWS: { f1: 0.4 } },
       required_action_recall: 0.8,
       results: [{
         id: 'case-1',
@@ -157,11 +159,15 @@ test('summarizeEvalResult imports agent_eval_v1 failures and optional sections',
         plannedActions: ['MARKET_AGENT'],
         missingRequiredActions: ['NEWS_AGENT'],
         matchedForbiddenActions: [],
+        intentSummary: '查询新闻',
+        rationale: '需要最新信息',
       }],
     },
     rag: { status: 'not_run' },
     trace: { status: 'not_run' },
+    end_to_end: { status: 'not_run' },
     baseline_delta: { status: 'completed' },
+    recommendations: ['补充 NEWS 边界样本'],
     gates: [{
       metric: 'route_accuracy',
       value: 0.5,
@@ -176,6 +182,10 @@ test('summarizeEvalResult imports agent_eval_v1 failures and optional sections',
   assert.equal(summary.worstCases[0].id, 'case-1')
   assert.match(summary.worstCases[0].expectedAnswer, /missing NEWS_AGENT/)
   assert.equal(summary.optionalSections.rag, 'not_run')
+  assert.equal(summary.optionalSections.endToEnd, 'not_run')
+  assert.equal(summary.ragasMetrics[0].metric, 'route_macro_f1')
+  assert.equal(summary.ragasMetrics[1].metric, 'route_news_f1')
+  assert.equal(summary.recommendations[0], '补充 NEWS 边界样本')
   assert.equal(summarizeAgentEval({ planner: {}, gates: [] }).kind, 'agent')
 })
 

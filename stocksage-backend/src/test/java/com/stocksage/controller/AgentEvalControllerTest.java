@@ -30,7 +30,8 @@ class AgentEvalControllerTest {
     void exposesTypedPlannerEndpoint() throws Exception {
         when(service.evaluate(any())).thenReturn(new PlannerEvalResponse(
                 "planner_eval_v1", PlannerEvalMode.DETERMINISTIC, "passed",
-                1, 1, 0, 1.0, 1.0, 0.0, 1.0,
+                1, 1, 0, 1.0, 1.0, java.util.Map.of(),
+                1.0, 0.0, 1.0,
                 3L, "2026-07-24T00:00:00", List.of()
         ));
 

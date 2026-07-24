@@ -355,7 +355,7 @@ function traceToReasoning(trace) {
     if (step.attributes?.kind === 'routing-decision') {
       rows.push({
         type: 'route_decision',
-        content: `Route ${step.attributes.route} selected by ${step.attributes.source}.`,
+        content: formatRouteDecision(step.attributes),
         metadata: step.attributes,
         durationMs: dur,
       })
@@ -383,6 +383,19 @@ const traceSummary = computed(() => {
 function formatAction(step) {
   const actionInput = textFrom(step.actionInput)
   return actionInput ? `${step.action}：${actionInput}` : textFrom(step.action)
+}
+
+function formatRouteDecision(metadata = {}) {
+  const lines = [
+    `意图理解：${metadata.intentSummary || '未提供'}`,
+    `选择路由：${metadata.route || 'DIRECT'}`,
+    `决策来源：${metadata.source || 'UNKNOWN'}`,
+    `置信度：${Number(metadata.confidence || 0).toFixed(2)}`,
+    `依据：${metadata.rationale || '未提供'}`,
+    `RAG 命中：${Number(metadata.ragHitCount || 0)}`,
+  ]
+  if (metadata.fallbackReason) lines.push(`降级原因：${metadata.fallbackReason}`)
+  return lines.join('\n')
 }
 
 function textFrom(value) {

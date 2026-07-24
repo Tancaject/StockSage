@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.AgentStep;
 import com.stocksage.agent.Coordinator;
 import com.stocksage.agent.ExecutionPlan;
-import com.stocksage.agent.IntentAwarePlanner;
-import com.stocksage.agent.IntentRecognitionRequest;
 import com.stocksage.agent.RoutingDecisionMetadata;
 import com.stocksage.agent.RoutingDecisionObserver;
 import com.stocksage.memory.LongTermMemory;
@@ -111,7 +109,6 @@ public class ChatService {
     private final ToolPrefetchService toolPrefetchService;
     private final ConversationMessageService conversationMessageService;
     private final RoutingDecisionObserver routingDecisionObserver;
-    private final IntentAwarePlanner intentAwarePlanner;
     private final ResearchMemoryService researchMemoryService;
 
     @Value("${stocksage.chat.stream.heartbeat-seconds:20}")
@@ -173,17 +170,11 @@ public class ChatService {
 
         // 4. 让 Coordinator 选择路由。它可以使用 LLM，
         // 但在路由失败时会回退到确定性规则。
-        List<String> intentContextSnapshot = shortTermMemory.getContext(conversationId);
-        List<String> recentIntentContext = intentContextSnapshot.stream()
-                .skip(Math.max(0, intentContextSnapshot.size() - 4L))
-                .toList();
-        ExecutionPlan executionPlan = intentAwarePlanner.plan(new IntentRecognitionRequest(
+        ExecutionPlan executionPlan = coordinator.plan(
                 request.getMessage(),
-                recentIntentContext,
                 retrievedDocs.size(),
-                hasImages,
-                tickerCandidates
-        ));
+                buildRoutingRagSummary(retrievedDocs)
+        );
         RoutingDecisionMetadata routingDecision = executionPlan.routingDecision();
         routingDecisionObserver.record(routingDecision);
         traceService.addStep(traceId, AgentStep.builder()
@@ -213,8 +204,7 @@ public class ChatService {
                 ? Flux.empty()
                 : Flux.just(toJson(ChatChunk.builder()
                         .type("route_decision")
-                        .content("Route " + routingDecision.route().name()
-                                + " selected by " + routingDecision.decisionSource().name() + ".")
+                        .content(formatRouteDecision(routingDecision))
                         .traceId(traceId)
                         .conversationId(conversationId)
                         .metadata(routingDecision.toAttributes())
@@ -713,6 +703,41 @@ public class ChatService {
             sources.append("  ").append(snippet).append("\n");
         }
         return sources.toString().trim();
+    }
+
+    /**
+     * 给路由模型的 RAG 信号只保留前三条来源和短摘要，避免把完整文档或普通模型回答
+     * 当成路由依据。最终回答仍使用完整的受限 RAG 上下文。
+     */
+    private String buildRoutingRagSummary(List<Document> retrievedDocs) {
+        if (retrievedDocs == null || retrievedDocs.isEmpty()) {
+            return "";
+        }
+        StringBuilder summary = new StringBuilder();
+        int limit = Math.min(3, retrievedDocs.size());
+        for (int i = 0; i < limit; i++) {
+            Document doc = retrievedDocs.get(i);
+            String text = doc.getText() == null ? "" : doc.getText().replaceAll("\\s+", " ").trim();
+            summary.append(formatCitationSource(i + 1, doc))
+                    .append(" | ")
+                    .append(PromptText.truncate(text, 240))
+                    .append("\n");
+        }
+        return summary.toString().trim();
+    }
+
+    private String formatRouteDecision(RoutingDecisionMetadata decision) {
+        StringBuilder text = new StringBuilder()
+                .append("意图理解：").append(decision.intentSummary())
+                .append("\n选择路由：").append(decision.route().name())
+                .append("\n决策来源：").append(decision.decisionSource().name())
+                .append("\n置信度：").append(String.format(Locale.ROOT, "%.2f", decision.confidence()))
+                .append("\n依据：").append(decision.rationale())
+                .append("\nRAG 命中：").append(decision.ragHitCount());
+        if (!decision.fallbackReason().isBlank()) {
+            text.append("\n降级原因：").append(decision.fallbackReason());
+        }
+        return text.toString();
     }
 
     /**

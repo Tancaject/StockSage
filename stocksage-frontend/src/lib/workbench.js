@@ -757,11 +757,12 @@ export function summarizeAgentEval(result) {
       id: item.id,
       category: `${item.expectedRoute || '--'} → ${item.actualRoute || '--'}`,
       score: item.passed ? 1 : 0,
-      question: '',
+      question: item.intentSummary || '',
       answer: item.plannedActions?.join(', ') || '',
       expectedAnswer: [
         ...(item.missingRequiredActions || []).map(action => `missing ${action}`),
         ...(item.matchedForbiddenActions || []).map(action => `forbidden ${action}`),
+        ...(item.rationale ? [`reason ${item.rationale}`] : []),
       ].join(', '),
       contexts: [],
       citations: [],
@@ -776,7 +777,13 @@ export function summarizeAgentEval(result) {
       context_recall: planner.route_accuracy,
       citation_precision: planner.required_action_recall,
     },
-    ragasMetrics: [],
+    ragasMetrics: [
+      { metric: 'route_macro_f1', value: numberOrNull(planner.macro_f1) },
+      ...Object.entries(planner.per_route || {}).map(([route, metrics]) => ({
+        metric: `route_${route.toLowerCase()}_f1`,
+        value: numberOrNull(metrics?.f1),
+      })),
+    ],
     gates: gateRows,
     failedMetrics: gateRows.filter(row => row.status === 'fail'),
     worstCases: failedCases,
@@ -784,8 +791,10 @@ export function summarizeAgentEval(result) {
     optionalSections: {
       rag: result?.rag?.status || 'completed',
       trace: result?.trace?.status || 'completed',
+      endToEnd: result?.end_to_end?.status || 'completed',
       baseline: result?.baseline_delta?.status || 'completed',
     },
+    recommendations: Array.isArray(result?.recommendations) ? result.recommendations : [],
   }
 }
 

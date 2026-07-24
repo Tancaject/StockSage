@@ -68,15 +68,23 @@ test('buildResearchTimeline uses route decision as the plan stage', () => {
     reasoning: [
       {
         type: 'route_decision',
-        content: 'Route FUNDAMENTALS selected by LEGACY_LLM.',
-        metadata: { route: 'FUNDAMENTALS', source: 'LEGACY_LLM' },
+        content: '意图理解：分析财报风险',
+        metadata: {
+          route: 'FUNDAMENTALS',
+          source: 'ROUTING_LLM',
+          intentSummary: '分析财报风险',
+          rationale: '问题要求读取公司财报',
+          confidence: 0.92,
+          ragHitCount: 2,
+        },
       },
       { type: 'thought', content: 'Preparing evidence.' },
     ],
   })
 
   assert.equal(timeline[0].kind, 'plan')
-  assert.match(timeline[0].detail, /研究路线|Route FUNDAMENTALS/)
+  assert.equal(timeline[0].detail, '意图：分析财报风险；路由：FUNDAMENTALS；依据：问题要求读取公司财报')
+  assert.equal(timeline[0].meta, '来源 ROUTING_LLM · 置信度 0.92 · RAG 2 条')
 })
 
 test('buildResearchTimeline merges repeated tool calls and hides implementation details', () => {

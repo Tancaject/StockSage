@@ -55,8 +55,7 @@ class ChatServiceTenancyTest {
             mock(ImageAttachmentService.class),
             mock(ToolPrefetchService.class),
             mock(ConversationMessageService.class),
-            mock(com.stocksage.agent.RoutingDecisionObserver.class)
-            , mock(com.stocksage.agent.IntentAwarePlanner.class),
+            mock(com.stocksage.agent.RoutingDecisionObserver.class),
             mock(ResearchMemoryService.class)
     );
 

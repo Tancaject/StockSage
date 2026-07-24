@@ -16,6 +16,12 @@ public record PlannerEvalResult(
         boolean passed,
         boolean executable,
         long durationMs,
-        String errorCode
+        String errorCode,
+        String decisionSource,
+        String rawRoute,
+        String intentSummary,
+        String rationale,
+        double confidence,
+        String fallbackReason
 ) {
 }

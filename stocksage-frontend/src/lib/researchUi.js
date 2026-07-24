@@ -124,11 +124,12 @@ export function buildResearchTimeline({ reasoning = [], charts = [], hasAnswer =
 
   const planThought = routeDecisions[0] || thoughts[0]
   if (planThought) {
+    const routeMetadata = planThought.type === 'route_decision' ? planThought.metadata : null
     timeline.push({
       kind: 'plan',
       label: '分析规划',
-      detail: summarizePlanStage(planThought.content),
-      meta: '',
+      detail: routeMetadata ? summarizeRouteDecision(routeMetadata) : summarizePlanStage(planThought.content),
+      meta: routeMetadata ? summarizeRouteDecisionMeta(routeMetadata) : '',
     })
   }
 
@@ -220,6 +221,30 @@ function summarizePlanStage(content) {
     return '已确定研究路线与所需数据范围。'
   }
   return text || '已确定本轮研究重点。'
+}
+
+function summarizeRouteDecision(metadata = {}) {
+  const intent = String(metadata.intentSummary || '').trim()
+  const route = String(metadata.route || 'DIRECT').trim()
+  const rationale = String(metadata.rationale || '').trim()
+  const parts = []
+  if (intent) parts.push(`意图：${intent}`)
+  parts.push(`路由：${route}`)
+  if (rationale) parts.push(`依据：${rationale}`)
+  return parts.join('；')
+}
+
+function summarizeRouteDecisionMeta(metadata = {}) {
+  const parts = []
+  if (metadata.source) parts.push(`来源 ${metadata.source}`)
+  if (Number.isFinite(Number(metadata.confidence))) {
+    parts.push(`置信度 ${Number(metadata.confidence).toFixed(2)}`)
+  }
+  if (Number.isFinite(Number(metadata.ragHitCount))) {
+    parts.push(`RAG ${Number(metadata.ragHitCount)} 条`)
+  }
+  if (metadata.fallbackReason) parts.push(`降级 ${metadata.fallbackReason}`)
+  return parts.join(' · ')
 }
 
 function summarizeDataStage(actions, observations) {

@@ -22,7 +22,6 @@ class AgentGoldenSetTest(unittest.TestCase):
             self.assertTrue(case["query"].strip())
             self.assertIsInstance(case["requiredActions"], list)
             self.assertIsInstance(case["forbiddenActions"], list)
-            self.assertIsInstance(case["expectedSecondaryIntents"], list)
             self.assertIsInstance(case["critical"], bool)
 
 

@@ -5,6 +5,5 @@ package com.stocksage.model.dto;
  */
 public enum PlannerEvalMode {
     DETERMINISTIC,
-    LIVE_COORDINATOR,
-    INTENT_SHADOW
+    LIVE_COORDINATOR
 }

@@ -1,6 +1,7 @@
 package com.stocksage.model.dto;
 
 import java.util.List;
+import java.util.Map;
 
 public record PlannerEvalResponse(
         String schemaVersion,
@@ -10,6 +11,8 @@ public record PlannerEvalResponse(
         int passedCases,
         int criticalFailures,
         double routeAccuracy,
+        double macroF1,
+        Map<String, RouteEvalMetrics> perRoute,
         double requiredActionRecall,
         double forbiddenActionRate,
         double executableRate,

@@ -73,16 +73,22 @@ public class Coordinator {
      * 向路由模型请求执行计划；如果模型、解析或网络任一环节失败，则回退到本地路由规则。
      */
     public ExecutionPlan plan(String userQuery, int ragHitCount) {
+        return plan(userQuery, ragHitCount, "");
+    }
+
+    /**
+     * Lets one small routing model select only the execution layer. The model
+     * never chooses tools, actions, agents, or concrete model names.
+     */
+    public ExecutionPlan plan(String userQuery, int ragHitCount, String ragSummary) {
         long startedNanos = System.nanoTime();
         try {
             String content = routingChatClient.prompt()
-                    .user("""
-                            用户问题：%s
-                            知识库命中数量：%d
-                            """.formatted(userQuery, ragHitCount))
+                    .user(buildRoutingPrompt(userQuery, ragHitCount, ragSummary))
                     .call()
                     .content();
-            return parsePlan(content, userQuery, ragHitCount, elapsedMillis(startedNanos));
+            RouteDecision decision = parseRouteDecision(content);
+            return buildPlan(decision, userQuery, ragHitCount, elapsedMillis(startedNanos));
         } catch (Exception e) {
             log.warn("Coordinator LLM routing failed, using deterministic fallback. errorType={}",
                     e.getClass().getSimpleName());
@@ -174,55 +180,41 @@ public class Coordinator {
     public record SelectedModel(ModelTier tier, String modelName) {
     }
 
-    /**
-     * 将模型返回的 JSON 归一化为稳定的执行计划。
-     * 必要动作会在这里重新补齐，因为模型输出可能遗漏关键的数据查询步骤。
-     */
-    private ExecutionPlan parsePlan(String content, String userQuery, int ragHitCount, long durationMs) throws Exception {
+    /** Parse the only three fields the routing model is allowed to produce. */
+    RouteDecision parseRouteDecision(String content) throws Exception {
         String json = extractJson(content);
         JsonNode root = objectMapper.readTree(json);
-        PlanRoute route = PlanRoute.normalize(root.path("route").asText("DIRECT"));
-        String taskType = root.path("taskType").asText(route.name());
+        String rawRoute = root.path("route").asText("DIRECT");
+        PlanRoute route = PlanRoute.normalize(rawRoute);
+        String intentSummary = root.path("intent").asText("");
         String rationale = root.path("rationale").asText("");
-        ModelTier suggestedTier = ModelTier.from(
-                root.path("modelTier").asText(""),
-                selectDefaultModelTier(route, userQuery, ragHitCount)
-        );
+        double confidence = root.path("confidence").asDouble(0.0);
+        return new RouteDecision(intentSummary, rawRoute, route, rationale, confidence);
+    }
 
-        List<PlanAction> actions = new ArrayList<>();
-        JsonNode actionsNode = root.path("actions");
-        if (actionsNode.isArray()) {
-            for (JsonNode action : actionsNode) {
-                String label = action.asText("");
-                if (label.isBlank()) {
-                    continue;
-                }
-                // 路由模型可能输出词表之外的动作名；丢弃并记录，避免把无法执行的步骤写进计划。
-                PlanAction.fromLabel(label).ifPresentOrElse(actions::add,
-                        () -> log.debug("Coordinator dropped unknown plan action from model output: {}", label));
-            }
-        }
-        if (route == PlanRoute.DEEP) {
-            // 深度研究使用固定的证据工作流；如果允许路由器局部改写，会让报告质量更难审计。
-            actions = defaultActions(route);
-        } else if (actions.isEmpty()) {
-            actions = defaultActions(route);
-        }
-        actions = ensureRequiredActions(route, actions);
-        if (!actions.contains(PlanAction.FINAL_ANSWER)) {
-            actions.add(PlanAction.FINAL_ANSWER);
-        }
-
-        ModelTier modelTier = normalizeModelTier(route, suggestedTier, userQuery, ragHitCount);
-        String thought = "Coordinator 路由：识别为「" + taskType + "」；" + rationale;
+    /** Convert a validated route into the server-owned fixed execution plan. */
+    private ExecutionPlan buildPlan(
+            RouteDecision decision,
+            String userQuery,
+            int ragHitCount,
+            long durationMs
+    ) {
+        PlanRoute route = decision.route();
+        String taskType = taskType(route);
+        List<PlanAction> actions = defaultActions(route);
+        ModelTier modelTier = selectDefaultModelTier(route, userQuery, ragHitCount);
+        String thought = "Coordinator 路由：理解为「" + decision.intentSummary()
+                + "」，选择「" + taskType + "」；" + decision.rationale();
         String observation = "分层路线：" + route + "；模型层级：" + modelTier + "；计划步骤："
                 + String.join(" -> ", actions.stream().map(PlanAction::label).toList());
         RoutingDecisionMetadata routingDecision = new RoutingDecisionMetadata(
-                RoutingDecisionSource.LEGACY_LLM,
-                route.name(),
-                List.of(),
+                RoutingDecisionSource.ROUTING_LLM,
+                decision.rawRoute(),
                 route,
-                List.of(),
+                decision.intentSummary(),
+                decision.rationale(),
+                decision.confidence(),
+                List.of(confidenceSignal(decision.confidence())),
                 ragHitCount,
                 "",
                 durationMs
@@ -259,13 +251,7 @@ public class Coordinator {
         }
 
         List<PlanAction> actions = defaultActions(route);
-        String taskType = switch (route) {
-            case MARKET -> "单点市场查询";
-            case FUNDAMENTALS -> "单点财报查询";
-            case DEEP -> "深度投资分析";
-            case NEWS -> "新闻与事件分析";
-            default -> "知识类问答";
-        };
+        String taskType = taskType(route);
         String thought = "Coordinator 路由：识别为「" + taskType + "」；使用规则兜底完成分流。";
         ModelTier modelTier = selectDefaultModelTier(route, query, ragHitCount);
         String observation = "分层路线：" + route + "；模型层级：" + modelTier + "；计划步骤："
@@ -278,8 +264,10 @@ public class Coordinator {
         RoutingDecisionMetadata routingDecision = new RoutingDecisionMetadata(
                 RoutingDecisionSource.DETERMINISTIC_FALLBACK,
                 route.name(),
-                List.of(),
                 route,
+                taskType,
+                "Matched deterministic fallback signals: " + String.join(", ", matchedSignals),
+                0.0,
                 matchedSignals,
                 ragHitCount,
                 fallbackReason,
@@ -301,14 +289,6 @@ public class Coordinator {
             case MARKET, FUNDAMENTALS, NEWS -> ModelTier.STANDARD;
             case DIRECT -> looksComplexDirectQuery(userQuery, ragHitCount) ? ModelTier.STANDARD : ModelTier.FAST;
         };
-    }
-
-    /**
-     * 对模型建议做最低层级保护，避免金融、新闻和深度研究误降级。
-     */
-    private ModelTier normalizeModelTier(PlanRoute route, ModelTier suggestedTier, String userQuery, int ragHitCount) {
-        ModelTier minimumTier = selectDefaultModelTier(route, userQuery, ragHitCount);
-        return ModelTier.max(suggestedTier, minimumTier);
     }
 
     /**
@@ -376,28 +356,39 @@ public class Coordinator {
         return new ArrayList<>(actions);
     }
 
-    /**
-     * 保留模型建议的顺序，同时确保最低限度的标的识别和数据检查先于最终回答执行。
-     */
-    private List<PlanAction> ensureRequiredActions(PlanRoute route, List<PlanAction> actions) {
-        List<PlanAction> result = new ArrayList<>(actions);
-        List<PlanAction> required = switch (route) {
-            case MARKET, NEWS -> List.of(PlanAction.SEARCH_STOCKS);
-            case FUNDAMENTALS -> List.of(PlanAction.SEARCH_STOCKS,
-                    PlanAction.GET_FINANCIAL_REPORTS, PlanAction.SEARCH_COMPANY_REPORTS);
-            default -> List.of();
+    private String taskType(PlanRoute route) {
+        return switch (route) {
+            case MARKET -> "单点市场查询";
+            case FUNDAMENTALS -> "单点财报查询";
+            case DEEP -> "深度投资分析";
+            case NEWS -> "新闻与事件分析";
+            default -> "知识类问答";
         };
-        int insertAt = result.indexOf(PlanAction.FINAL_ANSWER);
-        if (insertAt < 0) {
-            insertAt = result.size();
+    }
+
+    private String confidenceSignal(double confidence) {
+        if (confidence >= 0.8) {
+            return "confidence-high";
         }
-        for (PlanAction action : required) {
-            if (!result.contains(action)) {
-                result.add(insertAt, action);
-                insertAt++;
-            }
+        if (confidence >= 0.5) {
+            return "confidence-medium";
         }
-        return result;
+        return "confidence-low";
+    }
+
+    private String boundedRagSummary(String value) {
+        String summary = value == null ? "" : value.trim();
+        return summary.isBlank() ? "无相关检索结果" : summary.substring(0, Math.min(1600, summary.length()));
+    }
+
+    String buildRoutingPrompt(String userQuery, int ragHitCount, String ragSummary) {
+        return """
+                用户问题：%s
+                知识库命中数量：%d
+                知识库检索摘要：
+                %s
+                """.formatted(userQuery == null ? "" : userQuery, Math.max(0, ragHitCount),
+                boundedRagSummary(ragSummary));
     }
 
     /**

@@ -48,7 +48,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--mode",
-        choices=("DETERMINISTIC", "LIVE_COORDINATOR", "INTENT_SHADOW"),
+        choices=("DETERMINISTIC", "LIVE_COORDINATOR"),
         default="DETERMINISTIC",
     )
     parser.add_argument("--cases", type=Path, default=HERE / "agent_golden_set.jsonl")
@@ -56,6 +56,11 @@ def main() -> int:
     parser.add_argument("--baseline", type=Path)
     parser.add_argument("--rag", type=Path)
     parser.add_argument("--trace", type=Path)
+    parser.add_argument(
+        "--dialog",
+        type=Path,
+        help="Optional EchoMind-style end-to-end dialog/LLM-as-Judge report",
+    )
     parser.add_argument("--output", type=Path, default=HERE / "agent_eval_result.json")
     parser.add_argument("--admin-token")
     args = parser.parse_args()
@@ -68,6 +73,7 @@ def main() -> int:
             load_json(args.baseline) if args.baseline else None,
             load_json(args.rag) if args.rag else None,
             load_json(args.trace) if args.trace else None,
+            load_json(args.dialog) if args.dialog else None,
         )
         args.output.write_text(
             json.dumps(report, ensure_ascii=False, indent=2) + "\n",

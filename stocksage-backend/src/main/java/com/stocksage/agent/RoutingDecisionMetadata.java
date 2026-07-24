@@ -7,15 +7,17 @@ import java.util.Map;
 /**
  * Safe, structured routing metadata shared by traces, SSE and metrics.
  *
- * <p>The object deliberately contains only bounded enums, stable signal codes and
- * counts. User queries, model rationales and exception messages must not be stored
- * here.</p>
+ * <p>The object contains the selected route plus bounded diagnostic text from the
+ * router. It never stores the raw prompt, complete RAG chunks, user query, provider
+ * exception message, or hidden chain of thought.</p>
  */
 public record RoutingDecisionMetadata(
         RoutingDecisionSource decisionSource,
-        String primaryIntent,
-        List<String> secondaryIntents,
+        String rawRoute,
         PlanRoute route,
+        String intentSummary,
+        String rationale,
+        double confidence,
         List<String> matchedSignals,
         int ragHitCount,
         String fallbackReason,
@@ -23,9 +25,11 @@ public record RoutingDecisionMetadata(
 ) {
     public RoutingDecisionMetadata {
         decisionSource = decisionSource == null ? RoutingDecisionSource.DETERMINISTIC_FALLBACK : decisionSource;
+        rawRoute = bounded(rawRoute, 48);
         route = route == null ? PlanRoute.DIRECT : route;
-        primaryIntent = primaryIntent == null || primaryIntent.isBlank() ? route.name() : primaryIntent;
-        secondaryIntents = secondaryIntents == null ? List.of() : List.copyOf(secondaryIntents);
+        intentSummary = bounded(intentSummary, 160);
+        rationale = bounded(rationale, 240);
+        confidence = Math.max(0.0, Math.min(1.0, confidence));
         matchedSignals = matchedSignals == null ? List.of() : List.copyOf(matchedSignals);
         ragHitCount = Math.max(0, ragHitCount);
         fallbackReason = fallbackReason == null ? "" : fallbackReason;
@@ -44,14 +48,21 @@ public record RoutingDecisionMetadata(
         Map<String, Object> attributes = new LinkedHashMap<>();
         attributes.put("kind", "routing-decision");
         attributes.put("source", decisionSource.name());
-        attributes.put("primaryIntent", primaryIntent);
-        attributes.put("secondaryIntents", secondaryIntents);
+        attributes.put("rawRoute", rawRoute);
         attributes.put("route", route.name());
+        attributes.put("intentSummary", intentSummary);
+        attributes.put("rationale", rationale);
+        attributes.put("confidence", confidence);
         attributes.put("matchedSignals", matchedSignals);
         attributes.put("ragHitCount", ragHitCount);
         attributes.put("fallbackReason", fallbackReason);
         attributes.put("outcome", outcome());
         attributes.put("durationMs", durationMs);
         return Map.copyOf(attributes);
+    }
+
+    private static String bounded(String value, int maxLength) {
+        String normalized = value == null ? "" : value.replaceAll("\\s+", " ").trim();
+        return normalized.substring(0, Math.min(maxLength, normalized.length()));
     }
 }

@@ -93,10 +93,16 @@ public class PhoenixTraceService {
             return;
         }
         setStringAttribute(span, "stocksage.routing.source", step.getAttributes().get("source"));
-        setStringAttribute(span, "stocksage.routing.primary_intent", step.getAttributes().get("primaryIntent"));
+        setStringAttribute(span, "stocksage.routing.raw_route", step.getAttributes().get("rawRoute"));
         setStringAttribute(span, "stocksage.routing.route", step.getAttributes().get("route"));
+        setStringAttribute(span, "stocksage.routing.intent_summary", step.getAttributes().get("intentSummary"));
+        setStringAttribute(span, "stocksage.routing.rationale", step.getAttributes().get("rationale"));
         setStringAttribute(span, "stocksage.routing.outcome", step.getAttributes().get("outcome"));
         setStringAttribute(span, "stocksage.routing.fallback_reason", step.getAttributes().get("fallbackReason"));
+        Object confidence = step.getAttributes().get("confidence");
+        if (confidence instanceof Number number) {
+            span.setAttribute("stocksage.routing.confidence", number.doubleValue());
+        }
         Object ragHitCount = step.getAttributes().get("ragHitCount");
         if (ragHitCount instanceof Number number) {
             span.setAttribute("stocksage.routing.rag_hit_count", number.longValue());

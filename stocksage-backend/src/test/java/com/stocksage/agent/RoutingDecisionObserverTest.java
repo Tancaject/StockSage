@@ -18,8 +18,10 @@ class RoutingDecisionObserverTest {
         RoutingDecisionMetadata decision = new RoutingDecisionMetadata(
                 RoutingDecisionSource.DETERMINISTIC_FALLBACK,
                 "NEWS",
-                List.of(),
                 PlanRoute.NEWS,
+                "最新新闻查询",
+                "Matched deterministic fallback signals: news-rule",
+                0.0,
                 List.of("news-rule"),
                 2,
                 "ROUTING_LLM_FAILED",
