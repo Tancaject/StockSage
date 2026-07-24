@@ -1,0 +1,9 @@
+{
+  "route_accuracy_min": 0.95,
+  "required_action_recall_min": 0.98,
+  "forbidden_action_rate_max": 0.0,
+  "critical_failures_max": 0,
+  "executable_rate_min": 1.0,
+  "legacy_delta_max_drop": 0.02,
+  "p95_latency_ratio_max": 1.2
+}

@@ -24,13 +24,16 @@ public class SkillExecutionService {
     private final SkillResolver skillResolver;
     private final CapabilityGateway capabilityGateway;
     private final ChatStreamEmitter chatStreamEmitter;
+    private final SkillExecutionObserver executionObserver;
 
     public SkillExecutionService(SkillResolver skillResolver,
                                  CapabilityGateway capabilityGateway,
-                                 ChatStreamEmitter chatStreamEmitter) {
+                                 ChatStreamEmitter chatStreamEmitter,
+                                 SkillExecutionObserver executionObserver) {
         this.skillResolver = skillResolver;
         this.capabilityGateway = capabilityGateway;
         this.chatStreamEmitter = chatStreamEmitter;
+        this.executionObserver = executionObserver;
     }
 
     public ExecutionResult executePrefetch(ExecutionPlan executionPlan,
@@ -39,12 +42,15 @@ public class SkillExecutionService {
                                            String traceId,
                                            Long conversationId,
                                            String userId) {
+        long startedAt = System.nanoTime();
         Optional<SkillDefinition> resolved = skillResolver.resolve(executionPlan);
         if (resolved.isEmpty()) {
+            executionObserver.record("", SkillExecutionObserver.Outcome.LEGACY_PATH, elapsedMs(startedAt));
             return ExecutionResult.empty();
         }
         SkillDefinition skill = resolved.get();
         if (skill.executionMode() != SkillDefinition.ExecutionMode.INLINE_DETERMINISTIC) {
+            executionObserver.record(skill.id(), SkillExecutionObserver.Outcome.LEGACY_PATH, elapsedMs(startedAt));
             return ExecutionResult.empty();
         }
 
@@ -62,50 +68,61 @@ public class SkillExecutionService {
         EnumSet<PlanAction> handledActions = EnumSet.noneOf(PlanAction.class);
         int calls = 0;
         boolean fallbackUsed = false;
-        for (SkillDefinition.SkillStep step : skill.steps()) {
-            if (step.type() != SkillDefinition.StepType.CAPABILITY) {
-                continue;
-            }
-            calls = requireCallBudget(skill, calls + 1);
-            Map<String, Object> arguments = newsArguments(userQuery, maxSearchResults);
-            try {
-                CapabilityResult result = capabilityGateway.invoke(
-                        step.capability(), arguments, invocationContext);
-                appendEvidence(context, skill.id(), result, false);
-                markHandled(step.capability(), handledActions);
-            } catch (CapabilityException primaryError) {
-                if (primaryError.reason() == CapabilityException.Reason.DENIED
-                        || primaryError.reason() == CapabilityException.Reason.UNKNOWN) {
-                    throw primaryError;
+        try {
+            for (SkillDefinition.SkillStep step : skill.steps()) {
+                if (step.type() != SkillDefinition.StepType.CAPABILITY) {
+                    continue;
                 }
-                String fallbackCapability = clean(step.fallbackCapability());
-                if (!fallbackCapability.isBlank()) {
-                    calls = requireCallBudget(skill, calls + 1);
-                    emit(traceId, conversationId,
-                            "MCP 能力不可用，已降级到本地能力 " + fallbackCapability);
-                    try {
-                        CapabilityResult fallback = capabilityGateway.invoke(
-                                fallbackCapability, arguments, invocationContext);
-                        appendEvidence(context, skill.id(), fallback, true);
-                        markHandled(fallbackCapability, handledActions);
-                        fallbackUsed = true;
-                    } catch (CapabilityException fallbackError) {
-                        if (fallbackError.reason() == CapabilityException.Reason.DENIED
-                                || fallbackError.reason() == CapabilityException.Reason.UNKNOWN
-                                || step.required()) {
-                            throw fallbackError;
-                        }
-                        emit(traceId, conversationId,
-                                "本地降级能力暂不可用，继续使用原有 NEWS 执行路径");
+                calls = requireCallBudget(skill, calls + 1);
+                Map<String, Object> arguments = newsArguments(userQuery, maxSearchResults);
+                try {
+                    CapabilityResult result = capabilityGateway.invoke(
+                            step.capability(), arguments, invocationContext);
+                    appendEvidence(context, skill.id(), result, false);
+                    markHandled(step.capability(), handledActions);
+                } catch (CapabilityException primaryError) {
+                    if (primaryError.reason() == CapabilityException.Reason.DENIED
+                            || primaryError.reason() == CapabilityException.Reason.UNKNOWN) {
+                        throw primaryError;
                     }
-                } else if (step.required()) {
-                    throw primaryError;
-                } else {
-                    emit(traceId, conversationId,
-                            "可选能力 " + step.capability() + " 不可用，继续使用现有本地流程");
+                    String fallbackCapability = clean(step.fallbackCapability());
+                    if (!fallbackCapability.isBlank()) {
+                        calls = requireCallBudget(skill, calls + 1);
+                        emit(traceId, conversationId,
+                                "MCP 能力不可用，已降级到本地能力 " + fallbackCapability);
+                        try {
+                            CapabilityResult fallback = capabilityGateway.invoke(
+                                    fallbackCapability, arguments, invocationContext);
+                            appendEvidence(context, skill.id(), fallback, true);
+                            markHandled(fallbackCapability, handledActions);
+                            fallbackUsed = true;
+                        } catch (CapabilityException fallbackError) {
+                            if (fallbackError.reason() == CapabilityException.Reason.DENIED
+                                    || fallbackError.reason() == CapabilityException.Reason.UNKNOWN
+                                    || step.required()) {
+                                throw fallbackError;
+                            }
+                            emit(traceId, conversationId,
+                                    "本地降级能力暂不可用，继续使用原有 NEWS 执行路径");
+                        }
+                    } else if (step.required()) {
+                        throw primaryError;
+                    } else {
+                        emit(traceId, conversationId,
+                                "可选能力 " + step.capability() + " 不可用，继续使用现有本地流程");
+                    }
                 }
             }
+        } catch (RuntimeException error) {
+            executionObserver.record(skill.id(), SkillExecutionObserver.Outcome.FAILED, elapsedMs(startedAt));
+            throw error;
         }
+        SkillExecutionObserver.Outcome outcome = fallbackUsed
+                ? SkillExecutionObserver.Outcome.FALLBACK_SUCCESS
+                : context.isEmpty()
+                ? SkillExecutionObserver.Outcome.LEGACY_PATH
+                : SkillExecutionObserver.Outcome.SUCCESS;
+        executionObserver.record(skill.id(), outcome, elapsedMs(startedAt));
         return new ExecutionResult(
                 context.toString().trim(),
                 Set.copyOf(handledActions),
@@ -180,6 +197,10 @@ public class SkillExecutionService {
             return "";
         }
         return value.length() <= maxLength ? value : value.substring(0, maxLength) + "...";
+    }
+
+    private long elapsedMs(long startedAt) {
+        return java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt);
     }
 
     public record ExecutionResult(

@@ -739,6 +739,62 @@ export function summarizeRagEval(result, gates = DEFAULT_GATE_TARGETS) {
   }
 }
 
+export function summarizeAgentEval(result) {
+  const planner = result?.planner || {}
+  const gateRows = (result?.gates || []).map(gate => ({
+    metric: gate.metric,
+    label: readableMetricLabel(gate.metric),
+    value: numberOrNull(gate.value),
+    target: {
+      operator: gate.operator,
+      threshold: gate.threshold,
+    },
+    status: gate.status === 'passed' ? 'pass' : gate.status === 'failed' ? 'fail' : 'missing',
+  }))
+  const failedCases = (planner.results || [])
+    .filter(item => item.passed === false)
+    .map(item => ({
+      id: item.id,
+      category: `${item.expectedRoute || '--'} → ${item.actualRoute || '--'}`,
+      score: item.passed ? 1 : 0,
+      question: '',
+      answer: item.plannedActions?.join(', ') || '',
+      expectedAnswer: [
+        ...(item.missingRequiredActions || []).map(action => `missing ${action}`),
+        ...(item.matchedForbiddenActions || []).map(action => `forbidden ${action}`),
+      ].join(', '),
+      contexts: [],
+      citations: [],
+    }))
+    .slice(0, 20)
+
+  return {
+    kind: 'agent',
+    createdAt: result?.generated_at || '',
+    caseCount: Number(planner.total_cases || 0),
+    averages: {
+      context_recall: planner.route_accuracy,
+      citation_precision: planner.required_action_recall,
+    },
+    ragasMetrics: [],
+    gates: gateRows,
+    failedMetrics: gateRows.filter(row => row.status === 'fail'),
+    worstCases: failedCases,
+    status: result?.status === 'passed' ? 'pass' : 'fail',
+    optionalSections: {
+      rag: result?.rag?.status || 'completed',
+      trace: result?.trace?.status || 'completed',
+      baseline: result?.baseline_delta?.status || 'completed',
+    },
+  }
+}
+
+export function summarizeEvalResult(result) {
+  return result?.schema_version === 'agent_eval_v1'
+    ? summarizeAgentEval(result)
+    : { ...summarizeRagEval(result), kind: 'rag' }
+}
+
 export function summarizeHealthChecks(checks) {
   const required = checks.filter(check => check.required !== false)
   const requiredReady = required.filter(check => check.ok).length

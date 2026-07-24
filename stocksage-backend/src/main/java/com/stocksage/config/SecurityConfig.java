@@ -67,6 +67,7 @@ public class SecurityConfig {
                         .ignoringRequestMatchers(
                                 "/api/docs/**",
                                 "/api/eval/**",
+                                "/api/admin/**",
                                 "/api/memory/**",
                                 "/api/chat/regression/**",
                                 "/api/chat/test"
@@ -88,6 +89,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/docs/**",
                                 "/api/eval/**",
+                                "/api/admin/**",
                                 "/api/memory/**",
                                 "/api/chat/regression/**",
                                 "/api/chat/test"

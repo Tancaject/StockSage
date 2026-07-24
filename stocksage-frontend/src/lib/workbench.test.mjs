@@ -25,6 +25,8 @@ import {
   summarizeTaskTimeline,
   shortHash,
   summarizeHealthChecks,
+  summarizeAgentEval,
+  summarizeEvalResult,
   summarizeRagEval,
   summarizeReportVersions,
 } from './workbench.js'
@@ -137,6 +139,44 @@ test('summarizeRagEval exposes RAGAS metrics and failed case details', () => {
   assert.equal(summary.worstCases[0].question, 'What changed in AWS margins?')
   assert.equal(summary.worstCases[0].contexts[0].ticker, 'AMZN')
   assert.equal(summary.worstCases[0].citations[0].claim, 'AWS margin improved')
+})
+
+test('summarizeEvalResult imports agent_eval_v1 failures and optional sections', () => {
+  const summary = summarizeEvalResult({
+    schema_version: 'agent_eval_v1',
+    status: 'failed',
+    planner: {
+      total_cases: 2,
+      route_accuracy: 0.5,
+      required_action_recall: 0.8,
+      results: [{
+        id: 'case-1',
+        expectedRoute: 'NEWS',
+        actualRoute: 'MARKET',
+        passed: false,
+        plannedActions: ['MARKET_AGENT'],
+        missingRequiredActions: ['NEWS_AGENT'],
+        matchedForbiddenActions: [],
+      }],
+    },
+    rag: { status: 'not_run' },
+    trace: { status: 'not_run' },
+    baseline_delta: { status: 'completed' },
+    gates: [{
+      metric: 'route_accuracy',
+      value: 0.5,
+      operator: '>=',
+      threshold: 0.95,
+      status: 'failed',
+    }],
+  })
+
+  assert.equal(summary.kind, 'agent')
+  assert.equal(summary.status, 'fail')
+  assert.equal(summary.worstCases[0].id, 'case-1')
+  assert.match(summary.worstCases[0].expectedAnswer, /missing NEWS_AGENT/)
+  assert.equal(summary.optionalSections.rag, 'not_run')
+  assert.equal(summarizeAgentEval({ planner: {}, gates: [] }).kind, 'agent')
 })
 
 test('summarizeHealthChecks returns fail when any required service fails', () => {

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,7 @@ public class InvestmentReportVersionService {
 
     private final InvestmentReportVersionRepository repository;
     private final ObjectMapper objectMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public void prepareHashes(AnalysisState state) {
         if (state == null) {
@@ -119,6 +121,7 @@ public class InvestmentReportVersionService {
         if (existing.isPresent()) {
             InvestmentReport reused = toReport(existing.get(), true);
             state.setInvestmentReport(reused);
+            eventPublisher.publishEvent(new InvestmentReportPersistedEvent(existing.get(), reused));
             return new PersistedReportVersion(reused, existing.get().getId(), true);
         }
 
@@ -160,11 +163,13 @@ public class InvestmentReportVersionService {
             if (raced.isPresent()) {
                 InvestmentReport reused = toReport(raced.get(), true);
                 state.setInvestmentReport(reused);
+                eventPublisher.publishEvent(new InvestmentReportPersistedEvent(raced.get(), reused));
                 return new PersistedReportVersion(reused, raced.get().getId(), true);
             }
             throw e;
         }
         state.setInvestmentReport(report);
+        eventPublisher.publishEvent(new InvestmentReportPersistedEvent(entity, report));
         return new PersistedReportVersion(report, entity.getId(), false);
     }
 

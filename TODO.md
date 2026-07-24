@@ -288,36 +288,36 @@
 
 ### F2（P0）：独立的混合 LLM Intent Recognizer（先 shadow）
 
-- [ ] 新增 `IntentType`，首期覆盖：知识解释、行情、技术分析、基本面、新闻事件、比较研究、组合诊断、深度投研、未知
-- [ ] 新增 `IntentRecognitionRequest`：当前问题、最多 4 条近期上下文、RAG 命中数、是否有图片、已识别 ticker 候选
-- [ ] 新增 `IntentDecision`：主/次意图、实体、时间范围、是否需要新鲜数据/RAG/深度研究、建议 route、简短依据和模型自报 confidence
-- [ ] 新增 `IntentRecognitionService`，使用独立的 fast-model ChatClient 和严格结构化输出；先验证当前 Spring AI Alibaba 的实际 API，再决定是否使用 converter
-- [ ] Intent 专用配置与回答模型解耦：低温度、较小输出预算和明确超时；不复用当前全局 `0.7 / 4096 tokens`
-- [ ] 新增结果校验器：未知枚举、非法实体、空 route、越权动作和解析失败都进入确定性 fallback
-- [ ] 保留现有规则作为可用性和安全兜底，不再让关键词规则承担主语义识别
-- [ ] 增加 `stocksage.agent.intent.mode=LEGACY|SHADOW|ACTIVE`，默认先保持 `LEGACY`
-- [ ] `SHADOW` 模式只记录新旧意图与 route 差异，旧 Coordinator 仍是唯一执行结果；不得额外调用工具
-- [ ] 抽出确定性 `IntentPlanAssembler`：只把合法 Intent 映射到现有 `PlanRoute/PlanAction/ModelTier`
-- [ ] 复合意图通过次意图表达，Action 只能从现有白名单取并继续执行必要动作补全；DEEP 固定证据工作流不交给 LLM 改写
+- [x] 新增 `IntentType`，首期覆盖：知识解释、行情、技术分析、基本面、新闻事件、比较研究、组合诊断、深度投研、未知
+- [x] 新增 `IntentRecognitionRequest`：当前问题、最多 4 条近期上下文、RAG 命中数、是否有图片、已识别 ticker 候选
+- [x] 新增 `IntentDecision`：主/次意图、实体、时间范围、是否需要新鲜数据/RAG/深度研究、建议 route、简短依据和模型自报 confidence
+- [x] 新增 `IntentRecognitionService`，使用独立的 fast-model ChatClient 和严格结构化输出；先验证当前 Spring AI Alibaba 的实际 API，再决定是否使用 converter
+- [x] Intent 专用配置与回答模型解耦：低温度、较小输出预算和明确超时；不复用当前全局 `0.7 / 4096 tokens`
+- [x] 新增结果校验器：未知枚举、非法实体、空 route、越权动作和解析失败都进入确定性 fallback
+- [x] 保留现有规则作为可用性和安全兜底，不再让关键词规则承担主语义识别
+- [x] 增加 `stocksage.agent.intent.mode=LEGACY|SHADOW|ACTIVE`，默认先保持 `LEGACY`
+- [x] `SHADOW` 模式只记录新旧意图与 route 差异，旧 Coordinator 仍是唯一执行结果；不得额外调用工具
+- [x] 抽出确定性 `IntentPlanAssembler`：只把合法 Intent 映射到现有 `PlanRoute/PlanAction/ModelTier`
+- [x] 复合意图通过次意图表达，Action 只能从现有白名单取并继续执行必要动作补全；DEEP 固定证据工作流不交给 LLM 改写
 
 验收：
 
-- [ ] 模型超时、空响应、围栏 JSON、未知枚举和网络异常均能稳定 fallback
-- [ ] “分析 NVDA 最新财报以及市场反应”等复合问题能同时识别基本面与新闻意图
-- [ ] “那它最新一季呢”等追问能利用受限近期上下文恢复意图，但不会读取其他用户会话
-- [ ] SHADOW 开关关闭后不产生第二次路由模型调用；切回 LEGACY 不影响聊天、RAG 或工具链
+- [x] 模型超时、空响应、围栏 JSON、未知枚举和网络异常均能稳定 fallback
+- [x] “分析 NVDA 最新财报以及市场反应”等复合问题能同时识别基本面与新闻意图
+- [x] “那它最新一季呢”等追问能利用受限近期上下文恢复意图，但不会读取其他用户会话
+- [x] SHADOW 开关关闭后不产生第二次路由模型调用；切回 LEGACY 不影响聊天、RAG 或工具链
 
 ### F3（P0）：统一 Agent Eval、基线和切换门禁
 
-- [ ] 新增 typed `PlannerEvalCase/Request/Result/Response`，断言使用 `PlanRoute/PlanAction`，不再比较展示文案
-- [ ] 新增 `POST /api/eval/agent/planner`，支持 `DETERMINISTIC / LIVE_COORDINATOR / INTENT_SHADOW`
-- [ ] 让现有 4 条 `CoordinatorRegressionService` 用例委托给 typed evaluator；保留旧 `/api/chat/regression/**` 兼容入口
-- [ ] 新建 `rag-eval/agent_golden_set.jsonl`，至少 100 例，覆盖五条现有 route、复合意图、上下文追问、中英混合、模糊请求、无 ticker 和 prompt injection
-- [ ] 每例保存：期望主/次意图、route、requiredActions、forbiddenActions、是否 critical；不得收录真实用户隐私
-- [ ] 新增 `run_agent_eval.py / agent_eval_summary.py / agent_eval_gates.json`，统一输出 `agent_eval_v1`
-- [ ] 统一报告聚合 Planner、既有 RAG、可选 Trace 完整性、延迟和基线 delta；未运行的分区必须标为 `not_run`
-- [ ] `EvalDesk` 兼容导入旧 RAG JSON 和新统一报告，展示失败用例、缺失/多余 Action 与基线变化
-- [ ] LLM Judge 只作补充指标，不作为唯一质量门禁
+- [x] 新增 typed `PlannerEvalCase/Request/Result/Response`，断言使用 `PlanRoute/PlanAction`，不再比较展示文案
+- [x] 新增 `POST /api/eval/agent/planner`，支持 `DETERMINISTIC / LIVE_COORDINATOR / INTENT_SHADOW`（F2 落地前 `INTENT_SHADOW` 明确返回 `not_run`）
+- [x] 让现有 4 条 `CoordinatorRegressionService` 用例委托给 typed evaluator；保留旧 `/api/chat/regression/**` 兼容入口
+- [x] 新建 `rag-eval/agent_golden_set.jsonl`，至少 100 例，覆盖五条现有 route、复合意图、上下文追问、中英混合、模糊请求、无 ticker 和 prompt injection
+- [x] 每例保存：期望主/次意图、route、requiredActions、forbiddenActions、是否 critical；不得收录真实用户隐私
+- [x] 新增 `run_agent_eval.py / agent_eval_summary.py / agent_eval_gates.json`，统一输出 `agent_eval_v1`
+- [x] 统一报告聚合 Planner、既有 RAG、可选 Trace 完整性、延迟和基线 delta；未运行的分区必须标为 `not_run`
+- [x] `EvalDesk` 兼容导入旧 RAG JSON 和新统一报告，展示失败用例、缺失/多余 Action 与基线变化
+- [x] LLM Judge 只作补充指标，不作为唯一质量门禁
 
 Intent 从 SHADOW 切换到 ACTIVE 的首期门禁：
 
@@ -332,15 +332,15 @@ Intent 从 SHADOW 切换到 ACTIVE 的首期门禁：
 
 ### F4（P0–P1）：只读 Skill / Capability / MCP 管理与监控
 
-- [ ] 新增 `GET /api/admin/agent/skills`：展示 id/version/routes/mode/model tier/policy/steps/fallback 链和当前默认关系
-- [ ] 新增 `GET /api/admin/agent/runtime`：展示脱敏 Capability、MCP、Skill 当前进程状态和稳定错误码
-- [ ] `/api/admin/**` 同步接入 `SecurityConfig` 与 `AdminApiInterceptor`；无 Admin Token 返回 403
-- [ ] MCP 状态只返回 `DISABLED/UNCONFIGURED/READY/DEGRADED`、approved tool 数和协议版本；不返回 URL、token、原始参数或完整 tool schema
-- [ ] 新增 `SkillExecutionObserver`，记录 `SUCCESS/FALLBACK_SUCCESS/LEGACY_PATH/FAILED`、调用数、fallback 数和耗时
-- [ ] Capability Timer 启用可用的 percentile/histogram，再展示 P95；无样本显示 `NO_DATA`，不能显示为 0% 成功率
-- [ ] 在 `EvalDesk` 增加 Skills 与 Capabilities/MCP 开发者面板；Admin Token 只保存在当前页面内存
-- [ ] MCP 关闭显示“已关闭”而非系统故障，管理接口不得为了刷新状态主动调用外部工具
-- [ ] V1 不做 Skill 在线编辑、启停、上传、热更新、任意 MCP URL 注册或基于延迟自动修改语义 route
+- [x] 新增 `GET /api/admin/agent/skills`：展示 id/version/routes/mode/model tier/policy/steps/fallback 链和当前默认关系
+- [x] 新增 `GET /api/admin/agent/runtime`：展示脱敏 Capability、MCP、Skill 当前进程状态和稳定错误码
+- [x] `/api/admin/**` 同步接入 `SecurityConfig` 与 `AdminApiInterceptor`；无 Admin Token 返回 403
+- [x] MCP 状态只返回 `DISABLED/UNCONFIGURED/READY/DEGRADED`、approved tool 数和协议版本；不返回 URL、token、原始参数或完整 tool schema
+- [x] 新增 `SkillExecutionObserver`，记录 `SUCCESS/FALLBACK_SUCCESS/LEGACY_PATH/FAILED`、调用数、fallback 数和耗时
+- [x] Capability Timer 启用可用的 percentile/histogram，再展示 P95；无样本显示 `NO_DATA`，不能显示为 0% 成功率
+- [x] 在 `EvalDesk` 增加 Skills 与 Capabilities/MCP 开发者面板；Admin Token 只保存在当前页面内存
+- [x] MCP 关闭显示“已关闭”而非系统故障，管理接口不得为了刷新状态主动调用外部工具
+- [x] V1 不做 Skill 在线编辑、启停、上传、热更新、任意 MCP URL 注册或基于延迟自动修改语义 route
 - [ ] V1 稳定后再评估“完整候选集校验 -> 原子切换 -> 审计记录”的热更新
 
 验收：
@@ -352,21 +352,21 @@ Intent 从 SHADOW 切换到 ACTIVE 的首期门禁：
 
 ### F5（P1）：有来源的跨会话研究结论记忆
 
-- [ ] 建立独立 `ResearchMemoryEntry` 域，不复用 `LongTermMemory` 用户画像，也不写入全局 `stocksage_docs`
-- [ ] 首期唯一允许来源是已持久化的 `InvestmentReportVersion`，且至少含 citation 或非空 `EvidenceItem.source`
-- [ ] 排除普通聊天回答、短期摘要、画像摘要和 `DEMO/offline-rule-fallback` 报告
-- [ ] Agent 不获得“写记忆”工具；报告持久化成功后由后端事件确定性生成 memory text
-- [ ] MySQL 保存真值和审计字段：用户、ticker、来源报告/会话/trace、来源引用、数据截止时间、snapshot/content hash、向量状态
-- [ ] 唯一约束使用 `user_id + source_type + source_id`，保证重复事件幂等
-- [ ] 使用独立 Milvus collection `stocksage_user_research_memory_v1`；关系表是真值，向量索引必须可重建
-- [ ] Milvus metadata 强制 tenant filter，可叠加 ticker；不得把原始 userId 拼入可注入 filter 表达式
-- [ ] 遵守 embedding 每批最多 10 条；模型或维度变化时新建版本化 collection，不原地混写
-- [ ] 写向量失败不得影响报告保存；使用 `PENDING/INDEXED/FAILED/REVOKED` 和补偿任务恢复
-- [ ] 检索 Top 3、总注入不超过 2400 字符；先以 shadow retrieval 只写 Trace，不进入 Prompt
-- [ ] 正式注入时使用独立 `[M1]` 引用，并标记为“可能过期的历史研究证据”；当前 RAG/工具数据冲突时必须以当前证据为准
-- [ ] Trace 只记录 memory entry id、ticker、score、age 和 source 数量，不记录私人记忆正文
-- [ ] 新增用户自主管理接口：只读列表和撤销/删除；用户身份只能来自 `RequestIdentity`
-- [ ] 使用四个独立止损开关：`capture/index/retrieve/inject`，默认全部关闭并按顺序灰度
+- [x] 建立独立 `ResearchMemoryEntry` 域，不复用 `LongTermMemory` 用户画像，也不写入全局 `stocksage_docs`
+- [x] 首期唯一允许来源是已持久化的 `InvestmentReportVersion`，且至少含 citation 或非空 `EvidenceItem.source`
+- [x] 排除普通聊天回答、短期摘要、画像摘要和 `DEMO/offline-rule-fallback` 报告
+- [x] Agent 不获得“写记忆”工具；报告持久化成功后由后端事件确定性生成 memory text
+- [x] MySQL 保存真值和审计字段：用户、ticker、来源报告/会话/trace、来源引用、数据截止时间、snapshot/content hash、向量状态
+- [x] 唯一约束使用 `user_id + source_type + source_id`，保证重复事件幂等
+- [x] 使用独立 Milvus collection `stocksage_user_research_memory_v1`；关系表是真值，向量索引必须可重建
+- [x] Milvus metadata 强制 tenant filter，可叠加 ticker；不得把原始 userId 拼入可注入 filter 表达式
+- [x] 遵守 embedding 每批最多 10 条；模型或维度变化时新建版本化 collection，不原地混写
+- [x] 写向量失败不得影响报告保存；使用 `PENDING/INDEXED/FAILED/REVOKED` 和补偿任务恢复
+- [x] 检索 Top 3、总注入不超过 2400 字符；先以 shadow retrieval 只写 Trace，不进入 Prompt
+- [x] 正式注入时使用独立 `[M1]` 引用，并标记为“可能过期的历史研究证据”；当前 RAG/工具数据冲突时必须以当前证据为准
+- [x] Trace 只记录 memory entry id、ticker、score、age 和 source 数量，不记录私人记忆正文
+- [x] 新增用户自主管理接口：只读列表和撤销/删除；用户身份只能来自 `RequestIdentity`
+- [x] 使用四个独立止损开关：`capture/index/retrieve/inject`，默认全部关闭并按顺序灰度
 
 验收：
 
@@ -382,14 +382,14 @@ Intent 从 SHADOW 切换到 ACTIVE 的首期门禁：
 
 ### 阶段 F 推荐提交顺序
 
-1. [ ] `F0` 路由契约修复
+1. [x] `F0` 路由契约修复
 2. [x] `F1` 决策元数据、Trace 与指标
-3. [ ] `F3` typed Planner Eval API 和 golden set 骨架
-4. [ ] `F2` Intent Recognizer + SHADOW
-5. [ ] `F3` 统一报告、基线比较和 ACTIVE 门禁
-6. [ ] `F4` Skill/Capability 只读 API、指标与前端
-7. [ ] `F5` 研究记忆 capture/index
-8. [ ] `F5` shadow retrieval、评测、用户管理和受控注入
+3. [x] `F3` typed Planner Eval API 和 golden set 骨架
+4. [x] `F2` Intent Recognizer + SHADOW
+5. [x] `F3` 统一报告、基线比较和 ACTIVE 门禁
+6. [x] `F4` Skill/Capability 只读 API、指标与前端
+7. [x] `F5` 研究记忆 capture/index
+8. [~] `F5` shadow retrieval、评测、用户管理和受控注入（代码完成；live Milvus golden-set 门禁待运行）
 
 每个提交必须满足：
 

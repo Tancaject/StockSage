@@ -1,0 +1,23 @@
+CREATE TABLE research_memory_entries (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    user_id VARCHAR(32) NOT NULL,
+    ticker VARCHAR(32) NOT NULL,
+    source_type VARCHAR(32) NOT NULL,
+    source_id VARCHAR(64) NOT NULL,
+    source_conversation_id BIGINT NULL,
+    source_trace_id VARCHAR(64) NULL,
+    source_citations JSON NOT NULL,
+    data_cutoff_at DATETIME NULL,
+    snapshot_hash VARCHAR(64) NOT NULL,
+    content_hash VARCHAR(64) NOT NULL,
+    memory_text TEXT NOT NULL,
+    vector_status VARCHAR(16) NOT NULL,
+    vector_error_code VARCHAR(64) NULL,
+    revoked_at DATETIME NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_research_memory_source UNIQUE (user_id, source_type, source_id),
+    INDEX idx_research_memory_user_created (user_id, created_at),
+    INDEX idx_research_memory_user_ticker_status (user_id, ticker, vector_status)
+);

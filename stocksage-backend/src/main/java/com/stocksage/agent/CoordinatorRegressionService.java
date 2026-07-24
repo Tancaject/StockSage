@@ -2,8 +2,13 @@ package com.stocksage.agent;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.stocksage.model.dto.PlannerEvalCase;
+import com.stocksage.model.dto.PlannerEvalMode;
+import com.stocksage.model.dto.PlannerEvalRequest;
+import com.stocksage.model.dto.PlannerEvalResponse;
+import com.stocksage.model.dto.PlannerEvalResult;
+import com.stocksage.service.PlannerEvalService;
 
-import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CoordinatorRegressionService {
 
-    private final Coordinator coordinator;
+    private final PlannerEvalService plannerEvalService;
 
     /**
      * 运行默认 Coordinator 路由回归用例。
@@ -25,17 +30,19 @@ public class CoordinatorRegressionService {
      * <p>该检查只调用确定性规划方法，不触发模型、网络或外部工具，适合作为开发期快速烟测。</p>
      */
     public Map<String, Object> runDefaultRegression() {
-        long startedAt = System.currentTimeMillis();
-        List<Map<String, Object>> cases = regressionCases().stream()
-                .map(this::runCase)
+        List<PlannerEvalCase> regressionCases = regressionCases();
+        PlannerEvalResponse response = plannerEvalService.evaluate(
+                new PlannerEvalRequest(PlannerEvalMode.DETERMINISTIC, regressionCases)
+        );
+        List<Map<String, Object>> cases = java.util.stream.IntStream.range(0, regressionCases.size())
+                .mapToObj(index -> toLegacyCase(regressionCases.get(index), response.results().get(index)))
                 .toList();
-        boolean passed = cases.stream().allMatch(item -> Boolean.TRUE.equals(item.get("passed")));
 
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("status", passed ? "passed" : "failed");
+        result.put("status", response.status());
         result.put("cases", cases);
-        result.put("durationMs", System.currentTimeMillis() - startedAt);
-        result.put("checkedAt", LocalDateTime.now().toString());
+        result.put("durationMs", response.durationMs());
+        result.put("checkedAt", response.checkedAt());
         return result;
     }
 
@@ -44,65 +51,62 @@ public class CoordinatorRegressionService {
      *
      * <p>判定逻辑只要求计划动作包含期望动作，允许 Coordinator 额外添加最终回答等辅助步骤。</p>
      */
-    private Map<String, Object> runCase(RegressionCase regressionCase) {
-        ExecutionPlan plan = coordinator.planDeterministically(regressionCase.query(), regressionCase.ragHitCount());
-        boolean passed = plan.actionLabels().containsAll(regressionCase.expectedActions());
-
+    private Map<String, Object> toLegacyCase(PlannerEvalCase evalCase, PlannerEvalResult evalResult) {
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("name", regressionCase.name());
-        result.put("query", regressionCase.query());
-        result.put("route", plan.route());
-        result.put("taskType", plan.taskType());
-        result.put("modelTier", plan.modelTier());
-        result.put("expectedActions", regressionCase.expectedActions());
-        result.put("plannedActions", plan.actionLabels());
-        result.put("passed", passed);
+        result.put("name", evalCase.id());
+        result.put("query", evalCase.query());
+        result.put("route", evalResult.actualRoute());
+        result.put("expectedActions", evalCase.requiredActions().stream().map(PlanAction::label).toList());
+        result.put("plannedActions", evalResult.plannedActions().stream().map(PlanAction::label).toList());
+        result.put("passed", evalResult.passed());
         return result;
     }
 
     /**
      * 定义覆盖知识直答、行情查询、财报摄取和深度研究的基础路由样例。
      */
-    private List<RegressionCase> regressionCases() {
+    private List<PlannerEvalCase> regressionCases() {
         return List.of(
-                new RegressionCase(
+                new PlannerEvalCase(
                         "direct_knowledge",
                         "什么是市盈率？",
                         1,
-                        List.of("Knowledge Retrieval", "Final Answer")
+                        PlanRoute.DIRECT,
+                        List.of(PlanAction.KNOWLEDGE_RETRIEVAL, PlanAction.FINAL_ANSWER),
+                        List.of(PlanAction.BULL_RESEARCHER, PlanAction.BEAR_RESEARCHER),
+                        true
                 ),
-                new RegressionCase(
+                new PlannerEvalCase(
                         "market_query",
                         "NVDA 最近 K 线走势如何？",
                         0,
-                        List.of("Market Agent", "getStockKLine", "Final Answer")
+                        PlanRoute.MARKET,
+                        List.of(PlanAction.MARKET_AGENT, PlanAction.GET_STOCK_KLINE, PlanAction.FINAL_ANSWER),
+                        List.of(PlanAction.BULL_RESEARCHER, PlanAction.BEAR_RESEARCHER),
+                        true
                 ),
-                new RegressionCase(
+                new PlannerEvalCase(
                         "fundamentals_filing",
                         "苹果的风险因素有哪些？",
                         0,
-                        // 注意：FUNDAMENTALS 路由的默认计划早已从 ingestCompanyFilings 演进为
-                        // searchCompanyReports + getFinancialReports；旧期望使该用例长期 failed。
-                        List.of("Fundamentals Agent", "searchCompanyReports", "getFinancialReports",
-                                "Knowledge Retrieval", "Final Answer")
+                        PlanRoute.FUNDAMENTALS,
+                        List.of(PlanAction.FUNDAMENTALS_AGENT, PlanAction.SEARCH_COMPANY_REPORTS,
+                                PlanAction.GET_FINANCIAL_REPORTS, PlanAction.KNOWLEDGE_RETRIEVAL,
+                                PlanAction.FINAL_ANSWER),
+                        List.of(PlanAction.BULL_RESEARCHER, PlanAction.BEAR_RESEARCHER),
+                        true
                 ),
-                new RegressionCase(
+                new PlannerEvalCase(
                         "deep_analysis",
                         "苹果值不值得长期投资？",
                         0,
-                        List.of("Fundamentals Agent", "Market Agent", "News Agent", "Bull Researcher", "Bear Researcher", "Research Manager", "Final Answer")
+                        PlanRoute.DEEP,
+                        List.of(PlanAction.FUNDAMENTALS_AGENT, PlanAction.MARKET_AGENT, PlanAction.NEWS_AGENT,
+                                PlanAction.BULL_RESEARCHER, PlanAction.BEAR_RESEARCHER,
+                                PlanAction.RESEARCH_MANAGER, PlanAction.FINAL_ANSWER),
+                        List.of(),
+                        true
                 )
         );
-    }
-
-    /**
-     * 单条确定性路由回归用例。
-     *
-     * @param name 用例名称
-     * @param query 用户问题
-     * @param ragHitCount 预设 RAG 命中数量
-     * @param expectedActions 期望规划中包含的动作名称
-     */
-    private record RegressionCase(String name, String query, int ragHitCount, List<String> expectedActions) {
     }
 }

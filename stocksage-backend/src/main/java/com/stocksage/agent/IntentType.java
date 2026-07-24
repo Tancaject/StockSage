@@ -1,0 +1,13 @@
+package com.stocksage.agent;
+
+public enum IntentType {
+    KNOWLEDGE_EXPLANATION,
+    MARKET_DATA,
+    TECHNICAL_ANALYSIS,
+    FUNDAMENTALS,
+    NEWS_EVENT,
+    COMPARISON,
+    PORTFOLIO_DIAGNOSIS,
+    DEEP_RESEARCH,
+    UNKNOWN
+}

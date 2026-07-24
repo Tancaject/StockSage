@@ -58,6 +58,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns(
                         "/api/docs/**",
                         "/api/eval/**",
+                        "/api/admin/**",
                         "/api/memory/**",
                         "/api/chat/regression/**",
                         "/api/chat/test"

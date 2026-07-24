@@ -16,7 +16,7 @@
           <div class="panel-header">
             <div>
               <span class="panel-kicker">质量门禁</span>
-              <h2>RAG 评估</h2>
+              <h2>{{ evalSummary.kind === 'agent' ? 'Agent 评估' : 'RAG 评估' }}</h2>
             </div>
             <label class="file-button">
               <input type="file" accept="application/json,.json" @change="importEvalResult" />
@@ -35,13 +35,19 @@
               <strong>{{ evalSummary.caseCount }}</strong>
             </div>
             <div>
-              <span>召回</span>
+              <span>{{ evalSummary.kind === 'agent' ? '路由准确率' : '召回' }}</span>
               <strong>{{ formatMetric(evalSummary.averages.context_recall) }}</strong>
             </div>
             <div>
-              <span>引用</span>
+              <span>{{ evalSummary.kind === 'agent' ? '动作召回率' : '引用' }}</span>
               <strong>{{ formatMetric(evalSummary.averages.citation_precision) }}</strong>
             </div>
+          </div>
+
+          <div v-if="evalSummary.optionalSections" class="optional-strip">
+            <span>RAG: {{ evalSummary.optionalSections.rag }}</span>
+            <span>Trace: {{ evalSummary.optionalSections.trace }}</span>
+            <span>Baseline: {{ evalSummary.optionalSections.baseline }}</span>
           </div>
 
           <div class="gate-list">
@@ -96,6 +102,90 @@
           </div>
         </div>
       </section>
+
+      <section class="admin-section">
+        <div class="panel admin-toolbar">
+          <div>
+            <span class="panel-kicker">只读运行时</span>
+            <h2>Skills / Capabilities / MCP</h2>
+            <p>Admin Token 仅保存在当前页面内存，刷新即清除。</p>
+          </div>
+          <div class="admin-controls">
+            <input
+              v-model="adminToken"
+              type="password"
+              autocomplete="off"
+              placeholder="Admin Token"
+              @keyup.enter="loadAdminSnapshot"
+            />
+            <button class="quiet-button" :disabled="adminLoading" @click="loadAdminSnapshot">
+              {{ adminLoading ? '加载中…' : '刷新状态' }}
+            </button>
+          </div>
+          <p v-if="adminState.message" class="admin-message" :class="adminState.status">
+            {{ adminState.message }}
+          </p>
+        </div>
+
+        <div v-if="adminSnapshot" class="workspace-grid runtime-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <span class="panel-kicker">Skills</span>
+                <h2>已注册工作流</h2>
+              </div>
+            </div>
+            <div class="case-list">
+              <div v-for="skill in adminSnapshot.skills.skills" :key="skill.id" class="runtime-row">
+                <div>
+                  <strong>{{ skill.displayName }}</strong>
+                  <small>{{ skill.id }} · v{{ skill.version }} · {{ skill.executionMode }}</small>
+                </div>
+                <span>{{ skill.routes.join(', ') }}</span>
+                <p>
+                  默认：{{ skill.currentDefault ? '是' : '否' }} · Tier：{{ skill.minimumModelTier }}
+                  · Fallback：{{ skill.fallbackSkillIds.join(' → ') || '无' }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <span class="panel-kicker">Runtime</span>
+                <h2>Capabilities / MCP</h2>
+              </div>
+              <strong class="runtime-badge" :class="adminSnapshot.runtime.mcp.state.toLowerCase()">
+                {{ mcpStateLabel(adminSnapshot.runtime.mcp.state) }}
+              </strong>
+            </div>
+            <p class="runtime-note">
+              approved tools {{ adminSnapshot.runtime.mcp.approvedToolCount }}
+              · protocol {{ adminSnapshot.runtime.mcp.protocolVersions.join(', ') || '--' }}
+              · {{ adminSnapshot.runtime.mcp.errorCode || 'READY' }}
+            </p>
+            <div class="case-list">
+              <div
+                v-for="capability in adminSnapshot.runtime.capabilities"
+                :key="capability.id"
+                class="runtime-row"
+              >
+                <div>
+                  <strong>{{ capability.id }}</strong>
+                  <small>{{ capability.providerType }} · {{ capability.riskLevel }}</small>
+                </div>
+                <span>{{ capability.metricsStatus }}</span>
+                <p>
+                  calls {{ capability.calls }}
+                  · success {{ formatRate(capability.successRate) }}
+                  · P95 {{ formatDuration(capability.p95DurationMs) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 </template>
@@ -105,11 +195,16 @@ import { computed, ref } from 'vue'
 import { Upload } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { RECENT_RAG_EVAL_SNAPSHOT } from '../data/ragEvalSnapshot.js'
-import { summarizeRagEval } from '../lib/workbench.js'
+import { fetchAgentAdminSnapshot } from '../api/agentAdmin.js'
+import { summarizeEvalResult } from '../lib/workbench.js'
 
 const importedEvalResult = ref(null)
+const adminToken = ref('')
+const adminSnapshot = ref(null)
+const adminLoading = ref(false)
+const adminState = ref({ status: 'idle', message: '' })
 
-const evalSummary = computed(() => summarizeRagEval(importedEvalResult.value || RECENT_RAG_EVAL_SNAPSHOT))
+const evalSummary = computed(() => summarizeEvalResult(importedEvalResult.value || RECENT_RAG_EVAL_SNAPSHOT))
 
 async function importEvalResult(event) {
   const file = event.target.files?.[0]
@@ -129,6 +224,42 @@ function formatMetric(value) {
   if (!Number.isFinite(number)) return '--'
   if (Math.abs(number) <= 1) return number.toFixed(3)
   return number.toFixed(1)
+}
+
+async function loadAdminSnapshot() {
+  if (!adminToken.value) {
+    adminState.value = { status: 'forbidden', message: '请输入 Admin Token。' }
+    return
+  }
+  adminLoading.value = true
+  try {
+    adminSnapshot.value = await fetchAgentAdminSnapshot(adminToken.value)
+    adminState.value = { status: 'ready', message: '只读运行时快照已更新。' }
+  } catch (error) {
+    adminSnapshot.value = null
+    adminState.value = error.status === 403
+      ? { status: 'forbidden', message: 'Admin Token 无效或缺失（403）。' }
+      : { status: 'unavailable', message: `后端状态不可用：${error.message}` }
+  } finally {
+    adminLoading.value = false
+  }
+}
+
+function mcpStateLabel(state) {
+  return {
+    DISABLED: '已关闭',
+    UNCONFIGURED: '未配置',
+    READY: '就绪',
+    DEGRADED: '已降级',
+  }[state] || state
+}
+
+function formatRate(value) {
+  return value === null || value === undefined ? 'NO_DATA' : `${(Number(value) * 100).toFixed(1)}%`
+}
+
+function formatDuration(value) {
+  return value === null || value === undefined ? 'NO_DATA' : `${Number(value).toFixed(1)}ms`
 }
 </script>
 
@@ -219,7 +350,7 @@ function formatMetric(value) {
 .eval-main {
   min-height: 0;
   flex: 1;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .workspace-grid {
@@ -228,12 +359,115 @@ function formatMetric(value) {
   display: grid;
   gap: 14px;
   padding: 18px;
-  overflow: auto;
 }
 
 .eval-grid {
   grid-template-columns: minmax(320px, 0.86fr) minmax(420px, 1.14fr);
   align-items: start;
+}
+
+.admin-section {
+  padding: 0 18px 18px;
+}
+
+.admin-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-toolbar p,
+.runtime-note {
+  margin: 5px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.admin-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-controls input {
+  width: 220px;
+  min-height: 38px;
+  padding: 0 11px;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.admin-message {
+  grid-column: 1 / -1;
+}
+
+.admin-message.ready {
+  color: var(--positive);
+}
+
+.admin-message.forbidden,
+.admin-message.unavailable {
+  color: var(--negative);
+}
+
+.runtime-grid {
+  height: auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 14px 0 0;
+}
+
+.runtime-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 10px;
+  padding: 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.runtime-row div {
+  min-width: 0;
+}
+
+.runtime-row strong,
+.runtime-row small {
+  display: block;
+}
+
+.runtime-row small,
+.runtime-row span,
+.runtime-row p {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.runtime-row p {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.runtime-badge {
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.runtime-badge.ready {
+  color: var(--positive);
+  background: rgba(32, 128, 88, 0.1);
+}
+
+.runtime-badge.disabled,
+.runtime-badge.unconfigured {
+  color: var(--text-muted);
+  background: rgba(93, 108, 101, 0.1);
+}
+
+.runtime-badge.degraded {
+  color: var(--negative);
+  background: rgba(180, 64, 48, 0.1);
 }
 
 .panel {
@@ -318,6 +552,22 @@ function formatMetric(value) {
   margin-top: 16px;
 }
 
+.optional-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.optional-strip span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--border-soft);
+}
+
 .gate-list.compact {
   margin-top: 8px;
 }
@@ -375,7 +625,8 @@ function formatMetric(value) {
 }
 
 @media (max-width: 1080px) {
-  .eval-grid {
+  .eval-grid,
+  .runtime-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -391,6 +642,18 @@ function formatMetric(value) {
 
   .panel {
     padding: 12px;
+  }
+
+  .admin-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-controls {
+    flex-direction: column;
+  }
+
+  .admin-controls input {
+    width: 100%;
   }
 }
 </style>

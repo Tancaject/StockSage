@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.AgentStep;
 import com.stocksage.agent.Coordinator;
 import com.stocksage.agent.ExecutionPlan;
+import com.stocksage.agent.IntentAwarePlanner;
+import com.stocksage.agent.IntentRecognitionRequest;
 import com.stocksage.agent.RoutingDecisionMetadata;
 import com.stocksage.agent.RoutingDecisionObserver;
 import com.stocksage.memory.LongTermMemory;
@@ -43,12 +45,15 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 对话编排服务。
@@ -68,8 +73,24 @@ public class ChatService {
 
     private static final String CONVERSATION_ORIGIN_CHAT = "chat";
     private static final String CONVERSATION_ORIGIN_WORKBENCH = "workbench";
+    private static final Pattern INTENT_TICKER_PATTERN = Pattern.compile("\\b[A-Z]{1,5}\\b");
+    private static final Set<String> INTENT_NON_TICKERS = Set.of(
+            "AI", "PE", "PB", "ROE", "RSI", "MACD", "SEC", "ETF", "USD", "EPS", "EV", "FCF"
+    );
 
     private record MemoryEntry(String role, String content) {
+    }
+
+    private List<String> extractTickerCandidates(String query) {
+        LinkedHashSet<String> candidates = new LinkedHashSet<>();
+        Matcher matcher = INTENT_TICKER_PATTERN.matcher(query == null ? "" : query);
+        while (matcher.find() && candidates.size() < 5) {
+            String candidate = matcher.group();
+            if (!INTENT_NON_TICKERS.contains(candidate)) {
+                candidates.add(candidate);
+            }
+        }
+        return List.copyOf(candidates);
     }
 
     private final ConversationRepository conversationRepository;
@@ -90,6 +111,8 @@ public class ChatService {
     private final ToolPrefetchService toolPrefetchService;
     private final ConversationMessageService conversationMessageService;
     private final RoutingDecisionObserver routingDecisionObserver;
+    private final IntentAwarePlanner intentAwarePlanner;
+    private final ResearchMemoryService researchMemoryService;
 
     @Value("${stocksage.chat.stream.heartbeat-seconds:20}")
     private long streamHeartbeatSeconds;
@@ -140,10 +163,27 @@ public class ChatService {
                     .tokenCount(0)
                     .build());
         }
+        List<String> tickerCandidates = extractTickerCandidates(request.getMessage());
+        ResearchMemoryService.RetrievalResult researchMemory = researchMemoryService.retrieve(
+                request.getUserId(),
+                tickerCandidates.isEmpty() ? "" : tickerCandidates.get(0),
+                request.getMessage(),
+                traceId
+        );
 
         // 4. 让 Coordinator 选择路由。它可以使用 LLM，
         // 但在路由失败时会回退到确定性规则。
-        ExecutionPlan executionPlan = coordinator.plan(request.getMessage(), retrievedDocs.size());
+        List<String> intentContextSnapshot = shortTermMemory.getContext(conversationId);
+        List<String> recentIntentContext = intentContextSnapshot.stream()
+                .skip(Math.max(0, intentContextSnapshot.size() - 4L))
+                .toList();
+        ExecutionPlan executionPlan = intentAwarePlanner.plan(new IntentRecognitionRequest(
+                request.getMessage(),
+                recentIntentContext,
+                retrievedDocs.size(),
+                hasImages,
+                tickerCandidates
+        ));
         RoutingDecisionMetadata routingDecision = executionPlan.routingDecision();
         routingDecisionObserver.record(routingDecision);
         traceService.addStep(traceId, AgentStep.builder()
@@ -238,7 +278,8 @@ public class ChatService {
                 );
             }
             List<org.springframework.ai.chat.messages.Message> promptMessages =
-                    buildPromptMessages(request.getUserId(), conversationId, preparedToolContext, retrievedDocs, imageMedia);
+                    buildPromptMessages(request.getUserId(), conversationId, preparedToolContext,
+                            retrievedDocs, researchMemory.promptContext(), imageMedia);
             Flux<String> modelStarted = Flux.just(toJson(ChatChunk.builder()
                     .type("model")
                     .content(selectedModel.modelName())
@@ -519,7 +560,14 @@ public class ChatService {
      * <p>顺序很重要：先放时间规则和用户记忆，再放 RAG 参考上下文、确定性工具观测、
      * 可选报告草稿，最后放最近对话历史。</p>
      */
-    private List<org.springframework.ai.chat.messages.Message> buildPromptMessages(String userId, Long conversationId, ToolPrefetchService.PreparedToolContext preparedToolContext, List<Document> retrievedDocs, List<Media> imageMedia) {
+    private List<org.springframework.ai.chat.messages.Message> buildPromptMessages(
+            String userId,
+            Long conversationId,
+            ToolPrefetchService.PreparedToolContext preparedToolContext,
+            List<Document> retrievedDocs,
+            String researchMemoryContext,
+            List<Media> imageMedia
+    ) {
         List<Message> history = messageRepository.findByConversationIdOrderByCreatedAtAsc(conversationId);
         List<org.springframework.ai.chat.messages.Message> messages = new java.util.ArrayList<>();
         String deterministicToolContext = preparedToolContext == null ? "" : preparedToolContext.context();
@@ -546,6 +594,9 @@ public class ChatService {
 
                     %s
                     """.formatted(PromptText.truncate(ragContext, 4000))));
+        }
+        if (researchMemoryContext != null && !researchMemoryContext.isBlank()) {
+            messages.add(new SystemMessage(researchMemoryContext));
         }
         if (deterministicToolContext != null && !deterministicToolContext.isBlank()) {
             messages.add(new SystemMessage("""

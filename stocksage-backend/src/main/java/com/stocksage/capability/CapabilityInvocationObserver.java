@@ -116,6 +116,8 @@ public class CapabilityInvocationObserver {
                 .tag("capability", descriptor.id())
                 .tag("skill", skillId)
                 .tag("status", status)
+                .publishPercentiles(0.95)
+                .publishPercentileHistogram()
                 .register(meterRegistry)
                 .record(Duration.ofMillis(Math.max(0, durationMs)));
     }

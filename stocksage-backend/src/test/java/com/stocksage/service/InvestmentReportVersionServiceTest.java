@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +26,8 @@ class InvestmentReportVersionServiceTest {
     private final InvestmentReportVersionRepository repository = mock(InvestmentReportVersionRepository.class);
     private final InvestmentReportVersionService service = new InvestmentReportVersionService(
             repository,
-            new ObjectMapper().findAndRegisterModules()
+            new ObjectMapper().findAndRegisterModules(),
+            mock(ApplicationEventPublisher.class)
     );
 
     @Test

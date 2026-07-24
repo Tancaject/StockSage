@@ -80,6 +80,23 @@ public class McpCapabilityProvider {
         );
     }
 
+    /**
+     * Returns the last known process-local state without triggering discovery
+     * or any external MCP call. Admin polling must remain read-only.
+     */
+    public Status statusSnapshot() {
+        Catalog current = catalog;
+        return new Status(
+                properties.isEnabled(),
+                properties.hasNewsSearchTarget()
+                        && current.callbacks().containsKey(properties.newsSearchKey()),
+                current.callbacks().size(),
+                current.protocolVersions(),
+                current.error(),
+                current.checkedAt()
+        );
+    }
+
     private Catalog currentCatalog() {
         if (!properties.isEnabled()) {
             return Catalog.empty("MCP is disabled");

@@ -23,6 +23,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -37,6 +38,8 @@ class SkillExecutionServiceTest {
     private CapabilityGateway gateway;
     @Mock
     private ChatStreamEmitter emitter;
+    @Mock
+    private SkillExecutionObserver observer;
 
     private SkillExecutionService service;
     private SkillDefinition skill;
@@ -44,7 +47,7 @@ class SkillExecutionServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new SkillExecutionService(resolver, gateway, emitter);
+        service = new SkillExecutionService(resolver, gateway, emitter, observer);
         skill = new SkillDefinition(
                 "latest-news-mcp", 1, "news", true, Set.of(PlanRoute.NEWS),
                 SkillDefinition.ExecutionMode.INLINE_DETERMINISTIC,
@@ -83,6 +86,8 @@ class SkillExecutionServiceTest {
         assertThat(result.handled(PlanAction.SEARCH_NEWS)).isTrue();
         assertThat(result.fallbackUsed()).isFalse();
         assertThat(result.context()).contains("remote evidence", "untrusted evidence");
+        verify(observer).record(eq("latest-news-mcp"),
+                eq(SkillExecutionObserver.Outcome.SUCCESS), anyLong());
     }
 
     @Test
@@ -101,6 +106,8 @@ class SkillExecutionServiceTest {
         assertThat(result.context()).contains("local evidence", "Fallback: true");
         verify(emitter).emit("trace", 7L, "observation",
                 "MCP 能力不可用，已降级到本地能力 local.news.searchNews");
+        verify(observer).record(eq("latest-news-mcp"),
+                eq(SkillExecutionObserver.Outcome.FALLBACK_SUCCESS), anyLong());
     }
 
     @Test
@@ -116,6 +123,8 @@ class SkillExecutionServiceTest {
         assertThat(result.context()).isBlank();
         verify(emitter).emit("trace", 7L, "observation",
                 "本地降级能力暂不可用，继续使用原有 NEWS 执行路径");
+        verify(observer).record(eq("latest-news-mcp"),
+                eq(SkillExecutionObserver.Outcome.LEGACY_PATH), anyLong());
     }
 
     private SkillExecutionService.ExecutionResult execute() {
