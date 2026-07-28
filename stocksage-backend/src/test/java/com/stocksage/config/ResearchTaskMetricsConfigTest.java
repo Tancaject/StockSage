@@ -17,8 +17,9 @@ class ResearchTaskMetricsConfigTest {
     private final ResearchTaskMetricsConfig config = new ResearchTaskMetricsConfig();
 
     @Test
-    void registersQueueDlqAndRunningTaskGauges() {
+    void registersQueuePendingDlqAndRunningTaskGauges() {
         when(queue.queueDepth()).thenReturn(8L);
+        when(queue.pendingDepth()).thenReturn(3L);
         when(queue.dlqDepth()).thenReturn(2L);
         when(repository.countByStatus(ResearchTask.Status.RUNNING)).thenReturn(3L);
 
@@ -26,6 +27,7 @@ class ResearchTaskMetricsConfigTest {
         config.researchTaskMetrics(queue, repository).bindTo(registry);
 
         assertThat(registry.get("stocksage.research.queue.depth").gauge().value()).isEqualTo(8);
+        assertThat(registry.get("stocksage.research.queue.pending.depth").gauge().value()).isEqualTo(3);
         assertThat(registry.get("stocksage.research.queue.dlq.depth").gauge().value()).isEqualTo(2);
         assertThat(registry.get("stocksage.research.tasks.running").gauge().value()).isEqualTo(3);
     }
@@ -35,12 +37,14 @@ class ResearchTaskMetricsConfigTest {
         ResearchTaskQueue.QueueUnavailableException unavailable =
                 new ResearchTaskQueue.QueueUnavailableException("redis unavailable", new IllegalStateException());
         when(queue.queueDepth()).thenThrow(unavailable);
+        when(queue.pendingDepth()).thenThrow(unavailable);
         when(queue.dlqDepth()).thenThrow(unavailable);
 
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
         config.researchTaskMetrics(queue, repository).bindTo(registry);
 
         assertThat(registry.get("stocksage.research.queue.depth").gauge().value()).isEqualTo(-1);
+        assertThat(registry.get("stocksage.research.queue.pending.depth").gauge().value()).isEqualTo(-1);
         assertThat(registry.get("stocksage.research.queue.dlq.depth").gauge().value()).isEqualTo(-1);
     }
 }

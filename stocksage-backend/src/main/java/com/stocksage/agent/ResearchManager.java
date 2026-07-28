@@ -2,6 +2,10 @@ package com.stocksage.agent;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.harness.EvidenceLedger;
+import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
+import com.stocksage.harness.HarnessModels.ParseStatus;
+import com.stocksage.harness.HarnessModels.SynthesisResult;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.tool.ChatStreamEmitter;
@@ -13,7 +17,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -48,12 +56,16 @@ public class ResearchManager {
      * @return 结构化投资报告；当模型 JSON 不完整时会降级为包含原文摘要的 HOLD 报告
      */
     public InvestmentReport synthesize(AnalysisState state) {
+        return synthesizeResult(state).report();
+    }
+
+    public SynthesisResult synthesizeResult(AnalysisState state) {
         String content = chatClient.prompt()
                 .user(buildPrompt(state))
                 .call()
                 .content();
 
-        return parseReport(content, state);
+        return parseReportResult(content, state);
     }
 
     /**
@@ -68,8 +80,9 @@ public class ResearchManager {
      */
     public Mono<InvestmentReport> synthesizeStreaming(AnalysisState state, String traceId,
                                                      Long conversationId, ChatStreamEmitter emitter) {
-        return synthesizeStreaming(
-                state, traceId, conversationId, emitter, NO_OP_EXECUTION_GUARD);
+        return synthesizeStreamingResult(
+                state, traceId, conversationId, emitter, NO_OP_EXECUTION_GUARD)
+                .map(SynthesisResult::report);
     }
 
     /**
@@ -79,6 +92,28 @@ public class ResearchManager {
      * 其他远端服务。检查器抛出的异常会取消上游模型流，并原样传递给调用方。</p>
      */
     public Mono<InvestmentReport> synthesizeStreaming(
+            AnalysisState state,
+            String traceId,
+            Long conversationId,
+            ChatStreamEmitter emitter,
+            Runnable executionGuard
+    ) {
+        return synthesizeStreamingResult(
+                state, traceId, conversationId, emitter, executionGuard)
+                .map(SynthesisResult::report);
+    }
+
+    public Mono<SynthesisResult> synthesizeStreamingResult(
+            AnalysisState state,
+            String traceId,
+            Long conversationId,
+            ChatStreamEmitter emitter
+    ) {
+        return synthesizeStreamingResult(
+                state, traceId, conversationId, emitter, NO_OP_EXECUTION_GUARD);
+    }
+
+    public Mono<SynthesisResult> synthesizeStreamingResult(
             AnalysisState state,
             String traceId,
             Long conversationId,
@@ -135,7 +170,7 @@ public class ResearchManager {
                 })
                 .then(Mono.fromCallable(() -> {
                     guard.run();
-                    return parseReport(buffer.toString(), state);
+                    return parseReportResult(buffer.toString(), state);
                 }));
     }
 
@@ -176,9 +211,13 @@ public class ResearchManager {
 
                 第二段：另起一行，输出 ```json 代码块包裹的严格 JSON（不要在代码块外再写任何文字）。
                 所有可读文本必须使用简体中文。
-                citations 只能写业务可读来源，例如“结构化财务数据”“近 60 日行情与技术指标”“SEC 10-K 知识库片段”“近 7 日新闻搜索结果”。
-                citations 里不要出现 Java 方法名、工具函数名、类名或内部 agent 名。
                 evidenceItems 必须只写上文已有证据；如果证据不足，不要补编数据，把缺口写入 unknowns。
+                每个 evidenceItems.sourceEvidenceIds 必须引用下方 Evidence Ledger 中至少一个真实 evidenceId。
+                Evidence Ledger 为每条可用证据明确列出 provider、sourceRef 和业务 asOf；asOf=unknown 表示工具没有返回可验证的业务时点。
+                你只负责选择 sourceEvidenceIds，不要编写或概括来源标签。evidenceItems.source 和顶层 citations 会由后端按这些 ID 确定性绑定。
+
+                Evidence Ledger:
+                %s
 
                 ```json
                 {
@@ -191,7 +230,8 @@ public class ResearchManager {
                       "dimension": "财务/估值/行情/技术面/新闻/公告/RAG",
                       "evidence": "可核验的关键证据，不写没有出现过的精确数字",
                       "implication": "这条证据对投资判断的含义",
-                      "source": "结构化财务数据/近 60 日行情与技术指标/SEC 10-K 知识库片段/近 7 日新闻搜索结果"
+                      "source": "",
+                      "sourceEvidenceIds": ["本轮 Evidence Ledger 中的 evidenceId"]
                     }
                   ],
                   "bullFactors": ["最重要的利多因素1", "最重要的利多因素2"],
@@ -200,7 +240,7 @@ public class ResearchManager {
                   "notSuitableFor": ["不适合的投资者或回避条件"],
                   "unknowns": ["当前证据无法确认但会影响判断的事项"],
                   "dataFreshness": "说明本轮数据来源和时点，例如：行情为近 60 日快照，新闻为近 7 日搜索，财报以当前工具返回为准",
-                  "citations": ["结构化财务数据", "近 60 日行情与技术指标", "SEC 10-K 知识库片段", "近 7 日新闻搜索结果"]
+                  "citations": []
                 }
                 ```
 
@@ -219,7 +259,8 @@ public class ResearchManager {
                 truncate(safe(state.getNewsReport()), 2500),
                 truncate(safe(state.getBullThesis()), 1800),
                 truncate(safe(state.getBearThesis()), 1800),
-                truncate(String.join("\n\n", state.getDebateRounds()), 3500)
+                truncate(String.join("\n\n", state.getDebateRounds()), 3500),
+                evidenceLedgerSummary(state)
         );
     }
 
@@ -229,27 +270,33 @@ public class ResearchManager {
      * <p>解析阶段会校验 recommendation 枚举值、读取数组字段，并为缺失的风险和未知项补默认说明。
      * 如果模型没有返回合法 JSON，则进入兜底分支，保证用户仍能看到原始综合内容。</p>
      */
-    private InvestmentReport parseReport(String content, AnalysisState state) {
+    private SynthesisResult parseReportResult(String content, AnalysisState state) {
         try {
             String json = extractJson(content);
             JsonNode root = objectMapper.readTree(json);
 
-            String recommendation = root.path("recommendation").asText("HOLD").toUpperCase();
-            if (!List.of("BUY", "OVERWEIGHT", "HOLD", "UNDERWEIGHT", "SELL").contains(recommendation)) {
-                recommendation = "HOLD";
-            }
+            String recommendation = root.path("recommendation").asText("").toUpperCase();
+            boolean recommendationValid = List.of(
+                    "BUY", "OVERWEIGHT", "HOLD", "UNDERWEIGHT", "SELL")
+                    .contains(recommendation);
 
             List<String> rationale = readStringArray(root.path("rationale"));
             List<String> riskFactors = readStringArray(root.path("riskFactors"));
             String analystSummary = root.path("analystSummary").asText("");
-            List<InvestmentReport.EvidenceItem> evidenceItems = readEvidenceItems(root.path("evidenceItems"));
+            List<InvestmentReport.EvidenceItem> parsedEvidenceItems =
+                    readEvidenceItems(root.path("evidenceItems"));
+            BoundEvidence boundEvidence = bindEvidenceProvenance(
+                    parsedEvidenceItems,
+                    state
+            );
+            List<InvestmentReport.EvidenceItem> evidenceItems = boundEvidence.items();
             List<String> bullFactors = readStringArray(root.path("bullFactors"));
             List<String> bearFactors = readStringArray(root.path("bearFactors"));
             List<String> suitableFor = readStringArray(root.path("suitableFor"));
             List<String> notSuitableFor = readStringArray(root.path("notSuitableFor"));
             List<String> unknowns = readStringArray(root.path("unknowns"));
             String dataFreshness = root.path("dataFreshness").asText("");
-            List<String> citations = readStringArray(root.path("citations"));
+            List<String> citations = boundEvidence.citations();
 
             if (riskFactors.isEmpty()) {
                 riskFactors = List.of("模型输出仍需结合实时数据、仓位和个人风险承受能力复核。");
@@ -258,9 +305,10 @@ public class ResearchManager {
                 unknowns = List.of("部分数据源可能存在延迟、缺失或覆盖不完整，需要结合最新公告和行情复核。");
             }
 
-            return InvestmentReport.builder()
+            InvestmentReport report = InvestmentReport.builder()
+                    .ticker(state.getPrimaryTicker())
                     .recommendation(recommendation)
-                    .analystSummary(analystSummary.isBlank() ? content : analystSummary)
+                    .analystSummary(analystSummary)
                     .bullCase(state.getBullThesis())
                     .bearCase(state.getBearThesis())
                     .rationale(rationale.isEmpty() ? List.of(content) : rationale)
@@ -272,20 +320,23 @@ public class ResearchManager {
                     .notSuitableFor(notSuitableFor)
                     .unknowns(unknowns)
                     .dataFreshness(dataFreshness)
-                    .citations(citations.isEmpty() ? state.getCitations() : citations)
+                    .citations(citations)
                     .build();
+            List<String> issues = new ArrayList<>();
+            if (!recommendationValid) issues.add("recommendation");
+            if (analystSummary.isBlank()) issues.add("analystSummary");
+            if (rationale.isEmpty()) issues.add("rationale");
+            if (dataFreshness.isBlank()) issues.add("dataFreshness");
+            if (evidenceItems.isEmpty()) issues.add("evidenceItems");
+            ParseStatus status = issues.isEmpty() ? ParseStatus.VALID : ParseStatus.INVALID_SCHEMA;
+            return new SynthesisResult(report, status, issues);
         } catch (Exception e) {
-            log.warn("Failed to parse Research Manager structured output, using raw content: {}", e.getMessage());
-            return InvestmentReport.builder()
-                    .recommendation("HOLD")
-                    .analystSummary(content)
-                    .bullCase(state.getBullThesis())
-                    .bearCase(state.getBearThesis())
-                    .rationale(List.of(content))
-                    .riskFactors(List.of("模型输出仍需结合实时数据、仓位和个人风险承受能力复核。"))
-                    .unknowns(List.of("Research Manager 未能返回完整结构化 JSON，证据表需要人工复核。"))
-                    .citations(state.getCitations())
-                    .build();
+            log.warn("Failed to parse Research Manager structured output, errorType={}",
+                    e.getClass().getSimpleName());
+            ParseStatus status = content == null || content.isBlank()
+                    ? ParseStatus.EMPTY_OUTPUT
+                    : ParseStatus.INVALID_JSON;
+            return new SynthesisResult(null, status, List.of("structuredOutput"));
         }
     }
 
@@ -338,6 +389,7 @@ public class ResearchManager {
                         .evidence(item.path("evidence").asText("").trim())
                         .implication(item.path("implication").asText("").trim())
                         .source(item.path("source").asText("").trim())
+                        .sourceEvidenceIds(readStringArray(item.path("sourceEvidenceIds")))
                         .build();
                 if (!safe(evidenceItem.getEvidence()).isBlank()) {
                     values.add(evidenceItem);
@@ -357,11 +409,95 @@ public class ResearchManager {
         return values;
     }
 
+    private BoundEvidence bindEvidenceProvenance(
+            List<InvestmentReport.EvidenceItem> parsedItems,
+            AnalysisState state
+    ) {
+        EvidenceLedger ledger = state == null ? null : state.getEvidenceLedger();
+        if (ledger == null || parsedItems == null || parsedItems.isEmpty()) {
+            return BoundEvidence.empty();
+        }
+
+        Set<String> usableIds = ledger.usableEvidenceIds();
+        Map<String, EvidenceEnvelope> usableById = new LinkedHashMap<>();
+        for (EvidenceEnvelope envelope : ledger.evidence()) {
+            if (usableIds.contains(envelope.evidenceId())) {
+                usableById.putIfAbsent(envelope.evidenceId(), envelope);
+            }
+        }
+
+        List<InvestmentReport.EvidenceItem> boundItems = new ArrayList<>();
+        LinkedHashSet<String> reportCitations = new LinkedHashSet<>();
+        for (InvestmentReport.EvidenceItem item : parsedItems) {
+            LinkedHashSet<String> boundIds = new LinkedHashSet<>();
+            LinkedHashSet<String> itemSources = new LinkedHashSet<>();
+            List<String> sourceEvidenceIds = item.getSourceEvidenceIds() == null
+                    ? List.of()
+                    : item.getSourceEvidenceIds();
+            for (String evidenceId : sourceEvidenceIds) {
+                EvidenceEnvelope envelope = usableById.get(evidenceId);
+                if (envelope == null) {
+                    continue;
+                }
+                boundIds.add(evidenceId);
+                String citation = provenanceCitation(envelope);
+                itemSources.add(citation);
+                reportCitations.add(citation);
+            }
+            if (boundIds.isEmpty()) {
+                continue;
+            }
+            boundItems.add(InvestmentReport.EvidenceItem.builder()
+                    .dimension(item.getDimension())
+                    .evidence(item.getEvidence())
+                    .implication(item.getImplication())
+                    .source(String.join(" | ", itemSources))
+                    .sourceEvidenceIds(List.copyOf(boundIds))
+                    .build());
+        }
+        return new BoundEvidence(
+                List.copyOf(boundItems),
+                List.copyOf(reportCitations)
+        );
+    }
+
+    private String provenanceCitation(EvidenceEnvelope envelope) {
+        String asOf = envelope.asOf() == null
+                ? "unknown"
+                : envelope.asOf().toString();
+        return "provider=%s; sourceRef=%s; asOf=%s".formatted(
+                envelope.provider(),
+                envelope.sourceRef(),
+                asOf
+        );
+    }
+
     /**
      * 将空值转换为空字符串，供 JSON 解析兜底和提示词拼装复用。
      */
     private String safe(String value) {
         return value == null ? "" : value;
+    }
+
+    private String evidenceLedgerSummary(AnalysisState state) {
+        if (state == null || state.getEvidenceLedger() == null
+                || state.getEvidenceLedger().evidence().isEmpty()) {
+            return "(no structured evidence)";
+        }
+        EvidenceLedger ledger = state.getEvidenceLedger();
+        Set<String> usableIds = ledger.usableEvidenceIds();
+        return ledger.evidence().stream()
+                .filter(item -> usableIds.contains(item.evidenceId()))
+                .map(item -> "- evidenceId=%s; dimension=%s; capability=%s; provider=%s; sourceRef=%s; asOf=%s"
+                        .formatted(
+                                item.evidenceId(),
+                                item.dimension().name(),
+                                item.capabilityId(),
+                                item.provider(),
+                                item.sourceRef(),
+                                item.asOf() == null ? "unknown" : item.asOf()))
+                .reduce((left, right) -> left + "\n" + right)
+                .orElse("(no usable structured evidence)");
     }
 
     /**
@@ -372,5 +508,14 @@ public class ResearchManager {
             return value;
         }
         return value.substring(0, maxLength) + "\n...[truncated]";
+    }
+
+    private record BoundEvidence(
+            List<InvestmentReport.EvidenceItem> items,
+            List<String> citations
+    ) {
+        private static BoundEvidence empty() {
+            return new BoundEvidence(List.of(), List.of());
+        }
     }
 }

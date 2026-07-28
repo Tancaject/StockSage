@@ -131,6 +131,25 @@ public class ReportMarkdownRenderer {
         if (report == null) {
             return "";
         }
+        if (report.getQualityStatus() == InvestmentReport.ReportQualityStatus.NOT_RATED) {
+            return """
+                    ## 投资结论
+                    - 结论：**无法评级（报告校验未通过）**
+                    - 说明：%s
+
+                    ## 当前数据缺口
+                    %s
+
+                    ## 建议
+                    - 稍后重试，或先核验财务、行情与原始来源。
+                    - 本轮不会把结构或证据引用失败解释为 HOLD。
+
+                    以上分析仅供参考，不构成投资建议。
+                    """.formatted(
+                    blankToDefault(report.getAnalystSummary(), "本轮报告没有通过完成策略验收。"),
+                    String.join("\n", listOrFallback(
+                            report.getUnknowns(), List.of("报告证据引用需要重新核验。"))));
+        }
 
         StringBuilder answer = new StringBuilder();
         answer.append("## 投资结论\n");
@@ -193,8 +212,12 @@ public class ReportMarkdownRenderer {
         }
         answer.append("- ").append(sanitizeUserFacingText(blankToDefault(report.getDataFreshness(),
                 "本轮数据来自后端预取的财务、行情、新闻和知识库片段；具体时点以各数据源返回为准。"))).append("\n");
-        for (String source : listOrFallback(report.getCitations(), evidenceBasis())) {
-            answer.append("- ").append(sanitizeUserFacingText(source)).append("\n");
+        if (report.getCitations() == null || report.getCitations().isEmpty()) {
+            answer.append("- 本轮报告未声明额外的业务可读来源；请以证据表引用为准。\n");
+        } else {
+            for (String source : report.getCitations()) {
+                answer.append("- ").append(sanitizeUserFacingText(source)).append("\n");
+            }
         }
         answer.append("\n以上分析仅供参考，不构成投资建议。");
         return answer.toString();
@@ -280,16 +303,7 @@ public class ReportMarkdownRenderer {
         if (report.getEvidenceItems() != null && !report.getEvidenceItems().isEmpty()) {
             return report.getEvidenceItems();
         }
-        List<InvestmentReport.EvidenceItem> fallback = new ArrayList<>();
-        for (String source : listOrFallback(report.getCitations(), evidenceBasis())) {
-            fallback.add(InvestmentReport.EvidenceItem.builder()
-                    .dimension("来源")
-                    .evidence("本轮已参考该来源，但未生成逐条证据。")
-                    .implication("结论需要结合上文工具观察和原始材料复核。")
-                    .source(source)
-                    .build());
-        }
-        return fallback;
+        return List.of();
     }
 
     /**

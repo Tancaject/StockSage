@@ -2,18 +2,28 @@ package com.stocksage.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.exception.ResourceNotFoundException;
+import com.stocksage.harness.DeepResearchCompletionPolicy;
+import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.InvestmentReport;
+import com.stocksage.model.dto.InvestmentReportReviewRequest;
+import com.stocksage.model.dto.InvestmentReportReviewSummary;
 import com.stocksage.model.dto.InvestmentReportVersionSummary;
+import com.stocksage.model.entity.InvestmentReportReview;
 import com.stocksage.model.entity.InvestmentReportVersion;
+import com.stocksage.repository.InvestmentReportReviewRepository;
 import com.stocksage.repository.InvestmentReportVersionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -23,17 +33,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class InvestmentReportVersionService {
 
-    private static final String PROMPT_CONTRACT_VERSION = "investment-report-v2-stable-news-excluded";
+    private static final String PROMPT_CONTRACT_VERSION = "investment-report-v3-harness-evidence-bound";
     private static final int DEFAULT_HISTORY_LIMIT = 20;
     private static final int MAX_HISTORY_LIMIT = 50;
 
     private final InvestmentReportVersionRepository repository;
+    private final InvestmentReportReviewRepository reviewRepository;
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -48,11 +60,28 @@ public class InvestmentReportVersionService {
     public String computeDataSnapshotHash(AnalysisState state) {
         StringBuilder canonical = new StringBuilder();
         appendField(canonical, "contract", PROMPT_CONTRACT_VERSION);
+        appendField(canonical, "policyId", DeepResearchCompletionPolicy.POLICY_ID);
+        appendField(canonical, "policyVersion",
+                Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION));
         appendField(canonical, "ticker", normalizeTicker(state == null ? null : state.getPrimaryTicker()));
-        appendField(canonical, "fundamentals", state == null ? null : state.getFundamentalsReport());
-        appendField(canonical, "market", state == null ? null : state.getMarketReport());
-        // News/search payloads still feed the report, but not the reuse key because upstream ordering changes often.
-        appendField(canonical, "newsPolicy", "excluded-from-cache-key");
+        if (state != null && state.getEvidenceLedger() != null) {
+            state.getEvidenceLedger().evidence().stream()
+                    .sorted(Comparator
+                            .comparing((EvidenceEnvelope item) -> item.dimension().name())
+                            .thenComparing(EvidenceEnvelope::capabilityId)
+                            .thenComparing(EvidenceEnvelope::evidenceId))
+                    .forEach(item -> appendField(
+                            canonical,
+                            "evidence",
+                            String.join("|",
+                                    item.dimension().name(),
+                                    item.capabilityId(),
+                                    item.status().name(),
+                                    item.evidenceId(),
+                                    item.payloadHash(),
+                                    item.asOf() == null ? "" : item.asOf().toString())
+                    ));
+        }
         appendSortedList(canonical, "citations", state == null ? null : state.getCitations());
         return sha256(canonical.toString());
     }
@@ -83,7 +112,8 @@ public class InvestmentReportVersionService {
                         state.getDataSnapshotHash(),
                         state.getContextHash()
                 )
-                .map(entity -> toReport(entity, true));
+                .map(entity -> toReport(entity, true))
+                .filter(report -> reusableUnderCurrentPolicy(report, state));
     }
 
     public InvestmentReport persistReportVersion(
@@ -208,14 +238,65 @@ public class InvestmentReportVersionService {
                 )
                 .stream()
                 .findFirst()
-                .map(entity -> {
-                    InvestmentReport report = toReport(entity, false);
-                    return new ReportDetail(
-                            toSummary(entity, report),
-                            safeList(report.getEvidenceItems()),
-                            safeList(report.getCitations())
-                    );
-                });
+                .map(this::toDetail);
+    }
+
+    @Transactional(readOnly = true)
+    public ReportDetail getReportDetail(String userId, Long reportVersionId) {
+        InvestmentReportVersion entity = findOwnedReport(userId, reportVersionId);
+        return toDetail(entity);
+    }
+
+    @Transactional
+    public ReportDetail reviewReport(
+            String userId,
+            Long reportVersionId,
+            InvestmentReportReviewRequest request
+    ) {
+        InvestmentReportVersion entity = findOwnedReport(userId, reportVersionId);
+        validateReviewRequest(request);
+
+        long currentLockVersion = effectiveLockVersion(entity.getLockVersion());
+        if (request.expectedLockVersion() != currentLockVersion) {
+            throw staleReview();
+        }
+
+        InvestmentReportVersion.ReviewStatus fromStatus = effectiveReviewStatus(entity.getReviewStatus());
+        InvestmentReportVersion.ReviewStatus toStatus = request.status();
+        if (!isAllowedTransition(fromStatus, toStatus)) {
+            throw new IllegalArgumentException(
+                    "Invalid report review transition from " + fromStatus + " to " + toStatus);
+        }
+
+        String comment = blankToNull(request.comment());
+        if ((toStatus == InvestmentReportVersion.ReviewStatus.REJECTED
+                || toStatus == InvestmentReportVersion.ReviewStatus.NEEDS_RESEARCH)
+                && comment == null) {
+            throw new IllegalArgumentException("A non-blank comment is required for " + toStatus);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        entity.setReviewStatus(toStatus);
+        entity.setReviewerUserId(userId.trim());
+        entity.setReviewComment(comment);
+        entity.setReviewedAt(now);
+
+        try {
+            repository.saveAndFlush(entity);
+        } catch (OptimisticLockingFailureException e) {
+            throw staleReview();
+        }
+
+        InvestmentReportReview review = new InvestmentReportReview();
+        review.setReportVersionId(entity.getId());
+        review.setReviewer(userId.trim());
+        review.setFromStatus(fromStatus);
+        review.setToStatus(toStatus);
+        review.setComment(comment);
+        review.setCreatedAt(now);
+        reviewRepository.saveAndFlush(review);
+
+        return toDetail(entity);
     }
 
     @Transactional(readOnly = true)
@@ -248,7 +329,29 @@ public class InvestmentReportVersionService {
         }
         enrichReport(report, entity.getTicker(), entity.getDataSnapshotHash(), entity.getContextHash(),
                 entity.getReportVersion(), entity.getModelTier(), entity.getModelName(), reusedFromCache);
+        if (report.getQualityStatus() == null) {
+            report.setQualityStatus(InvestmentReport.ReportQualityStatus.LEGACY_UNVERIFIED);
+        }
         return report;
+    }
+
+    private boolean reusableUnderCurrentPolicy(InvestmentReport report, AnalysisState state) {
+        if (report == null
+                || report.getQualityStatus() != InvestmentReport.ReportQualityStatus.VERIFIED
+                || !DeepResearchCompletionPolicy.POLICY_ID.equals(report.getCompletionPolicyId())
+                || !Integer.valueOf(DeepResearchCompletionPolicy.POLICY_VERSION)
+                .equals(report.getCompletionPolicyVersion())
+                || state.getEvidenceLedger() == null) {
+            return false;
+        }
+        Set<String> knownEvidenceIds = state.getEvidenceLedger().evidenceIds();
+        List<InvestmentReport.EvidenceItem> evidenceItems = safeList(report.getEvidenceItems());
+        return !evidenceItems.isEmpty()
+                && evidenceItems.stream().allMatch(item ->
+                item != null
+                        && item.getSourceEvidenceIds() != null
+                        && !item.getSourceEvidenceIds().isEmpty()
+                        && knownEvidenceIds.containsAll(item.getSourceEvidenceIds()));
     }
 
     private InvestmentReportVersionSummary toSummary(InvestmentReportVersion entity) {
@@ -270,7 +373,95 @@ public class InvestmentReportVersionService {
                 entity.getGeneratedAt(),
                 entity.getCreatedAt(),
                 entity.getUserQuery(),
-                buildPreview(report)
+                buildPreview(report),
+                effectiveReviewStatus(entity.getReviewStatus()),
+                entity.getReviewerUserId(),
+                entity.getReviewComment(),
+                entity.getReviewedAt(),
+                entity.getUpdatedAt() == null ? entity.getCreatedAt() : entity.getUpdatedAt(),
+                effectiveLockVersion(entity.getLockVersion())
+        );
+    }
+
+    private ReportDetail toDetail(InvestmentReportVersion entity) {
+        InvestmentReport report = toReport(entity, false);
+        List<InvestmentReportReviewSummary> history = safeList(
+                reviewRepository.findByReportVersionIdOrderByCreatedAtAscIdAsc(entity.getId())
+        ).stream()
+                .map(this::toReviewSummary)
+                .toList();
+        return new ReportDetail(
+                toSummary(entity, report),
+                report,
+                safeList(report.getEvidenceItems()),
+                safeList(report.getCitations()),
+                history
+        );
+    }
+
+    private InvestmentReportReviewSummary toReviewSummary(InvestmentReportReview review) {
+        return new InvestmentReportReviewSummary(
+                review.getId(),
+                review.getReportVersionId(),
+                review.getFromStatus(),
+                review.getToStatus(),
+                review.getComment(),
+                review.getReviewer(),
+                review.getCreatedAt()
+        );
+    }
+
+    private InvestmentReportVersion findOwnedReport(String userId, Long reportVersionId) {
+        if (userId == null || userId.isBlank() || reportVersionId == null) {
+            throw new ResourceNotFoundException("Investment report not found");
+        }
+        return repository.findByIdAndUserId(reportVersionId, userId.trim())
+                .orElseThrow(() -> new ResourceNotFoundException("Investment report not found"));
+    }
+
+    private void validateReviewRequest(InvestmentReportReviewRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Review request is required");
+        }
+        if (request.status() == null) {
+            throw new IllegalArgumentException("status is required");
+        }
+        if (request.expectedLockVersion() == null) {
+            throw new IllegalArgumentException("expectedLockVersion is required");
+        }
+        if (request.comment() != null && request.comment().length() > 2000) {
+            throw new IllegalArgumentException("comment must be at most 2000 characters");
+        }
+    }
+
+    private boolean isAllowedTransition(
+            InvestmentReportVersion.ReviewStatus fromStatus,
+            InvestmentReportVersion.ReviewStatus toStatus
+    ) {
+        return switch (fromStatus) {
+            case DRAFT -> toStatus == InvestmentReportVersion.ReviewStatus.IN_REVIEW;
+            case IN_REVIEW -> toStatus == InvestmentReportVersion.ReviewStatus.APPROVED
+                    || toStatus == InvestmentReportVersion.ReviewStatus.REJECTED
+                    || toStatus == InvestmentReportVersion.ReviewStatus.NEEDS_RESEARCH;
+            case APPROVED, REJECTED, NEEDS_RESEARCH ->
+                    toStatus == InvestmentReportVersion.ReviewStatus.IN_REVIEW;
+        };
+    }
+
+    private InvestmentReportVersion.ReviewStatus effectiveReviewStatus(
+            InvestmentReportVersion.ReviewStatus status
+    ) {
+        return status == null ? InvestmentReportVersion.ReviewStatus.DRAFT : status;
+    }
+
+    private long effectiveLockVersion(Long lockVersion) {
+        return lockVersion == null ? 0L : lockVersion;
+    }
+
+    private ResponseStatusException staleReview() {
+        return new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Investment report review changed; refresh and retry"
         );
     }
 
@@ -389,9 +580,18 @@ public class InvestmentReportVersionService {
 
     public record ReportDetail(
             InvestmentReportVersionSummary summary,
+            InvestmentReport report,
             List<InvestmentReport.EvidenceItem> evidenceItems,
-            List<String> citations
+            List<String> citations,
+            List<InvestmentReportReviewSummary> reviewHistory
     ) {
+        public ReportDetail(
+                InvestmentReportVersionSummary summary,
+                List<InvestmentReport.EvidenceItem> evidenceItems,
+                List<String> citations
+        ) {
+            this(summary, null, evidenceItems, citations, List.of());
+        }
     }
 
     private <T> List<T> safeList(List<T> values) {

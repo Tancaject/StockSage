@@ -1,5 +1,14 @@
 package com.stocksage.agent;
 
+import com.stocksage.harness.DeepResearchCompletionPolicy;
+import com.stocksage.harness.HarnessModels.HarnessDecision;
+import com.stocksage.harness.HarnessModels.HarnessPhase;
+import com.stocksage.harness.HarnessModels.HarnessOutcome;
+import com.stocksage.harness.HarnessModels.HarnessSnapshot;
+import com.stocksage.harness.HarnessModels.RecoveryAction;
+import com.stocksage.harness.HarnessModels.RunContext;
+import com.stocksage.harness.HarnessModels.SynthesisResult;
+import com.stocksage.harness.ResearchHarness;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.AnalysisState.DebateTurn;
 import com.stocksage.model.dto.InvestmentReport;
@@ -14,6 +23,10 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuple3;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * 编排深度研究中的多空辩论循环。
@@ -50,6 +63,8 @@ public class ResearchDebateService {
     private final DebateRoundPlanner debateRoundPlanner;
     private final TraceService traceService;
     private final ChatStreamEmitter chatStreamEmitter;
+    private final ResearchHarness researchHarness;
+    private final DeepResearchCompletionPolicy completionPolicy;
 
     @Value("${stocksage.agent.debate.max-rounds:5}")
     private int maxRounds;
@@ -87,7 +102,7 @@ public class ResearchDebateService {
     ) {
         return runDebate(
                 traceId, conversationId, state, startRound, fixedPlannedRounds,
-                checkpointer, null);
+                checkpointer, null, null);
     }
 
     /**
@@ -104,6 +119,28 @@ public class ResearchDebateService {
             int fixedPlannedRounds,
             RoundCheckpointer checkpointer,
             Runnable executionGuard
+    ) {
+        return runDebate(
+                traceId,
+                conversationId,
+                state,
+                startRound,
+                fixedPlannedRounds,
+                checkpointer,
+                executionGuard,
+                null
+        );
+    }
+
+    public AnalysisState runDebate(
+            String traceId,
+            Long conversationId,
+            AnalysisState state,
+            int startRound,
+            int fixedPlannedRounds,
+            RoundCheckpointer checkpointer,
+            Runnable executionGuard,
+            Consumer<AnalysisState> harnessCheckpointer
     ) {
         Runnable guard = executionGuard == null ? NO_OP_EXECUTION_GUARD : executionGuard;
         AnalysisState workingState = state == null ? AnalysisState.builder().build() : state;
@@ -177,18 +214,95 @@ public class ResearchDebateService {
         // 让用户在 Manager 思考期间持续看到中文综合判断生成而非静默等待。
         long managerStart = System.currentTimeMillis();
         log.info("Research Manager started (streaming), traceId={}", traceId);
-        Mono<InvestmentReport> synthesis = executionGuard == null
-                ? researchManager.synthesizeStreaming(
+        Mono<SynthesisResult> synthesis = executionGuard == null
+                ? researchManager.synthesizeStreamingResult(
                         workingState, traceId, conversationId, chatStreamEmitter)
-                : researchManager.synthesizeStreaming(
+                : researchManager.synthesizeStreamingResult(
                         workingState, traceId, conversationId, chatStreamEmitter, guard);
-        InvestmentReport report = synthesis.block();
+        SynthesisResult synthesisResult = synthesis.block();
+        HarnessDecision reportDecision = researchHarness.evaluateReport(
+                traceId,
+                completionPolicy,
+                RunContext.deepResearch(),
+                workingState.getEvidenceLedger(),
+                synthesisResult
+        );
+        if (reportDecision.outcome() == HarnessOutcome.RECOVER
+                && reportDecision.recoveryActions().contains(RecoveryAction.RESYNTHESIZE_REPORT)) {
+            workingState.setHarnessSnapshot(HarnessSnapshot.from(
+                    completionPolicy.policyId(),
+                    Integer.toString(completionPolicy.policyVersion()),
+                    HarnessPhase.REPORT,
+                    reportDecision,
+                    Map.of()
+            ));
+            if (harnessCheckpointer != null) {
+                harnessCheckpointer.accept(workingState);
+            }
+            chatStreamEmitter.emit(traceId, conversationId, "observation",
+                    "报告结构或证据引用未通过校验，正在重新综合一次。");
+            Mono<SynthesisResult> repair = executionGuard == null
+                    ? researchManager.synthesizeStreamingResult(
+                            workingState, traceId, conversationId, chatStreamEmitter)
+                    : researchManager.synthesizeStreamingResult(
+                            workingState, traceId, conversationId, chatStreamEmitter, guard);
+            synthesisResult = repair.block();
+            reportDecision = researchHarness.evaluateReport(
+                    traceId,
+                    completionPolicy,
+                    new RunContext("DEEP", Map.of(RecoveryAction.RESYNTHESIZE_REPORT, 1)),
+                    workingState.getEvidenceLedger(),
+                    synthesisResult
+            );
+            workingState.setHarnessSnapshot(HarnessSnapshot.from(
+                    completionPolicy.policyId(),
+                    Integer.toString(completionPolicy.policyVersion()),
+                    HarnessPhase.REPORT,
+                    reportDecision,
+                    Map.of(RecoveryAction.RESYNTHESIZE_REPORT, 1)
+            ));
+        }
+        InvestmentReport report;
+        if (reportDecision.outcome() == HarnessOutcome.PASS
+                && synthesisResult != null && synthesisResult.report() != null) {
+            report = synthesisResult.report();
+            report.setQualityStatus(InvestmentReport.ReportQualityStatus.VERIFIED);
+            report.setCompletionPolicyId(completionPolicy.policyId());
+            report.setCompletionPolicyVersion(completionPolicy.policyVersion());
+        } else {
+            report = buildNotRatedReport(workingState, reportDecision);
+        }
         workingState.setInvestmentReport(report);
         addTraceStep(traceId, "Research Manager", "Synthesize InvestmentReport",
                 report.getAnalystSummary(), managerStart);
         log.info("Research Manager completed, traceId={}, durationMs={}",
                 traceId, System.currentTimeMillis() - managerStart);
         return workingState;
+    }
+
+    private InvestmentReport buildNotRatedReport(
+            AnalysisState state,
+            HarnessDecision decision
+    ) {
+        List<String> violationCodes = decision == null
+                ? List.of("REPORT_VALIDATION_FAILED")
+                : decision.violations().stream()
+                .map(violation -> violation.code().name())
+                .toList();
+        return InvestmentReport.builder()
+                .ticker(state.getPrimaryTicker())
+                .qualityStatus(InvestmentReport.ReportQualityStatus.NOT_RATED)
+                .completionPolicyId(completionPolicy.policyId())
+                .completionPolicyVersion(completionPolicy.policyVersion())
+                .recommendation(null)
+                .analystSummary("研究经理输出未通过结构或证据引用校验，本轮不生成投资评级。")
+                .rationale(List.of("报告校验未通过：" + String.join(", ", violationCodes)))
+                .riskFactors(List.of("关键证据与最终结论尚未形成可审计映射。"))
+                .unknowns(List.of("需要重新获取或人工核验报告证据引用。"))
+                .dataFreshness("本轮报告未通过完成策略验收。")
+                .citations(List.of())
+                .evidenceItems(List.of())
+                .build();
     }
 
     /**

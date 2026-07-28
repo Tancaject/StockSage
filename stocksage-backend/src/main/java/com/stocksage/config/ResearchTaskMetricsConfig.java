@@ -24,7 +24,14 @@ public class ResearchTaskMetricsConfig {
                             researchTaskQueue,
                             queue -> safeQueueDepth(queue::queueDepth)
                     )
-                    .description("Current research task Redis Stream depth")
+                    .description("Current uncompleted research task Redis Stream depth (unread plus pending)")
+                    .register(registry);
+            Gauge.builder(
+                            "stocksage.research.queue.pending.depth",
+                            researchTaskQueue,
+                            queue -> safeQueueDepth(queue::pendingDepth)
+                    )
+                    .description("Current research task records delivered but not yet acknowledged")
                     .register(registry);
             Gauge.builder(
                             "stocksage.research.queue.dlq.depth",

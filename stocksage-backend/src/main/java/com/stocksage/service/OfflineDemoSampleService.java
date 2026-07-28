@@ -91,6 +91,7 @@ public class OfflineDemoSampleService {
                         "COMPLETE",
                         1,
                         null,
+                        "OFFLINE_FALLBACK",
                         generatedAt,
                         generatedAt,
                         generatedAt,
@@ -110,6 +111,7 @@ public class OfflineDemoSampleService {
                 : state.getQuery().trim();
         return InvestmentReport.builder()
                 .ticker(stock.ticker())
+                .qualityStatus(InvestmentReport.ReportQualityStatus.OFFLINE_FALLBACK)
                 .recommendation(report.recommendation())
                 .modelTier(MODEL_TIER)
                 .modelName(MODEL_NAME)

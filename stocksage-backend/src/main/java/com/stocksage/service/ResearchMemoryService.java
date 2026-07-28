@@ -197,6 +197,15 @@ public class ResearchMemoryService {
                 || "offline-rule-fallback".equalsIgnoreCase(source.getModelName())) {
             return false;
         }
+        if (report.getQualityStatus() != InvestmentReport.ReportQualityStatus.VERIFIED
+                || report.getEvidenceItems() == null
+                || report.getEvidenceItems().isEmpty()
+                || report.getEvidenceItems().stream().anyMatch(item ->
+                item == null
+                        || item.getSourceEvidenceIds() == null
+                        || item.getSourceEvidenceIds().isEmpty())) {
+            return false;
+        }
         return !sourceCitations(report).isEmpty();
     }
 

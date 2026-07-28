@@ -4,7 +4,9 @@ import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 import {
+  fetchInvestmentReportDetail,
   searchWorkbenchStocks,
+  updateInvestmentReportReview,
 } from '../api/workbench.js'
 
 import {
@@ -18,7 +20,10 @@ import {
   buildTickerSuggestions,
   buildLatestBriefDigest,
   buildWatchlistFromProfile,
+  getReportReviewActions,
+  getReportReviewStatusLabel,
   markHealthCheck,
+  normalizeInvestmentReportDetail,
   normalizeTicker,
   normalizeCockpit,
   summarizeEvidencePreview,
@@ -40,10 +45,17 @@ test('normalizeTicker uppercases symbols and strips noisy characters', () => {
 test('buildResearchPrompt creates a single-stock deep research request', () => {
   const prompt = buildResearchPrompt('aapl', ['valuation', 'risks'])
 
-  assert.match(prompt, /AAPL/)
-  assert.match(prompt, /valuation/)
-  assert.match(prompt, /risks/)
-  assert.match(prompt, /SEC/)
+  assert.equal(
+    prompt,
+    [
+      'Run a full StockSage single-stock research pass for AAPL.',
+      'Focus areas: valuation, risks.',
+      'Use SEC filing evidence, market/K-line data, news context when useful, and the bull/bear/research-manager structure.',
+      'Separate supported facts, model inference, data gaps, and risks. Include citations when SEC/RAG evidence is used.',
+      'Finish with exactly one supported recommendation: BUY, OVERWEIGHT, HOLD, UNDERWEIGHT, or SELL. If the evidence is insufficient, do not force a recommendation or use HOLD as a fallback; mark the report NOT_RATED / 暂不评级. This is not investment advice.',
+    ].join('\n'),
+  )
+  assert.doesNotMatch(prompt, /watch \/ avoid \/ investigate-more/)
 })
 
 test('buildComparisonPrompt keeps both tickers and requested dimensions', () => {
@@ -325,6 +337,96 @@ test('searchWorkbenchStocks calls the workbench stock search endpoint', async ()
   }
 })
 
+test('investment report detail and review APIs use the owner-scoped contract with CSRF', async () => {
+  const originalFetch = globalThis.fetch
+  const originalDocument = globalThis.document
+  const calls = []
+  globalThis.document = { cookie: 'XSRF-TOKEN=review-token' }
+  globalThis.fetch = async (url, options = {}) => {
+    calls.push({ url, options })
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        summary: { id: 42, reviewStatus: 'IN_REVIEW', lockVersion: 3 },
+        report: {},
+        evidenceItems: [],
+        citations: [],
+        reviewHistory: [],
+      }),
+    }
+  }
+
+  try {
+    await fetchInvestmentReportDetail(42)
+    await updateInvestmentReportReview(42, {
+      status: 'needs_research',
+      comment: '  缺少最新财务证据  ',
+      expectedLockVersion: 3,
+    })
+
+    assert.equal(calls[0].url, '/api/reports/investment/42')
+    assert.equal(calls[0].options.method, undefined)
+    assert.equal(calls[1].url, '/api/reports/investment/42/review')
+    assert.equal(calls[1].options.method, 'PATCH')
+    assert.equal(calls[1].options.credentials, 'include')
+    assert.equal(calls[1].options.headers.get('Content-Type'), 'application/json')
+    assert.equal(calls[1].options.headers.get('X-XSRF-TOKEN'), 'review-token')
+    assert.deepEqual(JSON.parse(calls[1].options.body), {
+      status: 'NEEDS_RESEARCH',
+      comment: '缺少最新财务证据',
+      expectedLockVersion: 3,
+    })
+  } finally {
+    globalThis.fetch = originalFetch
+    if (originalDocument === undefined) {
+      delete globalThis.document
+    } else {
+      globalThis.document = originalDocument
+    }
+  }
+})
+
+test('investment report review API surfaces backend conflict messages', async () => {
+  const originalFetch = globalThis.fetch
+  const originalDocument = globalThis.document
+  globalThis.document = { cookie: 'XSRF-TOKEN=review-token' }
+  globalThis.fetch = async () => ({
+    ok: false,
+    status: 409,
+    json: async () => ({ message: '报告已被其他审核人更新，请刷新后重试' }),
+  })
+
+  try {
+    await assert.rejects(
+      updateInvestmentReportReview(42, {
+        status: 'APPROVED',
+        comment: '',
+        expectedLockVersion: 3,
+      }),
+      /报告已被其他审核人更新，请刷新后重试/,
+    )
+  } finally {
+    globalThis.fetch = originalFetch
+    if (originalDocument === undefined) {
+      delete globalThis.document
+    } else {
+      globalThis.document = originalDocument
+    }
+  }
+})
+
+test('investment report review API rejects a missing lock version before sending', async () => {
+  await assert.rejects(
+    updateInvestmentReportReview(42, {
+      status: 'APPROVED',
+      comment: '',
+      expectedLockVersion: null,
+    }),
+    /expectedLockVersion is required/,
+  )
+})
+
 test('buildReportMarkdown includes thesis, evidence, and disclaimers', () => {
   const markdown = buildReportMarkdown({
     ticker: 'nvda',
@@ -387,6 +489,7 @@ test('summarizeReportVersions exposes compact version metadata', () => {
       modelName: 'qwen3.6-max',
       generatedAt: '2026-06-05T09:00:00',
       preview: 'Updated report preview.',
+      reviewStatus: 'IN_REVIEW',
     },
   ])
 
@@ -395,7 +498,98 @@ test('summarizeReportVersions exposes compact version metadata', () => {
   assert.equal(rows[0].contextLabel, 'abcdef123456')
   assert.equal(rows[0].modelLabel, 'STRONG / qwen3.6-max')
   assert.equal(rows[0].preview, 'Updated report preview.')
+  assert.equal(rows[0].reviewStatusLabel, '复核中')
   assert.equal(shortHash(''), '--')
+})
+
+test('report review status labels and actions follow the backend transition contract', () => {
+  assert.equal(getReportReviewStatusLabel('draft'), '草稿')
+  assert.equal(getReportReviewStatusLabel('IN_REVIEW'), '复核中')
+  assert.equal(getReportReviewStatusLabel('APPROVED'), '已批准')
+  assert.equal(getReportReviewStatusLabel('NEEDS_RESEARCH'), '待补研')
+  assert.equal(getReportReviewStatusLabel('REJECTED'), '已驳回')
+  assert.equal(getReportReviewStatusLabel('CUSTOM_STATE'), 'CUSTOM_STATE')
+
+  assert.deepEqual(
+    getReportReviewActions('DRAFT').map(action => action.status),
+    ['IN_REVIEW'],
+  )
+  assert.deepEqual(
+    getReportReviewActions('IN_REVIEW').map(action => action.status),
+    ['APPROVED', 'NEEDS_RESEARCH', 'REJECTED'],
+  )
+  assert.deepEqual(
+    getReportReviewActions('APPROVED').map(action => action.status),
+    ['IN_REVIEW'],
+  )
+  assert.equal(
+    getReportReviewActions('IN_REVIEW').find(action => action.status === 'NEEDS_RESEARCH').requiresComment,
+    true,
+  )
+  assert.equal(
+    getReportReviewActions('IN_REVIEW').find(action => action.status === 'REJECTED').requiresComment,
+    true,
+  )
+  assert.deepEqual(getReportReviewActions('CUSTOM_STATE'), [])
+})
+
+test('normalizeInvestmentReportDetail keeps report evidence provenance and review history', () => {
+  const detail = normalizeInvestmentReportDetail({
+    summary: {
+      id: 42,
+      ticker: 'nvda',
+      reportVersion: 7,
+      reviewStatus: 'in_review',
+      reviewerUserId: ' reviewer-1 ',
+      reviewComment: ' 初审通过格式检查 ',
+      reviewedAt: '2026-07-28T09:30:00Z',
+      lockVersion: 3,
+    },
+    report: {
+      recommendation: 'HOLD',
+      analystSummary: ' 估值偏高，但增长仍有支撑。 ',
+      rationale: [' 收入增长 ', '', '毛利率稳定'],
+      riskFactors: ['估值回撤'],
+      unknowns: ['下一季指引'],
+    },
+    evidenceItems: [
+      {
+        dimension: ' fundamentals ',
+        evidence: ' Revenue increased. ',
+        implication: ' Supports the growth case. ',
+        source: ' SEC EDGAR ',
+        sourceEvidenceIds: [' ev-sec-1 ', ''],
+      },
+    ],
+    citations: [' SEC filing 10-Q ', ''],
+    reviewHistory: [
+      {
+        id: 9,
+        reportVersionId: 42,
+        fromStatus: 'DRAFT',
+        toStatus: 'IN_REVIEW',
+        reviewer: 'author-1',
+        comment: 'created',
+        createdAt: '2026-07-28T08:00:00Z',
+      },
+    ],
+  })
+
+  assert.equal(detail.summary.ticker, 'NVDA')
+  assert.equal(detail.summary.reviewStatus, 'IN_REVIEW')
+  assert.equal(detail.summary.reviewStatusLabel, '复核中')
+  assert.equal(detail.summary.reviewerUserId, 'reviewer-1')
+  assert.equal(detail.summary.lockVersion, 3)
+  assert.equal(detail.report.analystSummary, '估值偏高，但增长仍有支撑。')
+  assert.deepEqual(detail.report.rationale, ['收入增长', '毛利率稳定'])
+  assert.equal(detail.evidenceItems[0].source, 'SEC EDGAR')
+  assert.deepEqual(detail.evidenceItems[0].sourceEvidenceIds, ['ev-sec-1'])
+  assert.deepEqual(detail.citations, ['SEC filing 10-Q'])
+  assert.equal(detail.reviewHistory[0].reviewerUserId, 'author-1')
+  assert.equal(detail.reviewHistory[0].fromStatusLabel, '草稿')
+  assert.equal(detail.reviewHistory[0].toStatusLabel, '复核中')
+  assert.equal(detail.reviewHistory[0].statusLabel, '复核中')
+  assert.equal(detail.reviewHistory[0].timeLabel, '2026-07-28T08:00:00Z')
 })
 
 test('buildLatestBriefDigest turns the latest report into an actionable brief', () => {
@@ -522,6 +716,77 @@ test('normalizeCockpit labels offline sample cockpit status distinctly', () => {
   assert.equal(cockpit.isSample, true)
 })
 
+test('normalizeCockpit leaves unavailable financial metrics empty instead of inventing values', () => {
+  const cockpit = normalizeCockpit({
+    ticker: 'NVDA',
+    chartStatus: 'READY',
+    chart: {
+      chartType: 'candlestick',
+      symbol: 'NVDA',
+      points: [{ date: '2026-06-05', open: 130, high: 132, low: 129, close: 131, volume: 1000 }],
+    },
+  })
+
+  assert.equal(cockpit.quote.pe, null)
+  assert.equal(cockpit.quote.pb, null)
+  assert.equal(cockpit.quote.marketCap, null)
+  assert.equal(cockpit.quote.turnoverRate, null)
+  assert.equal(cockpit.quote.turnover, null)
+  assert.equal(cockpit.quote.currency, null)
+  assert.equal(cockpit.sentimentScore, undefined)
+})
+
+test('normalizeCockpit leaves unavailable quote values empty instead of displaying zeroes', () => {
+  const cockpit = normalizeCockpit({
+    ticker: 'NVDA',
+    chartStatus: 'DEGRADED',
+  })
+
+  assert.equal(cockpit.quote.price, null)
+  assert.equal(cockpit.quote.change, null)
+  assert.equal(cockpit.quote.changePercent, null)
+  assert.equal(cockpit.quote.volume, null)
+  assert.equal(cockpit.quote.turnover, null)
+})
+
+test('normalizeCockpit accepts explicit live financials but never merges them into SAMPLE data', () => {
+  const financials = {
+    currency: '$',
+    pe: 24.5,
+    pb: 8.1,
+    marketCap: '2.4T',
+    turnoverRate: 0.8,
+  }
+  const live = normalizeCockpit({
+    ticker: 'NVDA',
+    chartStatus: 'READY',
+    financials,
+  })
+  const sample = normalizeCockpit({
+    ticker: 'NVDA',
+    chartStatus: 'SAMPLE',
+    financials,
+    quote: { turnover: 123456789 },
+  })
+
+  assert.deepEqual(
+    {
+      currency: live.quote.currency,
+      pe: live.quote.pe,
+      pb: live.quote.pb,
+      marketCap: live.quote.marketCap,
+      turnoverRate: live.quote.turnoverRate,
+    },
+    financials,
+  )
+  assert.equal(sample.quote.currency, null)
+  assert.equal(sample.quote.pe, null)
+  assert.equal(sample.quote.pb, null)
+  assert.equal(sample.quote.marketCap, null)
+  assert.equal(sample.quote.turnoverRate, null)
+  assert.equal(sample.quote.turnover, null)
+})
+
 test('summarizeEvidencePreview falls back to citations when evidence rows are empty', () => {
   const rows = summarizeEvidencePreview([], ['[1] NVDA 10-Q risk factor'])
 
@@ -560,4 +825,19 @@ test('summarizeTaskTimeline labels report synthesis without claiming DLQ for ord
   assert.equal(rows[0].deadLettered, false)
   assert.equal(rows[1].deadLettered, false)
   assert.equal(rows[1].recoveryHint, '')
+})
+
+test('summarizeTaskTimeline separates technical success from research result kind', () => {
+  const rows = summarizeTaskTimeline([
+    {
+      id: 12,
+      status: 'SUCCEEDED',
+      stage: 'COMPLETE',
+      attempts: 1,
+      resultKind: 'INSUFFICIENT_EVIDENCE',
+    },
+  ])
+
+  assert.equal(rows[0].statusLabel, '已完成')
+  assert.equal(rows[0].resultKindLabel, '证据不足，暂不评级')
 })

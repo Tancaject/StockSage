@@ -285,6 +285,7 @@ class WorkbenchCockpitServiceTest {
                         "COMPLETE",
                         1,
                         null,
+                        "OFFLINE_FALLBACK",
                         LocalDateTime.parse("2026-06-05T10:00:00"),
                         LocalDateTime.parse("2026-06-05T10:00:00"),
                         LocalDateTime.parse("2026-06-05T10:00:00"),

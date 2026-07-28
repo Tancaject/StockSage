@@ -195,6 +195,7 @@ public interface ResearchTaskRepository extends JpaRepository<ResearchTask, Long
                    payload_json = :payloadJson,
                    error_message = NULL,
                    result_report_version_id = NULL,
+                   result_kind = NULL,
                    started_at = NULL,
                    completed_at = NULL,
                    heartbeat_at = :resetAt,
@@ -256,6 +257,7 @@ public interface ResearchTaskRepository extends JpaRepository<ResearchTask, Long
                SET status = 'SUCCEEDED',
                    stage = 'COMPLETE',
                    result_report_version_id = :resultReportVersionId,
+                   result_kind = :resultKind,
                    completed_at = :completedAt,
                    heartbeat_at = :completedAt,
                    updated_at = :completedAt,
@@ -269,6 +271,7 @@ public interface ResearchTaskRepository extends JpaRepository<ResearchTask, Long
             @Param("id") Long id,
             @Param("leaseToken") String leaseToken,
             @Param("resultReportVersionId") Long resultReportVersionId,
+            @Param("resultKind") String resultKind,
             @Param("completedAt") LocalDateTime completedAt
     );
 

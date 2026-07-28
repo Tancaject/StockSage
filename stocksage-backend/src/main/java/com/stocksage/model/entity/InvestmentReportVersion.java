@@ -2,13 +2,17 @@ package com.stocksage.model.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.Version;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -74,13 +78,53 @@ public class InvestmentReportVersion {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "review_status", length = 32, nullable = false)
+    private ReviewStatus reviewStatus = ReviewStatus.DRAFT;
+
+    @Column(name = "reviewer_user_id", length = 32)
+    private String reviewerUserId;
+
+    @Column(name = "review_comment", columnDefinition = "TEXT")
+    private String reviewComment;
+
+    @Column(name = "reviewed_at")
+    private LocalDateTime reviewedAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @Version
+    @Column(name = "lock_version", nullable = false)
+    private Long lockVersion;
+
     @PrePersist
     protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
         if (createdAt == null) {
-            createdAt = LocalDateTime.now();
+            createdAt = now;
         }
         if (generatedAt == null) {
             generatedAt = createdAt;
         }
+        if (reviewStatus == null) {
+            reviewStatus = ReviewStatus.DRAFT;
+        }
+        if (updatedAt == null) {
+            updatedAt = now;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    public enum ReviewStatus {
+        DRAFT,
+        IN_REVIEW,
+        APPROVED,
+        REJECTED,
+        NEEDS_RESEARCH
     }
 }

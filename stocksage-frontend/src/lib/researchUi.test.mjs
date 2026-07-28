@@ -87,6 +87,29 @@ test('buildResearchTimeline uses route decision as the plan stage', () => {
   assert.equal(timeline[0].meta, '来源 ROUTING_LLM · 置信度 0.92 · RAG 2 条')
 })
 
+test('buildResearchTimeline explains harness recovery and report acceptance', () => {
+  const timeline = buildResearchTimeline({
+    reasoning: [
+      {
+        type: 'action',
+        content: 'harness:deep-equity-v1',
+        metadata: {
+          policyId: 'deep-equity-v1',
+          phase: 'EVIDENCE',
+          decision: 'RECOVER',
+          violationCodes: ['MARKET_MISSING'],
+          recoveryActions: ['RETRY_MARKET'],
+        },
+      },
+    ],
+  })
+
+  const harness = timeline.find(stage => stage.label === '证据验收')
+  assert.equal(harness.kind, 'harness-recover')
+  assert.equal(harness.detail, 'deep-equity-v1：RECOVER')
+  assert.equal(harness.meta, '恢复动作：RETRY_MARKET')
+})
+
 test('buildResearchTimeline merges repeated tool calls and hides implementation details', () => {
   const timeline = buildResearchTimeline({
     reasoning: [

@@ -20,15 +20,19 @@ public class AdminApiInterceptor implements HandlerInterceptor {
     @Value("${stocksage.admin.header-name:X-StockSage-Admin-Token}")
     private String headerName;
 
-    @Value("${stocksage.admin.token:local-admin}")
+    @Value("${stocksage.admin.token:}")
     private String adminToken;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
-        if (!enabled || "OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
         }
-        if (adminToken == null || adminToken.isBlank()) {
+        if (!enabled) {
+            writeError(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Admin API is disabled");
+            return false;
+        }
+        if (headerName == null || headerName.isBlank() || adminToken == null || adminToken.isBlank()) {
             writeError(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Admin token is not configured");
             return false;
         }

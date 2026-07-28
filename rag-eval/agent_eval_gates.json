@@ -6,5 +6,17 @@
   "critical_failures_max": 0,
   "executable_rate_min": 1.0,
   "baseline_delta_max_drop": 0.02,
-  "p95_latency_ratio_max": 1.2
+  "p95_latency_ratio_max": 1.2,
+  "harness_policy_id_expected": "deep-equity-v1",
+  "harness_policy_version_expected": 2,
+  "harness_case_count_min": 60,
+  "harness_exact_accuracy_min": 1.0,
+  "harness_decision_contract_exact_match_rate_min": 1.0,
+  "harness_violation_exact_match_rate_min": 1.0,
+  "harness_recovery_exact_match_rate_min": 1.0,
+  "harness_unsafe_pass_count_max": 0,
+  "harness_live_case_count_min": 30,
+  "harness_live_completed_rate_min": 1.0,
+  "harness_live_safe_terminal_rate_min": 1.0,
+  "harness_live_unsafe_result_count_max": 0
 }

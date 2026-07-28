@@ -1,5 +1,7 @@
 package com.stocksage.model.dto;
 
+import com.stocksage.harness.EvidenceLedger;
+import com.stocksage.harness.HarnessModels.HarnessSnapshot;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -69,6 +71,18 @@ public class AnalysisState {
     /** 当前研究链路中收集到的引用或证据来源。 */
     @Builder.Default
     private List<String> citations = new ArrayList<>();
+
+    /**
+     * 本轮研究的结构化证据元数据账本。
+     *
+     * <p>只保存来源、状态、时间和哈希，不重复保存工具正文。默认空账本确保旧 checkpoint JSON
+     * 在缺少该字段时仍可反序列化。</p>
+     */
+    @Builder.Default
+    private EvidenceLedger evidenceLedger = EvidenceLedger.empty();
+
+    /** Last durable completion-policy decision and bounded recovery counters. */
+    private HarnessSnapshot harnessSnapshot;
 
     /**
      * 辩论中的一条单方发言。

@@ -34,6 +34,53 @@ export async function fetchInvestmentReportVersions({ ticker = '', limit = 20 } 
   return response.json()
 }
 
+export async function fetchInvestmentReportDetail(reportId) {
+  const id = String(reportId ?? '').trim()
+  if (!id) {
+    throw new Error('reportId is required')
+  }
+  const response = await apiFetch(`${BASE_URL}/reports/investment/${encodeURIComponent(id)}`)
+  if (!response.ok) {
+    throw new Error(await responseMessage(response))
+  }
+  return response.json()
+}
+
+export async function updateInvestmentReportReview(
+  reportId,
+  { status, comment = '', expectedLockVersion } = {},
+) {
+  const id = String(reportId ?? '').trim()
+  const reviewStatus = String(status || '').trim().toUpperCase()
+  const hasLockVersion = expectedLockVersion !== null
+    && expectedLockVersion !== undefined
+    && String(expectedLockVersion).trim() !== ''
+  const lockVersion = Number(expectedLockVersion)
+  if (!id) {
+    throw new Error('reportId is required')
+  }
+  if (!reviewStatus) {
+    throw new Error('status is required')
+  }
+  if (!hasLockVersion || !Number.isInteger(lockVersion) || lockVersion < 0) {
+    throw new Error('expectedLockVersion is required')
+  }
+
+  const response = await apiFetch(`${BASE_URL}/reports/investment/${encodeURIComponent(id)}/review`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      status: reviewStatus,
+      comment: String(comment ?? '').trim(),
+      expectedLockVersion: lockVersion,
+    }),
+  })
+  if (!response.ok) {
+    throw new Error(await responseMessage(response))
+  }
+  return response.json()
+}
+
 export async function fetchStockCockpit({ ticker, period = 'daily', days = 120 } = {}) {
   const symbol = String(ticker || '').trim()
   if (!symbol) {

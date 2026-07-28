@@ -89,8 +89,10 @@ public class ResearchTaskQueue {
         if (record == null) {
             return;
         }
-        execute("ack research task queue record", () ->
-                streamOperations.acknowledge(stream, group, record.getId()));
+        execute("ack and delete research task queue record", () -> {
+            streamOperations.acknowledge(stream, group, record.getId());
+            streamOperations.delete(stream, record.getId());
+        });
     }
 
     public List<MapRecord<String, String, String>> claimStale(String consumerName, int limit) {

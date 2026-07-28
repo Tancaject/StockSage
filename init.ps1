@@ -135,13 +135,14 @@ function Invoke-BackendCheck {
 }
 
 function Invoke-FrontendCheck {
-    Write-Host "=== Frontend: npm run build ==="
+    Write-Host "=== Frontend: npm test + production build ==="
     $npm = Resolve-Npm
     Push-Location "$Root\stocksage-frontend"
     try {
         if (-not $SkipInstall -and -not (Test-Path "node_modules")) {
             Invoke-CheckedCommand -FilePath $npm -CommandArgs @("install")
         }
+        Invoke-CheckedCommand -FilePath $npm -CommandArgs @("test")
         Invoke-CheckedCommand -FilePath $npm -CommandArgs @("run", "build")
     } finally {
         Pop-Location

@@ -30,6 +30,10 @@ public class InvestmentReport {
     private String modelName;
     private Boolean reusedFromCache;
 
+    private ReportQualityStatus qualityStatus;
+    private String completionPolicyId;
+    private Integer completionPolicyVersion;
+
     private String recommendation;
 
     @Builder.Default
@@ -79,5 +83,15 @@ public class InvestmentReport {
         private String evidence;
         private String implication;
         private String source;
+
+        @Builder.Default
+        private List<String> sourceEvidenceIds = new ArrayList<>();
+    }
+
+    public enum ReportQualityStatus {
+        VERIFIED,
+        NOT_RATED,
+        OFFLINE_FALLBACK,
+        LEGACY_UNVERIFIED
     }
 }

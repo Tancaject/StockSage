@@ -7,6 +7,12 @@ import com.stocksage.agent.DebateRoundPlanner;
 import com.stocksage.agent.ModelTier;
 import com.stocksage.agent.ResearchDebateService;
 import com.stocksage.agent.ResearchManager;
+import com.stocksage.harness.DeepResearchCompletionPolicy;
+import com.stocksage.harness.HarnessModels.HarnessDecision;
+import com.stocksage.harness.HarnessModels.HarnessOutcome;
+import com.stocksage.harness.HarnessModels.ParseStatus;
+import com.stocksage.harness.HarnessModels.SynthesisResult;
+import com.stocksage.harness.ResearchHarness;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.model.entity.ResearchTask;
@@ -29,6 +35,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -79,10 +86,14 @@ class CheckpointTakeoverIT {
                 .recommendation("HOLD")
                 .analystSummary("resumed report")
                 .build();
-        when(researchManager.synthesizeStreaming(any(), any(), any(), any()))
-                .thenReturn(Mono.just(report));
-        when(researchManager.synthesizeStreaming(any(), any(), any(), any(), any(Runnable.class)))
-                .thenReturn(Mono.just(report));
+        SynthesisResult synthesisResult = new SynthesisResult(report, ParseStatus.VALID, List.of());
+        when(researchManager.synthesizeStreamingResult(any(), any(), any(), any()))
+                .thenReturn(Mono.just(synthesisResult));
+        when(researchManager.synthesizeStreamingResult(any(), any(), any(), any(), any(Runnable.class)))
+                .thenReturn(Mono.just(synthesisResult));
+        ResearchHarness researchHarness = mock(ResearchHarness.class);
+        when(researchHarness.evaluateReport(any(), any(), any(), any(), any()))
+                .thenReturn(new HarnessDecision(HarnessOutcome.PASS, List.of(), List.of()));
 
         ResearchDebateService debateService = spy(new ResearchDebateService(
                 bullResearcher,
@@ -90,7 +101,9 @@ class CheckpointTakeoverIT {
                 researchManager,
                 roundPlanner,
                 mock(TraceService.class),
-                mock(ChatStreamEmitter.class)
+                mock(ChatStreamEmitter.class),
+                researchHarness,
+                new DeepResearchCompletionPolicy()
         ));
         ResearchTaskService researchTaskService = mock(ResearchTaskService.class);
         ResearchTaskLeaseService.Lease firstLease = lease("instance-a-token");
@@ -162,7 +175,12 @@ class CheckpointTakeoverIT {
                 task.setResultReportVersionId(99L);
                 return null;
             }).when(researchTaskService)
-                    .markSucceededForOwner(task, takeoverLease.token(), 99L);
+                    .markSucceededForOwner(
+                            task,
+                            takeoverLease.token(),
+                            99L,
+                            ResearchTask.ResultKind.FULL_REPORT
+                    );
 
             DeepResearchPipeline pipeline = new DeepResearchPipeline(
                     researchTaskService,
@@ -192,7 +210,7 @@ class CheckpointTakeoverIT {
             verify(evidenceCollector, never()).collect(any(), any(), any(), any());
             verify(debateService).runDebate(
                     eq("trace-42"), eq(20L), any(AnalysisState.class), eq(3), eq(3),
-                    any(), any(Runnable.class));
+                    any(), any(Runnable.class), any());
             verify(bullResearcher, times(1)).argue(any(), eq(1));
             verify(bullResearcher, times(1)).argue(any(), eq(2));
             verify(bullResearcher, times(1)).argue(any(), eq(3));

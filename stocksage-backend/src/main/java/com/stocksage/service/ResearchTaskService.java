@@ -346,6 +346,9 @@ public class ResearchTaskService {
         task.setStatus(ResearchTask.Status.SUCCEEDED);
         task.setStage(ResearchTask.Stage.COMPLETE);
         task.setResultReportVersionId(resultReportVersionId);
+        task.setResultKind(resultReportVersionId == null
+                ? ResearchTask.ResultKind.INSUFFICIENT_EVIDENCE
+                : ResearchTask.ResultKind.FULL_REPORT);
         task.setCompletedAt(now);
         task.setHeartbeatAt(now);
         task.setLeaseToken(null);
@@ -355,13 +358,34 @@ public class ResearchTaskService {
 
     @Transactional
     public void markSucceededForOwner(ResearchTask task, String leaseToken, Long resultReportVersionId) {
+        markSucceededForOwner(
+                task,
+                leaseToken,
+                resultReportVersionId,
+                resultReportVersionId == null
+                        ? ResearchTask.ResultKind.INSUFFICIENT_EVIDENCE
+                        : ResearchTask.ResultKind.FULL_REPORT
+        );
+    }
+
+    @Transactional
+    public void markSucceededForOwner(
+            ResearchTask task,
+            String leaseToken,
+            Long resultReportVersionId,
+            ResearchTask.ResultKind resultKind
+    ) {
         if (task == null || task.getId() == null) {
             throw new IllegalArgumentException("task id is required for owner-checked completion");
         }
+        ResearchTask.ResultKind effectiveResultKind = resultKind == null
+                ? ResearchTask.ResultKind.POLICY_BLOCKED
+                : resultKind;
         int updated = repository.completeForOwner(
                 task.getId(),
                 normalizeText(leaseToken),
                 resultReportVersionId,
+                effectiveResultKind.name(),
                 LocalDateTime.now()
         );
         if (updated == 0) {
@@ -370,6 +394,7 @@ public class ResearchTaskService {
         task.setStatus(ResearchTask.Status.SUCCEEDED);
         task.setStage(ResearchTask.Stage.COMPLETE);
         task.setResultReportVersionId(resultReportVersionId);
+        task.setResultKind(effectiveResultKind);
         task.setCompletedAt(LocalDateTime.now());
         task.setLeaseToken(null);
         task.setErrorMessage(null);
@@ -521,6 +546,7 @@ public class ResearchTaskService {
         task.setPayloadJson(normalizedPayload);
         task.setErrorMessage(null);
         task.setResultReportVersionId(null);
+        task.setResultKind(null);
         task.setStartedAt(null);
         task.setCompletedAt(null);
         task.setHeartbeatAt(now);

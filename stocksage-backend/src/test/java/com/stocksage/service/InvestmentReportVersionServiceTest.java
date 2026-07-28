@@ -1,31 +1,48 @@
 package com.stocksage.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.harness.DeepResearchCompletionPolicy;
+import com.stocksage.harness.EvidenceLedger;
+import com.stocksage.harness.HarnessModels.EvidenceDimension;
+import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
+import com.stocksage.harness.HarnessModels.EvidenceStatus;
+import com.stocksage.harness.HarnessModels.TargetIdentity;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.InvestmentReport;
+import com.stocksage.model.dto.InvestmentReportReviewRequest;
+import com.stocksage.model.entity.InvestmentReportReview;
 import com.stocksage.model.entity.InvestmentReportVersion;
+import com.stocksage.repository.InvestmentReportReviewRepository;
 import com.stocksage.repository.InvestmentReportVersionRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class InvestmentReportVersionServiceTest {
 
     private final InvestmentReportVersionRepository repository = mock(InvestmentReportVersionRepository.class);
+    private final InvestmentReportReviewRepository reviewRepository = mock(InvestmentReportReviewRepository.class);
     private final InvestmentReportVersionService service = new InvestmentReportVersionService(
             repository,
+            reviewRepository,
             new ObjectMapper().findAndRegisterModules(),
             mock(ApplicationEventPublisher.class)
     );
@@ -152,6 +169,16 @@ class InvestmentReportVersionServiceTest {
 
         InvestmentReport storedReport = InvestmentReport.builder()
                 .recommendation("HOLD")
+                .qualityStatus(InvestmentReport.ReportQualityStatus.VERIFIED)
+                .completionPolicyId(DeepResearchCompletionPolicy.POLICY_ID)
+                .completionPolicyVersion(DeepResearchCompletionPolicy.POLICY_VERSION)
+                .evidenceItems(List.of(InvestmentReport.EvidenceItem.builder()
+                        .dimension("market")
+                        .evidence("stored evidence")
+                        .implication("bounded")
+                        .source("tool:market")
+                        .sourceEvidenceIds(List.of("e-market"))
+                        .build()))
                 .rationale(List.of("The stored report is tied to this exact snapshot."))
                 .build();
         InvestmentReportVersion existing = new InvestmentReportVersion();
@@ -247,7 +274,236 @@ class InvestmentReportVersionServiceTest {
         assertThat(summaries.get(0).preview()).isBlank();
     }
 
+    @Test
+    void returnsOwnedReportDetailWithFullReportAndReviewHistory() throws Exception {
+        InvestmentReportVersion reportVersion = reportVersion(
+                31L,
+                InvestmentReportVersion.ReviewStatus.IN_REVIEW,
+                2L
+        );
+        InvestmentReportReview review = review(
+                1L,
+                31L,
+                InvestmentReportVersion.ReviewStatus.DRAFT,
+                InvestmentReportVersion.ReviewStatus.IN_REVIEW,
+                "Ready for review"
+        );
+        when(repository.findByIdAndUserId(31L, "u_001")).thenReturn(Optional.of(reportVersion));
+        when(reviewRepository.findByReportVersionIdOrderByCreatedAtAscIdAsc(31L))
+                .thenReturn(List.of(review));
+
+        InvestmentReportVersionService.ReportDetail detail =
+                service.getReportDetail("u_001", 31L);
+
+        assertThat(detail.summary().reviewStatus())
+                .isEqualTo(InvestmentReportVersion.ReviewStatus.IN_REVIEW);
+        assertThat(detail.report().getRecommendation()).isEqualTo("HOLD");
+        assertThat(detail.evidenceItems()).hasSize(1);
+        assertThat(detail.citations()).containsExactly("[1] filing");
+        assertThat(detail.reviewHistory()).singleElement()
+                .satisfies(item -> {
+                    assertThat(item.fromStatus()).isEqualTo(InvestmentReportVersion.ReviewStatus.DRAFT);
+                    assertThat(item.toStatus()).isEqualTo(InvestmentReportVersion.ReviewStatus.IN_REVIEW);
+                    assertThat(item.reviewerUserId()).isEqualTo("u_001");
+                });
+    }
+
+    @Test
+    void crossUserAndMissingReportsShareTheSameNotFoundResult() {
+        when(repository.findByIdAndUserId(31L, "stranger")).thenReturn(Optional.empty());
+        when(repository.findByIdAndUserId(999L, "u_001")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getReportDetail("stranger", 31L))
+                .isInstanceOf(com.stocksage.exception.ResourceNotFoundException.class)
+                .hasMessage("Investment report not found");
+        assertThatThrownBy(() -> service.getReportDetail("u_001", 999L))
+                .isInstanceOf(com.stocksage.exception.ResourceNotFoundException.class)
+                .hasMessage("Investment report not found");
+    }
+
+    @Test
+    void validReviewTransitionUpdatesCurrentStateAndAppendsHistory() throws Exception {
+        InvestmentReportVersion reportVersion = reportVersion(
+                31L,
+                InvestmentReportVersion.ReviewStatus.DRAFT,
+                4L
+        );
+        List<InvestmentReportReview> history = new ArrayList<>();
+        when(repository.findByIdAndUserId(31L, "u_001")).thenReturn(Optional.of(reportVersion));
+        when(repository.saveAndFlush(reportVersion)).thenAnswer(invocation -> {
+            reportVersion.setLockVersion(5L);
+            return reportVersion;
+        });
+        when(reviewRepository.saveAndFlush(any(InvestmentReportReview.class))).thenAnswer(invocation -> {
+            InvestmentReportReview saved = invocation.getArgument(0);
+            saved.setId(71L);
+            history.add(saved);
+            return saved;
+        });
+        when(reviewRepository.findByReportVersionIdOrderByCreatedAtAscIdAsc(31L))
+                .thenAnswer(invocation -> List.copyOf(history));
+
+        InvestmentReportVersionService.ReportDetail detail = service.reviewReport(
+                "u_001",
+                31L,
+                new InvestmentReportReviewRequest(
+                        InvestmentReportVersion.ReviewStatus.IN_REVIEW,
+                        "  Ready for human review.  ",
+                        4L
+                )
+        );
+
+        assertThat(detail.summary().reviewStatus())
+                .isEqualTo(InvestmentReportVersion.ReviewStatus.IN_REVIEW);
+        assertThat(detail.summary().reviewerUserId()).isEqualTo("u_001");
+        assertThat(detail.summary().reviewComment()).isEqualTo("Ready for human review.");
+        assertThat(detail.summary().lockVersion()).isEqualTo(5L);
+        assertThat(detail.reviewHistory()).singleElement()
+                .satisfies(item -> {
+                    assertThat(item.id()).isEqualTo(71L);
+                    assertThat(item.fromStatus()).isEqualTo(InvestmentReportVersion.ReviewStatus.DRAFT);
+                    assertThat(item.toStatus()).isEqualTo(InvestmentReportVersion.ReviewStatus.IN_REVIEW);
+                    assertThat(item.comment()).isEqualTo("Ready for human review.");
+                });
+    }
+
+    @Test
+    void rejectsInvalidReviewTransitionWithoutWritingHistory() throws Exception {
+        InvestmentReportVersion reportVersion = reportVersion(
+                31L,
+                InvestmentReportVersion.ReviewStatus.DRAFT,
+                0L
+        );
+        when(repository.findByIdAndUserId(31L, "u_001")).thenReturn(Optional.of(reportVersion));
+
+        assertThatThrownBy(() -> service.reviewReport(
+                "u_001",
+                31L,
+                new InvestmentReportReviewRequest(
+                        InvestmentReportVersion.ReviewStatus.APPROVED,
+                        null,
+                        0L
+                )
+        ))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invalid report review transition");
+
+        verify(repository, never()).saveAndFlush(reportVersion);
+        verify(reviewRepository, never()).saveAndFlush(any(InvestmentReportReview.class));
+    }
+
+    @Test
+    void rejectedAndNeedsResearchRequireNonBlankComment() throws Exception {
+        InvestmentReportVersion reportVersion = reportVersion(
+                31L,
+                InvestmentReportVersion.ReviewStatus.IN_REVIEW,
+                1L
+        );
+        when(repository.findByIdAndUserId(31L, "u_001")).thenReturn(Optional.of(reportVersion));
+
+        assertThatThrownBy(() -> service.reviewReport(
+                "u_001",
+                31L,
+                new InvestmentReportReviewRequest(
+                        InvestmentReportVersion.ReviewStatus.REJECTED,
+                        "   ",
+                        1L
+                )
+        ))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("non-blank comment");
+
+        verify(reviewRepository, never()).saveAndFlush(any(InvestmentReportReview.class));
+    }
+
+    @Test
+    void staleExpectedLockVersionReturnsConflictWithoutWritingHistory() throws Exception {
+        InvestmentReportVersion reportVersion = reportVersion(
+                31L,
+                InvestmentReportVersion.ReviewStatus.DRAFT,
+                3L
+        );
+        when(repository.findByIdAndUserId(31L, "u_001")).thenReturn(Optional.of(reportVersion));
+
+        assertThatThrownBy(() -> service.reviewReport(
+                "u_001",
+                31L,
+                new InvestmentReportReviewRequest(
+                        InvestmentReportVersion.ReviewStatus.IN_REVIEW,
+                        null,
+                        2L
+                )
+        ))
+                .isInstanceOfSatisfying(ResponseStatusException.class, exception ->
+                        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT));
+
+        verify(repository, never()).saveAndFlush(reportVersion);
+        verify(reviewRepository, never()).saveAndFlush(any(InvestmentReportReview.class));
+    }
+
+    private InvestmentReportVersion reportVersion(
+            Long id,
+            InvestmentReportVersion.ReviewStatus status,
+            Long lockVersion
+    ) throws Exception {
+        InvestmentReport report = InvestmentReport.builder()
+                .recommendation("HOLD")
+                .evidenceItems(List.of(InvestmentReport.EvidenceItem.builder()
+                        .dimension("fundamentals")
+                        .evidence("Revenue grew.")
+                        .implication("Demand remains healthy.")
+                        .source("10-Q")
+                        .build()))
+                .citations(List.of("[1] filing"))
+                .build();
+        InvestmentReportVersion entity = new InvestmentReportVersion();
+        entity.setId(id);
+        entity.setUserId("u_001");
+        entity.setTicker("NVDA");
+        entity.setReportVersion(3);
+        entity.setRecommendation("HOLD");
+        entity.setDataSnapshotHash("d".repeat(64));
+        entity.setContextHash("c".repeat(64));
+        entity.setReportJson(new ObjectMapper().findAndRegisterModules().writeValueAsString(report));
+        entity.setReviewStatus(status);
+        entity.setLockVersion(lockVersion);
+        return entity;
+    }
+
+    private InvestmentReportReview review(
+            Long id,
+            Long reportVersionId,
+            InvestmentReportVersion.ReviewStatus fromStatus,
+            InvestmentReportVersion.ReviewStatus toStatus,
+            String comment
+    ) {
+        InvestmentReportReview review = new InvestmentReportReview();
+        review.setId(id);
+        review.setReportVersionId(reportVersionId);
+        review.setReviewer("u_001");
+        review.setFromStatus(fromStatus);
+        review.setToStatus(toStatus);
+        review.setComment(comment);
+        return review;
+    }
+
     private AnalysisState analysisState(String ticker, String market, String fundamentals, String news, String query) {
+        Instant observedAt = Instant.parse("2026-07-24T00:00:00Z");
+        EvidenceLedger ledger = new EvidenceLedger(
+                TargetIdentity.resolved(ticker),
+                List.of(
+                        new EvidenceEnvelope(
+                                "e-fundamentals", EvidenceDimension.FUNDAMENTALS,
+                                "financials", ticker, EvidenceStatus.AVAILABLE,
+                                "tool:financials", "test", observedAt, observedAt,
+                                fundamentals, true),
+                        new EvidenceEnvelope(
+                                "e-market", EvidenceDimension.MARKET,
+                                "bars", ticker, EvidenceStatus.AVAILABLE,
+                                "tool:bars", "test", observedAt, observedAt,
+                                market, true)
+                )
+        );
         return AnalysisState.builder()
                 .primaryTicker(ticker)
                 .query(query)
@@ -255,6 +511,7 @@ class InvestmentReportVersionServiceTest {
                 .fundamentalsReport(fundamentals)
                 .newsReport(news)
                 .citations(List.of("source-a", "source-b"))
+                .evidenceLedger(ledger)
                 .build();
     }
 }

@@ -183,7 +183,8 @@ class DeepResearchPipelineTest {
 
         pipeline.runFullPipeline(task, lease);
 
-        verify(researchTaskService).markSucceededForOwner(task, lease.token(), null);
+        verify(researchTaskService).markSucceededForOwner(
+                task, lease.token(), null, ResearchTask.ResultKind.INSUFFICIENT_EVIDENCE);
         verify(chatStreamEmitter).emit("trace-1", 20L, "task-final", "insufficient");
         verify(researchTaskService, never()).markFailedForOwner(any(), any(), any());
     }
@@ -233,7 +234,11 @@ class DeepResearchPipelineTest {
         AnalysisState completed = AnalysisState.builder()
                 .query("q")
                 .primaryTicker("AAPL")
-                .investmentReport(InvestmentReport.builder().ticker("AAPL").recommendation("BUY").build())
+                .investmentReport(InvestmentReport.builder()
+                        .ticker("AAPL")
+                        .recommendation("BUY")
+                        .qualityStatus(InvestmentReport.ReportQualityStatus.VERIFIED)
+                        .build())
                 .build();
         when(checkpointService.load(7L)).thenReturn(Optional.empty());
         when(researchTaskService.startAttempt(task, lease.token(), ResearchTask.Stage.DATA_PREFETCH)).thenReturn(task);
@@ -242,7 +247,8 @@ class DeepResearchPipelineTest {
         when(investmentReportVersionService.findReusableReport("u_001", 20L, evidenceState))
                 .thenReturn(Optional.empty());
         when(researchDebateService.runDebate(
-                eq("trace-1"), eq(20L), eq(evidenceState), eq(1), eq(0), any(), any(Runnable.class)))
+                eq("trace-1"), eq(20L), eq(evidenceState), eq(1), eq(0),
+                any(), any(Runnable.class), any()))
                 .thenReturn(completed);
         when(investmentReportVersionService.persistReportVersionWithMetadata(
                 "u_001", 20L, completed, ModelTier.STRONG.name(), null))
@@ -256,7 +262,8 @@ class DeepResearchPipelineTest {
         verify(researchTaskService).markStageForOwner(task, lease.token(), ResearchTask.Stage.AGENT_DEBATE);
         verify(checkpointService).saveSynthesis(7L, lease.token(), completed);
         verify(conversationMessageService).persistAssistantReport(20L, "u_001", "brief", "trace-1");
-        verify(researchTaskService).markSucceededForOwner(task, lease.token(), 99L);
+        verify(researchTaskService).markSucceededForOwner(
+                task, lease.token(), 99L, ResearchTask.ResultKind.FULL_REPORT);
         verify(checkpointService).deleteForCompletedTask(7L);
         verify(chatStreamEmitter).emit("trace-1", 20L, "task-final", "brief");
     }
@@ -276,10 +283,12 @@ class DeepResearchPipelineTest {
         pipeline.runFullPipeline(task, lease);
 
         verify(researchDebateService, never()).runDebate(
-                any(), any(), any(), any(Integer.class), any(Integer.class), any(), any(Runnable.class));
+                any(), any(), any(), any(Integer.class), any(Integer.class),
+                any(), any(Runnable.class), any());
         verify(investmentReportVersionService, never()).persistReportVersionWithMetadata(any(), any(), any(), any(), any());
         verify(conversationMessageService).persistAssistantReport(20L, "u_001", "insufficient", "trace-1");
-        verify(researchTaskService).markSucceededForOwner(task, lease.token(), null);
+        verify(researchTaskService).markSucceededForOwner(
+                task, lease.token(), null, ResearchTask.ResultKind.INSUFFICIENT_EVIDENCE);
         verify(chatStreamEmitter).emit("trace-1", 20L, "task-final", "insufficient");
     }
 
@@ -291,14 +300,19 @@ class DeepResearchPipelineTest {
         AnalysisState completed = AnalysisState.builder()
                 .query("q")
                 .primaryTicker("AAPL")
-                .investmentReport(InvestmentReport.builder().ticker("AAPL").recommendation("HOLD").build())
+                .investmentReport(InvestmentReport.builder()
+                        .ticker("AAPL")
+                        .recommendation("HOLD")
+                        .qualityStatus(InvestmentReport.ReportQualityStatus.VERIFIED)
+                        .build())
                 .build();
         when(checkpointService.load(9L)).thenReturn(Optional.of(
                 new ResearchTaskCheckpointService.CheckpointState(
                         ResearchTask.Stage.AGENT_DEBATE, 2, 3, state)));
         when(researchTaskService.startAttempt(task, lease.token(), ResearchTask.Stage.DATA_PREFETCH)).thenReturn(task);
         when(researchDebateService.runDebate(
-                eq("trace-1"), eq(20L), eq(state), eq(3), eq(3), any(), any(Runnable.class)))
+                eq("trace-1"), eq(20L), eq(state), eq(3), eq(3),
+                any(), any(Runnable.class), any()))
                 .thenReturn(completed);
         when(investmentReportVersionService.persistReportVersionWithMetadata(
                 "u_001", 20L, completed, ModelTier.STRONG.name(), null))
@@ -310,8 +324,10 @@ class DeepResearchPipelineTest {
 
         verify(evidenceCollector, never()).collect(any(), any(), any(), any());
         verify(researchDebateService).runDebate(
-                eq("trace-1"), eq(20L), eq(state), eq(3), eq(3), any(), any(Runnable.class));
-        verify(researchTaskService).markSucceededForOwner(task, lease.token(), 100L);
+                eq("trace-1"), eq(20L), eq(state), eq(3), eq(3),
+                any(), any(Runnable.class), any());
+        verify(researchTaskService).markSucceededForOwner(
+                task, lease.token(), 100L, ResearchTask.ResultKind.FULL_REPORT);
     }
 
     @Test
@@ -357,7 +373,8 @@ class DeepResearchPipelineTest {
         assertThat(reportJson.orElseThrow()).contains("offline-rule-fallback");
         assertThat(state.getInvestmentReport()).isSameAs(fallback);
         verify(researchTaskService).markStageForOwner(task, "owner-token", ResearchTask.Stage.REPORT_PERSIST);
-        verify(researchTaskService).markSucceededForOwner(task, "owner-token", 99L);
+        verify(researchTaskService).markSucceededForOwner(
+                task, "owner-token", 99L, ResearchTask.ResultKind.OFFLINE_FALLBACK);
     }
 
     private ResearchTask pendingTask(Long id) {

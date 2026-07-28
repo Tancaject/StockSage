@@ -141,12 +141,23 @@ class ResearchMemoryServiceTest {
     }
 
     private InvestmentReport report(List<String> citations) {
+        List<InvestmentReport.EvidenceItem> evidenceItems = citations.isEmpty()
+                ? List.of()
+                : List.of(InvestmentReport.EvidenceItem.builder()
+                .dimension("fundamentals")
+                .evidence("Revenue growth remains strong")
+                .implication("supports monitored growth")
+                .source("SEC filing")
+                .sourceEvidenceIds(List.of("e-fundamentals"))
+                .build());
         return InvestmentReport.builder()
                 .ticker("NVDA")
+                .qualityStatus(InvestmentReport.ReportQualityStatus.VERIFIED)
                 .recommendation("WATCH")
                 .rationale(List.of("Revenue growth remains strong"))
                 .riskFactors(List.of("Valuation risk"))
                 .citations(citations)
+                .evidenceItems(evidenceItems)
                 .build();
     }
 }

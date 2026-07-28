@@ -6,6 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.Coordinator;
 import com.stocksage.agent.ExecutionPlan;
 import com.stocksage.agent.PlanAction;
+import com.stocksage.harness.DeepResearchCompletionPolicy;
+import com.stocksage.harness.HarnessModels.HarnessPhase;
+import com.stocksage.harness.HarnessModels.HarnessOutcome;
+import com.stocksage.harness.HarnessModels.HarnessSnapshot;
 import com.stocksage.agent.FundamentalsAgent;
 import com.stocksage.agent.MarketAgent;
 import com.stocksage.agent.NewsAgent;
@@ -60,6 +64,7 @@ public class ToolPrefetchService {
     private final DeepResearchPipeline deepResearchPipeline;
     private final InvestmentReportVersionService investmentReportVersionService;
     private final ResearchTaskService researchTaskService;
+    private final ResearchTaskCheckpointService researchTaskCheckpointService;
     private final ResearchTaskQueue researchTaskQueue;
     private final KnowledgeIngestionService knowledgeIngestionService;
     private final SkillExecutionService skillExecutionService;
@@ -346,16 +351,52 @@ public class ToolPrefetchService {
         try {
             DeepEvidenceCollector.EvidenceCollection evidence = deepEvidenceCollector.collect(
                     primaryTicker, userQuery, traceId, conversationId);
+            if (evidence.harnessDecision().outcome() == HarnessOutcome.RECOVER) {
+                List<com.stocksage.harness.HarnessModels.RecoveryAction> recoveryActions =
+                        evidence.harnessDecision().recoveryActions();
+                evidence.state().setHarnessSnapshot(HarnessSnapshot.from(
+                        DeepResearchCompletionPolicy.POLICY_ID,
+                        Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION),
+                        HarnessPhase.EVIDENCE,
+                        evidence.harnessDecision(),
+                        Map.of()
+                ));
+                researchTaskCheckpointService.saveHarnessSnapshot(
+                        runningTask.getId(), acquired.token(), evidence.state());
+                evidence = deepEvidenceCollector.recover(
+                        evidence,
+                        recoveryActions,
+                        traceId,
+                        conversationId
+                );
+                evidence.state().setHarnessSnapshot(HarnessSnapshot.from(
+                        DeepResearchCompletionPolicy.POLICY_ID,
+                        Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION),
+                        HarnessPhase.EVIDENCE,
+                        evidence.harnessDecision(),
+                        recoveryActions.stream().collect(
+                                java.util.stream.Collectors.toUnmodifiableMap(
+                                        action -> action,
+                                        action -> 1,
+                                        Math::max
+                                ))
+                ));
+            }
             context.append(evidence.contextMarkdown());
             AnalysisState agentState = evidence.state();
-            if (!evidence.sufficientForRecommendation()) {
+            if (evidence.harnessDecision().outcome() != HarnessOutcome.PASS) {
                 String answer = reportRenderer.buildInsufficientEvidenceReport(
                         primaryTicker,
                         evidence.tickerResolved(),
                         evidence.fundamentalsOk(),
                         evidence.marketOk()
                 );
-                researchTaskService.markSucceededForOwner(runningTask, acquired.token(), null);
+                ResearchTask.ResultKind resultKind =
+                        evidence.harnessDecision().outcome() == HarnessOutcome.BLOCK
+                                ? ResearchTask.ResultKind.POLICY_BLOCKED
+                                : ResearchTask.ResultKind.INSUFFICIENT_EVIDENCE;
+                researchTaskService.markSucceededForOwner(
+                        runningTask, acquired.token(), null, resultKind);
                 return new PreparedToolContext(context.toString().trim(), answer, null, traceId);
             }
 
@@ -366,7 +407,12 @@ public class ToolPrefetchService {
                 InvestmentReport report = reusableReport.orElseThrow();
                 agentState.setInvestmentReport(report);
                 appendContextSection(context, "Research Manager", safeReportJson(report));
-                researchTaskService.markSucceededForOwner(runningTask, acquired.token(), null);
+                researchTaskService.markSucceededForOwner(
+                        runningTask,
+                        acquired.token(),
+                        null,
+                        ResearchTask.ResultKind.FULL_REPORT
+                );
                 return new PreparedToolContext(
                         context.toString().trim(), reportRenderer.buildFinalAnswerBrief(agentState), null, traceId);
             }

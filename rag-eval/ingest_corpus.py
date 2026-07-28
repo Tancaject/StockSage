@@ -92,9 +92,12 @@ def parse_args():
     parser.add_argument("--sleep", type=float, default=2.0, help="请求间隔秒数（对 SEC 友好）")
     parser.add_argument("--admin-header", default=os.environ.get("STOCKSAGE_ADMIN_HEADER_NAME", "X-StockSage-Admin-Token"),
                         help="admin 鉴权头名（默认 X-StockSage-Admin-Token）")
-    parser.add_argument("--admin-token", default=os.environ.get("STOCKSAGE_ADMIN_TOKEN", "local-admin"),
-                        help="admin token；缺省取环境变量 STOCKSAGE_ADMIN_TOKEN，再缺省为 local-admin")
-    return parser.parse_args()
+    parser.add_argument("--admin-token", default=os.environ.get("STOCKSAGE_ADMIN_TOKEN", ""),
+                        help="admin token；缺省取环境变量 STOCKSAGE_ADMIN_TOKEN，必须显式配置")
+    args = parser.parse_args()
+    if not args.admin_token.strip():
+        parser.error("--admin-token or STOCKSAGE_ADMIN_TOKEN is required")
+    return args
 
 
 def main():

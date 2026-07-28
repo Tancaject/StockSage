@@ -56,6 +56,12 @@ def main() -> int:
     parser.add_argument("--baseline", type=Path)
     parser.add_argument("--rag", type=Path)
     parser.add_argument("--trace", type=Path)
+    parser.add_argument("--harness", type=Path)
+    parser.add_argument(
+        "--harness-live",
+        type=Path,
+        help="Optional harness_live_eval_v1 result from a real DEEP HTTP run",
+    )
     parser.add_argument(
         "--dialog",
         type=Path,
@@ -74,6 +80,8 @@ def main() -> int:
             load_json(args.rag) if args.rag else None,
             load_json(args.trace) if args.trace else None,
             load_json(args.dialog) if args.dialog else None,
+            load_json(args.harness) if args.harness else None,
+            load_json(args.harness_live) if args.harness_live else None,
         )
         args.output.write_text(
             json.dumps(report, ensure_ascii=False, indent=2) + "\n",

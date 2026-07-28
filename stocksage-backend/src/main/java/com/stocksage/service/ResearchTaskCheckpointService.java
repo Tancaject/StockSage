@@ -53,6 +53,18 @@ public class ResearchTaskCheckpointService {
         upsert(taskId, state, ResearchTask.Stage.DATA_PREFETCH, 0, 0);
     }
 
+    /**
+     * Persists the harness decision before a recovery action is executed.
+     *
+     * <p>Unlike ordinary resumability checkpoints this is fail-closed: losing the owner fence,
+     * serialization failure, or database failure prevents the recovery side effect.</p>
+     */
+    @Transactional
+    public void saveHarnessSnapshot(Long taskId, String leaseToken, AnalysisState state) {
+        requireOwnership(taskId, leaseToken);
+        upsertStrict(taskId, state, ResearchTask.Stage.DATA_PREFETCH, 0, 0);
+    }
+
     @Transactional
     public void saveDebateRound(
             Long taskId,
@@ -179,6 +191,32 @@ public class ResearchTaskCheckpointService {
         } catch (Exception e) {
             log.warn("Checkpoint save failed, taskId={}, continuing without checkpoint: {}", taskId, e.getMessage());
         }
+    }
+
+    private void upsertStrict(
+            Long taskId,
+            AnalysisState state,
+            ResearchTask.Stage stage,
+            int roundsCompleted,
+            int plannedRounds
+    ) {
+        Optional<ResearchTaskCheckpoint> existing = repository.findByTaskId(taskId);
+        ResearchTaskCheckpoint entity = existing.orElseGet(ResearchTaskCheckpoint::new);
+        ResearchTask.Stage effectiveStage = entity.getStageCompleted() != null
+                && entity.getStageCompleted().ordinal() > stage.ordinal()
+                ? entity.getStageCompleted()
+                : stage;
+        entity.setTaskId(taskId);
+        entity.setStageCompleted(effectiveStage);
+        entity.setDebateRoundsCompleted(Math.max(
+                safeInt(entity.getDebateRoundsCompleted()), roundsCompleted));
+        entity.setPlannedRounds(Math.max(safeInt(entity.getPlannedRounds()), plannedRounds));
+        try {
+            entity.setPayloadJson(objectMapper.writeValueAsString(state));
+        } catch (JsonProcessingException error) {
+            throw new IllegalStateException("Unable to serialize harness snapshot", error);
+        }
+        repository.saveAndFlush(entity);
     }
 
     private void requireOwnership(Long taskId, String leaseToken) {

@@ -54,6 +54,13 @@ public class ResearchTask {
         FAILED
     }
 
+    public enum ResultKind {
+        FULL_REPORT,
+        INSUFFICIENT_EVIDENCE,
+        OFFLINE_FALLBACK,
+        POLICY_BLOCKED
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -92,6 +99,10 @@ public class ResearchTask {
 
     @Column(name = "result_report_version_id")
     private Long resultReportVersionId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "result_kind", length = 32)
+    private ResultKind resultKind;
 
     @Column(name = "started_at")
     private LocalDateTime startedAt;

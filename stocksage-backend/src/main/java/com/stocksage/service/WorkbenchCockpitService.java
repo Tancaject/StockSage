@@ -238,6 +238,7 @@ public class WorkbenchCockpitService {
                 task.getStage() == null ? "" : task.getStage().name(),
                 task.getAttempts(),
                 task.getResultReportVersionId(),
+                task.getResultKind() == null ? null : task.getResultKind().name(),
                 task.getStartedAt(),
                 task.getHeartbeatAt(),
                 task.getCompletedAt(),

@@ -7,6 +7,7 @@ StockSage 是一个面向股票研究场景的 AI 投研工作台，将多 Agent
 ## 核心能力
 
 - **多 Agent 研究**：Coordinator 将问题路由到行情、基本面、新闻和深度研究路径；DEEP 模式由 Bull Researcher、Bear Researcher 与 Research Manager 生成结构化报告。
+- **运行时完成 Harness**：DEEP 研究使用结构化 Evidence Ledger、确定性证据/报告门、有限定向恢复和可持久化业务终态，证据不足时明确“暂不评级”，不伪装成 HOLD。
 - **可溯源 RAG**：支持 SEC EDGAR 财报入库、Parent-Child 分块、向量与关键词混合检索、RRF 融合、rerank 和引用追踪。
 - **可靠的后台任务**：Redis Stream 驱动深度研究，MySQL checkpoint 支持阶段恢复，SSE 支持实时进度与断线回放。
 - **投研工作台**：提供自选股、K 线、事件分析、对比研究、报告版本和 IBKR 只读持仓诊断。
@@ -144,7 +145,7 @@ npm run dev
 | `POST /api/docs/edgar/ingest` | SEC 财报入库 |
 | `GET /api/trace/{traceId}` | 研究链路追踪 |
 
-`/api/docs/**`、`/api/eval/**` 等管理接口默认需要 `X-StockSage-Admin-Token`。Data service 的完整 OpenAPI 文档由 FastAPI 提供。
+`/api/docs/**`、`/api/eval/**` 等管理接口需要 `X-StockSage-Admin-Token`。后端不再提供可预测的默认 token；启动前必须显式设置 `STOCKSAGE_ADMIN_TOKEN`，未配置或将 `STOCKSAGE_ADMIN_ENABLED=false` 时管理接口会 fail-closed 并返回 `503`。Data service 的完整 OpenAPI 文档由 FastAPI 提供。
 
 ## RAG 管线
 
@@ -180,11 +181,30 @@ SEC / 本地文档
 
 完整 RAG 评估需要 backend、data-service、MySQL、Redis、Milvus 和 Ollama 全部运行。
 
+Harness 的离线规则门禁与真实 DEEP 链路分开执行：
+
+```powershell
+# 生产 Java Policy 的固定 golden set
+python rag-eval\run_harness_eval.py --fail-on-gate
+
+# backend/data-service/MySQL/Redis/Milvus 与模型配置可用时
+python rag-eval\run_harness_live_eval.py --fail-on-gate
+```
+
+离线集包含 80 个语义唯一的生产 Policy 场景（Evidence 48、Report 32），精确校验
+outcome、违规码、恢复动作和是否允许评级；少于 60 条、覆盖矩阵不完整、fixture 重复
+或数据集 hash 缺失都会使门禁失败。
+
+在线结果写入忽略目录 `rag-eval/results/`，只保留脱敏后的任务终态、Harness
+decision、恢复次数、工具动作名称与耗时，不保存回答正文、证据正文或凭据。需要把两层
+Harness 结果并入统一 Agent Eval 时，分别传入 `--harness` 和 `--harness-live`。
+
 ## 设计文档
 
 - [RAG 评估与质量门禁](RAG_EVALUATION.md)
 - [DEEP 后台任务设计决策](docs/superpowers/specs/2026-07-09-ws1-decisions.md)
 - [身份与数据隔离设计](docs/superpowers/specs/2026-07-04-identity-multitenancy-design.md)
+- [投研运行时 Harness 设计与实施计划](docs/architecture/research-harness-design.md)
 
 ## 能力边界
 

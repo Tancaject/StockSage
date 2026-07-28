@@ -173,6 +173,7 @@
                 <span class="status-pill" :class="task.tone">{{ task.statusLabel }}</span>
                 <strong>{{ task.stageLabel }}</strong>
                 <small>{{ task.attempts }} 次尝试 · {{ formatDate(task.timeLabel) }}</small>
+                <p v-if="task.resultKindLabel">{{ task.resultKindLabel }}</p>
                 <p v-if="task.errorMessage">{{ task.errorMessage }}</p>
                 <p v-if="task.deadLettered" class="task-dlq-hint">{{ task.recoveryHint }}</p>
               </div>
@@ -198,8 +199,11 @@
             </button>
           </div>
 
+          <div v-if="reportVersionsLoading" class="report-library-state" role="status">
+            正在读取报告历史…
+          </div>
           <PanelError
-            v-if="reportVersionsError"
+            v-else-if="reportVersionsError"
             message="报告服务暂时不可用"
             :detail="reportVersionsError"
             @retry="loadReportVersions"
@@ -218,14 +222,21 @@
               v-for="row in reportVersionRows"
               :key="row.id || `${row.ticker}-${row.reportVersion}`"
               class="report-version-row"
+              :class="{ selected: String(selectedReportId) === String(row.id) }"
               type="button"
+              :aria-pressed="String(selectedReportId) === String(row.id)"
               @click="applyReportVersion(row)"
             >
               <span class="version-main">
                 <strong>{{ row.versionLabel }}</strong>
                 <small>{{ formatDate(row.timeLabel) }}</small>
               </span>
-              <span class="version-recommendation">{{ row.recommendation || 'UNKNOWN' }}</span>
+              <span class="version-statuses">
+                <span class="version-recommendation">{{ row.recommendation || 'UNKNOWN' }}</span>
+                <span class="version-review-status" :class="reviewStatusClass(row.reviewStatus)">
+                  {{ row.reviewStatusLabel }}
+                </span>
+              </span>
               <span class="version-hashes">
                 <small>快照 {{ row.snapshotLabel }}</small>
                 <small>上下文 {{ row.contextLabel }}</small>
@@ -235,6 +246,16 @@
             </button>
           </div>
         </div>
+
+        <ReportReviewPanel
+          :detail="reportDetail"
+          :loading="reportDetailLoading"
+          :error="reportDetailError"
+          :saving="reportReviewSaving"
+          :save-error="reportReviewError"
+          @retry="reloadSelectedReport"
+          @submit-review="handleReportReview"
+        />
       </section>
 
       <section v-else class="workspace-grid ops-grid">
@@ -300,7 +321,14 @@ import {
   SwitchButton,
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { fetchInvestmentReportVersions, fetchStockCockpit, runWorkbenchHealthChecks, searchWorkbenchStocks } from '../api/workbench.js'
+import {
+  fetchInvestmentReportDetail,
+  fetchInvestmentReportVersions,
+  fetchStockCockpit,
+  runWorkbenchHealthChecks,
+  searchWorkbenchStocks,
+  updateInvestmentReportReview,
+} from '../api/workbench.js'
 import { addToWatchList, getUserProfile, removeFromWatchList } from '../api/chat.js'
 import { getCurrentUser, logout } from '../api/auth.js'
 import { useResearchRun } from '../lib/useResearchRun.js'
@@ -312,6 +340,7 @@ import NewsPanel from '../components/workbench/NewsPanel.vue'
 import CompareDesk from '../components/workbench/CompareDesk.vue'
 import PortfolioDesk from '../components/workbench/PortfolioDesk.vue'
 import WorkbenchRunPanel from '../components/workbench/WorkbenchRunPanel.vue'
+import ReportReviewPanel from '../components/workbench/ReportReviewPanel.vue'
 import PanelEmpty from '../components/common/PanelEmpty.vue'
 import PanelError from '../components/common/PanelError.vue'
 import { buildPrimaryNavItems, getReportSurfaceLabels } from '../lib/productUi.js'
@@ -324,6 +353,7 @@ import {
   buildWatchlistFromProfile,
   buildTickerSuggestions,
   markHealthCheck,
+  normalizeInvestmentReportDetail,
   normalizeCockpit,
   normalizeTicker,
   summarizeHealthChecks,
@@ -379,12 +409,20 @@ const healthChecks = ref(buildHealthChecks({ backend: false, profile: false, rag
 const reportVersions = ref([])
 const reportVersionsLoading = ref(false)
 const reportVersionsError = ref('')
+const selectedReportId = ref(null)
+const reportDetail = ref(null)
+const reportDetailLoading = ref(false)
+const reportDetailError = ref('')
+const reportReviewSaving = ref(false)
+const reportReviewError = ref('')
 const cockpitRaw = ref(null)
 const cockpitLoading = ref(false)
 const cockpitError = ref('')
 const isRunPanelCollapsed = ref(false)
 const activeLensTab = ref('brief')
 let cockpitRequestId = 0
+let reportVersionsRequestId = 0
+let reportDetailRequestId = 0
 
 const marketIndexes = ref([
   { name: '上证指数', code: 'SSEC', value: '3,150.20', change: '+14.15', changePercent: '+0.45', points: [20, 25, 23, 28, 30, 27, 32, 35], isUp: true },
@@ -446,16 +484,23 @@ watch(() => workbenchRun.value.status, status => {
 })
 
 watch(activeTab, tab => {
-  if (tab === 'reports') {
+  if (tab === 'reports' && !reportVersionsLoading.value) {
     loadReportVersions()
   }
 })
 
 watch(selectedTicker, ticker => {
+  reportVersionsRequestId += 1
+  reportDetailRequestId += 1
   reportTicker.value = ticker
   cockpitRaw.value = null
   reportVersions.value = []
   reportVersionsError.value = ''
+  selectedReportId.value = null
+  reportDetail.value = null
+  reportDetailLoading.value = false
+  reportDetailError.value = ''
+  reportReviewError.value = ''
   loadStockCockpit()
   loadReportVersions({ silent: true })
 })
@@ -602,11 +647,15 @@ function handleCockpitResearch({ mode, ticker, eventText, eventSource }) {
 }
 
 /** LatestBrief open-report handler */
-function handleOpenReport(versionId) {
+async function handleOpenReport(versionId) {
   activeTab.value = 'reports'
   if (versionId) {
-    const row = reportVersionRows.value.find(r => r.id === versionId)
-    if (row) applyReportVersion(row)
+    const row = reportVersionRows.value.find(r => String(r.id) === String(versionId))
+    if (row) {
+      await applyReportVersion(row)
+    } else {
+      await loadReportVersions({ preferredReportId: versionId })
+    }
   }
 }
 
@@ -716,22 +765,59 @@ async function runHealthChecks() {
   }
 }
 
-async function loadReportVersions({ silent = false } = {}) {
+async function loadReportVersions({ silent = false, preferredReportId = null } = {}) {
+  const requestId = ++reportVersionsRequestId
+  const requestedTicker = reportTickerNormalized.value
+  let targetRow = null
   if (!silent) {
     reportVersionsLoading.value = true
   }
   reportVersionsError.value = ''
   try {
-    reportVersions.value = await fetchInvestmentReportVersions({
-      ticker: reportTickerNormalized.value,
+    const rows = await fetchInvestmentReportVersions({
+      ticker: requestedTicker,
       limit: 20,
     })
+    if (
+      requestId !== reportVersionsRequestId
+      || requestedTicker !== reportTickerNormalized.value
+    ) return
+    reportVersions.value = Array.isArray(rows) ? rows : []
+
+    if (activeTab.value === 'reports') {
+      const targetId = preferredReportId ?? selectedReportId.value
+      targetRow = targetId === null || targetId === undefined
+        ? reportVersions.value[0]
+        : reportVersions.value.find(row => String(row?.id) === String(targetId))
+          || reportVersions.value[0]
+
+      if (!targetRow) {
+        reportDetailRequestId += 1
+        selectedReportId.value = null
+        reportDetail.value = null
+        reportDetailLoading.value = false
+        reportDetailError.value = ''
+      }
+    }
   } catch (error) {
+    if (requestId !== reportVersionsRequestId) return
     reportVersionsError.value = error.message || '未知错误'
   } finally {
-    if (!silent) {
+    if (requestId === reportVersionsRequestId) {
       reportVersionsLoading.value = false
     }
+  }
+
+  if (
+    requestId === reportVersionsRequestId
+    &&
+    targetRow
+    && (
+      String(selectedReportId.value) !== String(targetRow.id)
+      || (!reportDetail.value && !reportDetailLoading.value)
+    )
+  ) {
+    await applyReportVersion(targetRow)
   }
 }
 
@@ -771,8 +857,86 @@ async function loadStockCockpit({ silent = false } = {}) {
   }
 }
 
-function applyReportVersion(row) {
+async function applyReportVersion(row) {
+  const reportId = row?.id
+  if (reportId === null || reportId === undefined || String(reportId).trim() === '') return
+
+  const requestId = ++reportDetailRequestId
+  selectedReportId.value = reportId
   reportTicker.value = row.ticker || reportTicker.value
+  reportDetail.value = null
+  reportDetailLoading.value = true
+  reportDetailError.value = ''
+  reportReviewError.value = ''
+
+  try {
+    const payload = await fetchInvestmentReportDetail(reportId)
+    if (requestId !== reportDetailRequestId || String(selectedReportId.value) !== String(reportId)) return
+    const normalized = normalizeInvestmentReportDetail(payload)
+    if (normalized.summary.id === null || normalized.summary.id === undefined) {
+      normalized.summary.id = reportId
+    }
+    reportDetail.value = normalized
+  } catch (error) {
+    if (requestId !== reportDetailRequestId || String(selectedReportId.value) !== String(reportId)) return
+    reportDetailError.value = error.message || '未知错误'
+  } finally {
+    if (requestId === reportDetailRequestId && String(selectedReportId.value) === String(reportId)) {
+      reportDetailLoading.value = false
+    }
+  }
+}
+
+function reloadSelectedReport() {
+  if (selectedReportId.value === null || selectedReportId.value === undefined) return
+  const row = reportVersionRows.value.find(
+    item => String(item.id) === String(selectedReportId.value),
+  )
+  applyReportVersion(row || {
+    id: selectedReportId.value,
+    ticker: reportTickerNormalized.value,
+  })
+}
+
+async function handleReportReview({ status, comment, expectedLockVersion }) {
+  const reportId = selectedReportId.value
+  if (reportId === null || reportId === undefined || reportReviewSaving.value) return
+
+  reportReviewSaving.value = true
+  reportReviewError.value = ''
+  try {
+    const payload = await updateInvestmentReportReview(reportId, {
+      status,
+      comment,
+      expectedLockVersion,
+    })
+    const normalized = normalizeInvestmentReportDetail(payload)
+    if (normalized.summary.id === null || normalized.summary.id === undefined) {
+      normalized.summary.id = reportId
+    }
+
+    reportVersionsRequestId += 1
+    reportVersionsLoading.value = false
+    reportVersions.value = reportVersions.value.map(row => (
+      String(row?.id) === String(reportId)
+        ? { ...row, ...normalized.summary }
+        : row
+    ))
+    if (String(selectedReportId.value) === String(reportId)) {
+      reportDetail.value = normalized
+    }
+    ElMessage.success(`审核状态已更新为${normalized.summary.reviewStatusLabel}`)
+  } catch (error) {
+    if (String(selectedReportId.value) === String(reportId)) {
+      reportReviewError.value = error.message || '审核更新失败'
+    }
+  } finally {
+    reportReviewSaving.value = false
+  }
+}
+
+function reviewStatusClass(status) {
+  return String(status || 'unknown').trim().toLowerCase().replaceAll('_', '-')
 }
 
 function formatMetric(value) {
@@ -1441,7 +1605,8 @@ function handleSearchSelect(raw) {
 }
 
 .report-library-grid {
-  grid-template-columns: minmax(480px, 960px);
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  align-items: start;
 }
 
 .ops-grid {
@@ -1717,6 +1882,25 @@ function handleSearchSelect(raw) {
   border-color: var(--accent);
 }
 
+.report-version-row.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.report-library-state {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
 .version-main {
   min-width: 0;
   display: grid;
@@ -1750,6 +1934,45 @@ function handleSearchSelect(raw) {
   color: var(--accent);
   font-size: 11px;
   font-weight: 700;
+}
+
+.version-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.version-review-status {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.version-review-status.in-review {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.version-review-status.approved {
+  background: rgba(37, 160, 105, 0.14);
+  color: var(--positive);
+}
+
+.version-review-status.needs-research {
+  background: rgba(217, 142, 35, 0.14);
+  color: #b36d0d;
+}
+
+.version-review-status.rejected {
+  background: rgba(207, 70, 70, 0.13);
+  color: var(--danger);
 }
 
 .version-hashes,
@@ -2299,6 +2522,10 @@ function handleSearchSelect(raw) {
   .task-row,
   .report-version-row {
     grid-template-columns: 1fr;
+  }
+
+  .version-statuses {
+    justify-content: flex-start;
   }
 }
 

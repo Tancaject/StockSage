@@ -105,7 +105,7 @@ class ResearchTaskRepositoryTest {
                 stale.getId(), "owner-a", "owner-c", cutoff, 3, now.plusNanos(1));
         int oldHeartbeat = repository.heartbeatForOwner(stale.getId(), "owner-a", now.plusSeconds(1));
         int oldCompletion = repository.completeForOwner(
-                stale.getId(), "owner-a", 99L, now.plusSeconds(1));
+                stale.getId(), "owner-a", 99L, "FULL_REPORT", now.plusSeconds(1));
         entityManager.flush();
         entityManager.clear();
 

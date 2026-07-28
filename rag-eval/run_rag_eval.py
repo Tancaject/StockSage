@@ -449,10 +449,13 @@ def parse_args():
     parser.add_argument("--no-phoenix", action="store_true")
     parser.add_argument(
         "--admin-token",
-        default=os.environ.get("STOCKSAGE_ADMIN_TOKEN", "local-admin"),
-        help="X-StockSage-Admin-Token header value; defaults to STOCKSAGE_ADMIN_TOKEN env var or 'local-admin'.",
+        default=os.environ.get("STOCKSAGE_ADMIN_TOKEN", ""),
+        help="X-StockSage-Admin-Token header value; defaults to STOCKSAGE_ADMIN_TOKEN and must be configured.",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if not args.admin_token.strip():
+        parser.error("--admin-token or STOCKSAGE_ADMIN_TOKEN is required")
+    return args
 
 
 def main():

@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -20,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = SecurityTestController.class)
 @AutoConfigureMockMvc
 @Import(SecurityConfig.class)
+@TestPropertySource(properties = "stocksage.admin.token=test-only-admin-token")
 class SecurityConfigTest {
 
     @Autowired
@@ -55,7 +57,7 @@ class SecurityConfigTest {
     @Test
     void adminTokenEndpointsAreNotBlockedByCsrf() throws Exception {
         mockMvc.perform(post("/api/eval/rag")
-                        .header("X-StockSage-Admin-Token", "local-admin"))
+                        .header("X-StockSage-Admin-Token", "test-only-admin-token"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("eval"));
     }

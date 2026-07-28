@@ -1,5 +1,10 @@
 package com.stocksage.agent;
 
+import com.stocksage.harness.DeepResearchCompletionPolicy;
+import com.stocksage.harness.HarnessModels.HarnessDecision;
+import com.stocksage.harness.HarnessModels.HarnessOutcome;
+import com.stocksage.harness.HarnessModels.SynthesisResult;
+import com.stocksage.harness.ResearchHarness;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.service.DeepResearchPipeline;
@@ -32,13 +37,17 @@ class ResearchDebateServiceResumeTest {
     private final ResearchManager researchManager = mock(ResearchManager.class);
     private final DebateRoundPlanner debateRoundPlanner = mock(DebateRoundPlanner.class);
     private final ChatStreamEmitter chatStreamEmitter = mock(ChatStreamEmitter.class);
+    private final ResearchHarness researchHarness = mock(ResearchHarness.class);
+    private final DeepResearchCompletionPolicy completionPolicy = new DeepResearchCompletionPolicy();
     private final ResearchDebateService service = new ResearchDebateService(
             bullResearcher,
             bearResearcher,
             researchManager,
             debateRoundPlanner,
             mock(TraceService.class),
-            chatStreamEmitter
+            chatStreamEmitter,
+            researchHarness,
+            completionPolicy
     );
 
     @BeforeEach
@@ -48,7 +57,14 @@ class ResearchDebateServiceResumeTest {
         when(bearResearcher.argue(any(), anyInt()))
                 .thenAnswer(invocation -> Flux.just("bear-r" + invocation.getArgument(1, Integer.class)));
         InvestmentReport report = InvestmentReport.builder().analystSummary("done").build();
-        when(researchManager.synthesizeStreaming(any(), any(), any(), any())).thenReturn(Mono.just(report));
+        when(researchManager.synthesizeStreamingResult(any(), any(), any(), any()))
+                .thenReturn(Mono.just(new SynthesisResult(
+                        report,
+                        com.stocksage.harness.HarnessModels.ParseStatus.VALID,
+                        List.of()
+                )));
+        when(researchHarness.evaluateReport(any(), any(), any(), any(), any()))
+                .thenReturn(new HarnessDecision(HarnessOutcome.PASS, List.of(), List.of()));
     }
 
     @Test

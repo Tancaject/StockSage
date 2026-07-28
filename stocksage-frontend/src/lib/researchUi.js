@@ -120,6 +120,7 @@ export function buildResearchTimeline({ reasoning = [], charts = [], hasAnswer =
   const thoughts = items.filter(item => item.type === 'thought' && !summarizeCalledTool(item.content))
   const actions = items.filter(item => item.type === 'action')
   const observations = items.filter(item => item.type === 'observation')
+  const harnessEvents = items.filter(item => item.metadata?.policyId && item.metadata?.decision)
   const timeline = []
 
   const planThought = routeDecisions[0] || thoughts[0]
@@ -140,6 +141,25 @@ export function buildResearchTimeline({ reasoning = [], charts = [], hasAnswer =
       label: '数据获取',
       detail: dataStage.detail,
       meta: dataStage.meta,
+    })
+  }
+
+  if (harnessEvents.length > 0) {
+    const latest = harnessEvents[harnessEvents.length - 1]
+    const metadata = latest.metadata || {}
+    const recoveries = Array.isArray(metadata.recoveryActions)
+      ? metadata.recoveryActions.join('、')
+      : ''
+    const violations = Array.isArray(metadata.violationCodes)
+      ? metadata.violationCodes.join('、')
+      : ''
+    timeline.push({
+      kind: `harness-${String(metadata.decision || '').toLowerCase()}`,
+      label: metadata.phase === 'REPORT' ? '报告验收' : '证据验收',
+      detail: `${metadata.policyId}：${metadata.decision}`,
+      meta: recoveries
+        ? `恢复动作：${recoveries}`
+        : (violations ? `约束：${violations}` : '完成策略已通过'),
     })
   }
 

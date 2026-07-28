@@ -400,6 +400,72 @@
 
 ---
 
+## 阶段 G：投研运行时完成 Harness
+
+> 状态：G0–G4 已实现；离线 Policy、真实 DEEP live 与 Testcontainers PIT 门禁均已通过。G5 的策略骨架已加入，后续按独立切片接入各 route。
+>
+> 设计与逐阶段实施清单：
+> [docs/architecture/research-harness-design.md](docs/architecture/research-harness-design.md)
+>
+> 决策：不复制通用 Agent Loop。新增阶段门禁式 `ResearchHarness`，
+> 复用现有 Coordinator、Skill/Capability、ResearchTask、checkpoint、Trace、SSE 和 Eval；
+> 第一版只覆盖 DEEP 证据与报告完成判定。
+
+### G0（P0）：结构化契约与只观察运行
+
+- [x] 定义 `TargetIdentity / EvidenceEnvelope / EvidenceLedger`
+- [x] 定义 `ResearchCompletionPolicy / HarnessDecision / RecoveryAction`
+- [x] 实现 `DeepResearchCompletionPolicy` 并完成只观察阶段
+- [x] 保持 G0 用户输出不变并补序列化、规则表和脱敏测试
+
+### G1（P0）：DEEP 证据门与定向恢复
+
+- [x] 后台 worker 与 inline fallback 共用同一 Policy
+- [x] 基本面和行情均通过才允许完整五档评级
+- [x] 每个缺失证据维度最多补采一次
+- [x] 证据不足输出“暂不评级”，不把降级映射为 HOLD
+- [x] 只展示本次真实 Ledger 来源
+
+### G2（P0）：报告门与一次 Manager 修复
+
+- [x] `ResearchManager` 返回 `SynthesisResult`
+- [x] EvidenceItem 增加 `sourceEvidenceIds`
+- [x] 校验结构、引用集合、标的一致性和缺失维度声明
+- [x] Manager 最多重新综合一次，Bull/Bear 不重跑
+- [x] 非法 JSON 不能成为有效 HOLD
+
+### G3（P0–P1）：恢复、终态、缓存与记忆闭环
+
+- [x] HarnessSnapshot 严格 owner-fenced 写入现有 checkpoint
+- [x] 新增 `ResearchTask.ResultKind`，不改变 Status/Stage
+- [x] policy version 和稳定 Evidence hash 纳入缓存验收
+- [x] cache hit 返回前重新验收
+- [x] Research Memory 只摄取 VERIFIED/FULL_REPORT
+- [x] 离线报告明确标为 OFFLINE_FALLBACK
+
+### G4（P1）：Harness Eval、前端解释与强制切换
+
+- [x] 将 Harness Golden Set 扩展为严格 V2：80 个语义唯一 case（Evidence 48 / Report 32），精确断言完整 decision contract，并对数量、覆盖、重复 fixture 与数据集 hash 设硬门禁
+- [x] Trace/Workbench 展示验收、补采、降级和业务终态
+- [x] 离线确定性门禁中关键违规拦截、无证据推荐、恢复越界和 owner-fence 违规均为 0
+- [x] Eval 门禁通过后删除旧 OR/string 判断和临时观察开关
+- [x] 固化真实 HTTP/SSE DEEP 验收器，并把安全终态、ResultKind、Harness Trace、恢复预算和延迟接入 Agent Eval
+
+### G5（P1）：扩展 MARKET、NEWS 与 RAG
+
+- [ ] 将已加入的 Market/News CompletionPolicy 骨架补齐 as-of、样本量、target/time-window 规则并接入 route
+- [ ] 将已加入的 RAG CompletionPolicy 骨架补齐 target/citation/no-answer 规则并接入 route
+- [ ] DEEP evidence 逐步迁移到现有 CapabilityGateway
+- [ ] 至少两个策略稳定后，再评估 Skill `completionPolicyId`
+- [x] LLM-as-Judge 仅用于离线 Eval，不进入请求热路径
+
+> G5 前置门禁已于 2026-07-24 满足：真实 NVDA DEEP 任务得到
+> `FULL_REPORT`，evidence/report 均为 `PASS`，安全终态率 1.0；`verify -Pit`
+> 同时通过 15/15。本轮只完成验收层，没有顺带激活 MARKET/NEWS/RAG Policy
+> 或迁移 DEEP CapabilityGateway，后续仍按上面的独立切片实施。
+
+---
+
 ## 待定项（低优先级）
 
 - [x] 提示词再收敛一轮

@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 
 SCHEMA_VERSION = "agent_eval_v1"
+SHA256_PATTERN = re.compile(r"^[0-9a-fA-F]{64}$")
 
 
 def percentile(values: list[float], quantile: float) -> float | None:
@@ -22,6 +24,22 @@ def percentile(values: list[float], quantile: float) -> float | None:
 
 def not_run(reason: str) -> dict[str, Any]:
     return {"status": "not_run", "reason": reason}
+
+
+def is_sha256(value: Any) -> bool:
+    return isinstance(value, str) and SHA256_PATTERN.fullmatch(value) is not None
+
+
+def normalize_observed_values(values: Any) -> list[str]:
+    if not isinstance(values, list):
+        return []
+    return sorted(
+        {
+            str(value).strip()
+            for value in values
+            if value is not None and str(value).strip()
+        }
+    )
 
 
 def normalize_planner(payload: dict[str, Any]) -> dict[str, Any]:
@@ -165,22 +183,331 @@ def build_report(
     rag_payload: dict[str, Any] | None = None,
     trace_payload: dict[str, Any] | None = None,
     dialog_payload: dict[str, Any] | None = None,
+    harness_payload: dict[str, Any] | None = None,
+    harness_live_payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     planner = normalize_planner(planner_payload)
     baseline = normalize_planner(baseline_payload) if baseline_payload else None
     delta = metric_delta(planner, baseline)
     gate_results = evaluate_gates(planner, delta, gates)
-    status = "failed" if any(gate["status"] == "failed" for gate in gate_results) else "passed"
+    expected_policy_id = gates.get("harness_policy_id_expected", "deep-equity-v1")
+    expected_policy_version = gates.get("harness_policy_version_expected", 2)
+    if harness_payload is not None:
+        harness_engine = harness_payload.get("engine")
+        harness_schema = harness_payload.get("schema_version")
+        harness_case_schema = harness_payload.get("case_schema_version")
+        harness_policy_id = harness_payload.get("policy_id")
+        harness_policy_version = harness_payload.get("policy_version")
+        harness_status = harness_payload.get("status")
+        harness_case_count = int(harness_payload.get("case_count", 0))
+        harness_accuracy = float(harness_payload.get("exact_accuracy", 0.0))
+        harness_decision_rate = float(
+            harness_payload.get("decision_contract_exact_match_rate", 0.0)
+        )
+        harness_violation_rate = float(
+            harness_payload.get("violation_exact_match_rate", 0.0)
+        )
+        harness_recovery_rate = float(
+            harness_payload.get("recovery_exact_match_rate", 0.0)
+        )
+        harness_unsafe = int(harness_payload.get("unsafe_pass_count", 0))
+        harness_coverage = harness_payload.get("coverage") or {}
+        harness_coverage_status = (
+            harness_coverage.get("status")
+            if isinstance(harness_coverage, dict)
+            else None
+        )
+        harness_dataset_hash = harness_payload.get("dataset_sha256")
+        harness_dataset_hash_valid = is_sha256(harness_dataset_hash)
+        gate_results.extend([
+            {
+                "metric": "harness_engine",
+                "value": harness_engine,
+                "operator": "==",
+                "threshold": "java-production-policy",
+                "status": "passed"
+                if harness_engine == "java-production-policy"
+                else "failed",
+            },
+            {
+                "metric": "harness_schema",
+                "value": harness_schema,
+                "operator": "==",
+                "threshold": "harness_eval_v1",
+                "status": "passed"
+                if harness_schema == "harness_eval_v1"
+                else "failed",
+            },
+            {
+                "metric": "harness_case_schema",
+                "value": harness_case_schema,
+                "operator": "==",
+                "threshold": "harness_golden_case_v2",
+                "status": "passed"
+                if harness_case_schema == "harness_golden_case_v2"
+                else "failed",
+            },
+            {
+                "metric": "harness_policy_id",
+                "value": harness_policy_id,
+                "operator": "==",
+                "threshold": expected_policy_id,
+                "status": "passed"
+                if harness_policy_id == expected_policy_id
+                else "failed",
+            },
+            {
+                "metric": "harness_policy_version",
+                "value": harness_policy_version,
+                "operator": "==",
+                "threshold": expected_policy_version,
+                "status": "passed"
+                if str(harness_policy_version) == str(expected_policy_version)
+                else "failed",
+            },
+            {
+                "metric": "harness_status",
+                "value": harness_status,
+                "operator": "==",
+                "threshold": "pass",
+                "status": "passed"
+                if harness_status == "pass"
+                else "failed",
+            },
+            {
+                "metric": "harness_case_count",
+                "value": harness_case_count,
+                "operator": ">=",
+                "threshold": gates.get("harness_case_count_min", 60),
+                "status": "passed"
+                if harness_case_count >= gates.get("harness_case_count_min", 60)
+                else "failed",
+            },
+            {
+                "metric": "harness_exact_accuracy",
+                "value": harness_accuracy,
+                "operator": ">=",
+                "threshold": gates.get("harness_exact_accuracy_min", 1.0),
+                "status": "passed"
+                if harness_accuracy >= gates.get("harness_exact_accuracy_min", 1.0)
+                else "failed",
+            },
+            {
+                "metric": "harness_decision_contract_exact_match_rate",
+                "value": harness_decision_rate,
+                "operator": ">=",
+                "threshold": gates.get(
+                    "harness_decision_contract_exact_match_rate_min", 1.0
+                ),
+                "status": "passed"
+                if harness_decision_rate
+                >= gates.get(
+                    "harness_decision_contract_exact_match_rate_min", 1.0
+                )
+                else "failed",
+            },
+            {
+                "metric": "harness_violation_exact_match_rate",
+                "value": harness_violation_rate,
+                "operator": ">=",
+                "threshold": gates.get(
+                    "harness_violation_exact_match_rate_min", 1.0
+                ),
+                "status": "passed"
+                if harness_violation_rate
+                >= gates.get("harness_violation_exact_match_rate_min", 1.0)
+                else "failed",
+            },
+            {
+                "metric": "harness_recovery_exact_match_rate",
+                "value": harness_recovery_rate,
+                "operator": ">=",
+                "threshold": gates.get(
+                    "harness_recovery_exact_match_rate_min", 1.0
+                ),
+                "status": "passed"
+                if harness_recovery_rate
+                >= gates.get("harness_recovery_exact_match_rate_min", 1.0)
+                else "failed",
+            },
+            {
+                "metric": "harness_unsafe_pass_count",
+                "value": harness_unsafe,
+                "operator": "<=",
+                "threshold": gates.get("harness_unsafe_pass_count_max", 0),
+                "status": "passed"
+                if harness_unsafe <= gates.get("harness_unsafe_pass_count_max", 0)
+                else "failed",
+            },
+            {
+                "metric": "harness_coverage_status",
+                "value": harness_coverage_status,
+                "operator": "==",
+                "threshold": "pass",
+                "status": "passed"
+                if harness_coverage_status == "pass"
+                else "failed",
+            },
+            {
+                "metric": "harness_dataset_sha256",
+                "value": harness_dataset_hash,
+                "operator": "matches",
+                "threshold": "64 hexadecimal characters",
+                "status": "passed"
+                if harness_dataset_hash_valid
+                else "failed",
+            },
+        ])
+    if harness_live_payload is not None:
+        live_metrics = harness_live_payload.get("metrics") or {}
+        live_engine = harness_live_payload.get("engine")
+        live_schema = harness_live_payload.get("schema")
+        live_status = harness_live_payload.get("status")
+        live_policy_ids = normalize_observed_values(
+            harness_live_payload.get("policy_ids")
+        )
+        live_policy_versions = normalize_observed_values(
+            harness_live_payload.get("policy_versions")
+        )
+        live_dataset_hash = harness_live_payload.get("dataset_sha256")
+        live_case_count = int(live_metrics.get("case_count", 0))
+        live_completed = int(live_metrics.get("completed_count", 0))
+        live_completed_rate = (
+            live_completed / live_case_count if live_case_count > 0 else 0.0
+        )
+        live_safe_terminal_rate = float(
+            live_metrics.get("safe_terminal_rate", 0.0)
+        )
+        live_unsafe = int(live_metrics.get("unsafe_result_count", 0))
+        gate_results.extend([
+            {
+                "metric": "harness_live_engine",
+                "value": live_engine,
+                "operator": "==",
+                "threshold": "stocksage-live-http",
+                "status": "passed"
+                if live_engine == "stocksage-live-http"
+                else "failed",
+            },
+            {
+                "metric": "harness_live_schema",
+                "value": live_schema,
+                "operator": "==",
+                "threshold": "harness_live_eval_v1",
+                "status": "passed"
+                if live_schema == "harness_live_eval_v1"
+                else "failed",
+            },
+            {
+                "metric": "harness_live_policy_ids",
+                "value": live_policy_ids,
+                "operator": "==",
+                "threshold": [str(expected_policy_id)],
+                "status": "passed"
+                if live_policy_ids == [str(expected_policy_id)]
+                else "failed",
+            },
+            {
+                "metric": "harness_live_policy_versions",
+                "value": live_policy_versions,
+                "operator": "==",
+                "threshold": [str(expected_policy_version)],
+                "status": "passed"
+                if live_policy_versions == [str(expected_policy_version)]
+                else "failed",
+            },
+            {
+                "metric": "harness_live_dataset_sha256",
+                "value": live_dataset_hash,
+                "operator": "matches",
+                "threshold": "64 hexadecimal characters",
+                "status": "passed"
+                if is_sha256(live_dataset_hash)
+                else "failed",
+            },
+            {
+                "metric": "harness_live_status",
+                "value": live_status,
+                "operator": "==",
+                "threshold": "pass",
+                "status": "passed" if live_status == "pass" else "failed",
+            },
+            {
+                "metric": "harness_live_case_count",
+                "value": live_case_count,
+                "operator": ">=",
+                "threshold": gates.get("harness_live_case_count_min", 30),
+                "status": "passed"
+                if live_case_count >= gates.get("harness_live_case_count_min", 30)
+                else "failed",
+            },
+            {
+                "metric": "harness_live_completed_rate",
+                "value": live_completed_rate,
+                "operator": ">=",
+                "threshold": gates.get("harness_live_completed_rate_min", 1.0),
+                "status": "passed"
+                if live_completed_rate
+                >= gates.get("harness_live_completed_rate_min", 1.0)
+                else "failed",
+            },
+            {
+                "metric": "harness_live_safe_terminal_rate",
+                "value": live_safe_terminal_rate,
+                "operator": ">=",
+                "threshold": gates.get(
+                    "harness_live_safe_terminal_rate_min", 1.0
+                ),
+                "status": "passed"
+                if live_safe_terminal_rate
+                >= gates.get("harness_live_safe_terminal_rate_min", 1.0)
+                else "failed",
+            },
+            {
+                "metric": "harness_live_unsafe_result_count",
+                "value": live_unsafe,
+                "operator": "<=",
+                "threshold": gates.get(
+                    "harness_live_unsafe_result_count_max", 0
+                ),
+                "status": "passed"
+                if live_unsafe
+                <= gates.get("harness_live_unsafe_result_count_max", 0)
+                else "failed",
+            },
+        ])
+    sections = {
+        "rag": rag_payload or not_run("RAG evaluation was not supplied"),
+        "trace": trace_payload or not_run(
+            "Trace integrity evaluation was not supplied"
+        ),
+        "completion": harness_payload or not_run(
+            "Harness completion evaluation was not supplied"
+        ),
+        "live_completion": harness_live_payload or not_run(
+            "Live DEEP Harness evaluation was not supplied"
+        ),
+        "end_to_end": dialog_payload or not_run(
+            "End-to-end dialog and LLM-as-Judge evaluation was not supplied"
+        ),
+    }
+    missing_sections = [
+        name
+        for name, section in sections.items()
+        if section.get("status") == "not_run"
+    ]
+    if any(gate["status"] == "failed" for gate in gate_results):
+        status = "failed"
+    elif missing_sections:
+        status = "incomplete"
+    else:
+        status = "passed"
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": status,
         "planner": planner,
-        "rag": rag_payload or not_run("RAG evaluation was not supplied"),
-        "trace": trace_payload or not_run("Trace integrity evaluation was not supplied"),
-        "end_to_end": dialog_payload or not_run(
-            "End-to-end dialog and LLM-as-Judge evaluation was not supplied"
-        ),
+        **sections,
         "baseline_delta": delta,
         "gates": gate_results,
         "recommendations": recommendations(planner, delta),

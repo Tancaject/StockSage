@@ -1,6 +1,10 @@
 package com.stocksage.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.harness.HarnessModels.HarnessDecision;
+import com.stocksage.harness.HarnessModels.HarnessOutcome;
+import com.stocksage.harness.HarnessModels.HarnessPhase;
+import com.stocksage.harness.HarnessModels.HarnessSnapshot;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.model.entity.ResearchTaskCheckpoint;
@@ -10,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,5 +56,25 @@ class ResearchTaskCheckpointServiceTest {
         when(repository.findByTaskId(7L)).thenReturn(Optional.of(broken));
 
         assertThat(service.load(7L)).isEmpty();
+    }
+
+    @Test
+    void harnessSnapshotPersistenceFailsClosed() {
+        AnalysisState state = AnalysisState.builder().query("q").build();
+        state.setHarnessSnapshot(HarnessSnapshot.from(
+                "deep-equity-v1",
+                "1",
+                HarnessPhase.EVIDENCE,
+                new HarnessDecision(HarnessOutcome.RECOVER, java.util.List.of(), java.util.List.of()),
+                java.util.Map.of()
+        ));
+        when(repository.lockOwnedRunningTask(42L, "lease")).thenReturn(Optional.of(42L));
+        when(repository.findByTaskId(42L)).thenReturn(Optional.empty());
+        when(repository.saveAndFlush(any()))
+                .thenThrow(new IllegalStateException("database unavailable"));
+
+        assertThatThrownBy(() -> service.saveHarnessSnapshot(42L, "lease", state))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("database unavailable");
     }
 }

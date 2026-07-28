@@ -55,6 +55,41 @@ const TASK_STAGE_LABELS = {
   FAILED: '失败',
 }
 
+const TASK_RESULT_LABELS = {
+  FULL_REPORT: '完整报告',
+  INSUFFICIENT_EVIDENCE: '证据不足，暂不评级',
+  OFFLINE_FALLBACK: '离线兜底结果',
+  POLICY_BLOCKED: '策略已阻断',
+}
+
+const REPORT_REVIEW_STATUS_LABELS = {
+  DRAFT: '草稿',
+  IN_REVIEW: '复核中',
+  APPROVED: '已批准',
+  NEEDS_RESEARCH: '待补研',
+  REJECTED: '已驳回',
+}
+
+const REPORT_REVIEW_ACTIONS = {
+  DRAFT: [
+    { status: 'IN_REVIEW', label: '提交复核', tone: 'primary', requiresComment: false },
+  ],
+  IN_REVIEW: [
+    { status: 'APPROVED', label: '批准', tone: 'positive', requiresComment: false },
+    { status: 'NEEDS_RESEARCH', label: '退回补研', tone: 'warning', requiresComment: true },
+    { status: 'REJECTED', label: '驳回', tone: 'danger', requiresComment: true },
+  ],
+  APPROVED: [
+    { status: 'IN_REVIEW', label: '重新开启复核', tone: 'secondary', requiresComment: false },
+  ],
+  NEEDS_RESEARCH: [
+    { status: 'IN_REVIEW', label: '重新开启复核', tone: 'secondary', requiresComment: false },
+  ],
+  REJECTED: [
+    { status: 'IN_REVIEW', label: '重新开启复核', tone: 'secondary', requiresComment: false },
+  ],
+}
+
 const TICKER_SUGGESTION_CATALOG = [
   { ticker: 'NVDA', name: 'NVIDIA', market: '美股', keywords: ['ai', 'gpu', 'semiconductor', '英伟达'] },
   { ticker: 'AMZN', name: 'Amazon', market: '美股', keywords: ['aws', 'cloud', 'retail', '亚马逊'] },
@@ -98,7 +133,7 @@ export function buildResearchPrompt(ticker, focusAreas = DEFAULT_FOCUS_AREAS) {
     `Focus areas: ${focus.join(', ')}.`,
     'Use SEC filing evidence, market/K-line data, news context when useful, and the bull/bear/research-manager structure.',
     'Separate supported facts, model inference, data gaps, and risks. Include citations when SEC/RAG evidence is used.',
-    'Finish with a watch / avoid / investigate-more stance. This is not investment advice.',
+    'Finish with exactly one supported recommendation: BUY, OVERWEIGHT, HOLD, UNDERWEIGHT, or SELL. If the evidence is insufficient, do not force a recommendation or use HOLD as a fallback; mark the report NOT_RATED / 暂不评级. This is not investment advice.',
   ].join('\n')
 }
 
@@ -308,10 +343,13 @@ export function summarizeReportVersions(items = []) {
     const ticker = normalizeTicker(item?.ticker) || 'UNKNOWN'
     const version = Number(item?.reportVersion)
     const versionLabel = `${ticker} v${Number.isFinite(version) ? version : '-'}`
+    const reviewStatus = normalizeReviewStatus(item?.reviewStatus)
     return {
       ...item,
       ticker,
       versionLabel,
+      reviewStatus,
+      reviewStatusLabel: getReportReviewStatusLabel(reviewStatus),
       snapshotLabel: shortHash(item?.dataSnapshotHash),
       contextLabel: shortHash(item?.contextHash),
       modelLabel: formatModelLabel(item?.modelTier, item?.modelName),
@@ -319,6 +357,91 @@ export function summarizeReportVersions(items = []) {
       preview: item?.preview || item?.userQuery || '',
     }
   })
+}
+
+export function getReportReviewStatusLabel(status) {
+  const normalized = normalizeReviewStatus(status, '')
+  return REPORT_REVIEW_STATUS_LABELS[normalized] || normalized || '未知状态'
+}
+
+export function getReportReviewActions(status) {
+  const normalized = normalizeReviewStatus(status, '')
+  return (REPORT_REVIEW_ACTIONS[normalized] || []).map(action => ({ ...action }))
+}
+
+export function normalizeInvestmentReportDetail(payload = {}) {
+  const source = isPlainObject(payload) ? payload : {}
+  const rawSummary = isPlainObject(source.summary) ? source.summary : {}
+  const rawReport = isPlainObject(source.report) ? source.report : {}
+  const reviewStatus = normalizeReviewStatus(rawSummary.reviewStatus)
+  const ticker = normalizeTicker(rawSummary.ticker || rawReport.ticker) || 'UNKNOWN'
+  const summary = {
+    ...rawSummary,
+    ticker,
+    reviewStatus,
+    reviewStatusLabel: getReportReviewStatusLabel(reviewStatus),
+    reviewerUserId: optionalText(rawSummary.reviewerUserId),
+    reviewComment: optionalText(rawSummary.reviewComment),
+    reviewedAt: rawSummary.reviewedAt || '',
+    updatedAt: rawSummary.updatedAt || '',
+    lockVersion: optionalNumber(rawSummary.lockVersion),
+  }
+  const report = {
+    ...rawReport,
+    ticker,
+    analystSummary: optionalText(rawReport.analystSummary || rawReport.summary || rawSummary.preview),
+    rationale: normalizeReviewTextList(rawReport.rationale),
+    riskFactors: normalizeReviewTextList(rawReport.riskFactors),
+    unknowns: normalizeReviewTextList(rawReport.unknowns),
+  }
+  const evidenceSource = Array.isArray(source.evidenceItems)
+    ? source.evidenceItems
+    : rawReport.evidenceItems
+  const citationSource = Array.isArray(source.citations)
+    ? source.citations
+    : rawReport.citations
+
+  return {
+    summary,
+    report,
+    evidenceItems: (Array.isArray(evidenceSource) ? evidenceSource : [])
+      .filter(isPlainObject)
+      .map((item, index) => ({
+        ...item,
+        id: item.id ?? `evidence-${index + 1}`,
+        dimension: optionalText(item.dimension) || 'Evidence',
+        evidence: optionalText(item.evidence) || '',
+        implication: optionalText(item.implication) || '',
+        source: optionalText(item.source) || '未标注来源',
+        sourceEvidenceIds: normalizeReviewTextList(item.sourceEvidenceIds),
+      })),
+    citations: normalizeReviewTextList(citationSource),
+    reviewHistory: (Array.isArray(source.reviewHistory) ? source.reviewHistory : [])
+      .filter(isPlainObject)
+      .map((entry, index) => {
+        const fromStatus = normalizeReviewStatus(entry.fromStatus, '')
+        const toStatus = normalizeReviewStatus(
+          entry.toStatus || entry.status || entry.reviewStatus,
+          '',
+        )
+        const reviewerUserId = optionalText(entry.reviewerUserId || entry.reviewer)
+        const timeLabel = entry.reviewedAt || entry.createdAt || entry.updatedAt || ''
+        return {
+          ...entry,
+          id: entry.id ?? `review-${index + 1}`,
+          fromStatus,
+          fromStatusLabel: getReportReviewStatusLabel(fromStatus),
+          toStatus,
+          toStatusLabel: getReportReviewStatusLabel(toStatus),
+          status: toStatus,
+          statusLabel: getReportReviewStatusLabel(toStatus),
+          reviewerUserId,
+          reviewer: reviewerUserId,
+          comment: optionalText(entry.comment || entry.reviewComment),
+          timeLabel,
+        }
+      }),
+  }
 }
 
 export function buildLatestBriefDigest({
@@ -410,74 +533,30 @@ export function buildLatestBriefDigest({
   }
 }
 
-function getFinancialsSnapshot(ticker) {
-  const t = String(ticker || '').toUpperCase()
-  const catalog = {
-    NVDA: { name: '英伟达', pe: 72.5, pb: 45.2, marketCap: '3.12T', currency: '$', turnoverRate: 1.8 },
-    AAPL: { name: '苹果', pe: 31.8, pb: 42.1, marketCap: '3.35T', currency: '$', turnoverRate: 0.9 },
-    MSFT: { name: '微软', pe: 36.2, pb: 13.8, marketCap: '3.28T', currency: '$', turnoverRate: 0.7 },
-    AMZN: { name: '亚马逊', pe: 41.5, pb: 9.2, marketCap: '2.01T', currency: '$', turnoverRate: 1.1 },
-    META: { name: 'Meta', pe: 28.6, pb: 8.4, marketCap: '1.25T', currency: '$', turnoverRate: 1.2 },
-    TSLA: { name: '特斯拉', pe: 58.2, pb: 11.5, marketCap: '780B', currency: '$', turnoverRate: 2.3 },
-    '600519': { name: '贵州茅台', pe: 25.4, pb: 6.8, marketCap: '2.05万亿', currency: '¥', turnoverRate: 0.2 },
-    '300750': { name: '宁德时代', pe: 18.2, pb: 4.5, marketCap: '8600亿', currency: '¥', turnoverRate: 1.1 },
-    '0700': { name: '腾讯控股', pe: 22.8, pb: 4.9, marketCap: '3.65万亿', currency: 'HK$', turnoverRate: 0.3 },
-    '9988': { name: '阿里巴巴', pe: 12.5, pb: 1.25, marketCap: '1.62万亿', currency: 'HK$', turnoverRate: 0.5 },
-  }
-  
-  if (catalog[t]) {
-    return catalog[t]
-  }
-  
-  let hash = 0
-  for (let i = 0; i < t.length; i++) {
-    hash = (hash << 5) - hash + t.charCodeAt(i)
-    hash |= 0
-  }
-  hash = Math.abs(hash)
-  
-  const isAShare = /^\d{6}$/.test(t) || t.endsWith('SH') || t.endsWith('SZ')
-  const isHKShare = (t.length <= 5 && /^\d+$/.test(t)) || t.endsWith('HK')
-  const currency = isAShare ? '¥' : isHKShare ? 'HK$' : '$'
-  const pe = parseFloat((15 + (hash % 30) + (hash % 10) / 10).toFixed(1))
-  const pb = parseFloat((1.2 + (hash % 8) + (hash % 10) / 10).toFixed(2))
-  const turnoverRate = parseFloat((0.3 + (hash % 3) + (hash % 10) / 10).toFixed(2))
-  
-  const capBillions = 10 + (hash % 490)
-  const marketCap = currency === '¥' || currency === 'HK$' 
-    ? `${capBillions * 10}亿` 
-    : `${capBillions}B`
-    
-  return {
-    name: t,
-    pe,
-    pb,
-    marketCap,
-    currency,
-    turnoverRate,
-  }
+function isPlainObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
-function getSentimentScore(latestReport, ticker) {
-  if (!latestReport) return 50
-  const stance = String(latestReport.stance || latestReport.decision || '').toLowerCase()
-  
-  let hash = 0
-  const t = String(ticker || '').toUpperCase()
-  for (let i = 0; i < t.length; i++) {
-    hash = (hash << 5) - hash + t.charCodeAt(i)
-    hash |= 0
-  }
-  hash = Math.abs(hash)
-  const delta = hash % 6 - 3 // -3 to +2
-  
-  if (['watch', 'bull', 'buy', '看多', '看涨'].some(word => stance.includes(word))) {
-    return 80 + delta
-  }
-  if (['avoid', 'bear', 'sell', '看空', '看跌'].some(word => stance.includes(word))) {
-    return 20 + delta
-  }
-  return 50 + delta
+function optionalNumber(value) {
+  if (value === null || value === undefined || String(value).trim() === '') return null
+  const number = Number(value)
+  return Number.isFinite(number) ? number : null
+}
+
+function optionalText(value) {
+  const text = String(value ?? '').trim()
+  return text || null
+}
+
+function normalizeReviewStatus(value, fallback = 'DRAFT') {
+  const status = String(value || '').trim().toUpperCase()
+  return status || fallback
+}
+
+function normalizeReviewTextList(value) {
+  return (Array.isArray(value) ? value : [])
+    .map(item => String(item ?? '').trim())
+    .filter(Boolean)
 }
 
 export function normalizeCockpit(payload = {}) {
@@ -493,34 +572,44 @@ export function normalizeCockpit(payload = {}) {
   const ticker = normalizeTicker(payload?.ticker) || 'STOCK'
   
   // 从 K 线提取最新价和涨跌幅
-  let price = 0
-  let change = 0
-  let changePercent = 0
-  let volume = 0
+  let price = null
+  let change = null
+  let changePercent = null
+  let volume = null
   
   if (chart && chart.points.length > 0) {
     const points = chart.points
     const latestPoint = points[points.length - 1]
-    price = latestPoint.close ?? latestPoint.Close ?? price
-    volume = latestPoint.volume ?? latestPoint.Volume ?? volume
+    price = optionalNumber(latestPoint.close ?? latestPoint.Close)
+    volume = optionalNumber(latestPoint.volume ?? latestPoint.Volume)
     
     const prevPoint = points.length > 1 ? points[points.length - 2] : null
-    const prevClose = prevPoint ? (prevPoint.close ?? prevPoint.Close) : (latestPoint.open ?? latestPoint.Open)
-    if (prevClose && prevClose > 0) {
+    const prevClose = optionalNumber(
+      prevPoint ? (prevPoint.close ?? prevPoint.Close) : (latestPoint.open ?? latestPoint.Open),
+    )
+    if (price !== null && prevClose !== null && prevClose > 0) {
       change = price - prevClose
       changePercent = (change / prevClose) * 100
     }
   }
   
-  const financials = getFinancialsSnapshot(ticker)
-  const sentimentScore = getSentimentScore(latestReport, ticker)
+  const backendFinancials = chartStatus === 'SAMPLE' || !isPlainObject(payload?.financials)
+    ? {}
+    : payload.financials
+  const backendQuote = chartStatus === 'SAMPLE' || !isPlainObject(payload?.quote)
+    ? {}
+    : payload.quote
   const quote = {
     price,
     change,
     changePercent,
     volume,
-    turnover: price * volume * 0.95,
-    ...financials,
+    turnover: optionalNumber(backendQuote.turnover),
+    currency: optionalText(backendFinancials.currency),
+    pe: optionalNumber(backendFinancials.pe),
+    pb: optionalNumber(backendFinancials.pb),
+    marketCap: optionalText(backendFinancials.marketCap),
+    turnoverRate: optionalNumber(backendFinancials.turnoverRate),
   }
 
   return {
@@ -537,7 +626,6 @@ export function normalizeCockpit(payload = {}) {
     evidencePreview,
     generatedAt: payload?.generatedAt || '',
     quote,
-    sentimentScore,
   }
 }
 
@@ -567,6 +655,7 @@ export function summarizeTaskTimeline(items = []) {
     const stage = String(item?.stage || 'CREATED').toUpperCase()
     const attempts = Number.isFinite(Number(item?.attempts)) ? Number(item.attempts) : 0
     const errorMessage = item?.errorMessage || ''
+    const resultKind = String(item?.resultKind || '').toUpperCase()
     const deadLettered = item?.deadLettered === true
       || (status === 'FAILED' && /attempts? exhausted|max(?:imum)? attempts? exceeded|dead.?letter|\bdlq\b/i.test(errorMessage))
     return {
@@ -579,6 +668,10 @@ export function summarizeTaskTimeline(items = []) {
       stageLabel: TASK_STAGE_LABELS[stage] || stage.replaceAll('_', ' '),
       attempts,
       resultReportVersionId: item?.resultReportVersionId ?? null,
+      resultKind: resultKind || null,
+      resultKindLabel: resultKind
+        ? (TASK_RESULT_LABELS[resultKind] || resultKind.replaceAll('_', ' '))
+        : '',
       startedAt: item?.startedAt || '',
       heartbeatAt: item?.heartbeatAt || '',
       completedAt: item?.completedAt || '',

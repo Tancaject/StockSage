@@ -43,6 +43,7 @@ public record WorkbenchCockpitResponse(
             String stage,
             Integer attempts,
             Long resultReportVersionId,
+            String resultKind,
             LocalDateTime startedAt,
             LocalDateTime heartbeatAt,
             LocalDateTime completedAt,

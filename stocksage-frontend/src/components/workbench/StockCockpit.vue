@@ -31,8 +31,8 @@
           <div class="price-val">
             <strong class="num">{{ cockpit.quote.currency }}{{ formatPrice(cockpit.quote.price) }}</strong>
             <span class="change-rate num">
-              {{ cockpit.quote.change >= 0 ? '+' : '' }}{{ formatPrice(cockpit.quote.change) }}
-              ({{ cockpit.quote.changePercent >= 0 ? '+' : '' }}{{ cockpit.quote.changePercent.toFixed(2) }}%)
+              {{ formatSignedPrice(cockpit.quote.change) }}
+              ({{ formatSignedPercent(cockpit.quote.changePercent) }})
             </span>
           </div>
         </div>
@@ -179,13 +179,29 @@ function formatDate(value) {
 }
 
 function formatPrice(val) {
+  if (val === null || val === undefined || val === '') return '--'
   const num = Number(val)
   if (!Number.isFinite(num)) return '--'
   if (num >= 1000) return num.toFixed(1)
   return num.toFixed(2)
 }
 
+function formatSignedPrice(val) {
+  if (val === null || val === undefined || val === '') return '--'
+  const num = Number(val)
+  if (!Number.isFinite(num)) return '--'
+  return `${num >= 0 ? '+' : ''}${formatPrice(num)}`
+}
+
+function formatSignedPercent(val) {
+  if (val === null || val === undefined || val === '') return '--'
+  const num = Number(val)
+  if (!Number.isFinite(num)) return '--'
+  return `${num >= 0 ? '+' : ''}${num.toFixed(2)}%`
+}
+
 function formatVolume(val) {
+  if (val === null || val === undefined || val === '') return '--'
   const num = Number(val)
   if (!Number.isFinite(num)) return '--'
   if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B'
@@ -195,7 +211,8 @@ function formatVolume(val) {
 }
 
 const quoteTone = computed(() => {
-  const change = props.cockpit.quote?.change ?? 0
+  const change = Number(props.cockpit.quote?.change)
+  if (!Number.isFinite(change)) return ''
   return change >= 0 ? 'up' : 'down'
 })
 </script>

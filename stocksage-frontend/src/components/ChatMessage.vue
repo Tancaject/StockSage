@@ -361,9 +361,24 @@ function traceToReasoning(trace) {
       })
       return rows
     }
-    if (step.thought) rows.push({ type: 'thought', content: textFrom(step.thought), durationMs: 0 })
-    if (step.action) rows.push({ type: 'action', content: formatAction(step), durationMs: dur })
-    if (step.observation) rows.push({ type: 'observation', content: textFrom(step.observation), durationMs: 0 })
+    if (step.thought) rows.push({
+      type: 'thought',
+      content: textFrom(step.thought),
+      durationMs: 0,
+      metadata: step.attributes || null,
+    })
+    if (step.action) rows.push({
+      type: 'action',
+      content: formatAction(step),
+      durationMs: dur,
+      metadata: step.attributes || null,
+    })
+    if (step.observation) rows.push({
+      type: 'observation',
+      content: textFrom(step.observation),
+      durationMs: 0,
+      metadata: step.attributes || null,
+    })
     return rows
   })
 }
