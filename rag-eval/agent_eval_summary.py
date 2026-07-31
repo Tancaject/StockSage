@@ -370,6 +370,9 @@ def build_report(
             harness_live_payload.get("policy_versions")
         )
         live_dataset_hash = harness_live_payload.get("dataset_sha256")
+        expected_live_dataset_hash = gates.get(
+            "harness_live_dataset_sha256_expected"
+        )
         live_case_count = int(live_metrics.get("case_count", 0))
         live_completed = int(live_metrics.get("completed_count", 0))
         live_completed_rate = (
@@ -419,10 +422,12 @@ def build_report(
             {
                 "metric": "harness_live_dataset_sha256",
                 "value": live_dataset_hash,
-                "operator": "matches",
-                "threshold": "64 hexadecimal characters",
+                "operator": "==",
+                "threshold": expected_live_dataset_hash,
                 "status": "passed"
                 if is_sha256(live_dataset_hash)
+                and is_sha256(expected_live_dataset_hash)
+                and live_dataset_hash == expected_live_dataset_hash
                 else "failed",
             },
             {

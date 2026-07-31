@@ -16,6 +16,7 @@
   "harness_recovery_exact_match_rate_min": 1.0,
   "harness_unsafe_pass_count_max": 0,
   "harness_live_case_count_min": 30,
+  "harness_live_dataset_sha256_expected": "137682582a19674681da154d4689f96aa4a3de4242300648f0c6af1fc03ab223",
   "harness_live_completed_rate_min": 1.0,
   "harness_live_safe_terminal_rate_min": 1.0,
   "harness_live_unsafe_result_count_max": 0

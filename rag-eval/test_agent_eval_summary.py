@@ -26,6 +26,7 @@ GATES = {
     "harness_recovery_exact_match_rate_min": 1.0,
     "harness_unsafe_pass_count_max": 0,
     "harness_live_case_count_min": 30,
+    "harness_live_dataset_sha256_expected": "b" * 64,
     "harness_live_completed_rate_min": 1.0,
     "harness_live_safe_terminal_rate_min": 1.0,
     "harness_live_unsafe_result_count_max": 0,
@@ -339,6 +340,20 @@ class AgentEvalSummaryTest(unittest.TestCase):
             planner(),
             GATES,
             harness_live_payload=live_harness_result(dataset_sha256=""),
+        )
+        self.assertEqual("failed", report["status"])
+        failed = {
+            gate["metric"]
+            for gate in report["gates"]
+            if gate["status"] == "failed"
+        }
+        self.assertEqual({"harness_live_dataset_sha256"}, failed)
+
+    def test_rejects_wrong_but_well_formed_live_dataset_hash(self):
+        report = build_report(
+            planner(),
+            GATES,
+            harness_live_payload=live_harness_result(dataset_sha256="c" * 64),
         )
         self.assertEqual("failed", report["status"])
         failed = {
