@@ -6,15 +6,22 @@ import com.stocksage.agent.AgentStep;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.model.entity.InvestmentReportVersion;
 import com.stocksage.model.entity.ResearchMemoryEntry;
+import com.stocksage.repository.InvestmentReportVersionRepository;
 import com.stocksage.repository.ResearchMemoryEntryRepository;
 import com.stocksage.trace.TraceService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -32,33 +39,57 @@ import java.util.Map;
 public class ResearchMemoryService {
 
     private static final String SOURCE_TYPE = "INVESTMENT_REPORT_VERSION";
+    private static final List<ResearchMemoryEntry.VectorStatus> INDEXABLE_VECTOR_STATUSES = List.of(
+            ResearchMemoryEntry.VectorStatus.PENDING,
+            ResearchMemoryEntry.VectorStatus.FAILED
+    );
+    private static final List<ResearchMemoryEntry.VectorStatus> SUCCESS_TRANSITION_STATUSES = List.of(
+            ResearchMemoryEntry.VectorStatus.PENDING,
+            ResearchMemoryEntry.VectorStatus.FAILED,
+            ResearchMemoryEntry.VectorStatus.INDEXED
+    );
     private final ResearchMemoryEntryRepository repository;
+    private final InvestmentReportVersionRepository reportVersionRepository;
     private final ResearchMemoryVectorIndex vectorIndex;
     private final ResearchMemoryProperties properties;
     private final ObjectMapper objectMapper;
     private final TraceService traceService;
+    private final TransactionTemplate transactionTemplate;
 
     public ResearchMemoryService(
             ResearchMemoryEntryRepository repository,
+            InvestmentReportVersionRepository reportVersionRepository,
             ResearchMemoryVectorIndex vectorIndex,
             ResearchMemoryProperties properties,
             ObjectMapper objectMapper,
-            TraceService traceService
+            TraceService traceService,
+            PlatformTransactionManager transactionManager
     ) {
         this.repository = repository;
+        this.reportVersionRepository = reportVersionRepository;
         this.vectorIndex = vectorIndex;
         this.properties = properties;
         this.objectMapper = objectMapper;
         this.traceService = traceService;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
+        this.transactionTemplate.setPropagationBehavior(
+                TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
-    @EventListener
+    @TransactionalEventListener(
+            phase = TransactionPhase.AFTER_COMMIT,
+            fallbackExecution = true
+    )
     public void onReportPersisted(InvestmentReportPersistedEvent event) {
         if (!properties.isCapture() || event == null) {
             return;
         }
         try {
-            capture(event.source(), event.report());
+            // capture() is a self-invocation here, so its @Transactional annotation is not
+            // intercepted. The explicit template also keeps transaction commit failures inside
+            // this best-effort catch boundary.
+            transactionTemplate.executeWithoutResult(
+                    status -> capture(event.source(), event.report()));
         } catch (Exception error) {
             // Report persistence has already succeeded. Memory is strictly best effort.
             log.warn("Research memory capture failed. errorType={}", error.getClass().getSimpleName());
@@ -67,27 +98,28 @@ public class ResearchMemoryService {
 
     @Transactional
     public ResearchMemoryEntry capture(InvestmentReportVersion source, InvestmentReport report) {
-        if (!eligible(source, report)) {
+        InvestmentReportVersion currentSource = lockCurrentSource(source);
+        if (!eligible(currentSource, report)) {
             return null;
         }
-        String sourceId = String.valueOf(source.getId());
+        String sourceId = String.valueOf(currentSource.getId());
         var existing = repository.findByUserIdAndSourceTypeAndSourceId(
-                source.getUserId(), SOURCE_TYPE, sourceId);
+                currentSource.getUserId(), SOURCE_TYPE, sourceId);
         if (existing.isPresent()) {
             return existing.get();
         }
 
         List<String> citations = sourceCitations(report);
-        String text = buildMemoryText(source, report, citations);
+        String text = buildMemoryText(currentSource, report, citations);
         ResearchMemoryEntry entry = new ResearchMemoryEntry();
-        entry.setUserId(source.getUserId());
-        entry.setTicker(normalizeTicker(source.getTicker()));
+        entry.setUserId(currentSource.getUserId());
+        entry.setTicker(normalizeTicker(currentSource.getTicker()));
         entry.setSourceType(SOURCE_TYPE);
         entry.setSourceId(sourceId);
-        entry.setSourceConversationId(source.getConversationId());
+        entry.setSourceConversationId(currentSource.getConversationId());
         entry.setSourceCitations(writeJson(citations));
-        entry.setDataCutoffAt(source.getGeneratedAt());
-        entry.setSnapshotHash(source.getDataSnapshotHash());
+        entry.setDataCutoffAt(currentSource.getGeneratedAt());
+        entry.setSnapshotHash(currentSource.getDataSnapshotHash());
         entry.setContentHash(sha256(text));
         entry.setMemoryText(text);
         entry.setVectorStatus(ResearchMemoryEntry.VectorStatus.PENDING);
@@ -95,10 +127,10 @@ public class ResearchMemoryService {
             entry = repository.saveAndFlush(entry);
         } catch (DataIntegrityViolationException duplicate) {
             return repository.findByUserIdAndSourceTypeAndSourceId(
-                    source.getUserId(), SOURCE_TYPE, sourceId).orElseThrow(() -> duplicate);
+                    currentSource.getUserId(), SOURCE_TYPE, sourceId).orElseThrow(() -> duplicate);
         }
         if (properties.isIndex()) {
-            indexOne(entry);
+            indexAfterCommit(entry);
         }
         return entry;
     }
@@ -126,15 +158,23 @@ public class ResearchMemoryService {
                     vectorIndex.search(userId, ticker == null ? "" : ticker, query, properties.getTopK());
             Map<Long, Double> scores = new LinkedHashMap<>();
             hits.forEach(hit -> scores.put(hit.entryId(), hit.score()));
-            List<ResearchMemoryEntry> entries = repository.findByIdInAndUserIdAndRevokedAtIsNull(
-                            scores.keySet(), userId.trim())
+            List<ResearchMemoryEntry> entries =
+                    repository.findByIdInAndUserIdAndRevokedAtIsNullAndVectorStatus(
+                            scores.keySet(),
+                            userId.trim(),
+                            ResearchMemoryEntry.VectorStatus.INDEXED)
                     .stream()
                     .filter(ResearchMemoryEntry::active)
+                    .filter(entry ->
+                            entry.getVectorStatus() == ResearchMemoryEntry.VectorStatus.INDEXED)
                     .sorted(Comparator.comparingDouble(
                             entry -> -scores.getOrDefault(entry.getId(), 0.0)))
                     .limit(3)
                     .toList();
             traceRetrieval(traceId, entries, scores, elapsedMs(startedAt));
+            if (entries.isEmpty()) {
+                return RetrievalResult.empty();
+            }
             if (!properties.isInject()) {
                 return new RetrievalResult("", entries.size(), false);
             }
@@ -156,38 +196,161 @@ public class ResearchMemoryService {
     @Transactional
     public boolean revoke(String userId, Long id) {
         ResearchMemoryEntry entry = repository.findByIdAndUserId(id, userId.trim()).orElse(null);
+        return revokeEntry(entry);
+    }
+
+    @Transactional
+    public boolean revokeForReport(InvestmentReportVersion source) {
+        if (source == null || source.getId() == null
+                || source.getUserId() == null || source.getUserId().isBlank()) {
+            return false;
+        }
+        ResearchMemoryEntry entry = repository.findByUserIdAndSourceTypeAndSourceId(
+                source.getUserId().trim(),
+                SOURCE_TYPE,
+                String.valueOf(source.getId())
+        ).orElse(null);
+        return revokeEntry(entry);
+    }
+
+    private boolean revokeEntry(ResearchMemoryEntry entry) {
         if (entry == null || !entry.active()) {
             return false;
         }
-        boolean wasIndexed = entry.getVectorStatus() == ResearchMemoryEntry.VectorStatus.INDEXED;
         entry.setRevokedAt(LocalDateTime.now());
         entry.setVectorStatus(ResearchMemoryEntry.VectorStatus.REVOKED);
         entry.setVectorErrorCode(null);
-        repository.save(entry);
-        if (wasIndexed) {
-            try {
-                vectorIndex.delete(entry.getId());
-            } catch (Exception error) {
-                log.warn("Research memory vector delete failed. entryId={}, errorType={}",
-                        entry.getId(), error.getClass().getSimpleName());
-            }
-        }
+        // Flush the database truth before deleting the vector. A concurrent index CAS must either
+        // finish first (then this delete removes its vector) or observe REVOKED and clean up its
+        // own just-written vector after the guarded update is rejected.
+        repository.saveAndFlush(entry);
+        // Delete even when the row was observed as PENDING/FAILED: a concurrent index call may
+        // already have written the deterministic vector id before its guarded database update.
+        // The database revocation is the authoritative truth and must commit before the
+        // non-transactional vector side effect is attempted.
+        deleteVectorAfterCommit(entry.getId(), "entry revoked");
         return true;
     }
 
     private void indexOne(ResearchMemoryEntry entry) {
-        if (entry == null || !entry.active()) {
+        if (entry == null || entry.getId() == null || !entry.active()
+                || repository.countByIdAndRevokedAtIsNullAndVectorStatusIn(
+                entry.getId(), INDEXABLE_VECTOR_STATUSES) == 0) {
             return;
         }
+        ResearchMemoryEntry.VectorStatus targetStatus;
+        String errorCode;
+        boolean vectorWritten = false;
         try {
             vectorIndex.index(entry);
-            entry.setVectorStatus(ResearchMemoryEntry.VectorStatus.INDEXED);
-            entry.setVectorErrorCode(null);
+            vectorWritten = true;
+            targetStatus = ResearchMemoryEntry.VectorStatus.INDEXED;
+            errorCode = null;
         } catch (Exception error) {
-            entry.setVectorStatus(ResearchMemoryEntry.VectorStatus.FAILED);
-            entry.setVectorErrorCode("VECTOR_INDEX_FAILED");
+            targetStatus = ResearchMemoryEntry.VectorStatus.FAILED;
+            errorCode = "VECTOR_INDEX_FAILED";
         }
-        repository.save(entry);
+        int updated;
+        try {
+            updated = repository.updateVectorStateIfIndexable(
+                    entry.getId(),
+                    targetStatus == ResearchMemoryEntry.VectorStatus.INDEXED
+                            ? SUCCESS_TRANSITION_STATUSES : INDEXABLE_VECTOR_STATUSES,
+                    targetStatus,
+                    errorCode,
+                    LocalDateTime.now()
+            );
+        } catch (Exception error) {
+            if (vectorWritten) {
+                // The authoritative database row is still PENDING/FAILED. Remove the vector that
+                // cannot be proven committed so retrieval can never observe a half-finished index.
+                deleteVectorBestEffort(entry.getId(), "post-index CAS failed");
+            }
+            log.warn("Research memory vector state update failed. entryId={}, errorType={}",
+                    entry.getId(), error.getClass().getSimpleName());
+            return;
+        }
+        if (updated > 0) {
+            // Only mirror a successful guarded transition. A rejected stale candidate is never
+            // mutated or merged back over the authoritative revoked row.
+            entry.setVectorStatus(targetStatus);
+            entry.setVectorErrorCode(errorCode);
+            return;
+        }
+        if (vectorWritten) {
+            deleteVectorBestEffort(entry.getId(), "post-index CAS rejected");
+        }
+    }
+
+    private void deleteVectorBestEffort(Long entryId, String reason) {
+        try {
+            vectorIndex.delete(entryId);
+        } catch (Exception error) {
+            // Retrieval always joins vector hits back to active INDEXED database truth.
+            log.warn("Research memory vector delete failed. entryId={}, reason={}, errorType={}",
+                    entryId, reason, error.getClass().getSimpleName());
+        }
+    }
+
+    private void deleteVectorAfterCommit(Long entryId, String reason) {
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            deleteVectorBestEffort(entryId, reason);
+            return;
+        }
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            // A Spring-managed @Transactional call always has synchronization. Failing closed here
+            // avoids deleting a vector for a database transaction that can still roll back.
+            log.warn("Research memory vector delete deferred without transaction synchronization. "
+                    + "entryId={}, reason={}", entryId, reason);
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                deleteVectorBestEffort(entryId, reason);
+            }
+        });
+    }
+
+    private void indexAfterCommit(ResearchMemoryEntry entry) {
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            indexOne(entry);
+            return;
+        }
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            // The committed PENDING row is recoverable by compensateIndex(). Do not risk an
+            // orphan vector while the surrounding database transaction may still roll back.
+            log.warn("Research memory vector index deferred without transaction synchronization. "
+                    + "entryId={}", entry == null ? null : entry.getId());
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                try {
+                    // afterCommit still runs while the completed transaction's resources are
+                    // thread-bound. Start an independent transaction so the vector-state CAS is
+                    // durably committed instead of accidentally joining that completed context.
+                    transactionTemplate.executeWithoutResult(status -> indexOne(entry));
+                } catch (Exception error) {
+                    // The committed PENDING row remains discoverable by compensateIndex().
+                    log.warn("Research memory post-commit vector index failed. entryId={}, errorType={}",
+                            entry == null ? null : entry.getId(),
+                            error.getClass().getSimpleName());
+                }
+            }
+        });
+    }
+
+    private InvestmentReportVersion lockCurrentSource(InvestmentReportVersion source) {
+        if (source == null || source.getId() == null
+                || source.getUserId() == null || source.getUserId().isBlank()) {
+            return null;
+        }
+        return reportVersionRepository.findByIdAndUserIdForUpdate(
+                source.getId(),
+                source.getUserId().trim()
+        ).orElse(null);
     }
 
     private boolean eligible(InvestmentReportVersion source, InvestmentReport report) {
@@ -195,6 +358,11 @@ public class ResearchMemoryService {
                 || source.getUserId() == null || source.getUserId().isBlank()
                 || "DEMO".equalsIgnoreCase(source.getModelTier())
                 || "offline-rule-fallback".equalsIgnoreCase(source.getModelName())) {
+            return false;
+        }
+        InvestmentReportVersion.ReviewStatus reviewStatus = source.getReviewStatus();
+        if (reviewStatus == InvestmentReportVersion.ReviewStatus.REJECTED
+                || reviewStatus == InvestmentReportVersion.ReviewStatus.NEEDS_RESEARCH) {
             return false;
         }
         if (report.getQualityStatus() != InvestmentReport.ReportQualityStatus.VERIFIED

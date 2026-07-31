@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.exception.ResourceNotFoundException;
 import com.stocksage.harness.DeepResearchCompletionPolicy;
 import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
+import com.stocksage.harness.HarnessModels.ParseStatus;
+import com.stocksage.harness.HarnessModels.RunContext;
+import com.stocksage.harness.HarnessModels.SynthesisResult;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.model.dto.InvestmentReportReviewRequest;
@@ -33,7 +36,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -48,6 +50,8 @@ public class InvestmentReportVersionService {
     private final InvestmentReportReviewRepository reviewRepository;
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final ResearchMemoryService researchMemoryService;
+    private final DeepResearchCompletionPolicy completionPolicy;
 
     public void prepareHashes(AnalysisState state) {
         if (state == null) {
@@ -112,8 +116,8 @@ public class InvestmentReportVersionService {
                         state.getDataSnapshotHash(),
                         state.getContextHash()
                 )
-                .map(entity -> toReport(entity, true))
-                .filter(report -> reusableUnderCurrentPolicy(report, state));
+                .filter(this::allowsCacheReuseUnderHumanReview)
+                .flatMap(entity -> reusableReport(entity, state));
     }
 
     public InvestmentReport persistReportVersion(
@@ -149,7 +153,7 @@ public class InvestmentReportVersionService {
                 state.getContextHash()
         );
         if (existing.isPresent()) {
-            InvestmentReport reused = toReport(existing.get(), true);
+            InvestmentReport reused = requireReusableReport(existing.get(), state);
             state.setInvestmentReport(reused);
             eventPublisher.publishEvent(new InvestmentReportPersistedEvent(existing.get(), reused));
             return new PersistedReportVersion(reused, existing.get().getId(), true);
@@ -191,7 +195,7 @@ public class InvestmentReportVersionService {
                     state.getContextHash()
             );
             if (raced.isPresent()) {
-                InvestmentReport reused = toReport(raced.get(), true);
+                InvestmentReport reused = requireReusableReport(raced.get(), state);
                 state.setInvestmentReport(reused);
                 eventPublisher.publishEvent(new InvestmentReportPersistedEvent(raced.get(), reused));
                 return new PersistedReportVersion(reused, raced.get().getId(), true);
@@ -296,6 +300,10 @@ public class InvestmentReportVersionService {
         review.setCreatedAt(now);
         reviewRepository.saveAndFlush(review);
 
+        if (isNegativeHumanReview(toStatus)) {
+            researchMemoryService.revokeForReport(entity);
+        }
+
         return toDetail(entity);
     }
 
@@ -317,6 +325,16 @@ public class InvestmentReportVersionService {
     }
 
     private InvestmentReport toReport(InvestmentReportVersion entity, boolean reusedFromCache) {
+        InvestmentReport report = readStoredReport(entity);
+        enrichReport(report, entity.getTicker(), entity.getDataSnapshotHash(), entity.getContextHash(),
+                entity.getReportVersion(), entity.getModelTier(), entity.getModelName(), reusedFromCache);
+        if (report.getQualityStatus() == null) {
+            report.setQualityStatus(InvestmentReport.ReportQualityStatus.LEGACY_UNVERIFIED);
+        }
+        return report;
+    }
+
+    private InvestmentReport readStoredReport(InvestmentReportVersion entity) {
         InvestmentReport report;
         try {
             report = objectMapper.readValue(entity.getReportJson(), InvestmentReport.class);
@@ -326,11 +344,6 @@ public class InvestmentReportVersionService {
             report = InvestmentReport.builder()
                     .recommendation(entity.getRecommendation())
                     .build();
-        }
-        enrichReport(report, entity.getTicker(), entity.getDataSnapshotHash(), entity.getContextHash(),
-                entity.getReportVersion(), entity.getModelTier(), entity.getModelName(), reusedFromCache);
-        if (report.getQualityStatus() == null) {
-            report.setQualityStatus(InvestmentReport.ReportQualityStatus.LEGACY_UNVERIFIED);
         }
         return report;
     }
@@ -344,14 +357,50 @@ public class InvestmentReportVersionService {
                 || state.getEvidenceLedger() == null) {
             return false;
         }
-        Set<String> knownEvidenceIds = state.getEvidenceLedger().evidenceIds();
-        List<InvestmentReport.EvidenceItem> evidenceItems = safeList(report.getEvidenceItems());
-        return !evidenceItems.isEmpty()
-                && evidenceItems.stream().allMatch(item ->
-                item != null
-                        && item.getSourceEvidenceIds() != null
-                        && !item.getSourceEvidenceIds().isEmpty()
-                        && knownEvidenceIds.containsAll(item.getSourceEvidenceIds()));
+        try {
+            return completionPolicy.afterReport(
+                    RunContext.deepResearch(),
+                    state.getEvidenceLedger(),
+                    new SynthesisResult(report, ParseStatus.VALID, List.of())
+            ).allowsRecommendation();
+        } catch (RuntimeException e) {
+            log.warn("Cached investment report failed deterministic report gate; reuse denied: {}",
+                    e.getClass().getSimpleName());
+            return false;
+        }
+    }
+
+    private Optional<InvestmentReport> reusableReport(
+            InvestmentReportVersion entity,
+            AnalysisState state
+    ) {
+        InvestmentReport report = readStoredReport(entity);
+        if (!reusableUnderCurrentPolicy(report, state)) {
+            return Optional.empty();
+        }
+        enrichReport(report, entity.getTicker(), entity.getDataSnapshotHash(), entity.getContextHash(),
+                entity.getReportVersion(), entity.getModelTier(), entity.getModelName(), true);
+        return Optional.of(report);
+    }
+
+    private boolean allowsCacheReuseUnderHumanReview(InvestmentReportVersion entity) {
+        return entity != null && !isNegativeHumanReview(effectiveReviewStatus(entity.getReviewStatus()));
+    }
+
+    private InvestmentReport requireReusableReport(
+            InvestmentReportVersion entity,
+            AnalysisState state
+    ) {
+        if (!allowsCacheReuseUnderHumanReview(entity)) {
+            throw new IllegalStateException("REPORT_REVIEW_DISALLOWS_CACHE_REUSE");
+        }
+        return reusableReport(entity, state)
+                .orElseThrow(() -> new IllegalStateException("REPORT_POLICY_DISALLOWS_CACHE_REUSE"));
+    }
+
+    private boolean isNegativeHumanReview(InvestmentReportVersion.ReviewStatus status) {
+        return status == InvestmentReportVersion.ReviewStatus.REJECTED
+                || status == InvestmentReportVersion.ReviewStatus.NEEDS_RESEARCH;
     }
 
     private InvestmentReportVersionSummary toSummary(InvestmentReportVersion entity) {

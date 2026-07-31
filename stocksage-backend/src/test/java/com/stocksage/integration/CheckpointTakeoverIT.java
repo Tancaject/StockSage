@@ -17,7 +17,9 @@ import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.model.entity.ResearchTaskCheckpoint;
+import com.stocksage.model.entity.User;
 import com.stocksage.repository.ResearchTaskCheckpointRepository;
+import com.stocksage.repository.UserAccountRepository;
 import com.stocksage.service.ConversationMessageService;
 import com.stocksage.service.DeepEvidenceCollector;
 import com.stocksage.service.DeepResearchPipeline;
@@ -26,6 +28,7 @@ import com.stocksage.service.OfflineDemoSampleService;
 import com.stocksage.service.ReportMarkdownRenderer;
 import com.stocksage.service.ResearchTaskCheckpointService;
 import com.stocksage.service.ResearchTaskLeaseService;
+import com.stocksage.service.ResearchTaskPublicationTransaction;
 import com.stocksage.service.ResearchTaskService;
 import com.stocksage.tool.ChatStreamEmitter;
 import com.stocksage.trace.TraceService;
@@ -180,7 +183,12 @@ class CheckpointTakeoverIT {
                             takeoverLease.token(),
                             99L,
                             ResearchTask.ResultKind.FULL_REPORT
-                    );
+                     );
+            UserAccountRepository userAccountRepository = mock(UserAccountRepository.class);
+            User publicationUser = new User();
+            publicationUser.setUserId("u_001");
+            when(userAccountRepository.lockByUserIdForUpdate("u_001"))
+                    .thenReturn(Optional.of(publicationUser));
 
             DeepResearchPipeline pipeline = new DeepResearchPipeline(
                     researchTaskService,
@@ -193,7 +201,9 @@ class CheckpointTakeoverIT {
                     evidenceCollector,
                     reportRenderer,
                     conversationMessageService,
-                    streamEmitter
+                    new ResearchTaskPublicationTransaction(userAccountRepository),
+                    streamEmitter,
+                    mock(com.stocksage.trace.TraceService.class)
             );
 
             Future<?> takenOver = instanceB.submit(() -> {

@@ -194,6 +194,19 @@ public class DeepEvidenceCollector {
             String traceId,
             Long conversationId
     ) {
+        return recover(existing, recoveryActions, Map.of(), traceId, conversationId);
+    }
+
+    /**
+     * Re-collects a recovery effect while preserving attempts from a durable checkpoint.
+     */
+    public EvidenceCollection recover(
+            EvidenceCollection existing,
+            List<RecoveryAction> recoveryActions,
+            Map<RecoveryAction, Integer> previousAttempts,
+            String traceId,
+            Long conversationId
+    ) {
         if (existing == null || recoveryActions == null || recoveryActions.isEmpty()) {
             return existing;
         }
@@ -204,9 +217,16 @@ public class DeepEvidenceCollector {
         boolean marketOk = existing.marketOk();
         boolean newsOk = existing.newsOk();
         EnumMap<RecoveryAction, Integer> attempts = new EnumMap<>(RecoveryAction.class);
+        if (previousAttempts != null) {
+            previousAttempts.forEach((action, count) -> {
+                if (action != null) {
+                    attempts.put(action, Math.max(0, count == null ? 0 : count));
+                }
+            });
+        }
 
         if (recoveryActions.contains(RecoveryAction.RETRY_FUNDAMENTALS)) {
-            attempts.put(RecoveryAction.RETRY_FUNDAMENTALS, 1);
+            attempts.merge(RecoveryAction.RETRY_FUNDAMENTALS, 1, Integer::sum);
             EvidenceSnapshot fundamentals = buildFundamentalsSnapshot(ticker);
             state.setFundamentalsReport(fundamentals.text());
             replaceDimension(merged, EvidenceDimension.FUNDAMENTALS, fundamentals.evidence());
@@ -215,7 +235,7 @@ public class DeepEvidenceCollector {
                     "Fundamentals evidence recovery completed.");
         }
         if (recoveryActions.contains(RecoveryAction.RETRY_MARKET)) {
-            attempts.put(RecoveryAction.RETRY_MARKET, 1);
+            attempts.merge(RecoveryAction.RETRY_MARKET, 1, Integer::sum);
             EvidenceSnapshot market = buildMarketSnapshot(ticker);
             state.setMarketReport(market.text());
             replaceDimension(merged, EvidenceDimension.MARKET, market.evidence());
@@ -224,7 +244,7 @@ public class DeepEvidenceCollector {
                     "Market evidence recovery completed.");
         }
         if (recoveryActions.contains(RecoveryAction.RETRY_NEWS)) {
-            attempts.put(RecoveryAction.RETRY_NEWS, 1);
+            attempts.merge(RecoveryAction.RETRY_NEWS, 1, Integer::sum);
             EvidenceSnapshot news = buildNewsSnapshot(ticker);
             state.setNewsReport(news.text());
             replaceDimension(merged, EvidenceDimension.NEWS, news.evidence());
@@ -246,6 +266,46 @@ public class DeepEvidenceCollector {
                 state,
                 decision.allowsRecommendation(),
                 existing.tickerResolved(),
+                fundamentalsOk,
+                marketOk,
+                newsOk,
+                ledger,
+                decision
+        );
+    }
+
+    /**
+     * Rebuilds a policy input from a durable checkpoint and evaluates it again.
+     *
+     * <p>Legacy checkpoints without an evidence ledger intentionally become an unresolved empty
+     * ledger. The production policy therefore fails safe instead of allowing debate to start from
+     * evidence that cannot be verified.</p>
+     */
+    public EvidenceCollection reevaluateCheckpoint(
+            AnalysisState checkpointState,
+            Map<RecoveryAction, Integer> recoveryAttempts,
+            String traceId
+    ) {
+        AnalysisState state = checkpointState == null
+                ? AnalysisState.builder().build()
+                : checkpointState;
+        EvidenceLedger ledger = state.getEvidenceLedger() == null
+                ? EvidenceLedger.empty()
+                : state.getEvidenceLedger();
+        boolean fundamentalsOk = ledger.hasUsable(EvidenceDimension.FUNDAMENTALS);
+        boolean marketOk = ledger.hasUsable(EvidenceDimension.MARKET);
+        boolean newsOk = ledger.hasUsable(EvidenceDimension.NEWS);
+        HarnessDecision decision = researchHarness.observeEvidence(
+                traceId,
+                completionPolicy,
+                new RunContext("DEEP", recoveryAttempts),
+                ledger
+        );
+        return new EvidenceCollection(
+                rebuildContext(state),
+                state,
+                decision.allowsRecommendation(),
+                ledger.target().isResolved(),
                 fundamentalsOk,
                 marketOk,
                 newsOk,

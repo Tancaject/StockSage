@@ -10,11 +10,15 @@ import com.stocksage.harness.HarnessModels.HarnessDecision;
 import com.stocksage.harness.HarnessModels.HarnessPhase;
 import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.HarnessSnapshot;
+import com.stocksage.harness.HarnessModels.HarnessViolation;
 import com.stocksage.harness.HarnessModels.RecoveryAction;
+import com.stocksage.harness.HarnessModels.RecoveryLifecycle;
+import com.stocksage.harness.HarnessModels.SuspendedRecovery;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.tool.ChatStreamEmitter;
+import com.stocksage.trace.TraceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
@@ -51,10 +55,13 @@ public class DeepResearchPipeline {
     private final DeepEvidenceCollector evidenceCollector;
     private final ReportMarkdownRenderer reportRenderer;
     private final ConversationMessageService conversationMessageService;
+    private final ResearchTaskPublicationTransaction publicationTransaction;
     private final ChatStreamEmitter chatStreamEmitter;
+    private final TraceService traceService;
 
     /** 整条 DEEP 管线在 worker 内运行，请求线程只负责创建任务和订阅事件。 */
     public void runFullPipeline(ResearchTask task, ResearchTaskLeaseService.Lease lease) {
+        long pipelineStartedAt = System.currentTimeMillis();
         SubmissionPayload payload = null;
         ResearchTask runningTask = task;
         AnalysisState workingState = null;
@@ -85,6 +92,13 @@ public class DeepResearchPipeline {
             Optional<ResearchTaskCheckpointService.CheckpointState> checkpoint =
                     checkpointService.load(task.getId());
             workingState = checkpoint.map(ResearchTaskCheckpointService.CheckpointState::state).orElse(null);
+            boolean checkpointedReportArtifact = workingState != null
+                    && workingState.getInvestmentReport() != null;
+            boolean resumeFromEvidenceBoundary = checkpoint
+                    .map(this::isEvidenceBoundaryCheckpoint)
+                    .orElse(false);
+            SuspendedRecovery suspendedReportRecovery =
+                    suspendedReportRecovery(workingState);
 
             int roundsDone = checkpoint
                     .map(ResearchTaskCheckpointService.CheckpointState::debateRoundsCompleted)
@@ -92,31 +106,48 @@ public class DeepResearchPipeline {
             int plannedRounds = checkpoint
                     .map(ResearchTaskCheckpointService.CheckpointState::plannedRounds)
                     .orElse(0);
+            if (hasPendingReportRecovery(workingState)) {
+                // Older inline checkpoints stored the strict REPORT/PLANNED payload while their
+                // checkpoint columns still said DATA_PREFETCH / 0 rounds. Recover the durable
+                // debate progress from the paired turns so takeover reaches Manager directly
+                // instead of replaying Bull/Bear and the planner.
+                int durableRounds = completedDebateRounds(workingState);
+                roundsDone = Math.max(roundsDone, durableRounds);
+                plannedRounds = Math.max(plannedRounds, durableRounds);
+            }
 
+            DeepEvidenceCollector.EvidenceCollection evidence = null;
+            Map<RecoveryAction, Integer> recoveryAttempts = Map.of();
             if (checkpoint.isEmpty()) {
                 requireTaskOwnership(runningTask, lease, ownershipLost);
                 chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "thought",
                         "开始收集深度研究证据……");
-                DeepEvidenceCollector.EvidenceCollection evidence = evidenceCollector.collect(
+                evidence = evidenceCollector.collect(
                         payload.ticker(), payload.query(), payload.traceId(), payload.conversationId());
-                if (evidence.harnessDecision().outcome() == HarnessOutcome.RECOVER) {
-                    List<RecoveryAction> recoveryActions =
-                            evidence.harnessDecision().recoveryActions();
-                    applyEvidenceSnapshot(evidence.state(), evidence.harnessDecision(), Map.of());
-                    saveHarnessSnapshotForOwner(
-                            runningTask, lease, evidence.state(), ownershipLost);
-                    evidence = evidenceCollector.recover(
-                            evidence,
-                            recoveryActions,
-                            payload.traceId(),
-                            payload.conversationId()
-                    );
-                    applyEvidenceSnapshot(
-                            evidence.state(),
-                            evidence.harnessDecision(),
-                            recoveryAttempts(recoveryActions)
-                    );
-                }
+            } else {
+                requireTaskOwnership(runningTask, lease, ownershipLost);
+                recoveryAttempts = checkpointRecoveryAttempts(workingState);
+                chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "observation",
+                        "从持久化断点恢复研究任务：重新执行当前证据门禁与未完成的恢复动作。");
+                evidence = evidenceCollector.reevaluateCheckpoint(
+                        workingState,
+                        recoveryAttempts,
+                        payload.traceId()
+                );
+                evidence = restoreDurablePlannedRecovery(workingState, evidence);
+            }
+
+            if (evidence != null) {
+                workingState = evidence.state();
+                evidence = executeEvidenceRecovery(
+                        runningTask,
+                        lease,
+                        payload,
+                        evidence,
+                        recoveryAttempts,
+                        suspendedReportRecovery,
+                        ownershipLost
+                );
                 workingState = evidence.state();
                 if (evidence.harnessDecision().outcome() != HarnessOutcome.PASS) {
                     String text = reportRenderer.buildInsufficientEvidenceReport(
@@ -130,24 +161,50 @@ public class DeepResearchPipeline {
                     return;
                 }
 
-                requireTaskOwnership(runningTask, lease, ownershipLost);
+                restoreSuspendedReportRecovery(workingState, suspendedReportRecovery);
+                // A checkpoint hash is historical metadata. Any current-policy PASS, including a
+                // recovered or policy-drift-only PASS, must bind reuse/persistence to the current
+                // ledger and policy contract.
                 investmentReportVersionService.prepareHashes(workingState);
-                Optional<InvestmentReport> reusable = investmentReportVersionService.findReusableReport(
-                        task.getUserId(), payload.conversationId(), workingState);
-                if (reusable.isPresent()) {
-                    workingState.setInvestmentReport(reusable.get());
-                    finishWithText(runningTask, lease, payload,
-                            reportRenderer.buildFinalAnswerBrief(workingState), null,
-                            ResearchTask.ResultKind.FULL_REPORT, ownershipLost);
-                    return;
-                }
 
-                saveEvidenceForOwner(runningTask, lease, workingState, ownershipLost);
-                markStageForOwner(runningTask, lease, ResearchTask.Stage.AGENT_DEBATE, ownershipLost);
-            } else {
+                if (checkpoint.isEmpty() || resumeFromEvidenceBoundary) {
+                    requireTaskOwnership(runningTask, lease, ownershipLost);
+                    Optional<InvestmentReport> reusable =
+                            investmentReportVersionService.findReusableReport(
+                                    task.getUserId(), payload.conversationId(), workingState);
+                    if (reusable.isPresent()) {
+                        workingState.setInvestmentReport(reusable.get());
+                        finishWithText(runningTask, lease, payload,
+                                reportRenderer.buildFinalAnswerBrief(workingState), null,
+                                ResearchTask.ResultKind.FULL_REPORT, ownershipLost);
+                        return;
+                    }
+
+                    saveEvidenceForOwner(runningTask, lease, workingState, ownershipLost);
+                    markStageForOwner(
+                            runningTask, lease, ResearchTask.Stage.AGENT_DEBATE, ownershipLost);
+                } else {
+                    requireTaskOwnership(runningTask, lease, ownershipLost);
+                    chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "observation",
+                            "证据门禁复验通过：继续恢复已完成 "
+                                    + roundsDone + " 轮的研究断点。");
+                }
+            }
+
+            if (checkpointedReportArtifact && workingState.getInvestmentReport() != null) {
                 requireTaskOwnership(runningTask, lease, ownershipLost);
-                chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "observation",
-                        "从断点恢复研究任务：已完成 " + roundsDone + " 轮辩论。");
+                ResearchTask ownedTask = runningTask;
+                workingState = researchDebateService.revalidateCheckpointedReport(
+                        payload.traceId(),
+                        payload.conversationId(),
+                        workingState,
+                        ownershipGuard(ownedTask, ownershipLost),
+                        state -> saveHarnessSnapshotForOwner(
+                                ownedTask, lease, state, ownershipLost)
+                );
+                saveSynthesisForOwner(runningTask, lease, workingState, ownershipLost);
+                markStageForOwner(
+                        runningTask, lease, ResearchTask.Stage.REPORT_SYNTHESIS, ownershipLost);
             }
 
             if (workingState.getInvestmentReport() == null) {
@@ -184,15 +241,16 @@ public class DeepResearchPipeline {
             }
 
             markStageForOwner(runningTask, lease, ResearchTask.Stage.REPORT_PERSIST, ownershipLost);
-            requireTaskOwnership(runningTask, lease, ownershipLost);
-            InvestmentReportVersionService.PersistedReportVersion persisted =
-                    investmentReportVersionService.persistReportVersionWithMetadata(
-                            task.getUserId(), payload.conversationId(), workingState,
-                            ModelTier.STRONG.name(), null);
-            String brief = reportRenderer.buildFinalAnswerBrief(workingState);
-            finishWithText(
-                    runningTask, lease, payload, brief, persisted.reportVersionId(),
-                    ResearchTask.ResultKind.FULL_REPORT, ownershipLost);
+            finishWithPublishedReport(
+                    runningTask,
+                    lease,
+                    payload,
+                    workingState,
+                    ModelTier.STRONG.name(),
+                    null,
+                    ResearchTask.ResultKind.FULL_REPORT,
+                    ownershipLost
+            );
         } catch (OwnershipLostException error) {
             log.info("Research task stopped after ownership loss, taskId={}, error={}",
                     task == null ? null : task.getId(), error.getMessage());
@@ -215,18 +273,57 @@ public class DeepResearchPipeline {
             }
 
             requireTaskOwnership(runningTask, lease, ownershipLost);
-            Optional<PersistedFallback> fallback = payload == null
+            ResearchTask fallbackTask = runningTask;
+            SubmissionPayload fallbackPayload = payload;
+            AnalysisState fallbackState = workingState;
+            Optional<PersistedFallback> fallback = fallbackPayload == null
                     ? Optional.empty()
-                    : persistOfflineFallbackReport(
-                            task.getUserId(), payload.conversationId(), workingState,
-                            runningTask, lease, error, ownershipLost);
+                    : publicationTransaction.executeForUser(task.getUserId(), () -> {
+                        Optional<PersistedFallback> candidate = persistOfflineFallbackReport(
+                                task.getUserId(),
+                                fallbackPayload.conversationId(),
+                                fallbackState,
+                                fallbackTask,
+                                lease,
+                                error,
+                                ownershipLost
+                        );
+                        if (candidate.isEmpty()) {
+                            return Optional.empty();
+                        }
+                        PersistedFallback persisted = candidate.orElseThrow();
+                        String brief = reportRenderer.buildFinalAnswerBrief(fallbackState);
+                        String text = brief == null || brief.isBlank()
+                                ? persisted.reportJson()
+                                : brief;
+                        conversationMessageService.persistAssistantReport(
+                                fallbackPayload.conversationId(),
+                                fallbackTask.getUserId(),
+                                text,
+                                fallbackPayload.traceId()
+                        );
+                        markSucceededForOwner(
+                                fallbackTask,
+                                lease,
+                                persisted.reportVersionId(),
+                                ResearchTask.ResultKind.OFFLINE_FALLBACK,
+                                ownershipLost
+                        );
+                        return Optional.of(new PersistedFallback(
+                                persisted.reportJson(),
+                                persisted.reportVersionId(),
+                                text
+                        ));
+                    });
             if (fallback.isPresent()) {
-                String brief = reportRenderer.buildFinalAnswerBrief(workingState);
                 PersistedFallback persistedFallback = fallback.get();
-                String text = brief == null || brief.isBlank() ? persistedFallback.reportJson() : brief;
-                finishWithText(runningTask, lease, payload, text,
-                        persistedFallback.reportVersionId(),
-                        ResearchTask.ResultKind.OFFLINE_FALLBACK, ownershipLost);
+                deleteCompletedCheckpointBestEffort(runningTask);
+                chatStreamEmitter.emit(
+                        payload.traceId(),
+                        payload.conversationId(),
+                        "task-final",
+                        persistedFallback.deliveryText()
+                );
                 return;
             }
 
@@ -246,7 +343,62 @@ public class DeepResearchPipeline {
             if (heartbeat != null) {
                 heartbeat.cancel(false);
             }
-            researchTaskService.release(lease);
+            try {
+                researchTaskService.release(lease);
+            } finally {
+                endTerminalTaskTraceBestEffort(
+                        runningTask,
+                        payload,
+                        System.currentTimeMillis() - pipelineStartedAt
+                );
+            }
+        }
+    }
+
+    /**
+     * Background-task completion is authoritative for its trace lifecycle.
+     *
+     * <p>The SSE subscriber may disconnect while the durable task keeps running. Closing the
+     * trace from the request stream would therefore record a false cancellation. Only a terminal
+     * task owned by this pipeline may close the task trace; ownership-loss paths leave it open for
+     * the takeover worker.</p>
+     */
+    private void endTerminalTaskTraceBestEffort(
+            ResearchTask task,
+            SubmissionPayload payload,
+            long durationMs
+    ) {
+        if (task == null
+                || payload == null
+                || payload.traceId() == null
+                || payload.traceId().isBlank()) {
+            return;
+        }
+        String status;
+        if (task.getStatus() == ResearchTask.Status.SUCCEEDED) {
+            status = "success";
+        } else if (task.getStatus() == ResearchTask.Status.FAILED) {
+            status = "error";
+        } else {
+            return;
+        }
+        try {
+            traceService.endTrace(
+                    payload.traceId(),
+                    status,
+                    0,
+                    Math.max(0, durationMs)
+            );
+        } catch (Exception error) {
+            // The business terminal state has already committed. Do not replay the research or
+            // risk duplicate publication because only the observability update failed.
+            log.warn(
+                    "Research task terminal trace update failed, taskId={}, traceId={}, status={}, error={}",
+                    task.getId(),
+                    payload.traceId(),
+                    status,
+                    error.getMessage()
+            );
         }
     }
 
@@ -260,9 +412,48 @@ public class DeepResearchPipeline {
             AtomicBoolean ownershipLost
     ) {
         requireTaskOwnership(task, lease, ownershipLost);
-        conversationMessageService.persistAssistantReport(
-                payload.conversationId(), task.getUserId(), text, payload.traceId());
-        markSucceededForOwner(task, lease, reportVersionId, resultKind, ownershipLost);
+        publicationTransaction.executeForUser(task.getUserId(), () -> {
+            conversationMessageService.persistAssistantReport(
+                    payload.conversationId(), task.getUserId(), text, payload.traceId());
+            markSucceededForOwner(task, lease, reportVersionId, resultKind, ownershipLost);
+        });
+        deleteCompletedCheckpointBestEffort(task);
+        chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "task-final", text);
+    }
+
+    private void finishWithPublishedReport(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            SubmissionPayload payload,
+            AnalysisState state,
+            String modelTier,
+            String modelName,
+            ResearchTask.ResultKind resultKind,
+            AtomicBoolean ownershipLost
+    ) {
+        requireTaskOwnership(task, lease, ownershipLost);
+        String text = publicationTransaction.executeForUser(task.getUserId(), () -> {
+            InvestmentReportVersionService.PersistedReportVersion persisted =
+                    investmentReportVersionService.persistReportVersionWithMetadata(
+                            task.getUserId(),
+                            payload.conversationId(),
+                            state,
+                            modelTier,
+                            modelName
+                    );
+            // Same-snapshot publication may replace the candidate with the already committed
+            // canonical report. Render only after that decision, while still under the user lock.
+            String committedText = reportRenderer.buildFinalAnswerBrief(state);
+            conversationMessageService.persistAssistantReport(
+                    payload.conversationId(),
+                    task.getUserId(),
+                    committedText,
+                    payload.traceId()
+            );
+            markSucceededForOwner(
+                    task, lease, persisted.reportVersionId(), resultKind, ownershipLost);
+            return committedText;
+        });
         deleteCompletedCheckpointBestEffort(task);
         chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "task-final", text);
     }
@@ -328,11 +519,19 @@ public class DeepResearchPipeline {
             requireTaskOwnership(runningTask, lease, ownershipLost);
             heartbeat = startResearchTaskHeartbeat(runningTask, lease, ownershipLost);
             ResearchTask reportTask = runningTask;
+            saveEvidenceForOwner(reportTask, lease, agentState, ownershipLost);
+            markStageForOwner(
+                    reportTask, lease, ResearchTask.Stage.AGENT_DEBATE, ownershipLost);
             AnalysisState completed = researchDebateService.runDebate(
-                    traceId, conversationId, agentState, 1, 0, null,
+                    traceId, conversationId, agentState, 1, 0,
+                    (state, rounds, planned) -> saveDebateRoundForOwner(
+                            reportTask, lease, state, rounds, planned, ownershipLost),
                     ownershipGuard(reportTask, ownershipLost),
                     state -> saveHarnessSnapshotForOwner(
                             reportTask, lease, state, ownershipLost));
+            saveSynthesisForOwner(reportTask, lease, completed, ownershipLost);
+            markStageForOwner(
+                    reportTask, lease, ResearchTask.Stage.REPORT_SYNTHESIS, ownershipLost);
             if (completed.getInvestmentReport() == null
                     || completed.getInvestmentReport().getQualityStatus()
                     != InvestmentReport.ReportQualityStatus.VERIFIED) {
@@ -348,41 +547,61 @@ public class DeepResearchPipeline {
             }
             markStageForOwner(runningTask, lease, ResearchTask.Stage.REPORT_PERSIST, ownershipLost);
             requireTaskOwnership(runningTask, lease, ownershipLost);
+            ResearchTask publicationTask = runningTask;
             InvestmentReportVersionService.PersistedReportVersion persisted =
-                    investmentReportVersionService.persistReportVersionWithMetadata(
-                            userId,
-                            conversationId,
-                            completed,
-                            selectedModel == null ? null : selectedModel.tier().name(),
-                            selectedModel == null ? null : selectedModel.modelName()
-                    );
+                    publicationTransaction.executeForUser(userId, () -> {
+                        InvestmentReportVersionService.PersistedReportVersion published =
+                                investmentReportVersionService.persistReportVersionWithMetadata(
+                                        userId,
+                                        conversationId,
+                                        completed,
+                                        selectedModel == null
+                                                ? null
+                                                : selectedModel.tier().name(),
+                                        selectedModel == null
+                                                ? null
+                                                : selectedModel.modelName()
+                        );
+                        markSucceededForOwner(
+                                publicationTask,
+                                lease,
+                                published.reportVersionId(),
+                                ResearchTask.ResultKind.FULL_REPORT,
+                                ownershipLost
+                        );
+                        return published;
+                    });
             String reportJson = objectMapper.writeValueAsString(
                     persisted.report() == null ? completed.getInvestmentReport() : persisted.report()
             );
-            markSucceededForOwner(
-                    runningTask, lease, persisted.reportVersionId(),
-                    ResearchTask.ResultKind.FULL_REPORT, ownershipLost);
             return reportJson;
         } catch (OwnershipLostException error) {
             throw error;
         } catch (Exception e) {
             ResearchTask failedTask = runningTask == null ? task : runningTask;
             requireTaskOwnership(failedTask, lease, ownershipLost);
-            Optional<PersistedFallback> fallbackReport = persistOfflineFallbackReport(
-                    userId,
-                    conversationId,
-                    agentState,
-                    failedTask,
-                    lease,
-                    e,
-                    ownershipLost
-            );
+            Optional<PersistedFallback> fallbackReport =
+                    publicationTransaction.executeForUser(userId, () -> {
+                        Optional<PersistedFallback> candidate = persistOfflineFallbackReport(
+                                userId,
+                                conversationId,
+                                agentState,
+                                failedTask,
+                                lease,
+                                e,
+                                ownershipLost
+                        );
+                        candidate.ifPresent(fallback -> markSucceededForOwner(
+                                failedTask,
+                                lease,
+                                fallback.reportVersionId(),
+                                ResearchTask.ResultKind.OFFLINE_FALLBACK,
+                                ownershipLost
+                        ));
+                        return candidate;
+                    });
             if (fallbackReport.isPresent()) {
-                PersistedFallback fallback = fallbackReport.get();
-                markSucceededForOwner(
-                        failedTask, lease, fallback.reportVersionId(),
-                        ResearchTask.ResultKind.OFFLINE_FALLBACK, ownershipLost);
-                return fallback.reportJson();
+                return fallbackReport.orElseThrow().reportJson();
             }
             requireTaskOwnership(failedTask, lease, ownershipLost);
             boolean failed = researchTaskService.markFailedForOwner(
@@ -410,23 +629,31 @@ public class DeepResearchPipeline {
             Exception sourceError
     ) {
         AtomicBoolean ownershipLost = new AtomicBoolean(false);
-        Optional<PersistedFallback> persisted = persistOfflineFallbackReport(
-                userId,
-                conversationId,
-                agentState,
-                runningTask,
-                lease,
-                sourceError,
-                ownershipLost
-        );
+        requireTaskOwnership(runningTask, lease, ownershipLost);
+        Optional<PersistedFallback> persisted =
+                publicationTransaction.executeForUser(userId, () -> {
+                    Optional<PersistedFallback> candidate = persistOfflineFallbackReport(
+                            userId,
+                            conversationId,
+                            agentState,
+                            runningTask,
+                            lease,
+                            sourceError,
+                            ownershipLost
+                    );
+                    candidate.ifPresent(fallback -> markSucceededForOwner(
+                            runningTask,
+                            lease,
+                            fallback.reportVersionId(),
+                            ResearchTask.ResultKind.OFFLINE_FALLBACK,
+                            ownershipLost
+                    ));
+                    return candidate;
+                });
         if (persisted.isEmpty()) {
             return Optional.empty();
         }
-        PersistedFallback fallback = persisted.get();
-        markSucceededForOwner(
-                runningTask, lease, fallback.reportVersionId(),
-                ResearchTask.ResultKind.OFFLINE_FALLBACK, ownershipLost);
-        return Optional.of(fallback.reportJson());
+        return Optional.of(persisted.orElseThrow().reportJson());
     }
 
     private Optional<PersistedFallback> persistOfflineFallbackReport(
@@ -464,7 +691,8 @@ public class DeepResearchPipeline {
             return Optional.of(new PersistedFallback(
                     objectMapper.writeValueAsString(
                             persisted.report() == null ? report : persisted.report()),
-                    persisted.reportVersionId()
+                    persisted.reportVersionId(),
+                    null
             ));
         } catch (OwnershipLostException ownershipError) {
             throw ownershipError;
@@ -614,30 +842,309 @@ public class DeepResearchPipeline {
         }
     }
 
-    private void applyEvidenceSnapshot(
+    private DeepEvidenceCollector.EvidenceCollection executeEvidenceRecovery(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            SubmissionPayload payload,
+            DeepEvidenceCollector.EvidenceCollection evidence,
+            Map<RecoveryAction, Integer> previousAttempts,
+            SuspendedRecovery suspendedReportRecovery,
+            AtomicBoolean ownershipLost
+    ) {
+        if (evidence.harnessDecision().outcome() != HarnessOutcome.RECOVER) {
+            closeLegacyPendingRecoveryIfNeeded(
+                    task,
+                    lease,
+                    evidence,
+                    previousAttempts,
+                    suspendedReportRecovery,
+                    ownershipLost
+            );
+            return evidence;
+        }
+
+        List<RecoveryAction> recoveryActions = evidence.harnessDecision().recoveryActions();
+        String effectKey = recoveryEffectKey(
+                task.getId(),
+                recoveryActions,
+                previousAttempts
+        );
+        HarnessSnapshot existingSnapshot = evidence.state().getHarnessSnapshot();
+        if (existingSnapshot != null
+                && existingSnapshot.hasPendingEvidenceRecovery()
+                && sameRecoveryActions(existingSnapshot.recoveryActions(), recoveryActions)
+                && !existingSnapshot.recoveryEffectKey().isBlank()) {
+            effectKey = existingSnapshot.recoveryEffectKey();
+        }
+
+        applyEvidenceRecoverySnapshot(
+                evidence.state(),
+                evidence.harnessDecision(),
+                previousAttempts,
+                RecoveryLifecycle.PLANNED,
+                recoveryActions,
+                effectKey,
+                suspendedReportRecovery
+        );
+        saveHarnessSnapshotForOwner(task, lease, evidence.state(), ownershipLost);
+        log.info("Resuming bounded evidence recovery, taskId={}, effectKey={}, actions={}",
+                task.getId(), effectKey, recoveryActions);
+
+        DeepEvidenceCollector.EvidenceCollection recovered = evidenceCollector.recover(
+                evidence,
+                recoveryActions,
+                previousAttempts,
+                payload.traceId(),
+                payload.conversationId()
+        );
+        Map<RecoveryAction, Integer> completedAttempts =
+                incrementRecoveryAttempts(previousAttempts, recoveryActions);
+        applyEvidenceRecoverySnapshot(
+                recovered.state(),
+                recovered.harnessDecision(),
+                completedAttempts,
+                RecoveryLifecycle.REVALIDATED,
+                recoveryActions,
+                effectKey,
+                suspendedReportRecovery
+        );
+        // Close the crash window between the read-only effect and the ordinary evidence checkpoint.
+        saveHarnessSnapshotForOwner(task, lease, recovered.state(), ownershipLost);
+        return recovered;
+    }
+
+    private void closeLegacyPendingRecoveryIfNeeded(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            DeepEvidenceCollector.EvidenceCollection evidence,
+            Map<RecoveryAction, Integer> recoveryAttempts,
+            SuspendedRecovery suspendedReportRecovery,
+            AtomicBoolean ownershipLost
+    ) {
+        HarnessSnapshot snapshot = evidence.state().getHarnessSnapshot();
+        if (snapshot == null || !snapshot.hasPendingEvidenceRecovery()) {
+            return;
+        }
+        applyEvidenceRecoverySnapshot(
+                evidence.state(),
+                evidence.harnessDecision(),
+                recoveryAttempts,
+                RecoveryLifecycle.REVALIDATED,
+                snapshot.recoveryActions(),
+                snapshot.recoveryEffectKey(),
+                suspendedReportRecovery
+        );
+        saveHarnessSnapshotForOwner(task, lease, evidence.state(), ownershipLost);
+    }
+
+    private DeepEvidenceCollector.EvidenceCollection restoreDurablePlannedRecovery(
+            AnalysisState state,
+            DeepEvidenceCollector.EvidenceCollection reevaluated
+    ) {
+        HarnessSnapshot snapshot = state == null ? null : state.getHarnessSnapshot();
+        if (snapshot == null
+                || !snapshot.hasPendingEvidenceRecovery()
+                || snapshot.recoveryActions().isEmpty()
+                || !DeepResearchCompletionPolicy.POLICY_ID.equals(snapshot.policyId())
+                || !Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION)
+                .equals(snapshot.policyVersion())
+                || snapshot.recoveryActions().stream().anyMatch(action ->
+                action != RecoveryAction.RETRY_FUNDAMENTALS
+                        && action != RecoveryAction.RETRY_MARKET
+                        && action != RecoveryAction.RETRY_NEWS)) {
+            return reevaluated;
+        }
+        HarnessDecision durablePlan = new HarnessDecision(
+                HarnessOutcome.RECOVER,
+                reevaluated.harnessDecision().violations(),
+                snapshot.recoveryActions()
+        );
+        return new DeepEvidenceCollector.EvidenceCollection(
+                reevaluated.contextMarkdown(),
+                reevaluated.state(),
+                false,
+                reevaluated.tickerResolved(),
+                reevaluated.fundamentalsOk(),
+                reevaluated.marketOk(),
+                reevaluated.newsOk(),
+                reevaluated.evidenceLedger(),
+                durablePlan
+        );
+    }
+
+    private void applyEvidenceRecoverySnapshot(
             AnalysisState state,
             HarnessDecision decision,
-            Map<RecoveryAction, Integer> recoveryAttempts
+            Map<RecoveryAction, Integer> recoveryAttempts,
+            RecoveryLifecycle recoveryLifecycle,
+            List<RecoveryAction> recoveryActions,
+            String recoveryEffectKey,
+            SuspendedRecovery suspendedReportRecovery
     ) {
-        state.setHarnessSnapshot(HarnessSnapshot.from(
+        state.setHarnessSnapshot(HarnessSnapshot.recovery(
                 DeepResearchCompletionPolicy.POLICY_ID,
                 Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION),
                 HarnessPhase.EVIDENCE,
                 decision,
-                recoveryAttempts
+                recoveryAttempts,
+                recoveryLifecycle,
+                recoveryActions,
+                recoveryEffectKey,
+                suspendedReportRecovery
         ));
     }
 
-    private Map<RecoveryAction, Integer> recoveryAttempts(List<RecoveryAction> actions) {
-        if (actions == null) {
-            return Map.of();
+    private SuspendedRecovery suspendedReportRecovery(AnalysisState state) {
+        HarnessSnapshot snapshot = state == null ? null : state.getHarnessSnapshot();
+        if (snapshot == null) {
+            return null;
         }
-        return actions.stream()
-                .collect(java.util.stream.Collectors.toUnmodifiableMap(
-                        action -> action,
-                        action -> 1,
-                        Math::max
-                ));
+        if (snapshot.suspendedRecovery() != null
+                && snapshot.suspendedRecovery().phase() == HarnessPhase.REPORT) {
+            return snapshot.suspendedRecovery();
+        }
+        return snapshot.phase() == HarnessPhase.REPORT
+                ? SuspendedRecovery.from(snapshot)
+                : null;
+    }
+
+    private void restoreSuspendedReportRecovery(
+            AnalysisState state,
+            SuspendedRecovery suspendedReportRecovery
+    ) {
+        if (state == null
+                || suspendedReportRecovery == null
+                || suspendedReportRecovery.phase() != HarnessPhase.REPORT) {
+            return;
+        }
+        HarnessSnapshot currentSnapshot = state.getHarnessSnapshot();
+        if (currentSnapshot == null || currentSnapshot.phase() != HarnessPhase.EVIDENCE) {
+            return;
+        }
+        HarnessDecision reportDecision = new HarnessDecision(
+                suspendedReportRecovery.outcome(),
+                suspendedReportRecovery.violations().stream()
+                        .map(code -> new HarnessViolation(code, null))
+                        .toList(),
+                suspendedReportRecovery.recoveryActions()
+        );
+        state.setHarnessSnapshot(HarnessSnapshot.recovery(
+                DeepResearchCompletionPolicy.POLICY_ID,
+                Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION),
+                HarnessPhase.REPORT,
+                reportDecision,
+                currentSnapshot.recoveryAttempts(),
+                suspendedReportRecovery.recoveryLifecycle(),
+                suspendedReportRecovery.recoveryActions(),
+                suspendedReportRecovery.recoveryEffectKey()
+        ));
+    }
+
+    private boolean isEvidenceBoundaryCheckpoint(
+            ResearchTaskCheckpointService.CheckpointState checkpoint
+    ) {
+        return checkpoint.stageCompleted() == null
+                || checkpoint.stageCompleted() == ResearchTask.Stage.DATA_PREFETCH;
+    }
+
+    private boolean hasPendingReportRecovery(AnalysisState state) {
+        HarnessSnapshot snapshot = state == null ? null : state.getHarnessSnapshot();
+        return snapshot != null
+                && snapshot.phase() == HarnessPhase.REPORT
+                && snapshot.recoveryLifecycle() == RecoveryLifecycle.PLANNED;
+    }
+
+    private int completedDebateRounds(AnalysisState state) {
+        if (state == null || state.getDebateTurns() == null) {
+            return 0;
+        }
+        int completed = 0;
+        while (hasDebateTurn(state, completed + 1, AnalysisState.DebateTurn.Side.BULL)
+                && hasDebateTurn(state, completed + 1, AnalysisState.DebateTurn.Side.BEAR)) {
+            completed++;
+        }
+        return completed;
+    }
+
+    private boolean hasDebateTurn(
+            AnalysisState state,
+            int round,
+            AnalysisState.DebateTurn.Side side
+    ) {
+        return state.getDebateTurns().stream()
+                .anyMatch(turn -> turn != null
+                        && turn.round() == round
+                        && turn.side() == side);
+    }
+
+    private Map<RecoveryAction, Integer> checkpointRecoveryAttempts(AnalysisState state) {
+        HarnessSnapshot snapshot = state == null ? null : state.getHarnessSnapshot();
+        return snapshot == null ? Map.of() : snapshot.recoveryAttempts();
+    }
+
+    private Map<RecoveryAction, Integer> incrementRecoveryAttempts(
+            Map<RecoveryAction, Integer> previousAttempts,
+            List<RecoveryAction> actions
+    ) {
+        java.util.EnumMap<RecoveryAction, Integer> attempts =
+                new java.util.EnumMap<>(RecoveryAction.class);
+        if (previousAttempts != null) {
+            previousAttempts.forEach((action, count) -> {
+                if (action != null) {
+                    attempts.put(action, Math.max(0, count == null ? 0 : count));
+                }
+            });
+        }
+        if (actions != null) {
+            actions.forEach(action -> {
+                if (action != null) {
+                    attempts.merge(action, 1, Integer::sum);
+                }
+            });
+        }
+        return Map.copyOf(attempts);
+    }
+
+    private String recoveryEffectKey(
+            Long taskId,
+            List<RecoveryAction> actions,
+            Map<RecoveryAction, Integer> previousAttempts
+    ) {
+        String actionKey = actions == null
+                ? "none"
+                : actions.stream()
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .sorted()
+                .map(action -> action.name().toLowerCase(java.util.Locale.ROOT)
+                        + "-" + (previousAttempts == null
+                        ? 1
+                        : previousAttempts.getOrDefault(action, 0) + 1))
+                .collect(java.util.stream.Collectors.joining("+"));
+        if (actionKey.isBlank()) {
+            actionKey = "none";
+        }
+        return "deep-evidence:"
+                + taskId
+                + ":"
+                + DeepResearchCompletionPolicy.POLICY_ID
+                + "-v"
+                + DeepResearchCompletionPolicy.POLICY_VERSION
+                + ":"
+                + actionKey;
+    }
+
+    private boolean sameRecoveryActions(
+            List<RecoveryAction> first,
+            List<RecoveryAction> second
+    ) {
+        List<RecoveryAction> normalizedFirst = first == null
+                ? List.of()
+                : first.stream().filter(java.util.Objects::nonNull).distinct().sorted().toList();
+        List<RecoveryAction> normalizedSecond = second == null
+                ? List.of()
+                : second.stream().filter(java.util.Objects::nonNull).distinct().sorted().toList();
+        return normalizedFirst.equals(normalizedSecond);
     }
 
     private void saveEvidenceForOwner(
@@ -695,7 +1202,11 @@ public class DeepResearchPipeline {
                 "research task lost ownership before checkpoint update, taskId=" + task.getId(), error);
     }
 
-    private record PersistedFallback(String reportJson, Long reportVersionId) {
+    private record PersistedFallback(
+            String reportJson,
+            Long reportVersionId,
+            String deliveryText
+    ) {
     }
 
     /** Signals the worker that another execution owns the task and this attempt must stop silently. */

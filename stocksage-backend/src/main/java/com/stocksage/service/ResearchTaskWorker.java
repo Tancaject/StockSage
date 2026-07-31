@@ -175,6 +175,7 @@ public class ResearchTaskWorker implements SmartLifecycle {
             return;
         }
 
+        boolean retryLocally = false;
         try {
             if (safeAttempts(task) >= maxAttempts) {
                 boolean failed = researchTaskService.failStaleRunningAtAttemptLimit(
@@ -214,7 +215,8 @@ public class ResearchTaskWorker implements SmartLifecycle {
                     error.getMessage()
             );
             if (resetForRetry) {
-                log.warn("Research task execution failed, taskId={}, reset to pending for reclaim: {}",
+                retryLocally = true;
+                log.warn("Research task execution failed, taskId={}, reset to pending for local retry: {}",
                         task.getId(), error.getMessage());
             } else {
                 log.warn("Research task execution failed after ownership changed or task became terminal, "
@@ -224,6 +226,15 @@ public class ResearchTaskWorker implements SmartLifecycle {
         } finally {
             researchTaskService.release(acquired);
             endExecution();
+        }
+        if (retryLocally && running.get()) {
+            // Only expose the Redis pending record to another local worker after the failed
+            // attempt's lease has been released. Redis remains the durable fallback: if this
+            // process stops during the short backoff, the record stays in the PEL for reclaim.
+            backoff();
+            if (running.get()) {
+                reclaimed.offer(record);
+            }
         }
     }
 

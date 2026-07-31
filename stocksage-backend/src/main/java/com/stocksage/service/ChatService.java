@@ -411,7 +411,21 @@ public class ChatService {
                         return;
                     }
                     long durationMs = System.currentTimeMillis() - startTime;
-                    if (terminalRecorded.compareAndSet(false, true)) {
+                    // A newly submitted background task owns the same trace as this request.
+                    // Its worker, not the lifetime of this SSE subscriber, must publish the
+                    // terminal trace status. Otherwise a client disconnect marks a task that
+                    // later succeeds as "cancelled" and makes durable reconciliation fail.
+                    //
+                    // When this request merely observes an already-running task, eventTraceId
+                    // points at the task's older trace. This request still owns its separate
+                    // observer trace and may close that trace with the subscriber lifecycle.
+                    boolean observingDifferentTaskTrace =
+                            shouldCloseObserverTraceFromSubscriber(
+                                    traceId,
+                                    eventTraceId.get()
+                            );
+                    if (observingDifferentTaskTrace
+                            && terminalRecorded.compareAndSet(false, true)) {
                         String status = relayFailed.get()
                                 ? "error"
                                 : signalType == SignalType.CANCEL ? "cancelled" : "success";
@@ -445,7 +459,25 @@ public class ChatService {
         // 7. 将元数据、推理计划、检索提示、实时工具事件、心跳和最终回答令牌
         // 合并成一条 SSE 流发送给前端。
         return Flux.concat(conversationStarted, routeDecisionStarted, executionPlanStarted, retrievalObservation,
-                Flux.merge(toolEvents, heartbeat, answerStream));
+                mergeSseStreamsWithLossyHeartbeat(toolEvents, heartbeat, answerStream));
+    }
+
+    static boolean shouldCloseObserverTraceFromSubscriber(
+            String requestTraceId,
+            String taskEventTraceId
+    ) {
+        return requestTraceId != null
+                && !requestTraceId.equals(taskEventTraceId);
+    }
+
+    static Flux<String> mergeSseStreamsWithLossyHeartbeat(
+            Flux<String> toolEvents,
+            Flux<String> heartbeat,
+            Flux<String> answerStream
+    ) {
+        // Heartbeat 只表示传输层存活，可以在客户端暂停读取时丢弃。只在该分支解除 interval 的
+        // demand 约束，避免其 OverflowException 终止整个 merge；工具事件和回答 token 保持无损。
+        return Flux.merge(toolEvents, heartbeat.onBackpressureDrop(), answerStream);
     }
 
     private Flux<String> streamPreparedDirectAnswer(

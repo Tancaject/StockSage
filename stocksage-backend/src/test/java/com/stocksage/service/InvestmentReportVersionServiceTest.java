@@ -15,6 +15,8 @@ import com.stocksage.model.entity.InvestmentReportVersion;
 import com.stocksage.repository.InvestmentReportReviewRepository;
 import com.stocksage.repository.InvestmentReportVersionRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
@@ -40,11 +42,14 @@ class InvestmentReportVersionServiceTest {
 
     private final InvestmentReportVersionRepository repository = mock(InvestmentReportVersionRepository.class);
     private final InvestmentReportReviewRepository reviewRepository = mock(InvestmentReportReviewRepository.class);
+    private final ResearchMemoryService researchMemoryService = mock(ResearchMemoryService.class);
     private final InvestmentReportVersionService service = new InvestmentReportVersionService(
             repository,
             reviewRepository,
             new ObjectMapper().findAndRegisterModules(),
-            mock(ApplicationEventPublisher.class)
+            mock(ApplicationEventPublisher.class),
+            researchMemoryService,
+            new DeepResearchCompletionPolicy()
     );
 
     @Test
@@ -167,24 +172,12 @@ class InvestmentReportVersionServiceTest {
         AnalysisState state = analysisState("NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
         service.prepareHashes(state);
 
-        InvestmentReport storedReport = InvestmentReport.builder()
-                .recommendation("HOLD")
-                .qualityStatus(InvestmentReport.ReportQualityStatus.VERIFIED)
-                .completionPolicyId(DeepResearchCompletionPolicy.POLICY_ID)
-                .completionPolicyVersion(DeepResearchCompletionPolicy.POLICY_VERSION)
-                .evidenceItems(List.of(InvestmentReport.EvidenceItem.builder()
-                        .dimension("market")
-                        .evidence("stored evidence")
-                        .implication("bounded")
-                        .source("tool:market")
-                        .sourceEvidenceIds(List.of("e-market"))
-                        .build()))
-                .rationale(List.of("The stored report is tied to this exact snapshot."))
-                .build();
+        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-market");
         InvestmentReportVersion existing = new InvestmentReportVersion();
         existing.setUserId("u_001");
         existing.setTicker("NVDA");
         existing.setReportVersion(7);
+        existing.setReviewStatus(InvestmentReportVersion.ReviewStatus.DRAFT);
         existing.setDataSnapshotHash(state.getDataSnapshotHash());
         existing.setContextHash(state.getContextHash());
         existing.setReportJson(new ObjectMapper().findAndRegisterModules().writeValueAsString(storedReport));
@@ -204,6 +197,102 @@ class InvestmentReportVersionServiceTest {
     }
 
     @Test
+    void invalidReportSchemaPreventsCacheReuse() throws Exception {
+        AnalysisState state = analysisState(
+                "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
+        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-market");
+        storedReport.setRiskFactors(List.of());
+
+        assertThat(findReusableReport(state, storedReport)).isEmpty();
+    }
+
+    @Test
+    void nullEvidenceItemFailsClosedAsCacheMiss() throws Exception {
+        AnalysisState state = analysisState(
+                "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
+        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-market");
+        List<InvestmentReport.EvidenceItem> malformedEvidenceItems = new ArrayList<>();
+        malformedEvidenceItems.add(null);
+        storedReport.setEvidenceItems(malformedEvidenceItems);
+
+        assertThat(findReusableReport(state, storedReport)).isEmpty();
+    }
+
+    @Test
+    void malformedCachedReportJsonFailsClosedAsCacheMiss() {
+        AnalysisState state = analysisState(
+                "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
+
+        assertThat(findReusableReportJson(state, "{bad json")).isEmpty();
+    }
+
+    @Test
+    void reportTickerMismatchPreventsCacheReuse() throws Exception {
+        AnalysisState state = analysisState(
+                "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
+        InvestmentReport storedReport = verifiedReusableReport("AAPL", "e-market");
+
+        assertThat(findReusableReport(state, storedReport)).isEmpty();
+    }
+
+    @Test
+    void unknownEvidenceReferencePreventsCacheReuse() throws Exception {
+        AnalysisState state = analysisState(
+                "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
+        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-unknown");
+
+        assertThat(findReusableReport(state, storedReport)).isEmpty();
+    }
+
+    @Test
+    void knownButUnusableEvidenceReferencePreventsCacheReuse() throws Exception {
+        AnalysisState state = analysisState(
+                "NVDA",
+                "market-v1",
+                "risks-v1",
+                "news-v1",
+                "Should I buy NVDA?",
+                EvidenceStatus.FAILED
+        );
+        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-market");
+
+        assertThat(findReusableReport(state, storedReport)).isEmpty();
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+            value = InvestmentReportVersion.ReviewStatus.class,
+            names = {"REJECTED", "NEEDS_RESEARCH"}
+    )
+    void negativeHumanReviewPreventsCacheReuse(
+            InvestmentReportVersion.ReviewStatus reviewStatus
+    ) throws Exception {
+        AnalysisState state = analysisState(
+                "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
+        service.prepareHashes(state);
+
+        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-market");
+        InvestmentReportVersion existing = new InvestmentReportVersion();
+        existing.setUserId("u_001");
+        existing.setTicker("NVDA");
+        existing.setReportVersion(7);
+        existing.setReviewStatus(reviewStatus);
+        existing.setDataSnapshotHash(state.getDataSnapshotHash());
+        existing.setContextHash(state.getContextHash());
+        existing.setReportJson(
+                new ObjectMapper().findAndRegisterModules().writeValueAsString(storedReport));
+
+        when(repository.findByUserIdAndTickerAndDataSnapshotHashAndContextHash(
+                "u_001",
+                "NVDA",
+                state.getDataSnapshotHash(),
+                state.getContextHash()
+        )).thenReturn(Optional.of(existing));
+
+        assertThat(service.findReusableReport("u_001", 10L, state)).isEmpty();
+    }
+
+    @Test
     void reusesExistingReportWhenConcurrentPersistCreatesSameSnapshot() throws Exception {
         AnalysisState state = analysisState("NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
         state.setInvestmentReport(InvestmentReport.builder()
@@ -212,14 +301,13 @@ class InvestmentReportVersionServiceTest {
                 .build());
         service.prepareHashes(state);
 
-        InvestmentReport storedReport = InvestmentReport.builder()
-                .recommendation("BUY")
-                .rationale(List.of("Concurrent request already persisted this snapshot."))
-                .build();
+        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-market");
+        storedReport.setRecommendation("BUY");
         InvestmentReportVersion existing = new InvestmentReportVersion();
         existing.setUserId("u_001");
         existing.setTicker("NVDA");
         existing.setReportVersion(4);
+        existing.setReviewStatus(InvestmentReportVersion.ReviewStatus.DRAFT);
         existing.setDataSnapshotHash(state.getDataSnapshotHash());
         existing.setContextHash(state.getContextHash());
         existing.setModelTier("STRONG");
@@ -242,6 +330,44 @@ class InvestmentReportVersionServiceTest {
         assertThat(reused.getReportVersion()).isEqualTo(4);
         assertThat(reused.getReusedFromCache()).isTrue();
         assertThat(reused.getModelName()).isEqualTo("qwen3.6-max");
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+            value = InvestmentReportVersion.ReviewStatus.class,
+            names = {"REJECTED", "NEEDS_RESEARCH"}
+    )
+    void persistPathFailsClosedInsteadOfReusingNegativeHumanReview(
+            InvestmentReportVersion.ReviewStatus reviewStatus
+    ) throws Exception {
+        AnalysisState state = analysisState(
+                "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
+        state.setInvestmentReport(InvestmentReport.builder()
+                .recommendation("BUY")
+                .qualityStatus(InvestmentReport.ReportQualityStatus.VERIFIED)
+                .build());
+        service.prepareHashes(state);
+
+        InvestmentReportVersion existing = new InvestmentReportVersion();
+        existing.setId(44L);
+        existing.setUserId("u_001");
+        existing.setTicker("NVDA");
+        existing.setReviewStatus(reviewStatus);
+        existing.setDataSnapshotHash(state.getDataSnapshotHash());
+        existing.setContextHash(state.getContextHash());
+        when(repository.findByUserIdAndTickerAndDataSnapshotHashAndContextHash(
+                "u_001",
+                "NVDA",
+                state.getDataSnapshotHash(),
+                state.getContextHash()
+        )).thenReturn(Optional.of(existing));
+
+        assertThatThrownBy(() -> service.persistReportVersionWithMetadata(
+                "u_001", 10L, state, "STRONG", "qwen3.6-max"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("REPORT_REVIEW_DISALLOWS_CACHE_REUSE");
+
+        verify(repository, never()).saveAndFlush(any(InvestmentReportVersion.class));
     }
 
     @Test
@@ -416,6 +542,68 @@ class InvestmentReportVersionServiceTest {
         verify(reviewRepository, never()).saveAndFlush(any(InvestmentReportReview.class));
     }
 
+    @ParameterizedTest
+    @EnumSource(
+            value = InvestmentReportVersion.ReviewStatus.class,
+            names = {"REJECTED", "NEEDS_RESEARCH"}
+    )
+    void negativeHumanReviewRevokesExistingResearchMemory(
+            InvestmentReportVersion.ReviewStatus reviewStatus
+    ) throws Exception {
+        InvestmentReportVersion reportVersion = reportVersion(
+                31L,
+                InvestmentReportVersion.ReviewStatus.IN_REVIEW,
+                1L
+        );
+        when(repository.findByIdAndUserId(31L, "u_001")).thenReturn(Optional.of(reportVersion));
+        when(repository.saveAndFlush(reportVersion)).thenAnswer(invocation -> {
+            reportVersion.setLockVersion(2L);
+            return reportVersion;
+        });
+        when(reviewRepository.saveAndFlush(any(InvestmentReportReview.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(reviewRepository.findByReportVersionIdOrderByCreatedAtAscIdAsc(31L))
+                .thenReturn(List.of());
+
+        service.reviewReport(
+                "u_001",
+                31L,
+                new InvestmentReportReviewRequest(reviewStatus, "Evidence is not acceptable.", 1L)
+        );
+
+        verify(researchMemoryService).revokeForReport(reportVersion);
+    }
+
+    @Test
+    void approvalDoesNotRevokeMachineVerifiedResearchMemory() throws Exception {
+        InvestmentReportVersion reportVersion = reportVersion(
+                31L,
+                InvestmentReportVersion.ReviewStatus.IN_REVIEW,
+                1L
+        );
+        when(repository.findByIdAndUserId(31L, "u_001")).thenReturn(Optional.of(reportVersion));
+        when(repository.saveAndFlush(reportVersion)).thenAnswer(invocation -> {
+            reportVersion.setLockVersion(2L);
+            return reportVersion;
+        });
+        when(reviewRepository.saveAndFlush(any(InvestmentReportReview.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(reviewRepository.findByReportVersionIdOrderByCreatedAtAscIdAsc(31L))
+                .thenReturn(List.of());
+
+        service.reviewReport(
+                "u_001",
+                31L,
+                new InvestmentReportReviewRequest(
+                        InvestmentReportVersion.ReviewStatus.APPROVED,
+                        "Human review agrees with the machine-verified report.",
+                        1L
+                )
+        );
+
+        verify(researchMemoryService, never()).revokeForReport(any());
+    }
+
     @Test
     void staleExpectedLockVersionReturnsConflictWithoutWritingHistory() throws Exception {
         InvestmentReportVersion reportVersion = reportVersion(
@@ -488,6 +676,17 @@ class InvestmentReportVersionServiceTest {
     }
 
     private AnalysisState analysisState(String ticker, String market, String fundamentals, String news, String query) {
+        return analysisState(ticker, market, fundamentals, news, query, EvidenceStatus.AVAILABLE);
+    }
+
+    private AnalysisState analysisState(
+            String ticker,
+            String market,
+            String fundamentals,
+            String news,
+            String query,
+            EvidenceStatus marketStatus
+    ) {
         Instant observedAt = Instant.parse("2026-07-24T00:00:00Z");
         EvidenceLedger ledger = new EvidenceLedger(
                 TargetIdentity.resolved(ticker),
@@ -499,7 +698,7 @@ class InvestmentReportVersionServiceTest {
                                 fundamentals, true),
                         new EvidenceEnvelope(
                                 "e-market", EvidenceDimension.MARKET,
-                                "bars", ticker, EvidenceStatus.AVAILABLE,
+                                "bars", ticker, marketStatus,
                                 "tool:bars", "test", observedAt, observedAt,
                                 market, true)
                 )
@@ -513,5 +712,61 @@ class InvestmentReportVersionServiceTest {
                 .citations(List.of("source-a", "source-b"))
                 .evidenceLedger(ledger)
                 .build();
+    }
+
+    private InvestmentReport verifiedReusableReport(String ticker, String evidenceId) {
+        return InvestmentReport.builder()
+                .ticker(ticker)
+                .recommendation("HOLD")
+                .analystSummary("The evidence supports a bounded hold recommendation.")
+                .dataFreshness("Evidence observed at 2026-07-24T00:00:00Z.")
+                .rationale(List.of("The current valuation balances growth and execution risk."))
+                .riskFactors(List.of("Demand or margins may weaken."))
+                .unknowns(List.of("Future guidance remains uncertain."))
+                .qualityStatus(InvestmentReport.ReportQualityStatus.VERIFIED)
+                .completionPolicyId(DeepResearchCompletionPolicy.POLICY_ID)
+                .completionPolicyVersion(DeepResearchCompletionPolicy.POLICY_VERSION)
+                .evidenceItems(List.of(InvestmentReport.EvidenceItem.builder()
+                        .dimension("market")
+                        .evidence("Stored evidence is bound to the current ledger.")
+                        .implication("The recommendation remains bounded.")
+                        .source("tool:market")
+                        .sourceEvidenceIds(List.of(evidenceId))
+                        .build()))
+                .build();
+    }
+
+    private Optional<InvestmentReport> findReusableReport(
+            AnalysisState state,
+            InvestmentReport storedReport
+    ) throws Exception {
+        return findReusableReportJson(
+                state,
+                new ObjectMapper().findAndRegisterModules().writeValueAsString(storedReport)
+        );
+    }
+
+    private Optional<InvestmentReport> findReusableReportJson(
+            AnalysisState state,
+            String reportJson
+    ) {
+        service.prepareHashes(state);
+        InvestmentReportVersion existing = new InvestmentReportVersion();
+        existing.setUserId("u_001");
+        existing.setTicker("NVDA");
+        existing.setReportVersion(7);
+        existing.setReviewStatus(InvestmentReportVersion.ReviewStatus.DRAFT);
+        existing.setDataSnapshotHash(state.getDataSnapshotHash());
+        existing.setContextHash(state.getContextHash());
+        existing.setReportJson(reportJson);
+
+        when(repository.findByUserIdAndTickerAndDataSnapshotHashAndContextHash(
+                "u_001",
+                "NVDA",
+                state.getDataSnapshotHash(),
+                state.getContextHash()
+        )).thenReturn(Optional.of(existing));
+
+        return service.findReusableReport("u_001", 10L, state);
     }
 }

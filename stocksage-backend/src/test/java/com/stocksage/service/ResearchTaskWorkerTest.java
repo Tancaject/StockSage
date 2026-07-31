@@ -10,7 +10,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -113,7 +115,7 @@ class ResearchTaskWorkerTest {
     }
 
     @Test
-    void failedRunningAttemptIsResetForRetryWithoutAcknowledgingTheRecord() {
+    void failedRunningAttemptIsResetAndQueuedForImmediateLocalRetry() {
         ResearchTaskQueue queue = mock(ResearchTaskQueue.class);
         ResearchTaskRepository repository = mock(ResearchTaskRepository.class);
         ResearchTaskService taskService = mock(ResearchTaskService.class);
@@ -138,6 +140,11 @@ class ResearchTaskWorkerTest {
                 task, "token-9", "simulated pipeline failure");
         verify(queue, never()).ack(record);
         verify(taskService).release(lease);
+        @SuppressWarnings("unchecked")
+        ConcurrentLinkedQueue<MapRecord<String, String, String>> localRetries =
+                (ConcurrentLinkedQueue<MapRecord<String, String, String>>)
+                        ReflectionTestUtils.getField(worker, "reclaimed");
+        assertThat(localRetries).containsExactly(record);
     }
 
     @Test

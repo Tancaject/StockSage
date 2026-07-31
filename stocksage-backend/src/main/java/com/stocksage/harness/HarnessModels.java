@@ -82,6 +82,19 @@ public final class HarnessModels {
         RETURN_SAFE_REFUSAL
     }
 
+    /**
+     * Durable lifecycle for a bounded recovery effect.
+     *
+     * <p>{@link #PLANNED} is persisted before the read-only tool effect. A takeover must execute
+     * that logical effect and re-run the evidence gate before advancing. {@link #REVALIDATED}
+     * records that the post-effect ledger has already been evaluated.</p>
+     */
+    public enum RecoveryLifecycle {
+        NONE,
+        PLANNED,
+        REVALIDATED
+    }
+
     public enum ParseStatus {
         VALID,
         INVALID_JSON,
@@ -214,6 +227,47 @@ public final class HarnessModels {
     }
 
     /**
+     * A recovery context temporarily displaced by a recovery in another phase.
+     *
+     * <p>For example, evidence may need one bounded retry while a report repair is already
+     * {@link RecoveryLifecycle#PLANNED}. Persisting this bounded context alongside the active
+     * evidence snapshot prevents a crash from resetting the reserved Manager repair.</p>
+     */
+    public record SuspendedRecovery(
+            HarnessPhase phase,
+            HarnessOutcome outcome,
+            List<ViolationCode> violations,
+            RecoveryLifecycle recoveryLifecycle,
+            List<RecoveryAction> recoveryActions,
+            String recoveryEffectKey
+    ) {
+        public SuspendedRecovery {
+            phase = phase == null ? HarnessPhase.REPORT : phase;
+            outcome = outcome == null ? HarnessOutcome.BLOCK : outcome;
+            violations = violations == null ? List.of() : List.copyOf(violations);
+            recoveryLifecycle = recoveryLifecycle == null
+                    ? RecoveryLifecycle.NONE
+                    : recoveryLifecycle;
+            recoveryActions = recoveryActions == null ? List.of() : List.copyOf(recoveryActions);
+            recoveryEffectKey = safe(recoveryEffectKey);
+        }
+
+        public static SuspendedRecovery from(HarnessSnapshot snapshot) {
+            if (snapshot == null) {
+                return null;
+            }
+            return new SuspendedRecovery(
+                    snapshot.phase(),
+                    snapshot.outcome(),
+                    snapshot.violations(),
+                    snapshot.recoveryLifecycle(),
+                    snapshot.recoveryActions(),
+                    snapshot.recoveryEffectKey()
+            );
+        }
+    }
+
+    /**
      * Durable policy state written before any recovery side effect.
      *
      * <p>Only bounded decision metadata is persisted; raw prompts and tool payloads stay out of
@@ -225,7 +279,11 @@ public final class HarnessModels {
             HarnessPhase phase,
             HarnessOutcome outcome,
             List<ViolationCode> violations,
-            Map<RecoveryAction, Integer> recoveryAttempts
+            Map<RecoveryAction, Integer> recoveryAttempts,
+            RecoveryLifecycle recoveryLifecycle,
+            List<RecoveryAction> recoveryActions,
+            String recoveryEffectKey,
+            SuspendedRecovery suspendedRecovery
     ) {
         public HarnessSnapshot {
             policyId = safe(policyId);
@@ -242,6 +300,11 @@ public final class HarnessModels {
                 });
             }
             recoveryAttempts = Map.copyOf(bounded);
+            recoveryLifecycle = recoveryLifecycle == null
+                    ? inferRecoveryLifecycle(outcome, recoveryAttempts)
+                    : recoveryLifecycle;
+            recoveryActions = recoveryActions == null ? List.of() : List.copyOf(recoveryActions);
+            recoveryEffectKey = safe(recoveryEffectKey);
         }
 
         public static HarnessSnapshot from(
@@ -260,8 +323,82 @@ public final class HarnessModels {
                     phase,
                     safeDecision.outcome(),
                     safeDecision.violations().stream().map(HarnessViolation::code).toList(),
-                    recoveryAttempts
+                    recoveryAttempts,
+                    inferRecoveryLifecycle(safeDecision.outcome(), recoveryAttempts),
+                    safeDecision.recoveryActions(),
+                    "",
+                    null
             );
+        }
+
+        public static HarnessSnapshot recovery(
+                String policyId,
+                String policyVersion,
+                HarnessPhase phase,
+                HarnessDecision decision,
+                Map<RecoveryAction, Integer> recoveryAttempts,
+                RecoveryLifecycle recoveryLifecycle,
+                List<RecoveryAction> recoveryActions,
+                String recoveryEffectKey
+        ) {
+            return recovery(
+                    policyId,
+                    policyVersion,
+                    phase,
+                    decision,
+                    recoveryAttempts,
+                    recoveryLifecycle,
+                    recoveryActions,
+                    recoveryEffectKey,
+                    null
+            );
+        }
+
+        public static HarnessSnapshot recovery(
+                String policyId,
+                String policyVersion,
+                HarnessPhase phase,
+                HarnessDecision decision,
+                Map<RecoveryAction, Integer> recoveryAttempts,
+                RecoveryLifecycle recoveryLifecycle,
+                List<RecoveryAction> recoveryActions,
+                String recoveryEffectKey,
+                SuspendedRecovery suspendedRecovery
+        ) {
+            HarnessDecision safeDecision = decision == null
+                    ? new HarnessDecision(HarnessOutcome.BLOCK, List.of(), List.of())
+                    : decision;
+            return new HarnessSnapshot(
+                    policyId,
+                    policyVersion,
+                    phase,
+                    safeDecision.outcome(),
+                    safeDecision.violations().stream().map(HarnessViolation::code).toList(),
+                    recoveryAttempts,
+                    recoveryLifecycle,
+                    recoveryActions,
+                    recoveryEffectKey,
+                    suspendedRecovery
+            );
+        }
+
+        @JsonIgnore
+        public boolean hasPendingEvidenceRecovery() {
+            return phase == HarnessPhase.EVIDENCE
+                    && outcome == HarnessOutcome.RECOVER
+                    && recoveryLifecycle == RecoveryLifecycle.PLANNED;
+        }
+
+        private static RecoveryLifecycle inferRecoveryLifecycle(
+                HarnessOutcome outcome,
+                Map<RecoveryAction, Integer> recoveryAttempts
+        ) {
+            if (outcome == HarnessOutcome.RECOVER) {
+                return RecoveryLifecycle.PLANNED;
+            }
+            return recoveryAttempts == null || recoveryAttempts.isEmpty()
+                    ? RecoveryLifecycle.NONE
+                    : RecoveryLifecycle.REVALIDATED;
         }
     }
 

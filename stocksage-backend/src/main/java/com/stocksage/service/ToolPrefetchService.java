@@ -10,6 +10,8 @@ import com.stocksage.harness.DeepResearchCompletionPolicy;
 import com.stocksage.harness.HarnessModels.HarnessPhase;
 import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.HarnessSnapshot;
+import com.stocksage.harness.HarnessModels.RecoveryAction;
+import com.stocksage.harness.HarnessModels.RecoveryLifecycle;
 import com.stocksage.agent.FundamentalsAgent;
 import com.stocksage.agent.MarketAgent;
 import com.stocksage.agent.NewsAgent;
@@ -338,10 +340,28 @@ public class ToolPrefetchService {
                     task.getId(), taskTraceId(task, traceId));
         }
         ResearchTaskLeaseService.Lease acquired = lease.orElseThrow();
+        try {
+            if (!researchTaskService.renewLease(acquired)) {
+                researchTaskService.release(acquired);
+                log.info("Inline research lease expired before DB start; switching to task "
+                        + "observation, taskId={}", task.getId());
+                return observeInlineTask(context, task, traceId);
+            }
+        } catch (RuntimeException leaseError) {
+            researchTaskService.release(acquired);
+            log.info("Inline research lease validation failed before DB start; switching to task "
+                    + "observation, taskId={}, error={}", task.getId(), leaseError.getMessage());
+            return observeInlineTask(context, task, traceId);
+        }
         ResearchTask runningTask;
         try {
             runningTask = researchTaskService.startAttempt(
                     task, acquired.token(), ResearchTask.Stage.DATA_PREFETCH);
+        } catch (IllegalStateException ownershipRace) {
+            researchTaskService.release(acquired);
+            log.info("Inline research start was fenced; switching to task observation, taskId={}, error={}",
+                    task.getId(), ownershipRace.getMessage());
+            return observeInlineTask(context, task, traceId);
         } catch (RuntimeException error) {
             researchTaskService.release(acquired);
             throw error;
@@ -349,38 +369,55 @@ public class ToolPrefetchService {
         AtomicBoolean ownershipLost = new AtomicBoolean(false);
         ScheduledFuture<?> heartbeat = startInlineHeartbeat(runningTask, acquired, ownershipLost);
         try {
+            requireInlineOwnership(runningTask, acquired, ownershipLost, "evidence prefetch");
             DeepEvidenceCollector.EvidenceCollection evidence = deepEvidenceCollector.collect(
                     primaryTicker, userQuery, traceId, conversationId);
             if (evidence.harnessDecision().outcome() == HarnessOutcome.RECOVER) {
-                List<com.stocksage.harness.HarnessModels.RecoveryAction> recoveryActions =
-                        evidence.harnessDecision().recoveryActions();
-                evidence.state().setHarnessSnapshot(HarnessSnapshot.from(
+                List<RecoveryAction> recoveryActions = evidence.harnessDecision().recoveryActions();
+                String recoveryEffectKey = inlineRecoveryEffectKey(
+                        runningTask.getId(),
+                        recoveryActions
+                );
+                evidence.state().setHarnessSnapshot(HarnessSnapshot.recovery(
                         DeepResearchCompletionPolicy.POLICY_ID,
                         Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION),
                         HarnessPhase.EVIDENCE,
                         evidence.harnessDecision(),
-                        Map.of()
+                        Map.of(),
+                        RecoveryLifecycle.PLANNED,
+                        recoveryActions,
+                        recoveryEffectKey
                 ));
-                researchTaskCheckpointService.saveHarnessSnapshot(
-                        runningTask.getId(), acquired.token(), evidence.state());
+                requireInlineOwnership(
+                        runningTask, acquired, ownershipLost, "planned recovery checkpoint");
+                saveInlineHarnessSnapshot(runningTask, acquired, evidence.state());
+                requireInlineOwnership(
+                        runningTask, acquired, ownershipLost, "evidence recovery");
                 evidence = deepEvidenceCollector.recover(
                         evidence,
                         recoveryActions,
                         traceId,
                         conversationId
                 );
-                evidence.state().setHarnessSnapshot(HarnessSnapshot.from(
+                Map<RecoveryAction, Integer> completedAttempts = recoveryActions.stream()
+                        .collect(java.util.stream.Collectors.toUnmodifiableMap(
+                                action -> action,
+                                action -> 1,
+                                Math::max
+                        ));
+                evidence.state().setHarnessSnapshot(HarnessSnapshot.recovery(
                         DeepResearchCompletionPolicy.POLICY_ID,
                         Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION),
                         HarnessPhase.EVIDENCE,
                         evidence.harnessDecision(),
-                        recoveryActions.stream().collect(
-                                java.util.stream.Collectors.toUnmodifiableMap(
-                                        action -> action,
-                                        action -> 1,
-                                        Math::max
-                                ))
+                        completedAttempts,
+                        RecoveryLifecycle.REVALIDATED,
+                        recoveryActions,
+                        recoveryEffectKey
                 ));
+                requireInlineOwnership(
+                        runningTask, acquired, ownershipLost, "revalidated recovery checkpoint");
+                saveInlineHarnessSnapshot(runningTask, acquired, evidence.state());
             }
             context.append(evidence.contextMarkdown());
             AnalysisState agentState = evidence.state();
@@ -395,8 +432,8 @@ public class ToolPrefetchService {
                         evidence.harnessDecision().outcome() == HarnessOutcome.BLOCK
                                 ? ResearchTask.ResultKind.POLICY_BLOCKED
                                 : ResearchTask.ResultKind.INSUFFICIENT_EVIDENCE;
-                researchTaskService.markSucceededForOwner(
-                        runningTask, acquired.token(), null, resultKind);
+                completeInlineTaskForOwner(
+                        runningTask, acquired, ownershipLost, null, resultKind);
                 return new PreparedToolContext(context.toString().trim(), answer, null, traceId);
             }
 
@@ -407,9 +444,10 @@ public class ToolPrefetchService {
                 InvestmentReport report = reusableReport.orElseThrow();
                 agentState.setInvestmentReport(report);
                 appendContextSection(context, "Research Manager", safeReportJson(report));
-                researchTaskService.markSucceededForOwner(
+                completeInlineTaskForOwner(
                         runningTask,
-                        acquired.token(),
+                        acquired,
+                        ownershipLost,
                         null,
                         ResearchTask.ResultKind.FULL_REPORT
                 );
@@ -417,15 +455,12 @@ public class ToolPrefetchService {
                         context.toString().trim(), reportRenderer.buildFinalAnswerBrief(agentState), null, traceId);
             }
 
+            requireInlineOwnership(runningTask, acquired, ownershipLost, "debate start");
             emitProgress(traceId, conversationId, "thought",
                     "开始 Bull/Bear 辩论，并由 Research Manager 综合裁决。");
             if (heartbeat != null) {
                 heartbeat.cancel(false);
                 heartbeat = null;
-            }
-            if (ownershipLost.get()) {
-                throw new DeepResearchPipeline.OwnershipLostException(
-                        "inline research task ownership was lost before debate, taskId=" + runningTask.getId());
             }
             String reportJson;
             try {
@@ -438,6 +473,8 @@ public class ToolPrefetchService {
                         runningTask,
                         acquired
                 );
+            } catch (DeepResearchPipeline.OwnershipLostException error) {
+                throw error;
             } catch (Exception error) {
                 throw new IllegalStateException("inline DEEP research failed", error);
             }
@@ -453,16 +490,109 @@ public class ToolPrefetchService {
                     ? reportJson
                     : reportRenderer.buildFinalAnswerBrief(agentState);
             return new PreparedToolContext(context.toString().trim(), answer, null, traceId);
+        } catch (DeepResearchPipeline.OwnershipLostException error) {
+            log.info("Inline research stopped after ownership loss; switching to task observation, "
+                    + "taskId={}, error={}", runningTask.getId(), error.getMessage());
+            return observeInlineTask(context, runningTask, traceId);
         } catch (RuntimeException error) {
-            researchTaskService.markFailedForOwner(runningTask, acquired.token(), error.getMessage());
-            emitProgress(traceId, conversationId, "error", "同步深度研究执行失败：" + error.getMessage());
-            throw error;
+            try {
+                requireInlineOwnership(
+                        runningTask, acquired, ownershipLost, "failure publication");
+            } catch (RuntimeException ownershipProofError) {
+                log.info("Inline research failure could not be published by the current owner; "
+                                + "switching to task observation, taskId={}, failure={}, fence={}",
+                        runningTask.getId(), error.getMessage(), ownershipProofError.getMessage());
+                return observeInlineTask(context, runningTask, traceId);
+            }
+            boolean failed =
+                    researchTaskService.markFailedForOwner(
+                            runningTask, acquired.token(), error.getMessage());
+            if (failed) {
+                emitProgress(traceId, conversationId, "error",
+                        "同步深度研究执行失败：" + error.getMessage());
+                throw error;
+            }
+            log.info("Inline research failure arrived after ownership changed; switching to task "
+                    + "observation, taskId={}, error={}", runningTask.getId(), error.getMessage());
+            return observeInlineTask(context, runningTask, traceId);
         } finally {
             if (heartbeat != null) {
                 heartbeat.cancel(false);
             }
             researchTaskService.release(acquired);
         }
+    }
+
+    private void requireInlineOwnership(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            AtomicBoolean ownershipLost,
+            String operation
+    ) {
+        if (ownershipLost.get()) {
+            throw inlineOwnershipLost(task, operation, null);
+        }
+        boolean leaseRenewed = researchTaskService.renewLease(lease);
+        boolean databaseOwner = leaseRenewed
+                && researchTaskService.heartbeatForOwner(task, lease.token());
+        if (!databaseOwner) {
+            ownershipLost.set(true);
+            throw inlineOwnershipLost(task, operation, null);
+        }
+    }
+
+    private void saveInlineHarnessSnapshot(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            AnalysisState state
+    ) {
+        try {
+            researchTaskCheckpointService.saveHarnessSnapshot(
+                    task.getId(), lease.token(), state);
+        } catch (ResearchTaskCheckpointService.OwnershipLostException error) {
+            throw inlineOwnershipLost(task, "harness checkpoint", error);
+        }
+    }
+
+    private void completeInlineTaskForOwner(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            AtomicBoolean ownershipLost,
+            Long reportVersionId,
+            ResearchTask.ResultKind resultKind
+    ) {
+        requireInlineOwnership(task, lease, ownershipLost, "terminal completion");
+        try {
+            researchTaskService.markSucceededForOwner(
+                    task, lease.token(), reportVersionId, resultKind);
+        } catch (IllegalStateException error) {
+            throw inlineOwnershipLost(task, "terminal completion", error);
+        }
+    }
+
+    private DeepResearchPipeline.OwnershipLostException inlineOwnershipLost(
+            ResearchTask task,
+            String operation,
+            Throwable cause
+    ) {
+        String message = "inline research task ownership was lost before "
+                + operation + ", taskId=" + (task == null ? null : task.getId());
+        return cause == null
+                ? new DeepResearchPipeline.OwnershipLostException(message)
+                : new DeepResearchPipeline.OwnershipLostException(message, cause);
+    }
+
+    private PreparedToolContext observeInlineTask(
+            StringBuilder context,
+            ResearchTask task,
+            String traceId
+    ) {
+        return new PreparedToolContext(
+                context.toString().trim(),
+                reportRenderer.buildTaskAcceptedAnswer(task),
+                task.getId(),
+                taskTraceId(task, traceId)
+        );
     }
 
     /** inline 降级仍可能包含耗时的数据预取，因此在进入辩论流水线前也必须持续续租。 */
@@ -507,6 +637,28 @@ public class ToolPrefetchService {
                     task.getId(), error.getMessage());
             return fallbackTraceId;
         }
+    }
+
+    private String inlineRecoveryEffectKey(Long taskId, List<RecoveryAction> actions) {
+        String actionKey = actions == null
+                ? "none"
+                : actions.stream()
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .sorted()
+                .map(action -> action.name().toLowerCase(Locale.ROOT) + "-1")
+                .collect(java.util.stream.Collectors.joining("+"));
+        if (actionKey.isBlank()) {
+            actionKey = "none";
+        }
+        return "deep-evidence:"
+                + taskId
+                + ":"
+                + DeepResearchCompletionPolicy.POLICY_ID
+                + "-v"
+                + DeepResearchCompletionPolicy.POLICY_VERSION
+                + ":"
+                + actionKey;
     }
 
     /**

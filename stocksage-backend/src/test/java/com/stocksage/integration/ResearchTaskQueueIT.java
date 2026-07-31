@@ -151,7 +151,7 @@ class ResearchTaskQueueIT {
     }
 
     @Test
-    void failedExecutionIsReclaimedAndSentToDlqAfterMaxAttempts() throws Exception {
+    void failedExecutionIsRetriedLocallyAndSentToDlqAfterMaxAttempts() throws Exception {
         doAnswer(invocation -> {
             ResearchTask task = invocation.getArgument(0);
             ResearchTaskLeaseService.Lease lease = invocation.getArgument(1);
@@ -163,13 +163,7 @@ class ResearchTaskQueueIT {
         ResearchTask task = createPendingTask("MSFT");
         queue.enqueue(task.getId());
 
-        awaitUntil(() -> attempts(task.getId()) == 1, Duration.ofSeconds(10));
-        waitUntilClaimable();
-        worker.reclaimStalePending();
         awaitUntil(() -> attempts(task.getId()) == 2, Duration.ofSeconds(10));
-        waitUntilClaimable();
-        worker.reclaimStalePending();
-
         awaitUntil(() -> queue.dlqDepth() == 1, Duration.ofSeconds(10));
         ResearchTask failed = researchTaskRepository.findById(task.getId()).orElseThrow();
         assertThat(failed.getStatus()).isEqualTo(ResearchTask.Status.FAILED);

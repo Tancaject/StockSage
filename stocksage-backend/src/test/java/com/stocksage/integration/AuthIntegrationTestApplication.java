@@ -25,8 +25,11 @@ import com.stocksage.trace.TraceEventStore;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+
+import static org.mockito.Mockito.mock;
 
 @SpringBootConfiguration
 @EnableAutoConfiguration(excludeName = {
@@ -51,7 +54,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         AuthController.class,
         ResearchTaskController.class,
         AuthService.class,
-        InvestmentReportVersionService.class,
         TraceEventStore.class,
         TraceEventRelay.class,
         ToolCallEventBus.class,
@@ -63,4 +65,12 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         TestAdminEvalController.class
 })
 class AuthIntegrationTestApplication {
+
+    @Bean
+    InvestmentReportVersionService investmentReportVersionService() {
+        // This integration slice verifies auth, tenancy, task events, Redis queueing and Trace
+        // bridging. Report persistence has its own real-JPA transaction tests, so keep the
+        // controller collaborator explicit instead of importing the complete report/memory graph.
+        return mock(InvestmentReportVersionService.class);
+    }
 }
