@@ -402,7 +402,12 @@
 
 ## 阶段 G：投研运行时完成 Harness
 
-> 状态：G0–G4 已实现；离线 Policy、真实 DEEP live 与 Testcontainers PIT 门禁均已通过。G5 的策略骨架已加入，后续按独立切片接入各 route。
+> 状态：G0–G4 的功能基础已实现，H0 已关闭崩溃恢复、人工否决信任边界和
+> Docker/Testcontainers/PIT 门禁。按用户要求，当前 live 在 5 个 case 后停止；
+> 5/5 业务任务成功，但一次受控 runner 断开暴露并修复了后台 Trace 归属缺陷，
+> 修复后尚未追加 live 复验。历史单例、中断运行和 5-case smoke 都不满足当前
+> 30-case 发布门禁。H1 和 G5
+> 在 live 明确通过前均未就绪，策略骨架继续暂停接入真实 route。
 >
 > 设计与逐阶段实施清单：
 > [docs/architecture/research-harness-design.md](docs/architecture/research-harness-design.md)
@@ -442,6 +447,8 @@
 - [x] cache hit 返回前重新验收
 - [x] Research Memory 只摄取 VERIFIED/FULL_REPORT
 - [x] 离线报告明确标为 OFFLINE_FALLBACK
+- [x] 证据补采与报告重综合的 pending recovery 在 takeover 后继续执行并重新验收
+- [x] REJECTED/NEEDS_RESEARCH 报告退出 cache reuse 并撤销 Research Memory
 
 ### G4（P1）：Harness Eval、前端解释与强制切换
 
@@ -459,10 +466,68 @@
 - [ ] 至少两个策略稳定后，再评估 Skill `completionPolicyId`
 - [x] LLM-as-Judge 仅用于离线 Eval，不进入请求热路径
 
-> G5 前置门禁已于 2026-07-24 满足：真实 NVDA DEEP 任务得到
-> `FULL_REPORT`，evidence/report 均为 `PASS`，安全终态率 1.0；`verify -Pit`
-> 同时通过 15/15。本轮只完成验收层，没有顺带激活 MARKET/NEWS/RAG Policy
-> 或迁移 DEEP CapabilityGateway，后续仍按上面的独立切片实施。
+> 2026-07-24 的真实 NVDA DEEP 任务得到 `FULL_REPORT`，evidence/report 均为
+> `PASS`，同期 `verify -Pit` 通过 15/15；但该 live 数据集只有 1 例，早于当前
+> 30-case/hash/policy metadata 门禁，只能说明链路曾经跑通。当前 H0
+> `clean verify -Pit` 已通过 Surefire 312/312、Failsafe 17/17；5-case smoke
+> 仅用于诊断，固定 30-case live 尚未完成；H1/G5 继续暂停。
+
+---
+
+## 阶段 H：完整 Agent Harness 的渐进式控制面
+
+> 目标架构、边界和规则治理见
+> [docs/architecture/research-harness-design.md](docs/architecture/research-harness-design.md)。
+> 原则是“稳定外壳 + 自由探索内核”：约束权限、状态、证据、终态和发布，不枚举模型
+> 的全部研究路径。
+
+### H0（P0）：关闭现有安全不变量
+
+- [x] recovery snapshot 增加稳定 effect key、动作集合和 durable lifecycle
+- [x] pending Evidence RECOVER 接管后补采并重新执行 Evidence Gate
+- [x] pending Report RECOVER 接管后只使用已预留的一次 Manager 修复预算
+- [x] Evidence 重新验收时保留 suspended Report recovery，跨阶段预算与 effect key 不丢失
+- [x] 所有非空 checkpoint 先执行当前 Evidence Gate；当前 PASS 重新计算 evidence hash
+- [x] 旧 RECOVER checkpoint 缺少新字段时 fail-safe
+- [x] cache reuse 对持久化原始 JSON、当前 Ledger 和当前 Policy 执行完整 Report Gate
+- [x] report/message/task owner CAS 原子发布；commit 后才清 checkpoint、发 SSE 和捕获记忆
+- [x] REJECTED/NEEDS_RESEARCH 阻断复用、摄取并撤销已有 Research Memory
+- [x] Research Memory capture 锁定重读当前审核状态，向量新增/删除只在 DB 提交后执行
+- [x] live Harness `--fail-on-gate` 仅允许 `pass` 返回 0
+- [x] live Harness 按 logical effect 计恢复预算，并单列 at-least-once replay 次数
+- [x] 缺少稳定 effect key 的恢复 Trace 只能诊断，不能通过 release gate
+- [x] 固定 30-case manifest、policy id/version 和跨 CRLF/LF 稳定的规范化 JSONL hash
+- [x] SSE 背压只允许丢弃 heartbeat，工具/领域事件和回答 token 保持无损
+- [x] Bull/Bear/Manager 模型阶段增加默认 300 秒外层硬截止并取消超时上游
+- [x] worker 失败后先释放 lease/执行占用，再进入本地快速重试；Redis PEL 保留持久兜底
+- [x] live runner 原子持久化逐 case checkpoint，断流后对账且不重复提交
+- [x] 后台任务 Trace 终态由 task pipeline 写入；SSE 断开不再把成功任务标为 cancelled
+- [x] live runner 支持 release-ineligible 的 `--case-limit` smoke，且不会提交超出上限的 case
+- [x] 重跑完整 fast harness
+- [x] 重跑 80-case production Policy eval
+- [x] 重跑非容器 `CheckpointTakeoverIT`
+- [x] 在 Docker 环境重跑完整 Testcontainers/PIT（`clean verify -Pit`：
+  Surefire 312/312、Failsafe 17/17）
+- [ ] 运行当前固定 30-case DEEP live release gate（5-case 诊断已停止；
+  修复后的完整 release gate 尚未运行，不得以 smoke 冒充通过）
+
+### H1（P1）：DEEP walking skeleton 完整化
+
+- [ ] 冻结最小 `ResearchRunSpec/PolicyBundle`，运行期间不允许 policy drift
+- [ ] DEEP 外部证据调用逐步收口到现有 `CapabilityGateway`
+- [ ] Trace 统一记录 policy、effect、预算和业务终态
+- [ ] Research Memory 物理向量删除增加有界重试与 Outbox/DLQ
+
+### H2（P1）：其他 route 先 Shadow
+
+- [ ] NEWS、MARKET、RAG 分别建立强类型 fixture、golden set 和 live cases
+- [ ] Shadow 不改变用户响应，达到各自门禁后再逐个 Enforce
+
+### H3–H4（P1–P2）：Claim Ledger 与生产证据
+
+- [ ] 关键财务数字建立 claim → evidence → source field 确定性链路
+- [ ] 完成真实双进程接管、provider/Redis/MySQL 故障、容量与 SLO 验证
+- [ ] 每月或重大事故/Eval 后审查规则，支持 SHADOW/ENFORCED/RETIRED 收敛
 
 ---
 

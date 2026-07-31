@@ -189,6 +189,9 @@ python rag-eval\run_harness_eval.py --fail-on-gate
 
 # backend/data-service/MySQL/Redis/Milvus 与模型配置可用时
 python rag-eval\run_harness_live_eval.py --fail-on-gate
+
+# 只做前 5 条诊断 smoke；结果会明确标为 release-ineligible
+python rag-eval\run_harness_live_eval.py --case-limit 5
 ```
 
 离线集包含 80 个语义唯一的生产 Policy 场景（Evidence 48、Report 32），精确校验
@@ -198,6 +201,31 @@ outcome、违规码、恢复动作和是否允许评级；少于 60 条、覆盖
 在线结果写入忽略目录 `rag-eval/results/`，只保留脱敏后的任务终态、Harness
 decision、恢复次数、工具动作名称与耗时，不保存回答正文、证据正文或凭据。需要把两层
 Harness 结果并入统一 Agent Eval 时，分别传入 `--harness` 和 `--harness-live`。
+`--fail-on-gate` 只有完整 `pass` 才返回 0；恢复预算按稳定 `recoveryEffectKey` 统计，
+相同 key 的物理 replay 单独展示。带恢复动作但缺少 key 的旧 Trace 只能用于诊断，
+release gate 会 fail-closed。
+
+当前 live release 数据集由 `rag-eval/harness_live_manifest.json` 固定为 30 个唯一
+DEEP case、`deep-equity-v1/v2` 和精确数据集 hash。hash 对每行 JSON object 做 key 排序
+和 LF 规范化后计算，不受 Windows CRLF/Linux LF checkout 影响；case 数、manifest、
+hash 或运行时 policy metadata 任一漂移都会在联网前或汇总时使门禁失败。
+
+Live runner 会在收到会话/Trace 标识时立即原子写入逐 case checkpoint。SSE 中断后，
+恢复执行只根据 checkpoint 对账 ResearchTask、Cockpit 和终态 Harness Trace，不会再次
+提交同一请求；无法证明业务终态或门禁终态时，批次停止、保留 checkpoint，并
+fail-closed，不会继续下一个 case。`--case-limit` 只用于快速诊断：输出
+`run_mode=smoke`、独立的 `smoke_status`，同时保持 `release_eligible=false` 并加入
+`live_release_case_limit_applied`，因此不能冒充 30-case release gate。
+
+2026-07-31 当前源码已通过 `clean verify -Pit`：Surefire 312/312、Failsafe
+17/17；Python regression 56/56。按用户要求，live acceptance 在前 5 个 case 后停止：
+5/5 业务任务均为 `SUCCEEDED/FULL_REPORT`，安全终态率和完整报告率均为 1.0，未提交
+第 6 条；但主动终止旧 runner 暴露出“SSE 取消错误关闭后台 Trace”的缺陷，使第 5 条
+GOOGL 虽然 Evidence/Report 均 PASS，Trace 却为 `cancelled`，因此本次 smoke 不能记为
+5/5 Harness 通过。当前源码已把后台 Trace 终态收归 task pipeline 并通过全量门禁，
+但未追加新的 live case 复验；30-case release gate 仍未运行完成。DashScope FAST
+`403 AllocationQuota.FreeTierOnly` 继续作为外部配额 access issue 单列，不降低
+发布标准。
 
 ## 设计文档
 

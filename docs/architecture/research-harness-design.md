@@ -1,13 +1,431 @@
-# StockSage 投研运行时 Harness 设计与实施计划
+# StockSage Agent Harness 目标架构与渐进式实施计划
 
-> 状态：Accepted；G0–G4 implemented；DEEP live 与 PIT acceptance passed，G5 ready for scoped implementation
-> 日期：2026-07-24
-> 路线图：`TODO.md` 阶段 G
-> 首个纵切面：DEEP 股票研究
+> 状态：Accepted；H0 代码、确定性门禁和 Docker/Testcontainers/PIT 已完成；
+> 5-case live 诊断已停止并修复其中发现的 Trace 归属缺陷，固定 30-case release
+> gate 尚未完成，生产验收仍未关闭。
+> G0–G4 是已实现的 Completion Harness 基础，不代表完整 Agent Harness 已达到生产成熟度；
+> H1 与 G5 在 live 明确通过前保持暂停。
+> 首版日期：2026-07-24
+> 最近修订：2026-07-31
+> 路线图：`TODO.md` 阶段 G/H
+> 业务边界：财报分析与股票投研助手；首个强约束纵切面为 DEEP 股票研究
+
+## 0. 2026-07-31 设计升级
+
+### 0.1 核心判断
+
+当前 `ResearchHarness + ResearchCompletionPolicy` 已经解决了 DEEP 链路的“结果够不够”
+问题，但它只是完整 Harness 的 Completion 子系统。StockSage 的目标 Harness 应定义为：
+
+> 包围现有 Coordinator、ExecutionPlan、Skill、Capability、ResearchTask、Pipeline、
+> Checkpoint、CompletionPolicy、Review、Trace 和 Eval 的 Agent 运行控制面。
+
+它不替模型决定研究过程，也不枚举所有可能的分析路线。它只固定以下外部可验证边界：
+
+1. 任务规格在运行开始时被冻结，不能被模型或远程内容悄然改写。
+2. 所有有副作用或访问外部系统的动作经过受控 Capability 边界。
+3. 状态、预算和恢复意图可持久化，进程崩溃后不会跳过未完成门禁。
+4. 证据和报告经过确定性最低正确性检查，不满足时明确降级或阻断。
+5. 机器验收、人类审核和可发布信任等级彼此分离。
+6. 每个发布结论都能追溯到真实运行过的 Eval，而不是配置值或未执行项。
+
+因此采用：
+
+```text
+稳定外壳 + 自由探索内核 + 渐进式约束
+```
+
+- 稳定外壳固定权限、状态、证据、终态、审计和发布边界。
+- 自由探索内核允许 Agent 在预算内提出子问题、选择已授权能力、比较矛盾证据、
+  调整搜索顺序和主动暴露未知项。
+- 新规则先观察、再影子评估、最后才执法；没有事故或 Eval 证据支持的规则不进入硬门禁。
+
+### 0.2 目标架构
+
+```mermaid
+flowchart TD
+    REQUEST["用户请求"] --> COORDINATOR["Coordinator / ExecutionPlan"]
+    COORDINATOR --> INITIALIZER["RunInitializer + PlanGuard"]
+    INITIALIZER --> RUNTIME["AgentHarnessRuntime"]
+
+    RUNTIME --> LOOP["Research Exploration Loop"]
+    LOOP --> PROPOSAL["ResearchActionProposal"]
+    PROPOSAL --> GATEWAY["CapabilityGateway"]
+    GATEWAY --> ADAPTERS["Local / Data Service / MCP Read-only Adapters"]
+    ADAPTERS --> LEDGER["EvidenceLedger"]
+    LEDGER --> LOOP
+
+    LEDGER --> EVIDENCE_GATE["Route Evidence Gate"]
+    EVIDENCE_GATE -->|"PASS"| SYNTHESIS["Debate / Synthesis"]
+    EVIDENCE_GATE -->|"RECOVER"| RECOVERY["Durable Bounded Recovery"]
+    RECOVERY --> GATEWAY
+    EVIDENCE_GATE -->|"DEGRADE / BLOCK"| SAFE_RESULT["安全业务终态"]
+
+    SYNTHESIS --> REPORT_GATE["Report Gate"]
+    REPORT_GATE -->|"PASS"| DELIVERY_GATE["Delivery Gate"]
+    REPORT_GATE -->|"RECOVER"| RESYNTHESIS["Manager-only Resynthesis"]
+    RESYNTHESIS --> REPORT_GATE
+    REPORT_GATE -->|"DEGRADE / BLOCK"| SAFE_RESULT
+
+    DELIVERY_GATE --> CACHE["Cache / Report / Research Memory"]
+    REVIEW["Human Review"] --> DELIVERY_GATE
+
+    STATE["MySQL ResearchTask + Checkpoint"] <--> RUNTIME
+    OBS["Trace / SSE / Metrics"] --- RUNTIME
+    EVAL["Golden / Trajectory / PIT / Live Eval"] --- RUNTIME
+```
+
+现有 MySQL `ResearchTask` 和 checkpoint 继续是真相源；Redis 只承担队列、lease 辅助和
+事件流。V1 不引入第二套任务系统、第二条事件总线、Temporal、LangGraph 或通用 Hook DSL。
+
+### 0.3 固定外层生命周期与动态内层探索
+
+外层生命周期是强类型的：
+
+```text
+INITIALIZE
+→ PLAN_VALIDATED
+→ EXPLORING
+→ EVIDENCE_GATE
+→ RECOVERING ↺
+→ SYNTHESIS
+→ REPORT_GATE
+→ DELIVERY_GATE
+→ TERMINAL
+```
+
+内层探索只提交建议，不直接取得权限：
+
+```java
+public record ResearchActionProposal(
+        String stepId,
+        String researchQuestion,
+        String capabilityId,
+        Map<String, Object> boundedArguments,
+        String expectedEvidenceDimension,
+        String stopCondition
+) {
+}
+```
+
+Harness 可以拒绝、截断或串行化提议，但不规定 Agent 必须按固定问题树思考，也不保存
+隐藏思维链。只记录决策摘要、动作、公开输入字段、结构化结果元数据和错误码。
+
+### 0.4 最小稳定契约
+
+运行开始时冻结：
+
+```java
+public record ResearchRunSpec(
+        String runId,
+        String userId,
+        PlanRoute route,
+        String workflowId,
+        int workflowVersion,
+        TargetIdentity target,
+        Instant dataAsOf,
+        PolicyBundle policies,
+        RunBudget budget,
+        Set<String> allowedCapabilities,
+        String idempotencyKey
+) {
+}
+```
+
+持久化快照至少包含：
+
+```java
+public record RunSnapshot(
+        String runSpecHash,
+        HarnessPhase phase,
+        Set<String> completedStepKeys,
+        EvidenceLedger evidence,
+        HarnessSnapshot completion,
+        BudgetState budget,
+        RecoveryEffect pendingRecovery
+) {
+}
+```
+
+当前代码不立即引入上述所有 Java 类型。H0 先修复已经存在的 `HarnessSnapshot` 恢复语义；
+只有第二条 route 进入稳定 Shadow 后，才抽取共享 `ResearchRunSpec/RunSnapshot`，避免为
+假想需求建立万能上下文对象。
+
+### 0.5 恢复是持久化 effect，而不是一个计数器
+
+恢复动作必须具有稳定 effect key：
+
+```text
+runId + policyId + policyVersion + recoveryAction + attempt
+```
+
+生命周期：
+
+```text
+PLANNED → STARTED → EFFECT_RECORDED → REVALIDATED
+```
+
+这是完整的逻辑生命周期。H0 当前所有恢复 effect 都是只读调用，而且
+`DeepEvidenceCollector.recover()` 在一次进程内调用中完成“调用、Ledger 替换和 Policy
+重新验收”，因此先只持久化两个有行为差异的边界：
+
+```text
+PLANNED → REVALIDATED
+```
+
+`PLANNED` 之后任何不确定崩溃窗口都用同一 effect key at-least-once 重放；
+`REVALIDATED` 才允许进入下一阶段。`STARTED/EFFECT_RECORDED` 暂作为 Trace 语义保留，
+只有出现非只读恢复、长时间异步 provider job，或必须区分“调用完成但尚未验收”的真实
+运维需求时才升级为持久化状态，避免当前多写两次数据库却不增加安全性。
+
+不变量：
+
+- `PLANNED` 必须在产生外部调用前 owner-fenced 落盘。
+- 接管者看到非 `REVALIDATED` 恢复时，必须恢复该动作并重新执行 Evidence Gate；
+  不能因为“存在 checkpoint”就直接进入 Debate。
+- 外部 provider 通常只能保证 at-least-once；通过稳定 effect key、结果哈希和 Ledger
+  去重做到“逻辑上只应用一次”。
+- `RECOVER/BLOCK` 绝不能进入 Debate；恢复预算耗尽后只能 `DEGRADE/BLOCK`。
+- 旧 checkpoint 缺少恢复状态时可读取；如果无法证明上次 RECOVER 已重新验收，
+  必须 fail-safe 地重新验收或降级，不能假设成功。
+
+Live Eval 按稳定 effect key 计算“逻辑恢复次数”，并单独保留物理 replay 次数；相同 key
+的 at-least-once 重放不能误报为恢复预算越界，不同 key 仍必须计为两次。旧 Trace 尚无
+effect key 时，可以折叠相邻、同 policy/version/phase/action 且均为 `RECOVER` 的完全
+同构记录，供运维诊断 replay 次数；但这种推断没有发布可信性，只要出现无 key 的
+`recoveryActions`，release gate 就必须 fail-closed。H0 已把稳定 effect key 写入当前
+DEEP Trace；真实 live case 只有观测到该 key 并满足逻辑恢复预算时才允许通过。H1 只在
+其他 route 接入时统一这套 Trace 契约，不重新定义 DEEP 的已验证语义。
+
+### 0.6 约束分级
+
+Harness 只保留少而精的规则，按风险分成四级：
+
+| 级别 | 用途 | 例子 | 失败行为 |
+|---|---|---|---|
+| Hard Invariant | 合规、安全、确定性正确性 | IBKR 只读、ticker 一致、证据成员关系、恢复预算、owner fence | `BLOCK` 或技术失败 |
+| Route Policy | 业务完成定义 | DEEP 必须有基本面与行情证据、NEWS 的时间窗 | `RECOVER/DEGRADE` |
+| Advisory | 模型可自主权衡的质量建议 | 多找一类反方证据、补充行业比较 | 只写 Trace，不阻断 |
+| Experiment / Shadow | 尚未证实的新规则 | 新鲜度阈值、新的 claim 检查 | 只统计差异 |
+
+升级规则的必要条件：
+
+1. 有真实缺陷、事故、用户反馈或 Eval 失败作为证据。
+2. 能定义可重复测试和明确误杀率。
+3. 有安全降级或回滚路径。
+4. 先经过 Shadow；除紧急安全修复外，不直接成为 Hard Invariant。
+
+### 0.7 机器质量、人审与发布信任分离
+
+三个状态回答不同问题：
+
+```text
+MachineQualityStatus: 机器规则是否验证通过
+HumanReviewStatus:    人类是否批准、否决或要求补研究
+ArtifactTrustLevel:   当前产物允许被如何使用
+```
+
+H0 的最小强制规则：
+
+- `REJECTED` 和 `NEEDS_RESEARCH` 对机器 `VERIFIED` 拥有否决权。
+- 被否决报告不能 cache reuse、不能新写入 Research Memory；已写入的记忆必须撤销。
+- `DRAFT/IN_REVIEW` 可继续作为当前用户的机器验证产物，但不能被标记为
+  `HUMAN_APPROVED`，也不能对外宣称人工批准。
+- 后续只有在真实工作流需要时，才增加“仅 APPROVED 可进入高信任记忆/发布”的可配置策略；
+  不在当前演示项目中强制所有报告先人工审批。
+
+### 0.8 Capability 边界
+
+所有外部 effect 最终收口为：
+
+```text
+authorize
+→ input schema / target 校验
+→ budget reserve
+→ adapter call
+→ timeout / circuit breaker
+→ content sanitization / truncation
+→ EvidenceEnvelope
+→ audit record
+```
+
+按能力而非每次调用启动容器：
+
+- 本地只读 Adapter：进程内逻辑隔离。
+- Python data-service：独立服务、固定 API、最小网络与凭据边界。
+- MCP：server/tool 精确白名单、只读风险级别、出口限制和超时。
+- 凭据只在 Adapter 边界注入，不进入 prompt、Trace、checkpoint 或 SSE。
+- 新 Capability 默认 fail-closed；是否可并发按具体调用参数判定，不按工具名永久分类。
+
+### 0.9 Route Profile，而不是最低公分母 Policy
+
+共享生命周期，不共享含大量 nullable 字段的万能完成定义：
+
+```java
+public interface HarnessProfile<C, E, R> {
+    SpecValidator<C> specValidator();
+    EvidencePolicy<C, E> evidencePolicy();
+    RecoveryExecutor<C, E> recoveryExecutor();
+    ResultPolicy<C, E, R> resultPolicy();
+    TerminalMapper<R> terminalMapper();
+}
+```
+
+迁移顺序：
+
+```text
+DEEP 参考实现修复
+→ NEWS Shadow / Enforce
+→ MARKET Shadow / Enforce
+→ RAG Shadow / Enforce
+→ 视真实需求决定是否拆出独立 FUNDAMENTALS Profile
+```
+
+`DIRECT` 保留轻量安全契约，不为了形式统一强套完整研究 Harness。
+
+### 0.10 验证分层
+
+| 层级 | 回答的问题 | 是否阻断 PR/发布 |
+|---|---|---|
+| Policy Golden | 同一输入是否得到确定性正确决定 | 阻断 PR |
+| Trajectory Simulation | 缺证据、恢复、耗尽预算的完整轨迹是否正确 | 阻断 PR |
+| Crash/PIT | 每个持久化/副作用窗口崩溃后是否等价恢复 | 阻断相关改动 |
+| Live Eval | 真实 HTTP/SSE/provider 是否完成且安全 | 阻断发布晋级 |
+| Semantic Eval | claim 是否被证据支持、报告质量是否提升 | 离线质量信号；不进热路径 |
+
+`pass` 是唯一成功门禁状态。`partial`、`incomplete`、未运行、样本不足、policy drift 或
+数据集 hash 缺失都必须返回非零退出码，不能以“部分可用”冒充发布通过。
+
+### 0.10.1 H0 长任务稳定性外壳
+
+生产验收暴露的稳定性约束只包围执行边界，不替 Agent 预设研究问题树：
+
+- SSE 背压只允许丢弃无业务语义的 heartbeat；工具/领域事件和回答 token 保持无损。
+- Bull/Bear 轮次聚合与 Manager 综合/修复各自有默认 300 秒外层硬截止；超时取消上游、
+  释放 worker，但不限制截止时间内的研究顺序、证据比较或论证内容。
+- worker 失败后先释放 lease 和执行占用，再等待 2 秒进入进程内快速重试队列；
+  进程退出时，Redis PEL 仍保留同一任务作为持久恢复来源。
+- Live runner 收到会话/Trace 标识后立即用临时文件、`fsync` 和原子替换保存逐 case
+  checkpoint。断流后只对账 ResearchTask、Cockpit 和终态 Harness Trace；已有 task
+  identity 时绝不重复 POST，无法证明终态时停止批次并保留 checkpoint。
+- 后台任务 Trace 的终态由拥有 task lease 的 pipeline 在业务终态提交后写入；
+  同一任务的 SSE subscriber 断开只结束传输，不再把继续执行并成功的任务标为
+  `cancelled`。旁观已有任务的独立请求仍只关闭自己的 observer Trace。
+- `--case-limit N` 只创建明确的 smoke 运行：最多提交前 N 条，保留 checkpoint，
+  输出独立 `smoke_status`，同时强制 `release_eligible=false` 和
+  `live_release_case_limit_applied`。
+
+这些约束处理无界等待、背压、租约占用和重复提交，不规定模型必须调用哪些能力或按什么
+顺序探索。只有新的事故或 Eval 证据证明边界不足时，才继续增加硬约束。
+
+### 0.11 渐进实施与验收
+
+#### H0（当前，P0）：修复现有安全不变量
+
+- [x] 恢复 effect 生命周期持久化；takeover 不得跳过 RECOVER 和重新验收。
+- [x] 跨 Evidence/Report 阶段保留 suspended recovery、稳定 effect key 和单调预算，
+  每个非空 checkpoint 都重新执行当前 Evidence Gate 并重算当前证据 hash。
+- [x] 为保存恢复意图前后、外部调用前后、重新验收前后补崩溃窗口测试。
+- [x] `REJECTED/NEEDS_RESEARCH` 退出 cache reuse 和 Research Memory，并撤销已有记忆。
+- [x] cache reuse 对原始持久化 JSON、当前 Ledger 和当前 Policy 执行完整 Report Gate。
+- [x] 报告版本、助手消息和 owner-fenced 任务终态在同一数据库事务中发布；事务提交后
+  才清 checkpoint、发 terminal SSE 和触发 Research Memory capture。
+- [x] `run_harness_live_eval.py --fail-on-gate` 对所有非 `pass` 状态返回非零。
+- [x] Live Eval 区分逻辑恢复与相同 effect 的物理 replay，不用重放次数冒充预算越界。
+- [x] 缺少稳定 effect key 的恢复轨迹只能用于诊断，不能通过 release gate。
+- [x] 固定 30 个唯一 DEEP case、policy id/version 和规范化 JSONL SHA-256；样本数、
+  manifest、hash 或运行时 policy metadata 漂移均 fail-closed。
+- [x] SSE 只让 heartbeat 在背压下可丢，业务事件和回答流保持无损。
+- [x] 模型阶段有默认 300 秒外层截止，超时会取消上游并归还 worker。
+- [x] worker 释放 lease/执行占用后再触发本地快速重试，Redis PEL 保留持久兜底。
+- [x] Live runner 原子 checkpoint、断流对账、恢复时不重复提交，未决 case 阻断后续批次。
+- [x] 后台 task pipeline 拥有 Trace 终态，SSE 取消不再覆盖后台业务终态。
+- [x] 受限 smoke 有显式 case 上限且永远不能通过 release gate。
+- [x] 保持 80-case Golden `unsafe_pass_count=0`。
+
+H0 的代码、确定性门禁和 Docker/Testcontainers/PIT 已于 2026-07-31 完成。按用户
+要求，live 在前 5 条后停止；该 smoke 不满足 30-case release contract，且修复后尚未
+追加 live 复验。因此 H0 的生产发布验收仍未关闭，H1 与 MARKET/NEWS/RAG Policy
+均不得提前激活。
+
+2026-07-31 验证证据：
+
+- `.\mvnw.cmd clean verify -Pit "-DfailIfNoTests=true"` 成功：
+  Surefire 71 个 suite、312/312；Failsafe 9 个 suite、17/17；均无 failure、error、skip。
+- Python eval regression 56/56。
+- Java production Policy 80/80，decision/violation/recovery exact-match 均为 1.0，
+  coverage `pass`，unsafe PASS 为 0。
+- 5-case smoke 的 5 个业务任务均为 `SUCCEEDED/FULL_REPORT`，安全终态率和完整报告率
+  均为 1.0，未创建第 6 个任务。NVDA/AAPL/MSFT/AMZN 完整通过；GOOGL 的 Evidence/
+  Report 均 PASS，但主动停止旧 runner 使其 Trace 被错误标为 `cancelled`，因此
+  smoke 的 Harness 结果是 4/5，不能记为通过。
+- 上述缺陷已修复为“后台 pipeline 拥有 Trace 终态”，并由 25 个定向 Java 测试、
+  当前完整 Java/Testcontainers 门禁和 56 个 Python eval 回归覆盖；遵循用户的
+  5-case 时间边界，没有追加新的 live case，故 live 修复仍缺一次运行态复验。
+- 脱敏结果保存在忽略目录
+  `rag-eval/results/harness_live_eval_20260731_h0_smoke5_disconnect.json`；
+  先前中断的 30-case 仍只作为事故证据，两者均不计入发布通过率。
+- 中断运行观察到 DashScope FAST `403 AllocationQuota.FreeTierOnly`；这是外部配额
+  access issue，必须与产品缺陷分开记录，但不会放宽 live gate。
+
+#### H1（P1）：DEEP walking skeleton 完整化
+
+- 冻结最小 `ResearchRunSpec/PolicyBundle`，运行期间 policy 不漂移。
+- 将 DEEP 的外部证据调用逐步收口到现有 `CapabilityGateway`。
+- 增加预算、effect key 和 terminal kind 的统一 Trace。
+- 为 Research Memory 物理向量删除增加有界重试与 Outbox/DLQ，关闭合规删除最终完成证明。
+- 不改变 Coordinator、ResearchTask、Redis Stream 或 Bull/Bear/Manager 的职责。
+
+#### H2（P1）：其他 route 先 Shadow
+
+- 为 NEWS、MARKET、RAG 分别建立强类型 fixture、golden set 和 live cases。
+- Shadow 只记录新旧差异，不改变用户响应与业务终态。
+- 每个 route 达到 `unsafe_pass_count=0`、误杀可解释、延迟在预算内后再单独 Enforce。
+
+#### H3（P1–P2）：逐 route 执法与 Claim Ledger
+
+- NEWS → MARKET → RAG 逐个 canary，支持快速退回 Shadow。
+- 对关键财务数字记录 `claim → value/unit/period/ticker → evidenceId → source field`。
+- 数值、期间、单位和 ticker 用确定性校验；语义蕴含只作离线辅助评测。
+
+#### H4（P2）：生产证据，而不是继续堆组件
+
+- 每个 enforced route 有足量固定 live cases，DEEP 不少于当前规定的 30 例。
+- 完成真实双进程 kill/restart、Redis/MySQL/provider 故障、容量和 SLO 验证。
+- 定期发布 Harness scorecard：安全错误、错误阻断、恢复成功、任务完成、P95、人工否决率。
+
+### 0.12 约束审查与收敛
+
+每月或每次重大 Eval/事故后审查一次规则表：
+
+1. 这条规则阻止了什么真实失败？
+2. 最近 30/90 天触发多少次，多少是真阳性、多少是误杀？
+3. 能否从 Hard 降为 Route/Advisory，或直接删除？
+4. 是否与其他规则重复，能否合并？
+5. Policy owner、版本、测试、回滚条件是否仍有效？
+
+规则状态：
+
+```text
+PROPOSED → SHADOW → ENFORCED → RETIRED
+```
+
+任何规则都必须有 owner、原因、作用范围、首次引入时间、命中指标、测试和删除条件。
+目标不是让规则只增不减，而是保持一个能解释、能测量、能删除的最小约束集合。
+
+### 0.13 明确不做
+
+- 不新增一个用 LLM 负责初始化的 Initiator Agent；初始化是确定性代码。
+- 不开放无限 ReAct、任意工具名、动态 Java Policy 或远程 MCP 自动注册。
+- 不预设所有财务分析问题树，也不把专家经验写成庞大 if/else。
+- 不保存 chain-of-thought；只保存可审计的公开决策摘要和动作结果。
+- 不让 LLM Judge 决定是否允许投资评级。
+- 不一次性迁移全部 route，不因“企业级”标签引入微服务、服务网格或新工作流框架。
 
 ## 1. 决策
 
-StockSage 采用“阶段门禁式领域 Harness”，在现有 Agent 编排链路中增加统一的运行时完成判定与有限恢复能力。
+StockSage 的完整 Harness 采用“运行控制面”设计；现有“阶段门禁式领域 Harness”
+继续作为其中的 Completion 子系统，在 Agent 编排链路中提供统一完成判定与有限恢复能力。
 
 第一版包含：
 
@@ -289,11 +707,14 @@ MODEL_FAILURE
 ```java
 public record HarnessSnapshot(
         String policyId,
-        int policyVersion,
+        String policyVersion,
         HarnessPhase lastPhase,
         HarnessOutcome lastOutcome,
         List<ViolationCode> violations,
-        Map<RecoveryType, Integer> recoveryAttempts
+        Map<RecoveryAction, Integer> recoveryAttempts,
+        RecoveryLifecycle recoveryLifecycle,
+        List<RecoveryAction> recoveryActions,
+        String recoveryEffectKey
 ) {
 }
 ```
@@ -301,9 +722,16 @@ public record HarnessSnapshot(
 要求：
 
 - 跟随 `AnalysisState` 序列化到现有 checkpoint JSON。
-- 执行恢复动作前先严格持久化对应 recovery count。
+- 执行恢复动作前先严格持久化已完成 recovery count、稳定 effect key、动作集合和
+  `PLANNED` 状态；pending effect 本身预留本次预算。
+- Evidence 重新验收期间必须挂起并保留已有 Report recovery；跨阶段恢复结束后合并
+  两阶段 attempt，任何 takeover 都不能重置预算或丢失 effect key。
+- H0 的只读恢复完成并重新通过 Gate 后推进到 `REVALIDATED`；四阶段逻辑生命周期的
+  中间状态按 0.5 的升级条件渐进引入。
 - owner-fenced 保存失败时停止当前 attempt，不能仅记录日志后继续。
-- takeover 后恢复次数不归零。
+- takeover 后恢复次数不归零，并从非终态 `pendingRecovery` 推导下一步；所有非空
+  checkpoint 必须先按当前 Policy 重跑 Evidence Gate，当前 PASS 必须重算证据 hash，
+  不能信任历史 checkpoint hash。
 - 不新增 `ResearchTask.Stage`；当前 checkpoint 防回退依赖枚举顺序。
 
 ## 6. DeepResearchCompletionPolicy V1
@@ -430,6 +858,26 @@ V5__research_task_result_kind.sql
 
 策略阻断是系统成功执行了安全规则，不应进入 DLQ；Policy 自身抛出未预期异常才属于技术失败。
 
+### 7.1 原子发布边界
+
+“报告已经落库”不等于“任务已经完成”。对后台完整报告和离线兜底，以下写入必须作为
+一个发布单元提交：
+
+```text
+同一 user 串行化锁
+→ 持久化或复用规范报告版本
+→ 从最终持久化报告渲染交付文本
+→ 持久化助手消息
+→ owner-token CAS 标记 ResearchTask SUCCEEDED
+→ COMMIT
+→ 清理 checkpoint / 发 terminal SSE / AFTER_COMMIT 记忆捕获
+```
+
+同一用户、同一 snapshot 的并发任务允许复用一个报告版本，但两个任务都必须各自通过
+owner CAS 到达终态。唯一键冲突、owner 丢失或消息写入失败必须回滚整个发布单元，不能留下
+“有报告无终态”或“有终态无消息”的半发布状态。inline 完整报告不写助手消息，但报告版本
+与任务终态仍处于同一事务。任何 SSE 都只能在事务成功返回后发送。
+
 ## 8. 缓存与 Research Memory
 
 ### 8.1 缓存验收
@@ -446,12 +894,13 @@ evidence as-of/freshness boundary
 
 新闻不直接使用原始返回文本计算哈希；使用排序后的稳定来源标识、URL/公告 ID、发布时间和 payloadHash。
 
-缓存命中后仍执行轻量报告门：
+缓存命中后仍执行当前完整 Report Gate，而不是只检查元数据：
 
 - qualityStatus 必须是 `VERIFIED`。
 - policy id/version 必须与当前一致。
 - required evidence 未过期。
-- sourceEvidenceIds 仍能解析。
+- 原始持久化 JSON 必须满足当前 schema、target 和 recommendation 规则。
+- sourceEvidenceIds 必须属于当前 Ledger 且仍是 usable evidence。
 
 旧报告：
 
@@ -467,6 +916,7 @@ evidence as-of/freshness boundary
 qualityStatus == VERIFIED
 AND resultKind == FULL_REPORT
 AND sourceEvidenceIds non-empty
+AND reviewStatus NOT IN (REJECTED, NEEDS_RESEARCH)
 ```
 
 以下结果不得进入长期研究记忆：
@@ -476,6 +926,28 @@ AND sourceEvidenceIds non-empty
 - `LEGACY_UNVERIFIED`
 - `INSUFFICIENT_EVIDENCE`
 - `POLICY_BLOCKED`
+- `REJECTED`
+- `NEEDS_RESEARCH`
+
+当报告从可用状态转为 `REJECTED/NEEDS_RESEARCH` 时，审核事务之后必须触发幂等撤销：
+
+- 删除或失效该 `reportVersionId` 对应的 Research Memory 记录。
+- cache acceptance 立即拒绝该版本。
+- 撤销失败要记录有限错误码并允许重试，不能继续把该报告当作可用记忆。
+
+当前 H0 不要求 `DRAFT/IN_REVIEW` 必须先变成 `APPROVED` 才能作为机器验证产物，
+但 UI、API 和 Trace 必须继续区分 `VERIFIED` 与 `APPROVED`。
+
+H0 的 capture 会在独立事务中按 `reportVersionId + userId` 锁定并重读报告，不能依赖
+可能陈旧的持久化事件对象；因此人工 `REJECTED/NEEDS_RESEARCH` 与新记忆写入共享同一
+串行化边界。数据库 truth row 先变为 `REVOKED`，检索注入必须回查该真值；并发补偿索引
+只能通过 `revokedAt IS NULL` 的条件更新推进，不能用陈旧实体复活已撤销记忆。向量新增和
+删除都延后到数据库事务 `afterCommit`，避免回滚产生孤儿向量或删除仍有效的向量。
+
+物理向量删除当前仍是 best effort：提交后删除失败会告警，但还没有
+`deleteAttempts/nextRetryAt` 或 Outbox/DLQ，因此不能宣称已经具备有界删除重试。该缺口
+不影响被否决内容进入 Prompt 的安全不变量，但影响合规删除的最终完成证明，必须在 H1
+以可观测、有限次数、可进死信的补偿机制关闭。
 
 ## 9. 可观测性
 
@@ -508,6 +980,7 @@ decision
 violationCodes
 recoveryActions
 recoveryAttempt
+recoveryEffectKey
 durationMs
 ```
 
@@ -635,6 +1108,10 @@ stocksage-backend/src/main/java/com/stocksage/service/ReportMarkdownRenderer.jav
 
 ### G3（P0–P1）：恢复预算、业务终态、缓存与记忆闭环
 
+> 2026-07-31 审查结论：G3 的基础字段和 owner-fenced 写入已经实现，但此前的
+> “takeover 后 recovery count 不归零”只验证了计数持久化，没有证明接管者会消费
+> 未完成的 RECOVER。该安全不变量在 H0 重新打开，不能再把 G3 视为完整闭环。
+
 新增/修改：
 
 ```text
@@ -656,14 +1133,18 @@ stocksage-backend/src/main/java/com/stocksage/service/OfflineDemoSampleService.j
 - [x] cache hit 在返回前重新执行报告门。
 - [x] Research Memory 只摄取 VERIFIED/FULL_REPORT。
 - [x] 离线示例始终标为 OFFLINE_FALLBACK，不能成为 VERIFIED。
+- [x] 接管者消费未完成 recovery effect，并在任何恢复后重新执行 Evidence Gate。
+- [x] `REJECTED/NEEDS_RESEARCH` 不能复用、不能摄取并撤销已有 Research Memory。
 
 退出条件：
 
 - [x] takeover 后 recovery count 不归零。
+- [x] takeover 后非终态 recovery 不会被跳过。
 - [x] 旧 owner 不能覆盖 HarnessSnapshot 或终态。
 - [x] Redis 事件过期后，任务 API 仍能返回 ResultKind。
 - [x] 不同 policyVersion 的报告不能互相复用。
 - [x] 降级/离线/旧版报告进入 Research Memory 的次数为 0。
+- [x] 人工否决报告进入复用或 Research Memory 的次数为 0。
 
 ### G4（P1）：Harness Eval、前端解释与强制切换
 
@@ -686,7 +1167,8 @@ stocksage-frontend/src/
 - [x] Workbench/Trace 时间线展示“证据验收、补采、降级、最终结果”。
 - [x] 用可重复的 golden expected/actual 决策报告替代临时 legacy/new 对比。
 - [x] 离线硬门禁通过后启用 enforce，并删除临时观察开关和旧 OR/string 判断。
-- [x] 通过真实 HTTP/SSE 链路运行固定 DEEP 用例，验收 ResultKind、Harness Trace、恢复预算、工具动作与端到端延迟。
+- [ ] 使用当前 30-case manifest 通过真实 HTTP/SSE 链路运行完整 DEEP release
+  acceptance；历史单例只作诊断证据。
 
 硬门禁：
 
@@ -707,8 +1189,9 @@ stocksage-frontend/src/
 前置条件：G0–G4 完成且 DEEP live/eval 门禁通过。
 
 当前状态：Policy 骨架与单元测试已加入，但未接入 MARKET/NEWS/RAG route。
-离线门禁、真实 provider DEEP Trace 与 Testcontainers PIT 已通过；G5 可以按独立
-route 切片实施，但本次验收工作没有改变这些 route 的运行时行为。
+离线门禁与恢复/Trace 语义变更后的完整 Testcontainers/PIT 已通过；5-case smoke
+不能替代尚未完成的 30-case provider gate，因此 G5 仍不得激活，H1 也不提前开始。
+本次验收没有改变这些 route 的运行时行为。
 
 任务：
 
@@ -842,16 +1325,25 @@ case count 至少 60、coverage status 为 `pass`、数据集 hash 非空、完�
 和 ResearchTask/Trace/Cockpit API 跑真实 DEEP 链路。它输出
 `schema=harness_live_eval_v1`、`engine=stocksage-live-http`，并以以下规则验收：
 
+- 发布数据集由 `harness_live_manifest.json` 固定为 30 个唯一 case、policy
+  `deep-equity-v1/v2` 和规范化 JSONL SHA-256
+  `137682582a19674681da154d4689f96aa4a3de4242300648f0c6af1fc03ab223`；
+  JSON object 按 key 排序并以 LF 规范化后计算，因此 Windows CRLF 与 Linux LF
+  checkout 得到同一 hash。
 - 任务必须到达 `SUCCEEDED` 技术终态且 ResultKind 属于显式集合。
 - `FULL_REPORT` 必须同时有最终 `EVIDENCE=PASS` 和 `REPORT=PASS`。
-- 降级或阻断 ResultKind 必须与相应 Harness decision 一致。
-- 同一恢复动作不得超过一次。
+- `INSUFFICIENT_EVIDENCE` 只接受 Evidence 自身 `DEGRADE/BLOCK`，或
+  `EVIDENCE=PASS` 后 Report `DEGRADE/BLOCK`；报告门缺失或 PASS 时不能伪装成证据不足。
+- 其他降级或阻断 ResultKind 必须与相应 Harness decision 一致。
+- 同一逻辑恢复 effect 不得超过一次；相同 effect key 的物理 replay 单独计数。
+- 只要 Trace 中的 `recoveryActions` 缺少稳定 effect key，该 case 就 fail-closed；
+  keyless 折叠结果只保留作诊断。
 - 结果只保留脱敏元数据，不保存最终回答、证据正文或凭据。
 
 Agent Eval 的 `live_completion` 分区仅在 engine/schema 正确、完成率与安全终态率均为
 1.0、unsafe result 为 0 且 live status 为 `pass` 时通过；`partial` 不算硬门禁通过。
 
-2026-07-24 live acceptance：
+2026-07-24 历史 live 诊断证据（不满足当前发布门禁）：
 
 - 固定 NVDA DEEP 用例进入后台研究任务，而不是普通对话路径。
 - `SUCCEEDED / COMPLETE / FULL_REPORT`，最终 `EVIDENCE=PASS`、
@@ -861,6 +1353,12 @@ Agent Eval 的 `live_completion` 分区仅在 engine/schema 正确、完成率�
   返回 403；Coordinator/轮数规划按设计降级，最终仍产生安全完整报告。
 - `.\mvnw.cmd verify -Pit` 通过 15/15，覆盖 queue、takeover/owner-fence、
   tenancy isolation 与 Trace bridge。
+
+上述 live 结果只有一个 NVDA case，早于当前“至少 30 个固定 case、精确数据集 hash、
+观测到 policy id/version”的发布门禁，因此只能证明链路曾经跑通，不能证明当前版本已经
+通过 live release acceptance。恢复与 Trace 归属修复后的当前 `clean verify -Pit`
+已通过 Surefire 312/312 与 Failsafe 17/17，关闭了容器集成门禁；它不能替代尚未完成的
+30-case live provider 门禁。
 
 最终：
 
@@ -953,9 +1451,13 @@ Agent、prompt、RAG 或报告行为发生变化时，必须附相关 regression
 
 ## 15. 下一步
 
-G0–G4 与前置验收已完成。后续进入 G5 的独立切片：
+H0 代码、确定性 Eval 和 Docker/Testcontainers/PIT 已完成，但不直接进入 H1/G5：
 
-1. 先补齐并接入 MARKET Policy 的 as-of、target 与样本量契约，使用专属 golden/live cases 验收。
-2. 再接入 NEWS Policy 的 target/topic/time-window、零结果与失败分离契约。
-3. 最后接入 RAG Policy 的 target filter、citation membership、过期过滤与 no-answer 契约。
-4. 再评估 DEEP evidence 向 `CapabilityGateway` 的渐进迁移，以及 Skill `completionPolicyId`；不引入第二套状态机或热路径 LLM Judge。
+1. 先用当前构建做一次最小的 client-disconnect live 复验，确认后台任务成功后 Trace
+   最终为 `success`，再开始新的固定 30-case DEEP release gate。
+2. 完整 gate 必须核对 policy v2、dataset hash、30/30 完成、安全终态率和 release
+   violation；`--case-limit` smoke、历史 checkpoint 和 pre-fix 结果均不得复用为通过证据。
+3. Live 明确通过后，才进入 H1 的最小 `ResearchRunSpec` 和 DEEP
+   CapabilityGateway 收口。
+4. 只有 DEEP walking skeleton 稳定后，才按 NEWS → MARKET → RAG 的顺序
+   Shadow、评估并逐个执法。
