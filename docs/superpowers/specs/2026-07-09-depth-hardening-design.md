@@ -1,5 +1,8 @@
 # 深度强化四工作流：DEEP 后台化 / 数字化 / 评测消融 / 降级矩阵（2026-07-09）
 
+> [!NOTE]
+> 混合历史规划文档。WS1 后台化已经落地，WS3 的当前方向由 `docs/architecture/research-harness-design.md` 接管；下文开头描述的是 2026-07-09 的历史现状。WS2 数字化与 WS4 降级演练仍可作为未完成研究素材，当前执行顺序以根目录 `TODO.md` 为准。
+
 ## 背景与目标
 
 外部评审（大厂在职工程师）结论：项目广度够，但**深度证据缺失**——没有量化数字、没有极限推演、没有验证性实验；且 DEEP 深度研究至今同步跑在 SSE 请求线程里（`ToolPrefetchService` 的 `RESEARCH_MANAGER` 分支内联调 `DeepResearchPipeline.runResearchDebateWithTask`），任务状态机/租约/心跳只当防重用，没有真正的后台 worker。

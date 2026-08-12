@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public final class DataServicePayloads {
 
+    /** 只用于检查顶层错误字段的线程安全 JSON 解析器。 */
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private DataServicePayloads() {
@@ -23,6 +24,9 @@ public final class DataServicePayloads {
      * <p>失败信号：顶层 {@code error} 字段为 {@code true} 或非空字符串；
      * 空响应与无法解析为 JSON 的响应也按失败处理（不缓存、计入熔断统计）。
      * 顶层无 {@code error} 字段的对象、以及数组等其他合法 JSON 视为成功。</p>
+     *
+     * @param body Python 数据服务返回的原始响应体
+     * @return true 表示该响应不可当作成功结果缓存或交给熔断器记为成功
      */
     public static boolean isFailure(String body) {
         if (body == null || body.isBlank()) {

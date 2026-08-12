@@ -1,7 +1,7 @@
 # StockSage MCP 与 Skill 模块设计
 
-> 状态：Phase 0–2 首个纵切面已实现；Phase 3–5 待后续迭代
-> 日期：2026-07-14
+> 状态：Phase 0–2 纵切面和 F4 脱敏运行状态已实现；真实 Streamable HTTP server 验收待完成
+> 最后复核：2026-08-12
 > 适用仓库：`D:\programming\StockSage`
 
 ## 1. 结论
@@ -25,7 +25,7 @@ Agent 解决“在给定证据和工具范围内如何分析”
 
 这与 StockSage 当前结构兼容。现有 `Coordinator + ExecutionPlan + PlanAction + AgentConfig + @Tool` 已经具有固定的 skill-like 能力分区；新设计应把它们抽象成可声明、可审计的工作流，而不是推翻重写。
 
-### 1.1 当前实现状态（2026-07-14）
+### 1.1 当前实现状态（2026-08-12）
 
 已落地：
 
@@ -40,7 +40,7 @@ Agent 解决“在给定证据和工具范围内如何分析”
 尚未完成：
 
 - 仓库没有内置真实第三方 MCP endpoint/密钥，因此 Streamable HTTP 真实 server 的现场协商验收仍需部署时配置后执行。
-- MARKET、FUNDAMENTALS、DEEP 尚未迁移成声明式 Skill；MCP health API、Workbench provider 标签和 DEEP provenance 属于后续 Phase 3–4。
+- 脱敏的 Skill/Capability/MCP 运行状态 API 和 EvalDesk 状态面板已经实现；MARKET、FUNDAMENTALS、DEEP 尚未迁移成声明式 Skill，DEEP provenance 收口仍属后续范围。
 
 启用一个可信 NEWS MCP server 时，在 ignored `application-local.properties` 中配置连接：
 
@@ -989,16 +989,14 @@ Walking skeleton 不需要先改 Vue，也不需要先建数据库表。
 - 为了展示 MCP，把现有 data-service REST 全量改写成 MCP。
 - 在同一个 PR 中同时升级 Spring AI 2.x、接 MCP、重构 Agent 和改前端。
 
-## 21. 推荐的第一步
+## 21. 当前下一步
 
-先实现 Phase 0 + Phase 1 的最小组合，不立即迁移所有现有路由：
+Phase 0–2 的 `CapabilityGateway`、fail-closed policy、统一 observer 和 `latest-news-mcp` walking skeleton 已经落地，不应重复实施。下一步只补真实传输与降级验收：
 
-1. 在当前 Spring AI 1.1.5 上验证一个只读 Streamable HTTP MCP test server。
-2. 建 `CapabilityGateway` 和 fail-closed policy。
-3. 让一个 local tool 与一个 MCP tool 产生相同 trace。
-4. 再实现 `latest-news-mcp` walking skeleton。
-
-这四步完成后，才能用真实证据决定是否升级 Spring AI patch、是否让 Agent 使用 request-scoped MCP callbacks，以及 DEEP 是否值得引入 MCP evidence。
+1. 配置一个可信、只读的 Streamable HTTP MCP server。
+2. 现场验证 initialize、tools/list、tools/call 和 exact allowlist。
+3. 验证 MCP 成功、MCP → 本地 fallback、双失败回 legacy 三条路径的脱敏 Trace、指标和前端状态。
+4. 通过真实验收后，再决定是否迁移其他 route 或调整 Spring AI 版本；不得把框架升级与 route 重构混在同一切片。
 
 ## 22. 官方参考
 

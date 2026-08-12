@@ -16,7 +16,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class IbkrSessionKeepaliveScheduler {
 
+    /** 决定 IBKR 集成和保活任务是否启用。 */
     private final IbkrProperties properties;
+    /** 提供认证状态查询与 tickle 的只读服务。 */
     private final IbkrReadOnlyService ibkrReadOnlyService;
 
     /**

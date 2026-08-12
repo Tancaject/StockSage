@@ -63,22 +63,31 @@ import java.util.regex.Pattern;
  * <p>典型请求路径：
  * 控制器 -> streamChat -> RAG 检索 -> Coordinator 规划 -> 可选预取/智能体 ->
  * 最终回答流 -> 持久化 + 关闭链路。</p>
+ *
+ * <p>边界：完整消息历史以 MySQL 为真源，Redis 短期记忆和长期画像均可降级；
+ * DEEP 后台任务拥有独立 trace 生命周期，浏览器取消 SSE 不会取消已经受理的研究任务。</p>
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
 
+    /** 普通聊天会话的来源标识，用于与工作台会话隔离列表。 */
     private static final String CONVERSATION_ORIGIN_CHAT = "chat";
+    /** 工作台创建会话的来源标识。 */
     private static final String CONVERSATION_ORIGIN_WORKBENCH = "workbench";
+    /** 从用户问题提取美股 ticker 候选，供研究记忆按标的过滤。 */
     private static final Pattern INTENT_TICKER_PATTERN = Pattern.compile("\\b[A-Z]{1,5}\\b");
+    /** 看似 ticker、实际是投研缩写的过滤表。 */
     private static final Set<String> INTENT_NON_TICKERS = Set.of(
             "AI", "PE", "PB", "ROE", "RSI", "MACD", "SEC", "ETF", "USD", "EPS", "EV", "FCF"
     );
 
+    /** 从 Redis 短期记忆行解析出的角色和正文。 */
     private record MemoryEntry(String role, String content) {
     }
 
+    /** 提取最多五个去重美股 ticker 候选。 */
     private List<String> extractTickerCandidates(String query) {
         LinkedHashSet<String> candidates = new LinkedHashSet<>();
         Matcher matcher = INTENT_TICKER_PATTERN.matcher(query == null ? "" : query);
@@ -91,26 +100,44 @@ public class ChatService {
         return List.copyOf(candidates);
     }
 
+    /** 创建、校验归属、列出和更新时间戳的会话仓储。 */
     private final ConversationRepository conversationRepository;
+    /** 持久化完整用户/助手消息历史。 */
     private final MessageRepository messageRepository;
+    /** 首轮完成后异步生成侧边栏短标题。 */
     private final ConversationTitleService conversationTitleService;
+    /** 将 SSE ChatChunk 序列化为 JSON。 */
     private final ObjectMapper objectMapper;
+    /** 记录路由、检索、模型完成和终态。 */
     private final TraceService traceService;
+    /** 在路由前检索知识库文档。 */
     private final RagService ragService;
+    /** 接收工具切面产生的实时开始/完成事件。 */
     private final ToolCallEventBus toolCallEventBus;
+    /** 将后台任务 trace 事件转发给当前 SSE 订阅。 */
     private final TraceEventRelay traceEventRelay;
+    /** 向后台任务 trace 发布进度事件。 */
     private final ChatStreamEmitter chatStreamEmitter;
+    /** 规划 route/action/model 并流式生成最终答案。 */
     private final Coordinator coordinator;
+    /** Redis 提示词窗口；不可用时可由数据库历史继续回答。 */
     private final ShortTermMemory shortTermMemory;
+    /** 数据库用户画像及后台提取逻辑。 */
     private final LongTermMemory longTermMemory;
-    // 分析师/工具预取和后台记忆更新共用的工作线程池（AsyncConfig#agentTaskExecutor，6 线程 daemon）。
+    /** 分析师预取、标题和后台记忆更新共用的 daemon 线程池。 */
     private final AsyncTaskExecutor agentTaskExecutor;
+    /** 校验并解码当前轮多模态图片。 */
     private final ImageAttachmentService imageAttachmentService;
+    /** 执行确定性工具/Agent 预取或提交 DEEP 后台任务。 */
     private final ToolPrefetchService toolPrefetchService;
+    /** 后台研究完成时按归属和幂等契约写入助手消息。 */
     private final ConversationMessageService conversationMessageService;
+    /** 汇总路由决策指标。 */
     private final RoutingDecisionObserver routingDecisionObserver;
+    /** 检索当前用户可能相关的跨会话历史研究。 */
     private final ResearchMemoryService researchMemoryService;
 
+    /** 长模型阶段向前端发送空心跳的间隔秒数。 */
     @Value("${stocksage.chat.stream.heartbeat-seconds:20}")
     private long streamHeartbeatSeconds;
 
@@ -120,6 +147,9 @@ public class ChatService {
      *
      * <p>返回的 Flux 会刻意把工具进度事件和回答令牌交错输出，
      * 让前端在最终回答仍在生成时也能展示观测结果。</p>
+     *
+     * @param request 用户、会话、文本和可选图片/重生成标记
+     * @return JSON 字符串组成的冷 Flux；订阅后才执行预取和模型生成
      */
     public Flux<String> streamChat(ChatRequest request) {
         long startTime = System.currentTimeMillis();
@@ -161,6 +191,7 @@ public class ChatService {
                     .build());
         }
         List<String> tickerCandidates = extractTickerCandidates(request.getMessage());
+        // 调用用户隔离的研究记忆检索；结果明确服从当前 RAG/工具证据，不命中或失败即空上下文。
         ResearchMemoryService.RetrievalResult researchMemory = researchMemoryService.retrieve(
                 request.getUserId(),
                 tickerCandidates.isEmpty() ? "" : tickerCandidates.get(0),
@@ -236,6 +267,7 @@ public class ChatService {
             // 深度研究会在最终阶段禁用模型工具调用，只让模型基于已准备证据综合回答。
             boolean preparedContextOnly = toolPrefetchService.isDeepResearchPlan(executionPlan.actions());
             Coordinator.SelectedModel selectedModel = coordinator.selectFinalAnswerModel(executionPlan.modelTier(), preparedContextOnly, hasImages);
+            // 调用预取服务执行计划动作；DEEP 可能在此转交后台队列并返回直接受理消息。
             ToolPrefetchService.PreparedToolContext preparedToolContext = toolPrefetchService.prefetch(
                     executionPlan,
                     request.getMessage(),
@@ -278,6 +310,7 @@ public class ChatService {
                     .traceId(traceId)
                     .conversationId(conversationId)
                     .build()));
+            // 调用 Coordinator 选择的最终 ChatClient 流；preparedContextOnly 时禁止模型再调用工具。
             Flux<String> responseTokens = coordinator.streamAnswer(promptMessages, preparedContextOnly, selectedModel.tier(), hasImages);
 
             return Flux.concat(modelStarted, responseTokens
@@ -462,6 +495,7 @@ public class ChatService {
                 mergeSseStreamsWithLossyHeartbeat(toolEvents, heartbeat, answerStream));
     }
 
+    /** 判断当前 SSE 订阅是否只观察另一个后台 task trace，取消时不应关闭任务 trace。 */
     static boolean shouldCloseObserverTraceFromSubscriber(
             String requestTraceId,
             String taskEventTraceId
@@ -470,13 +504,14 @@ public class ChatService {
                 && !requestTraceId.equals(taskEventTraceId);
     }
 
+    /** 合并工具事件、可丢心跳和不可丢回答流。 */
     static Flux<String> mergeSseStreamsWithLossyHeartbeat(
             Flux<String> toolEvents,
             Flux<String> heartbeat,
             Flux<String> answerStream
     ) {
-        // Heartbeat 只表示传输层存活，可以在客户端暂停读取时丢弃。只在该分支解除 interval 的
-        // demand 约束，避免其 OverflowException 终止整个 merge；工具事件和回答 token 保持无损。
+        // 心跳只表示传输层存活，客户端暂停读取时可丢弃；仅对此分支解除背压需求约束，
+        // 避免溢出异常终止整个合并流，工具事件和回答 token 仍保持无损。
         return Flux.merge(toolEvents, heartbeat.onBackpressureDrop(), answerStream);
     }
 
@@ -552,21 +587,47 @@ public class ChatService {
                 });
     }
 
+    /**
+     * 列出用户普通聊天会话，排除工作台来源。
+     *
+     * @param userId 当前用户 ID
+     * @return 按更新时间倒序的会话
+     */
     public List<Conversation> listConversations(String userId) {
         return conversationRepository.findByUserIdAndOriginOrderByUpdatedAtDesc(userId, CONVERSATION_ORIGIN_CHAT);
     }
 
+    /**
+     * 校验归属后列出完整消息历史。
+     *
+     * @param userId 当前用户 ID
+     * @param conversationId 会话 ID
+     * @return 按创建时间正序的消息
+     */
     public List<Message> listMessages(String userId, Long conversationId) {
         getConversationForUser(conversationId, userId);
         return messageRepository.findByConversationIdOrderByCreatedAtAsc(conversationId);
     }
 
-    /** 后台研究完成后复用同一条会话消息落库契约。 */
+    /**
+     * 后台研究完成后复用同一条会话消息落库契约，并同步短期记忆。
+     *
+     * @param conversationId 目标会话
+     * @param userId 任务所属用户
+     * @param text 最终报告 Markdown
+     * @param traceId 后台任务 trace ID
+     */
     public void persistAssistantReport(Long conversationId, String userId, String text, String traceId) {
         conversationMessageService.persistAssistantReport(conversationId, userId, text, traceId);
         shortTermMemory.addMessage(conversationId, "assistant", text);
     }
 
+    /**
+     * 删除归属当前用户的会话、全部消息和 Redis 短期记忆。
+     *
+     * @param userId 当前用户 ID
+     * @param conversationId 会话 ID
+     */
     @Transactional
     public void deleteConversation(String userId, Long conversationId) {
         Conversation conversation = getConversationForUser(conversationId, userId);
@@ -840,12 +901,11 @@ public class ChatService {
 
 
     /**
-     * 根据文本长度估算令牌数。
-     * 中文平均约 1.5 个令牌/字符，英文约 0.25 个令牌/词（约 4 字符/令牌）。
-     * 中英混合内容采用折中估算：字符数 / 2。
-     */
-    /**
-     * 粗略估算本轮提示词和回答 token 数。
+     * 以中英混合内容每两个字符约一个 token，粗略估算本轮提示词和回答用量。
+     *
+     * @param promptMessages 发送给模型的消息列表
+     * @param response 模型回答，可为空
+     * @return 仅用于用量记录的近似 token 数
      */
     private int estimateTokens(List<org.springframework.ai.chat.messages.Message> promptMessages, String response) {
         int promptChars = promptMessages.stream()
@@ -856,10 +916,9 @@ public class ChatService {
     }
 
     /**
-     * 将相对日期推理锚定到服务器日期，避免“最新”类问题继承旧示例或模型先验中的过期年份。
-     */
-    /**
-     * 构造带当前日期的时效性系统提示。
+     * 构造带服务器当前日期的系统提示，避免“最新”类问题沿用过期年份。
+     *
+     * @return 注入当前日期与来源要求的系统提示词
      */
     private String buildTemporalSystemPrompt() {
         LocalDate today = LocalDate.now();

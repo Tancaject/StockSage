@@ -19,7 +19,12 @@ import java.util.Locale;
 @Component
 public class ReportMarkdownRenderer {
 
-    /** Render the immediate acknowledgement returned after a DEEP task enters the background queue. */
+    /**
+     * 渲染 DEEP 任务进入后台队列后的立即确认消息。
+     *
+     * @param task 已创建或复用的研究任务
+     * @return 包含 ticker、任务号和阶段的 Markdown
+     */
     public String buildTaskAcceptedAnswer(ResearchTask task) {
         String ticker = task == null || task.getTicker() == null || task.getTicker().isBlank()
                 ? "UNKNOWN"
@@ -37,7 +42,13 @@ public class ReportMarkdownRenderer {
                 """.formatted(ticker, taskId, stage).trim();
     }
 
-    /** Render a deterministic response when one user has exhausted the active-task quota. */
+    /**
+     * 渲染用户达到活动研究任务配额时的确定性提示。
+     *
+     * @param activeCount 当前活动任务数
+     * @param maxActive 用户上限
+     * @return 配额说明 Markdown
+     */
     public String buildQuotaExceededAnswer(int activeCount, int maxActive) {
         return """
                 ## 深度研究并发额度已满
@@ -48,6 +59,9 @@ public class ReportMarkdownRenderer {
 
     /**
      * 构造最终回答顶部摘要（含面向用户的输出要求）。
+     *
+     * @param state 已包含结构化投资报告的研究状态
+     * @return 报告草稿和最终模型输出约束；无报告时返回空串
      */
     public String buildFinalAnswerBrief(AnalysisState state) {
         InvestmentReport report = state.getInvestmentReport();
@@ -74,6 +88,12 @@ public class ReportMarkdownRenderer {
     /**
      * 深度研究关键证据缺失时，构造确定性的“数据不足”回答草稿。
      * 避免在没有财务或行情数据的情况下输出 BUY/OVERWEIGHT/HOLD/UNDERWEIGHT/SELL 评级。
+     *
+     * @param ticker 目标 ticker
+     * @param tickerResolved 是否可靠解析了标的
+     * @param fundamentalsOk 财务证据是否可用
+     * @param marketOk 行情证据是否可用
+     * @return 明确 NOT_RATED 的 Markdown 报告
      */
     public String buildInsufficientEvidenceReport(String ticker, boolean tickerResolved,
                                                   boolean fundamentalsOk, boolean marketOk) {
@@ -107,6 +127,9 @@ public class ReportMarkdownRenderer {
 
     /**
      * 构造“同一深度研究任务已在运行”的确定性回答。
+     *
+     * @param task 已在运行的任务
+     * @return 避免重复执行的状态说明
      */
     public String buildResearchTaskAlreadyRunningAnswer(ResearchTask task) {
         String stage = task == null || task.getStage() == null ? "unknown" : task.getStage().name();
@@ -125,6 +148,9 @@ public class ReportMarkdownRenderer {
 
     /**
      * 构造证据优先的投资研究报告正文。
+     *
+     * @param state 已完成综合裁决的研究状态
+     * @return 用户可读 Markdown；报告未通过验收时返回 NOT_RATED 模板
      */
     public String buildEvidenceFirstInvestmentReport(AnalysisState state) {
         InvestmentReport report = state == null ? null : state.getInvestmentReport();
@@ -225,6 +251,9 @@ public class ReportMarkdownRenderer {
 
     /**
      * 清理面向用户的最终文本，去掉内部类名、工具名等实现细节。
+     *
+     * @param text 内部报告文本
+     * @return 替换实现术语后的用户文本
      */
     public String sanitizeUserFacingText(String text) {
         if (text == null) {
@@ -253,6 +282,11 @@ public class ReportMarkdownRenderer {
 
     /**
      * 追加报告章节列表，列表为空时使用 fallback。
+     *
+     * @param builder 输出缓冲区
+     * @param title Markdown 二级标题
+     * @param items 业务条目
+     * @param fallback 空列表兜底条目
      */
     private void appendReportSectionList(StringBuilder builder, String title, List<String> items, List<String> fallback) {
         builder.append("## ").append(title).append("\n");
@@ -267,6 +301,10 @@ public class ReportMarkdownRenderer {
 
     /**
      * 追加报告子列表。
+     *
+     * @param builder 输出缓冲区
+     * @param title 加粗子标题
+     * @param items 条目
      */
     private void appendReportSubList(StringBuilder builder, String title, List<String> items) {
         builder.append("**").append(title).append("**\n");
@@ -280,6 +318,9 @@ public class ReportMarkdownRenderer {
 
     /**
      * 追加证据表格。
+     *
+     * @param builder 输出缓冲区
+     * @param report 结构化报告
      */
     private void appendEvidenceTable(StringBuilder builder, InvestmentReport report) {
         builder.append("## 证据表\n");
@@ -299,6 +340,7 @@ public class ReportMarkdownRenderer {
         builder.append("\n");
     }
 
+    /** 返回报告证据项；未生成证据时返回空列表，不伪造占位证据。 */
     private List<InvestmentReport.EvidenceItem> evidenceItemsOrFallback(InvestmentReport report) {
         if (report.getEvidenceItems() != null && !report.getEvidenceItems().isEmpty()) {
             return report.getEvidenceItems();
@@ -308,6 +350,10 @@ public class ReportMarkdownRenderer {
 
     /**
      * 返回非空列表或兜底列表。
+     *
+     * @param items 首选列表
+     * @param fallback 首选列表没有有效文本时的兜底
+     * @return 可供渲染的列表
      */
     private List<String> listOrFallback(List<String> items, List<String> fallback) {
         if (items == null || items.stream().noneMatch(item -> item != null && !item.isBlank())) {
@@ -318,6 +364,10 @@ public class ReportMarkdownRenderer {
 
     /**
      * 清理 Markdown 表格单元格文本。
+     *
+     * @param value 原始文本
+     * @param fallback 空值兜底
+     * @return 转义换行和竖线后的单行文本
      */
     String markdownCell(String value, String fallback) {
         return sanitizeUserFacingText(blankToDefault(value, fallback))
@@ -344,6 +394,9 @@ public class ReportMarkdownRenderer {
 
     /**
      * 将五档推荐标签转换成中文动作说明。
+     *
+     * @param recommendation 五档评级
+     * @return 对仓位动作的用户说明
      */
     String recommendationAction(String recommendation) {
         return switch (blankToDefault(recommendation, "HOLD").toUpperCase(Locale.ROOT)) {
@@ -357,6 +410,8 @@ public class ReportMarkdownRenderer {
 
     /**
      * 返回默认证据来源说明。
+     *
+     * @return 数据类别说明列表
      */
     private List<String> evidenceBasis() {
         return List.of(
@@ -369,6 +424,10 @@ public class ReportMarkdownRenderer {
 
     /**
      * 提取首段并限制长度。
+     *
+     * @param text 多段论点
+     * @param maxLength 最大字符数
+     * @return 单行首段摘要
      */
     private String firstParagraph(String text, int maxLength) {
         if (text == null || text.isBlank()) {
@@ -389,6 +448,7 @@ public class ReportMarkdownRenderer {
         return value == null || value.isBlank() ? defaultValue : value.trim();
     }
 
+    /** 只展示哈希前缀，避免报告元信息过长。 */
     private String shortHash(String value) {
         if (value == null || value.isBlank()) {
             return "unknown";

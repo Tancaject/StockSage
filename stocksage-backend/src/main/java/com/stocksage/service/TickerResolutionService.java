@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class TickerResolutionService {
 
+    /** 匹配用户显式输入的 1～5 位大写美股代码。 */
     private static final Pattern US_TICKER_PATTERN = Pattern.compile("\\b[A-Z]{1,5}\\b");
 
     /**
@@ -39,12 +40,30 @@ public class TickerResolutionService {
             "ETF", "USD", "EPS", "EV", "FCF", "GDP", "CPI", "CEO", "CFO", "US", "QOQ", "YOY"
     );
 
+    /** 搜索兜底前应从问题中剔除的泛化投资措辞。 */
     private static final List<String> GENERIC_STOCK_QUERY_TERMS = List.of(
             "是否", "值得", "长期", "投资", "分析", "一下", "为什么", "为何", "原因",
             "股价", "暴涨", "大涨", "下跌", "今天", "这两天", "最近", "近期", "最新",
             "公司", "股票", "港股", "美股", "A股", "财报", "年报", "季报"
     );
 
+    /**
+     * 常见公司名按既有优先级排列；一句话出现多个公司时，第一个匹配项仍是主标的。
+     */
+    private static final List<CompanyAlias> COMPANY_ALIASES = List.of(
+            new CompanyAlias("MU", List.of("美光", "MICRON")),
+            new CompanyAlias("NVDA", List.of("英伟达", "英偉達", "NVIDIA")),
+            new CompanyAlias("MSFT", List.of("微软", "微軟", "MICROSOFT")),
+            new CompanyAlias("AAPL", List.of("苹果", "蘋果", "APPLE")),
+            new CompanyAlias("AMZN", List.of("亚马逊", "亞馬遜", "AMAZON")),
+            new CompanyAlias("GOOGL", List.of("谷歌", "GOOGLE", "ALPHABET")),
+            new CompanyAlias("TSLA", List.of("特斯拉", "TESLA")),
+            new CompanyAlias("JNJ", List.of("强生", "強生", "JOHNSON")),
+            new CompanyAlias("XOM", List.of("埃克森", "EXXON")),
+            new CompanyAlias("JPM", List.of("摩根", "JPMORGAN"))
+    );
+
+    /** 常见 ticker 的轻量行业映射，未知标的返回空字符串。 */
     private static final Map<String, String> TICKER_SECTOR_MAP = Map.ofEntries(
             Map.entry("AAPL", "消费电子与服务"),
             Map.entry("MSFT", "软件与云服务"),
@@ -71,12 +90,18 @@ public class TickerResolutionService {
             Map.entry("1211.HK", "新能源汽车")
     );
 
+    /** 读取最近用户消息，用于省略主语的追问解析。 */
     private final MessageRepository messageRepository;
+    /** 本地启发式失败后调用股票搜索工具兜底。 */
     private final MarketTools marketTools;
+    /** 解析股票搜索工具返回的候选 JSON。 */
     private final ObjectMapper objectMapper;
 
     /**
      * 从用户问题中解析主 ticker。
+     *
+     * @param query 当前用户问题
+     * @return 解析出的 ticker；无法判断时为空字符串
      */
     public String resolvePrimaryTicker(String query) {
         return resolvePrimaryTicker(query, null);
@@ -84,6 +109,10 @@ public class TickerResolutionService {
 
     /**
      * 结合会话短期记忆解析主 ticker。
+     *
+     * @param query 当前用户问题
+     * @param conversationId 会话 ID；为空时不回看历史
+     * @return 当前问题或最近六条用户消息中的主 ticker；无法判断时为空字符串
      */
     public String resolvePrimaryTicker(String query, Long conversationId) {
         String direct = resolvePrimaryTickerFromText(query);
@@ -122,6 +151,9 @@ public class TickerResolutionService {
     /**
      * 判断文本中是否包含疑似美股 ticker 的大写词（过滤 PE、ROE 等指标缩写）。
      * 供 Coordinator 的确定性路由规则复用。
+     *
+     * @param query 待检查文本
+     * @return 存在至少一个非保留大写候选时为 true
      */
     public boolean containsLikelyTicker(String query) {
         Matcher matcher = US_TICKER_PATTERN.matcher(query == null ? "" : query);
@@ -136,6 +168,9 @@ public class TickerResolutionService {
 
     /**
      * 判断 ticker 是否更像美股 SEC 标的。
+     *
+     * @param ticker 待分类的股票代码
+     * @return 美股式代码为 true，A/H 股格式或空值为 false
      */
     public boolean isLikelySecTicker(String ticker) {
         if (ticker == null) {
@@ -155,6 +190,9 @@ public class TickerResolutionService {
 
     /**
      * 根据 ticker 推断行业名称。
+     *
+     * @param ticker 股票代码
+     * @return 已知行业名称；映射中不存在时为空字符串
      */
     public String resolveSectorForTicker(String ticker) {
         if (ticker == null || ticker.isBlank()) {
@@ -172,16 +210,11 @@ public class TickerResolutionService {
             return "";
         }
         String upper = query.toUpperCase(Locale.ROOT);
-        if (query.contains("美光") || upper.contains("MICRON")) return "MU";
-        if (query.contains("英伟达") || query.contains("英偉達") || upper.contains("NVIDIA")) return "NVDA";
-        if (query.contains("微软") || query.contains("微軟") || upper.contains("MICROSOFT")) return "MSFT";
-        if (query.contains("苹果") || query.contains("蘋果") || upper.contains("APPLE")) return "AAPL";
-        if (query.contains("亚马逊") || query.contains("亞馬遜") || upper.contains("AMAZON")) return "AMZN";
-        if (query.contains("谷歌") || upper.contains("GOOGLE") || upper.contains("ALPHABET")) return "GOOGL";
-        if (query.contains("特斯拉") || upper.contains("TESLA")) return "TSLA";
-        if (query.contains("强生") || query.contains("強生") || upper.contains("JOHNSON")) return "JNJ";
-        if (query.contains("埃克森") || upper.contains("EXXON")) return "XOM";
-        if (query.contains("摩根") || upper.contains("JPMORGAN")) return "JPM";
+        for (CompanyAlias company : COMPANY_ALIASES) {
+            if (company.matches(upper)) {
+                return company.ticker();
+            }
+        }
 
         // 在原始大小写文本上匹配：用户写 ticker 时本就是大写（NVDA），写普通词时是小写（Run）。
         // 大小写本身就是区分 ticker 和普通词的信号，不能先把整句转大写后再匹配。
@@ -196,6 +229,7 @@ public class TickerResolutionService {
         if (searchQuery.isBlank()) {
             return "";
         }
+        // 调用 MarketTools.searchStocks 获取规范代码，网络或数据异常统一降级为空结果。
         return resolvePrimaryTickerWithSearch(searchQuery);
     }
 
@@ -254,5 +288,18 @@ public class TickerResolutionService {
             }
         }
         return "";
+    }
+
+    /**
+     * 一组按顺序匹配的公司别名；列表顺序决定多标的问题中谁是主标的。
+     *
+     * @param ticker 规范美股代码
+     * @param aliases 可识别的中英文公司名
+     */
+    private record CompanyAlias(String ticker, List<String> aliases) {
+
+        private boolean matches(String normalizedQuery) {
+            return aliases.stream().anyMatch(normalizedQuery::contains);
+        }
     }
 }

@@ -31,14 +31,18 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class TraceService {
 
+    /** AgentTrace.steps JSON 的反序列化类型，避免每次构造泛型信息。 */
     private static final TypeReference<List<AgentStep>> STEP_LIST_TYPE = new TypeReference<>() {
     };
 
     /** 按链路维度加锁，避免并发追加步骤时丢失数据。 */
     private final ConcurrentHashMap<String, Object> traceLocks = new ConcurrentHashMap<>();
 
+    /** MySQL 链路实体仓库，是追踪详情和最终状态的持久化真相。 */
     private final AgentTraceRepository agentTraceRepository;
+    /** 在 AgentStep 列表与 JSON 字段之间转换。 */
     private final ObjectMapper objectMapper;
+    /** 可选地把同一生命周期镜像到 Phoenix/OpenTelemetry。 */
     private final PhoenixTraceService phoenixTraceService;
 
     /**
@@ -62,6 +66,7 @@ public class TraceService {
         trace.setSteps("[]");
         trace.setCreatedAt(LocalDateTime.now());
 
+        // 数据库先落 running 记录，再启动可选 Phoenix span；外部观测不是持久化真相。
         agentTraceRepository.save(trace);
         phoenixTraceService.startTrace(traceId, userId, conversationId, userQuery);
         log.debug("Trace started, traceId={}, userId={}, conversationId={}", traceId, userId, conversationId);
@@ -84,6 +89,7 @@ public class TraceService {
 
             trace.setSteps(writeSteps(traceId, steps));
             trace.setTotalSteps(steps.size());
+            // 在同一 traceId 锁内完成读-改-写，避免并行工具/辩论步骤相互覆盖。
             agentTraceRepository.save(trace);
             phoenixTraceService.addStep(traceId, step);
         }
@@ -113,6 +119,14 @@ public class TraceService {
         return findTrace(traceId);
     }
 
+    /**
+     * 读取链路并校验租户归属。
+     *
+     * @param traceId 链路 ID
+     * @param userId 当前登录用户 ID
+     * @return 属于当前用户的链路
+     * @throws ResponseStatusException 链路属于其他用户时返回 403
+     */
     @Transactional(readOnly = true)
     public AgentTrace getTraceForUser(String traceId, String userId) {
         AgentTrace trace = findTrace(traceId);
@@ -124,6 +138,10 @@ public class TraceService {
 
     /**
      * 读取用户最近的追踪记录列表。
+     *
+     * @param userId 当前租户用户 ID
+     * @param limit 请求条数，最小收敛为 1
+     * @return 按创建时间倒序的链路列表
      */
     @Transactional(readOnly = true)
     public List<AgentTrace> listTraces(String userId, int limit) {

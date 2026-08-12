@@ -50,14 +50,20 @@ import java.util.concurrent.TimeoutException;
 /**
  * 收集 DEEP 深度研究所需的确定性证据快照。
  *
- * <p>单独成类是因为请求内联降级与后台 worker 都需要复用同一套证据收集行为。</p>
+ * <p>请求内联降级与后台 worker 复用同一套行为：按基本面、市场、新闻维度调用工具，
+ * 把原始结果转换为带 capability、payloadHash、asOf、sourceRef 的 {@link EvidenceEnvelope}，
+ * 再交给 {@link ResearchHarness} 和 {@link DeepResearchCompletionPolicy} 判断是否可继续辩论/评级。</p>
+ *
+ * <p>边界：工具失败会形成明确状态而非伪造证据；恢复只重试策略白名单维度，且保留 durable attempts。</p>
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeepEvidenceCollector {
 
+    /** 仅用于容错解析工具响应来源信息的轻量 JSON 解析器。 */
     private static final ObjectMapper PROVENANCE_MAPPER = new ObjectMapper();
+    /** 递归扫描工具 JSON 时视为业务数据时间的字段名白名单。 */
     private static final Set<String> BUSINESS_TIME_FIELDS = Set.of(
             "asof",
             "date",
@@ -73,6 +79,7 @@ public class DeepEvidenceCollector {
             "t"
     );
 
+    /** DEEP 计划中预期的 Agent 动作清单，主要用于日志和可观测性。 */
     private static final List<PlanAction> DEEP_ACTIONS = List.of(
             PlanAction.FUNDAMENTALS_AGENT,
             PlanAction.MARKET_AGENT,
@@ -82,26 +89,43 @@ public class DeepEvidenceCollector {
             PlanAction.RESEARCH_MANAGER
     );
 
+    /** 获取 K 线、财务指标、技术指标和板块上下文。 */
     private final MarketTools marketTools;
+    /** 获取股票新闻与网页/新闻搜索结果。 */
     private final NewsTools newsTools;
+    /** 获取结构化财报与 SEC 公司事实。 */
     private final FundamentalsTools fundamentalsTools;
+    /** 判断 ticker 市场路径与 SEC 适用性。 */
     private final TickerResolutionService tickerResolutionService;
+    /** 向 SSE/后台 trace 发出证据收集进度。 */
     private final ChatStreamEmitter chatStreamEmitter;
+    /** 为可并行工具调用提供受控执行线程。 */
     private final AsyncTaskExecutor agentTaskExecutor;
+    /** 记录并返回每次证据闸门决定。 */
     private final ResearchHarness researchHarness;
+    /** 定义最低证据、恢复白名单和尝试上限。 */
     private final DeepResearchCompletionPolicy completionPolicy;
 
+    /** 搜索类工具最多返回的结果数。 */
     @Value("${stocksage.chat.tool-prefetch.max-search-results:5}")
     private int toolPrefetchMaxSearchResults;
 
+    /** 单个确定性工具调用的超时秒数。 */
     @Value("${stocksage.chat.tool-prefetch.per-tool-timeout-seconds:8}")
     private long toolPrefetchPerToolTimeoutSeconds;
 
+    /** 是否允许证据路径自动触发 EDGAR 摄取。 */
     @Value("${stocksage.chat.auto-edgar-ingest.enabled:false}")
     private boolean autoEdgarIngestEnabled;
 
     /**
      * 为深度研究流程收集确定性基本面、市场和新闻快照。
+     *
+     * @param primaryTicker 已解析目标 ticker；空值会构造 unresolved ledger
+     * @param userQuery 用户原始问题
+     * @param traceId 研究 trace ID
+     * @param conversationId 会话 ID，用于进度事件
+     * @return 上下文、AnalysisState、EvidenceLedger 和首次 Harness 决定
      */
     public EvidenceCollection collect(
             String primaryTicker,
@@ -135,6 +159,7 @@ public class DeepEvidenceCollector {
         emitProgress(traceId, conversationId, "thought",
                 "DEEP prefetch started: collecting deterministic tool data for ticker=" + ticker + ".");
 
+        // 依次调用三类确定性工具构造证据；每类内部可并行，但维度结果独立验收。
         EvidenceSnapshot fundamentals = buildFundamentalsSnapshot(ticker);
         agentState.setFundamentalsReport(fundamentals.text());
         appendContextSection(context, "Fundamentals Agent", fundamentals.text());
@@ -163,6 +188,7 @@ public class DeepEvidenceCollector {
         EvidenceLedger ledger = new EvidenceLedger(
                 TargetIdentity.resolved(ticker), collectedEvidence);
         agentState.setEvidenceLedger(ledger);
+        // 调用 Harness 记录证据快照并按完成策略决定继续、恢复还是降级。
         HarnessDecision harnessDecision = researchHarness.observeEvidence(
                 traceId,
                 completionPolicy,
@@ -186,7 +212,13 @@ public class DeepEvidenceCollector {
     }
 
     /**
-     * Re-collects only dimensions explicitly allowlisted by the completion policy.
+     * 只重新收集完成策略明确允许恢复的证据维度。
+     *
+     * @param existing 现有证据集合
+     * @param recoveryActions 策略返回的恢复动作
+     * @param traceId 研究 trace ID
+     * @param conversationId 会话 ID
+     * @return 替换目标维度后的证据集合
      */
     public EvidenceCollection recover(
             EvidenceCollection existing,
@@ -198,7 +230,14 @@ public class DeepEvidenceCollector {
     }
 
     /**
-     * Re-collects a recovery effect while preserving attempts from a durable checkpoint.
+     * 在保留 durable checkpoint 尝试次数的前提下执行证据恢复。
+     *
+     * @param existing 现有证据集合
+     * @param recoveryActions 策略返回的恢复动作
+     * @param previousAttempts 已持久化的各动作尝试次数
+     * @param traceId 研究 trace ID
+     * @param conversationId 会话 ID
+     * @return 恢复后重新经过 Harness 判断的证据集合
      */
     public EvidenceCollection recover(
             EvidenceCollection existing,
@@ -275,11 +314,15 @@ public class DeepEvidenceCollector {
     }
 
     /**
-     * Rebuilds a policy input from a durable checkpoint and evaluates it again.
+     * 从 durable checkpoint 重建策略输入并重新评估。
      *
-     * <p>Legacy checkpoints without an evidence ledger intentionally become an unresolved empty
-     * ledger. The production policy therefore fails safe instead of allowing debate to start from
-     * evidence that cannot be verified.</p>
+     * <p>旧检查点若没有 evidence ledger，会被明确转为 unresolved 空账本；生产策略因此安全失败，
+     * 不会基于无法核验的旧文本直接开始辩论。</p>
+     *
+     * @param checkpointState 持久化分析状态
+     * @param recoveryAttempts 已持久化恢复计数
+     * @param traceId 研究 trace ID
+     * @return 重新计算可用维度和 Harness 决定的证据集合
      */
     public EvidenceCollection reevaluateCheckpoint(
             AnalysisState checkpointState,
@@ -958,6 +1001,16 @@ public class DeepEvidenceCollector {
 
     /**
      * 深度研究证据上下文、分析状态和最低证据门槛结果。
+     *
+     * @param contextMarkdown 供 Agent/报告综合使用的确定性上下文
+     * @param state 当前 AnalysisState
+     * @param sufficientForRecommendation 策略是否允许评级
+     * @param tickerResolved 是否解析了目标标的
+     * @param fundamentalsOk 是否有可用基本面证据
+     * @param marketOk 是否有可用市场证据
+     * @param newsOk 是否有可用新闻证据
+     * @param evidenceLedger 结构化证据账本
+     * @param harnessDecision 当前 Harness 决定
      */
     public record EvidenceCollection(
             String contextMarkdown,
@@ -971,7 +1024,7 @@ public class DeepEvidenceCollector {
             HarnessDecision harnessDecision) {
 
         /**
-         * Compatibility constructor for existing tests and callers that do not yet provide a ledger.
+         * 兼容尚未提供 EvidenceLedger 的旧测试和调用方；生产新代码应使用完整构造器。
          */
         public EvidenceCollection(
                 String contextMarkdown,

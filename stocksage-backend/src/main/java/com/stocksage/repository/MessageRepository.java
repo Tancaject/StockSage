@@ -14,10 +14,25 @@ import java.util.List;
  */
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-    /** 按时间正序查询会话的所有消息，用于加载完整对话历史。 */
+    /**
+     * 按创建时间正序查询会话全部消息，用于重建提示词和前端历史。
+     *
+     * @param conversationId 会话主键
+     * @return 从最早到最新排列的消息；没有消息时为空列表
+     */
     List<Message> findByConversationIdOrderByCreatedAtAsc(Long conversationId);
 
-    /** Prevent a resumed background task from inserting the same final report twice. */
+    /**
+     * 检查同一后台任务是否已经写入完全相同的最终消息。
+     *
+     * <p>恢复或接管任务在持久化报告前调用它，避免同一 trace 的最终答复重复插入。</p>
+     *
+     * @param conversationId 目标会话主键
+     * @param role 消息角色，后台最终答复通常为 assistant
+     * @param traceId 后台任务关联链路 ID
+     * @param content 最终消息完整正文
+     * @return 四个条件均命中现有消息时为 true
+     */
     boolean existsByConversationIdAndRoleAndTraceIdAndContent(
             Long conversationId,
             String role,
@@ -25,11 +40,22 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             String content
     );
 
-    /** 删除某个会话下的全部消息，通常在删除会话时一起执行。 */
+    /**
+     * 删除某个会话下的全部消息，通常与会话元数据删除配套调用。
+     *
+     * @param conversationId 要清空的会话主键
+     */
     @Transactional
     void deleteByConversationId(Long conversationId);
 
-    /** 删除某个会话中从指定消息 ID 开始的后续消息，用于重新生成回答前裁剪旧分支。 */
+    /**
+     * 删除会话中消息 ID 大于等于边界的所有记录。
+     *
+     * <p>用于“编辑后发送”或“重新生成”前裁剪旧分支；调用方必须先校验消息属于该会话和当前用户。</p>
+     *
+     * @param conversationId 目标会话主键
+     * @param id 首条要删除的消息主键，边界包含自身
+     */
     @Transactional
     void deleteByConversationIdAndIdGreaterThanEqual(Long conversationId, Long id);
 }

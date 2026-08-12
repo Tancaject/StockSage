@@ -19,16 +19,23 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Persists only bounded harness metadata and low-cardinality metrics.
+ * 持久化有限 Harness 元数据并记录低基数指标。
+ *
+ * <p>{@link ResearchHarness} 在纯策略得出决策后调用本组件。它把 outcome、违规代码、恢复动作和证据计数
+ * 写成 AgentStep，并向 Micrometer 记录次数/耗时；不保存原始证据或 prompt。观测失败由 Harness
+ * 失败开放处理，不能反向改变已经得出的业务决策。</p>
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class HarnessObserver {
 
+    /** 将 Harness 决策追加到同一业务 Trace。 */
     private final TraceService traceService;
+    /** 记录按策略、阶段和结果聚合的指标。 */
     private final MeterRegistry meterRegistry;
 
+    /** 记录证据阶段决策；空策略或空决策时跳过。 */
     public void evidenceDecision(
             String traceId,
             ResearchCompletionPolicy policy,
@@ -43,6 +50,7 @@ public class HarnessObserver {
         recordTrace(traceId, policy, decision, ledger, durationMs, HarnessPhase.EVIDENCE);
     }
 
+    /** 记录报告阶段决策；空策略或空决策时跳过。 */
     public void reportDecision(
             String traceId,
             ResearchCompletionPolicy policy,
@@ -105,6 +113,7 @@ public class HarnessObserver {
             List<String> recoveryActions = decision.recoveryActions().stream()
                     .map(Enum::name)
                     .toList();
+            // 属性只含枚举、版本和计数，前端/Eval 可复用且不会泄露原始证据。
             Map<String, Object> attributes = new LinkedHashMap<>();
             attributes.put("schemaVersion", 1);
             attributes.put("policyId", policy.policyId());

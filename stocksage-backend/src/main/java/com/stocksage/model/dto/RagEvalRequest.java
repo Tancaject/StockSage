@@ -33,6 +33,8 @@ public record RagEvalRequest(
      * 返回 includeIntermediate 的业务默认值。
      *
      * <p>评测脚本通常需要中间阶段来定位问题，因此未传值时默认开启。</p>
+     *
+     * @return 显式请求值；请求未提供时返回 true
      */
     public boolean includeIntermediateOrDefault() {
         return includeIntermediate == null || includeIntermediate;
@@ -42,6 +44,8 @@ public record RagEvalRequest(
      * 返回最大上下文字数的业务默认值。
      *
      * <p>默认 6000 字符在保留足够证据和控制评测耗时之间做了折中。</p>
+     *
+     * @return 正整数上下文上限；请求值为空或非正数时返回 6000
      */
     public int maxContextCharsOrDefault() {
         if (maxContextChars == null || maxContextChars <= 0) {

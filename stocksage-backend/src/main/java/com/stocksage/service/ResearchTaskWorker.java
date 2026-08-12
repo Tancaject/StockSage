@@ -18,26 +18,60 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * 研究任务 Redis Stream 的生命周期托管 worker。
+ *
+ * <p>每条记录先读取数据库任务、获取可续约租约并通过 {@link ResearchTaskService} 建立 owner fence，
+ * 再调用 {@link DeepResearchPipeline}。成功或终态记录才 ACK；ownership 丢失和临时失败保留在 PEL，
+ * 由本地重试或定时 reclaim 接手。停止时等待已进入执行区的任务完成到配置上限。</p>
+ */
 @Slf4j
 @Service
 public class ResearchTaskWorker implements SmartLifecycle {
 
+    /** Redis Stream 队列操作。 */
     private final ResearchTaskQueue queue;
+    /** 按 taskId 读取当前数据库任务。 */
     private final ResearchTaskRepository repository;
+    /** 获取租约、执行 fenced 状态变更和失败重置。 */
     private final ResearchTaskService researchTaskService;
+    /** 执行证据、辩论、报告和原子发布全流程。 */
     private final DeepResearchPipeline deepResearchPipeline;
+    /** 承载多个长期消费循环。 */
     private final ThreadPoolTaskExecutor executor;
+    /** 队列 worker 总开关。 */
     private final boolean enabled;
+    /** 启动的独立 consumer 数。 */
     private final int workerThreads;
+    /** 单任务最大执行尝试数。 */
     private final int maxAttempts;
+    /** 停机等待 in-flight 任务的最长时间。 */
     private final long gracefulShutdownWaitMillis;
+    /** 每个 JVM 实例唯一的 consumer 名称前缀。 */
     private final String consumerPrefix = "worker-" + UUID.randomUUID();
+    /** SmartLifecycle 运行状态和消费循环退出开关。 */
     private final AtomicBoolean running = new AtomicBoolean(false);
+    /** 已进入执行区、尚未退出的任务数。 */
     private final AtomicInteger inFlight = new AtomicInteger(0);
+    /** 协调停机线程等待 inFlight 归零。 */
     private final Object executionMonitor = new Object();
+    /** reclaim 线程转交给消费循环处理的 stale 记录。 */
     private final ConcurrentLinkedQueue<MapRecord<String, String, String>> reclaimed =
             new ConcurrentLinkedQueue<>();
 
+    /**
+     * 创建 worker 并收敛线程数、尝试数和停机等待配置。
+     *
+     * @param queue Redis Stream 队列
+     * @param repository 任务仓储
+     * @param researchTaskService 任务状态与租约服务
+     * @param deepResearchPipeline 深度研究管线
+     * @param executor worker 执行器
+     * @param enabled 是否启用
+     * @param workerThreads consumer 数
+     * @param maxAttempts 最大尝试数
+     * @param gracefulShutdownWaitSeconds 停机等待秒数
+     */
     public ResearchTaskWorker(
             ResearchTaskQueue queue,
             ResearchTaskRepository repository,
@@ -60,6 +94,7 @@ public class ResearchTaskWorker implements SmartLifecycle {
         this.gracefulShutdownWaitMillis = Math.max(0, gracefulShutdownWaitSeconds) * 1000;
     }
 
+    /** 创建 consumer group，并为每个配置线程启动一个长轮询循环。 */
     @Override
     public void start() {
         if (!enabled || !running.compareAndSet(false, true)) {
@@ -72,6 +107,7 @@ public class ResearchTaskWorker implements SmartLifecycle {
         }
     }
 
+    /** 停止接收新记录，并等待已开始执行的任务退出到配置期限。 */
     @Override
     public void stop() {
         running.set(false);
@@ -93,6 +129,11 @@ public class ResearchTaskWorker implements SmartLifecycle {
         }
     }
 
+    /**
+     * 停止完成后调用 Spring 生命周期回调。
+     *
+     * @param callback Spring 提供的停止完成回调
+     */
     @Override
     public void stop(Runnable callback) {
         try {
@@ -102,27 +143,32 @@ public class ResearchTaskWorker implements SmartLifecycle {
         }
     }
 
+    /** @return worker 是否仍接受和处理队列记录。 */
     @Override
     public boolean isRunning() {
         return running.get();
     }
 
+    /** @return 是否随 Spring 上下文自动启动。 */
     @Override
     public boolean isAutoStartup() {
         return enabled;
     }
 
+    /** @return 最大阶段值，使 worker 尽量最后停止。 */
     @Override
     public int getPhase() {
         return Integer.MAX_VALUE;
     }
 
+    /** 定时把长时间 pending 的记录 claim 到当前进程的待处理队列。 */
     @Scheduled(fixedDelayString = "${stocksage.research-task.queue.reclaim-interval-ms:60000}")
     public void reclaimStalePending() {
         if (!running.get()) {
             return;
         }
         try {
+            // 调用 XCLAIM 接手可能由崩溃 worker 留下的 PEL 记录，不先 ACK。
             List<MapRecord<String, String, String>> records =
                     queue.claimStale(consumerPrefix + "-reclaimer", Math.max(16, workerThreads * 8));
             reclaimed.addAll(records);
@@ -131,6 +177,7 @@ public class ResearchTaskWorker implements SmartLifecycle {
         }
     }
 
+    /** 持续优先处理已 reclaim 记录，再阻塞读取新记录。 */
     private void consumeLoop(String consumerName) {
         while (running.get()) {
             try {
@@ -153,6 +200,9 @@ public class ResearchTaskWorker implements SmartLifecycle {
         }
     }
 
+    /**
+     * 处理单条记录：终态去重、租约获取、尝试 fencing、管线执行及 ACK/重试。
+     */
     private void processRecord(MapRecord<String, String, String> record) {
         if (!running.get()) {
             return;
@@ -164,6 +214,7 @@ public class ResearchTaskWorker implements SmartLifecycle {
             return;
         }
 
+        // 调用租约服务竞争同一幂等任务的执行权；失败时保留记录给现 owner。
         Optional<ResearchTaskLeaseService.Lease> lease = researchTaskService.tryAcquire(task);
         if (lease.isEmpty()) {
             log.debug("Research task lease is owned elsewhere; leaving queue record pending, taskId={}", task.getId());
@@ -203,6 +254,7 @@ public class ResearchTaskWorker implements SmartLifecycle {
                 log.info("Research task stale attempt taken over, taskId={}, attempts={}",
                         task.getId(), task.getAttempts());
             }
+            // 只有建立 owner fence 后才调用完整研究管线，管线内部还会持续心跳校验。
             deepResearchPipeline.runFullPipeline(task, acquired);
             ackIfRunning(record);
         } catch (DeepResearchPipeline.OwnershipLostException error) {
@@ -238,6 +290,7 @@ public class ResearchTaskWorker implements SmartLifecycle {
         }
     }
 
+    /** 在停机锁下登记一个 in-flight 执行；停止后拒绝新执行。 */
     private boolean beginExecution() {
         synchronized (executionMonitor) {
             if (!running.get()) {
@@ -248,6 +301,7 @@ public class ResearchTaskWorker implements SmartLifecycle {
         }
     }
 
+    /** 注销 in-flight 执行，并在归零时唤醒停机等待线程。 */
     private void endExecution() {
         synchronized (executionMonitor) {
             if (inFlight.decrementAndGet() == 0) {
@@ -256,21 +310,25 @@ public class ResearchTaskWorker implements SmartLifecycle {
         }
     }
 
+    /** 仅在正常运行期间 ACK，停机时把记录留给后续 reclaim。 */
     private void ackIfRunning(MapRecord<String, String, String> record) {
         if (running.get()) {
             queue.ack(record);
         }
     }
 
+    /** 判断数据库任务是否已经成功或失败终结。 */
     private boolean isTerminal(ResearchTask task) {
         return task.getStatus() == ResearchTask.Status.SUCCEEDED
                 || task.getStatus() == ResearchTask.Status.FAILED;
     }
 
+    /** 将可空尝试次数视为零。 */
     private int safeAttempts(ResearchTask task) {
         return task.getAttempts() == null ? 0 : task.getAttempts();
     }
 
+    /** 从 Stream 记录读取 taskId；损坏记录返回 null 并按无任务 ACK。 */
     private Long parseTaskId(MapRecord<String, String, String> record) {
         try {
             String value = record == null ? null : record.getValue().get("taskId");
@@ -280,6 +338,7 @@ public class ResearchTaskWorker implements SmartLifecycle {
         }
     }
 
+    /** 尽力创建 consumer group；Redis 暂时不可用时留给循环重试。 */
     private void ensureGroupBestEffort() {
         try {
             queue.ensureConsumerGroup();
@@ -288,6 +347,7 @@ public class ResearchTaskWorker implements SmartLifecycle {
         }
     }
 
+    /** 队列或任务失败后短暂退避；中断时恢复线程标记。 */
     private void backoff() {
         try {
             Thread.sleep(2_000);

@@ -31,6 +31,6 @@ public class MemoryContextDTO {
     /** 配置允许注入模型上下文的最大消息数量。 */
     private int maxContextMessages;
 
-    /** Redis 短期记忆的剩余或配置 TTL，单位小时。 */
+    /** 每次写入后设置的 Redis 过期时长配置，单位小时；不是当前 key 的实时剩余时间。 */
     private int ttlHours;
 }

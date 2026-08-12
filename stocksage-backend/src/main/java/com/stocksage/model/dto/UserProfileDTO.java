@@ -6,8 +6,8 @@ import java.util.List;
 /**
  * 注入提示词的长期用户画像。
  *
- * <p>持仓、关注列表和风险偏好会被合并而不是替换，
- * 这样无需登录也能在后续对话中个性化分析。</p>
+ * <p>持仓和关注列表由 {@code UserService} 增量合并而不是直接替换，
+ * 后续对话可据此生成当前用户专属的个性化提示词。</p>
  */
 @Data
 public class UserProfileDTO {

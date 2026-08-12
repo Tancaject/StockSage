@@ -27,8 +27,10 @@ import java.util.regex.Pattern;
 @Component
 public class LongTermMemory {
 
+    /** 识别消息中 1 至 5 位大写美股代码的保守模式。 */
     private static final Pattern TICKER_PATTERN = Pattern.compile("\\b([A-Z]{1,5})\\b");
 
+    /** 看似 ticker、实际是常见词或技术缩写的过滤表。 */
     private static final Set<String> NOISE_WORDS = Set.of(
             "I", "A", "THE", "AND", "OR", "NOT", "MY", "FOR", "IS", "IT", "AT", "TO",
             "IN", "ON", "OF", "DO", "IF", "SO", "UP", "BY", "AN", "AM", "US", "OK",
@@ -47,15 +49,23 @@ public class LongTermMemory {
             "SSE", "RAG", "LLM", "JSON", "HTML", "HTTP", "URL"
     );
 
+    /** 负责从数据库读取并合并持久化用户画像。 */
     private final UserService userService;
+    /** 专用于画像抽取的低成本模型客户端。 */
     private final ChatClient memoryChatClient;
+    /** 解析记忆模型返回的严格 JSON。 */
     private final ObjectMapper objectMapper;
 
+    /** 控制是否在确定性规则之后再调用模型补充画像。 */
     @Value("${stocksage.memory.llm-profile.enabled:true}")
     private boolean llmProfileEnabled;
 
     /**
      * 注入画像持久化服务、记忆模型客户端和 JSON 解析器。
+     *
+     * @param userService 用户画像持久化服务
+     * @param memoryChatClient 画像抽取专用 ChatClient
+     * @param objectMapper JSON 解析器
      */
     public LongTermMemory(UserService userService,
                           @Qualifier("memoryChatClient") ChatClient memoryChatClient,
@@ -67,13 +77,20 @@ public class LongTermMemory {
 
     /**
      * 读取用户长期画像。
+     *
+     * @param userId 当前用户 ID
+     * @return 数据库中的画像；不存在时由 UserService 返回默认画像
      */
     public UserProfileDTO loadUserProfile(String userId) {
         return userService.getUserProfile(userId);
     }
 
     /**
-     * 合并更新用户长期画像。
+     * 合并更新用户长期画像，未提供的字段保持原值。
+     *
+     * @param userId 当前用户 ID
+     * @param update 本轮提取出的增量画像
+     * @return 持久化后的完整画像
      */
     public UserProfileDTO mergeUserProfile(String userId, UserProfileDTO update) {
         return userService.updateUserProfile(userId, update);
@@ -83,6 +100,9 @@ public class LongTermMemory {
      * 构造可注入聊天提示词的长期画像上下文。
      *
      * <p>画像为空时返回空字符串，避免无意义的默认信息干扰模型回答。</p>
+     *
+     * @param userId 当前用户 ID
+     * @return 可直接注入 SystemMessage 的画像文本；空画像返回空串
      */
     public String buildPromptContext(String userId) {
         UserProfileDTO profile = loadUserProfile(userId);
@@ -106,6 +126,10 @@ public class LongTermMemory {
     /**
      * 从用户消息中提取持仓、关注列表、风险偏好等信息并更新长期画像。
      * 使用关键词触发 + 正则提取美股代码的确定性方案，零 LLM 调用开销。
+     *
+     * @param userId 当前用户 ID
+     * @param assistantResponse 本轮助手回答，供可选 LLM 抽取补充上下文
+     * @param userMessage 本轮用户消息
      */
     public void extractAndUpdate(String userId, String assistantResponse, String userMessage) {
         if (userMessage == null || userMessage.isBlank()) {
@@ -140,6 +164,7 @@ public class LongTermMemory {
         }
 
         if (llmProfileEnabled) {
+            // 调用 memoryChatClient 补充规则难以识别的摘要，同时保留前面的确定性结果。
             hasUpdate = mergeLlmProfile(update, userMessage, assistantResponse) || hasUpdate;
         }
 
@@ -154,9 +179,15 @@ public class LongTermMemory {
      * 使用记忆模型从对话中抽取画像字段。
      *
      * <p>抽取失败时返回 false，调用方保留正则/关键词规则已经得到的更新结果。</p>
+     *
+     * @param update 待合并的本轮画像增量
+     * @param userMessage 用户原话
+     * @param assistantResponse 助手回答
+     * @return 是否抽取到了至少一个可持久化字段
      */
     private boolean mergeLlmProfile(UserProfileDTO update, String userMessage, String assistantResponse) {
         try {
+            // 调用独立记忆模型，避免主聊天模型承担后台画像抽取工作。
             String content = memoryChatClient.prompt()
                     .user("""
                             请从本轮对话中提取用户长期投资画像，输出严格 JSON：
@@ -205,6 +236,9 @@ public class LongTermMemory {
 
     /**
      * 从模型输出中提取 JSON 对象正文。
+     *
+     * @param content 可能带 Markdown 代码围栏的模型输出
+     * @return 可交给 ObjectMapper 解析的 JSON 文本
      */
     private String extractJson(String content) {
         if (content == null) {
@@ -227,6 +261,9 @@ public class LongTermMemory {
      * 读取并归一化 JSON 字符串数组。
      *
      * <p>ticker 会转为大写，便于长期画像中去重和展示。</p>
+     *
+     * @param node 模型 JSON 中的数组节点
+     * @return 去除空值并转为大写的字符串列表
      */
     private List<String> readStringArray(JsonNode node) {
         if (node == null || !node.isArray()) {
@@ -244,6 +281,10 @@ public class LongTermMemory {
 
     /**
      * 合并已有列表和新增列表，并保持插入顺序去重。
+     *
+     * @param current 已有值
+     * @param incoming 本轮新增值
+     * @return 保持原顺序的去重列表
      */
     private List<String> mergeLists(List<String> current, List<String> incoming) {
         LinkedHashSet<String> merged = new LinkedHashSet<>();
@@ -260,6 +301,9 @@ public class LongTermMemory {
      * 从文本中提取看起来像美股 ticker 的大写词。
      *
      * <p>会过滤常见英文噪声词和技术缩写，减少把普通单词写入持仓或关注列表的概率。</p>
+     *
+     * @param text 用户消息
+     * @return 候选 ticker 列表
      */
     private List<String> extractTickers(String text) {
         Matcher matcher = TICKER_PATTERN.matcher(text);
@@ -273,9 +317,7 @@ public class LongTermMemory {
         return tickers;
     }
 
-    /**
-     * 判断文本中是否包含任意关键词。
-     */
+    /** 判断文本中是否包含任意关键词。 */
     private boolean containsAny(String text, String... keywords) {
         for (String keyword : keywords) {
             if (text.contains(keyword)) {
@@ -285,9 +327,7 @@ public class LongTermMemory {
         return false;
     }
 
-    /**
-     * 判断用户画像是否仍处于默认空状态。
-     */
+    /** 判断用户画像是否仍处于默认空状态。 */
     private boolean isProfileEmpty(UserProfileDTO profile) {
         boolean noHoldings = profile.getHoldings() == null || profile.getHoldings().isEmpty();
         boolean noWatchList = profile.getWatchList() == null || profile.getWatchList().isEmpty();
@@ -296,16 +336,12 @@ public class LongTermMemory {
         return noHoldings && noWatchList && defaultRisk && noSummary;
     }
 
-    /**
-     * 将列表格式化为提示词可读文本。
-     */
+    /** 将列表格式化为提示词可读文本。 */
     private String formatList(List<String> values) {
         return values == null || values.isEmpty() ? "none" : String.join(", ", values);
     }
 
-    /**
-     * 空字符串兜底。
-     */
+    /** 空字符串兜底。 */
     private String emptyToDefault(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value;
     }

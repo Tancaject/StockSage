@@ -29,6 +29,9 @@ public class GlobalExceptionHandler {
      * 处理 Bean Validation 参数校验失败。
      *
      * <p>多个字段错误会拼接成一条消息返回，方便前端直接展示。</p>
+     *
+     * @param ex Spring MVC 收集的字段校验异常
+     * @return HTTP 400 及合并后的字段错误
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
@@ -41,12 +44,21 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理业务层主动抛出的非法参数错误。
+     *
+     * @param ex 参数或业务前置条件异常
+     * @return HTTP 400 错误响应
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(IllegalArgumentException ex) {
         return respond(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    /**
+     * 将重复邮箱注册映射为资源冲突。
+     *
+     * @param ex 重复邮箱异常
+     * @return HTTP 409 错误响应
+     */
     @ExceptionHandler(DuplicateEmailException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateEmail(DuplicateEmailException ex) {
         return respond(HttpStatus.CONFLICT, ex.getMessage());
@@ -54,12 +66,21 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理资源不存在 / 不属于当前用户（多租户下统一为 404，不区分两者、不回显资源 ID）。
+     *
+     * @param ex 资源缺失或归属不匹配异常
+     * @return HTTP 404 错误响应
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex) {
         return respond(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    /**
+     * 将认证阶段异常统一为不泄露原因的 401。
+     *
+     * @param ex Spring Security 认证异常
+     * @return HTTP 401 错误响应
+     */
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex) {
         return respond(HttpStatus.UNAUTHORIZED, "Authentication required");
@@ -67,6 +88,9 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理尚未实现的功能分支。
+     *
+     * @param ex 未支持操作异常
+     * @return HTTP 501 错误响应
      */
     @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<ErrorResponse> handleNotImplemented(UnsupportedOperationException ex) {
@@ -75,6 +99,9 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理带明确 HTTP 状态码的异常。
+     *
+     * @param ex 携带状态码和可选原因的异常
+     * @return 保留原状态码的错误响应
      */
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorResponse> handleResponseStatus(ResponseStatusException ex) {
@@ -82,6 +109,12 @@ public class GlobalExceptionHandler {
         return respond(HttpStatus.valueOf(ex.getStatusCode().value()), message);
     }
 
+    /**
+     * 将未匹配到静态资源或路由的请求转为统一 404 JSON。
+     *
+     * @param ex Spring MVC 资源缺失异常
+     * @return HTTP 404 错误响应
+     */
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResource(NoResourceFoundException ex) {
         return respond(HttpStatus.NOT_FOUND, "Resource not found");
@@ -98,6 +131,8 @@ public class GlobalExceptionHandler {
      *
      * <p>该处理器比 {@link #handleGeneral} 更具体，{@link IOException}（含 Spring 的
      * {@code AsyncRequestNotUsableException}、Tomcat 的 {@code ClientAbortException}）会优先命中这里。</p>
+     *
+     * @param ex SSE 写出或普通响应写出期间的 I/O 异常
      */
     @ExceptionHandler(IOException.class)
     public void handleStreamingIoError(IOException ex) {
@@ -112,6 +147,9 @@ public class GlobalExceptionHandler {
      * 兜底处理未预期异常。
      *
      * <p>详细堆栈只写入服务端日志，响应体避免把内部实现细节泄露给前端。</p>
+     *
+     * @param ex 未被更具体处理器捕获的异常
+     * @return HTTP 500 通用错误响应
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneral(Exception ex) {
@@ -121,6 +159,10 @@ public class GlobalExceptionHandler {
 
     /**
      * 构造统一错误响应实体。
+     *
+     * @param status HTTP 状态
+     * @param message 可安全展示给客户端的错误说明
+     * @return 带 {@link ErrorResponse} 主体的响应实体
      */
     private ResponseEntity<ErrorResponse> respond(HttpStatus status, String message) {
         return ResponseEntity.status(status).body(
@@ -134,6 +176,9 @@ public class GlobalExceptionHandler {
      * 判断异常链是否属于客户端断开（broken pipe / connection reset / 连接被中止）。
      *
      * <p>断开消息由操作系统给出、随系统语言变化，因此同时匹配英文与中文 Windows 的典型措辞。</p>
+     *
+     * @param ex 待检查的顶层异常
+     * @return 异常链中是否出现已知客户端断开信号
      */
     private static boolean isClientDisconnect(Throwable ex) {
         for (Throwable t = ex; t != null; t = t.getCause()) {

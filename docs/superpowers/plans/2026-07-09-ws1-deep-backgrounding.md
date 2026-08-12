@@ -1,5 +1,8 @@
 # WS1: DEEP 深度研究后台化 Implementation Plan
 
+> [!NOTE]
+> 2026-08-12 状态：WS1 主体实现及当前 Docker/Testcontainers/PIT 自动门禁已完成；本文保留原任务拆解。真实 UI reconnect、Redis-stop fallback 和双实例四步验收仍未完成，当前待办与证据以根目录 `TODO.md`、`progress.md` 为准。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 把 DEEP 深度研究从 SSE 请求线程内的同步执行，改造成基于 Redis Stream 消费组的后台任务系统：断点续跑、跨实例流式桥接、断线回放、背压配额、优雅停机、双实例可验证。
@@ -954,7 +957,7 @@ void workerCrashMidDebateIsResumedFromCheckpointWithoutRedoingRounds() {
 
 - [x] **Step 2: dual-instance-demo.ps1**：脚本、四步命令与观察点已落盘；AST 解析和 `-ChecklistOnly` 通过；支持 `-MySqlPort`，Compose MySQL 宿主端口也可用 `STOCKSAGE_MYSQL_PORT` 配置，默认行为不变。
 - [x] **Step 3: 全量回归** — 后端非容器回归 144/144；前端 `npm test` 81/81；`npm run build` 通过；`.\init.ps1 -Mode fast` 三阶段通过。
-- [ ] **Step 4: 按脚本实测双实例四步验证** — Compose MySQL/Redis 已启动（MySQL 映射 3307 以避让本机 `MySQL80`），但真实双实例四步尚未执行；当前 Docker 提权工具额度限制继续执行，接管耗时未编造。
+- [ ] **Step 4: 按脚本实测双实例四步验证** — 真实双实例四步仍未执行；接管耗时和跨实例观测不得用配置推算。
 - [ ] **Step 5: 决策文档定稿** — 架构取舍已落盘；真实双实例的接管耗时与跨实例日志/DB/Redis 证据待补齐后才能完成。
 - [x] **Step 6: Commit** — 已完成(7/10)：随 `df64dfa` 落库（脚本+决策文档+README）。
 
@@ -967,7 +970,7 @@ git commit -m "feat(ws1): dual-instance verification, checkpoint takeover IT, de
 
 ## WS1 验收清单（对照 spec）
 
-- [x] 现有全部测试 + 新增测试绿 — 已完成(7/10)：`verify -Pit` 144 单测 + 14 IT 全绿；`npm test` 81/81；`npm run build` 成功。
+- [x] 现有全部测试 + 新增测试绿 — 2026-07-10 初始门禁通过；当前 2026-07-31 `clean verify -Pit` 证据为 Surefire 312/312、Failsafe 17/17。
 - [x] DEEP 提交后请求线程不阻塞（Task 9 冒烟验证）— 任务 #10 受理后后台运行，期间并发 MARKET 查询 6.59s 完成
 - [x] 断线/刷新恢复观看（Task 12 手工验证）— 任务 #10 刷新重建成功，offline 3s 恢复后继续到 task-final
 - [ ] kill worker 断点接管（Task 13 IT + 双实例实测）

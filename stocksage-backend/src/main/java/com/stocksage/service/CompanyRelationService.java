@@ -26,10 +26,14 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class CompanyRelationService {
 
+    /** 按 ticker 读取已由离线抽取流程写入的公司关系边。 */
     private final CompanyRelationRepository companyRelationRepository;
 
     /**
      * 读取并组装某 ticker 的关系图谱；无数据时返回 empty=true 的空图，由前端走空态。
+     *
+     * @param ticker 中心公司的美股 ticker
+     * @return 包含 center、nodes、counts 和 empty 的前端图谱载荷
      */
     public Map<String, Object> getGraph(String ticker) {
         String normTicker = ticker == null ? "" : ticker.trim().toUpperCase();
@@ -98,6 +102,9 @@ public class CompanyRelationService {
 
     /**
      * 把对端公司名归一成可比较的小写词序列：剥法律后缀、去标点、套缩写表。
+     *
+     * @param name 原始公司名
+     * @return 用于别名比较的词序列
      */
     private List<String> canonicalTokens(String name) {
         String stripped = stripLegalSuffix(name).toLowerCase(Locale.ROOT)
@@ -113,6 +120,9 @@ public class CompanyRelationService {
 
     /**
      * 反复剥离末尾法律后缀（处理 "... Holdings Inc." 这类双重后缀）；剥空则回退原名。
+     *
+     * @param name 原始公司名
+     * @return 去除法律实体后缀的名称
      */
     private String stripLegalSuffix(String name) {
         String text = name == null ? "" : name.trim();
@@ -129,6 +139,10 @@ public class CompanyRelationService {
     /**
      * 两个归一词序列是否指向同一实体：其一是另一个的词前缀即视为同一家
      * （"Huawei" 之于 "Huawei Technologies"）。任一为空时退化为严格相等，避免空名误并。
+     *
+     * @param a 第一个公司名词序列
+     * @param b 第二个公司名词序列
+     * @return true 表示可合并为同一图节点
      */
     private boolean isSameEntity(List<String> a, List<String> b) {
         if (a.isEmpty() || b.isEmpty()) {

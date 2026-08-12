@@ -11,15 +11,22 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 工具调用事件总线。
  *
- * ChatService 为每次请求注册一个 Sink，AOP 拦截器往 Sink 推送工具调用事件，
- * ChatService 将事件流与答案流合并后统一推送给前端。
+ * <p>TraceEventRelay 为每次观察注册一个可回放 Sink，AOP/TraceEventStore 往 Sink 推送事件，
+ * SSE 层再把事件流与任务状态交给前端。它是 Redis 不可用时的单实例降级通道，
+ * 不承担跨实例持久化。</p>
  */
 @Component
 public class ToolCallEventBus {
 
+    /** 按 traceId 保存进程内回放 Sink；完成后延迟清理，给断线观察者一个短重连窗口。 */
     private final ConcurrentHashMap<String, Sinks.Many<String>> sinks = new ConcurrentHashMap<>();
 
-    /** 注册一个新的事件通道，返回可订阅的 Flux */
+    /**
+     * 注册或复用指定链路的事件通道。
+     *
+     * @param traceId 链路 ID
+     * @return 最多回放最近 512 条的 Flux
+     */
     public Flux<String> register(String traceId) {
         Sinks.Many<String> sink = sinks.computeIfAbsent(
                 traceId,
@@ -44,7 +51,11 @@ public class ToolCallEventBus {
         }
     }
 
-    /** 关闭通道并短暂保留回放，供 Redis 故障时的重连观察者读取终态。 */
+    /**
+     * 关闭通道并短暂保留回放，供 Redis 故障时的重连观察者读取终态。
+     *
+     * @param traceId 要结束的链路 ID
+     */
     public void complete(String traceId) {
         Sinks.Many<String> sink = sinks.get(traceId);
         if (sink != null) {

@@ -25,17 +25,23 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 将分析师证据和多空辩论整理成结构化的 InvestmentReport。
- * 这里的 JSON 契约会由 ChatService 格式化为面向用户的证据优先回答。
+ * 把分析师证据和多空辩论综合为结构化 {@link InvestmentReport} 的研究经理。
+ *
+ * <p>上游 {@link ResearchDebateService} 提供已固定的 {@link AnalysisState}；本类要求模型先输出
+ * 可流式展示的中文判断，再输出严格 JSON，并把报告证据 ID 确定性绑定回 {@link EvidenceLedger}。
+ * 下游 Harness 再决定报告是否可评级。本类不调用新工具，也不会接受账本外来源支撑结论。</p>
  */
 @Slf4j
 @Service
 public class ResearchManager {
 
+    /** 未提供执行权检查器时使用的无操作实现。 */
     private static final Runnable NO_OP_EXECUTION_GUARD = () -> {
     };
 
+    /** 无工具的研究经理 ChatClient，只综合已准备证据。 */
     private final ChatClient chatClient;
+    /** 解析模型返回的结构化 JSON。 */
     private final ObjectMapper objectMapper;
 
     /**
@@ -53,12 +59,18 @@ public class ResearchManager {
      * 汇总分析师报告、多空辩论和引用信息，生成最终投资研究报告。
      *
      * @param state 深度研究流水线当前状态
-     * @return 结构化投资报告；当模型 JSON 不完整时会降级为包含原文摘要的 HOLD 报告
+     * @return 解析得到的报告；解析失败时结果可能为空，调用方应使用 Harness 决定安全降级
      */
     public InvestmentReport synthesize(AnalysisState state) {
         return synthesizeResult(state).report();
     }
 
+    /**
+     * 同步综合并保留解析状态，供 Harness 区分合法报告与模型/结构失败。
+     *
+     * @param state 已含分析师报告、辩论和证据账本的状态
+     * @return 报告、解析状态和有限字段问题
+     */
     public SynthesisResult synthesizeResult(AnalysisState state) {
         String content = chatClient.prompt()
                 .user(buildPrompt(state))
@@ -76,6 +88,10 @@ public class ResearchManager {
      * <p>解决"辩论流式可见、但 Manager 还要憋 ~140s 才出报告"的体验断点：
      * 让用户在 Manager 思考期间能持续看到中文综合判断逐字生成。</p>
      *
+     * @param state 已准备好的研究状态
+     * @param traceId 当前链路 ID
+     * @param conversationId 会话 ID
+     * @param emitter 自然语言阶段的分组 SSE 出口
      * @return 完整 InvestmentReport 的 Mono，订阅者通常 {@code block()} 等待
      */
     public Mono<InvestmentReport> synthesizeStreaming(AnalysisState state, String traceId,
@@ -90,6 +106,13 @@ public class ResearchManager {
      *
      * <p>检查器只应读取调用方已经维护的内存状态，不能在 token 热路径中访问 Redis、数据库或
      * 其他远端服务。检查器抛出的异常会取消上游模型流，并原样传递给调用方。</p>
+     *
+     * @param state 已准备好的研究状态
+     * @param traceId 当前链路 ID
+     * @param conversationId 会话 ID
+     * @param emitter 自然语言阶段的分组 SSE 出口
+     * @param executionGuard 每个 token 前检查任务执行权的非阻塞回调
+     * @return 完整报告的异步结果
      */
     public Mono<InvestmentReport> synthesizeStreaming(
             AnalysisState state,
@@ -103,6 +126,11 @@ public class ResearchManager {
                 .map(SynthesisResult::report);
     }
 
+    /**
+     * 流式综合并返回报告解析状态，使用默认无操作执行权检查器。
+     *
+     * @return 供 Harness 直接验收的异步综合结果
+     */
     public Mono<SynthesisResult> synthesizeStreamingResult(
             AnalysisState state,
             String traceId,
@@ -113,6 +141,19 @@ public class ResearchManager {
                 state, traceId, conversationId, emitter, NO_OP_EXECUTION_GUARD);
     }
 
+    /**
+     * 流式综合并返回报告解析状态。
+     *
+     * <p>只有 JSON 边界前的自然语言 token 会发送给前端；JSON 全部留在后端 buffer，结束后一次解析，
+     * 避免把内部结构契约作为逐 token UI 内容。</p>
+     *
+     * @param state 已准备好的研究状态
+     * @param traceId 当前链路 ID
+     * @param conversationId 会话 ID
+     * @param emitter SSE 分组事件出口
+     * @param executionGuard 每个 token 前的执行权检查器
+     * @return 报告、解析状态和字段问题
+     */
     public Mono<SynthesisResult> synthesizeStreamingResult(
             AnalysisState state,
             String traceId,
@@ -285,6 +326,7 @@ public class ResearchManager {
             String analystSummary = root.path("analystSummary").asText("");
             List<InvestmentReport.EvidenceItem> parsedEvidenceItems =
                     readEvidenceItems(root.path("evidenceItems"));
+            // 模型只能挑选 evidenceId；来源标签和 citations 由后端账本确定性重建。
             BoundEvidence boundEvidence = bindEvidenceProvenance(
                     parsedEvidenceItems,
                     state
@@ -409,6 +451,15 @@ public class ResearchManager {
         return values;
     }
 
+    /**
+     * 把模型引用的证据 ID 绑定到当前账本的可信来源。
+     *
+     * <p>未知或不可用 ID 对应的 evidence item 会被丢弃，模型自填的 source 字段不会被信任。</p>
+     *
+     * @param parsedItems 模型解析出的证据项
+     * @param state 当前研究状态及账本
+     * @return 只含可用证据的报告项和去重引用
+     */
     private BoundEvidence bindEvidenceProvenance(
             List<InvestmentReport.EvidenceItem> parsedItems,
             AnalysisState state
@@ -461,6 +512,7 @@ public class ResearchManager {
         );
     }
 
+    /** 从账本字段生成稳定来源标签，不复用模型生成的来源文本。 */
     private String provenanceCitation(EvidenceEnvelope envelope) {
         String asOf = envelope.asOf() == null
                 ? "unknown"
@@ -479,6 +531,11 @@ public class ResearchManager {
         return value == null ? "" : value;
     }
 
+    /**
+     * 把可用证据账本压缩为研究经理可选择的 ID/来源目录。
+     *
+     * <p>失败、未审批、缺来源或跨标的证据已由 usableEvidenceIds 排除。</p>
+     */
     private String evidenceLedgerSummary(AnalysisState state) {
         if (state == null || state.getEvidenceLedger() == null
                 || state.getEvidenceLedger().evidence().isEmpty()) {
@@ -510,6 +567,7 @@ public class ResearchManager {
         return value.substring(0, maxLength) + "\n...[truncated]";
     }
 
+    /** 后端绑定完成的证据项和报告级引用。 */
     private record BoundEvidence(
             List<InvestmentReport.EvidenceItem> items,
             List<String> citations

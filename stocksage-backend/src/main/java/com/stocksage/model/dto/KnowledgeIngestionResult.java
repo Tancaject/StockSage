@@ -38,6 +38,12 @@ public record KnowledgeIngestionResult(
      *
      * <p>当解析出切片但没有新增向量时，状态会标记为 indexed_without_new_vectors，
      * 方便调用方区分“没有内容”和“内容已索引但无需新增向量”。</p>
+     *
+     * @param sourceId 来源稳定 ID
+     * @param chunksParsed 从来源解析出的切片总数
+     * @param chunksIngested 实际新增到向量库的切片数
+     * @param chunksSkippedAsDuplicates 因内容重复而跳过的切片数
+     * @return 包含状态和计数的摄取汇总
      */
     public static KnowledgeIngestionResult ingested(
             String sourceId,

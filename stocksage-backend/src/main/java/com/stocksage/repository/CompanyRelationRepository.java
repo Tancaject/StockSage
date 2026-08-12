@@ -14,10 +14,21 @@ import java.util.List;
  */
 public interface CompanyRelationRepository extends JpaRepository<CompanyRelation, Long> {
 
-    /** 按主体 ticker 读取关系边，置信度高的在前。 */
+    /**
+     * 按主体 ticker 读取关系边，置信度高的在前。
+     *
+     * @param sourceTicker 关系发起方证券代码
+     * @return 该公司的有向关系边；没有抽取结果时为空列表
+     */
     List<CompanyRelation> findBySourceTickerOrderByConfidenceDesc(String sourceTicker);
 
-    /** 重新抽取前清理该 ticker 的旧关系边。 */
+    /**
+     * 删除一个主体 ticker 的全部旧关系边。
+     *
+     * <p>该方法在事务中执行并产生批量删除副作用；调用方通常随后写入最新抽取结果。</p>
+     *
+     * @param sourceTicker 要整体刷新的主体证券代码
+     */
     @Transactional
     void deleteBySourceTicker(String sourceTicker);
 }

@@ -42,6 +42,7 @@ import java.util.function.Consumer;
 @Service
 public class RelationExtractionService {
 
+    /** 模型可输出并写入图谱的关系类型白名单。 */
     private static final Set<String> ALLOWED_TYPES =
             Set.of("COMPETITOR", "CUSTOMER", "SUPPLIER", "PARTNER");
 
@@ -56,19 +57,30 @@ public class RelationExtractionService {
     /** 单次抽取最多送入 LLM 的切片数上限，给抽取耗时兜底（即便某标的业务章节异常庞大）。 */
     private static final int MAX_SOURCE_CHUNKS = 25;
 
+    /** 专用于关系抽取的 STANDARD 模型客户端。 */
     private final ChatClient chatClient;
+    /** 读取最新 10-K Item 1 业务父切片。 */
     private final VectorDocumentRepository vectorDocumentRepository;
+    /** 幂等替换已抽取的公司关系边。 */
     private final CompanyRelationRepository companyRelationRepository;
+    /** 解析模型候选数组和切片元数据。 */
     private final ObjectMapper objectMapper;
 
+    /** 低于该置信度的模型候选不会落库。 */
     @Value("${stocksage.relations.min-confidence:0.5}")
     private double minConfidence;
 
+    /** 写入关系边的抽取模型标识，便于审计。 */
     @Value("${stocksage.relations.model-name:relation-extraction}")
     private String modelName;
 
     /**
      * 注入专用于关系抽取的 STANDARD 档 ChatClient，与主聊天链路隔离。
+     *
+     * @param chatClient 关系抽取模型
+     * @param vectorDocumentRepository SEC 切片仓储
+     * @param companyRelationRepository 关系边仓储
+     * @param objectMapper JSON 解析器
      */
     public RelationExtractionService(
             @Qualifier("relationExtractionChatClient") ChatClient chatClient,
@@ -81,6 +93,12 @@ public class RelationExtractionService {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * 为 ticker 抽取并刷新关系图谱，不回调进度。
+     *
+     * @param ticker 美股 ticker
+     * @return 抽取摘要或缺少 10-K 的错误载荷
+     */
     public Map<String, Object> extractForTicker(String ticker) {
         return extractForTicker(ticker, null);
     }
@@ -88,6 +106,7 @@ public class RelationExtractionService {
     /**
      * 为指定 ticker 抽取并刷新公司关系图谱。
      *
+     * @param ticker 美股 ticker
      * @param progressCallback 可选的进度回调，每处理完一个切片后调用
      * @return 抽取结果摘要（来源切片数、候选数、采纳数、各类丢弃计数与关系列表）
      */
@@ -97,6 +116,7 @@ public class RelationExtractionService {
             return Map.of("error", true, "message", "ticker is required");
         }
 
+        // 调用仓储只读取最新 10-K 的 Item 1 父切片，避免混入旧年报或子切片重复证据。
         List<VectorDocument> parents = vectorDocumentRepository.findLatest10KBusinessParents(normTicker);
         if (parents.isEmpty()) {
             log.warn("No latest-10-K Item 1. Business parent chunks for {}; ingest the 10-K first.", normTicker);
@@ -147,6 +167,7 @@ public class RelationExtractionService {
                 sourceAccession = accession;
             }
 
+            // 调用关系抽取模型获取候选；随后仍需通过类型、逐字证据和置信度三道本地校验。
             for (JsonNode candidate : callExtraction(normTicker, company, section, text)) {
                 candidateCount++;
                 String type = candidate.path("type").asText("").trim().toUpperCase();
@@ -197,6 +218,7 @@ public class RelationExtractionService {
         }
 
         // 幂等刷新：先清理旧边再写入本次结果
+        // 调用关系仓储按 ticker 替换整批边，使重新抽取结果保持幂等。
         companyRelationRepository.deleteBySourceTicker(normTicker);
         companyRelationRepository.saveAll(accepted);
 
@@ -222,9 +244,16 @@ public class RelationExtractionService {
 
     /**
      * 调用 LLM 抽取单个切片的关系候选，返回 JSON 数组节点；任何失败都返回空列表（fail-open）。
+     *
+     * @param ticker 主体 ticker
+     * @param company 主体公司名
+     * @param section SEC 章节
+     * @param text 原始切片正文
+     * @return 未经本地防幻觉校验的模型候选
      */
     private List<JsonNode> callExtraction(String ticker, String company, String section, String text) {
         try {
+            // 调用隔离的关系抽取 ChatClient；异常只丢弃当前切片，不终止整份年报。
             String raw = chatClient.prompt()
                     .user(buildUserPrompt(ticker, company, section, text))
                     .call()
@@ -244,6 +273,8 @@ public class RelationExtractionService {
 
     /**
      * 构造抽取用户提示词：主体公司、来源章节、财报原文。
+     *
+     * @return 要发送给关系抽取模型的提示词
      */
     private String buildUserPrompt(String ticker, String company, String section, String text) {
         return """
@@ -263,6 +294,9 @@ public class RelationExtractionService {
 
     /**
      * 从模型输出中截取 JSON 数组：去掉代码块围栏与数组前后的多余文字。
+     *
+     * @param raw 模型原始输出
+     * @return 数组 JSON；无法定位时返回 []
      */
     private String extractJsonArray(String raw) {
         if (raw == null) {
@@ -285,6 +319,9 @@ public class RelationExtractionService {
      *
      * <p>不含信号词的切片（如纯粹的"人力资本""可获取信息"等小节）即便送进 LLM 也抽不出
      * 命名关系，这里提前跳过以压缩抽取耗时与成本。</p>
+     *
+     * @param text 财报切片正文
+     * @return 是否值得调用关系抽取模型
      */
     private boolean hasRelationSignal(String text) {
         String lower = text.toLowerCase(Locale.ROOT);
@@ -300,6 +337,10 @@ public class RelationExtractionService {
      * 判断证据片段是否在原文中逐字出现（容忍空白差异）。
      *
      * <p>这是整条管线的防幻觉命门：模型若改写、翻译或凭空生成引文，这里就拦下。</p>
+     *
+     * @param source 来源原文
+     * @param quote 模型声明的逐字证据
+     * @return 忽略空白差异后是否原样命中且长度足够
      */
     private boolean containsVerbatim(String source, String quote) {
         if (source == null || quote == null) {
@@ -314,6 +355,9 @@ public class RelationExtractionService {
 
     /**
      * 解析 MySQL 中保存的切片元数据 JSON。
+     *
+     * @param json 元数据文本
+     * @return 元数据 map；损坏时返回空 map
      */
     private Map<String, Object> parseMetadata(String json) {
         if (json == null || json.isBlank()) {
@@ -329,6 +373,9 @@ public class RelationExtractionService {
 
     /**
      * 把一条关系边整理成对外视图。
+     *
+     * @param relation 已通过校验的关系实体
+     * @return 管理接口可序列化的关系字段
      */
     private Map<String, Object> toView(CompanyRelation relation) {
         Map<String, Object> view = new LinkedHashMap<>();

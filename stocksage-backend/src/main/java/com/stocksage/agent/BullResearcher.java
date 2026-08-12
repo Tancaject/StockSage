@@ -10,8 +10,11 @@ import reactor.core.publisher.Flux;
 import java.util.List;
 
 /**
- * 多空辩论中的多头参与者，负责提出最有证据支撑的正面观点。
- * 它不直接调用工具，只基于已经收集到 AnalysisState 中的分析师报告展开论证。
+ * DEEP 多空辩论中的多头研究员。
+ *
+ * <p>{@link ResearchDebateService} 在每轮把同一 {@link AnalysisState} 交给多空双方；本类只基于
+ * 已收集的分析师报告和历史辩论提出正面投资逻辑。它不直接调用工具，避免在证据快照固定后
+ * 引入无法进入 Evidence Ledger 的新事实。</p>
  */
 @Service
 public class BullResearcher {
@@ -19,6 +22,7 @@ public class BullResearcher {
     /** Round 1 是开局陈述，不强制反驳；Round 2+ 必须先逐条回应对方再展开新论据。 */
     private static final int OPENING_ROUND = 1;
 
+    /** 仅用于多头论证的无工具 ChatClient。 */
     private final ChatClient chatClient;
 
     /**

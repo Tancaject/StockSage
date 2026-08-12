@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url'
 
 import {
   fetchInvestmentReportDetail,
+  fetchStockIntraday,
+  runWorkbenchHealthChecks,
   searchWorkbenchStocks,
   updateInvestmentReportReview,
 } from '../api/workbench.js'
@@ -334,6 +336,87 @@ test('searchWorkbenchStocks calls the workbench stock search endpoint', async ()
     ])
   } finally {
     globalThis.fetch = originalFetch
+  }
+})
+
+test('searchWorkbenchStocks preserves an empty fallback for non-success responses', async () => {
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = async () => ({
+    ok: false,
+    status: 503,
+    json: async () => {
+      throw new Error('response body should not be read')
+    },
+  })
+
+  try {
+    assert.deepEqual(await searchWorkbenchStocks({ query: 'amazon' }), [])
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test('fetchStockIntraday reports only the HTTP status for non-success responses', async () => {
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = async () => ({
+    ok: false,
+    status: 503,
+    json: async () => ({ message: 'internal provider details' }),
+  })
+
+  try {
+    await assert.rejects(fetchStockIntraday('NVDA'), error => {
+      assert.equal(error.message, 'HTTP 503')
+      return true
+    })
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test('runWorkbenchHealthChecks degrades timed-out probes without rejecting', async () => {
+  const originalFetch = globalThis.fetch
+  const originalWindow = globalThis.window
+  const clearedTimers = []
+  globalThis.window = {
+    setTimeout(callback) {
+      queueMicrotask(callback)
+      return 1
+    },
+    clearTimeout(timer) {
+      clearedTimers.push(timer)
+    },
+  }
+  globalThis.fetch = async (url, { signal } = {}) => new Promise((_, reject) => {
+    signal.addEventListener('abort', () => {
+      const error = new Error(`aborted ${url}`)
+      error.name = 'AbortError'
+      reject(error)
+    }, { once: true })
+  })
+
+  try {
+    const result = await runWorkbenchHealthChecks()
+
+    assert.equal(result.backend, false)
+    assert.equal(result.profile, false)
+    assert.equal(result.cockpit, false)
+    assert.deepEqual(
+      ['backend', 'profile', 'cockpit'].map(name => result.details[name]),
+      [
+        { ok: false, status: 0, message: 'timeout' },
+        { ok: false, status: 0, message: 'timeout' },
+        { ok: false, status: 0, message: 'timeout' },
+      ],
+    )
+    assert.deepEqual(clearedTimers, [1, 1, 1])
+  } finally {
+    globalThis.fetch = originalFetch
+    if (originalWindow === undefined) {
+      delete globalThis.window
+    } else {
+      globalThis.window = originalWindow
+    }
   }
 })
 

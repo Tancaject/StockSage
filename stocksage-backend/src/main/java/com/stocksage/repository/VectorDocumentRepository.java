@@ -17,24 +17,39 @@ import java.util.Optional;
  */
 public interface VectorDocumentRepository extends JpaRepository<VectorDocument, Long> {
 
-    /** 判断某个文档名是否已经入库，用于避免重复摄取同一份资料。 */
+    /**
+     * 判断某个文档名是否已有切片记录，供回归种子等简单去重路径使用。
+     *
+     * @param docName 原始文档名称
+     * @return 至少存在一个同名切片时为 true
+     */
     boolean existsByDocName(String docName);
 
-    /** 根据向量库返回的 vectorId 找回对应文本切片和元数据。 */
+    /**
+     * 根据向量库返回的 ID 找回 MySQL 中的文本切片和元数据。
+     *
+     * @param vectorId 向量存储中的稳定 ID
+     * @return 对应文本镜像；索引不一致或已删除时为空
+     */
     Optional<VectorDocument> findByVectorId(String vectorId);
 
-    /** 批量删除指定 vectorId 对应的文本切片，通常与向量库删除操作配套执行。 */
+    /**
+     * 批量删除指定向量 ID 的文本镜像。
+     *
+     * <p>调用方在事务中将其与向量库和 {@code doc_index} 清理配套执行。</p>
+     *
+     * @param vectorIds 要删除的向量 ID 集合
+     */
     void deleteByVectorIdIn(Collection<String> vectorIds);
 
     /**
-     * 读取某 ticker【最新一份 10-K】的"业务(Item 1. Business)"父级切片，供公司关系抽取使用。
+     * 读取某 ticker 最新一份 10-K 的“Item 1. Business”父级切片。
      *
-     * <p>命名的竞争对手/供应商基本都出在 Item 1. Business 的 Competition / 供应制造小节；
-     * Item 1A 风险因素多为泛指、点不出具体公司，过"证据逐字命中"闸门后几乎全丢却最耗时，故不取。
-     * 同时只锁定 filing_type=10-K 且 filing_date 最新的那个 accession，避免把历年年报与季报
-     * （10-Q 的 "Item 1. Financial Statements" 会被 'Item 1.%' 误伤）一并卷入——既保证内容正确，
-     * 又把切片数从几百压到个位/十位级，让抽取在数分钟内可控完成。
-     * 只取父块（is_parent=true）以拿到完整上下文。元数据是 JSON 字段，用 JSON_EXTRACT 过滤。</p>
+     * <p>原生 SQL 从 JSON 元数据中选择 filing_date 最新的 accession，只返回父块并按主键排序。
+     * 这样关系抽取既获得完整业务上下文，也不会混入历年年报、10-Q 或泛化风险章节。</p>
+     *
+     * @param ticker 已归一化的证券代码
+     * @return 最新年报业务章节的父级切片；知识库无匹配资料时为空列表
      */
     @Query(value = "SELECT * FROM vector_documents v "
             + "WHERE JSON_UNQUOTE(JSON_EXTRACT(v.metadata, '$.ticker')) = :ticker "

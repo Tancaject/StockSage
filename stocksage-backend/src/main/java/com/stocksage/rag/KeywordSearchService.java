@@ -29,21 +29,39 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class KeywordSearchService {
 
+    /** 从 Milvus 风格过滤表达式中提取 ticker 等值条件。 */
     private static final Pattern TICKER_FILTER_PATTERN = Pattern.compile("ticker\\s*==\\s*'([^']+)'");
 
+    /** 执行 MySQL FULLTEXT 查询并映射结果。 */
     private final JdbcTemplate jdbcTemplate;
 
+    /** 混合检索开关；关闭时关键词路径返回空列表。 */
     @Value("${stocksage.rag.hybrid-search.enabled:true}")
     private boolean enabled;
 
     /**
      * 使用 MySQL FULLTEXT 搜索 vector_documents 表。
      * MATCH AGAINST 在 NATURAL LANGUAGE MODE 下近似 BM25 排序。
+     *
+     * @param query 检索文本
+     * @param topK 最大候选数
+     * @return 按全文相关度排序的文档
      */
     public List<Document> search(String query, int topK) {
         return search(query, topK, null);
     }
 
+    /**
+     * 使用与向量检索相同的 ticker 过滤条件执行全文检索。
+     *
+     * <p>当前只支持 ticker 等值或 OR 组合；遇到无法等价转换的过滤表达式时返回空列表，
+     * 防止关键词路径绕过向量路径的元数据边界。</p>
+     *
+     * @param query 检索文本
+     * @param topK 最大候选数
+     * @param filterExpression RagService 生成的可选 ticker 过滤表达式
+     * @return 全文候选；功能关闭、表达式不支持或查询失败时为空
+     */
     public List<Document> search(String query, int topK, String filterExpression) {
         if (!enabled || query == null || query.isBlank()) {
             return List.of();
@@ -80,6 +98,7 @@ public class KeywordSearchService {
                     """);
             params.add(topK);
 
+            // JdbcTemplate 绑定 query、ticker 和 LIMIT 参数，避免把用户文本拼进 SQL。
             return jdbcTemplate.query(sql.toString(), (rs, rowNum) -> {
                 String vectorId = rs.getString("redis_key");
                 String contentFull = rs.getString("content_full");
@@ -104,6 +123,12 @@ public class KeywordSearchService {
         }
     }
 
+    /**
+     * 提取过滤表达式中的 ticker，并按出现顺序去重。
+     *
+     * @param filterExpression Milvus 风格过滤表达式
+     * @return 规范化为大写的 ticker 列表
+     */
     private List<String> extractTickerFilters(String filterExpression) {
         if (filterExpression == null || filterExpression.isBlank()) {
             return List.of();
@@ -119,6 +144,13 @@ public class KeywordSearchService {
         return List.copyOf(tickers);
     }
 
+    /**
+     * 合并数据库元数据与关键词检索诊断字段；诊断字段优先。
+     *
+     * @param base 本次检索生成的 doc_id、来源和相关度
+     * @param metadataJson 数据库保存的原始元数据 JSON
+     * @return 合并结果；JSON 损坏时仅返回基础字段
+     */
     @SuppressWarnings("unchecked")
     private Map<String, Object> mergeMetadata(Map<String, Object> base, String metadataJson) {
         if (metadataJson == null || metadataJson.isBlank()) return base;

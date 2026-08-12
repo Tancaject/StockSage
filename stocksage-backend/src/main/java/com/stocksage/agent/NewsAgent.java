@@ -5,12 +5,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
- * 聚焦实时新闻、政策、宏观事件和情绪面的分析师智能体。
- * 对时效性敏感的问题应由新闻工具或网页搜索观测支撑，而不是依赖模型的过期先验。
+ * 聚焦实时新闻、政策、宏观事件和情绪面的专业分析 Agent。
+ *
+ * <p>上游提供标的与已知上下文；本类通过专用 ChatClient 使用新闻/网页搜索工具，产出供普通回答
+ * 或 DEEP 辩论消费的新闻报告。时效性事实必须来自工具观察，不依赖模型的过期先验。</p>
  */
 @Service
 public class NewsAgent {
 
+    /** 在 AgentConfig 中绑定新闻与网页搜索工具的专用客户端。 */
     private final ChatClient chatClient;
 
     /**

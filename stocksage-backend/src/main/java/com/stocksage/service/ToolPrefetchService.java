@@ -54,53 +54,82 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 public class ToolPrefetchService {
 
+    /** 行情、K 线和股票搜索工具入口。 */
     private final MarketTools marketTools;
+    /** 新闻搜索与公告查询工具入口。 */
     private final NewsTools newsTools;
+    /** 财务指标和 SEC 结构化数据工具入口。 */
     private final FundamentalsTools fundamentalsTools;
+    /** 基本面分析师，用预取证据生成专业观察。 */
     private final FundamentalsAgent fundamentalsAgent;
+    /** 市场分析师，用预取行情生成技术面观察。 */
     private final MarketAgent marketAgent;
+    /** 新闻分析师，用搜索结果生成事件面观察。 */
     private final NewsAgent newsAgent;
+    /** 把自然语言与会话上下文解析为统一 ticker。 */
     private final TickerResolutionService tickerResolutionService;
+    /** 构造任务受理、配额和报告复用提示。 */
     private final ReportMarkdownRenderer reportRenderer;
+    /** 收集深度研究所需的多源证据。 */
     private final DeepEvidenceCollector deepEvidenceCollector;
+    /** 执行 Bull/Bear/Manager 深度研究流水线。 */
     private final DeepResearchPipeline deepResearchPipeline;
+    /** 查询与发布可复用的投资报告版本。 */
     private final InvestmentReportVersionService investmentReportVersionService;
+    /** 创建任务并维护状态、租约和 checkpoint。 */
     private final ResearchTaskService researchTaskService;
+    /** 为同步降级路线读写阶段 checkpoint。 */
     private final ResearchTaskCheckpointService researchTaskCheckpointService;
+    /** 将深度研究任务写入 Redis Stream。 */
     private final ResearchTaskQueue researchTaskQueue;
+    /** 把搜索结果异步摄取到知识库。 */
     private final KnowledgeIngestionService knowledgeIngestionService;
+    /** 执行规划中声明的可复用技能。 */
     private final SkillExecutionService skillExecutionService;
+    /** 向聊天 SSE 通道发送预取进度。 */
     private final ChatStreamEmitter chatStreamEmitter;
+    /** 序列化报告与解析工具结果。 */
     private final ObjectMapper objectMapper;
-    // 分析师/工具预取和后台记忆更新共用的工作线程池（AsyncConfig#agentTaskExecutor，6 线程 daemon）。
+    /** 分析师预取与搜索入库共用的后台线程池。 */
     private final AsyncTaskExecutor agentTaskExecutor;
+    /** 同步降级执行期间定时续租任务所有权。 */
     private final TaskScheduler researchHeartbeatScheduler;
 
+    /** 是否启用计划预取；关闭时直接返回空上下文。 */
     @Value("${stocksage.chat.tool-prefetch.enabled:true}")
     private boolean toolPrefetchEnabled;
 
+    /** 单次搜索预取允许返回的最大结果数。 */
     @Value("${stocksage.chat.tool-prefetch.max-search-results:5}")
     private int toolPrefetchMaxSearchResults;
 
+    /** 是否把聊天搜索结果异步写入知识库。 */
     @Value("${stocksage.chat.search-ingest.enabled:true}")
     private boolean searchIngestEnabled;
 
+    /** 聊天搜索知识的有效期，单位为天。 */
     @Value("${stocksage.chat.search-ingest.ttl-days:7}")
     private long searchIngestTtlDays;
 
+    /** 并行分析师预取的整体等待上限，单位为秒。 */
     @Value("${stocksage.agent.prefetch.timeout-seconds:120}")
     private long agentPrefetchTimeoutSeconds;
 
+    /** 单个用户可同时持有的活跃研究任务上限。 */
     @Value("${stocksage.research-task.user-max-active:3}")
     private int userMaxActive = 3;
 
     /**
-     * 在最终回答前执行 Coordinator 计划的证据收集步骤。
-     * 生成的类 Markdown 片段会作为系统上下文注入，
-     * 使最终模型回答稳定且受证据约束。
-     */
-    /**
-     * 根据 Coordinator 规划预取确定性工具和智能体上下文。
+     * 在最终回答前执行 Coordinator 计划，并生成受证据约束的上下文。
+     * 深度研究会提交后台任务；队列不可用时才在请求线程同步降级。
+     *
+     * @param executionPlan Coordinator 生成的动作计划
+     * @param userQuery 用户原始问题
+     * @param traceId 本次聊天链路标识
+     * @param conversationId 会话 ID，可用于回看标的上下文
+     * @param userId 当前用户 ID，用于配额与任务隔离
+     * @param selectedModel 当前选定模型，供同步降级流水线使用
+     * @return 待注入的上下文、可选直答以及可能创建的任务信息
      */
     public PreparedToolContext prefetch(
             ExecutionPlan executionPlan,
@@ -117,6 +146,7 @@ public class ToolPrefetchService {
         List<PlanAction> actions = executionPlan.actions();
         String primaryTicker = tickerResolutionService.resolvePrimaryTicker(userQuery, conversationId);
         if (isDeepResearchPlan(actions)) {
+            // 深度计划交给持久化任务与 Redis 队列；提交失败时由其内部切换同步降级路线。
             return submitDeepResearch(
                     userQuery, traceId, conversationId, userId, selectedModel, primaryTicker);
         }
@@ -663,6 +693,9 @@ public class ToolPrefetchService {
 
     /**
      * 判断规划动作是否需要进入深度研究流水线。
+     *
+     * @param actions Coordinator 生成的动作列表
+     * @return 包含任一 Bull、Bear 或 Research Manager 动作时为 true
      */
     public boolean isDeepResearchPlan(List<PlanAction> actions) {
         return actions.contains(PlanAction.BULL_RESEARCHER)
@@ -888,6 +921,8 @@ public class ToolPrefetchService {
      *
      * @param context 追加到最终提示词的工具/智能体观察
      * @param directAnswer 可以直接发送给用户的答案；为空时继续走模型生成
+     * @param submittedTaskId 已提交的研究任务 ID；普通预取时为空
+     * @param eventTraceId SSE 事件链路标识；普通预取时为空
      */
     public record PreparedToolContext(
             String context,
@@ -895,10 +930,23 @@ public class ToolPrefetchService {
             Long submittedTaskId,
             String eventTraceId
     ) {
+        /**
+         * 构造普通预取结果，任务 ID 与事件 trace 均为空。
+         *
+         * @param context 待注入的工具上下文
+         * @param directAnswer 可选直答
+         */
         public PreparedToolContext(String context, String directAnswer) {
             this(context, directAnswer, null, null);
         }
 
+        /**
+         * 构造已提交任务的结果，事件 trace 默认留空。
+         *
+         * @param context 待注入的工具上下文
+         * @param directAnswer 可选直答
+         * @param submittedTaskId 已提交的研究任务 ID
+         */
         public PreparedToolContext(String context, String directAnswer, Long submittedTaskId) {
             this(context, directAnswer, submittedTaskId, null);
         }

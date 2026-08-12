@@ -18,8 +18,14 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 public class AsyncConfig {
 
     /**
-     * Provides bounded threads for Spring MVC reactive/SSE response writes. Keeping this pool
-     * separate prevents slow Servlet clients from consuming agent or research-worker capacity.
+     * 为 Spring MVC 的异步响应和 SSE 写出提供有界线程池。
+     *
+     * <p>它与 Agent、研究任务线程池隔离，避免慢客户端耗尽实际研究工作的执行容量。</p>
+     *
+     * @param corePoolSize 常驻工作线程数
+     * @param maxPoolSize 高峰期允许创建的最大线程数
+     * @param queueCapacity 等待执行的响应任务上限
+     * @return 由 Spring 负责启动和关闭的 MVC 异步执行器
      */
     @Bean("applicationTaskExecutor")
     public ThreadPoolTaskExecutor applicationTaskExecutor(
@@ -39,6 +45,8 @@ public class AsyncConfig {
 
     /**
      * 分析师/工具预取与后台记忆更新共用的工作线程池，对应原静态 AGENT_EXECUTOR（6 线程）。
+     *
+     * @return 固定并发度的 Agent 异步执行器
      */
     @Bean
     public AsyncTaskExecutor agentTaskExecutor() {
@@ -51,7 +59,14 @@ public class AsyncConfig {
         return executor;
     }
 
-    /** 深度研究任务的租约心跳调度器；线程数与 worker 并发一致，避免一次慢续租拖过其他任务 TTL。 */
+    /**
+     * 创建深度研究任务的租约心跳调度器。
+     *
+     * <p>线程数与 worker 并发一致，避免一次慢续租拖过其他任务的 TTL。</p>
+     *
+     * @param workerThreads 研究 worker 的配置并发数，最小按 1 处理
+     * @return 专门执行租约续期的调度器
+     */
     @Bean
     public TaskScheduler researchHeartbeatScheduler(
             @Value("${stocksage.research-task.worker-threads:2}") int workerThreads) {
@@ -65,6 +80,9 @@ public class AsyncConfig {
 
     /**
      * Redis Stream 研究任务由固定 worker 线程长期阻塞消费，独立线程池避免占用分析师预取资源。
+     *
+     * @param workerThreads 同时消费 Redis Stream 的 worker 数，最小按 1 处理
+     * @return 研究任务消费者专用执行器
      */
     @Bean("researchWorkerExecutor")
     public ThreadPoolTaskExecutor researchWorkerExecutor(

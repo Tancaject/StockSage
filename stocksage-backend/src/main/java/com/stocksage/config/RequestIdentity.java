@@ -16,6 +16,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class RequestIdentity {
 
+    /**
+     * 从 Spring Security 上下文读取当前用户 ID。
+     *
+     * @return 去除首尾空白后的内部用户 ID
+     * @throws AuthenticationCredentialsNotFoundException 请求没有有效登录主体时抛出
+     */
     public String currentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null
@@ -27,6 +33,7 @@ public class RequestIdentity {
         throw new AuthenticationCredentialsNotFoundException("No authenticated user in security context");
     }
 
+    /** 判断字符串是否包含非空白字符。 */
     private boolean hasText(String value) {
         return value != null && !value.trim().isEmpty();
     }

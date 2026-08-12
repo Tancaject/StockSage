@@ -14,6 +14,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 @Configuration
 public class RedisConfig {
 
+    /**
+     * 创建所有 Redis 文本读写共用的模板。
+     *
+     * @param factory Spring Boot 根据连接配置创建的 Redis 连接工厂
+     * @return 使用字符串键值序列化的 Redis 操作模板
+     */
     @Bean
     public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory factory) {
         return new StringRedisTemplate(factory);

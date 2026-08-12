@@ -16,17 +16,38 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-/** Builds sanitized, process-local Agent administration snapshots. */
+/**
+ * 生成供管理接口展示的 Agent 技能、能力和 MCP 运行快照。
+ *
+ * <p>该服务只读取 {@link SkillRegistry}、{@link CapabilityRegistry} 和 Micrometer 当前进程指标，
+ * 不修改 Agent 配置，也不会暴露密钥或原始 MCP 连接信息。</p>
+ */
 @Service
 public class AgentAdminService {
 
+    /** 提供当前已加载的技能定义。 */
     private final SkillRegistry skillRegistry;
+    /** 提供可被计划器选择的能力描述。 */
     private final CapabilityRegistry capabilityRegistry;
+    /** 提供 MCP 工具发现的即时状态。 */
     private final McpCapabilityProvider mcpProvider;
+    /** 判断 MCP 开关和目标端点是否完整配置。 */
     private final McpProperties mcpProperties;
+    /** 查询能力调用次数、成功率和耗时指标。 */
     private final MeterRegistry meterRegistry;
+    /** 配置中指定的默认新闻技能 ID。 */
     private final String defaultNewsSkill;
 
+    /**
+     * 注入管理快照所需的只读注册表和指标源。
+     *
+     * @param skillRegistry 技能注册表
+     * @param capabilityRegistry 能力注册表
+     * @param mcpProvider MCP 能力提供器
+     * @param mcpProperties MCP 配置
+     * @param meterRegistry 进程指标注册表
+     * @param defaultNewsSkill 默认新闻技能 ID
+     */
     public AgentAdminService(
             SkillRegistry skillRegistry,
             CapabilityRegistry capabilityRegistry,
@@ -43,6 +64,7 @@ public class AgentAdminService {
         this.defaultNewsSkill = defaultNewsSkill;
     }
 
+    /** @return 当前技能清单及默认新闻技能标记，不包含执行期私有状态。 */
     public SkillsSnapshot skills() {
         List<SkillView> skills = skillRegistry.list().stream()
                 .map(skill -> new SkillView(
@@ -62,6 +84,11 @@ public class AgentAdminService {
         return new SkillsSnapshot("agent_skills_v1", defaultNewsSkill, skills);
     }
 
+    /**
+     * 汇总能力指标和 MCP 健康状态。
+     *
+     * @return 当前进程的只读运行快照；无指标样本时明确标为 NO_DATA
+     */
     public RuntimeSnapshot runtime() {
         McpCapabilityProvider.Status rawMcp = mcpProvider.statusSnapshot();
         McpState mcpState;
@@ -92,6 +119,7 @@ public class AgentAdminService {
         return new RuntimeSnapshot("agent_runtime_v1", capabilities, mcp);
     }
 
+    /** 将单个能力描述与其 Micrometer 观测值合并为管理视图。 */
     private CapabilityView capabilityView(CapabilityDescriptor descriptor) {
         List<Counter> counters = meterRegistry.find("stocksage.capability.calls")
                 .tag("capability", descriptor.id())
@@ -127,9 +155,11 @@ public class AgentAdminService {
         );
     }
 
+    /** 管理接口的技能快照根对象。 */
     public record SkillsSnapshot(String schemaVersion, String defaultNewsSkill, List<SkillView> skills) {
     }
 
+    /** 单个技能的公开定义以及它是否为当前默认技能。 */
     public record SkillView(
             String id,
             int version,
@@ -145,6 +175,7 @@ public class AgentAdminService {
     ) {
     }
 
+    /** 管理接口的 Agent 运行快照根对象。 */
     public record RuntimeSnapshot(
             String schemaVersion,
             List<CapabilityView> capabilities,
@@ -152,6 +183,7 @@ public class AgentAdminService {
     ) {
     }
 
+    /** 能力配置与进程内调用指标的合并视图。 */
     public record CapabilityView(
             String id,
             CapabilityDescriptor.ProviderType providerType,
@@ -166,6 +198,7 @@ public class AgentAdminService {
     ) {
     }
 
+    /** MCP 工具发现状态的脱敏视图。 */
     public record McpView(
             McpState state,
             int approvedToolCount,
@@ -175,6 +208,7 @@ public class AgentAdminService {
     ) {
     }
 
+    /** 前端可稳定消费的 MCP 状态枚举。 */
     public enum McpState {
         DISABLED,
         UNCONFIGURED,

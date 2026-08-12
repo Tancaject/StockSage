@@ -4,10 +4,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * IBKR Client Portal Web API 配置。
+ * IBKR Client Portal Web API 的 Spring 配置载体。
  *
- * Gateway 默认使用本地自签名 HTTPS 端点：
- * https://localhost:5000/v1/api
+ * <p>{@link IbkrWebApiClient} 用它创建只读 HTTP 客户端，
+ * {@link IbkrSessionKeepaliveScheduler} 用它控制会话保活；
+ * 默认指向本地自签名 Gateway，且集成保持关闭。</p>
  */
 @Component
 @ConfigurationProperties(prefix = "stocksage.ibkr")

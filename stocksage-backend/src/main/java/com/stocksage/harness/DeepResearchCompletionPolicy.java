@@ -18,12 +18,19 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * V1 deterministic evidence policy for DEEP equity research.
+ * DEEP 股票研究的确定性完成策略。
+ *
+ * <p>{@link ResearchHarness} 在证据收集后和报告综合后分别调用本策略。证据阶段检查标的、
+ * 基本面、行情、来源和能力审批；报告阶段检查结构、标的一致性以及引用是否来自
+ * {@link EvidenceLedger#usableEvidenceIds()}。策略只返回 PASS/RECOVER/DEGRADE/BLOCK 决策，
+ * 不调用工具、不写 checkpoint，也绝不在证据不足时编造评级。</p>
  */
 @Component
 public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
 
+    /** 持久化到 Trace/checkpoint 的稳定策略 ID。 */
     public static final String POLICY_ID = "deep-equity-v1";
+    /** 当前规则版本；规则语义变化时递增，用于拒绝陈旧报告权威。 */
     public static final int POLICY_VERSION = 2;
 
     @Override
@@ -36,12 +43,20 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
         return POLICY_VERSION;
     }
 
+    /**
+     * 对已收集证据执行第一阶段门槛。
+     *
+     * @param context 当前恢复动作的已用次数
+     * @param ledger 本轮结构化证据元数据
+     * @return 通过、一次定向恢复、安全降级或阻断决策
+     */
     @Override
     public HarnessDecision afterEvidence(RunContext context, EvidenceLedger ledger) {
         RunContext safeContext = context == null ? RunContext.deepResearch() : context;
         EvidenceLedger safeLedger = ledger == null ? EvidenceLedger.empty() : ledger;
         List<HarnessViolation> violations = new ArrayList<>();
 
+        // 标的错误会污染所有下游结论，必须优先于“缺哪类证据”检查并直接阻断。
         if (safeLedger.target().status() == TargetResolutionStatus.AMBIGUOUS) {
             violations.add(new HarnessViolation(ViolationCode.TARGET_AMBIGUOUS, null));
             return decision(HarnessOutcome.BLOCK, violations, List.of(RecoveryAction.RETURN_SAFE_REFUSAL));
@@ -81,6 +96,7 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
             return decision(HarnessOutcome.DEGRADE, violations, List.of(RecoveryAction.RETURN_NOT_RATED));
         }
 
+        // 每类关键证据最多请求一次定向恢复；预算用尽后返回 NOT_RATED，而不是无限重试。
         List<RecoveryAction> recoveries = new ArrayList<>();
         if (!fundamentalsAvailable
                 && safeContext.attempts(RecoveryAction.RETRY_FUNDAMENTALS) == 0) {
@@ -100,6 +116,14 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
         return decision(HarnessOutcome.PASS, violations, List.of());
     }
 
+    /**
+     * 对 Research Manager 的结构化报告执行第二阶段验收。
+     *
+     * @param context 报告重新综合的已用次数
+     * @param ledger 与报告同一研究轮次的证据账本
+     * @param synthesis 模型报告、解析状态和字段问题
+     * @return 通过、最多一次重新综合或 NOT_RATED 降级决策
+     */
     @Override
     public HarnessDecision afterReport(
             RunContext context,
@@ -156,6 +180,7 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
                 violations.add(new HarnessViolation(
                         ViolationCode.REPORT_EVIDENCE_REFERENCE_UNKNOWN, null));
             }
+            // “ID 存在”仍不够；失败、无来源、未审批或跨标的证据不能支撑投资结论。
             if (referencedEvidenceIds.stream()
                     .filter(knownEvidenceIds::contains)
                     .anyMatch(id -> !usableEvidenceIds.contains(id))) {
@@ -170,6 +195,7 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
         return decision(HarnessOutcome.PASS, List.of(), List.of());
     }
 
+    /** 报告首次失败允许重综合一次，第二次仍失败则安全降级为不评级。 */
     private HarnessDecision repairOrDegrade(
             RunContext context,
             List<HarnessViolation> violations

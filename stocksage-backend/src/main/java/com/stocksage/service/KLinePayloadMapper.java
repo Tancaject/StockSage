@@ -11,14 +11,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * 把不同行情工具的 K 线 JSON 归一成前端蜡烛图载荷。
+ *
+ * <p>由工具事件/工作台链路调用，兼容 Python data-service 与 IBKR 的嵌套字段和大小写差异；
+ * 无法识别或上游返回错误时返回 {@link Optional#empty()}，不会影响原工具结果。</p>
+ */
 @Component
 @RequiredArgsConstructor
 public class KLinePayloadMapper {
 
+    /** 防止一次工具事件向前端推送过多图表点。 */
     private static final int CHART_POINT_LIMIT = 260;
 
+    /** 在字符串响应和对象响应之间统一构造 JSON 树。 */
     private final ObjectMapper objectMapper;
 
+    /**
+     * 将受支持工具的响应转换为前端 candlestick 载荷。
+     *
+     * @param sourceTool 产生结果的工具名
+     * @param result 工具原始结果，可为 JSON 字符串或对象
+     * @param args 工具调用参数，用于补足 symbol、period
+     * @return 图表载荷；非 K 线工具、错误响应或无有效 OHLC 时为空
+     */
     public Optional<Map<String, Object>> toChartPayload(String sourceTool, Object result, Object[] args) {
         if (!isKlineTool(sourceTool) || result == null) {
             return Optional.empty();
@@ -58,12 +74,19 @@ public class KLinePayloadMapper {
         }
     }
 
+    /**
+     * 判断工具结果是否应尝试解析为 K 线。
+     *
+     * @param sourceTool 工具名
+     * @return true 表示该工具受当前映射器支持
+     */
     public static boolean isKlineTool(String sourceTool) {
         return "getStockKLine".equals(sourceTool)
                 || "getGlobalKLine".equals(sourceTool)
                 || "getIbkrHistoricalBars".equals(sourceTool);
     }
 
+    /** 从任意兼容嵌套结构中提取并限制有效 OHLCV 点。 */
     private List<Map<String, Object>> extractChartPoints(JsonNode root) {
         JsonNode rows = findOhlcvArray(root, 0);
         if (rows == null || !rows.isArray()) {
@@ -97,6 +120,7 @@ public class KLinePayloadMapper {
         return points;
     }
 
+    /** 在常见字段及有限深度的对象树中定位 OHLCV 数组。 */
     private JsonNode findOhlcvArray(JsonNode node, int depth) {
         if (node == null || node.isMissingNode() || depth > 4) {
             return null;
@@ -125,6 +149,7 @@ public class KLinePayloadMapper {
         return null;
     }
 
+    /** 采样数组前几项，判断是否至少包含一条完整 OHLC 记录。 */
     private boolean containsOhlcRow(JsonNode array) {
         if (!array.isArray() || array.isEmpty()) {
             return false;
@@ -142,6 +167,7 @@ public class KLinePayloadMapper {
         return false;
     }
 
+    /** 按兼容字段顺序读取第一个非空文本。 */
     private String firstText(JsonNode node, String... fields) {
         if (node == null || node.isMissingNode()) {
             return "";
@@ -158,6 +184,7 @@ public class KLinePayloadMapper {
         return "";
     }
 
+    /** 按兼容字段顺序读取数值，并容忍带千分位的字符串。 */
     private Double firstDouble(JsonNode node, String... fields) {
         if (node == null || node.isMissingNode()) {
             return null;
@@ -182,6 +209,7 @@ public class KLinePayloadMapper {
         return null;
     }
 
+    /** 容错读取工具参数，缺失时返回空串。 */
     private String argAt(Object[] args, int index) {
         if (args == null || index < 0 || index >= args.length || args[index] == null) {
             return "";
@@ -189,6 +217,7 @@ public class KLinePayloadMapper {
         return String.valueOf(args[index]).trim();
     }
 
+    /** 从若干候选文本中选择第一个非空值。 */
     private String firstNonBlank(String... values) {
         for (String value : values) {
             if (value != null && !value.isBlank()) {

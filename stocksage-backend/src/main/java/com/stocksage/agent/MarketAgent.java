@@ -5,12 +5,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
- * 聚焦市场数据、估值字段、价格走势和技术指标的分析师智能体。
- * ChatService 会在该智能体运行前提供已解析的股票身份，确保分析绑定到用户想查的标的。
+ * 聚焦市场数据、估值字段、价格走势和技术指标的专业分析 Agent。
+ *
+ * <p>上游在运行前提供已解析股票身份；本类通过专用 ChatClient 使用行情和 IBKR 只读工具，
+ * 产出供普通回答或 DEEP 辩论消费的市场报告。它不提供下单能力，也不决定最终投资评级。</p>
  */
 @Service
 public class MarketAgent {
 
+    /** 在 AgentConfig 中绑定行情/只读 IBKR 工具的专用客户端。 */
     private final ChatClient chatClient;
 
     /**

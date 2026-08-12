@@ -21,18 +21,29 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RagRegressionService {
 
+    /** 数据库中识别固定回归资料的标题。 */
     private static final String REGRESSION_TITLE = "RAG_REGRESSION_NVIDIA_AI_STRATEGY_2026";
+
+    /** 正文中的稳定标记，用于元数据缺失时识别夹具切片。 */
     private static final String REGRESSION_MARKER = "stocksage-rag-regression-marker-nvidia-ai-strategy";
+
+    /** 正向召回文档必须同时保留的关键概念。 */
     private static final List<String> EXPECTED_TERMS = List.of("CUDA", "AI Enterprise", "GB200");
+
+    /** 应召回固定 NVIDIA 资料的查询。 */
     private static final List<String> POSITIVE_QUERIES = List.of(
             "英伟达 AI 战略为什么强调 CUDA 和全栈平台？",
             "NVIDIA AI Enterprise 在英伟达 AI 战略中扮演什么角色？",
             "GB200 和网络互联为什么是 NVIDIA 数据中心战略的一部分？"
     );
+
+    /** 不应召回该公司资料的通用估值和技术分析查询。 */
     private static final List<String> NEGATIVE_QUERIES = List.of(
             "PE-TTM 和 PB 估值指标有什么区别？",
             "如何用布林带判断短线超买超卖？"
     );
+
+    /** 首次运行时写入知识库的稳定英文夹具正文。 */
     private static final String REGRESSION_CONTENT = """
             %s
 
@@ -56,18 +67,26 @@ public class RagRegressionService {
             unrelated valuation glossary or generic technical-analysis questions.
             """.formatted(REGRESSION_MARKER);
 
+    /** 首次运行时保存固定学习型知识。 */
     private final KnowledgeService knowledgeService;
+
+    /** 使用生产同款检索链路执行正反查询。 */
     private final RagService ragService;
+
+    /** 检查夹具是否已入库，保证重复运行幂等。 */
     private final VectorDocumentRepository vectorDocumentRepository;
 
     /**
      * 执行默认回归套件，并返回适合接口直接展示的诊断结果。
+     *
+     * @return 夹具写入状态、逐查询结果、总耗时与最终状态
      */
     public Map<String, Object> runDefaultRegression() {
         long startedAt = System.currentTimeMillis();
         boolean alreadySeeded = vectorDocumentRepository.existsByDocName(REGRESSION_TITLE);
         int chunksSaved = 0;
         if (!alreadySeeded) {
+            // saveLearnedKnowledge 走正式入库路径，使夹具覆盖真实切片、向量和镜像逻辑。
             chunksSaved = knowledgeService.saveLearnedKnowledge(
                     REGRESSION_TITLE,
                     REGRESSION_CONTENT,
@@ -101,6 +120,9 @@ public class RagRegressionService {
 
     /**
      * 校验相关查询是否能召回回归夹具，并包含关键概念词。
+     *
+     * @param query 应命中夹具的自然语言问题
+     * @return 命中数量、预览和关键概念检查
      */
     private Map<String, Object> runPositiveCheck(String query) {
         List<Document> results = ragService.retrieve(query);
@@ -121,6 +143,9 @@ public class RagRegressionService {
 
     /**
      * 校验无关查询不会误召回回归夹具，用来捕捉检索过宽的问题。
+     *
+     * @param query 不应命中夹具的自然语言问题
+     * @return 命中数量、预览和隔离检查
      */
     private Map<String, Object> runNegativeCheck(String query) {
         List<Document> results = ragService.retrieve(query);
@@ -134,6 +159,10 @@ public class RagRegressionService {
 
     /**
      * 生成正反检查共用的命中摘要，便于接口直接返回诊断信息。
+     *
+     * @param query 本次检查查询
+     * @param results 生产检索返回的文档
+     * @return 查询、命中数和前三条预览
      */
     private Map<String, Object> baseCheck(String query, List<Document> results) {
         Map<String, Object> check = new LinkedHashMap<>();
@@ -148,6 +177,9 @@ public class RagRegressionService {
 
     /**
      * 把检索命中压缩成稳定的小对象，避免回归接口返回过长正文。
+     *
+     * @param document 单个检索命中
+     * @return 来源、标题、类型和正文预览
      */
     private Map<String, Object> summarizeHit(Document document) {
         Map<String, Object> hit = new LinkedHashMap<>();
@@ -160,6 +192,9 @@ public class RagRegressionService {
 
     /**
      * 判断命中文档是否属于本回归夹具。
+     *
+     * @param document 待检查文档
+     * @return 标题或正文标记是否匹配夹具
      */
     private boolean isRegressionDoc(Document document) {
         Object title = document.getMetadata().get("title");
@@ -169,6 +204,10 @@ public class RagRegressionService {
 
     /**
      * 生成单行预览文本，保留足够上下文但限制接口输出长度。
+     *
+     * @param text 原始切片正文
+     * @param maxLength 最大字符数
+     * @return 压缩空白并按上限截断的预览
      */
     private String preview(String text, int maxLength) {
         if (text == null) {

@@ -20,11 +20,18 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ChatStreamEmitter {
 
+    /** 把序列化后的分片写入可回放的 Trace 事件通道。 */
     private final TraceEventStore traceEventStore;
+    /** 将 ChatChunk DTO 转为 SSE/Redis 共用的 JSON 格式。 */
     private final ObjectMapper objectMapper;
 
     /**
      * 推送一条普通进度块（不分组）。
+     *
+     * @param traceId 当前链路 ID；为空时静默跳过
+     * @param conversationId 会话 ID
+     * @param type 分片类型，如 action、observation
+     * @param content 前端可展示的简短内容
      */
     public void emit(String traceId, Long conversationId, String type, String content) {
         send(traceId, ChatChunk.builder()
@@ -40,6 +47,13 @@ public class ChatStreamEmitter {
      *
      * <p>前端会把 {@code section} 相同的连续数据块聚合到同一个推理块，
      * 这样逐 token 流式才不会在界面上碎成成百上千条独立条目。</p>
+     *
+     * @param traceId 当前链路 ID
+     * @param conversationId 会话 ID
+     * @param type 分片类型
+     * @param section 稳定分组键
+     * @param sectionLabel 前端显示的分组标题
+     * @param content 当前 token 或文本片段
      */
     public void emitSection(String traceId, Long conversationId, String type,
                             String section, String sectionLabel, String content) {

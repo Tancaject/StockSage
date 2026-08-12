@@ -35,26 +35,42 @@ import java.util.Set;
  * <p>输入可以来自本地文档、SEC EDGAR 公告或对话触发的搜索片段。
  * 本服务负责归一化元数据、写入向量检索文档、保留关系型副本供父级切片查询，
  * 并记录来源哈希，以便后续摄取时跳过未变化文件。</p>
+ *
+ * <p>边界：向量库和 MySQL 不是同一事务资源；来源索引、稳定 chunkId 和下一次重摄取清理
+ * 提供幂等补偿基础，但单次数据库事务成功不等价于跨存储原子提交。</p>
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class KnowledgeIngestionService {
 
-    // DashScope text-embedding-v4 每批最多 10 条；即使使用本地向量模型，
-    // 也保持该上限，确保后续切换供应商时安全。
+    /**
+     * DashScope text-embedding-v4 每批最多 10 条；本地模型也保持该上限，便于安全切换供应商。
+     */
     private static final int EMBEDDING_BATCH_SIZE = 10;
 
+    /** 写入并检索 Milvus 等 Spring AI 向量库。 */
     private final VectorStore vectorStore;
+    /** 保存每个来源的内容哈希、chunkId 列表和 TTL。 */
     private final DocIndexRepository docIndexRepository;
+    /** 保存全文和元数据镜像，供父块扩展、全文检索及审计。 */
     private final VectorDocumentRepository vectorDocumentRepository;
+    /** 将文档元数据序列化为关系库 JSON。 */
     private final ObjectMapper objectMapper;
 
+    /** 可选语义去重的向量相似度阈值。 */
     @Value("${stocksage.rag.dedup-similarity-threshold:0.85}")
     private double dedupSimilarityThreshold;
 
     /**
      * 摄取单段文本，并默认开启语义去重。
+     *
+     * @param sourceId 来源稳定 ID
+     * @param content 正文
+     * @param metadata 检索元数据
+     * @param sourceType 来源类型
+     * @param ttl 临时来源有效期；null 表示永久
+     * @return 摄取、跳过和重复计数
      */
     @Transactional
     public KnowledgeIngestionResult ingestText(
@@ -70,6 +86,9 @@ public class KnowledgeIngestionService {
      * 摄取单段文本。
      *
      * <p>空文本会直接返回零切片结果；非空文本会包装成一个 Document 后进入统一摄取路径。</p>
+     *
+     * @param semanticDedupEnabled 是否调用向量相似搜索去重
+     * @return 摄取结果
      */
     @Transactional
     public KnowledgeIngestionResult ingestText(
@@ -98,6 +117,13 @@ public class KnowledgeIngestionService {
      *
      * <p>来源级去重由内容哈希处理；切片级去重使用精确哈希和可选语义搜索。
      * 父级切片会持久化以供后续扩展，但会刻意跳过向量化。</p>
+     *
+     * @param sourceId 来源稳定 ID
+     * @param contentHash 来源内容/切片策略哈希
+     * @param parsedDocuments 已切分文档
+     * @param sourceType 来源类型
+     * @param ttl 临时来源有效期
+     * @return 摄取结果；此重载默认关闭跨来源语义去重
      */
     @Transactional
     public KnowledgeIngestionResult ingestDocuments(
@@ -113,6 +139,14 @@ public class KnowledgeIngestionService {
      * 摄取一批已解析的文档切片。
      *
      * <p>该重载允许调用方选择是否启用语义去重，适合网页临时摄取与本地文档入库共用。</p>
+     *
+     * @param sourceId 来源稳定 ID
+     * @param contentHash 来源内容/切片策略哈希
+     * @param parsedDocuments 已切分文档
+     * @param sourceType 来源类型
+     * @param ttl 临时来源有效期；null 表示永久
+     * @param semanticDedupEnabled 是否执行向量语义去重
+     * @return 摄取、跳过和重复计数
      */
     @Transactional
     public KnowledgeIngestionResult ingestDocuments(
@@ -181,6 +215,7 @@ public class KnowledgeIngestionService {
             metadataRows.add(toVectorDocument(metadata, text, i));
         }
 
+        // 先调用向量库按供应商上限分批写入，再保存 MySQL 全文镜像和来源索引。
         addToVectorStoreInBatches(documentsToAdd);
         if (!metadataRows.isEmpty()) {
             vectorDocumentRepository.saveAll(metadataRows);
@@ -214,6 +249,8 @@ public class KnowledgeIngestionService {
 
     /**
      * 删除已经过期的临时 RAG 来源。
+     *
+     * @return 本轮清理的来源数
      */
     @Transactional
     public int deleteExpiredDocuments() {
@@ -227,6 +264,8 @@ public class KnowledgeIngestionService {
 
     /**
      * 删除某个来源在向量库、MySQL 元数据和索引表中的全部切片。
+     *
+     * @param entry 来源索引记录，包含全部 chunkId
      */
     private void deleteIndexedChunks(DocIndexEntry entry) {
         List<String> chunkIds = entry.chunkIds() == null ? List.of() : entry.chunkIds();
@@ -242,6 +281,9 @@ public class KnowledgeIngestionService {
      * 使用向量相似度判断新切片是否与已有知识高度重复。
      *
      * <p>语义去重失败时选择保留候选切片，避免检索服务短暂异常导致知识丢失。</p>
+     *
+     * @param text 候选切片正文
+     * @return true 表示已有高于阈值的向量命中
      */
     private boolean isSemanticDuplicate(String text) {
         if (dedupSimilarityThreshold <= 0) {
@@ -253,6 +295,7 @@ public class KnowledgeIngestionService {
                     .topK(1)
                     .similarityThreshold(dedupSimilarityThreshold)
                     .build();
+            // 调用向量库 top-1 相似检索；失败时 fail-open 保留候选知识。
             return !vectorStore.similaritySearch(request).isEmpty();
         } catch (Exception e) {
             log.warn("Semantic dedup check failed; keeping candidate chunk. message={}", e.getMessage());
@@ -262,6 +305,8 @@ public class KnowledgeIngestionService {
 
     /**
      * 分小批添加向量，避免批量摄取时超过具体供应商的向量化限制。
+     *
+     * @param documents 实际需要向量化的子切片
      */
     private void addToVectorStoreInBatches(List<Document> documents) {
         for (int start = 0; start < documents.size(); start += EMBEDDING_BATCH_SIZE) {
@@ -272,6 +317,9 @@ public class KnowledgeIngestionService {
 
     /**
      * 父级切片存入 MySQL 用于上下文扩展，子级切片才是实际向量检索目标。
+     *
+     * @param metadata 归一化切片元数据
+     * @return true 表示应写入向量库
      */
     private boolean shouldVectorize(Map<String, Object> metadata) {
         Object isParent = metadata.get("is_parent");
@@ -280,6 +328,8 @@ public class KnowledgeIngestionService {
 
     /**
      * 将 Document 元数据和正文保存成 MySQL 镜像行。
+     *
+     * @return 可供全文/父块查询的 VectorDocument
      */
     private VectorDocument toVectorDocument(Map<String, Object> metadata, String text, int chunkIndex) {
         VectorDocument row = new VectorDocument();
@@ -297,6 +347,8 @@ public class KnowledgeIngestionService {
 
     /**
      * 优先使用显式 doc_id，否则使用系统生成的 fallback。
+     *
+     * @return 稳定切片 ID
      */
     private String resolveChunkId(Map<String, Object> metadata, String fallback) {
         Object explicitDocId = metadata.get("doc_id");
@@ -309,6 +361,8 @@ public class KnowledgeIngestionService {
 
     /**
      * 根据来源、内容哈希和切片序号构造稳定切片 ID。
+     *
+     * @return 带 d_ 前缀的短 SHA-256 ID
      */
     private String buildChunkId(String sourceId, String contentHash, int chunkIndex) {
         return "d_" + sha256(sourceId + ":" + contentHash + ":" + chunkIndex).substring(0, 32);
@@ -316,6 +370,9 @@ public class KnowledgeIngestionService {
 
     /**
      * 计算 SHA-256 十六进制字符串。
+     *
+     * @param value 输入文本；null 按空串处理
+     * @return 64 位十六进制摘要
      */
     public static String sha256(String value) {
         try {

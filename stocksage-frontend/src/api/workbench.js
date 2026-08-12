@@ -1,4 +1,4 @@
-import { BASE_URL, apiFetch, responseMessage } from './http.js'
+import { BASE_URL, apiFetch, getJson, requestJson } from './http.js'
 
 const PROBE_TIMEOUT_MS = 8000
 
@@ -27,38 +27,24 @@ export async function fetchInvestmentReportVersions({ ticker = '', limit = 20 } 
   const params = new URLSearchParams()
   if (ticker) params.set('ticker', ticker)
   params.set('limit', String(limit))
-  const response = await apiFetch(`${BASE_URL}/reports/investment?${params.toString()}`)
-  if (!response.ok) {
-    throw new Error(await responseMessage(response))
-  }
-  return response.json()
+  return getJson(`${BASE_URL}/reports/investment?${params.toString()}`)
 }
 
 export async function fetchInvestmentReportDetail(reportId) {
-  const id = String(reportId ?? '').trim()
-  if (!id) {
-    throw new Error('reportId is required')
-  }
-  const response = await apiFetch(`${BASE_URL}/reports/investment/${encodeURIComponent(id)}`)
-  if (!response.ok) {
-    throw new Error(await responseMessage(response))
-  }
-  return response.json()
+  const reportIdSegment = requiredPathSegment(reportId, 'reportId')
+  return getJson(`${BASE_URL}/reports/investment/${reportIdSegment}`)
 }
 
 export async function updateInvestmentReportReview(
   reportId,
   { status, comment = '', expectedLockVersion } = {},
 ) {
-  const id = String(reportId ?? '').trim()
+  const reportIdSegment = requiredPathSegment(reportId, 'reportId')
   const reviewStatus = String(status || '').trim().toUpperCase()
   const hasLockVersion = expectedLockVersion !== null
     && expectedLockVersion !== undefined
     && String(expectedLockVersion).trim() !== ''
   const lockVersion = Number(expectedLockVersion)
-  if (!id) {
-    throw new Error('reportId is required')
-  }
   if (!reviewStatus) {
     throw new Error('status is required')
   }
@@ -66,7 +52,7 @@ export async function updateInvestmentReportReview(
     throw new Error('expectedLockVersion is required')
   }
 
-  const response = await apiFetch(`${BASE_URL}/reports/investment/${encodeURIComponent(id)}/review`, {
+  return requestJson(`${BASE_URL}/reports/investment/${reportIdSegment}/review`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -75,74 +61,39 @@ export async function updateInvestmentReportReview(
       expectedLockVersion: lockVersion,
     }),
   })
-  if (!response.ok) {
-    throw new Error(await responseMessage(response))
-  }
-  return response.json()
 }
 
 export async function fetchStockCockpit({ ticker, period = 'daily', days = 120 } = {}) {
-  const symbol = String(ticker || '').trim()
-  if (!symbol) {
-    throw new Error('ticker is required')
-  }
+  const tickerSegment = requiredTicker(ticker)
   const params = new URLSearchParams()
   params.set('period', period)
   params.set('days', String(days))
-  const response = await apiFetch(`${BASE_URL}/workbench/stocks/${encodeURIComponent(symbol)}/cockpit?${params.toString()}`)
-  if (!response.ok) {
-    throw new Error(await responseMessage(response))
-  }
-  return response.json()
+  return getJson(`${BASE_URL}/workbench/stocks/${tickerSegment}/cockpit?${params.toString()}`)
 }
 
 export async function fetchStockRelations(ticker) {
-  const symbol = String(ticker || '').trim()
-  if (!symbol) {
-    throw new Error('ticker is required')
-  }
-  const response = await apiFetch(`${BASE_URL}/workbench/stocks/${encodeURIComponent(symbol)}/relations`)
-  if (!response.ok) {
-    throw new Error(await responseMessage(response))
-  }
-  return response.json()
+  const tickerSegment = requiredTicker(ticker)
+  return getJson(`${BASE_URL}/workbench/stocks/${tickerSegment}/relations`)
 }
 
 export async function fetchStockNews(ticker, days = 7) {
-  const symbol = String(ticker || '').trim()
-  if (!symbol) {
-    throw new Error('ticker is required')
-  }
+  const tickerSegment = requiredTicker(ticker)
   const params = new URLSearchParams()
   params.set('days', String(days))
-  const response = await apiFetch(
-    `${BASE_URL}/workbench/stocks/${encodeURIComponent(symbol)}/news?${params.toString()}`,
-  )
-  if (!response.ok) {
-    throw new Error(await responseMessage(response))
-  }
-  return response.json()
+  return getJson(`${BASE_URL}/workbench/stocks/${tickerSegment}/news?${params.toString()}`)
 }
 
 export async function refreshStockRelations(ticker) {
-  const symbol = String(ticker || '').trim()
-  if (!symbol) {
-    throw new Error('ticker is required')
-  }
-  const response = await apiFetch(
-    `${BASE_URL}/workbench/stocks/${encodeURIComponent(symbol)}/relations/refresh`,
+  const tickerSegment = requiredTicker(ticker)
+  return requestJson(
+    `${BASE_URL}/workbench/stocks/${tickerSegment}/relations/refresh`,
     { method: 'POST' },
   )
-  if (!response.ok) {
-    throw new Error(await responseMessage(response))
-  }
-  return response.json()
 }
 
 export async function fetchStockIntraday(ticker) {
-  const symbol = String(ticker || '').trim()
-  if (!symbol) throw new Error('ticker is required')
-  const response = await apiFetch(`${BASE_URL}/workbench/stocks/${encodeURIComponent(symbol)}/intraday`)
+  const tickerSegment = requiredTicker(ticker)
+  const response = await apiFetch(`${BASE_URL}/workbench/stocks/${tickerSegment}/intraday`)
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`)
   }
@@ -162,6 +113,18 @@ export async function searchWorkbenchStocks({ query = '', limit = 8 } = {}) {
   }
   const body = await response.json()
   return Array.isArray(body) ? body : []
+}
+
+function requiredPathSegment(value, name) {
+  const segment = String(value ?? '').trim()
+  if (!segment) {
+    throw new Error(`${name} is required`)
+  }
+  return encodeURIComponent(segment)
+}
+
+function requiredTicker(ticker) {
+  return requiredPathSegment(ticker || '', 'ticker')
 }
 
 async function probe(url) {

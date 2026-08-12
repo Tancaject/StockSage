@@ -22,21 +22,29 @@ import java.util.Set;
 @Service
 public class ImageAttachmentService {
 
+    /** 当前模型链路允许的图片 MIME 类型白名单。 */
     private static final Set<String> SUPPORTED_IMAGE_MEDIA_TYPES = Set.of(
             "image/png", "image/jpeg", "image/webp"
     );
 
+    /** 多模态总开关；关闭时有附件的请求会明确失败。 */
     @Value("${stocksage.chat.multimodal.enabled:true}")
     private boolean multimodalEnabled;
 
+    /** 单轮最多接受的图片数量。 */
     @Value("${stocksage.chat.multimodal.max-images:4}")
     private int maxImagesPerRequest;
 
+    /** 单张解码后图片的最大字节数。 */
     @Value("${stocksage.chat.multimodal.max-image-bytes:5242880}")
     private int maxImageBytes;
 
     /**
      * 归一化当前轮图片附件，并把 data URL 转为 Spring AI 可消费的媒体内容。
+     *
+     * @param attachments 前端提交的图片附件
+     * @return 已校验并解码的 Spring AI Media 列表
+     * @throws IllegalArgumentException 功能关闭、数量/类型/大小或 base64 不合法时
      */
     public List<Media> normalizeImageAttachments(List<ChatRequest.ImageAttachment> attachments) {
         if (attachments == null || attachments.isEmpty()) {
@@ -66,6 +74,10 @@ public class ImageAttachmentService {
 
     /**
      * 允许纯图片请求；无文本且无图片时明确拒绝。
+     *
+     * @param message 用户文本
+     * @param hasImages 当前请求是否包含有效图片
+     * @return 去空格文本；纯图片请求返回默认分析指令
      */
     public String normalizeUserMessage(String message, boolean hasImages) {
         String normalized = message == null ? "" : message.trim();
@@ -80,6 +92,9 @@ public class ImageAttachmentService {
 
     /**
      * 从前端 data URL 中提取 MIME 类型和二进制图片。
+     *
+     * @param attachment 单张前端附件
+     * @return 已校验的 MIME 类型与字节数组
      */
     private DecodedImage decodeImageAttachment(ChatRequest.ImageAttachment attachment) {
         String dataUrl = attachment.getDataUrl() == null ? "" : attachment.getDataUrl().trim();
@@ -115,6 +130,7 @@ public class ImageAttachmentService {
 
         byte[] bytes;
         try {
+            // 调用 JDK Base64 解码器，把 data URL 正文转换成模型请求所需的二进制。
             bytes = Base64.getDecoder().decode(base64.replaceAll("\\s+", ""));
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("图片 base64 数据无法解析。");
@@ -130,6 +146,9 @@ public class ImageAttachmentService {
 
     /**
      * 归一化图片 MIME 类型。
+     *
+     * @param mediaType 前端或 data URL 声明的类型
+     * @return 小写标准类型；image/jpg 转为 image/jpeg
      */
     private String normalizeImageMediaType(String mediaType) {
         String normalized = mediaType == null ? "" : mediaType.trim().toLowerCase(Locale.ROOT);
@@ -138,6 +157,9 @@ public class ImageAttachmentService {
 
     /**
      * 清理进入模型请求元数据的附件名。
+     *
+     * @param name 原始文件名
+     * @return 去除控制字符和路径非法字符的短名称
      */
     private String sanitizeAttachmentName(String name) {
         String sanitized = name == null ? "uploaded-image" : name.trim()
@@ -151,6 +173,9 @@ public class ImageAttachmentService {
 
     /**
      * 面向错误消息的人类可读大小。
+     *
+     * @param bytes 字节数
+     * @return B、KB 或 MB 文本
      */
     private String formatBytes(int bytes) {
         if (bytes >= 1024 * 1024) {

@@ -16,19 +16,38 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 工作台统一股票搜索适配器。
+ *
+ * <p>调用 {@link DataServiceClient#searchStocks} 获取 A 股、港股和美股候选，再把供应商字段差异
+ * 收敛为 {@link WorkbenchStockSuggestion}；搜索异常降级为空列表，不阻断工作台页面。</p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class WorkbenchStockSearchService {
 
+    /** 未传有效 limit 时的默认候选数。 */
     private static final int DEFAULT_LIMIT = 8;
+    /** 防止一次搜索返回过多候选的上限。 */
     private static final int MAX_LIMIT = 20;
+    /** 识别 data-service 返回的标准 A 股代码。 */
     private static final Pattern A_SHARE_CODE = Pattern.compile("^(?:SH|SZ|BJ)\\.(\\d{6})$");
+    /** 识别带 .HK 后缀的港股代码。 */
     private static final Pattern HK_CODE = Pattern.compile("^0*(\\d{1,5})\\.HK$");
 
+    /** 访问跨市场股票目录搜索端点。 */
     private final DataServiceClient dataServiceClient;
+    /** 解析候选响应 JSON。 */
     private final ObjectMapper objectMapper;
 
+    /**
+     * 搜索并归一化工作台股票候选。
+     *
+     * @param query 公司名、代码或别名片段
+     * @param limit 最大候选数；非正数使用默认值
+     * @return 去重后的候选列表；空查询或上游失败时返回空列表
+     */
     public List<WorkbenchStockSuggestion> search(String query, int limit) {
         String cleanedQuery = String.valueOf(query == null ? "" : query).trim();
         if (cleanedQuery.isBlank()) {
@@ -37,6 +56,7 @@ public class WorkbenchStockSearchService {
 
         int maxResults = normalizeLimit(limit);
         try {
+            // 调用 data-service 的本地解析→外部目录搜索链，再在 Java 侧统一前端 DTO。
             String raw = dataServiceClient.searchStocks(cleanedQuery, maxResults);
             return parseSuggestions(raw, maxResults);
         } catch (Exception e) {
@@ -45,6 +65,7 @@ public class WorkbenchStockSearchService {
         }
     }
 
+    /** 解析供应商兼容字段、按 ticker 去重并限制结果数。 */
     private List<WorkbenchStockSuggestion> parseSuggestions(String raw, int limit) throws Exception {
         JsonNode root = objectMapper.readTree(String.valueOf(raw == null ? "" : raw));
         if (root.path("error").asBoolean(false) || !root.path("candidates").isArray()) {
@@ -92,6 +113,7 @@ public class WorkbenchStockSearchService {
         return suggestions;
     }
 
+    /** 将标准市场代码转换为关注列表使用的无标点展示代码。 */
     private String normalizeTickerForWatchlist(String value, String market) {
         String ticker = String.valueOf(value == null ? "" : value).trim().toUpperCase(Locale.ROOT);
         String normalizedMarket = String.valueOf(market == null ? "" : market).trim().toUpperCase(Locale.ROOT);
@@ -112,6 +134,7 @@ public class WorkbenchStockSearchService {
         return ticker.replaceAll("[^A-Z0-9]", "");
     }
 
+    /** 将调用方 limit 限制在默认值与 MAX_LIMIT 之间。 */
     private int normalizeLimit(int limit) {
         if (limit <= 0) {
             return DEFAULT_LIMIT;
@@ -119,11 +142,13 @@ public class WorkbenchStockSearchService {
         return Math.min(limit, MAX_LIMIT);
     }
 
+    /** 容错读取候选节点的文本字段。 */
     private String text(JsonNode node, String field) {
         JsonNode value = node.path(field);
         return value.isMissingNode() || value.isNull() ? "" : value.asText("");
     }
 
+    /** 从不同供应商字段中选择第一个非空值。 */
     private String firstNonBlank(String... values) {
         for (String value : values) {
             String cleaned = String.valueOf(value == null ? "" : value).trim();

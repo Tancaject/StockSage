@@ -29,6 +29,9 @@ public class PhoenixTracingConfig {
      *
      * <p>即使 Phoenix 上报关闭，也会返回可用 Provider；区别只是不开启 OTLP exporter。
      * 这样业务代码可以始终注入 Tracer，而不需要在调用侧判断观测功能是否启用。</p>
+     *
+     * @param properties Phoenix 开关、端点、项目名和超时配置
+     * @return 可选挂载 OTLP exporter 的追踪提供器
      */
     @Bean(destroyMethod = "close")
     public SdkTracerProvider phoenixTracerProvider(PhoenixTraceProperties properties) {
@@ -55,6 +58,9 @@ public class PhoenixTracingConfig {
      * 基于 Phoenix TracerProvider 构造独立 OpenTelemetry 实例。
      *
      * <p>该实例与 Spring 默认遥测隔离，避免可选 Phoenix 配置影响其他监控链路。</p>
+     *
+     * @param phoenixTracerProvider Phoenix 专用追踪提供器
+     * @return 业务代码可注入的独立 OpenTelemetry 实例
      */
     @Bean
     public OpenTelemetry phoenixOpenTelemetry(SdkTracerProvider phoenixTracerProvider) {
@@ -65,6 +71,9 @@ public class PhoenixTracingConfig {
 
     /**
      * 暴露 StockSage 业务追踪使用的 Tracer。
+     *
+     * @param phoenixOpenTelemetry Phoenix 专用 OpenTelemetry 实例
+     * @return 使用 {@code stocksage-backend} instrumentation scope 的 Tracer
      */
     @Bean
     public Tracer stockSageTracer(OpenTelemetry phoenixOpenTelemetry) {

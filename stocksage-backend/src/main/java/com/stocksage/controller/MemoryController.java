@@ -23,11 +23,17 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MemoryController {
 
+    /** Redis 中的会话窗口、摘要和压缩操作。 */
     private final ShortTermMemory shortTermMemory;
+
+    /** MySQL 中的用户画像及提示词上下文构造。 */
     private final LongTermMemory longTermMemory;
 
     /**
      * 查看某个会话当前会注入模型的短期记忆快照。
+     *
+     * @param conversationId 待诊断的会话 ID
+     * @return 摘要、近期消息和估算大小
      */
     @GetMapping("/conversations/{conversationId}/context")
     public MemoryContextDTO getConversationContext(@PathVariable Long conversationId) {
@@ -38,6 +44,10 @@ public class MemoryController {
      * 手动向短期记忆追加一条消息。
      *
      * <p>该接口用于调试记忆拼装，不会触发模型生成回答。</p>
+     *
+     * @param conversationId 目标会话 ID
+     * @param request 消息角色与文本
+     * @return 追加后的短期记忆快照
      */
     @PostMapping("/conversations/{conversationId}/messages")
     public MemoryContextDTO addConversationMessage(
@@ -51,6 +61,9 @@ public class MemoryController {
      * 对指定会话执行一次短期记忆压缩。
      *
      * <p>当消息数量未超过上限时，服务会返回未压缩状态。</p>
+     *
+     * @param conversationId 目标会话 ID
+     * @return 是否压缩、压缩前后数量及摘要
      */
     @PostMapping("/conversations/{conversationId}/compress")
     public MemoryCompressionResult compressConversationContext(@PathVariable Long conversationId) {
@@ -59,6 +72,9 @@ public class MemoryController {
 
     /**
      * 清空某个会话的短期记忆缓存。
+     *
+     * @param conversationId 目标会话 ID
+     * @return 清理成功状态
      */
     @DeleteMapping("/conversations/{conversationId}/context")
     public Map<String, Object> clearConversationContext(@PathVariable Long conversationId) {
@@ -68,6 +84,9 @@ public class MemoryController {
 
     /**
      * 读取用户长期画像。
+     *
+     * @param userId 目标用户 ID；该管理接口不从 Session 推断
+     * @return 风险偏好、关注行业与自选股画像
      */
     @GetMapping("/users/{userId}/profile")
     public UserProfileDTO getLongTermProfile(@PathVariable String userId) {
@@ -78,6 +97,10 @@ public class MemoryController {
      * 合并更新用户长期画像。
      *
      * <p>合并逻辑在 LongTermMemory 中完成，控制器只负责参数绑定和返回结果。</p>
+     *
+     * @param userId 目标用户 ID
+     * @param profile 待合并的画像字段
+     * @return 合并并持久化后的画像
      */
     @PutMapping("/users/{userId}/profile")
     public UserProfileDTO mergeLongTermProfile(
@@ -89,6 +112,9 @@ public class MemoryController {
 
     /**
      * 查看长期画像拼接成提示词上下文后的文本。
+     *
+     * @param userId 目标用户 ID
+     * @return 用户 ID 与最终提示词片段
      */
     @GetMapping("/users/{userId}/prompt-context")
     public Map<String, Object> getPromptContext(@PathVariable String userId) {

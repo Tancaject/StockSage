@@ -25,6 +25,8 @@ import baostock.common.context as bs_context
 import baostock.util.socketutil as bs_socket_util
 import pandas as pd
 
+from app.services.technical_indicators import calculate_technical_indicators
+
 
 BAOSTOCK_LOCK = RLock()
 BAOSTOCK_LOGIN_TIMEOUT_SECONDS = 8
@@ -436,38 +438,7 @@ class BaostockService:
 
         df = pd.DataFrame(kline["data"])
         df["close"] = pd.to_numeric(df["close"], errors="coerce")
-        result = {}
-
-        # ---- MA（移动平均线）----
-        # rolling(N).mean() 计算 N 日收盘价的算术平均
-        if "MA" in indicators:
-            result["MA5"] = round(df["close"].rolling(5).mean().iloc[-1], 2)
-            result["MA10"] = round(df["close"].rolling(10).mean().iloc[-1], 2)
-            result["MA20"] = round(df["close"].rolling(20).mean().iloc[-1], 2)
-            result["MA60"] = round(df["close"].rolling(60).mean().iloc[-1], 2)
-
-        # ---- RSI（相对强弱指标）----
-        # RSI = 100 - 100 / (1 + 平均涨幅/平均跌幅)
-        if "RSI" in indicators:
-            delta = df["close"].diff()
-            gain = delta.where(delta > 0, 0).rolling(14).mean()   # 14 日平均涨幅
-            loss = (-delta.where(delta < 0, 0)).rolling(14).mean() # 14 日平均跌幅
-            rs = gain / loss
-            result["RSI14"] = round((100 - 100 / (1 + rs.iloc[-1])), 2)
-
-        # ---- MACD ----
-        # DIF = EMA12 - EMA26（快线减慢线）
-        # DEA = DIF 的 9 日 EMA（信号线）
-        # MACD = 2 × (DIF - DEA)（柱状图，正值看多，负值看空）
-        if "MACD" in indicators:
-            ema12 = df["close"].ewm(span=12).mean()
-            ema26 = df["close"].ewm(span=26).mean()
-            dif = ema12 - ema26
-            dea = dif.ewm(span=9).mean()
-            macd = 2 * (dif - dea)
-            result["MACD_DIF"] = round(dif.iloc[-1], 4)
-            result["MACD_DEA"] = round(dea.iloc[-1], 4)
-            result["MACD"] = round(macd.iloc[-1], 4)
+        result = calculate_technical_indicators(df["close"], indicators)
 
         return {"code": code, "indicators": result}
 

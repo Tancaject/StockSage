@@ -20,24 +20,31 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class AiConfig {
 
+    /** 查询改写、路由和记忆摘要使用的快速模型。 */
     @Value("${stocksage.chat.model-routing.fast-model:qwen3.6-flash}")
     private String fastModel;
 
+    /** 普通对话与多数结构化任务使用的标准模型。 */
     @Value("${stocksage.chat.model-routing.standard-model:${STOCKSAGE_CHAT_MODEL:qwen3.6-plus}}")
     private String standardModel;
 
+    /** 最终评测回答等高要求任务使用的强模型。 */
     @Value("${stocksage.chat.model-routing.strong-model:qwen3.6-max-preview}")
     private String strongModel;
 
+    /** 普通模型调用共用的采样温度。 */
     @Value("${stocksage.chat.model-routing.temperature:${STOCKSAGE_CHAT_TEMPERATURE:0.7}}")
     private double modelRoutingTemperature;
 
+    /** 普通模型调用允许生成的最大 token 数。 */
     @Value("${stocksage.chat.model-routing.max-output-tokens:${STOCKSAGE_CHAT_MAX_OUTPUT_TOKENS:4096}}")
     private int modelRoutingMaxOutputTokens;
 
+    /** Coordinator 路由调用的低温度设置，用于减少分类漂移。 */
     @Value("${stocksage.agent.routing.temperature:0.1}")
     private double routingTemperature;
 
+    /** Coordinator 严格 JSON 输出的 token 上限。 */
     @Value("${stocksage.agent.routing.max-output-tokens:256}")
     private int routingMaxOutputTokens;
 
@@ -46,6 +53,13 @@ public class AiConfig {
      *
      * <p>这是普通聊天入口使用的主客户端，绑定基本面、市场和新闻工具。
      * 系统提示词集中约束数据真实性、股票身份核对、IBKR 只读边界和投资建议免责声明。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @param fundamentalsTools 财报与结构化财务工具
+     * @param marketTools 行情、指标和 IBKR 只读工具
+     * @param newsTools 新闻与网页搜索工具
+     * @param compatibilityTools 股票解析等兼容工具
+     * @return 普通聊天入口使用的主 ChatClient
      */
     @Bean
     @Primary
@@ -98,6 +112,9 @@ public class AiConfig {
      *
      * <p>该客户端不绑定工具，只消费后端已经预取好的 RAG、行情、财务、新闻和辩论上下文。
      * 它用于把确定性执行结果整理成面向用户的最终回答，避免在最后一步再次触发不可控工具调用。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @return 不具备工具调用能力的最终回答客户端
      */
     @Bean("preparedAnswerChatClient")
     public ChatClient preparedAnswerChatClient(ChatClient.Builder builder) {
@@ -121,6 +138,9 @@ public class AiConfig {
      *
      * <p>该客户端只负责把自然语言问题压缩成检索词，不回答问题、不调用工具，
      * 供 {@link com.stocksage.rag.QueryRewriter} 在检索前使用。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @return 用于 RAG 查询改写的快速客户端
      */
     @Bean("queryRewriteChatClient")
     public ChatClient queryRewriteChatClient(ChatClient.Builder builder) {
@@ -144,6 +164,9 @@ public class AiConfig {
      *
      * <p>入库阶段为每个切片生成一句情境说明，调用量大、单次任务简单，
      * 因此固定走 FAST 档模型，并用系统提示词约束输出格式与事实边界。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @return 为文档切片生成检索 gist 的客户端
      */
     @Bean("contextualGistChatClient")
     public ChatClient contextualGistChatClient(ChatClient.Builder builder) {
@@ -165,6 +188,9 @@ public class AiConfig {
      * <p>从 SEC 财报章节抽取"主体公司↔其它实体"的竞争/客户/供应/合作关系，输出严格 JSON。
      * 任务需要一定语义判断但不需多 Agent 辩论，固定走 STANDARD 档，并用低温度提升结构化输出稳定性；
      * 事实边界由系统提示词与"必须逐字引用原文"硬约束，落库侧再做证据逐字命中校验。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @return 输出严格关系 JSON 的抽取客户端
      */
     @Bean("relationExtractionChatClient")
     public ChatClient relationExtractionChatClient(ChatClient.Builder builder) {
@@ -199,6 +225,9 @@ public class AiConfig {
      *
      * <p>评测场景要求只依据给定 SEC 上下文作答并附带引用，因此这里使用英文系统提示词固定输出规则，
      * 避免普通聊天工具或通用知识影响评测分数。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @return 离线 RAG 评测专用回答客户端
      */
     @Bean("ragEvalChatClient")
     public ChatClient ragEvalChatClient(ChatClient.Builder builder) {
@@ -218,6 +247,9 @@ public class AiConfig {
      * 创建 Coordinator 规划客户端。
      *
      * <p>该客户端只做意图分类和分层调度，输出严格 JSON，让 ChatService 能把模型规划转换成确定性动作。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @return 只负责路由决策的低温度客户端
      */
     @Bean("coordinatorChatClient")
     public ChatClient coordinatorChatClient(ChatClient.Builder builder) {
@@ -257,6 +289,9 @@ public class AiConfig {
      * 创建记忆摘要客户端。
      *
      * <p>短期记忆压缩和长期画像提取共用该客户端，提示词要求只保留用户已经表达过的事实。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @return 对话压缩与画像提取共用的快速客户端
      */
     @Bean("memoryChatClient")
     public ChatClient memoryChatClient(ChatClient.Builder builder) {
@@ -274,6 +309,9 @@ public class AiConfig {
      *
      * <p>chat 走百炼 OpenAI 兼容接口，模型名（含视觉模型 qwen3-vl-plus）通过标准 OpenAI 协议传递，
      * 视觉输入由消息上的 Media 自动转为 image_url，无需再做接口切换。</p>
+     *
+     * @param modelName 本次职责应使用的模型名；空值时回退到标准模型
+     * @return 包含模型、温度和输出上限的调用选项
      */
     private OpenAiChatOptions chatOptions(String modelName) {
         String resolvedModel = modelName == null || modelName.isBlank() ? standardModel : modelName.trim();

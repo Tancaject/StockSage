@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RagMaintenanceScheduler {
 
+    /** 按来源删除 MySQL 元数据和对应向量。 */
     private final KnowledgeIngestionService knowledgeIngestionService;
 
     /**

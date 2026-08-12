@@ -12,14 +12,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/** Loads the version-controlled capability catalog and binds it to concrete adapters. */
+/**
+ * 启动时加载能力清单并绑定具体适配器的只读注册表。
+ *
+ * <p>清单来自仓库内 {@code capabilities/*.yml}，适配器来自 Spring Bean。两侧必须一一对应；
+ * 重复、缺失或没有本地策略描述的适配器都会阻止启动。下游 Gateway 只从该不可变快照取能力。</p>
+ */
 @Component
 public class CapabilityRegistry {
 
+    /** Spring classpath 中版本库受控能力清单的位置。 */
     private static final String CATALOG_PATTERN = "classpath*:capabilities/*.yml";
 
+    /** 按稳定能力 ID 索引的不可变“策略 + 适配器”快照。 */
     private final Map<String, RegisteredCapability> capabilities;
 
+    /**
+     * 校验并组装所有清单与适配器；发现不一致时失败启动。
+     *
+     * @param adapters Spring 扫描到的本地/MCP 能力适配器
+     */
     public CapabilityRegistry(List<CapabilityAdapter> adapters) {
         Map<String, CapabilityAdapter> adapterById = new LinkedHashMap<>();
         for (CapabilityAdapter adapter : adapters) {
@@ -29,6 +41,7 @@ public class CapabilityRegistry {
         }
 
         Map<String, RegisteredCapability> loaded = new LinkedHashMap<>();
+        // 清单是授权来源；只有与清单逐项匹配的适配器才能进入运行时注册表。
         for (CapabilityDescriptor descriptor : loadDescriptors()) {
             CapabilityAdapter adapter = adapterById.remove(descriptor.id());
             if (adapter == null) {
@@ -45,16 +58,23 @@ public class CapabilityRegistry {
         this.capabilities = Map.copyOf(loaded);
     }
 
+    /**
+     * 按 ID 获取已绑定能力。
+     *
+     * @throws CapabilityException ID 不在本地清单中
+     */
     public RegisteredCapability require(String capabilityId) {
         return Optional.ofNullable(capabilities.get(capabilityId))
                 .orElseThrow(() -> new CapabilityException(CapabilityException.Reason.UNKNOWN,
                         "Unknown capability: " + capabilityId));
     }
 
+    /** @return 所有本地能力描述的只读列表，供管理面板展示 */
     public List<CapabilityDescriptor> descriptors() {
         return capabilities.values().stream().map(RegisteredCapability::descriptor).toList();
     }
 
+    /** 从所有 classpath YAML 清单读取并去重能力描述。 */
     private List<CapabilityDescriptor> loadDescriptors() {
         YAMLMapper mapper = YAMLMapper.builder()
                 .findAndAddModules()
@@ -86,9 +106,11 @@ public class CapabilityRegistry {
         }
     }
 
+    /** YAML 顶层结构，仅用于反序列化。 */
     private record CapabilityCatalog(List<CapabilityDescriptor> capabilities) {
     }
 
+    /** 已通过启动校验的一对本地策略描述和执行适配器。 */
     public record RegisteredCapability(CapabilityDescriptor descriptor, CapabilityAdapter adapter) {
     }
 }

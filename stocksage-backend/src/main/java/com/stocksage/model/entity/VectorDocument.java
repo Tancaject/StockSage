@@ -52,6 +52,7 @@ public class VectorDocument {
      * 新增记录前补齐创建时间。
      *
      * <p>该时间用于过期清理和排查知识摄取批次，不依赖调用方手动传入。</p>
+     * 该方法由 JPA 自动调用。
      */
     @PrePersist
     protected void onCreate() {

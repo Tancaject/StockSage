@@ -38,28 +38,49 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>负责把一次 Bull/Bear 辩论包装成带租约与心跳的研究任务：启动尝试、租约心跳续期、
  * 报告版本持久化、失败时的离线兜底报告，以及任务终态回写。从 ChatService 拆出，
  * 使任务生命周期逻辑可以独立测试。</p>
+ *
+ * <p>证据、Harness、辩论和综合状态写入持久化 checkpoint；最终报告、会话消息和带 owner fencing 的
+ * SUCCEEDED CAS 通过 {@link ResearchTaskPublicationTransaction} 同事务发布。任务所有权丢失时立即停止，
+ * 不清理检查点、不关闭任务 trace，由接管 worker 继续。</p>
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeepResearchPipeline {
 
+    /** 执行任务状态机、租约续期和 owner-fenced CAS。 */
     private final ResearchTaskService researchTaskService;
+    /** 运行 Bull/Bear/Manager 多轮辩论与报告综合。 */
     private final ResearchDebateService researchDebateService;
+    /** 计算双哈希、执行安全复用并持久化报告版本。 */
     private final InvestmentReportVersionService investmentReportVersionService;
+    /** 外部服务不可用时生成显式 OFFLINE_FALLBACK 样本报告。 */
     private final OfflineDemoSampleService offlineDemoSampleService;
+    /** 解析任务提交载荷并序列化兼容结果。 */
     private final ObjectMapper objectMapper;
-    // 深度研究任务租约心跳（AsyncConfig#researchHeartbeatScheduler，单线程 daemon）。
+    /** 运行研究任务租约与数据库心跳的单线程 daemon 调度器。 */
     private final TaskScheduler researchHeartbeatScheduler;
+    /** 保存证据、Harness、辩论轮次和综合状态检查点。 */
     private final ResearchTaskCheckpointService checkpointService;
+    /** 收集/恢复确定性证据并执行首次 Harness 闸门。 */
     private final DeepEvidenceCollector evidenceCollector;
+    /** 把结构化报告或证据不足状态渲染为用户 Markdown。 */
     private final ReportMarkdownRenderer reportRenderer;
+    /** 在发布事务中按归属和幂等契约写入最终助手消息。 */
     private final ConversationMessageService conversationMessageService;
+    /** 原子提交报告、消息和任务终态。 */
     private final ResearchTaskPublicationTransaction publicationTransaction;
+    /** 向已订阅 SSE/Trace 发布后台进度和最终文本。 */
     private final ChatStreamEmitter chatStreamEmitter;
+    /** 仅在任务真正终态后关闭后台任务 trace。 */
     private final TraceService traceService;
 
-    /** 整条 DEEP 管线在 worker 内运行，请求线程只负责创建任务和订阅事件。 */
+    /**
+     * 在 worker 内运行完整 DEEP 管线；请求线程只负责创建任务和订阅事件。
+     *
+     * @param task 已落库 PENDING 任务或由 worker fenced 接管的 RUNNING 任务
+     * @param lease 当前执行租约，token 将贯穿所有 owner-fenced 写入
+     */
     public void runFullPipeline(ResearchTask task, ResearchTaskLeaseService.Lease lease) {
         long pipelineStartedAt = System.currentTimeMillis();
         SubmissionPayload payload = null;
@@ -71,7 +92,7 @@ public class DeepResearchPipeline {
 
         try {
             payload = parsePayload(task);
-            // A PENDING task has no DB owner yet, so only the lease can be checked before startAttempt.
+            // PENDING 任务尚无数据库 owner，startAttempt 前只能先校验 Redis 租约所有权。
             requireLeaseOwnership(task, lease, ownershipLost);
             if (task.getStatus() == ResearchTask.Status.RUNNING) {
                 if (!lease.token().equals(task.getLeaseToken())) {
@@ -88,7 +109,7 @@ public class DeepResearchPipeline {
             requireTaskOwnership(runningTask, lease, ownershipLost);
             heartbeat = startResearchTaskHeartbeat(runningTask, lease, ownershipLost);
 
-            // Load only after the pending-start or RUNNING-takeover fence owns the task.
+            // 取得 PENDING 启动权或 RUNNING 接管权后再读 checkpoint，避免旧 worker 越权恢复。
             Optional<ResearchTaskCheckpointService.CheckpointState> checkpoint =
                     checkpointService.load(task.getId());
             workingState = checkpoint.map(ResearchTaskCheckpointService.CheckpointState::state).orElse(null);
@@ -107,10 +128,7 @@ public class DeepResearchPipeline {
                     .map(ResearchTaskCheckpointService.CheckpointState::plannedRounds)
                     .orElse(0);
             if (hasPendingReportRecovery(workingState)) {
-                // Older inline checkpoints stored the strict REPORT/PLANNED payload while their
-                // checkpoint columns still said DATA_PREFETCH / 0 rounds. Recover the durable
-                // debate progress from the paired turns so takeover reaches Manager directly
-                // instead of replaying Bull/Bear and the planner.
+                // 旧同步 checkpoint 的列仍是 DATA_PREFETCH/0；从成对辩论记录恢复轮次，接管后直接进入 Manager。
                 int durableRounds = completedDebateRounds(workingState);
                 roundsDone = Math.max(roundsDone, durableRounds);
                 plannedRounds = Math.max(plannedRounds, durableRounds);
@@ -122,6 +140,7 @@ public class DeepResearchPipeline {
                 requireTaskOwnership(runningTask, lease, ownershipLost);
                 chatStreamEmitter.emit(payload.traceId(), payload.conversationId(), "thought",
                         "开始收集深度研究证据……");
+                // 调用证据收集器建立结构化 ledger；后续辩论不得绕过 Harness 决定。
                 evidence = evidenceCollector.collect(
                         payload.ticker(), payload.query(), payload.traceId(), payload.conversationId());
             } else {
@@ -162,13 +181,12 @@ public class DeepResearchPipeline {
                 }
 
                 restoreSuspendedReportRecovery(workingState, suspendedReportRecovery);
-                // A checkpoint hash is historical metadata. Any current-policy PASS, including a
-                // recovered or policy-drift-only PASS, must bind reuse/persistence to the current
-                // ledger and policy contract.
+                // checkpoint 哈希仅是历史元数据；当前策略通过后，复用与持久化必须重新绑定当前证据账本和策略。
                 investmentReportVersionService.prepareHashes(workingState);
 
                 if (checkpoint.isEmpty() || resumeFromEvidenceBoundary) {
                     requireTaskOwnership(runningTask, lease, ownershipLost);
+                    // 调用版本服务复用同快照报告，但仍需当前策略和人工审核允许。
                     Optional<InvestmentReport> reusable =
                             investmentReportVersionService.findReusableReport(
                                     task.getUserId(), payload.conversationId(), workingState);
@@ -356,12 +374,10 @@ public class DeepResearchPipeline {
     }
 
     /**
-     * Background-task completion is authoritative for its trace lifecycle.
+     * 仅由后台任务终态结束对应 trace。
      *
-     * <p>The SSE subscriber may disconnect while the durable task keeps running. Closing the
-     * trace from the request stream would therefore record a false cancellation. Only a terminal
-     * task owned by this pipeline may close the task trace; ownership-loss paths leave it open for
-     * the takeover worker.</p>
+     * <p>SSE 订阅断开时持久化任务仍可能运行，请求流不能据此记录取消。
+     * 本流水线仅关闭自己持有的终态任务 trace；丢失所有权时留给接管 worker 关闭。</p>
      */
     private void endTerminalTaskTraceBestEffort(
             ResearchTask task,
@@ -390,8 +406,7 @@ public class DeepResearchPipeline {
                     Math.max(0, durationMs)
             );
         } catch (Exception error) {
-            // The business terminal state has already committed. Do not replay the research or
-            // risk duplicate publication because only the observability update failed.
+            // 业务终态已经提交；可观测性更新失败不能触发研究重放或重复发布。
             log.warn(
                     "Research task terminal trace update failed, taskId={}, traceId={}, status={}, error={}",
                     task.getId(),
@@ -412,6 +427,7 @@ public class DeepResearchPipeline {
             AtomicBoolean ownershipLost
     ) {
         requireTaskOwnership(task, lease, ownershipLost);
+        // 在用户行锁事务内同时写消息和 owner-fenced 终态，任一步失败则整体回滚。
         publicationTransaction.executeForUser(task.getUserId(), () -> {
             conversationMessageService.persistAssistantReport(
                     payload.conversationId(), task.getUserId(), text, payload.traceId());
@@ -432,6 +448,7 @@ public class DeepResearchPipeline {
             AtomicBoolean ownershipLost
     ) {
         requireTaskOwnership(task, lease, ownershipLost);
+        // 报告版本、最终消息和任务终态在同一用户发布锁/事务下提交。
         String text = publicationTransaction.executeForUser(task.getUserId(), () -> {
             InvestmentReportVersionService.PersistedReportVersion persisted =
                     investmentReportVersionService.persistReportVersionWithMetadata(
@@ -441,8 +458,7 @@ public class DeepResearchPipeline {
                             modelTier,
                             modelName
                     );
-            // Same-snapshot publication may replace the candidate with the already committed
-            // canonical report. Render only after that decision, while still under the user lock.
+            // 同快照发布可能改用已提交的规范报告，因此须在用户锁内完成裁决后再渲染。
             String committedText = reportRenderer.buildFinalAnswerBrief(state);
             conversationMessageService.persistAssistantReport(
                     payload.conversationId(),
@@ -493,6 +509,16 @@ public class DeepResearchPipeline {
      * 在研究任务的租约保护下运行 Bull/Bear 辩论，并把结果持久化为报告版本。
      *
      * <p>辩论失败时优先尝试离线兜底报告；兜底也失败才把任务标记为失败并向上抛出。</p>
+     *
+     * @param traceId 研究 trace ID
+     * @param conversationId 来源会话 ID
+     * @param userId 任务所属用户
+     * @param agentState 已包含确定性证据的状态
+     * @param selectedModel 最终报告模型元数据
+     * @param task 已落库研究任务
+     * @param lease 当前执行租约
+     * @return 已发布报告的 JSON 表示
+     * @throws Exception 辩论和离线兜底均失败时
      */
     public String runResearchDebateWithTask(
             String traceId,
@@ -522,6 +548,7 @@ public class DeepResearchPipeline {
             saveEvidenceForOwner(reportTask, lease, agentState, ownershipLost);
             markStageForOwner(
                     reportTask, lease, ResearchTask.Stage.AGENT_DEBATE, ownershipLost);
+            // 调用辩论服务；每轮回调先保存 checkpoint，并在关键副作用前再次检查 ownership。
             AnalysisState completed = researchDebateService.runDebate(
                     traceId, conversationId, agentState, 1, 0,
                     (state, rounds, planned) -> saveDebateRoundForOwner(
@@ -908,7 +935,7 @@ public class DeepResearchPipeline {
                 effectKey,
                 suspendedReportRecovery
         );
-        // Close the crash window between the read-only effect and the ordinary evidence checkpoint.
+        // 立即写入 checkpoint，收窄只读恢复副作用与常规证据 checkpoint 之间的崩溃窗口。
         saveHarnessSnapshotForOwner(task, lease, recovered.state(), ownershipLost);
         return recovered;
     }
@@ -1209,13 +1236,18 @@ public class DeepResearchPipeline {
     ) {
     }
 
-    /** Signals the worker that another execution owns the task and this attempt must stop silently. */
+    /** 通知 worker 当前执行已失去 ownership，应静默停止并把队列记录留给新 owner。 */
     public static final class OwnershipLostException extends RuntimeException {
 
+        /** @param message 所有权丢失的阶段与任务上下文 */
         public OwnershipLostException(String message) {
             super(message);
         }
 
+        /**
+         * @param message 所有权丢失的阶段与任务上下文
+         * @param cause 触发 owner-fence 失败的原始异常
+         */
         public OwnershipLostException(String message, Throwable cause) {
             super(message, cause);
         }

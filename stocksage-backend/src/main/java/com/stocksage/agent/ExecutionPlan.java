@@ -17,6 +17,7 @@ import java.util.List;
  * @param actions 需要预先执行的确定性动作名称列表，例如 RAG 检索或行情查询
  * @param observation Coordinator 对当前上下文的观察摘要，会写入追踪面板
  * @param modelTier 最终回答应使用的模型能力层级，由后端映射到具体模型名
+ * @param routingDecision 有界路由诊断元数据；历史调用可为空
  */
 public record ExecutionPlan(
         PlanRoute route,
@@ -51,6 +52,7 @@ public record ExecutionPlan(
     /**
      * 允许显式路由调用省略模型层级。
      */
+    /** 保留显式路由与模型层级、但不传路由诊断元数据的兼容构造形式。 */
     public ExecutionPlan(PlanRoute route,
                          String taskType,
                          String thought,

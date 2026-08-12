@@ -20,18 +20,34 @@ import java.util.concurrent.TimeoutException;
 /**
  * 只读的 IBKR Client Portal Web API 服务。
  *
- * 本服务刻意不包含下单、撤单或改单调用。
+ * <p>工具层通过本服务查询认证、账户、持仓、报价和历史 K 线；本服务再调用
+ * {@link IbkrWebApiClient} 访问本地 Gateway，并统一处理配置开关、熔断与错误 JSON。</p>
+ *
+ * <p>边界：刻意不包含下单、撤单或改单调用，Gateway 登录和双重验证也必须由用户完成。</p>
  */
 @Slf4j
 @Service
 public class IbkrReadOnlyService {
 
+    /** IBKR 开关、端点、超时和快照字段配置。 */
     private final IbkrProperties properties;
+    /** 执行本地 Client Portal Gateway HTTP 请求。 */
     private final IbkrWebApiClient client;
+    /** 将用户代码解析为 IBKR 合约搜索条件。 */
     private final IbkrInstrumentResolver instrumentResolver;
+    /** 构造并序列化统一 JSON 响应。 */
     private final ObjectMapper objectMapper;
+    /** Gateway 连续失败时快速拒绝后续只读调用。 */
     private final CircuitBreaker ibkrCircuitBreaker;
 
+    /**
+     * 创建只读 IBKR 门面并初始化独立熔断器。
+     *
+     * @param properties IBKR 配置
+     * @param client Gateway HTTP 客户端
+     * @param instrumentResolver 股票代码解析器
+     * @param objectMapper JSON 解析器
+     */
     public IbkrReadOnlyService(IbkrProperties properties, IbkrWebApiClient client,
                                IbkrInstrumentResolver instrumentResolver, ObjectMapper objectMapper) {
         this.properties = properties;
@@ -52,6 +68,8 @@ public class IbkrReadOnlyService {
 
     /**
      * 查询 Client Portal Gateway 当前认证状态。
+     *
+     * @return 认证状态 JSON；关闭或失败时返回统一错误 JSON
      */
     public String getAuthStatus() {
         return execute("authStatus", () -> client.postEmpty("/iserver/auth/status"));
@@ -59,6 +77,8 @@ public class IbkrReadOnlyService {
 
     /**
      * 调用 tickle 保持已登录会话活跃。
+     *
+     * @return Gateway tickle 响应 JSON
      */
     public String tickle() {
         return execute("tickle", () -> client.postEmpty("/tickle"));
@@ -66,6 +86,8 @@ public class IbkrReadOnlyService {
 
     /**
      * 读取当前登录用户可见的投资组合账户列表。
+     *
+     * @return 带 provider、endpoint 和 timestamp 的账户 JSON
      */
     public String getPortfolioAccounts() {
         return execute("portfolioAccounts", this::portfolioAccounts);
@@ -73,11 +95,15 @@ public class IbkrReadOnlyService {
 
     /**
      * 读取账户摘要；未传账户时按配置或账户列表自动选择。
+     *
+     * @param accountId 可选账户 ID
+     * @return 带来源元数据的账户摘要 JSON
      */
     public String getAccountSummary(String accountId) {
         return execute("accountSummary", () -> {
             JsonNode accounts = rawPortfolioAccounts();
             String resolvedAccountId = resolveAccountId(accountId, accounts);
+            // 调用 Gateway 的账户摘要端点；账户选择顺序由 resolveAccountId 统一控制。
             JsonNode summary = client.get(uriBuilder -> uriBuilder
                     .path("/portfolio/{accountId}/summary")
                     .build(resolvedAccountId));
@@ -91,6 +117,9 @@ public class IbkrReadOnlyService {
 
     /**
      * 读取账户持仓；仅返回 IBKR 提供的只读持仓数据。
+     *
+     * @param accountId 可选账户 ID
+     * @return 带来源元数据的持仓 JSON
      */
     public String getPositions(String accountId) {
         return execute("positions", () -> {
@@ -109,6 +138,9 @@ public class IbkrReadOnlyService {
 
     /**
      * 获取股票实时或延迟报价，并附带订阅可用性提示。
+     *
+     * @param code 用户输入的美股或港股代码
+     * @return 归一化报价 JSON；不支持、未登录或熔断时返回错误 JSON
      */
     public String getRealtimeQuote(String code) {
         return execute("realtimeQuote", () -> {
@@ -117,12 +149,14 @@ public class IbkrReadOnlyService {
                 return errorPayload(instrument.input(), instrument.message());
             }
 
+            // 先调用 secdef/search 取得 conid，后续快照端点只接受该 IBKR 合约 ID。
             JsonNode contract = resolveContract(instrument);
             String conid = text(contract, "conid");
             if (conid.isBlank()) {
                 return errorPayload(code, "IBKR did not return a conid for " + instrument.symbol());
             }
 
+            // IBKR 要求先初始化 brokerage accounts，再请求行情订阅快照。
             client.get("/iserver/accounts");
             JsonNode snapshot = null;
             JsonNode firstQuote = objectMapper.createObjectNode();
@@ -159,6 +193,11 @@ public class IbkrReadOnlyService {
 
     /**
      * 获取历史 K 线数据；period 和 bar 为空时使用保守默认值。
+     *
+     * @param code 用户输入的美股或港股代码
+     * @param period IBKR 历史窗口，如 1d、1y
+     * @param bar K 线粒度，如 5min、1d
+     * @return 带合约和来源元数据的历史行情 JSON
      */
     public String getHistoricalBars(String code, String period, String bar) {
         return execute("historicalBars", () -> {
@@ -175,6 +214,7 @@ public class IbkrReadOnlyService {
 
             String safePeriod = defaultIfBlank(period, "1d");
             String safeBar = defaultIfBlank(bar, "1h");
+            // 调用只读 history 端点；outsideRth=true 让盘前盘后数据由 IBKR 决定是否返回。
             JsonNode history = client.get(uriBuilder -> uriBuilder
                     .path("/iserver/marketdata/history")
                     .queryParam("conid", conid)
@@ -202,6 +242,8 @@ public class IbkrReadOnlyService {
 
     /**
      * 为账户列表响应追加统一元数据。
+     *
+     * @return 可直接序列化的账户响应节点
      */
     private JsonNode portfolioAccounts() {
         return withMetadata(rawPortfolioAccounts(), Map.of(
@@ -212,6 +254,8 @@ public class IbkrReadOnlyService {
 
     /**
      * 调用原始账户端点，不做错误包装，由外层 execute 统一处理。
+     *
+     * @return Gateway 原始账户数组或对象
      */
     private JsonNode rawPortfolioAccounts() {
         return client.get("/portfolio/accounts");
@@ -219,6 +263,10 @@ public class IbkrReadOnlyService {
 
     /**
      * 按“显式参数 -> 默认配置 -> 第一个可见账户”的顺序解析账户 ID。
+     *
+     * @param accountId 调用方显式账户 ID
+     * @param accounts Gateway 返回的可见账户树
+     * @return 最终账户 ID
      */
     private String resolveAccountId(String accountId, JsonNode accounts) {
         if (accountId != null && !accountId.isBlank()) {
@@ -238,6 +286,9 @@ public class IbkrReadOnlyService {
 
     /**
      * 搜索并选择 IBKR 合约定义，返回包含 conid 的合约节点。
+     *
+     * @param instrument 已归一化标的
+     * @return 选中的合约节点
      */
     private JsonNode resolveContract(IbkrInstrument instrument) {
         JsonNode matches = client.get(uriBuilder -> uriBuilder
@@ -254,6 +305,10 @@ public class IbkrReadOnlyService {
 
     /**
      * 在同名合约中优先选择与解析市场一致的候选。
+     *
+     * @param matches secdef/search 返回的候选数组
+     * @param instrument 目标市场和符号
+     * @return 最合适的候选；无候选时返回 missing node
      */
     private JsonNode chooseContract(JsonNode matches, IbkrInstrument instrument) {
         if (!matches.isArray() || matches.size() == 0) {
@@ -280,6 +335,9 @@ public class IbkrReadOnlyService {
 
     /**
      * 请求 IBKR 市场快照端点，字段集合由配置控制。
+     *
+     * @param conid IBKR 合约 ID
+     * @return Gateway 快照数组
      */
     private JsonNode marketDataSnapshot(String conid) {
         return client.get(uriBuilder -> uriBuilder
@@ -291,6 +349,10 @@ public class IbkrReadOnlyService {
 
     /**
      * 为第三方原始响应包一层统一元数据，便于模型判断来源和时间。
+     *
+     * @param payload Gateway 原始数据
+     * @param metadata 来源、账户或合约等稳定元数据
+     * @return 包含 timestamp、metadata 和 data 的对象
      */
     private JsonNode withMetadata(JsonNode payload, Map<String, String> metadata) {
         ObjectNode result = objectMapper.createObjectNode();
@@ -302,6 +364,10 @@ public class IbkrReadOnlyService {
 
     /**
      * 构造统一错误载荷，避免工具调用异常直接泄漏为非 JSON 文本。
+     *
+     * @param input 当前操作或用户输入
+     * @param message 可向用户展示的失败原因
+     * @return 顶层带 error=true 的 JSON 对象
      */
     private ObjectNode errorPayload(String input, String message) {
         ObjectNode result = objectMapper.createObjectNode();
@@ -315,6 +381,10 @@ public class IbkrReadOnlyService {
 
     /**
      * 所有 IBKR 操作的统一保护层：配置开关、熔断和异常 JSON 化都在这里处理。
+     *
+     * @param operation 日志和错误响应中的操作名
+     * @param call 实际 Gateway 调用
+     * @return 序列化后的成功或错误 JSON
      */
     private String execute(String operation, IbkrCall call) {
         if (!properties.isEnabled()) {
@@ -349,16 +419,19 @@ public class IbkrReadOnlyService {
         }
     }
 
+    /** 识别需要用户重新登录或刷新会话的 400/401 响应。 */
     private boolean isGatewaySessionFailure(WebClientResponseException e) {
         int status = e.getStatusCode().value();
         return status == 400 || status == 401;
     }
 
+    /** 识别 Gateway 的 5xx 服务端故障。 */
     private boolean isGatewayServerFailure(WebClientResponseException e) {
         int status = e.getStatusCode().value();
         return status >= 500 && status < 600;
     }
 
+    /** 沿异常链识别 WebClient/Reactor 包装后的超时。 */
     private boolean isGatewayTimeoutFailure(Throwable e) {
         Throwable current = e;
         while (current != null) {
@@ -370,6 +443,7 @@ public class IbkrReadOnlyService {
         return false;
     }
 
+    /** 将会话失败转换为带重新登录指引的错误 JSON。 */
     private String handleGatewaySessionFailure(String operation, WebClientResponseException e) {
         int status = e.getStatusCode().value();
         String message = gatewaySessionMessage(status, e.getStatusText());
@@ -378,6 +452,7 @@ public class IbkrReadOnlyService {
         return write(errorPayload(operation, message));
     }
 
+    /** 将 Gateway 5xx 转换为按操作定制的错误 JSON。 */
     private String handleGatewayServerFailure(String operation, WebClientResponseException e) {
         int status = e.getStatusCode().value();
         String message = gatewayServerMessage(operation, status, e.getStatusText());
@@ -386,6 +461,7 @@ public class IbkrReadOnlyService {
         return write(errorPayload(operation, message));
     }
 
+    /** 将超时转换为可操作的重试提示，并保留详细堆栈到 DEBUG 日志。 */
     private String handleGatewayTimeoutFailure(String operation, Throwable e) {
         String message = gatewayTimeoutMessage(operation);
         log.warn("IBKR Web API operation {} timed out. {}", operation, message);
@@ -393,6 +469,7 @@ public class IbkrReadOnlyService {
         return write(errorPayload(operation, message));
     }
 
+    /** 生成会话错误的人类可读说明。 */
     private String gatewaySessionMessage(int status, String statusText) {
         String suffix = "Log in at https://localhost:5000, complete any required 2FA, then retry.";
         if (status == 401) {
@@ -404,6 +481,7 @@ public class IbkrReadOnlyService {
                 + "). The Gateway browser session may be stale or contract search may not be ready. " + suffix;
     }
 
+    /** 生成普通或历史行情端点的 5xx 说明。 */
     private String gatewayServerMessage(String operation, int status, String statusText) {
         String statusLabel = status + " " + defaultIfBlank(statusText, "Internal Server Error");
         if ("historicalBars".equals(operation)) {
@@ -414,6 +492,7 @@ public class IbkrReadOnlyService {
                 + ". Retry after refreshing the Gateway session at https://localhost:5000.";
     }
 
+    /** 生成普通或历史行情端点的超时说明。 */
     private String gatewayTimeoutMessage(String operation) {
         if ("historicalBars".equals(operation)) {
             return "IBKR Client Portal Gateway timed out after 10000ms while calling the history endpoint. The Workbench daily cockpit uses period=1y and bar=1d, while the 1D intraday view uses period=24h and bar=5min; Gateway can stall when the local session, market data subscription, pacing limit, or instrument history backend is not ready. Retry, refresh the Gateway session, or use another range.";
@@ -421,6 +500,7 @@ public class IbkrReadOnlyService {
         return "IBKR Client Portal Gateway timed out after 10000ms. Retry after refreshing the Gateway session at https://localhost:5000.";
     }
 
+    /** 将内部 JSON 节点序列化为 Spring AI 工具可返回的字符串。 */
     private String write(JsonNode node) {
         try {
             return objectMapper.writeValueAsString(node);
@@ -429,6 +509,7 @@ public class IbkrReadOnlyService {
         }
     }
 
+    /** 递归遍历不同 Gateway 版本的账户响应结构，查找第一个账户 ID。 */
     private String findFirstAccountId(JsonNode node) {
         if (node == null || node.isMissingNode() || node.isNull()) {
             return "";
@@ -460,6 +541,7 @@ public class IbkrReadOnlyService {
         return "";
     }
 
+    /** 按多个兼容字段名从单个对象中读取账户 ID。 */
     private String findAccountIdInObject(JsonNode node) {
         for (String field : new String[]{"accountId", "account_id", "acctId", "id"}) {
             String value = text(node, field);
@@ -470,6 +552,7 @@ public class IbkrReadOnlyService {
         return "";
     }
 
+    /** 将 IBKR 字段 6509 映射为模型易理解的行情可用性。 */
     private String availabilityHint(String availability) {
         if (availability == null || availability.isBlank()) {
             return "UNKNOWN";
@@ -486,10 +569,12 @@ public class IbkrReadOnlyService {
         return "UNKNOWN";
     }
 
+    /** 判断快照是否尚未返回 last/bid/ask 任一价格。 */
     private boolean isMissingPrice(JsonNode quote) {
         return text(quote, "31").isBlank() && text(quote, "84").isBlank() && text(quote, "86").isBlank();
     }
 
+    /** 读取快照数组第一项；缺失时返回空对象，简化调用方判空。 */
     private JsonNode firstArrayItem(JsonNode node) {
         if (node != null && node.isArray() && node.size() > 0) {
             return node.get(0);
@@ -497,6 +582,7 @@ public class IbkrReadOnlyService {
         return objectMapper.createObjectNode();
     }
 
+    /** 容错读取 JSON 文本字段。 */
     private String text(JsonNode node, String field) {
         if (node == null || !node.has(field) || node.get(field).isNull()) {
             return "";
@@ -504,10 +590,12 @@ public class IbkrReadOnlyService {
         return node.get(field).asText("");
     }
 
+    /** 将 null 或空白文本替换为给定默认值。 */
     private String defaultIfBlank(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value.trim();
     }
 
+    /** 等待行情订阅生效；中断时恢复线程中断标记。 */
     private void sleepQuietly(long millis) {
         try {
             Thread.sleep(millis);
@@ -516,6 +604,7 @@ public class IbkrReadOnlyService {
         }
     }
 
+    /** 允许 execute 统一包装任意返回 JSON 节点的 Gateway 调用。 */
     @FunctionalInterface
     private interface IbkrCall {
         JsonNode invoke();

@@ -26,6 +26,10 @@ public record IbkrInstrument(
 
     /**
      * 构造美股合约目标，默认走 SMART 路由和 USD。
+     *
+     * @param input 用户原始输入
+     * @param symbol 归一化美股 ticker
+     * @return 可用于 IBKR 合约搜索的美股描述
      */
     public static IbkrInstrument us(String input, String symbol) {
         return new IbkrInstrument(input, "US", symbol, "SMART", "USD", true, "");
@@ -33,6 +37,10 @@ public record IbkrInstrument(
 
     /**
      * 构造港股合约目标，默认使用 SEHK 和 HKD。
+     *
+     * @param input 用户原始输入
+     * @param symbol 去除前导零的港股代码
+     * @return 可用于 IBKR 合约搜索的港股描述
      */
     public static IbkrInstrument hk(String input, String symbol) {
         return new IbkrInstrument(input, "HK", symbol, "SEHK", "HKD", true, "");
@@ -42,6 +50,10 @@ public record IbkrInstrument(
      * 构造不支持的合约目标。
      *
      * <p>上层服务会把 message 放入错误响应，帮助用户改用受支持的符号格式或数据服务。</p>
+     *
+     * @param input 用户原始输入
+     * @param message 拒绝原因和建议
+     * @return supported=false 的描述对象
      */
     public static IbkrInstrument unsupported(String input, String message) {
         return new IbkrInstrument(input, "UNKNOWN", "", "", "", false, message);

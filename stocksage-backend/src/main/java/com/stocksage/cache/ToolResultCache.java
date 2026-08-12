@@ -29,9 +29,12 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class ToolResultCache {
 
+    /** 所有工具缓存键的命名空间，避免与会话记忆等 Redis 数据冲突。 */
     private static final String KEY_PREFIX = "cache:tool:";
 
+    /** 执行字符串类型的 Redis 读写，缓存值保持为上游返回的原始 JSON。 */
     private final StringRedisTemplate stringRedisTemplate;
+    /** 抑制 Redis 持续不可用期间的重复 WARN，恢复后会自动复位。 */
     private final AtomicBoolean redisUnavailableLogged = new AtomicBoolean(false);
 
     /**
@@ -62,6 +65,7 @@ public class ToolResultCache {
         }
 
         log.debug("Cache MISS: {}", cacheKey);
+        // 缓存未命中或 Redis 不可用时，调用业务方传入的真实数据源方法。
         String result = supplier.get();
 
         if (cacheAvailable && result != null && cacheable.test(result)) {
@@ -80,6 +84,10 @@ public class ToolResultCache {
      * 构造稳定、可读的 Redis 缓存 key。
      *
      * <p>参数会 trim 并转小写，减少大小写或首尾空格导致的重复缓存。</p>
+     *
+     * @param category 数据类别，作为键的第二段
+     * @param parts 能唯一标识一次工具请求的参数
+     * @return 归一化后的 Redis 键
      */
     private String buildKey(String category, String[] parts) {
         StringBuilder sb = new StringBuilder(KEY_PREFIX).append(category);
@@ -89,6 +97,13 @@ public class ToolResultCache {
         return sb.toString();
     }
 
+    /**
+     * 按故障类型记录缓存异常；连接故障只在首次出现时告警，业务仍继续访问数据源。
+     *
+     * @param operation 失败的 Redis 操作名
+     * @param cacheKey 相关缓存键
+     * @param e Redis 异常
+     */
     private void logCacheFailure(String operation, String cacheKey, Exception e) {
         if (isRedisConnectionFailure(e)) {
             if (redisUnavailableLogged.compareAndSet(false, true)) {
@@ -112,6 +127,7 @@ public class ToolResultCache {
         log.warn("Cache {} failed, falling through to source: {}", operation, cacheKey, e);
     }
 
+    /** 判断异常链是否包含 Redis 连接池或连接失败。 */
     private boolean isRedisConnectionFailure(Throwable error) {
         for (Throwable current = error; current != null; current = current.getCause()) {
             String className = current.getClass().getName();
@@ -125,6 +141,7 @@ public class ToolResultCache {
         return false;
     }
 
+    /** 提取异常链最底层的可读消息，供降噪日志使用。 */
     private String rootMessage(Throwable error) {
         Throwable current = error;
         Throwable last = error;

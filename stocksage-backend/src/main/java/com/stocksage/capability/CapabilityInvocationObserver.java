@@ -15,23 +15,42 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.util.Map;
 
-/** Emits the same action/observation timeline for local and MCP capability calls. */
+/**
+ * 为本地和 MCP 能力生成一致的执行观测。
+ *
+ * <p>{@link CapabilityGateway} 在调用前后通知本组件；组件把简短 action/observation 写入
+ * {@link TraceEventStore} 供 SSE 实时展示，把结构化步骤交给 {@link TraceService} 持久化，
+ * 同时记录低基数指标。观测失败只记日志，不改变能力调用结果。</p>
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class CapabilityInvocationObserver {
 
+    /** 实时/回放事件存储；Redis 不可用时由其内部降级到本地总线。 */
     private final TraceEventStore traceEventStore;
+    /** 保存可在前端追踪面板查看的能力步骤。 */
     private final TraceService traceService;
+    /** 只序列化受控字段，不写入完整查询或结果正文。 */
     private final ObjectMapper objectMapper;
+    /** 记录按能力、提供方、Skill 和状态聚合的次数与延迟。 */
     private final MeterRegistry meterRegistry;
 
+    /**
+     * 在提供方调用前发出“正在执行”事件。
+     *
+     * @param descriptor 能力的本地策略描述
+     * @param context 当前调用链路上下文
+     */
     public void started(CapabilityDescriptor descriptor, CapabilityInvocationContext context) {
         String providerLabel = descriptor.providerType() == CapabilityDescriptor.ProviderType.MCP
                 ? "外部 MCP" : "本地";
         emit(context, "action", providerLabel + "能力: " + descriptor.id());
     }
 
+    /**
+     * 记录成功或截断结果；只保存参数名和结果摘要，不保存原始证据正文。
+     */
     public void completed(CapabilityDescriptor descriptor,
                           CapabilityInvocationContext context,
                           Map<String, Object> arguments,
@@ -43,6 +62,9 @@ public class CapabilityInvocationObserver {
         recordMetrics(descriptor, context, result.status().name(), result.durationMs());
     }
 
+    /**
+     * 记录失败类别、耗时和受限异常摘要；不会吞掉 Gateway 随后抛出的异常。
+     */
     public void failed(CapabilityDescriptor descriptor,
                        CapabilityInvocationContext context,
                        Map<String, Object> arguments,
@@ -81,6 +103,7 @@ public class CapabilityInvocationObserver {
             return;
         }
         try {
+            // Trace 只保留参数键，避免把搜索词或未来可能出现的敏感值持久化。
             String argumentSummary = objectMapper.writeValueAsString(Map.of(
                     "argumentKeys", arguments == null ? java.util.Set.of() : arguments.keySet(),
                     "skillId", context.skillId() == null ? "" : context.skillId()

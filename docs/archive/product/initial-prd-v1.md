@@ -1,5 +1,8 @@
 # 智能投研助手 Agent 产品需求文档（PRD）
 
+> [!WARNING]
+> 本文是项目早期规划快照，已不代表当前实现、架构或验证结果。当前信息以仓库根目录的 `README.md`、`CLAUDE.md`、`TODO.md`、`progress.md` 和 `feature_list.json` 为准。
+
 | 项目信息 | 内容 |
 |---------|------|
 | 产品名称 | StockSage 智能投研助手 |

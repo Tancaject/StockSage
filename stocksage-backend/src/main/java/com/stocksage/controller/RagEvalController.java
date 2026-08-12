@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class RagEvalController {
 
+    /** 串联检索、回答生成和诊断信息组装。 */
     private final RagEvalService ragEvalService;
 
     /**
@@ -28,6 +29,9 @@ public class RagEvalController {
      *
      * <p>该接口面向 rag-eval 脚本而非普通前端聊天页面，返回值会包含检索上下文、引用和可选中间阶段，
      * 用于定位召回、重排或回答生成环节的质量问题。</p>
+     *
+     * @param request 问题、过滤条件和诊断开关
+     * @return 生成答案、引用及各检索阶段结果
      */
     @PostMapping("/rag")
     public RagEvalResponse evaluateRag(@Valid @RequestBody RagEvalRequest request) {

@@ -53,9 +53,11 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 public class ResearchDebateService {
 
+    /** 调用方未提供执行权检查器时使用的无操作实现。 */
     private static final Runnable NO_OP_EXECUTION_GUARD = () -> {
     };
 
+    /** 每轮完成后的可选持久化钩子，由后台研究任务保存可恢复状态。 */
     @FunctionalInterface
     public interface RoundCheckpointer {
 
@@ -63,15 +65,24 @@ public class ResearchDebateService {
         void onRoundCompleted(AnalysisState state, int roundsCompleted, int plannedRounds);
     }
 
+    /** 只基于现有证据生成看多论证。 */
     private final BullResearcher bullResearcher;
+    /** 只基于现有证据生成看空论证。 */
     private final BearResearcher bearResearcher;
+    /** 把分析师与辩论证据综合为结构化报告。 */
     private final ResearchManager researchManager;
+    /** 用轻量模型选择 1 到配置上限的辩论轮数。 */
     private final DebateRoundPlanner debateRoundPlanner;
+    /** 持久化每个规划、辩论和综合步骤。 */
     private final TraceService traceService;
+    /** 把逐 token 辩论与恢复提示写入 SSE/Trace 事件流。 */
     private final ChatStreamEmitter chatStreamEmitter;
+    /** 在报告阶段调用纯完成策略并记录决策。 */
     private final ResearchHarness researchHarness;
+    /** DEEP 证据/报告的权威完成规则。 */
     private final DeepResearchCompletionPolicy completionPolicy;
 
+    /** 可配置辩论轮数上限，RoundPlanner 还会硬限制到五轮。 */
     @Value("${stocksage.agent.debate.max-rounds:5}")
     private int maxRounds;
 
@@ -148,6 +159,23 @@ public class ResearchDebateService {
         );
     }
 
+    /**
+     * 从指定轮次运行或恢复完整辩论、报告综合与报告 Harness。
+     *
+     * <p>首次运行会并行执行 Round 1 的 Bull、Bear 和轮次规划；恢复运行严格沿用 checkpoint 的
+     * {@code fixedPlannedRounds}，不重新规划历史。每轮完成后才写回状态并 checkpoint，随后执行
+     * Research Manager、最多一次报告修复和 NOT_RATED 安全降级。</p>
+     *
+     * @param traceId 当前任务链路 ID；为空时跳过 Trace/SSE
+     * @param conversationId 会话 ID
+     * @param state 已包含分析师报告、证据账本和可选历史轮次的状态
+     * @param startRound 首个待执行轮次；首次运行传 1
+     * @param fixedPlannedRounds 恢复时的既定总轮数；首次规划时传非正数
+     * @param checkpointer 每轮双方定稿后的 checkpoint 回调
+     * @param executionGuard 每个模型 token 前的非阻塞执行权检查器
+     * @param harnessCheckpointer Harness 生命周期与报告产物的原子持久化回调
+     * @return 原状态对象，已补充辩论、报告和 Harness 快照
+     */
     public AnalysisState runDebate(
             String traceId,
             Long conversationId,
@@ -239,6 +267,7 @@ public class ResearchDebateService {
         long managerStart = System.currentTimeMillis();
         log.info("Research Manager started (streaming), traceId={}", traceId);
         HarnessSnapshot checkpointSnapshot = workingState.getHarnessSnapshot();
+        // REVALIDATED 却缺报告说明历史 checkpoint 不完整；失败关闭为 NOT_RATED，绝不重新评级。
         if (isRevalidatedReportMissingArtifact(checkpointSnapshot, workingState)) {
             HarnessDecision failSafeDecision = failSafeMissingReportDecision(checkpointSnapshot);
             InvestmentReport notRated = buildNotRatedReport(workingState, failSafeDecision);
@@ -262,6 +291,7 @@ public class ResearchDebateService {
         Map<RecoveryAction, Integer> reportRecoveryAttempts =
                 reportRecoveryAttempts(checkpointSnapshot);
         if (resumingReportRecovery) {
+            // PLANNED 已预留唯一一次 Manager 修复预算，恢复时必须延续同一 effect key。
             reportRecoveryAttempts = withMinimumRecoveryAttempt(
                     reportRecoveryAttempts,
                     RecoveryAction.RESYNTHESIZE_REPORT,
@@ -285,6 +315,7 @@ public class ResearchDebateService {
                 "manager-synthesis",
                 traceId
         );
+        // ResearchManager 只负责生成；是否允许评级由 Harness 第二阶段独立决定。
         HarnessDecision reportDecision = researchHarness.evaluateReport(
                 traceId,
                 completionPolicy,
@@ -358,8 +389,7 @@ public class ResearchDebateService {
         }
         workingState.setInvestmentReport(report);
         if (checkpointRevalidatedReport) {
-            // Persist the decision and its resulting report together. A takeover must never observe
-            // REVALIDATED without the artifact that was actually revalidated.
+            // 决策与对应报告一起 checkpoint，接管者不能只看到 REVALIDATED 却拿不到被验收的产物。
             checkpointHarnessState(harnessCheckpointer, workingState);
         }
         addTraceStep(traceId, "Research Manager", "Synthesize InvestmentReport",
@@ -370,13 +400,18 @@ public class ResearchDebateService {
     }
 
     /**
-     * Revalidates a synthesized report loaded from a durable checkpoint against the current
-     * completion policy and evidence ledger.
+     * 用当前完成策略和证据账本重新验收持久化报告。
      *
-     * <p>A checkpoint's {@code VERIFIED} label is historical data, not current authority. If the
-     * artifact no longer passes, this method may consume the single report-repair budget, but it
-     * never replays Bull/Bear rounds. A repair is allowed only when complete debate turns prove
-     * that at least one round already finished; otherwise recovery fails closed to NOT_RATED.</p>
+     * <p>checkpoint 中的 {@code VERIFIED} 只是历史数据，不是当前权威。若产物不再通过，本方法可消费
+     * 唯一一次报告修复预算，但不会重放 Bull/Bear。只有完整双方发言证明至少完成一轮时才允许修复；
+     * 否则失败关闭为 NOT_RATED。</p>
+     *
+     * @param traceId 当前任务链路 ID
+     * @param conversationId 会话 ID
+     * @param state 从 checkpoint 恢复的分析状态
+     * @param executionGuard Manager token 前的执行权检查器
+     * @param harnessCheckpointer 保存最新 Harness/报告的回调
+     * @return 重新验收、修复或安全降级后的状态
      */
     public AnalysisState revalidateCheckpointedReport(
             String traceId,
@@ -395,8 +430,7 @@ public class ResearchDebateService {
         Map<RecoveryAction, Integer> previousAttempts =
                 reportRecoveryAttempts(previousSnapshot);
 
-        // A persisted PLANNED decision reserves the one Manager repair. Do not let a stale
-        // artifact (if an older writer happened to retain one) cancel that durable effect.
+        // 持久化 PLANNED 已预留唯一一次 Manager 修复；旧 writer 留下的陈旧产物不能取消该副作用。
         if (isReportRecoveryCheckpoint(previousSnapshot)) {
             HarnessDecision plannedDecision = recoveryDecisionFrom(previousSnapshot);
             return executeCheckpointedReportRepair(
@@ -468,6 +502,11 @@ public class ResearchDebateService {
         return workingState;
     }
 
+    /**
+     * 执行 checkpoint 中已计划或当前验收新触发的唯一一次 Manager 修复。
+     *
+     * <p>修复前先持久化 PLANNED 并清空无效旧报告；崩溃接管后仍会沿用同一 effect key。</p>
+     */
     private AnalysisState executeCheckpointedReportRepair(
             String traceId,
             Long conversationId,
@@ -512,8 +551,7 @@ public class ResearchDebateService {
                 RecoveryLifecycle.PLANNED,
                 effectKey
         );
-        // The invalid historical artifact must not survive the PLANNED checkpoint. If the process
-        // crashes now, takeover sees a missing artifact plus the reserved Manager-only repair.
+        // 无效历史报告不能留在 PLANNED checkpoint；此处崩溃时，接管者看到“缺产物 + 已预留修复”。
         state.setInvestmentReport(null);
         checkpointHarnessState(harnessCheckpointer, state);
 
@@ -529,10 +567,12 @@ public class ResearchDebateService {
         );
     }
 
+    /** 从快照读取报告恢复预算；无快照时返回空不可变表。 */
     private Map<RecoveryAction, Integer> reportRecoveryAttempts(HarnessSnapshot snapshot) {
         return snapshot == null ? Map.of() : snapshot.recoveryAttempts();
     }
 
+    /** 恢复 PLANNED 副作用时确保对应预算至少记为已使用一次。 */
     private Map<RecoveryAction, Integer> withMinimumRecoveryAttempt(
             Map<RecoveryAction, Integer> attempts,
             RecoveryAction action,
@@ -547,6 +587,7 @@ public class ResearchDebateService {
         return Map.copyOf(merged);
     }
 
+    /** 在不可变副本中增加指定恢复动作次数。 */
     private Map<RecoveryAction, Integer> incrementRecoveryAttempt(
             Map<RecoveryAction, Integer> attempts,
             RecoveryAction action
@@ -560,6 +601,7 @@ public class ResearchDebateService {
         return Map.copyOf(incremented);
     }
 
+    /** 从持久化 PLANNED 快照重建本次报告修复决策。 */
     private HarnessDecision recoveryDecisionFrom(HarnessSnapshot snapshot) {
         List<HarnessViolation> violations = snapshot.violations().stream()
                 .map(code -> new HarnessViolation(code, null))
@@ -574,6 +616,7 @@ public class ResearchDebateService {
         );
     }
 
+    /** @return 报告是否由当前 ID/版本的完成策略验收 */
     private boolean hasCurrentPolicyMetadata(InvestmentReport report) {
         return report != null
                 && completionPolicy.policyId().equals(report.getCompletionPolicyId())
@@ -581,6 +624,11 @@ public class ResearchDebateService {
                 .equals(report.getCompletionPolicyVersion());
     }
 
+    /**
+     * 计算从 Round 1 开始连续、且 Bull/Bear 双方都已完成的轮数。
+     *
+     * <p>只完成单方或中间缺轮都不算，防止基于残缺辩论直接修复报告。</p>
+     */
     private int completedDebateRounds(AnalysisState state) {
         if (state == null || state.getDebateTurns() == null) {
             return 0;
@@ -605,6 +653,7 @@ public class ResearchDebateService {
         return completed;
     }
 
+    /** 把最终报告决策写回 HarnessSnapshot，并保留已执行修复的稳定 effect key。 */
     private void applyFinalReportSnapshot(
             AnalysisState state,
             HarnessDecision decision,
@@ -632,12 +681,14 @@ public class ResearchDebateService {
         ));
     }
 
+    /** @return 快照是否表示尚待执行/重验的报告修复 */
     private boolean isReportRecoveryCheckpoint(HarnessSnapshot snapshot) {
         return snapshot != null
                 && snapshot.phase() == HarnessPhase.REPORT
                 && snapshot.recoveryLifecycle() == RecoveryLifecycle.PLANNED;
     }
 
+    /** @return 快照声称修复已重验、但实际报告产物缺失的故障状态 */
     private boolean isRevalidatedReportMissingArtifact(
             HarnessSnapshot snapshot,
             AnalysisState state
@@ -650,6 +701,7 @@ public class ResearchDebateService {
                 && (state == null || state.getInvestmentReport() == null);
     }
 
+    /** 为“REVALIDATED 但缺产物”构造 NOT_RATED 的失败关闭决策。 */
     private HarnessDecision failSafeMissingReportDecision(HarnessSnapshot snapshot) {
         List<HarnessViolation> violations = snapshot.violations().stream()
                 .map(code -> new HarnessViolation(code, null))
@@ -660,6 +712,7 @@ public class ResearchDebateService {
         return new HarnessDecision(HarnessOutcome.DEGRADE, violations, List.of());
     }
 
+    /** 写入报告修复的 PLANNED 或 REVALIDATED 生命周期快照。 */
     private void applyReportRecoverySnapshot(
             AnalysisState state,
             HarnessDecision decision,
@@ -679,6 +732,7 @@ public class ResearchDebateService {
         ));
     }
 
+    /** 调用可选持久化回调；无后台任务/测试场景可不提供。 */
     private void checkpointHarnessState(
             Consumer<AnalysisState> harnessCheckpointer,
             AnalysisState state
@@ -688,6 +742,7 @@ public class ResearchDebateService {
         }
     }
 
+    /** 优先复用 checkpoint 中的 effect key，否则按本次运行生成稳定键。 */
     private String existingOrStableReportEffectKey(
             HarnessSnapshot snapshot,
             String traceId,
@@ -698,6 +753,11 @@ public class ResearchDebateService {
                 : snapshot.recoveryEffectKey();
     }
 
+    /**
+     * 为单次 DEEP 运行的唯一报告修复生成稳定逻辑副作用键。
+     *
+     * <p>键不包含用户正文，供崩溃接管识别“同一次修复”。</p>
+     */
     private String stableReportRecoveryEffectKey(String traceId, Long conversationId) {
         String runKey = traceId == null || traceId.isBlank()
                 ? conversationId == null ? "unscoped" : "conversation-" + conversationId
@@ -711,6 +771,7 @@ public class ResearchDebateService {
                 + ":resynthesize_report-1";
     }
 
+    /** 根据 Harness 违规构造无 recommendation、无引用的安全 NOT_RATED 报告。 */
     private InvestmentReport buildNotRatedReport(
             AnalysisState state,
             HarnessDecision decision
@@ -760,6 +821,15 @@ public class ResearchDebateService {
                 .then(Mono.fromCallable(buffer::toString));
     }
 
+    /**
+     * 为一个模型阶段施加执行层硬超时并同步等待结果。
+     *
+     * @param stage Bull/Bear/Planner/Manager 的组合 Mono
+     * @param stageName 日志使用的稳定阶段名
+     * @param traceId 当前链路 ID
+     * @return 阶段结果
+     * @throws ModelStageTimeoutException 超过配置硬截止时间
+     */
     private <T> T awaitModelStage(Mono<T> stage, String stageName, String traceId) {
         long timeoutMs = Math.max(1L, modelStageTimeoutMs);
         ModelStageTimeoutException timeout = new ModelStageTimeoutException(
@@ -775,6 +845,7 @@ public class ResearchDebateService {
                 .block();
     }
 
+    /** 模型阶段超过执行层硬截止时间时抛出的稳定异常。 */
     static final class ModelStageTimeoutException extends RuntimeException {
 
         ModelStageTimeoutException(String stageName, long timeoutMs, String traceId) {
@@ -803,6 +874,7 @@ public class ResearchDebateService {
         state.getDebateRounds().add("Round " + round + " Bear:\n" + bear);
     }
 
+    /** @return 文本非空且非纯空白 */
     private boolean isPresent(String value) {
         return value != null && !value.isBlank();
     }

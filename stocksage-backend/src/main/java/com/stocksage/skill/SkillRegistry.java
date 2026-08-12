@@ -12,14 +12,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/** Immutable startup registry for repository-owned Skill manifests. */
+/**
+ * 仓库内 Skill 清单的启动期不可变注册表。
+ *
+ * <p>构造时读取 {@code skills/*.yml}，逐项交给 {@link SkillValidator} 做安全校验，并拒绝重复 ID。
+ * 下游 Resolver 只读取完成校验的快照，运行期间不会接受模型或远端服务动态注册流程。</p>
+ */
 @Component
 public class SkillRegistry {
 
+    /** classpath 中 Skill YAML 清单的位置。 */
     private static final String SKILL_PATTERN = "classpath*:skills/*.yml";
 
+    /** 按稳定 ID 索引的不可变 Skill 快照。 */
     private final Map<String, SkillDefinition> skills;
 
+    /**
+     * 加载并校验所有 Skill；任何不安全引用都会阻止应用启动。
+     *
+     * @param validator Skill 元数据、预算和能力引用校验器
+     */
     public SkillRegistry(SkillValidator validator) {
         Map<String, SkillDefinition> loaded = new LinkedHashMap<>();
         for (SkillDefinition skill : loadSkills()) {
@@ -31,14 +43,17 @@ public class SkillRegistry {
         this.skills = Map.copyOf(loaded);
     }
 
+    /** @return 指定 ID 的已启用或禁用定义；不存在时为空 */
     public Optional<SkillDefinition> find(String skillId) {
         return Optional.ofNullable(skills.get(skillId));
     }
 
+    /** @return 注册表中全部 Skill 的只读列表 */
     public List<SkillDefinition> list() {
         return List.copyOf(skills.values());
     }
 
+    /** 从所有 classpath YAML 读取并去重 Skill 定义。 */
     private List<SkillDefinition> loadSkills() {
         YAMLMapper mapper = YAMLMapper.builder()
                 .findAndAddModules()

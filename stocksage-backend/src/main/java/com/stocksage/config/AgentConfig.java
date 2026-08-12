@@ -20,18 +20,23 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AgentConfig {
 
+    /** 低成本规划任务使用的快速模型。 */
     @Value("${stocksage.chat.model-routing.fast-model:qwen3.6-flash}")
     private String fastModel;
 
+    /** 基本面、行情和新闻分析师默认使用的标准模型。 */
     @Value("${stocksage.chat.model-routing.standard-model:${STOCKSAGE_CHAT_MODEL:qwen3.6-plus}}")
     private String standardModel;
 
+    /** 多空研究员和研究经理使用的高能力模型。 */
     @Value("${stocksage.chat.model-routing.strong-model:qwen3.6-max-preview}")
     private String strongModel;
 
+    /** Agent 生成文本时的统一采样温度。 */
     @Value("${stocksage.chat.model-routing.temperature:${STOCKSAGE_CHAT_TEMPERATURE:0.7}}")
     private double modelRoutingTemperature;
 
+    /** 单次 Agent 调用允许生成的最大 token 数。 */
     @Value("${stocksage.chat.model-routing.max-output-tokens:${STOCKSAGE_CHAT_MAX_OUTPUT_TOKENS:4096}}")
     private int modelRoutingMaxOutputTokens;
 
@@ -40,6 +45,11 @@ public class AgentConfig {
      *
      * <p>该角色绑定财报、公告和结构化财务数据工具，输出会作为后续研究经理汇总时的重要证据来源。
      * 系统提示词中特别区分 A 股、港股和美股的数据来源，避免分析师把不同市场的数据接口混用。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @param fundamentalsTools 财报与结构化财务数据工具
+     * @param compatibilityTools 搜索、公告等兼容工具
+     * @return 仅开放基本面相关工具的 ChatClient
      */
     @Bean("fundamentalsAgentChatClient")
     public ChatClient fundamentalsAgentChatClient(ChatClient.Builder builder,
@@ -61,6 +71,11 @@ public class AgentConfig {
      *
      * <p>该角色绑定行情和 IBKR 只读工具，负责实时价格、K 线、技术指标、估值指标和账户快照。
      * 提示词要求必须通过工具读取运行时数据，防止模型凭记忆编造报价、持仓或技术指标。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @param marketTools 行情、指标和 IBKR 只读工具
+     * @param compatibilityTools 股票搜索等兼容工具
+     * @return 仅开放市场分析相关工具的 ChatClient
      */
     @Bean("marketAgentChatClient")
     public ChatClient marketAgentChatClient(ChatClient.Builder builder,
@@ -82,6 +97,11 @@ public class AgentConfig {
      *
      * <p>该角色绑定新闻与网页搜索工具，负责处理具有时效性的宏观政策、公司事件和市场情绪。
      * 输出侧重信息时间、来源和不确定性，供研究经理判断新闻证据是否仍然有效。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @param newsTools 新闻与网页搜索工具
+     * @param compatibilityTools 股票搜索等兼容工具
+     * @return 仅开放新闻研究相关工具的 ChatClient
      */
     @Bean("newsAgentChatClient")
     public ChatClient newsAgentChatClient(ChatClient.Builder builder,
@@ -102,6 +122,9 @@ public class AgentConfig {
      *
      * <p>多头研究员不直接调用工具，只基于分析师已给出的证据组织正方论点，
      * 重点挖掘增长、护城河、估值修复和潜在催化剂。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @return 不绑定工具的多头研究员 ChatClient
      */
     @Bean("bullResearcherChatClient")
     public ChatClient bullResearcherChatClient(ChatClient.Builder builder) {
@@ -113,6 +136,9 @@ public class AgentConfig {
      *
      * <p>空头研究员同样不直接调用工具，只针对已有证据提出反方论点，
      * 重点检查估值压力、竞争、周期、财务质量和执行风险。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @return 不绑定工具的空头研究员 ChatClient
      */
     @Bean("bearResearcherChatClient")
     public ChatClient bearResearcherChatClient(ChatClient.Builder builder) {
@@ -124,6 +150,9 @@ public class AgentConfig {
      *
      * <p>研究经理负责整合分析师报告和多空辩论，输出最终结构化结论。
      * 这里的提示词强调公司一致性校验和证据追溯，避免把不同公司或不同 ticker 的信息拼接成同一份报告。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @return 负责最终研究综合的 ChatClient
      */
     @Bean("researchManagerChatClient")
     public ChatClient researchManagerChatClient(ChatClient.Builder builder) {
@@ -144,6 +173,9 @@ public class AgentConfig {
      *
      * <p>轮次规划只需根据证据复杂度输出一个整数 JSON，不需要前沿模型，因此固定走 FAST 档。
      * 配合 {@code ResearchDebateService} 让它与第 1 轮辩论并发执行，使其不再占用深度研究的关键路径。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @return 只输出轮次决策的 ChatClient
      */
     @Bean("debatePlannerChatClient")
     public ChatClient debatePlannerChatClient(ChatClient.Builder builder) {
@@ -181,6 +213,9 @@ public class AgentConfig {
      * 统一构造 Agent 使用的后端白名单模型选项。
      *
      * <p>chat 走百炼 OpenAI 兼容接口，模型名通过标准 OpenAI 协议传递。</p>
+     *
+     * @param modelName 本次角色应使用的模型名；空值时回退到标准模型
+     * @return 包含模型、温度和输出上限的调用选项
      */
     private OpenAiChatOptions chatOptions(String modelName) {
         String resolvedModel = modelName == null || modelName.isBlank() ? standardModel : modelName.trim();

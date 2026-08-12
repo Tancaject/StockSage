@@ -8,6 +8,9 @@ package com.stocksage.exception;
  */
 public class ResourceNotFoundException extends RuntimeException {
 
+    /**
+     * @param message 不泄露资源归属或内部 ID 的通用说明
+     */
     public ResourceNotFoundException(String message) {
         super(message);
     }

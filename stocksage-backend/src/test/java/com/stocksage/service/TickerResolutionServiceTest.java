@@ -3,12 +3,18 @@ package com.stocksage.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.repository.MessageRepository;
 import com.stocksage.tool.MarketTools;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.api.Test;
+
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class TickerResolutionServiceTest {
@@ -25,6 +31,19 @@ class TickerResolutionServiceTest {
         assertThat(service.resolvePrimaryTicker("美光最近财报怎么样")).isEqualTo("MU");
         assertThat(service.resolvePrimaryTicker("分析一下英伟达")).isEqualTo("NVDA");
         assertThat(service.resolvePrimaryTicker("苹果值不值得长期投资")).isEqualTo("AAPL");
+    }
+
+    @ParameterizedTest
+    @MethodSource("companyAliases")
+    void resolvesEveryKnownCompanyAliasWithoutSearching(String query, String ticker) {
+        assertThat(service.resolvePrimaryTicker(query)).isEqualTo(ticker);
+        verifyNoInteractions(marketTools);
+    }
+
+    @Test
+    void preservesKnownCompanyPriorityWhenSeveralAliasesAppear() {
+        assertThat(service.resolvePrimaryTicker("比较 apple、NVIDIA 和 micron"))
+                .isEqualTo("MU");
     }
 
     @Test
@@ -59,5 +78,20 @@ class TickerResolutionServiceTest {
         assertThat(service.resolveSectorForTicker("nvda")).isEqualTo("半导体");
         assertThat(service.resolveSectorForTicker("UNKNOWN1")).isEmpty();
         assertThat(service.resolveSectorForTicker(null)).isEmpty();
+    }
+
+    private static Stream<Arguments> companyAliases() {
+        return Stream.of(
+                Arguments.of("micron earnings", "MU"),
+                Arguments.of("英偉達走势", "NVDA"),
+                Arguments.of("microsoft cloud", "MSFT"),
+                Arguments.of("蘋果新品", "AAPL"),
+                Arguments.of("亞馬遜财报", "AMZN"),
+                Arguments.of("alphabet valuation", "GOOGL"),
+                Arguments.of("tesla deliveries", "TSLA"),
+                Arguments.of("強生诉讼", "JNJ"),
+                Arguments.of("exxon oil", "XOM"),
+                Arguments.of("jpmorgan earnings", "JPM")
+        );
     }
 }

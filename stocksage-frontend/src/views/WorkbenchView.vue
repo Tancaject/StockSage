@@ -424,29 +424,6 @@ let cockpitRequestId = 0
 let reportVersionsRequestId = 0
 let reportDetailRequestId = 0
 
-const marketIndexes = ref([
-  { name: '上证指数', code: 'SSEC', value: '3,150.20', change: '+14.15', changePercent: '+0.45', points: [20, 25, 23, 28, 30, 27, 32, 35], isUp: true },
-  { name: '深证成指', code: 'SZN', value: '10,210.15', change: '+32.45', changePercent: '+0.32', points: [15, 18, 16, 22, 20, 25, 24, 28], isUp: true },
-  { name: '恒生指数', code: 'HSI', value: '18,450.60', change: '-107.80', changePercent: '-0.58', points: [40, 38, 35, 32, 36, 30, 28, 25], isUp: false },
-  { name: '纳斯达克', code: 'IXIC', value: '16,850.30', change: '+192.15', changePercent: '+1.15', points: [10, 12, 15, 18, 20, 22, 24, 28], isUp: true },
-  { name: '标普 500', code: 'SPX', value: '5,430.20', change: '+45.60', changePercent: '+0.85', points: [15, 16, 18, 17, 21, 20, 23, 25], isUp: true },
-])
-
-function buildSparkline(points) {
-  if (!points || !points.length) return ''
-  const width = 50
-  const height = 18
-  const maxVal = Math.max(...points)
-  const minVal = Math.min(...points)
-  const span = maxVal - minVal || 1
-  return points.map((p, idx) => {
-    const x = (idx / (points.length - 1)) * width
-    const y = height - ((p - minVal) / span) * height
-    return `${idx === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`
-  }).join(' ')
-}
-
-
 const tabs = [
   { id: 'portfolio', label: '持仓', icon: markRaw(Wallet) },
   { id: 'research', label: '研究', icon: markRaw(DataAnalysis) },
@@ -937,13 +914,6 @@ async function handleReportReview({ status, comment, expectedLockVersion }) {
 
 function reviewStatusClass(status) {
   return String(status || 'unknown').trim().toLowerCase().replaceAll('_', '-')
-}
-
-function formatMetric(value) {
-  const number = Number(value)
-  if (!Number.isFinite(number)) return '--'
-  if (Math.abs(number) <= 1) return number.toFixed(3)
-  return number.toFixed(1)
 }
 
 function formatDate(value) {

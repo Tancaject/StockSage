@@ -5,12 +5,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
- * 聚焦财务报表、SEC 文件和经营质量的分析师智能体。
- * 它接收 ChatService 已准备好的上下文，并可在需要时通过配置的 ChatClient 使用基本面工具。
+ * 聚焦财务报表、SEC 文件和经营质量的专业分析 Agent。
+ *
+ * <p>上游预取/ChatService 提供已解析标的和 RAG 上下文；本类通过专用 ChatClient 使用最小基本面
+ * 工具集合并产出文本报告，DEEP 时再由 Bull/Bear 与 ResearchManager 消费。它不负责路由或评级。</p>
  */
 @Service
 public class FundamentalsAgent {
 
+    /** 在 AgentConfig 中绑定基本面工具和角色提示词的专用客户端。 */
     private final ChatClient chatClient;
 
     /**

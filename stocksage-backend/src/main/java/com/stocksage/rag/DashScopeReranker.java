@@ -22,11 +22,14 @@ import java.util.List;
 @Service
 public class DashScopeReranker {
 
+    /** 延迟提供重排模型，使未配置 DashScope 时应用仍可启动。 */
     private final ObjectProvider<DashScopeRerankModel> rerankModelProvider;
 
+    /** 是否启用语义重排阶段。 */
     @Value("${stocksage.rag.rerank.enabled:true}")
     private boolean enabled;
 
+    /** DashScope 重排模型名。 */
     @Value("${stocksage.rag.rerank.model:gte-rerank-v2}")
     private String modelName;
 
@@ -34,6 +37,8 @@ public class DashScopeReranker {
      * 延迟注入 DashScope 重排模型。
      *
      * <p>使用 ObjectProvider 是为了让缺少 DashScope 配置时服务仍能启动，并在重排阶段自动降级。</p>
+     *
+     * @param rerankModelProvider 可选重排模型提供器
      */
     public DashScopeReranker(ObjectProvider<DashScopeRerankModel> rerankModelProvider) {
         this.rerankModelProvider = rerankModelProvider;
@@ -41,6 +46,8 @@ public class DashScopeReranker {
 
     /**
      * 返回当前配置是否启用重排。
+     *
+     * @return 配置开关值；不代表模型 Bean 一定可用
      */
     public boolean isEnabled() {
         return enabled;
@@ -49,6 +56,11 @@ public class DashScopeReranker {
     /**
      * 对融合候选重新排序，并把重排分数保存在文档元数据中，
      * 供引用展示和评估诊断使用。
+     *
+     * @param query 用户查询或改写后的查询
+     * @param candidates RRF 融合后的候选列表
+     * @param topN 最多返回的文档数
+     * @return 重排结果；关闭、失败或无模型时按原顺序截断
      */
     public List<Document> rerank(String query, List<Document> candidates, int topN) {
         if (!enabled || query == null || query.isBlank() || candidates == null || candidates.isEmpty()) {
@@ -62,6 +74,7 @@ public class DashScopeReranker {
         }
 
         try {
+            // DashScopeRerankModel.call 执行远程重排；returnDocuments 让响应保留原文和元数据。
             DashScopeRerankOptions options = DashScopeRerankOptions.builder()
                     .model(modelName)
                     .topN(topN)
@@ -88,6 +101,9 @@ public class DashScopeReranker {
      * 将 DashScope 返回的带分数文档转回 Spring AI Document。
      *
      * <p>重排分数同时写入 metadata 和 score，方便引用展示、评测脚本和后续排序逻辑读取。</p>
+     *
+     * @param scoredDocument DashScope 返回的文档与分数
+     * @return 带 {@code rerank_score} 的 Spring AI 文档；无输出时返回 {@code null}
      */
     private Document toDocument(DocumentWithScore scoredDocument) {
         if (scoredDocument == null || scoredDocument.getOutput() == null) {
@@ -102,6 +118,10 @@ public class DashScopeReranker {
 
     /**
      * 在重排不可用时按原顺序截断候选列表。
+     *
+     * @param documents 待截断文档；可为空
+     * @param topN 最大返回数，负数按 0 处理
+     * @return 不超过上限的新列表
      */
     private List<Document> limit(List<Document> documents, int topN) {
         if (documents == null || documents.isEmpty()) {

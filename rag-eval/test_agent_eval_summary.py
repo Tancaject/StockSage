@@ -195,6 +195,164 @@ class AgentEvalSummaryTest(unittest.TestCase):
             all(gate["status"] != "failed" for gate in report["gates"])
         )
 
+    def test_completion_gate_contract_preserves_order_schema_and_thresholds(self):
+        evidence = complete_evidence()
+        evidence["harness_payload"] = harness_result(policy_version="2")
+        report = build_report(
+            planner(),
+            GATES,
+            baseline_payload=planner(),
+            **evidence,
+        )
+
+        self.assertEqual(
+            [
+                "schema_version",
+                "generated_at",
+                "status",
+                "planner",
+                "rag",
+                "trace",
+                "completion",
+                "live_completion",
+                "end_to_end",
+                "baseline_delta",
+                "gates",
+                "recommendations",
+            ],
+            list(report),
+        )
+        self.assertEqual(
+            [
+                "route_accuracy",
+                "macro_f1",
+                "required_action_recall",
+                "forbidden_action_rate",
+                "critical_failures",
+                "executable_rate",
+                "baseline_max_metric_drop",
+                "p95_latency_ratio",
+            ],
+            [gate["metric"] for gate in report["gates"][:8]],
+        )
+
+        fields = ("metric", "value", "operator", "threshold", "status")
+        completion_gates = report["gates"][8:]
+        self.assertTrue(all(list(gate) == list(fields) for gate in completion_gates))
+        self.assertEqual(
+            [
+                (
+                    "harness_engine",
+                    "java-production-policy",
+                    "==",
+                    "java-production-policy",
+                    "passed",
+                ),
+                (
+                    "harness_schema",
+                    "harness_eval_v1",
+                    "==",
+                    "harness_eval_v1",
+                    "passed",
+                ),
+                (
+                    "harness_case_schema",
+                    "harness_golden_case_v2",
+                    "==",
+                    "harness_golden_case_v2",
+                    "passed",
+                ),
+                (
+                    "harness_policy_id",
+                    "deep-equity-v1",
+                    "==",
+                    "deep-equity-v1",
+                    "passed",
+                ),
+                ("harness_policy_version", "2", "==", 2, "passed"),
+                ("harness_status", "pass", "==", "pass", "passed"),
+                ("harness_case_count", 60, ">=", 60, "passed"),
+                ("harness_exact_accuracy", 1.0, ">=", 1.0, "passed"),
+                (
+                    "harness_decision_contract_exact_match_rate",
+                    1.0,
+                    ">=",
+                    1.0,
+                    "passed",
+                ),
+                (
+                    "harness_violation_exact_match_rate",
+                    1.0,
+                    ">=",
+                    1.0,
+                    "passed",
+                ),
+                (
+                    "harness_recovery_exact_match_rate",
+                    1.0,
+                    ">=",
+                    1.0,
+                    "passed",
+                ),
+                ("harness_unsafe_pass_count", 0, "<=", 0, "passed"),
+                ("harness_coverage_status", "pass", "==", "pass", "passed"),
+                (
+                    "harness_dataset_sha256",
+                    "a" * 64,
+                    "matches",
+                    "64 hexadecimal characters",
+                    "passed",
+                ),
+                (
+                    "harness_live_engine",
+                    "stocksage-live-http",
+                    "==",
+                    "stocksage-live-http",
+                    "passed",
+                ),
+                (
+                    "harness_live_schema",
+                    "harness_live_eval_v1",
+                    "==",
+                    "harness_live_eval_v1",
+                    "passed",
+                ),
+                (
+                    "harness_live_policy_ids",
+                    ["deep-equity-v1"],
+                    "==",
+                    ["deep-equity-v1"],
+                    "passed",
+                ),
+                (
+                    "harness_live_policy_versions",
+                    ["2"],
+                    "==",
+                    ["2"],
+                    "passed",
+                ),
+                (
+                    "harness_live_dataset_sha256",
+                    "b" * 64,
+                    "==",
+                    "b" * 64,
+                    "passed",
+                ),
+                ("harness_live_status", "pass", "==", "pass", "passed"),
+                ("harness_live_case_count", 30, ">=", 30, "passed"),
+                ("harness_live_completed_rate", 1.0, ">=", 1.0, "passed"),
+                (
+                    "harness_live_safe_terminal_rate",
+                    1.0,
+                    ">=",
+                    1.0,
+                    "passed",
+                ),
+                ("harness_live_unsafe_result_count", 0, "<=", 0, "passed"),
+            ],
+            [tuple(gate[field] for field in fields) for gate in completion_gates],
+        )
+
     def test_rejects_old_offline_policy_version(self):
         report = build_report(
             planner(),

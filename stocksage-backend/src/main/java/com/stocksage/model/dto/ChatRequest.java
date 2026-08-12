@@ -37,7 +37,9 @@ public class ChatRequest {
     private Boolean replaceLastTurn;
 
     /**
-     * 前端上传或粘贴的图片附件。
+     * 当前聊天轮次上传或粘贴的图片附件。
+     *
+     * <p>后端校验 MIME 类型与 data URL 后把图片传给多模态模型，不把原图写入消息表。</p>
      */
     @Data
     public static class ImageAttachment {
@@ -48,7 +50,7 @@ public class ChatRequest {
         /** MIME 类型，例如 image/png。 */
         private String mediaType;
 
-        /** data URL，格式为 data:image/png;base64,...。 */
+        /** data URL，格式为 data:image/png;base64,...；后端会校验类型、编码和大小。 */
         private String dataUrl;
     }
 }

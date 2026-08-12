@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.Map;
 
 /**
- * 智能体推理的一个步骤。
+ * 一条可持久化的智能体执行步骤。
  *
  * 规划-执行流程中的每一步产生一个 AgentStep，包含：
  *   - thought:     LLM 的思考过程（"我需要获取茅台的K线数据"）
@@ -16,8 +16,9 @@ import java.util.Map;
  *   - actionInput: 工具调用参数的 JSON（{"code":"sh.600519","period":"daily","days":30}）
  *   - observation:  工具返回的结果
  *
- * 多个 AgentStep 组成一条完整链路，存储在 agent_traces.steps 字段中（JSON 数组）。
- * 前端链路视图读取这个数组，渲染成时间线界面。
+ * <p>{@link com.stocksage.trace.TraceService} 为步骤编号并存入 {@code agent_traces.steps} JSON 数组，
+ * Phoenix 可选地镜像同一信息，前端再渲染为执行时间线。该 DTO 只保存有界摘要；
+ * 调用方不应把完整 prompt、敏感参数或超大工具结果放入其中。</p>
  */
 @Data
 @Builder
@@ -46,6 +47,6 @@ public class AgentStep {
     /** 本步骤消耗的令牌数（提示词 + 补全文本） */
     private int tokenCount;
 
-    /** Optional structured metadata. Values must be safe for persistence and observability. */
+    /** 可选结构化元数据；值必须适合持久化与可观测展示，不得包含敏感正文。 */
     private Map<String, Object> attributes;
 }

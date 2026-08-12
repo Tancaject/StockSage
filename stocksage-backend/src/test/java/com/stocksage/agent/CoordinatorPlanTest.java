@@ -31,7 +31,10 @@ class CoordinatorPlanTest {
     void conceptQuestionRoutesToDirectKnowledge() {
         ExecutionPlan plan = coordinator.planDeterministically("什么是市盈率？", 1);
         assertThat(plan.route()).isEqualTo(PlanRoute.DIRECT);
-        assertThat(plan.actionLabels()).contains("Knowledge Retrieval", "Final Answer");
+        assertThat(plan.actions()).containsExactly(
+                PlanAction.KNOWLEDGE_RETRIEVAL,
+                PlanAction.FINAL_ANSWER
+        );
         assertThat(plan.actions()).doesNotContain(PlanAction.BULL_RESEARCHER);
         assertThat(plan.modelTier()).isEqualTo(ModelTier.FAST);
         assertThat(plan.routingDecision().decisionSource()).isEqualTo(RoutingDecisionSource.DETERMINISTIC_FALLBACK);
@@ -43,7 +46,14 @@ class CoordinatorPlanTest {
     void tickerQueryRoutesToMarket() {
         ExecutionPlan plan = coordinator.planDeterministically("NVDA 最近 K 线走势如何？", 0);
         assertThat(plan.route()).isEqualTo(PlanRoute.MARKET);
-        assertThat(plan.actionLabels()).contains("Market Agent", "searchStocks", "getStockKLine", "Final Answer");
+        assertThat(plan.actions()).containsExactly(
+                PlanAction.MARKET_AGENT,
+                PlanAction.SEARCH_STOCKS,
+                PlanAction.GET_STOCK_KLINE,
+                PlanAction.GET_FINANCIAL_METRICS,
+                PlanAction.GET_TECHNICAL_INDICATORS,
+                PlanAction.FINAL_ANSWER
+        );
         assertThat(plan.modelTier()).isEqualTo(ModelTier.STANDARD);
     }
 
@@ -51,17 +61,29 @@ class CoordinatorPlanTest {
     void filingQuestionRoutesToFundamentals() {
         ExecutionPlan plan = coordinator.planDeterministically("苹果的风险因素有哪些？", 0);
         assertThat(plan.route()).isEqualTo(PlanRoute.FUNDAMENTALS);
-        assertThat(plan.actionLabels()).contains("Fundamentals Agent", "searchStocks",
-                "getFinancialReports", "searchCompanyReports", "Knowledge Retrieval", "Final Answer");
+        assertThat(plan.actions()).containsExactly(
+                PlanAction.FUNDAMENTALS_AGENT,
+                PlanAction.SEARCH_STOCKS,
+                PlanAction.GET_FINANCIAL_REPORTS,
+                PlanAction.SEARCH_COMPANY_REPORTS,
+                PlanAction.KNOWLEDGE_RETRIEVAL,
+                PlanAction.FINAL_ANSWER
+        );
     }
 
     @Test
     void investmentQuestionRoutesToDeepWithStrongTier() {
         ExecutionPlan plan = coordinator.planDeterministically("苹果值不值得长期投资？", 0);
         assertThat(plan.route()).isEqualTo(PlanRoute.DEEP);
-        assertThat(plan.actionLabels()).containsAll(List.of(
-                "Fundamentals Agent", "Market Agent", "News Agent",
-                "Bull Researcher", "Bear Researcher", "Research Manager", "Final Answer"));
+        assertThat(plan.actions()).containsExactly(
+                PlanAction.FUNDAMENTALS_AGENT,
+                PlanAction.MARKET_AGENT,
+                PlanAction.NEWS_AGENT,
+                PlanAction.BULL_RESEARCHER,
+                PlanAction.BEAR_RESEARCHER,
+                PlanAction.RESEARCH_MANAGER,
+                PlanAction.FINAL_ANSWER
+        );
         assertThat(plan.modelTier()).isEqualTo(ModelTier.STRONG);
     }
 
@@ -69,8 +91,14 @@ class CoordinatorPlanTest {
     void newsQuestionRoutesToNews() {
         ExecutionPlan plan = coordinator.planDeterministically("美联储今天有什么最新消息？", 0);
         assertThat(plan.route()).isEqualTo(PlanRoute.NEWS);
-        assertThat(plan.actionLabels()).contains("News Agent", "searchStocks",
-                "searchNews", "webSearch", "getMarketOverview", "Final Answer");
+        assertThat(plan.actions()).containsExactly(
+                PlanAction.NEWS_AGENT,
+                PlanAction.SEARCH_STOCKS,
+                PlanAction.SEARCH_NEWS,
+                PlanAction.WEB_SEARCH,
+                PlanAction.GET_MARKET_OVERVIEW,
+                PlanAction.FINAL_ANSWER
+        );
     }
 
     @Test

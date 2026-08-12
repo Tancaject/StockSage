@@ -24,10 +24,10 @@ import java.util.Map;
 @AllArgsConstructor
 public class RagDocument {
 
-    /** Milvus 中的唯一 ID */
+    /** Milvus 中的唯一向量 ID，用于去重和溯源。 */
     private String id;
 
-    /** 文档块的文本内容 */
+    /** 实际参与 embedding 和回答上下文注入的文本。 */
     private String content;
 
     // ===== 元数据 =====
@@ -62,6 +62,6 @@ public class RagDocument {
     /** 检索时的相似度得分（仅检索结果中有值） */
     private double score;
 
-    /** 扩展元数据，灵活存储其他信息 */
+    /** 未提升为固定字段的扩展元数据；键值需可安全序列化。 */
     private Map<String, String> extra;
 }

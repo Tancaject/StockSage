@@ -10,16 +10,18 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Bounded, serializable contracts shared by research completion policies.
+ * 研究完成策略共享的有限、可序列化契约集合。
  *
- * <p>The contracts intentionally contain metadata rather than raw tool payloads. This keeps policy
- * evaluation deterministic and makes the same objects safe to persist in checkpoints and traces.</p>
+ * <p>这些枚举和 record 只携带元数据，不保存原始工具 payload。这样策略判断可重复，
+ * 同一对象也能安全写入 checkpoint 与 Trace。上游研究流水线构造这些对象，
+ * {@link ResearchCompletionPolicy} 读取它们，恢复流程再持久化 {@link HarnessSnapshot}。</p>
  */
 public final class HarnessModels {
 
     private HarnessModels() {
     }
 
+    /** 证据在研究结论中承担的业务维度。 */
     public enum EvidenceDimension {
         FUNDAMENTALS,
         MARKET,
@@ -27,6 +29,7 @@ public final class HarnessModels {
         RAG
     }
 
+    /** 一次证据收集的稳定终态；只有 AVAILABLE 被视为有可用数据。 */
     public enum EvidenceStatus {
         AVAILABLE,
         EMPTY,
@@ -36,17 +39,22 @@ public final class HarnessModels {
         NOT_COLLECTED
     }
 
+    /** 标的解析结果；模糊和未解析都不能生成确定评级。 */
     public enum TargetResolutionStatus {
         RESOLVED,
         UNRESOLVED,
         AMBIGUOUS
     }
 
+    /** Harness 执行的两个阶段边界。 */
     public enum HarnessPhase {
         EVIDENCE,
         REPORT
     }
 
+    /**
+     * 策略结果：通过、有限恢复、安全降级或立即阻断。
+     */
     public enum HarnessOutcome {
         PASS,
         RECOVER,
@@ -54,6 +62,7 @@ public final class HarnessModels {
         BLOCK
     }
 
+    /** 可持久化和离线评估的有限违规代码。 */
     public enum ViolationCode {
         TARGET_UNRESOLVED,
         TARGET_AMBIGUOUS,
@@ -72,6 +81,7 @@ public final class HarnessModels {
         REPORT_EVIDENCE_REFERENCE_UNUSABLE
     }
 
+    /** 策略允许请求的有限恢复动作；流水线决定如何执行副作用。 */
     public enum RecoveryAction {
         RETRY_FUNDAMENTALS,
         RETRY_MARKET,
@@ -83,11 +93,10 @@ public final class HarnessModels {
     }
 
     /**
-     * Durable lifecycle for a bounded recovery effect.
+     * 有限恢复副作用的持久化生命周期。
      *
-     * <p>{@link #PLANNED} is persisted before the read-only tool effect. A takeover must execute
-     * that logical effect and re-run the evidence gate before advancing. {@link #REVALIDATED}
-     * records that the post-effect ledger has already been evaluated.</p>
+     * <p>{@link #PLANNED} 必须先于只读工具副作用写入；接管者看到它时继续同一逻辑副作用并重跑证据验收。
+     * {@link #REVALIDATED} 表示副作用后的账本或报告已重新评估。</p>
      */
     public enum RecoveryLifecycle {
         NONE,
@@ -95,6 +104,7 @@ public final class HarnessModels {
         REVALIDATED
     }
 
+    /** Research Manager 输出的解析/结构校验状态。 */
     public enum ParseStatus {
         VALID,
         INVALID_JSON,
@@ -103,6 +113,13 @@ public final class HarnessModels {
         MODEL_FAILURE
     }
 
+    /**
+     * 规范化后的研究标的身份。
+     *
+     * @param canonicalKey 用于严格比较的标准大写键
+     * @param displaySymbol 面向界面的原始/展示代码
+     * @param status 解析状态
+     */
     public record TargetIdentity(
             String canonicalKey,
             String displaySymbol,
@@ -114,6 +131,7 @@ public final class HarnessModels {
             status = status == null ? TargetResolutionStatus.UNRESOLVED : status;
         }
 
+        /** 从 ticker 构造已解析身份；空值安全降级为 unresolved。 */
         public static TargetIdentity resolved(String ticker) {
             String normalized = normalizeTarget(ticker);
             if (normalized.isBlank()) {
@@ -123,16 +141,33 @@ public final class HarnessModels {
                     TargetResolutionStatus.RESOLVED);
         }
 
+        /** @return 标准的未解析身份 */
         public static TargetIdentity unresolved() {
             return new TargetIdentity("", "", TargetResolutionStatus.UNRESOLVED);
         }
 
+        /** @return 状态为 RESOLVED 且标准键非空时为 {@code true} */
         @JsonIgnore
         public boolean isResolved() {
             return status == TargetResolutionStatus.RESOLVED && !canonicalKey.isBlank();
         }
     }
 
+    /**
+     * 一次工具/RAG 证据的审计元数据。
+     *
+     * @param evidenceId 单轮研究内稳定证据 ID
+     * @param dimension 业务证据维度
+     * @param capabilityId 产生证据的能力 ID
+     * @param targetKey 证据所属标准标的
+     * @param status 收集终态
+     * @param sourceRef 可追溯来源引用
+     * @param provider 实际数据提供方
+     * @param observedAt 系统观察到结果的时间
+     * @param asOf 数据自身的业务时点，可为空
+     * @param payloadHash 原始结果摘要哈希，不保存正文
+     * @param approvedReadOnly 是否来自批准的只读能力
+     */
     public record EvidenceEnvelope(
             String evidenceId,
             EvidenceDimension dimension,
@@ -157,10 +192,12 @@ public final class HarnessModels {
             payloadHash = safe(payloadHash);
         }
 
+        /** @return 仅当状态为 AVAILABLE 时为 {@code true} */
         public boolean hasUsableData() {
             return status == EvidenceStatus.AVAILABLE;
         }
 
+        /** @return 可用数据是否同时具有完整最小来源字段 */
         public boolean hasProvenance() {
             return hasUsableData()
                     && !evidenceId.isBlank()
@@ -171,6 +208,12 @@ public final class HarnessModels {
         }
     }
 
+    /**
+     * 一次策略评估的工作流与恢复预算上下文。
+     *
+     * @param workflow 路由/工作流名称
+     * @param recoveryAttempts 各恢复动作已执行次数
+     */
     public record RunContext(
             String workflow,
             Map<RecoveryAction, Integer> recoveryAttempts
@@ -188,15 +231,23 @@ public final class HarnessModels {
             recoveryAttempts = Map.copyOf(bounded);
         }
 
+        /** @return 未使用任何恢复预算的 DEEP 上下文 */
         public static RunContext deepResearch() {
             return new RunContext("DEEP", Map.of());
         }
 
+        /** @return 指定恢复动作已执行次数，未出现时为 0 */
         public int attempts(RecoveryAction action) {
             return recoveryAttempts.getOrDefault(action, 0);
         }
     }
 
+    /**
+     * 一条策略违规及其可选证据维度。
+     *
+     * @param code 稳定违规代码
+     * @param dimension 仅维度相关问题需要填写
+     */
     public record HarnessViolation(
             ViolationCode code,
             EvidenceDimension dimension
@@ -208,6 +259,13 @@ public final class HarnessModels {
         }
     }
 
+    /**
+     * 完成策略返回给执行流水线的纯决策。
+     *
+     * @param outcome 总体结果
+     * @param violations 触发该结果的有限违规列表
+     * @param recoveryActions 建议的有限恢复动作
+     */
     public record HarnessDecision(
             HarnessOutcome outcome,
             List<HarnessViolation> violations,
@@ -221,17 +279,17 @@ public final class HarnessModels {
             recoveryActions = recoveryActions == null ? List.of() : List.copyOf(recoveryActions);
         }
 
+        /** @return 只有 PASS 才允许生成投资建议 */
         public boolean allowsRecommendation() {
             return outcome == HarnessOutcome.PASS;
         }
     }
 
     /**
-     * A recovery context temporarily displaced by a recovery in another phase.
+     * 被另一阶段恢复暂时让位的恢复上下文。
      *
-     * <p>For example, evidence may need one bounded retry while a report repair is already
-     * {@link RecoveryLifecycle#PLANNED}. Persisting this bounded context alongside the active
-     * evidence snapshot prevents a crash from resetting the reserved Manager repair.</p>
+     * <p>例如报告修复已经 PLANNED 时，证据阶段又需要一次有限重试；把被挂起上下文一并持久化，
+     * 可防止进程崩溃后重置已预留的 Manager 修复预算。</p>
      */
     public record SuspendedRecovery(
             HarnessPhase phase,
@@ -252,6 +310,7 @@ public final class HarnessModels {
             recoveryEffectKey = safe(recoveryEffectKey);
         }
 
+        /** @return 从现有快照复制的挂起恢复；输入为空时返回 {@code null} */
         public static SuspendedRecovery from(HarnessSnapshot snapshot) {
             if (snapshot == null) {
                 return null;
@@ -268,10 +327,10 @@ public final class HarnessModels {
     }
 
     /**
-     * Durable policy state written before any recovery side effect.
+     * 在任何恢复副作用之前写入的持久化策略状态。
      *
-     * <p>Only bounded decision metadata is persisted; raw prompts and tool payloads stay out of
-     * checkpoints.</p>
+     * <p>快照只包含有限决策元数据；原始 prompt 和工具 payload 不进入 checkpoint。
+     * {@code recoveryEffectKey} 让接管者识别同一个逻辑副作用，避免重复消耗恢复预算。</p>
      */
     public record HarnessSnapshot(
             String policyId,
@@ -307,6 +366,7 @@ public final class HarnessModels {
             recoveryEffectKey = safe(recoveryEffectKey);
         }
 
+        /** 根据普通策略决策生成不带显式副作用键的快照。 */
         public static HarnessSnapshot from(
                 String policyId,
                 String policyVersion,
@@ -331,6 +391,7 @@ public final class HarnessModels {
             );
         }
 
+        /** 生成当前阶段的恢复快照，不挂起其他阶段。 */
         public static HarnessSnapshot recovery(
                 String policyId,
                 String policyVersion,
@@ -354,6 +415,7 @@ public final class HarnessModels {
             );
         }
 
+        /** 生成完整恢复快照，并可携带被暂时挂起的另一阶段恢复。 */
         public static HarnessSnapshot recovery(
                 String policyId,
                 String policyVersion,
@@ -382,6 +444,7 @@ public final class HarnessModels {
             );
         }
 
+        /** @return 是否存在尚待执行/重验的证据阶段恢复 */
         @JsonIgnore
         public boolean hasPendingEvidenceRecovery() {
             return phase == HarnessPhase.EVIDENCE
@@ -402,6 +465,13 @@ public final class HarnessModels {
         }
     }
 
+    /**
+     * Research Manager 的结构化产物及解析校验结果。
+     *
+     * @param report 成功解析的报告，失败时可为空
+     * @param parseStatus 解析或模型失败分类
+     * @param validationIssues 缺失/非法字段名的有限列表
+     */
     public record SynthesisResult(
             InvestmentReport report,
             ParseStatus parseStatus,

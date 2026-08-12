@@ -22,6 +22,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class CompatibilityTools {
 
+    /**
+     * 接住模型误发的 {@code code_interpreter} 调用并返回明确拒绝，不执行任何代码。
+     *
+     * @param input 模型传入的内容；仅统计长度后丢弃
+     * @return 固定的不可用 JSON，引导模型改用已注册的只读研究工具
+     */
     @Tool(name = "code_interpreter",
             description = "DO NOT USE. Code interpreter is NOT available in this environment. " +
                     "Always answer analytically using the market/fundamentals/news tools that are actually provided. " +

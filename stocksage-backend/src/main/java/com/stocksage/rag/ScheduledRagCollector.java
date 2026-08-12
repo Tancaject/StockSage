@@ -30,25 +30,36 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ScheduledRagCollector {
 
+    /** 调用 data-service 的网页搜索接口。 */
     private final DataServiceClient dataServiceClient;
+
+    /** 解析网页搜索响应 JSON。 */
     private final ObjectMapper objectMapper;
+
+    /** 将搜索摘要作为带 TTL 的临时来源写入 RAG。 */
     private final KnowledgeIngestionService knowledgeIngestionService;
 
+    /** 定时市场背景采集总开关。 */
     @Value("${stocksage.rag.scheduled-ingest.enabled:false}")
     private boolean enabled;
 
+    /** 是否在应用就绪后立即补采一次。 */
     @Value("${stocksage.rag.scheduled-ingest.run-on-startup:true}")
     private boolean runOnStartup;
 
+    /** 逗号分隔的公开网页搜索主题。 */
     @Value("${stocksage.rag.scheduled-ingest.keywords:US stock market outlook,NVDA AAPL TSLA earnings,Fed monetary policy}")
     private String keywordsCsv;
 
+    /** 每个主题最多读取的搜索结果数。 */
     @Value("${stocksage.rag.scheduled-ingest.max-results:5}")
     private int maxResults;
 
+    /** 临时市场背景保留天数。 */
     @Value("${stocksage.rag.scheduled-ingest.ttl-days:7}")
     private long ttlDays;
 
+    /** 低于该字符数的搜索摘要不入库。 */
     @Value("${stocksage.rag.scheduled-ingest.min-content-length:200}")
     private int minContentLength;
 
@@ -80,6 +91,8 @@ public class ScheduledRagCollector {
 
     /**
      * 立即执行所有配置关键词的采集，并返回每个来源的入库摘要。
+     *
+     * @return 关键词、来源数、去重数和逐来源结果
      */
     public Map<String, Object> collectNow() {
         List<String> keywords = parseKeywords();
@@ -102,10 +115,14 @@ public class ScheduledRagCollector {
 
     /**
      * 对单个关键词执行搜索、摘要过滤和短期知识入库。
+     *
+     * @param keyword 网页搜索主题
+     * @return 每个合格搜索结果的摄取结果
      */
     private List<KnowledgeIngestionResult> collectKeyword(String keyword) {
         List<KnowledgeIngestionResult> results = new ArrayList<>();
         try {
+            // webSearch 走 data-service 统一搜索管线；本类只消费返回的标题、链接和摘要。
             String response = dataServiceClient.webSearch(keyword, maxResults);
             JsonNode root = objectMapper.readTree(response);
             if (root.has("error") && !root.path("error").asText("").isBlank()) {
@@ -155,6 +172,12 @@ public class ScheduledRagCollector {
 
     /**
      * 将搜索结果整理成可被 RAG 检索的短文本来源。
+     *
+     * @param keyword 触发该结果的搜索词
+     * @param title 搜索结果标题
+     * @param link 原始来源链接
+     * @param snippet 搜索摘要
+     * @return 带标题、查询和来源的标准化短文本
      */
     private String buildContent(String keyword, String title, String link, String snippet) {
         return """
@@ -174,6 +197,8 @@ public class ScheduledRagCollector {
 
     /**
      * 解析逗号分隔关键词配置，忽略空白项。
+     *
+     * @return 按配置顺序排列的非空关键词
      */
     private List<String> parseKeywords() {
         List<String> keywords = new ArrayList<>();

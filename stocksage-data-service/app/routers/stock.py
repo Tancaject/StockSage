@@ -8,6 +8,8 @@
 - 错误返回 message 字段，不抛 500（LLM 需要读到错误信息来决定下一步）
 """
 
+from dataclasses import dataclass, field
+
 from fastapi import APIRouter, Query
 from app.services.akshare_service import AkshareService
 from app.services.baostock_service import BaostockService
@@ -27,6 +29,43 @@ bao = BaostockService()       # A 股数据（兼容）
 ak_svc = AkshareService()     # 港股免费数据源
 edgar = EdgarService()        # 美股 SEC 财报 / XBRL 数据源
 search_svc = SearchService()  # Tavily / DDG 新闻检索，供股票新闻端点复用
+
+_MERGEABLE_CANDIDATE_FIELDS = (
+    "name",
+    "shortName",
+    "longName",
+    "exchange",
+    "quoteType",
+    "provider",
+    "matchedTerm",
+)
+_EASTMONEY_CANDIDATE_FIELDS = (
+    "shortName",
+    "longName",
+    "exchange",
+    "quoteType",
+    "score",
+    "provider",
+    "matchedTerm",
+)
+_A_CATALOG_CANDIDATE_FIELDS = (
+    "shortName",
+    "longName",
+    "companyName",
+    "exchange",
+    "quoteType",
+    "score",
+    "provider",
+)
+_HK_CATALOG_CANDIDATE_FIELDS = (
+    "shortName",
+    "longName",
+    "englishName",
+    "exchange",
+    "quoteType",
+    "score",
+    "provider",
+)
 
 
 def _with_route(payload: dict, route) -> dict:
@@ -117,6 +156,113 @@ def _route_candidate(route, origin: str, extra: dict | None = None) -> dict:
     return candidate
 
 
+@dataclass(slots=True)
+class _CandidateCollector:
+    """按稳定身份收集候选，并合并来自不同来源的补充证据。"""
+
+    candidates: list[dict] = field(default_factory=list)
+    _seen: dict[tuple[str, str], dict] = field(default_factory=dict)
+
+    def add(self, candidate: dict) -> None:
+        key = (
+            candidate.get("market", ""),
+            candidate.get("resolvedCode") or candidate.get("symbol", ""),
+        )
+        if not key[1]:
+            return
+
+        existing = self._seen.get(key)
+        if existing is None:
+            self._seen[key] = candidate
+            self.candidates.append(candidate)
+            return
+
+        origin = candidate.get("origin")
+        if origin and origin != existing.get("origin"):
+            confirmed_by = existing.setdefault("confirmedBy", [])
+            if origin not in confirmed_by:
+                confirmed_by.append(origin)
+
+        for candidate_field in _MERGEABLE_CANDIDATE_FIELDS:
+            if not existing.get(candidate_field) and candidate.get(candidate_field):
+                existing[candidate_field] = candidate[candidate_field]
+
+
+def _candidate_from_provider_item(
+    item: dict,
+    origin: str,
+    extra_fields: tuple[str, ...],
+    keep_unsupported: bool = False,
+) -> dict | None:
+    """把供应商搜索行转换为稳定候选，不执行任何供应商调用。"""
+    symbol = item.get("symbol")
+    if not symbol:
+        return None
+
+    route = resolve_stock_route(symbol)
+    if not route.is_supported:
+        if not keep_unsupported:
+            return None
+        return {
+            "input": symbol,
+            "market": "UNSUPPORTED",
+            "resolvedCode": symbol,
+            "source": origin,
+            "routeReason": "search result is outside supported A/HK/US routing",
+            "origin": origin,
+            "symbol": symbol,
+            "name": item.get("shortName") or item.get("longName"),
+            "shortName": item.get("shortName"),
+            "longName": item.get("longName"),
+            "exchange": item.get("exchange"),
+            "quoteType": item.get("quoteType"),
+        }
+
+    extra = {
+        "symbol": symbol,
+        "name": item.get("shortName") or item.get("longName"),
+    }
+    extra.update({candidate_field: item.get(candidate_field) for candidate_field in extra_fields})
+    return _route_candidate(route, origin, extra)
+
+
+def _merge_provider_results(
+    collector: _CandidateCollector,
+    search_result: dict,
+    origin: str,
+    extra_fields: tuple[str, ...],
+    max_results: int,
+    keep_unsupported: bool = False,
+) -> None:
+    """按原始顺序合并一个供应商响应，并保留既有截断语义。"""
+    for item in search_result.get("results", []):
+        candidate = _candidate_from_provider_item(
+            item,
+            origin,
+            extra_fields,
+            keep_unsupported,
+        )
+        if candidate is None:
+            continue
+        collector.add(candidate)
+        if keep_unsupported and candidate.get("market") == "UNSUPPORTED":
+            continue
+        if len(collector.candidates) >= max_results:
+            break
+
+
+def _candidate_response(
+    query: str,
+    collector: _CandidateCollector,
+    max_results: int,
+) -> dict:
+    return {
+        "query": query,
+        "count": len(collector.candidates),
+        "candidates": collector.candidates[:max_results],
+    }
+
+
 def _resolve_with_search(value: str):
     """先直接解析；如果是公司名，再使用供应商搜索兜底。"""
     route = resolve_stock_route(value)
@@ -198,33 +344,13 @@ def search_stock(
     搜索顺序刻意从确定性到高成本：先走本地解析器，再走东方财富 suggest，
     最后才查较慢的 AKShare 目录。这样常见代码/公司名能快速返回，同时保留别名兜底。
     """
-    candidates = []
-    seen: dict[tuple[str, str], dict] = {}
-
-    def add_candidate(candidate: dict) -> None:
-        """候选去重，同时保留来自多个来源的证据。"""
-        key = (candidate.get("market", ""), candidate.get("resolvedCode") or candidate.get("symbol", ""))
-        if not key[1]:
-            return
-        existing = seen.get(key)
-        if existing is not None:
-            origin = candidate.get("origin")
-            if origin and origin != existing.get("origin"):
-                confirmed_by = existing.setdefault("confirmedBy", [])
-                if origin not in confirmed_by:
-                    confirmed_by.append(origin)
-            for field in ("name", "shortName", "longName", "exchange", "quoteType", "provider", "matchedTerm"):
-                if not existing.get(field) and candidate.get(field):
-                    existing[field] = candidate[field]
-            return
-        seen[key] = candidate
-        candidates.append(candidate)
+    collector = _CandidateCollector()
 
     # 阶段 1：本地确定性解析器速度快，且无需网络。
     for route in search_stock_routes(q, max_results=max_results):
-        add_candidate(_route_candidate(route, "local_resolver"))
+        collector.add(_route_candidate(route, "local_resolver"))
 
-    if not candidates and not ak_svc.has_specific_stock_terms(q):
+    if not collector.candidates and not ak_svc.has_specific_stock_terms(q):
         return {
             "query": q,
             "count": 0,
@@ -234,120 +360,65 @@ def search_stock(
 
     # 阶段 2：东方财富 suggest 覆盖跨市场的中英文别名；可用时优先使用。
     em_search = ak_svc.search_symbols(q, max_results=max_results)
-    for item in em_search.get("results", []):
-        symbol = item.get("symbol")
-        if not symbol:
-            continue
-        route = resolve_stock_route(symbol)
-        if not route.is_supported:
-            continue
-        add_candidate(_route_candidate(route, "eastmoney_suggest", {
-            "symbol": symbol,
-            "name": item.get("shortName") or item.get("longName"),
-            "shortName": item.get("shortName"),
-            "longName": item.get("longName"),
-            "exchange": item.get("exchange"),
-            "quoteType": item.get("quoteType"),
-            "score": item.get("score"),
-            "provider": item.get("provider"),
-            "matchedTerm": item.get("matchedTerm"),
-        }))
-        if len(candidates) >= max_results:
-            break
+    _merge_provider_results(
+        collector,
+        em_search,
+        "eastmoney_suggest",
+        _EASTMONEY_CANDIDATE_FIELDS,
+        max_results,
+    )
 
     if em_search.get("results"):
         # suggest 命中通常已经包含跨市场候选；直接返回可避免慢目录搜索拖慢对话工具调用。
-        return {
-            "query": q,
-            "count": len(candidates),
-            "candidates": candidates[:max_results],
-        }
+        return _candidate_response(q, collector, max_results)
 
     a_search = {"results": []}
     hk_search = {"results": []}
 
-    def add_a_results(search_result: dict) -> None:
-        """合并 A 股目录搜索结果。"""
-        for item in search_result.get("results", []):
-            symbol = item.get("symbol")
-            if not symbol:
-                continue
-            route = resolve_stock_route(symbol)
-            if not route.is_supported:
-                continue
-            add_candidate(_route_candidate(route, "akshare_a_catalog", {
-                "symbol": symbol,
-                "name": item.get("shortName") or item.get("longName"),
-                "shortName": item.get("shortName"),
-                "longName": item.get("longName"),
-                "companyName": item.get("companyName"),
-                "exchange": item.get("exchange"),
-                "quoteType": item.get("quoteType"),
-                "score": item.get("score"),
-                "provider": item.get("provider"),
-            }))
-            if len(candidates) >= max_results:
-                break
-
-    def add_hk_results(search_result: dict) -> None:
-        """合并港股目录搜索结果。"""
-        for item in search_result.get("results", []):
-            symbol = item.get("symbol")
-            if not symbol:
-                continue
-            route = resolve_stock_route(symbol)
-            if not route.is_supported:
-                add_candidate({
-                    "input": symbol,
-                    "market": "UNSUPPORTED",
-                    "resolvedCode": symbol,
-                    "source": "akshare_hk_catalog",
-                    "routeReason": "search result is outside supported A/HK/US routing",
-                    "origin": "akshare_hk_catalog",
-                    "symbol": symbol,
-                    "name": item.get("shortName") or item.get("longName"),
-                    "shortName": item.get("shortName"),
-                    "longName": item.get("longName"),
-                    "exchange": item.get("exchange"),
-                    "quoteType": item.get("quoteType"),
-                })
-                continue
-            add_candidate(_route_candidate(route, "akshare_hk_catalog", {
-                "symbol": symbol,
-                "name": item.get("shortName") or item.get("longName"),
-                "shortName": item.get("shortName"),
-                "longName": item.get("longName"),
-                "englishName": item.get("englishName"),
-                "exchange": item.get("exchange"),
-                "quoteType": item.get("quoteType"),
-                "score": item.get("score"),
-                "provider": item.get("provider"),
-            }))
-            if len(candidates) >= max_results:
-                break
-
     # 阶段 3：较慢的目录搜索用于补缺，并由市场提示决定先查 A 股还是港股。
-    prefer_a = _search_prefers_a_share(q, candidates)
-    prefer_hk = _search_prefers_hk(q, candidates)
+    prefer_a = _search_prefers_a_share(q, collector.candidates)
+    prefer_hk = _search_prefers_hk(q, collector.candidates)
 
     if prefer_a and not prefer_hk:
         a_search = ak_svc.search_a_symbols(q, max_results=max_results)
-        add_a_results(a_search)
-        if len(candidates) < max_results:
+        _merge_provider_results(
+            collector,
+            a_search,
+            "akshare_a_catalog",
+            _A_CATALOG_CANDIDATE_FIELDS,
+            max_results,
+        )
+        if len(collector.candidates) < max_results:
             hk_search = ak_svc.search_hk_symbols(q, max_results=max_results)
-            add_hk_results(hk_search)
+            _merge_provider_results(
+                collector,
+                hk_search,
+                "akshare_hk_catalog",
+                _HK_CATALOG_CANDIDATE_FIELDS,
+                max_results,
+                keep_unsupported=True,
+            )
     else:
         hk_search = ak_svc.search_hk_symbols(q, max_results=max_results)
-        add_hk_results(hk_search)
-        if len(candidates) < max_results and not hk_search.get("results"):
+        _merge_provider_results(
+            collector,
+            hk_search,
+            "akshare_hk_catalog",
+            _HK_CATALOG_CANDIDATE_FIELDS,
+            max_results,
+            keep_unsupported=True,
+        )
+        if len(collector.candidates) < max_results and not hk_search.get("results"):
             a_search = ak_svc.search_a_symbols(q, max_results=max_results)
-            add_a_results(a_search)
+            _merge_provider_results(
+                collector,
+                a_search,
+                "akshare_a_catalog",
+                _A_CATALOG_CANDIDATE_FIELDS,
+                max_results,
+            )
 
-    response = {
-        "query": q,
-        "count": len(candidates),
-        "candidates": candidates[:max_results],
-    }
+    response = _candidate_response(q, collector, max_results)
     if em_search.get("error"):
         response["eastmoneySearchError"] = em_search.get("error")
     if a_search.get("error"):

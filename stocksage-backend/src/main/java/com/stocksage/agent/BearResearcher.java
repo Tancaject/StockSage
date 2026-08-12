@@ -7,7 +7,11 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 /**
- * 多空辩论中的空头参与者，负责从风险、估值压力、竞争、周期性和数据质量等角度挑战投资逻辑。
+ * DEEP 多空辩论中的空头研究员。
+ *
+ * <p>{@link ResearchDebateService} 在每轮把同一 {@link AnalysisState} 交给多空双方；本类只基于
+ * 上游已收集的基本面、行情、新闻和历史辩论，从风险、估值压力和数据质量角度提出反方观点。
+ * 它不绑定工具，不能在辩论阶段引入账本外的新事实。</p>
  */
 @Service
 public class BearResearcher {
@@ -15,6 +19,7 @@ public class BearResearcher {
     /** Round 1 是开局陈述，不强制反驳；Round 2+ 必须先逐条回应对方再展开新论据。 */
     private static final int OPENING_ROUND = 1;
 
+    /** 仅用于空头论证的无工具 ChatClient。 */
     private final ChatClient chatClient;
 
     /**

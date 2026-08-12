@@ -41,21 +41,45 @@ import java.util.regex.Pattern;
 @Slf4j
 public class LocalEmbeddingModel implements EmbeddingModel {
 
+    /** Ollama tokenizer 前先移除的不可见控制字符。 */
     private static final Pattern CONTROL_CHARS = Pattern.compile("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]");
+
+    /** 将连续空白压成单个空格，稳定哈希和 tokenizer 输入。 */
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
+
+    /** 最后一级兜底中用于移除非 ASCII 字符。 */
     private static final Pattern NON_ASCII_PRINTABLE = Pattern.compile("[^\\x20-\\x7E]");
+
+    /** 零向量降级达到该倍数时再次输出 warn。 */
     private static final int NAN_WARNING_SAMPLE_RATE = 100;
 
+    /** 调用 Ollama {@code /api/embed} 的响应式 HTTP 客户端。 */
     private final WebClient webClient;
+
+    /** Ollama 中实际执行 embedding 的模型名。 */
     private final String model;
+
+    /** 解析 Ollama JSON 响应。 */
     private final ObjectMapper objectMapper;
+
+    /** 单次 HTTP 请求的最大等待时间。 */
     private final Duration timeout;
+
+    /** 尚未成功观测维度时用于构造零向量的配置值。 */
     private final int fallbackDimension;
+
+    /** 记录累计零向量降级次数，用于日志采样。 */
     private final AtomicInteger nanFallbackCount = new AtomicInteger();
+
+    /** 最近一次有效响应的向量维度，跨线程可见。 */
     private volatile int observedDimension;
 
     /**
      * 使用默认 1024 维兜底向量初始化本地向量模型。
+     *
+     * @param baseUrl Ollama 服务地址
+     * @param model 向量模型名称
+     * @param timeout 单次请求超时
      */
     public LocalEmbeddingModel(String baseUrl, String model, Duration timeout) {
         this(baseUrl, model, timeout, 1024);
@@ -82,6 +106,9 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 对单个 Spring AI Document 生成向量。
+     *
+     * @param document 待向量化文档
+     * @return 文档正文的 embedding
      */
     @Override
     public float[] embed(Document document) {
@@ -92,6 +119,10 @@ public class LocalEmbeddingModel implements EmbeddingModel {
      * 批量生成向量。
      *
      * <p>请求前会先做文本清洗；如果批量调用出现 NaN 或数量不匹配，则自动退回逐条向量化。</p>
+     *
+     * @param request Spring AI 提供的文本列表请求
+     * @return 与输入顺序、索引对应的向量响应
+     * @throws RuntimeException Ollama 非无效向量类错误或网络错误时抛出
      */
     @Override
     public EmbeddingResponse call(EmbeddingRequest request) {
@@ -100,7 +131,7 @@ public class LocalEmbeddingModel implements EmbeddingModel {
             return new EmbeddingResponse(List.of());
         }
 
-        // 预处理：去控制字符，替换空白文本
+        // 先去除已知会触发 llama.cpp NaN 的控制字符，并替换空白文本。
         List<String> sanitized = texts.stream()
                 .map(this::sanitizeText)
                 .toList();
@@ -134,6 +165,9 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 判断 Ollama 响应是否属于无效向量错误。
+     *
+     * @param body Ollama 错误响应正文
+     * @return 是否包含 NaN、Inf 或非法浮点值信号
      */
     private boolean isInvalidEmbeddingError(String body) {
         if (body == null) {
@@ -148,6 +182,9 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 压缩错误响应，避免日志输出过长 HTML 或 JSON。
+     *
+     * @param body 原始错误正文
+     * @return 最多 180 字符的单行摘要
      */
     private String summarizeError(String body) {
         if (body == null || body.isBlank()) {
@@ -159,6 +196,9 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 调用 Ollama /api/embed 接口并解析响应。
+     *
+     * @param texts 已完成清洗的文本批次
+     * @return Ollama 返回并通过有限值校验的向量
      */
     private EmbeddingResponse doEmbed(List<String> texts) {
         int totalChars = texts.stream().mapToInt(String::length).sum();
@@ -170,6 +210,7 @@ public class LocalEmbeddingModel implements EmbeddingModel {
         body.put("input", texts);
         body.put("truncate", true);
 
+        // WebClient 发起同步等待的本地 HTTP 调用；timeout 限制 block 的最长时间。
         String response = webClient.post()
                 .uri("/api/embed")
                 .header("Content-Type", "application/json")
@@ -185,6 +226,9 @@ public class LocalEmbeddingModel implements EmbeddingModel {
     /**
      * 批量向量化产生 NaN 时，逐条重试。
      * 对产生 NaN 的文本记录警告并跳过（返回零向量），不阻塞整体入库流程。
+     *
+     * @param texts 已完成清洗的文本
+     * @return 保持原索引的一组有效或零向量
      */
     private EmbeddingResponse embedOneByOne(List<String> texts) {
         List<Embedding> embeddings = new ArrayList<>();
@@ -221,6 +265,11 @@ public class LocalEmbeddingModel implements EmbeddingModel {
      * 解析 Ollama 返回的 embeddings 数组。
      *
      * <p>任何 NaN 或 Inf 都会抛出 InvalidEmbeddingException，交由上层降级逻辑处理。</p>
+     *
+     * @param response Ollama JSON 响应
+     * @param expectedCount 调用方预期的向量数量，用于保留请求语义；数量校验由上层完成
+     * @return 已解析的 embedding 列表
+     * @throws InvalidEmbeddingException 任一维度不是有限浮点数时抛出
      */
     private EmbeddingResponse parseEmbeddingResponse(String response, int expectedCount) {
         try {
@@ -255,6 +304,8 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 记录实际观测到的向量维度，供后续零向量兜底使用。
+     *
+     * @param values 有效模型向量
      */
     private void rememberDimension(float[] values) {
         if (values != null && values.length > 0) {
@@ -264,6 +315,8 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 生成与当前模型维度一致的零向量。
+     *
+     * @return 观测维度或配置兜底维度的全零数组
      */
     private float[] zeroVector() {
         int dimension = observedDimension > 0 ? observedDimension : fallbackDimension;
@@ -272,6 +325,10 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 对无效文本尝试多种降级版本，仍失败时返回零向量。
+     *
+     * @param text 已清洗但触发无效向量的文本
+     * @param index 文本在原批次中的索引
+     * @return 首个成功候选的向量，全部失败时为零向量
      */
     private float[] retryInvalidTextOrZero(String text, int index) {
         for (String candidate : fallbackCandidates(text)) {
@@ -299,6 +356,9 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 构造一组更保守的文本候选，尽量绕过 Ollama 后端的 NaN 边界输入。
+     *
+     * @param text 原始清洗文本
+     * @return 按信息保留程度排序且去重的候选
      */
     private List<String> fallbackCandidates(String text) {
         LinkedHashSet<String> candidates = new LinkedHashSet<>();
@@ -319,6 +379,10 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 添加非空且不同于原文的兜底候选。
+     *
+     * @param candidates 保持顺序并去重的候选集合
+     * @param original 原始清洗文本
+     * @param candidate 待加入的降级文本
      */
     private void addFallbackCandidate(LinkedHashSet<String> candidates, String original, String candidate) {
         if (candidate == null) {
@@ -332,6 +396,10 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 从文本末尾删除指定数量的词。
+     *
+     * @param text 原文本
+     * @param wordsToDrop 要删除的尾部词数
+     * @return 删除后的文本；词数不足时返回空串
      */
     private String dropTrailingWords(String text, int wordsToDrop) {
         String result = text == null ? "" : text.stripTrailing();
@@ -347,6 +415,10 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 按比例截断文本，并尽量落在词边界。
+     *
+     * @param text 原文本
+     * @param ratio 保留字符比例
+     * @return 截断后的文本
      */
     private String truncateAtWordBoundary(String text, double ratio) {
         if (text == null || text.length() < 40) {
@@ -362,6 +434,9 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 取首句或一个较短窗口作为兜底文本。
+     *
+     * @param text 原文本
+     * @return 首句或按比例截断的前部窗口
      */
     private String firstSentenceOrWindow(String text) {
         if (text == null || text.length() <= 120) {
@@ -376,6 +451,9 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 查找英文句子结束符位置。
+     *
+     * @param text 待扫描文本
+     * @return 最早的句号、问号或感叹号位置；没有时为 -1
      */
     private int findSentenceEnd(String text) {
         int period = text.indexOf('.');
@@ -392,6 +470,9 @@ public class LocalEmbeddingModel implements EmbeddingModel {
      * 记录无效向量兜底事件。
      *
      * <p>前几次和采样点输出 warn，其余输出 debug，避免大量脏文本时日志刷屏。</p>
+     *
+     * @param text 最终无法向量化的文本
+     * @param index 文本在批次中的索引
      */
     private void logInvalidEmbeddingFallback(String text, int index) {
         int count = nanFallbackCount.incrementAndGet();
@@ -408,6 +489,9 @@ public class LocalEmbeddingModel implements EmbeddingModel {
     /**
      * 预处理文本：去除控制字符，确保非空。
      * 某些 PDF 提取的文本包含 \x00 等字节，会导致 bge-m3 产生 NaN。
+     *
+     * @param text 原始切片文本
+     * @return Unicode 规范化、标点归一和空白压缩后的非空文本
      */
     private String sanitizeText(String text) {
         if (text == null || text.isBlank()) {
@@ -438,6 +522,9 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /**
      * 构造仅保留 ASCII 可打印字符的兜底文本。
+     *
+     * @param text 已清洗但仍触发无效向量的文本
+     * @return 只含 ASCII 可打印字符的非空文本
      */
     private String asciiFallbackText(String text) {
         String cleaned = NON_ASCII_PRINTABLE.matcher(text).replaceAll(" ");
@@ -450,6 +537,8 @@ public class LocalEmbeddingModel implements EmbeddingModel {
      * 表示 Ollama 返回的向量包含 NaN 或 Inf。
      */
     private static class InvalidEmbeddingException extends RuntimeException {
+
+        /** @param message 无效向量的位置或原因 */
         InvalidEmbeddingException(String message) {
             super(message);
         }

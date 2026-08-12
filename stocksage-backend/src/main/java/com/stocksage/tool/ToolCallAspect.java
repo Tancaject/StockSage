@@ -26,13 +26,19 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ToolCallAspect {
 
+    /** 持久化参数和 observation 的最大字符数，防止大 JSON 撑大 Trace 行。 */
     private static final int TRACE_TEXT_LIMIT = 1200;
 
+    /** 实时 action/observation 与 chart 分片写入入口。 */
     private final TraceEventStore traceEventStore;
+    /** 序列化 ChatChunk、参数摘要和图表 payload。 */
     private final ObjectMapper objectMapper;
+    /** 把每次工具调用追加为可审计的 AgentStep。 */
     private final TraceService traceService;
+    /** 仅把 K 线类工具结果转换为前端图表协议。 */
     private final KLinePayloadMapper kLinePayloadMapper;
 
+    /** 方法名到新人可读中文动作名的稳定映射。 */
     private static final Map<String, String> TOOL_LABELS = Map.ofEntries(
             Map.entry("webSearch", "搜索网页"),
             Map.entry("searchNews", "搜索新闻"),
@@ -64,6 +70,7 @@ public class ToolCallAspect {
     @Around("@annotation(org.springframework.ai.tool.annotation.Tool)")
     public Object interceptToolCall(ProceedingJoinPoint joinPoint) throws Throwable {
         if (ToolCallContext.isObservationSuppressed()) {
+            // CapabilityGateway 已自行记录能力调用；此时直接执行，避免同一本地 @Tool 被追踪两次。
             return joinPoint.proceed();
         }
         String traceId = ToolCallContext.getTraceId();
@@ -87,6 +94,7 @@ public class ToolCallAspect {
             // 推送 observation 状态：工具返回摘要
             String summary = summarizeResult(methodName, result, duration);
             emitChunk(traceId, "observation", summary, conversationId);
+            // K 线结果额外映射为 chart 分片；普通工具不会进入该分支。
             emitChartChunk(traceId, methodName, joinPoint.getArgs(), result, conversationId);
             recordTraceStep(traceId, methodName, label, joinPoint.getArgs(), result, duration, null);
 
@@ -190,6 +198,7 @@ public class ToolCallAspect {
         }
     }
 
+    /** 将 K 线工具结果转换为 chart 事件；转换失败不影响原始工具结果。 */
     private void emitChartChunk(String traceId, String methodName, Object[] args, Object result, Long conversationId) {
         if (!KLinePayloadMapper.isKlineTool(methodName) || result == null) {
             return;
@@ -202,6 +211,7 @@ public class ToolCallAspect {
         }
     }
 
+    /** 序列化前端图表 payload 并复用普通事件出口。 */
     private void emitChartPayload(String traceId, Map<String, Object> payload, Long conversationId) {
         try {
             emitChunk(traceId, "chart", objectMapper.writeValueAsString(payload), conversationId);

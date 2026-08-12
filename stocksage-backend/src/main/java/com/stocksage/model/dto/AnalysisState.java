@@ -26,10 +26,13 @@ public class AnalysisState {
     /** 用户原始研究问题，贯穿分析师、辩论和最终报告。 */
     private String query;
 
+    /** 本轮研究的主证券代码；哈希、报告版本和工具预取都以它为标的。 */
     private String primaryTicker;
 
+    /** 结构化证据集合的稳定哈希，用于判断数据快照是否变化。 */
     private String dataSnapshotHash;
 
+    /** 用户问题与数据快照的联合哈希，用于严格控制报告缓存复用。 */
     private String contextHash;
 
     /** 基本面分析师输出的财报、公告和经营质量分析。 */
@@ -81,7 +84,7 @@ public class AnalysisState {
     @Builder.Default
     private EvidenceLedger evidenceLedger = EvidenceLedger.empty();
 
-    /** Last durable completion-policy decision and bounded recovery counters. */
+    /** 最近一次持久化的完成策略决策及有界恢复计数，供任务接管后继续执行。 */
     private HarnessSnapshot harnessSnapshot;
 
     /**
@@ -93,7 +96,7 @@ public class AnalysisState {
      */
     public record DebateTurn(int round, Side side, String fullText) {
 
-        /** 辩论立场。 */
+        /** 辩论发言方：BULL 表示看多观点，BEAR 表示看空观点。 */
         public enum Side {
             BULL, BEAR
         }

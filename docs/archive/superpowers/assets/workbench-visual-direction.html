@@ -1,0 +1,213 @@
+<!-- Historical visual-direction artifact. It is retained only to explain the archived UI design decision. -->
+<h2>工作台视觉方向 — 三选一</h2>
+<p class="subtitle">同一份内容(观察列表 + 行情 + K线 + 新闻),三种视觉语言。数字为视觉稿假数据,只比风格。点击卡片选择,或在对话里直接说感受。</p>
+
+<style>
+.mk { border-radius: 8px; overflow: hidden; margin: 10px 0 12px; font-family: Inter, "Segoe UI", "Microsoft YaHei", sans-serif; }
+.mk * { box-sizing: border-box; }
+.mk .num { font-variant-numeric: tabular-nums; }
+.traits { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.traits span { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: rgba(127,127,127,.12); }
+.fit { font-size: 12.5px; opacity: .75; margin-top: 8px; }
+
+/* ============ A 终端 Terminal Pro ============ */
+.ta { background: #0a0e14; color: #d7dee9; border: 1px solid #1c2430; }
+.ta .mono { font-family: Consolas, "JetBrains Mono", monospace; }
+.ta-top { display: flex; align-items: center; gap: 14px; padding: 0 12px; height: 34px; border-bottom: 1px solid #1c2430; background: #0d121a; font-size: 12px; }
+.ta-top .tk { font-weight: 700; color: #fff; letter-spacing: .02em; }
+.ta-top .nm { color: #566072; }
+.ta-top .px { color: #16c784; font-weight: 700; }
+.ta-top .kv { color: #8b95a7; }
+.ta-top .kv b { color: #d7dee9; font-weight: 600; }
+.ta-grid { display: grid; grid-template-columns: 178px 1fr 196px; }
+.ta-col { border-right: 1px solid #1c2430; min-width: 0; }
+.ta-h { padding: 7px 10px 5px; font-size: 10px; letter-spacing: .14em; color: #566072; font-weight: 700; }
+.ta-row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 0 10px; height: 27px; font-size: 11.5px; border-left: 2px solid transparent; }
+.ta-row b { font-weight: 600; color: #cbd4e1; }
+.ta-row .up { color: #16c784; } .ta-row .dn { color: #ea3943; }
+.ta-row.sel { background: #121926; border-left-color: #e8a33d; }
+.ta-chart { padding: 8px 10px 4px; }
+.ta-ranges { display: flex; gap: 2px; padding: 0 10px 6px; }
+.ta-ranges span { font-size: 10px; padding: 2px 7px; color: #566072; border-radius: 3px; }
+.ta-ranges .on { background: #1a2332; color: #e8a33d; }
+.ta-news { padding: 2px 10px; }
+.ta-news .it { padding: 6px 0; border-bottom: 1px solid #141b26; }
+.ta-news .it p { margin: 0; font-size: 11.5px; line-height: 1.45; color: #b8c2d1; }
+.ta-news .it small { font-size: 10px; color: #566072; }
+.ta-status { display: flex; gap: 16px; padding: 0 12px; height: 24px; align-items: center; border-top: 1px solid #1c2430; background: #0d121a; font-size: 10px; color: #566072; }
+.ta-status .ok { color: #16c784; }
+
+/* ============ B 研究工作台 Research Studio ============ */
+.tb { background: #f7f8fa; color: #1a2233; border: 1px solid #e4e7ee; }
+.tb-top { display: flex; align-items: baseline; gap: 14px; padding: 14px 16px 10px; background: #fff; border-bottom: 1px solid #eceff4; }
+.tb-top .tk { font-size: 16px; font-weight: 700; }
+.tb-top .nm { font-size: 12px; color: #78829a; }
+.tb-top .px { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
+.tb-top .chg { font-size: 13px; color: #089981; font-weight: 600; }
+.tb-top .kv { margin-left: auto; display: flex; gap: 18px; font-size: 12px; color: #78829a; }
+.tb-top .kv b { display: block; color: #1a2233; font-weight: 600; font-size: 12.5px; }
+.tb-grid { display: grid; grid-template-columns: 190px 1fr 208px; gap: 10px; padding: 10px; }
+.tb-card { background: #fff; border: 1px solid #eceff4; border-radius: 8px; min-width: 0; }
+.tb-h { padding: 9px 12px 6px; font-size: 12px; font-weight: 600; color: #444e64; }
+.tb-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; padding: 6px 12px; font-size: 12.5px; border-left: 2px solid transparent; }
+.tb-row b { font-weight: 600; }
+.tb-row small { color: #98a1b5; font-size: 11px; }
+.tb-row .up { color: #089981; font-weight: 600; } .tb-row .dn { color: #f23645; font-weight: 600; }
+.tb-row.sel { background: #f0f4ff; border-left-color: #2962ff; }
+.tb-chart { padding: 6px 12px 10px; }
+.tb-news .it { padding: 7px 12px; border-top: 1px solid #f2f4f8; }
+.tb-news .it p { margin: 0 0 2px; font-size: 12px; line-height: 1.5; color: #2a3348; }
+.tb-news .it small { font-size: 11px; color: #98a1b5; }
+
+/* ============ C 现状精修 Emerald Refined ============ */
+.tc { background: #f8fafc; color: #0f172a; border: 1px solid #e2e8f0; }
+.tc-top { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #fff; border-bottom: 1px solid #e2e8f0; }
+.tc-top .tk { font-size: 14px; font-weight: 700; }
+.tc-top .badge { font-size: 10px; padding: 2px 8px; border-radius: 5px; background: rgba(5,150,105,.09); color: #059669; font-weight: 600; }
+.tc-top .px { margin-left: auto; font-size: 17px; font-weight: 700; }
+.tc-top .chg { font-size: 12px; color: #059669; font-weight: 600; }
+.tc-grid { display: grid; grid-template-columns: 186px 1fr 200px; gap: 10px; padding: 10px; }
+.tc-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; min-width: 0; }
+.tc-h { padding: 9px 12px 5px; font-size: 12px; font-weight: 700; color: #334155; }
+.tc-row { display: grid; grid-template-columns: 1fr auto; gap: 1px 8px; padding: 6px 12px; font-size: 12.5px; border-left: 2px solid transparent; }
+.tc-row b { font-weight: 600; }
+.tc-row small { color: #94a3b8; font-size: 11px; }
+.tc-row .up { color: #059669; font-weight: 600; } .tc-row .dn { color: #ef4444; font-weight: 600; }
+.tc-row.sel { background: rgba(5,150,105,.06); border-left-color: #059669; }
+.tc-chart { padding: 6px 12px 10px; }
+.tc-news .it { padding: 7px 12px; border-top: 1px solid #f1f5f9; }
+.tc-news .it p { margin: 0 0 2px; font-size: 12px; line-height: 1.5; color: #1e293b; }
+.tc-news .it small { font-size: 11px; color: #94a3b8; }
+</style>
+
+<div class="options">
+
+  <!-- ============ 方向 A ============ -->
+  <div class="option" data-choice="A-terminal-pro" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content" style="min-width:0">
+      <h3>专业终端 Terminal Pro(深色优先)</h3>
+      <p>Bloomberg / TradingView 谱系:高密度、等宽数字、4px 小圆角、细边框分区、琥珀色选中态、底部状态栏。最"真产品",与量化/终端定位最搭。</p>
+
+      <div class="mk ta">
+        <div class="ta-top mono num">
+          <span class="tk">NVDA</span><span class="nm">NVIDIA Corp · NASDAQ</span>
+          <span class="px">181.36 +3.82 (+2.15%)</span>
+          <span class="kv">PE <b>45.2</b></span><span class="kv">市值 <b>4.43T</b></span><span class="kv">成交量 <b>198.3M</b></span>
+        </div>
+        <div class="ta-grid">
+          <div class="ta-col">
+            <div class="ta-h">WATCHLIST · 7</div>
+            <div class="ta-row sel mono num"><b>NVDA</b><svg width="44" height="12"><polyline points="0.0,4.1 4.0,3.2 8.0,4.3 12.0,2.8 16.0,1.0 20.0,5.4 24.0,10.3 28.0,6.2 32.0,8.5 36.0,11.0 40.0,5.2 44.0,5.2" fill="none" stroke="#16c784" stroke-width="1"/></svg><span class="up">+2.15%</span></div>
+            <div class="ta-row mono num"><b>AAPL</b><svg width="44" height="12"><polyline points="0.0,1.0 4.0,4.0 8.0,4.6 12.0,7.2 16.0,10.5 20.0,11.0 24.0,7.2 28.0,4.4 32.0,2.0 36.0,4.0 40.0,3.4 44.0,4.9" fill="none" stroke="#16c784" stroke-width="1"/></svg><span class="up">+0.42%</span></div>
+            <div class="ta-row mono num"><b>MSFT</b><svg width="44" height="12"><polyline points="0.0,11.0 4.0,9.9 8.0,8.6 12.0,6.6 16.0,5.5 20.0,3.7 24.0,5.4 28.0,5.4 32.0,3.5 36.0,2.8 40.0,1.0 44.0,2.4" fill="none" stroke="#16c784" stroke-width="1"/></svg><span class="up">+1.10%</span></div>
+            <div class="ta-row mono num"><b>AMZN</b><svg width="44" height="12"><polyline points="0.0,7.6 4.0,3.4 8.0,3.2 12.0,5.6 16.0,11.0 20.0,8.7 24.0,8.6 28.0,5.2 32.0,6.3 36.0,2.7 40.0,4.9 44.0,1.0" fill="none" stroke="#ea3943" stroke-width="1"/></svg><span class="dn">-0.65%</span></div>
+            <div class="ta-row mono num"><b>META</b><svg width="44" height="12"><polyline points="0.0,8.1 4.0,1.0 8.0,5.9 12.0,2.4 16.0,7.9 20.0,11.0 24.0,3.3 28.0,7.0 32.0,4.5 36.0,4.6 40.0,4.7 44.0,4.3" fill="none" stroke="#16c784" stroke-width="1"/></svg><span class="up">+1.87%</span></div>
+            <div class="ta-row mono num"><b>0700.HK</b><svg width="44" height="12"><polyline points="0.0,4.1 4.0,3.2 8.0,4.3 12.0,2.8 16.0,1.0 20.0,5.4 24.0,10.3 28.0,6.2 32.0,8.5 36.0,11.0 40.0,5.2 44.0,5.2" fill="none" stroke="#16c784" stroke-width="1"/></svg><span class="up">+0.30%</span></div>
+            <div class="ta-row mono num"><b>TSLA</b><svg width="44" height="12"><polyline points="0.0,7.6 4.0,3.4 8.0,3.2 12.0,5.6 16.0,11.0 20.0,8.7 24.0,8.6 28.0,5.2 32.0,6.3 36.0,2.7 40.0,4.9 44.0,1.0" fill="none" stroke="#ea3943" stroke-width="1"/></svg><span class="dn">-2.41%</span></div>
+          </div>
+          <div class="ta-col">
+            <div class="ta-chart"><svg width="100%" height="112" viewBox="0 0 340 112" preserveAspectRatio="none"><line x1="0" y1="28" x2="340" y2="28" stroke="#141b26"/><line x1="0" y1="56" x2="340" y2="56" stroke="#141b26"/><line x1="0" y1="84" x2="340" y2="84" stroke="#141b26"/><line x1="7.7" y1="10.8" x2="7.7" y2="29.7" stroke="#ea3943" stroke-width="1"/><rect x="3.4" y="14.3" width="8.5" height="5.7" fill="#ea3943"/><line x1="23.2" y1="11.7" x2="23.2" y2="44.8" stroke="#ea3943" stroke-width="1"/><rect x="18.9" y="20.0" width="8.5" height="18.7" fill="#ea3943"/><line x1="38.6" y1="30.7" x2="38.6" y2="60.2" stroke="#ea3943" stroke-width="1"/><rect x="34.4" y="38.7" width="8.5" height="19.4" fill="#ea3943"/><line x1="54.1" y1="55.5" x2="54.1" y2="60.9" stroke="#ea3943" stroke-width="1"/><rect x="49.9" y="58.1" width="8.5" height="1.2" fill="#ea3943"/><line x1="69.5" y1="46.3" x2="69.5" y2="61.9" stroke="#ea3943" stroke-width="1"/><rect x="65.2" y="58.1" width="8.5" height="1.2" fill="#ea3943"/><line x1="85.0" y1="49.2" x2="85.0" y2="82.9" stroke="#ea3943" stroke-width="1"/><rect x="80.8" y="58.6" width="8.5" height="10.9" fill="#ea3943"/><line x1="100.5" y1="55.6" x2="100.5" y2="83.2" stroke="#16c784" stroke-width="1"/><rect x="96.2" y="62.2" width="8.5" height="7.3" fill="#16c784"/><line x1="115.9" y1="50.0" x2="115.9" y2="87.4" stroke="#ea3943" stroke-width="1"/><rect x="111.7" y="62.2" width="8.5" height="20.0" fill="#ea3943"/><line x1="131.4" y1="79.1" x2="131.4" y2="102.6" stroke="#ea3943" stroke-width="1"/><rect x="127.2" y="82.2" width="8.5" height="15.0" fill="#ea3943"/><line x1="146.8" y1="73.6" x2="146.8" y2="106.0" stroke="#16c784" stroke-width="1"/><rect x="142.6" y="77.5" width="8.5" height="19.7" fill="#16c784"/><line x1="162.3" y1="60.7" x2="162.3" y2="85.9" stroke="#16c784" stroke-width="1"/><rect x="158.1" y="67.0" width="8.5" height="10.5" fill="#16c784"/><line x1="177.7" y1="64.6" x2="177.7" y2="90.4" stroke="#ea3943" stroke-width="1"/><rect x="173.4" y="67.0" width="8.5" height="19.2" fill="#ea3943"/><line x1="193.2" y1="66.6" x2="193.2" y2="91.7" stroke="#16c784" stroke-width="1"/><rect x="188.9" y="73.5" width="8.5" height="12.7" fill="#16c784"/><line x1="208.6" y1="58.5" x2="208.6" y2="78.9" stroke="#16c784" stroke-width="1"/><rect x="204.3" y="65.8" width="8.5" height="7.7" fill="#16c784"/><line x1="224.1" y1="37.0" x2="224.1" y2="70.4" stroke="#16c784" stroke-width="1"/><rect x="219.8" y="47.2" width="8.5" height="18.6" fill="#16c784"/><line x1="239.5" y1="31.9" x2="239.5" y2="59.7" stroke="#16c784" stroke-width="1"/><rect x="235.2" y="40.1" width="8.5" height="7.1" fill="#16c784"/><line x1="255.0" y1="19.7" x2="255.0" y2="53.8" stroke="#16c784" stroke-width="1"/><rect x="250.8" y="24.9" width="8.5" height="15.2" fill="#16c784"/><line x1="270.5" y1="18.1" x2="270.5" y2="52.2" stroke="#ea3943" stroke-width="1"/><rect x="266.2" y="24.9" width="8.5" height="16.3" fill="#ea3943"/><line x1="285.9" y1="33.5" x2="285.9" y2="57.9" stroke="#ea3943" stroke-width="1"/><rect x="281.6" y="41.2" width="8.5" height="14.5" fill="#ea3943"/><line x1="301.4" y1="32.6" x2="301.4" y2="64.5" stroke="#16c784" stroke-width="1"/><rect x="297.1" y="43.7" width="8.5" height="12.0" fill="#16c784"/><line x1="316.8" y1="15.5" x2="316.8" y2="54.0" stroke="#16c784" stroke-width="1"/><rect x="312.6" y="21.0" width="8.5" height="22.7" fill="#16c784"/><line x1="332.3" y1="4.0" x2="332.3" y2="28.3" stroke="#16c784" stroke-width="1"/><rect x="328.1" y="12.8" width="8.5" height="8.2" fill="#16c784"/></svg></div>
+            <div class="ta-ranges mono"><span>1D</span><span>10D</span><span>30D</span><span class="on">60D</span><span>120D</span><span>1Y</span></div>
+          </div>
+          <div class="ta-col" style="border-right:none">
+            <div class="ta-h">NEWS · NVDA</div>
+            <div class="ta-news">
+              <div class="it"><p>NVIDIA 与台积电扩大 CoWoS 产能合作</p><small>Reuters · 2小时前</small></div>
+              <div class="it"><p>美银上调目标价至 210 美元,维持买入</p><small>Bloomberg · 5小时前</small></div>
+              <div class="it"><p>超大规模云厂商资本开支指引集体上调</p><small>WSJ · 昨天</small></div>
+            </div>
+          </div>
+        </div>
+        <div class="ta-status mono"><span class="ok">● IBKR 已连接</span><span>数据延迟 15 分钟</span><span>报告 v12 · 08:32</span></div>
+      </div>
+
+      <div class="traits"><span>密度:极高</span><span>数字:等宽对齐</span><span>圆角:4px</span><span>选中:琥珀色</span><span>动效:近乎无</span></div>
+      <p class="fit">适合:把 StockSage 讲成"专业投研终端"的面试叙事;深色截图放简历/README 最有冲击力。代价:改造量最大,浅色模式降为次要。</p>
+    </div>
+  </div>
+
+  <!-- ============ 方向 B ============ -->
+  <div class="option" data-choice="B-research-studio" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content" style="min-width:0">
+      <h3>现代研究工作台 Research Studio(浅色优先)</h3>
+      <p>Koyfin / Linear 谱系:克制的蓝色系、白卡片浅描边、中等密度、大数字层级清晰。理性、干净、"SaaS 成品"感。</p>
+
+      <div class="mk tb">
+        <div class="tb-top num">
+          <span class="tk">NVDA</span><span class="nm">NVIDIA Corp</span>
+          <span class="px">181.36</span><span class="chg">+3.82 (+2.15%)</span>
+          <div class="kv"><span>PE<b>45.2</b></span><span>市值<b>4.43T</b></span><span>成交量<b>198.3M</b></span></div>
+        </div>
+        <div class="tb-grid">
+          <div class="tb-card">
+            <div class="tb-h">观察列表</div>
+            <div class="tb-row sel num"><b>NVDA</b><span class="up">+2.15%</span><small>NVIDIA</small><small class="num">181.36</small></div>
+            <div class="tb-row num"><b>AAPL</b><span class="up">+0.42%</span><small>Apple</small><small class="num">213.55</small></div>
+            <div class="tb-row num"><b>MSFT</b><span class="up">+1.10%</span><small>Microsoft</small><small class="num">498.84</small></div>
+            <div class="tb-row num"><b>AMZN</b><span class="dn">-0.65%</span><small>Amazon</small><small class="num">223.30</small></div>
+            <div class="tb-row num"><b>META</b><span class="up">+1.87%</span><small>Meta</small><small class="num">719.01</small></div>
+            <div class="tb-row num"><b>0700.HK</b><span class="up">+0.30%</span><small>腾讯控股</small><small class="num">501.50</small></div>
+          </div>
+          <div class="tb-card">
+            <div class="tb-h">价格走势 · 60D</div>
+            <div class="tb-chart"><svg width="100%" height="118" viewBox="0 0 340 112" preserveAspectRatio="none"><defs><linearGradient id="gb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2962ff" stop-opacity=".18"/><stop offset="1" stop-color="#2962ff" stop-opacity="0"/></linearGradient></defs><polygon points="0,112 0.0,105.0 8.7,100.6 17.4,82.5 26.2,81.7 34.9,79.3 43.6,73.9 52.3,83.7 61.0,81.2 69.7,74.2 78.5,61.0 87.2,74.3 95.9,79.6 104.6,93.0 113.3,79.2 122.1,69.8 130.8,85.0 139.5,64.7 148.2,45.0 156.9,37.1 165.6,30.6 174.4,41.5 183.1,57.7 191.8,54.5 200.5,69.1 209.2,78.7 217.9,86.3 226.7,101.9 235.4,101.2 244.1,101.4 252.8,86.3 261.5,83.5 270.3,76.1 279.0,74.0 287.7,65.8 296.4,65.3 305.1,71.6 313.8,50.7 322.6,29.9 331.3,14.9 340.0,5.0 340,112" fill="url(#gb)"/><polyline points="0.0,105.0 8.7,100.6 17.4,82.5 26.2,81.7 34.9,79.3 43.6,73.9 52.3,83.7 61.0,81.2 69.7,74.2 78.5,61.0 87.2,74.3 95.9,79.6 104.6,93.0 113.3,79.2 122.1,69.8 130.8,85.0 139.5,64.7 148.2,45.0 156.9,37.1 165.6,30.6 174.4,41.5 183.1,57.7 191.8,54.5 200.5,69.1 209.2,78.7 217.9,86.3 226.7,101.9 235.4,101.2 244.1,101.4 252.8,86.3 261.5,83.5 270.3,76.1 279.0,74.0 287.7,65.8 296.4,65.3 305.1,71.6 313.8,50.7 322.6,29.9 331.3,14.9 340.0,5.0" fill="none" stroke="#2962ff" stroke-width="1.6"/></svg></div>
+          </div>
+          <div class="tb-card tb-news">
+            <div class="tb-h">近期动态</div>
+            <div class="it"><p>NVIDIA 与台积电扩大 CoWoS 产能合作</p><small>Reuters · 2小时前</small></div>
+            <div class="it"><p>美银上调目标价至 210 美元,维持买入</p><small>Bloomberg · 5小时前</small></div>
+            <div class="it"><p>云厂商资本开支指引集体上调</p><small>WSJ · 昨天</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="traits"><span>密度:中</span><span>数字:tabular 对齐</span><span>圆角:8px</span><span>主色:克制蓝</span><span>动效:轻微</span></div>
+      <p class="fit">适合:把 StockSage 讲成"AI 投研助手/SaaS 产品"的叙事;浅色演示投影效果好。代价:换主色=全局刷一遍,和"终端"的硬核感相比温和。</p>
+    </div>
+  </div>
+
+  <!-- ============ 方向 C ============ -->
+  <div class="option" data-choice="C-emerald-refined" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content" style="min-width:0">
+      <h3>现状精修 Emerald Refined(保留绿色系)</h3>
+      <p>不换皮,只治病:保留现在的绿色 + 浅色卡片体系,把密度、数字排版、圆角节奏、动效纪律全部修到位。改造量最小、风险最低。</p>
+
+      <div class="mk tc">
+        <div class="tc-top num">
+          <span class="tk">NVDA · NVIDIA Corp</span><span class="badge">已自选</span>
+          <span class="px">181.36</span><span class="chg">+3.82 (+2.15%)</span>
+        </div>
+        <div class="tc-grid">
+          <div class="tc-card">
+            <div class="tc-h">观察列表</div>
+            <div class="tc-row sel num"><b>NVDA</b><span class="up">+2.15%</span><small>NVIDIA</small><small class="num">181.36</small></div>
+            <div class="tc-row num"><b>AAPL</b><span class="up">+0.42%</span><small>Apple</small><small class="num">213.55</small></div>
+            <div class="tc-row num"><b>MSFT</b><span class="up">+1.10%</span><small>Microsoft</small><small class="num">498.84</small></div>
+            <div class="tc-row num"><b>AMZN</b><span class="dn">-0.65%</span><small>Amazon</small><small class="num">223.30</small></div>
+            <div class="tc-row num"><b>META</b><span class="up">+1.87%</span><small>Meta</small><small class="num">719.01</small></div>
+            <div class="tc-row num"><b>0700.HK</b><span class="up">+0.30%</span><small>腾讯控股</small><small class="num">501.50</small></div>
+          </div>
+          <div class="tc-card">
+            <div class="tc-h">K 线 · 60D</div>
+            <div class="tc-chart"><svg width="100%" height="118" viewBox="0 0 340 112" preserveAspectRatio="none"><line x1="0" y1="28" x2="340" y2="28" stroke="#f1f5f9"/><line x1="0" y1="56" x2="340" y2="56" stroke="#f1f5f9"/><line x1="0" y1="84" x2="340" y2="84" stroke="#f1f5f9"/><line x1="7.7" y1="33.0" x2="7.7" y2="84.7" stroke="#089981" stroke-width="1"/><rect x="3.4" y="49.5" width="8.5" height="25.9" fill="#089981"/><line x1="23.2" y1="31.8" x2="23.2" y2="62.3" stroke="#089981" stroke-width="1"/><rect x="18.9" y="34.8" width="8.5" height="14.7" fill="#089981"/><line x1="38.6" y1="4.0" x2="38.6" y2="49.5" stroke="#089981" stroke-width="1"/><rect x="34.4" y="21.3" width="8.5" height="13.5" fill="#089981"/><line x1="54.1" y1="13.3" x2="54.1" y2="43.2" stroke="#f23645" stroke-width="1"/><rect x="49.9" y="21.3" width="8.5" height="9.6" fill="#f23645"/><line x1="69.5" y1="21.7" x2="69.5" y2="61.9" stroke="#f23645" stroke-width="1"/><rect x="65.2" y="30.9" width="8.5" height="26.3" fill="#f23645"/><line x1="85.0" y1="54.2" x2="85.0" y2="91.4" stroke="#f23645" stroke-width="1"/><rect x="80.8" y="57.2" width="8.5" height="20.3" fill="#f23645"/><line x1="100.5" y1="71.7" x2="100.5" y2="105.1" stroke="#f23645" stroke-width="1"/><rect x="96.2" y="77.5" width="8.5" height="19.5" fill="#f23645"/><line x1="115.9" y1="65.8" x2="115.9" y2="106.0" stroke="#089981" stroke-width="1"/><rect x="111.7" y="69.1" width="8.5" height="27.9" fill="#089981"/><line x1="131.4" y1="46.2" x2="131.4" y2="83.7" stroke="#089981" stroke-width="1"/><rect x="127.2" y="61.8" width="8.5" height="7.3" fill="#089981"/><line x1="146.8" y1="28.0" x2="146.8" y2="70.2" stroke="#089981" stroke-width="1"/><rect x="142.6" y="34.4" width="8.5" height="27.4" fill="#089981"/><line x1="162.3" y1="18.8" x2="162.3" y2="56.0" stroke="#f23645" stroke-width="1"/><rect x="158.1" y="34.4" width="8.5" height="4.8" fill="#f23645"/><line x1="177.7" y1="34.5" x2="177.7" y2="63.0" stroke="#f23645" stroke-width="1"/><rect x="173.4" y="39.2" width="8.5" height="18.2" fill="#f23645"/><line x1="193.2" y1="47.9" x2="193.2" y2="81.3" stroke="#f23645" stroke-width="1"/><rect x="188.9" y="57.4" width="8.5" height="12.9" fill="#f23645"/><line x1="208.6" y1="68.1" x2="208.6" y2="89.7" stroke="#f23645" stroke-width="1"/><rect x="204.3" y="70.3" width="8.5" height="11.0" fill="#f23645"/><line x1="224.1" y1="70.5" x2="224.1" y2="102.1" stroke="#f23645" stroke-width="1"/><rect x="219.8" y="81.3" width="8.5" height="4.1" fill="#f23645"/><line x1="239.5" y1="59.1" x2="239.5" y2="97.0" stroke="#089981" stroke-width="1"/><rect x="235.2" y="69.1" width="8.5" height="16.3" fill="#089981"/><line x1="255.0" y1="50.8" x2="255.0" y2="84.9" stroke="#089981" stroke-width="1"/><rect x="250.8" y="53.7" width="8.5" height="15.4" fill="#089981"/><line x1="270.5" y1="16.1" x2="270.5" y2="67.9" stroke="#089981" stroke-width="1"/><rect x="266.2" y="31.6" width="8.5" height="22.1" fill="#089981"/><line x1="285.9" y1="23.4" x2="285.9" y2="38.0" stroke="#f23645" stroke-width="1"/><rect x="281.6" y="31.6" width="8.5" height="2.7" fill="#f23645"/><line x1="301.4" y1="18.5" x2="301.4" y2="37.4" stroke="#089981" stroke-width="1"/><rect x="297.1" y="21.6" width="8.5" height="12.7" fill="#089981"/><line x1="316.8" y1="17.0" x2="316.8" y2="43.3" stroke="#f23645" stroke-width="1"/><rect x="312.6" y="21.6" width="8.5" height="14.4" fill="#f23645"/><line x1="332.3" y1="33.9" x2="332.3" y2="64.8" stroke="#f23645" stroke-width="1"/><rect x="328.1" y="36.0" width="8.5" height="24.4" fill="#f23645"/></svg></div>
+          </div>
+          <div class="tc-card tc-news">
+            <div class="tc-h">近期动态</div>
+            <div class="it"><p>NVIDIA 与台积电扩大 CoWoS 产能合作</p><small>Reuters · 2小时前</small></div>
+            <div class="it"><p>美银上调目标价至 210 美元,维持买入</p><small>Bloomberg · 5小时前</small></div>
+            <div class="it"><p>云厂商资本开支指引集体上调</p><small>WSJ · 昨天</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="traits"><span>密度:中</span><span>数字:tabular 对齐</span><span>圆角:8px 统一</span><span>主色:保留绿</span><span>动效:全部收敛</span></div>
+      <p class="fit">适合:时间紧、想最快见效;所有改动都在现有 token 体系内完成。代价:底色仍是"AI 模板常见脸",辨识度提升有限。</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:6px">备注:三个方向都会统一"涨绿跌红"(美股惯例,可加设置切换 A 股红涨);都包含数字等宽对齐、动效收敛、状态设计这些基本功,差别只在视觉语言本身。</p>

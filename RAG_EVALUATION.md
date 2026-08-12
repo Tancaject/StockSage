@@ -433,10 +433,11 @@ Implemented:
   - `no_answer_accuracy`
   - `unsupported_answer_rate`
 - Result summarizer and CI-style quality gate helper: `rag-eval/eval_summary.py`.
+- Offline LLM-judge runner: `rag-eval/run_ragas_eval.py`. It consumes an existing full-eval result and adds prefixed Faithfulness, Factual Correctness, LLM Context Recall/Precision, and optional Response Relevancy metrics without rerunning retrieval.
 
 Still missing / to improve:
 
-- Add LLM-judged Ragas metrics such as `Faithfulness`, `ResponseRelevancy`, `LLMContextRecall`, `LLMContextPrecisionWithReference`, and `FactualCorrectness`.
+- Run and record a current full 50-case LLM-judge baseline. The runner exists, but script availability alone is not evidence that the current model and data revision pass its gates.
 - Add duplicate-rate and near-duplicate context checks.
 - Add controlled experiment metadata: git commit, chunking version, embedding model, rerank model, top-k, and feature flags.
 - Wire `eval_summary.py --fail-on-gate` into CI once a CI runner exists for this local demo project.
@@ -446,5 +447,5 @@ Still missing / to improve:
 1. Run `python .\rag-eval\run_rag_eval.py` after backend and Phoenix are up.
 2. Review failed cases in `rag-eval/results/rag_eval_<timestamp>.json`.
 3. Summarize a run with `python .\rag-eval\eval_summary.py .\rag-eval\results\rag_eval_<timestamp>.json --fail-on-gate`.
-4. Add LLM-judged Ragas metrics once the judge model is configured.
+4. Run `python .\rag-eval\run_ragas_eval.py --dry-run`, then a limited judge run, before recording the full LLM-judge baseline.
 5. Run controlled experiments for rerank, top-k, query rewrite, and chunking.

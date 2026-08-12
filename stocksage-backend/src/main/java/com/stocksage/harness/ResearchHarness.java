@@ -11,19 +11,31 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Stage-boundary adapter around pure policies and side-effecting observation.
+ * 连接纯完成策略与有副作用观测的阶段边界适配器。
  *
- * <p>The policy decision is authoritative; observation remains fail-open and cannot change it.</p>
+ * <p>深度研究流水线通过本类调用策略，而不直接调用 Observer。策略异常失败关闭为 BLOCK；
+ * Trace/指标观测异常失败开放，不能改变已得出的权威决策。该不对称边界保证“安全判断失败时拒绝，
+ * 监控失败时业务仍按判断继续”。</p>
  */
 @Slf4j
 @Component
 public class ResearchHarness {
 
+    /** 把有限决策写入 Trace 和指标；其失败不影响业务决策。 */
     private final HarnessObserver observer;
     public ResearchHarness(HarnessObserver observer) {
         this.observer = observer;
     }
 
+    /**
+     * 执行并观测证据阶段策略。
+     *
+     * @param traceId 当前链路 ID，可为空
+     * @param policy 要执行的纯策略
+     * @param context 工作流和恢复预算
+     * @param ledger 证据账本
+     * @return 权威 Harness 决策；策略异常时为安全 BLOCK
+     */
     public HarnessDecision observeEvidence(
             String traceId,
             ResearchCompletionPolicy policy,
@@ -45,6 +57,7 @@ public class ResearchHarness {
         }
         long durationMs = (System.nanoTime() - startedAt) / 1_000_000;
         try {
+            // 观测是旁路副作用；失败只能丢失可观测数据，不能推翻安全决策。
             observer.evidenceDecision(
                     traceId,
                     policy,
@@ -59,6 +72,16 @@ public class ResearchHarness {
         return decision;
     }
 
+    /**
+     * 执行并观测报告阶段策略。
+     *
+     * @param traceId 当前链路 ID，可为空
+     * @param policy 要执行的纯策略
+     * @param context 工作流和恢复预算
+     * @param ledger 报告对应的证据账本
+     * @param synthesis Research Manager 的结构化产物
+     * @return 权威 Harness 决策；策略异常时为安全 BLOCK
+     */
     public HarnessDecision evaluateReport(
             String traceId,
             ResearchCompletionPolicy policy,

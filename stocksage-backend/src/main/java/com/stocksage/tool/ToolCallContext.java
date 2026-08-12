@@ -91,7 +91,12 @@ public final class ToolCallContext {
     }
 
     /**
-     * Execute a local {@code @Tool} through CapabilityGateway without emitting a second AOP trace.
+     * 在 CapabilityGateway 内执行本地 {@code @Tool}，同时抑制 AOP 的第二份追踪记录。
+     *
+     * <p>抑制标记只作用于当前线程，并在 finally 中恢复调用前状态。</p>
+     *
+     * @param action 要执行的本地工具调用
+     * @return 工具调用结果
      */
     public static <T> T withoutObservation(Supplier<T> action) {
         boolean previous = OBSERVATION_SUPPRESSED.get();
@@ -107,6 +112,7 @@ public final class ToolCallContext {
         }
     }
 
+    /** @return 当前线程是否由 Gateway 接管了 observation 记录 */
     public static boolean isObservationSuppressed() {
         return OBSERVATION_SUPPRESSED.get();
     }

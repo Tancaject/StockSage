@@ -32,15 +32,23 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class DocumentLoader {
 
+    /** 调用 Python/PyMuPDF 解析 PDF 的 HTTP 客户端。 */
     private final DataServiceClient dataServiceClient;
+
+    /** 解析 data-service 返回的切片 JSON。 */
     private final ObjectMapper objectMapper;
+
+    /** 对切片做哈希去重并同步写入向量库和 MySQL。 */
     private final KnowledgeIngestionService knowledgeIngestionService;
 
+    /** 本地知识文档根目录。 */
     @Value("${stocksage.rag.docs-path:docs}")
     private String docsPath;
 
     /**
      * 加载演示知识库约定使用的 docs 子目录：reports、articles 和 glossary。
+     *
+     * @return 三类目录本次实际新增的切片总数
      */
     public int loadAll() {
         Path basePath = Path.of(docsPath);
@@ -61,6 +69,10 @@ public class DocumentLoader {
     /**
      * 解析单个源文件，并把切片交给 KnowledgeIngestionService。
      * 如果解析结果为零切片，不会删除旧索引，以保护知识库免受临时解析失败影响。
+     *
+     * @param filePath 待入库的本地文件
+     * @param docType 写入元数据的文档类型
+     * @return 本次新增切片数；文件缺失或解析失败时为 0
      */
     public int loadSingleFile(Path filePath, String docType) {
         if (!Files.exists(filePath)) {
@@ -75,6 +87,7 @@ public class DocumentLoader {
         }
 
         String sourceId = filePath.toAbsolutePath().normalize().toString();
+        // ingestDocuments 以绝对路径和文件哈希做幂等判断，并负责双存储一致性。
         KnowledgeIngestionResult result = knowledgeIngestionService.ingestDocuments(
                 sourceId,
                 sha256File(filePath),
@@ -93,6 +106,10 @@ public class DocumentLoader {
 
     /**
      * 加载某个文档类型目录下的所有支持文件。
+     *
+     * @param dir 文档类型子目录
+     * @param docType 该目录写入的统一文档类型
+     * @return 目录内所有文件实际新增的切片数
      */
     private int loadDirectory(Path dir, String docType) {
         if (!Files.exists(dir)) {
@@ -113,6 +130,10 @@ public class DocumentLoader {
 
     /**
      * 根据文件扩展名选择解析方式。
+     *
+     * @param file 源文件
+     * @param docType 写入切片元数据的文档类型
+     * @return 解析得到的 Spring AI 文档切片
      */
     private List<Document> parseFile(Path file, String docType) {
         String name = file.getFileName().toString().toLowerCase();
@@ -124,9 +145,14 @@ public class DocumentLoader {
 
     /**
      * PDF 使用 Python 解析器，使每个向量切片保留章节标题和页码范围元数据，便于引用。
+     *
+     * @param file PDF 文件
+     * @param docType 文档类型
+     * @return PyMuPDF 切片；远程错误或响应异常时为空
      */
     private List<Document> parsePdfViaPython(Path file, String docType) {
         try {
+            // DataServiceClient.parsePdf 上传文件并调用 Python 的 PyMuPDF 分块接口。
             String response = dataServiceClient.parsePdf(file, 3000, 300);
             JsonNode root = objectMapper.readTree(response);
 
@@ -167,6 +193,10 @@ public class DocumentLoader {
      * 解析纯文本、Markdown、HTML 或 docx 导出的文本类文件。
      *
      * <p>当前实现按空行切片，复杂版式文档仍建议优先走 Python/PDF 解析路径。</p>
+     *
+     * @param file 文本类源文件
+     * @param docType 文档类型
+     * @return 按段落构造的文档切片；读取失败时为空
      */
     private List<Document> parseTextFile(Path file, String docType) {
         try {
@@ -193,6 +223,9 @@ public class DocumentLoader {
 
     /**
      * 判断本地知识库加载器支持的文件类型。
+     *
+     * @param path 待检查路径
+     * @return 扩展名是否属于支持列表
      */
     private boolean isSupportedFile(Path path) {
         String name = path.getFileName().toString().toLowerCase();
@@ -202,6 +235,10 @@ public class DocumentLoader {
 
     /**
      * 计算文件 SHA-256，用于判断本地文档是否发生变化。
+     *
+     * @param path 源文件路径
+     * @return 小写十六进制 SHA-256
+     * @throws IllegalStateException 文件无法读取或哈希算法不可用时抛出
      */
     private String sha256File(Path path) {
         try (InputStream input = Files.newInputStream(path)) {

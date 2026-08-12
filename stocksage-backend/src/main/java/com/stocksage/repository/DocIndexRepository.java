@@ -26,11 +26,16 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DocIndexRepository {
 
+    /** Jackson 反序列化 {@code chunk_ids} JSON 数组所需的泛型类型。 */
     private static final TypeReference<List<String>> STRING_LIST = new TypeReference<>() {};
 
+    /** 执行索引表 DDL 和参数化 SQL 的 Spring JDBC 入口。 */
     private final JdbcTemplate jdbcTemplate;
+
+    /** 负责切片 ID 列表与 JSON 字符串互转。 */
     private final ObjectMapper objectMapper;
 
+    /** 将一行 {@code doc_index} 数据统一映射为不可变索引快照。 */
     private final RowMapper<DocIndexEntry> rowMapper = (rs, rowNum) -> new DocIndexEntry(
             rs.getString("file_path"),
             rs.getString("file_hash"),
@@ -42,6 +47,8 @@ public class DocIndexRepository {
 
     /**
      * 应用启动时确保轻量索引表存在，避免本地演示环境需要手工执行额外迁移。
+     *
+     * <p>{@link PostConstruct} 自动调用；建表失败会阻止该仓储完成初始化。</p>
      */
     @PostConstruct
     public void ensureTable() {
@@ -61,6 +68,9 @@ public class DocIndexRepository {
 
     /**
      * 根据来源路径或逻辑 sourceId 查询当前索引快照。
+     *
+     * @param filePath 文件路径或逻辑来源 ID，也是表主键
+     * @return 当前索引快照；来源尚未入库时为空
      */
     public Optional<DocIndexEntry> findByFilePath(String filePath) {
         List<DocIndexEntry> rows = jdbcTemplate.query(
@@ -73,6 +83,9 @@ public class DocIndexRepository {
 
     /**
      * 查找已过期的临时知识来源，供维护任务清理向量和元数据。
+     *
+     * @param now 过期判断基准时间，不能为空
+     * @return expiresAt 不晚于基准时间的索引快照
      */
     public List<DocIndexEntry> findExpired(LocalDateTime now) {
         return jdbcTemplate.query(
@@ -88,6 +101,11 @@ public class DocIndexRepository {
 
     /**
      * 写入或替换一个来源的索引快照。
+     *
+     * <p>filePath 冲突时原子覆盖哈希、切片 ID、来源类型和时间字段。</p>
+     *
+     * @param entry 要持久化的完整索引快照
+     * @throws IllegalStateException 切片 ID 无法序列化为 JSON 时抛出
      */
     public void save(DocIndexEntry entry) {
         jdbcTemplate.update(
@@ -112,6 +130,8 @@ public class DocIndexRepository {
 
     /**
      * 删除来源索引记录；调用方负责先清理对应切片。
+     *
+     * @param filePath 要删除的文件路径或逻辑来源 ID
      */
     public void deleteByFilePath(String filePath) {
         jdbcTemplate.update("DELETE FROM doc_index WHERE file_path = ?", filePath);
@@ -119,6 +139,9 @@ public class DocIndexRepository {
 
     /**
      * 反序列化切片 ID 列表；解析失败时返回空列表，避免维护任务中断。
+     *
+     * @param json 数据库中的 JSON 字符串数组
+     * @return 切片 ID 列表；格式损坏时记录警告并返回空列表
      */
     private List<String> fromJson(String json) {
         try {
@@ -131,6 +154,10 @@ public class DocIndexRepository {
 
     /**
      * 将切片 ID 列表保存为 JSON，便于 MySQL 一行记录描述一个来源。
+     *
+     * @param chunkIds 切片 ID 列表；null 按空列表处理
+     * @return JSON 字符串数组
+     * @throws IllegalStateException Jackson 序列化失败时抛出
      */
     private String toJson(List<String> chunkIds) {
         try {
@@ -143,7 +170,11 @@ public class DocIndexRepository {
     /**
      * 单个文件或临时来源的索引快照。
      *
+     * @param filePath 文件路径或逻辑来源 ID，也是索引表主键
+     * @param fileHash 来源内容的 SHA-256 哈希，用于判断是否变化
      * @param chunkIds 实际写入向量库或全文表的切片 ID 列表
+     * @param sourceType 来源分类，例如本地文档或临时上传
+     * @param ingestedAt 本次索引写入时间
      * @param expiresAt 为空表示永久知识源；非空表示可由维护任务按时清理
      */
     public record DocIndexEntry(
@@ -154,6 +185,12 @@ public class DocIndexRepository {
             LocalDateTime ingestedAt,
             LocalDateTime expiresAt
     ) {
+        /**
+         * 判断该来源在指定时间点是否已经到期。
+         *
+         * @param now 判断基准时间，不能为空
+         * @return expiresAt 非空且不晚于 now 时为 true
+         */
         public boolean isExpired(LocalDateTime now) {
             return expiresAt != null && !expiresAt.isAfter(now);
         }

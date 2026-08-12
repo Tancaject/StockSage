@@ -16,12 +16,14 @@ import java.util.Map;
 /**
  * Coordinator 路由的小型确定性回归测试入口。
  *
- * <p>这里刻意调用 planDeterministically，使结果不依赖网络或模型服务即可检查。</p>
+ * <p>上游回归/管理入口调用本服务，它再委托 {@link PlannerEvalService} 以确定性模式评估固定样例。
+ * 因此结果不依赖网络或模型服务；它验证“计划含必要动作”，不证明真实工具执行或端到端完成率。</p>
  */
 @Service
 @RequiredArgsConstructor
 public class CoordinatorRegressionService {
 
+    /** 复用统一 Planner Eval 契约和判定逻辑。 */
     private final PlannerEvalService plannerEvalService;
 
     /**
@@ -31,6 +33,7 @@ public class CoordinatorRegressionService {
      */
     public Map<String, Object> runDefaultRegression() {
         List<PlannerEvalCase> regressionCases = regressionCases();
+        // 调用统一 Eval 服务，而不是在此复制 Coordinator 动作匹配规则。
         PlannerEvalResponse response = plannerEvalService.evaluate(
                 new PlannerEvalRequest(PlannerEvalMode.DETERMINISTIC, regressionCases)
         );
@@ -50,6 +53,10 @@ public class CoordinatorRegressionService {
      * 执行单条回归用例并输出结构化结果。
      *
      * <p>判定逻辑只要求计划动作包含期望动作，允许 Coordinator 额外添加最终回答等辅助步骤。</p>
+     *
+     * @param evalCase 固定评估用例
+     * @param evalResult Planner Eval 的结构化结果
+     * @return 兼容旧接口字段名的结果 Map
      */
     private Map<String, Object> toLegacyCase(PlannerEvalCase evalCase, PlannerEvalResult evalResult) {
         Map<String, Object> result = new LinkedHashMap<>();
@@ -63,7 +70,9 @@ public class CoordinatorRegressionService {
     }
 
     /**
-     * 定义覆盖知识直答、行情查询、财报摄取和深度研究的基础路由样例。
+     * 定义覆盖知识直答、行情查询、财报查询和深度研究的基础路由样例。
+     *
+     * @return 顺序稳定的默认回归用例
      */
     private List<PlannerEvalCase> regressionCases() {
         return List.of(

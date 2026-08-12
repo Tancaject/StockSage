@@ -13,12 +13,15 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * News-route contract. A successful provider query with no results is a valid, explicit outcome;
- * transport/provider failure is recoverable once and then degrades.
+ * NEWS 路由的确定性完成契约。
+ *
+ * <p>提供方成功执行但明确返回 NO_RESULTS 是合法结果，不会被误判为系统失败；传输/提供方失败可恢复一次，
+ * 再失败则安全降级。任何未批准能力直接阻断。</p>
  */
 @Component
 public class NewsCompletionPolicy implements ResearchCompletionPolicy {
 
+    /** Trace/checkpoint 使用的稳定策略 ID。 */
     public static final String POLICY_ID = "news-read-v1";
 
     @Override
@@ -31,6 +34,13 @@ public class NewsCompletionPolicy implements ResearchCompletionPolicy {
         return 1;
     }
 
+    /**
+     * 验收新闻证据，区分“没有新闻”和“搜索失败”。
+     *
+     * @param context NEWS 重试已用次数
+     * @param evidence 本轮证据账本
+     * @return PASS、一次 RETRY_NEWS、DEGRADE 或 BLOCK
+     */
     @Override
     public HarnessDecision afterEvidence(RunContext context, EvidenceLedger evidence) {
         EvidenceLedger ledger = evidence == null ? EvidenceLedger.empty() : evidence;
@@ -38,6 +48,7 @@ public class NewsCompletionPolicy implements ResearchCompletionPolicy {
             return decision(HarnessOutcome.BLOCK, ViolationCode.UNAPPROVED_CAPABILITY,
                     RecoveryAction.RETURN_SAFE_REFUSAL);
         }
+        // NO_RESULTS 只有在调用获批、提供方和观察时间完整时才算可信的显式空结果。
         boolean validNoResults = ledger.evidence().stream()
                 .filter(item -> item.dimension() == EvidenceDimension.NEWS)
                 .anyMatch(item -> item.status() == EvidenceStatus.NO_RESULTS

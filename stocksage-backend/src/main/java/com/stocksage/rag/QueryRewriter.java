@@ -17,11 +17,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class QueryRewriter {
 
+    /** 只负责输出一行检索词的轻量模型客户端。 */
     private final ChatClient chatClient;
 
+    /** 是否在召回前调用模型改写查询。 */
     @Value("${stocksage.rag.rewrite-query:true}")
     private boolean enabled;
 
+    /** 改写结果允许的最大字符数，避免关键词失焦。 */
     @Value("${stocksage.rag.rewrite-query.max-length:180}")
     private int maxLength;
 
@@ -29,6 +32,8 @@ public class QueryRewriter {
      * 注入专门用于查询改写的 ChatClient。
      *
      * <p>使用独立 Bean 可以把改写提示词和主聊天/研究智能体隔离开，避免检索预处理污染业务对话上下文。</p>
+     *
+     * @param chatClient {@code queryRewriteChatClient} 专用 Bean
      */
     public QueryRewriter(@Qualifier("queryRewriteChatClient") ChatClient chatClient) {
         this.chatClient = chatClient;
@@ -39,6 +44,9 @@ public class QueryRewriter {
      *
      * <p>当开关关闭、问题为空、模型调用失败或模型输出明显无效时，都会直接返回原始 query。
      * 这种失败回退策略让 RAG 流程保持可用：改写是增强项，不是检索链路的硬依赖。</p>
+     *
+     * @param query 用户原始问题
+     * @return 可用于召回的单行查询；改写失败时返回原文
      */
     public String rewrite(String query) {
         if (!enabled || query == null || query.isBlank()) {
@@ -46,6 +54,7 @@ public class QueryRewriter {
         }
 
         try {
+            // 专用 ChatClient.call() 只生成检索词，不进入主对话记忆或工具链。
             String rewritten = chatClient.prompt()
                     .user("""
                             用户问题：
@@ -72,6 +81,9 @@ public class QueryRewriter {
      *
      * <p>模型可能返回 Markdown 代码块、项目符号、多行文本或多余引号，这里统一压缩成单行文本，
      * 并根据配置截断最大长度，避免过长查询拉低向量检索的语义聚焦度。</p>
+     *
+     * @param rewritten 模型原始输出
+     * @return 去围栏、去换行并按上限截断的文本
      */
     private String normalize(String rewritten) {
         if (rewritten == null) {
@@ -96,6 +108,9 @@ public class QueryRewriter {
      * 去掉包裹在整段检索词外侧的成对引号。
      *
      * <p>循环处理是为了兼容模型输出 {@code "关键词"}、{@code ```"关键词"```} 等多层包裹场景。</p>
+     *
+     * @param text 已完成基础清洗的文本
+     * @return 去除所有成对外层包裹符的文本
      */
     private String stripWrappingQuotes(String text) {
         String result = text;
@@ -107,6 +122,10 @@ public class QueryRewriter {
 
     /**
      * 判断首尾字符是否是一组可剥离的包裹符。
+     *
+     * @param start 首字符
+     * @param end 尾字符
+     * @return 是否构成支持的引号或反引号对
      */
     private boolean isWrappingQuote(char start, char end) {
         return (start == '"' && end == '"')
@@ -120,6 +139,9 @@ public class QueryRewriter {
      * 过滤模型拒答、道歉或无法处理类输出。
      *
      * <p>这些内容如果进入向量检索，会把召回方向带偏；识别到后直接使用用户原始问题更可靠。</p>
+     *
+     * @param text 规范化后的模型输出
+     * @return 是否像拒答而不是检索词
      */
     private boolean isLikelyInvalid(String text) {
         String lower = text.toLowerCase();

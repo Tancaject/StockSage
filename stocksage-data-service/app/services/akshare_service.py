@@ -15,6 +15,8 @@ import re
 import httpx
 import pandas as pd
 
+from app.services.technical_indicators import calculate_technical_indicators
+
 
 # akshare 目录函数（stock_hk_spot / stock_info_*_name_code 等）内部用 requests 拉大表，
 # 且不带任何超时；上游网络异常时会无限期挂起，远超 Java 客户端 10s 预算。
@@ -350,30 +352,11 @@ class AkshareService:
 
         df = pd.DataFrame(kline["data"])
         df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
-        result = {}
-
-        if "MA" in indicators:
-            result["MA5"] = self._rounded(df["Close"].rolling(5).mean().iloc[-1])
-            result["MA10"] = self._rounded(df["Close"].rolling(10).mean().iloc[-1])
-            result["MA20"] = self._rounded(df["Close"].rolling(20).mean().iloc[-1])
-            result["MA60"] = self._rounded(df["Close"].rolling(60).mean().iloc[-1])
-
-        if "RSI" in indicators:
-            delta = df["Close"].diff()
-            gain = delta.where(delta > 0, 0).rolling(14).mean()
-            loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
-            rs = gain / loss
-            result["RSI14"] = self._rounded(100 - 100 / (1 + rs.iloc[-1]))
-
-        if "MACD" in indicators:
-            ema12 = df["Close"].ewm(span=12).mean()
-            ema26 = df["Close"].ewm(span=26).mean()
-            dif = ema12 - ema26
-            dea = dif.ewm(span=9).mean()
-            macd = 2 * (dif - dea)
-            result["MACD_DIF"] = self._rounded(dif.iloc[-1], 4)
-            result["MACD_DEA"] = self._rounded(dea.iloc[-1], 4)
-            result["MACD"] = self._rounded(macd.iloc[-1], 4)
+        result = calculate_technical_indicators(
+            df["Close"],
+            indicators,
+            self._rounded,
+        )
 
         return {"symbol": self._hk_code(symbol), "indicators": result, "provider": "akshare"}
 
@@ -391,30 +374,11 @@ class AkshareService:
 
         df = pd.DataFrame(kline["data"])
         df["close"] = pd.to_numeric(df["close"], errors="coerce")
-        result = {}
-
-        if "MA" in indicators:
-            result["MA5"] = self._rounded(df["close"].rolling(5).mean().iloc[-1])
-            result["MA10"] = self._rounded(df["close"].rolling(10).mean().iloc[-1])
-            result["MA20"] = self._rounded(df["close"].rolling(20).mean().iloc[-1])
-            result["MA60"] = self._rounded(df["close"].rolling(60).mean().iloc[-1])
-
-        if "RSI" in indicators:
-            delta = df["close"].diff()
-            gain = delta.where(delta > 0, 0).rolling(14).mean()
-            loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
-            rs = gain / loss
-            result["RSI14"] = self._rounded(100 - 100 / (1 + rs.iloc[-1]))
-
-        if "MACD" in indicators:
-            ema12 = df["close"].ewm(span=12).mean()
-            ema26 = df["close"].ewm(span=26).mean()
-            dif = ema12 - ema26
-            dea = dif.ewm(span=9).mean()
-            macd = 2 * (dif - dea)
-            result["MACD_DIF"] = self._rounded(dif.iloc[-1], 4)
-            result["MACD_DEA"] = self._rounded(dea.iloc[-1], 4)
-            result["MACD"] = self._rounded(macd.iloc[-1], 4)
+        result = calculate_technical_indicators(
+            df["close"],
+            indicators,
+            self._rounded,
+        )
 
         return {"code": symbol, "symbol": code, "indicators": result, "provider": "akshare"}
 

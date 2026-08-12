@@ -16,6 +16,9 @@ public class IbkrInstrumentResolver {
      *
      * <p>当前主要支持美股 ticker 和港股数字代码；A 股仍交给 Python 数据服务处理。
      * 解析失败时返回 unsupported 对象，而不是抛异常，方便上层工具把原因直接反馈给模型。</p>
+     *
+     * @param input 用户输入的股票代码
+     * @return 归一化合约描述；不支持时返回带原因的对象
      */
     public IbkrInstrument resolve(String input) {
         String raw = input == null ? "" : input.trim();
@@ -51,6 +54,9 @@ public class IbkrInstrumentResolver {
      * 去掉港股代码前导零。
      *
      * <p>IBKR 搜索港股时通常使用不带前导零的数字符号；全为零时保留单个 0，避免返回空字符串。</p>
+     *
+     * @param value 港股数字代码
+     * @return IBKR 搜索使用的数字符号
      */
     private String stripLeadingZeros(String value) {
         String stripped = value.replaceFirst("^0+", "");

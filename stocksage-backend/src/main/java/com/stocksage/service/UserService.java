@@ -24,14 +24,20 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
 
+    /** ObjectMapper 读取字符串数组时保留泛型类型信息。 */
     private static final TypeReference<List<String>> STRING_LIST = new TypeReference<>() {
     };
 
+    /** 读写用户画像实体。 */
     private final UserProfileRepository userProfileRepository;
+    /** 在数据库 JSON 字符串与 Java 列表间转换。 */
     private final ObjectMapper objectMapper;
 
     /**
      * 加载画像；首次使用时生成默认提示词画像。
+     *
+     * @param userId 用户 ID
+     * @return 完整画像 DTO；不存在时返回未落库的默认画像
      */
     @Transactional(readOnly = true)
     public UserProfileDTO getUserProfile(String userId) {
@@ -42,6 +48,10 @@ public class UserService {
 
     /**
      * 将新事实合并进已有持仓和关注列表，而不是直接替换，从而保留早前会话学到的记忆。
+     *
+     * @param userId 用户 ID
+     * @param dto 增量画像；null 字段表示保持原值
+     * @return 合并并持久化后的完整画像
      */
     @Transactional
     public UserProfileDTO updateUserProfile(String userId, UserProfileDTO dto) {
@@ -61,11 +71,15 @@ public class UserService {
             profile.setProfileSummary(dto.getProfileSummary().trim());
         }
 
+        // 调用画像仓储保存合并结果，长期记忆由数据库而非 Redis 作为真源。
         return toDto(userProfileRepository.save(profile));
     }
 
     /**
      * 将画像实体转换为前端 DTO。
+     *
+     * @param profile 数据库实体
+     * @return 解析 JSON 列表后的 DTO
      */
     private UserProfileDTO toDto(UserProfile profile) {
         UserProfileDTO dto = new UserProfileDTO();
@@ -81,6 +95,9 @@ public class UserService {
      * 构造默认画像实体。
      *
      * <p>默认风险偏好使用 moderate，其余列表为空，表示还没有从对话中学习到个性化事实。</p>
+     *
+     * @param userId 用户 ID
+     * @return 尚未持久化的默认实体
      */
     private UserProfile defaultProfile(String userId) {
         UserProfile profile = new UserProfile();
@@ -94,6 +111,9 @@ public class UserService {
 
     /**
      * 读取 JSON 字符串数组。
+     *
+     * @param json 数据库中的 JSON 数组文本
+     * @return 可修改字符串列表
      */
     private List<String> readJsonArray(String json) {
         if (!hasText(json)) {
@@ -108,6 +128,9 @@ public class UserService {
 
     /**
      * 将字符串列表写为 JSON 数组。
+     *
+     * @param values 持仓或关注列表
+     * @return 数据库存储使用的 JSON 文本
      */
     private String writeJsonArray(List<String> values) {
         try {
@@ -117,6 +140,12 @@ public class UserService {
         }
     }
 
+    /**
+     * 从关注和持仓列表中删除同一归一化 ticker。
+     *
+     * @param userId 用户 ID
+     * @param ticker 前端提交的股票代码
+     */
     @Transactional
     public void removeFromWatchList(String userId, String ticker) {
         UserProfile profile = userProfileRepository.findById(userId)
@@ -141,6 +170,9 @@ public class UserService {
      *
      * <p>此前"添加自选"只改前端本地状态、没落库，刷新时被服务端 profile 覆盖而消失；
      * 这里补齐与删除对称的持久化，让服务端 profile 成为自选的唯一真源。</p>
+     *
+     * @param userId 用户 ID
+     * @param ticker 要保存的展示代码
      */
     @Transactional
     public void addToWatchList(String userId, String ticker) {
@@ -166,6 +198,10 @@ public class UserService {
 
     /**
      * 合并已有列表和新增列表，保持顺序并去重。
+     *
+     * @param current 数据库已有列表
+     * @param incoming 本轮增量列表
+     * @return 保持首次出现顺序的去重结果
      */
     private List<String> merge(List<String> current, List<String> incoming) {
         LinkedHashSet<String> merged = new LinkedHashSet<>();

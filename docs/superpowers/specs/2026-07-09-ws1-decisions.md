@@ -1,8 +1,8 @@
 # WS1 DEEP 后台任务系统：决策与验证记录
 
-更新时间：2026-07-10
+更新时间：2026-08-12
 
-状态：代码级方案已落地；双实例真实栈与性能数字仍待验证。本文只记录已经有证据的结论，未实测项明确标为“待验证”。
+状态：代码级方案和当前 Docker/Testcontainers/PIT 自动门禁已完成；双实例真实栈与性能数字仍待验证。本文只记录已经有证据的结论，未实测项明确标为“待验证”。
 
 ## 问题
 
@@ -68,7 +68,7 @@ checkpoint 放在独立的 `research_task_checkpoints` 表，避免几十 KB 的
 | 前两轮是否重跑 | **通过** | IT 断言 round 1/2 的 Bull/Bear 各只调用 1 次、round 3 各 1 次，接管路径 evidence collector 调用 0 次，即确定跳过 2 个已完成轮次。该结论不等价于已测 token 省量。 |
 | 后端单元回归 | **通过（144/144）** | 2026-07-10 加固后的 `mvnw test`：Failures=0、Errors=0；`init.ps1 -Mode fast` 后端阶段同样通过。 |
 | WS1 定向容器 IT | **通过（9/9）** | `TraceEventBridgeIT` 1/1、`ResearchTaskQueueIT` 4/4、`ResearchTaskEventsIT` 4/4，使用真实 Testcontainers Redis/MySQL。 |
-| 完整 `verify -Pit` | **修复后待重跑** | 首次全套运行 14 个 IT，其中 5 个因继承式 `@Testcontainers` 重启容器、Spring Context 复用旧随机端口而报连接错误；`AuthIntegrationTestBase` 已改为 JVM 级 singleton containers。修复后的重跑被当前提权工具额度限制阻止，不能写成通过。 |
+| 完整 `clean verify -Pit` | **通过** | 2026-07-31 当前证据：Surefire 312/312、Failsafe 17/17，无 failure、error 或 skip。该自动门禁不替代真实双实例四步验收。 |
 | 双实例脚本静态检查 | **通过** | Windows PowerShell AST parser 与 `-ChecklistOnly` 通过；支持 `-MySqlPort`，Compose 端可用 `STOCKSAGE_MYSQL_PORT` 避让已占用的 3306。 |
 | 双实例同任务不双跑 | **待真实栈验证** | 按 `scripts/dual-instance-demo.ps1` 第 1 步记录 taskId、attempts 和日志。 |
 | kill 后接管耗时 | **待真实栈验证：不得填配置推算值** | 从强停时间到另一实例首个恢复日志/事件计时。Compose MySQL/Redis 已启动，但真实两进程四步尚未执行。 |

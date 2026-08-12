@@ -39,6 +39,8 @@ public class Conversation {
 
     /**
      * 首次保存会话前初始化创建和更新时间。
+     *
+     * <p>JPA 自动调用该回调，两个时间会统一为当前本地时间。</p>
      */
     @PrePersist
     protected void onCreate() {
@@ -48,6 +50,8 @@ public class Conversation {
 
     /**
      * 每次更新会话元数据前刷新更新时间。
+     *
+     * <p>该副作用使最近活跃会话能按 {@link #updatedAt} 倒序展示。</p>
      */
     @PreUpdate
     protected void onUpdate() {

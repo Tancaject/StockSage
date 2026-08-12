@@ -1,5 +1,8 @@
 # StockSage 交付材料
 
+> [!WARNING]
+> 本文是 2026 年 5 月的交付材料快照，架构图和能力描述已被后续实现取代。当前项目说明以仓库根目录的 `README.md` 和 `docs/interview/agent-module-interview-guide.md` 为准。
+
 ## 架构图
 
 ```mermaid

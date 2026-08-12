@@ -11,10 +11,16 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/** Deterministic completion contract for market-data routes. */
+/**
+ * MARKET 路由的确定性完成契约。
+ *
+ * <p>要求标的已解析、能力均获批准，并至少有一条来源完整且标的一致的行情证据。
+ * 首次缺失允许重试一次 MARKET，之后降级为 NOT_RATED；标的或权限问题直接阻断。</p>
+ */
 @Component
 public class MarketCompletionPolicy implements ResearchCompletionPolicy {
 
+    /** Trace/checkpoint 使用的稳定策略 ID。 */
     public static final String POLICY_ID = "market-read-v1";
 
     @Override
@@ -27,6 +33,13 @@ public class MarketCompletionPolicy implements ResearchCompletionPolicy {
         return 1;
     }
 
+    /**
+     * 检查行情路由证据并返回有限恢复决策。
+     *
+     * @param context MARKET 重试已用次数
+     * @param evidence 本轮证据账本
+     * @return PASS、一次 RETRY_MARKET、DEGRADE 或 BLOCK
+     */
     @Override
     public HarnessDecision afterEvidence(RunContext context, EvidenceLedger evidence) {
         EvidenceLedger ledger = evidence == null ? EvidenceLedger.empty() : evidence;

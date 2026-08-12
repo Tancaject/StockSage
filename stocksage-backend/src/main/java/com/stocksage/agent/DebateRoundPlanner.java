@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class DebateRoundPlanner {
 
+    /** 只输出辩论轮数 JSON 的轻量规划客户端。 */
     private final ChatClient chatClient;
+    /** 解析模型返回的 rounds/reason 字段。 */
     private final ObjectMapper objectMapper;
 
     /**
@@ -35,10 +37,15 @@ public class DebateRoundPlanner {
 
     /**
      * 返回受限范围内的轮数，以及用于链路输出的可读原因。
+     *
+     * @param state 已收集证据和用户问题的研究状态
+     * @param configuredMaxRounds 配置上限，内部进一步限制为 1 到 5
+     * @return 受限轮数和简短选择原因；模型失败时为确定性兜底结果
      */
     public RoundDecision decide(AnalysisState state, int configuredMaxRounds) {
         int maxRounds = Math.max(1, Math.min(configuredMaxRounds, 5));
         try {
+            // 仅让模型选择轮数；具体多空 Agent 和执行顺序仍由服务器固定。
             String content = chatClient.prompt()
                     .user("""
                             你是 StockSage 的辩论轮次规划器。请根据用户问题和已收集证据，决定本次 Bull/Bear 投资辩论需要几轮。

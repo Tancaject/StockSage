@@ -13,10 +13,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,27 +28,38 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class Coordinator {
 
+    /** 只负责输出有限路由 JSON 的轻量客户端。 */
     private final ChatClient routingChatClient;
+    /** 普通回答客户端，可按当前对话配置使用工具。 */
     private final ChatClient responseChatClient;
+    /** 证据已固定后的无工具回答客户端，主要用于 DEEP 最终输出。 */
     private final ChatClient preparedAnswerChatClient;
+    /** 解析路由模型返回的最小 JSON。 */
     private final ObjectMapper objectMapper;
+    /** 确定性兜底中识别问题是否包含股票标的。 */
     private final TickerResolutionService tickerResolutionService;
 
+    /** FAST 层级映射的后端白名单模型名。 */
     @Value("${stocksage.chat.model-routing.fast-model:qwen3.6-flash}")
     private String fastModel;
 
+    /** STANDARD 层级映射的后端白名单模型名。 */
     @Value("${stocksage.chat.model-routing.standard-model:${STOCKSAGE_CHAT_MODEL:qwen3.6-plus}}")
     private String standardModel;
 
+    /** STRONG 层级映射的后端白名单模型名。 */
     @Value("${stocksage.chat.model-routing.strong-model:qwen3.6-max-preview}")
     private String strongModel;
 
+    /** 图片输入固定使用的视觉模型名。 */
     @Value("${stocksage.chat.model-routing.vision-model:qwen3-vl-plus}")
     private String visionModel;
 
+    /** 最终回答请求的统一温度配置。 */
     @Value("${stocksage.chat.model-routing.temperature:${STOCKSAGE_CHAT_TEMPERATURE:0.7}}")
     private double modelRoutingTemperature;
 
+    /** 最终回答的最大输出 token 数。 */
     @Value("${stocksage.chat.model-routing.max-output-tokens:${STOCKSAGE_CHAT_MAX_OUTPUT_TOKENS:4096}}")
     private int modelRoutingMaxOutputTokens;
 
@@ -71,14 +80,24 @@ public class Coordinator {
 
     /**
      * 向路由模型请求执行计划；如果模型、解析或网络任一环节失败，则回退到本地路由规则。
+     *
+     * @param userQuery 用户原始问题
+     * @param ragHitCount 知识库命中数
+     * @return 服务器拥有动作列表和模型层级的执行计划
      */
     public ExecutionPlan plan(String userQuery, int ragHitCount) {
         return plan(userQuery, ragHitCount, "");
     }
 
     /**
-     * Lets one small routing model select only the execution layer. The model
-     * never chooses tools, actions, agents, or concrete model names.
+     * 让一次轻量模型调用只选择执行路由。
+     *
+     * <p>模型不能选择工具、动作、Agent 或具体模型名；这些都由 {@link #buildPlan} 按后端固定表生成。</p>
+     *
+     * @param userQuery 用户原始问题
+     * @param ragHitCount 知识库命中数
+     * @param ragSummary 有界检索摘要，只辅助路由判断
+     * @return 模型路由计划；任一失败时返回确定性兜底计划
      */
     public ExecutionPlan plan(String userQuery, int ragHitCount, String ragSummary) {
         long startedNanos = System.nanoTime();
@@ -88,6 +107,7 @@ public class Coordinator {
                     .call()
                     .content();
             RouteDecision decision = parseRouteDecision(content);
+            // 路由模型只给 route；实际动作表和模型层级由服务器在 buildPlan 中补齐。
             return buildPlan(decision, userQuery, ragHitCount, elapsedMillis(startedNanos));
         } catch (Exception e) {
             log.warn("Coordinator LLM routing failed, using deterministic fallback. errorType={}",
@@ -98,6 +118,10 @@ public class Coordinator {
 
     /**
      * 只使用本地规则生成计划，供回归测试和模型不可用时复用。
+     *
+     * @param userQuery 用户原始问题
+     * @param ragHitCount 知识库命中数
+     * @return 不访问模型或外部工具的固定计划
      */
     public ExecutionPlan planDeterministically(String userQuery, int ragHitCount) {
         return fallbackPlan(userQuery, ragHitCount, "EXPLICIT_DETERMINISTIC", System.nanoTime());
@@ -180,7 +204,13 @@ public class Coordinator {
     public record SelectedModel(ModelTier tier, String modelName) {
     }
 
-    /** Parse the only three fields the routing model is allowed to produce. */
+    /**
+     * 解析路由模型唯一允许输出的有界字段。
+     *
+     * @param content 模型文本，允许外包 Markdown 围栏
+     * @return 归一化的最小路由决策
+     * @throws Exception JSON 无法解析时交由上层触发确定性兜底
+     */
     RouteDecision parseRouteDecision(String content) throws Exception {
         String json = extractJson(content);
         JsonNode root = objectMapper.readTree(json);
@@ -192,7 +222,7 @@ public class Coordinator {
         return new RouteDecision(intentSummary, rawRoute, route, rationale, confidence);
     }
 
-    /** Convert a validated route into the server-owned fixed execution plan. */
+    /** 把已归一化路由转换为服务器拥有动作表的固定执行计划。 */
     private ExecutionPlan buildPlan(
             RouteDecision decision,
             String userQuery,
@@ -205,8 +235,7 @@ public class Coordinator {
         ModelTier modelTier = selectDefaultModelTier(route, userQuery, ragHitCount);
         String thought = "Coordinator 路由：理解为「" + decision.intentSummary()
                 + "」，选择「" + taskType + "」；" + decision.rationale();
-        String observation = "分层路线：" + route + "；模型层级：" + modelTier + "；计划步骤："
-                + String.join(" -> ", actions.stream().map(PlanAction::label).toList());
+        String observation = buildPlanObservation(route, modelTier, actions);
         RoutingDecisionMetadata routingDecision = new RoutingDecisionMetadata(
                 RoutingDecisionSource.ROUTING_LLM,
                 decision.rawRoute(),
@@ -254,8 +283,7 @@ public class Coordinator {
         String taskType = taskType(route);
         String thought = "Coordinator 路由：识别为「" + taskType + "」；使用规则兜底完成分流。";
         ModelTier modelTier = selectDefaultModelTier(route, query, ragHitCount);
-        String observation = "分层路线：" + route + "；模型层级：" + modelTier + "；计划步骤："
-                + String.join(" -> ", actions.stream().map(PlanAction::label).toList());
+        String observation = buildPlanObservation(route, modelTier, actions);
         List<String> matchedSignals = new ArrayList<>();
         matchedSignals.add(route.name().toLowerCase(Locale.ROOT) + "-rule");
         if (ragHitCount > 0) {
@@ -276,6 +304,7 @@ public class Coordinator {
         return new ExecutionPlan(route, taskType, thought, actions, observation, modelTier, routingDecision);
     }
 
+    /** 把单调时钟差转换为非负毫秒数。 */
     private long elapsedMillis(long startedNanos) {
         return TimeUnit.NANOSECONDS.toMillis(Math.max(0L, System.nanoTime() - startedNanos));
     }
@@ -319,53 +348,66 @@ public class Coordinator {
      * 每条路由的默认步骤。名称刻意与 ChatService 的预取分支和前端追踪标签保持一致。
      */
     private List<PlanAction> defaultActions(PlanRoute route) {
-        Set<PlanAction> actions = new LinkedHashSet<>();
-        switch (route) {
-            case MARKET -> {
-                actions.add(PlanAction.MARKET_AGENT);
-                actions.add(PlanAction.SEARCH_STOCKS);
-                actions.add(PlanAction.GET_STOCK_KLINE);
-                actions.add(PlanAction.GET_FINANCIAL_METRICS);
-                actions.add(PlanAction.GET_TECHNICAL_INDICATORS);
-            }
-            case FUNDAMENTALS -> {
-                actions.add(PlanAction.FUNDAMENTALS_AGENT);
-                actions.add(PlanAction.SEARCH_STOCKS);
-                actions.add(PlanAction.GET_FINANCIAL_REPORTS);
-                actions.add(PlanAction.SEARCH_COMPANY_REPORTS);
-                actions.add(PlanAction.KNOWLEDGE_RETRIEVAL);
-            }
-            case DEEP -> {
-                actions.add(PlanAction.FUNDAMENTALS_AGENT);
-                actions.add(PlanAction.MARKET_AGENT);
-                actions.add(PlanAction.NEWS_AGENT);
-                actions.add(PlanAction.BULL_RESEARCHER);
-                actions.add(PlanAction.BEAR_RESEARCHER);
-                actions.add(PlanAction.RESEARCH_MANAGER);
-            }
-            case NEWS -> {
-                actions.add(PlanAction.NEWS_AGENT);
-                actions.add(PlanAction.SEARCH_STOCKS);
-                actions.add(PlanAction.SEARCH_NEWS);
-                actions.add(PlanAction.WEB_SEARCH);
-                actions.add(PlanAction.GET_MARKET_OVERVIEW);
-            }
-            default -> actions.add(PlanAction.KNOWLEDGE_RETRIEVAL);
-        }
+        List<PlanAction> routeActions = switch (route) {
+            case MARKET -> List.of(
+                    PlanAction.MARKET_AGENT,
+                    PlanAction.SEARCH_STOCKS,
+                    PlanAction.GET_STOCK_KLINE,
+                    PlanAction.GET_FINANCIAL_METRICS,
+                    PlanAction.GET_TECHNICAL_INDICATORS
+            );
+            case FUNDAMENTALS -> List.of(
+                    PlanAction.FUNDAMENTALS_AGENT,
+                    PlanAction.SEARCH_STOCKS,
+                    PlanAction.GET_FINANCIAL_REPORTS,
+                    PlanAction.SEARCH_COMPANY_REPORTS,
+                    PlanAction.KNOWLEDGE_RETRIEVAL
+            );
+            case DEEP -> List.of(
+                    PlanAction.FUNDAMENTALS_AGENT,
+                    PlanAction.MARKET_AGENT,
+                    PlanAction.NEWS_AGENT,
+                    PlanAction.BULL_RESEARCHER,
+                    PlanAction.BEAR_RESEARCHER,
+                    PlanAction.RESEARCH_MANAGER
+            );
+            case NEWS -> List.of(
+                    PlanAction.NEWS_AGENT,
+                    PlanAction.SEARCH_STOCKS,
+                    PlanAction.SEARCH_NEWS,
+                    PlanAction.WEB_SEARCH,
+                    PlanAction.GET_MARKET_OVERVIEW
+            );
+            case DIRECT -> List.of(PlanAction.KNOWLEDGE_RETRIEVAL);
+        };
+        // 复制不可变路由动作后再追加 FINAL_ANSWER；动作顺序是预取与 Trace 的行为契约。
+        List<PlanAction> actions = new ArrayList<>(routeActions);
         actions.add(PlanAction.FINAL_ANSWER);
-        return new ArrayList<>(actions);
+        return actions;
     }
 
+    /** 把稳定路由映射为面向 Trace/界面的中文任务类型。 */
     private String taskType(PlanRoute route) {
         return switch (route) {
             case MARKET -> "单点市场查询";
             case FUNDAMENTALS -> "单点财报查询";
             case DEEP -> "深度投资分析";
             case NEWS -> "新闻与事件分析";
-            default -> "知识类问答";
+            case DIRECT -> "知识类问答";
         };
     }
 
+    /** 生成不含原始 prompt 的可读计划摘要。 */
+    private String buildPlanObservation(
+            PlanRoute route,
+            ModelTier modelTier,
+            List<PlanAction> actions
+    ) {
+        String actionLabels = String.join(" -> ", actions.stream().map(PlanAction::label).toList());
+        return "分层路线：" + route + "；模型层级：" + modelTier + "；计划步骤：" + actionLabels;
+    }
+
+    /** 把连续置信度收敛为有限诊断信号，便于 Trace/Eval 使用。 */
     private String confidenceSignal(double confidence) {
         if (confidence >= 0.8) {
             return "confidence-high";
@@ -376,11 +418,15 @@ public class Coordinator {
         return "confidence-low";
     }
 
+    /** 截断只用于路由的 RAG 摘要，避免把完整检索块交给路由模型。 */
     private String boundedRagSummary(String value) {
         String summary = value == null ? "" : value.trim();
         return summary.isBlank() ? "无相关检索结果" : summary.substring(0, Math.min(1600, summary.length()));
     }
 
+    /**
+     * 构造最小路由输入；系统约束由专用 routing ChatClient 的配置提供。
+     */
     String buildRoutingPrompt(String userQuery, int ragHitCount, String ragSummary) {
         return """
                 用户问题：%s

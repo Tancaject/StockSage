@@ -26,11 +26,17 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class StockNewsService {
 
+    /** 复用 Python 新闻端点及其缓存、搜索降级策略。 */
     private final DataServiceClient dataServiceClient;
+    /** 将供应商 JSON 解析成统一前端结构。 */
     private final ObjectMapper objectMapper;
 
     /**
      * 读取某 ticker 近 {@code days} 天新闻并归一为前端条目列表。
+     *
+     * @param ticker 股票代码
+     * @param days 回溯天数；非正数默认 7 天
+     * @return 包含 provider、items、count、empty 和可选 error 的载荷
      */
     public Map<String, Object> getNews(String ticker, int days) {
         String norm = ticker == null ? "" : ticker.trim().toUpperCase();
@@ -43,6 +49,7 @@ public class StockNewsService {
 
         if (!norm.isEmpty()) {
             try {
+                // 调用 data-service 的既有新闻管线，不在 Java 侧直接访问第三方搜索供应商。
                 String raw = dataServiceClient.getStockNews(norm, window);
                 JsonNode root = objectMapper.readTree(raw == null || raw.isBlank() ? "{}" : raw);
                 provider = root.path("provider").asText("");
@@ -76,10 +83,12 @@ public class StockNewsService {
         return result;
     }
 
+    /** 在供应商兼容字段中选择第一个非空文本。 */
     private static String firstNonBlank(String a, String b) {
         return a != null && !a.isBlank() ? a : (b == null ? "" : b);
     }
 
+    /** URL 未提供 source 字段时提取主机名作为展示来源。 */
     private static String domainOf(String url) {
         if (url == null || url.isBlank()) {
             return "";

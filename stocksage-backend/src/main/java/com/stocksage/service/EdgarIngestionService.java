@@ -31,46 +31,67 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class EdgarIngestionService {
 
+    /** 父切片默认目标字符数。 */
     private static final int DEFAULT_PARENT_CHUNK_SIZE = 3000;
+    /** 父切片默认重叠字符数。 */
     private static final int DEFAULT_PARENT_CHUNK_OVERLAP = 300;
+    /** 子切片默认目标字符数。 */
     private static final int DEFAULT_CHILD_CHUNK_SIZE = 800;
+    /** 子切片默认重叠字符数。 */
     private static final int DEFAULT_CHILD_CHUNK_OVERLAP = 120;
+    /** 小于目标大小该比例的尾块会尝试并回前一块。 */
     private static final double SMALL_TAIL_RATIO = 0.25;
+    /** 合并尾块后允许相对目标大小的最大比例。 */
     private static final double MAX_MERGED_CHUNK_RATIO = 1.15;
+    /** 参与内容哈希的默认切片契约版本。 */
     private static final String DEFAULT_CHUNKING_VERSION = "edgar-v4-contextual-gist-child-vector";
 
+    /** 调用 Python 服务获取公告索引和结构化章节正文。 */
     private final DataServiceClient dataServiceClient;
+    /** 统一写入来源索引、MySQL 父/子镜像和 Milvus 子向量。 */
     private final KnowledgeIngestionService ingestionService;
+    /** 解析 data-service 响应 JSON。 */
     private final ObjectMapper objectMapper;
+    /** 可选为父块或子块生成上下文 gist。 */
     private final ContextualEnricher contextualEnricher;
 
+    /** 可配置父切片大小。 */
     @Value("${stocksage.rag.edgar.parent-chunk-size:3000}")
     private int parentChunkSize = DEFAULT_PARENT_CHUNK_SIZE;
 
+    /** 可配置父切片重叠。 */
     @Value("${stocksage.rag.edgar.parent-chunk-overlap:300}")
     private int parentChunkOverlap = DEFAULT_PARENT_CHUNK_OVERLAP;
 
+    /** 可配置子切片大小。 */
     @Value("${stocksage.rag.edgar.child-chunk-size:800}")
     private int childChunkSize = DEFAULT_CHILD_CHUNK_SIZE;
 
+    /** 可配置子切片重叠。 */
     @Value("${stocksage.rag.edgar.child-chunk-overlap:120}")
     private int childChunkOverlap = DEFAULT_CHILD_CHUNK_OVERLAP;
 
+    /** 当前切片与 embedding 文本契约版本。 */
     @Value("${stocksage.rag.edgar.chunking-version:edgar-v4-contextual-gist-child-vector}")
     private String chunkingVersion = DEFAULT_CHUNKING_VERSION;
 
+    /** contextual gist 由每个 parent 共享还是每个 child 单独生成。 */
     @Value("${stocksage.rag.contextual.granularity:child}")
     private String contextualGranularity = "child";
 
     /**
      * 入库指定公司的最近 N 份财报。
      *
+     * @param ticker 美股 ticker
+     * @param filingType SEC 公告类型，如 10-K 或 10-Q
+     * @param count 最近公告数量
      * @return 入库结果摘要
      */
     public Map<String, Object> ingestFilings(String ticker, String filingType, int count) {
         log.info("Starting EDGAR ingestion: ticker={}, type={}, count={}", ticker, filingType, count);
 
         // 1. 获取公告文件索引
+        // 调用 Python EDGAR 索引端点，Java 侧只负责编排切片和持久化。
         String filingsJson = dataServiceClient.getEdgarFilings(ticker, filingType, count);
         JsonNode filingsRoot = parseJson(filingsJson);
         if (filingsRoot == null || filingsRoot.has("error")) {
@@ -134,6 +155,8 @@ public class EdgarIngestionService {
      *
      * <p>该方法同时生成父级上下文切片和子级检索切片：父级用于回答时扩展上下文，
      * 子级用于向量召回命中。</p>
+     *
+     * @return 本次实际向量化的子切片数
      */
     private int ingestSingleFiling(
             String sourceId,
@@ -145,6 +168,7 @@ public class EdgarIngestionService {
             String accession) {
 
         // 下载并解析公告文件
+        // 调用 Python 公告解析端点，把 HTML 转为按 Item/章节组织的正文。
         String contentJson = dataServiceClient.getEdgarFilingContent(documentUrl, filingType);
         JsonNode contentRoot = parseJson(contentJson);
         if (contentRoot == null || contentRoot.has("error")) {
@@ -193,6 +217,7 @@ public class EdgarIngestionService {
                 String parentGist = null;
                 boolean parentGranularity = "parent".equalsIgnoreCase(contextualGranularity);
                 if (contextualEnricher.isEnabled() && parentGranularity) {
+                    // 调用 ContextualEnricher 为整个父块生成一次 gist，供其全部子块复用。
                     parentGist = contextualEnricher.generateGist(
                             parentText, parentText, "parent",
                             ticker, companyName, filingType, filingDate, sectionName);
@@ -252,6 +277,7 @@ public class EdgarIngestionService {
         }
 
         // 入库（永久层，无 TTL，不做语义去重）
+        // 调用统一摄取服务：父块仅写 MySQL，子块写 MySQL 并进入向量库。
         var result = ingestionService.ingestDocuments(
                 sourceId,
                 buildContentHash(sourceId, filingDate, accession, documentUrl),
@@ -267,6 +293,8 @@ public class EdgarIngestionService {
      * 构造父级切片 ID。
      *
      * <p>父级切片只持久化到 MySQL，用于子切片命中后的上下文扩展。</p>
+     *
+     * @return 由来源、章节和序号派生的稳定父切片 ID
      */
     private String buildParentId(String sourceId, String sectionName, int parentIndex) {
         return "parent_" + KnowledgeIngestionService.sha256(
@@ -277,6 +305,8 @@ public class EdgarIngestionService {
      * 构造来源内容哈希。
      *
      * <p>哈希中包含切片策略版本和参数，确保切片规则变化后会重新入库，而不是误判为来源未变化。</p>
+     *
+     * @return 来源和全部切片配置的 SHA-256
      */
     private String buildContentHash(String sourceId, String filingDate, String accession, String documentUrl) {
         return KnowledgeIngestionService.sha256(String.join("|",
@@ -300,9 +330,7 @@ public class EdgarIngestionService {
         ));
     }
 
-    /**
-     * 归一化切片策略版本号。
-     */
+    /** 归一化切片策略版本号。 */
     private String normalizeChunkingVersion() {
         return chunkingVersion == null || chunkingVersion.isBlank()
                 ? DEFAULT_CHUNKING_VERSION
@@ -315,6 +343,8 @@ public class EdgarIngestionService {
      * <p>这些前缀能让短切片在向量空间中保留公司身份和财报上下文，降低跨公司误召回。
      * 启用 Contextual Retrieval 时再追加一行 LLM 情境说明（Context:），
      * 向量与 FULLTEXT 两条检索腿共用该文本。</p>
+     *
+     * @return 带公司、公告、章节和可选 gist 前缀的嵌入正文
      */
     private String buildChildEmbeddingText(
             String childText,
@@ -347,6 +377,11 @@ public class EdgarIngestionService {
 
     /**
      * 按字符数分块，优先在段落、换行、句子边界处断开，并合并过短尾块。
+     *
+     * @param text 原始章节或父块正文
+     * @param chunkSize 目标字符数
+     * @param overlap 相邻块重叠字符数，最多为 chunkSize 一半
+     * @return 保持原顺序的非空切片
      */
     static List<String> splitIntoChunks(String text, int chunkSize, int overlap) {
         String normalizedText = text == null ? "" : text

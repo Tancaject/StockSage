@@ -24,22 +24,36 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Component
 public class ShortTermMemory {
 
+    /** Redis 会话窗口键前缀。 */
     private static final String KEY_PREFIX = "chat:conv:";
+    /** 压缩摘要写回列表时使用的消息角色。 */
     private static final String SUMMARY_ROLE = "system";
 
+    /** 读写会话消息列表和 TTL 的 Redis 客户端。 */
     private final StringRedisTemplate stringRedisTemplate;
+    /** 长窗口压缩所用的专用模型客户端。 */
     private final ChatClient memoryChatClient;
+    /** Redis 持续不可用时仅记录一次警告的状态位。 */
     private final AtomicBoolean redisUnavailableWarned = new AtomicBoolean(false);
 
+    /** 每次访问后刷新的会话记忆 TTL，单位小时。 */
     @Value("${stocksage.memory.short-term-ttl-hours}")
     private int ttlHours;
 
+    /** 允许直接注入提示词的最大消息条数。 */
     @Value("${stocksage.memory.max-context-messages}")
     private int maxContextMessages;
 
+    /** 是否优先用模型生成旧消息摘要；关闭时使用确定性拼接。 */
     @Value("${stocksage.memory.llm-summary.enabled:true}")
     private boolean llmSummaryEnabled;
 
+    /**
+     * 创建短期记忆组件。
+     *
+     * @param stringRedisTemplate Redis 字符串客户端
+     * @param memoryChatClient 摘要模型客户端
+     */
     public ShortTermMemory(StringRedisTemplate stringRedisTemplate,
                            @Qualifier("memoryChatClient") ChatClient memoryChatClient) {
         this.stringRedisTemplate = stringRedisTemplate;
@@ -50,6 +64,9 @@ public class ShortTermMemory {
      * 返回某个会话当前短期记忆快照。
      *
      * <p>该方法主要供调试接口使用，会同时返回消息列表、数量、窗口上限和 TTL 配置。</p>
+     *
+     * @param conversationId 会话 ID
+     * @return 消息列表及当前窗口配置
      */
     public MemoryContextDTO getContextSnapshot(Long conversationId) {
         List<String> messages = getContext(conversationId);
@@ -64,9 +81,13 @@ public class ShortTermMemory {
 
     /**
      * 读取 Redis 中某个会话的可注入上下文列表。
+     *
+     * @param conversationId 会话 ID
+     * @return 按写入顺序排列的消息；Redis 不可用时返回空列表
      */
     public List<String> getContext(Long conversationId) {
         try {
+            // 调用 Redis LRANGE 一次取回整个受限窗口，顺序与对话发生顺序一致。
             List<String> raw = stringRedisTemplate.opsForList().range(key(conversationId), 0, -1);
             markRedisAvailable();
             return raw == null ? List.of() : raw;
@@ -101,6 +122,9 @@ public class ShortTermMemory {
 
     /**
      * 当 Redis 列表超过配置的提示词窗口时压缩较早轮次，并原样保留最近消息。
+     *
+     * @param conversationId 会话 ID
+     * @return 是否压缩以及压缩前后的消息数量
      */
     public MemoryCompressionResult compressIfNeeded(Long conversationId) {
         List<String> messages = getContext(conversationId);
@@ -138,7 +162,9 @@ public class ShortTermMemory {
     }
 
     /**
-     * 清空指定会话的短期记忆。
+     * 清空指定会话的短期记忆；数据库中的完整聊天记录不受影响。
+     *
+     * @param conversationId 会话 ID
      */
     public void clear(Long conversationId) {
         try {
@@ -153,6 +179,9 @@ public class ShortTermMemory {
      * 用一组消息整体替换会话短期记忆。
      *
      * <p>常用于从数据库历史消息重建 Redis 窗口，空值和空白消息会被过滤。</p>
+     *
+     * @param conversationId 会话 ID
+     * @param messages 已按时间排序的角色消息文本
      */
     public void replaceWithMessages(Long conversationId, List<String> messages) {
         List<String> sanitized = messages == null
@@ -170,6 +199,9 @@ public class ShortTermMemory {
      * 原子化地删除旧列表并写入新上下文。
      *
      * <p>这里不做复杂事务控制，因为短期记忆只是提示词缓存，真实聊天历史仍由数据库保存。</p>
+     *
+     * @param conversationId 会话 ID
+     * @param messages 新的完整窗口
      */
     private void replaceContext(Long conversationId, List<String> messages) {
         try {
@@ -189,12 +221,16 @@ public class ShortTermMemory {
      * 为较早消息生成摘要。
      *
      * <p>优先使用记忆模型压缩；模型失败或返回空内容时回退到确定性摘要，保证压缩流程不中断。</p>
+     *
+     * @param messages 要压缩的较早消息
+     * @return 一段可作为 system 记忆注入的摘要
      */
     private String buildSummary(List<String> messages) {
         if (!llmSummaryEnabled) {
             return buildDeterministicSummary(messages);
         }
         try {
+            // 调用 memoryChatClient 生成摘要；任何异常都由下方确定性路径兜底。
             String summary = memoryChatClient.prompt()
                     .user("""
                             请将以下较早对话压缩为短期记忆摘要，保留：
@@ -222,6 +258,9 @@ public class ShortTermMemory {
      * 无模型模式下的确定性摘要兜底。
      *
      * <p>它不会真正理解内容，只保留前若干条消息作为可读提示，适合本地离线或模型不可用时使用。</p>
+     *
+     * @param messages 要压缩的较早消息
+     * @return 有长度上限的拼接摘要
      */
     private String buildDeterministicSummary(List<String> messages) {
         if (messages.isEmpty()) {
@@ -235,13 +274,12 @@ public class ShortTermMemory {
         return "Earlier conversation summary scaffold: " + joined;
     }
 
-    /**
-     * 刷新短期记忆 key 的过期时间。
-     */
+    /** 刷新短期记忆 key 的过期时间。 */
     private void refreshTtl(String key) {
         stringRedisTemplate.expire(key, Duration.ofHours(ttlHours));
     }
 
+    /** Redis 降级时返回与正常接口同结构的空快照。 */
     private MemoryContextDTO emptySnapshot(Long conversationId) {
         return MemoryContextDTO.builder()
                 .conversationId(conversationId)
@@ -252,6 +290,7 @@ public class ShortTermMemory {
                 .build();
     }
 
+    /** 在一段连续故障中只记录第一次 Redis 不可用警告。 */
     private void warnRedisUnavailable(String operation, Long conversationId, Exception error) {
         if (redisUnavailableWarned.compareAndSet(false, true)) {
             log.warn("Short-term memory Redis unavailable during {} for conversationId={}; "
@@ -260,6 +299,7 @@ public class ShortTermMemory {
         }
     }
 
+    /** Redis 调用恢复成功后重置告警抑制状态。 */
     private void markRedisAvailable() {
         redisUnavailableWarned.set(false);
     }

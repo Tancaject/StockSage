@@ -31,13 +31,19 @@ import java.util.regex.Pattern;
 @Service
 public class RagEvalService {
 
+    /** 识别模型回答中的 [1]、[2] 等上下文引用编号。 */
     private static final Pattern CITATION_PATTERN = Pattern.compile("\\[(\\d+)]");
 
+    /** 暴露可复现的检索中间阶段和最终上下文。 */
     private final RagService ragService;
+    /** 仅使用检索上下文生成评估答案的专用模型。 */
     private final ChatClient ragEvalChatClient;
 
     /**
      * 注入 RAG 服务和评测专用回答模型。
+     *
+     * @param ragService 被测检索管线
+     * @param ragEvalChatClient 评估回答模型
      */
     public RagEvalService(RagService ragService,
                           @Qualifier("ragEvalChatClient") ChatClient ragEvalChatClient) {
@@ -48,8 +54,12 @@ public class RagEvalService {
     /**
      * 端到端运行一个评估用例：检索、仅基于上下文回答、解析引用，
      * 并返回足够的元数据给 Python 打分器。
+     *
+     * @param request 问题、参考答案和上下文长度等评估配置
+     * @return Python RAGAS/回归脚本需要的检索、回答、引用和中间阶段
      */
     public RagEvalResponse evaluate(RagEvalRequest request) {
+        // 调用 RagService 的评测入口，保留查询改写、融合和重排等中间证据。
         RagRetrievalEvaluation retrieval = ragService.retrieveForEval(request.question());
         int maxContextChars = request.maxContextCharsOrDefault();
 
@@ -75,6 +85,10 @@ public class RagEvalService {
     /**
      * 评估回答刻意限制为只使用检索上下文，
      * 让回答质量指标反映 RAG 行为，而不是模型通用知识。
+     *
+     * @param question 评估问题
+     * @param contexts 最终检索上下文
+     * @return 带方括号引用的模型回答
      */
     private String generateAnswer(String question, List<RagEvalContext> contexts) {
         String prompt = """
@@ -91,6 +105,7 @@ public class RagEvalService {
                 - If the contexts are insufficient, say the filing context does not disclose the requested information.
                 """.formatted(question, buildNumberedContext(contexts));
 
+        // 调用专用评估模型，避免生产聊天提示词和记忆影响结果。
         return ragEvalChatClient.prompt()
                 .user(prompt)
                 .call()
@@ -101,6 +116,9 @@ public class RagEvalService {
      * 将评测上下文拼成带编号的提示词片段。
      *
      * <p>编号与引用格式 [1]、[2] 对齐，方便后续从回答中反查引用来源。</p>
+     *
+     * @param contexts 已按排名排序的上下文
+     * @return 可直接注入评估提示词的编号文本
      */
     private String buildNumberedContext(List<RagEvalContext> contexts) {
         StringBuilder builder = new StringBuilder();
@@ -124,6 +142,11 @@ public class RagEvalService {
      * 构造可选的检索阶段诊断详情。
      *
      * <p>includeIntermediate 为 false 时只返回计数，避免评测响应过大。</p>
+     *
+     * @param retrieval RagService 返回的完整评估轨迹
+     * @param includeIntermediate 是否携带各阶段正文
+     * @param maxContextChars 最终上下文单条字符上限
+     * @return 中间阶段计数和可选正文
      */
     private RagEvalRetrievalDetails toRetrievalDetails(RagRetrievalEvaluation retrieval,
                                                        boolean includeIntermediate,
@@ -151,6 +174,10 @@ public class RagEvalService {
 
     /**
      * 将 Spring AI Document 列表转换为评测上下文 DTO。
+     *
+     * @param documents 检索文档，顺序即排名
+     * @param maxContentChars 单条正文最大字符数
+     * @return 带排名和来源元数据的上下文列表
      */
     private List<RagEvalContext> toContexts(List<Document> documents, int maxContentChars) {
         if (documents == null || documents.isEmpty()) {
@@ -165,6 +192,11 @@ public class RagEvalService {
 
     /**
      * 将单个 Document 转换为带排名和归一化元数据的上下文。
+     *
+     * @param doc Spring AI 检索文档
+     * @param rank 一基排名
+     * @param maxContentChars 正文上限
+     * @return 评估上下文 DTO
      */
     private RagEvalContext toContext(Document doc, int rank, int maxContentChars) {
         Map<String, Object> metadata = doc.getMetadata();
@@ -185,6 +217,10 @@ public class RagEvalService {
 
     /**
      * 从模型回答中提取方括号引用，并映射回上下文元数据。
+     *
+     * @param answer 模型回答
+     * @param contexts 编号上下文
+     * @return 去重且保持首次出现顺序的有效引用
      */
     private List<RagEvalCitation> extractCitations(String answer, List<RagEvalContext> contexts) {
         if (answer == null || answer.isBlank()) {
@@ -216,6 +252,9 @@ public class RagEvalService {
 
     /**
      * 安全读取 Document 自带分数。
+     *
+     * @param doc 检索文档
+     * @return 向量/融合分数；当前 Spring AI 实现不支持时为 null
      */
     private Double documentScore(Document doc) {
         try {
@@ -227,6 +266,10 @@ public class RagEvalService {
 
     /**
      * 从元数据中读取 Double 值。
+     *
+     * @param metadata 文档元数据
+     * @param key 分数字段名
+     * @return 数值；缺失或无法解析时为 null
      */
     private Double metadataDouble(Map<String, Object> metadata, String key) {
         if (metadata == null || !metadata.containsKey(key)) {
@@ -245,6 +288,10 @@ public class RagEvalService {
 
     /**
      * 按候选 key 顺序读取第一个非空元数据字符串。
+     *
+     * @param metadata 文档元数据
+     * @param keys 兼容字段名
+     * @return 第一个非空值
      */
     private String metadataValue(Map<String, Object> metadata, String... keys) {
         if (metadata == null) {

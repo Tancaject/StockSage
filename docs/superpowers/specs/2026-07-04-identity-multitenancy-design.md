@@ -1,7 +1,7 @@
 # 身份与多租户（Identity + Multi-tenancy）设计
 
 > 属"真·可上线"子项目序列的第 1 项（脊椎）。后续：安全护栏 → 数据诚实化(已有 spec) → 可观测性/部署 → 弹性。
-> 前置事实：后端一期重构已完成（见 `2026-07-04-backend-phase1-refactor-design.md`），Flyway 已接入（V1 基线）。
+> 前置事实：后端一期重构已完成（见 `docs/archive/superpowers/specs/2026-07-04-backend-phase1-refactor-design.md`），Flyway 已接入（V1 基线）。
 
 ## 1. 背景与目标
 

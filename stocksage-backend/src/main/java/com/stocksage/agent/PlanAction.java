@@ -34,9 +34,11 @@ public enum PlanAction {
     GET_MARKET_OVERVIEW("getMarketOverview"),
     FINAL_ANSWER("Final Answer");
 
+    /** 历史展示标签到枚举的不可变反向索引。 */
     private static final Map<String, PlanAction> BY_LABEL = Arrays.stream(values())
             .collect(Collectors.toUnmodifiableMap(PlanAction::label, Function.identity()));
 
+    /** 与现有 Trace、SSE 和前端协议兼容的展示标签。 */
     private final String label;
 
     PlanAction(String label) {
@@ -48,7 +50,12 @@ public enum PlanAction {
         return label;
     }
 
-    /** 按标签解析动作；未知标签返回空（路由模型可能输出词表之外的动作名）。 */
+    /**
+     * 按标签解析动作；未知标签返回空，绝不把模型自由文本当作可执行动作。
+     *
+     * @param label 历史展示标签
+     * @return 已注册动作或空
+     */
     public static Optional<PlanAction> fromLabel(String label) {
         if (label == null) {
             return Optional.empty();
