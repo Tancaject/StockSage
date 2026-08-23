@@ -168,7 +168,7 @@ class ResearchDebateServiceResumeTest {
                 Map.of(RecoveryAction.RETRY_FUNDAMENTALS, 1),
                 RecoveryLifecycle.PLANNED,
                 List.of(RecoveryAction.RESYNTHESIZE_REPORT),
-                "deep-report:trace-1:deep-equity-v1-v2:resynthesize_report-1"
+                "deep-report:trace-1:deep-equity-v1-v3:resynthesize_report-1"
         ));
 
         InvestmentReport invalidReport = InvestmentReport.builder()
@@ -237,7 +237,7 @@ class ResearchDebateServiceResumeTest {
                 .containsEntry(RecoveryAction.RESYNTHESIZE_REPORT, 1)
                 .containsEntry(RecoveryAction.RETRY_FUNDAMENTALS, 1);
         assertThat(checkpoints.get(0).recoveryEffectKey())
-                .isEqualTo("deep-report:trace-1:deep-equity-v1-v2:resynthesize_report-1");
+                .isEqualTo("deep-report:trace-1:deep-equity-v1-v3:resynthesize_report-1");
         assertThat(checkpointedReports).hasSize(1);
         assertThat(checkpointedReports.get(0).getQualityStatus())
                 .isEqualTo(InvestmentReport.ReportQualityStatus.NOT_RATED);
@@ -264,7 +264,7 @@ class ResearchDebateServiceResumeTest {
                 ),
                 RecoveryLifecycle.REVALIDATED,
                 List.of(RecoveryAction.RESYNTHESIZE_REPORT),
-                "deep-report:trace-1:deep-equity-v1-v2:resynthesize_report-1"
+                "deep-report:trace-1:deep-equity-v1-v3:resynthesize_report-1"
         ));
         List<HarnessSnapshot> checkpoints = new ArrayList<>();
         List<InvestmentReport> checkpointedReports = new ArrayList<>();
@@ -295,7 +295,7 @@ class ResearchDebateServiceResumeTest {
                 .containsEntry(RecoveryAction.RESYNTHESIZE_REPORT, 1)
                 .containsEntry(RecoveryAction.RETRY_MARKET, 1);
         assertThat(checkpoints.get(0).recoveryEffectKey())
-                .isEqualTo("deep-report:trace-1:deep-equity-v1-v2:resynthesize_report-1");
+                .isEqualTo("deep-report:trace-1:deep-equity-v1-v3:resynthesize_report-1");
         assertThat(checkpointedReports).hasSize(1);
         assertThat(checkpointedReports.get(0).getQualityStatus())
                 .isEqualTo(InvestmentReport.ReportQualityStatus.NOT_RATED);
@@ -509,7 +509,7 @@ class ResearchDebateServiceResumeTest {
                 DeepResearchCompletionPolicy.POLICY_VERSION
         ));
         String effectKey =
-                "deep-report:trace-exhausted:deep-equity-v1-v2:resynthesize_report-1";
+                "deep-report:trace-exhausted:deep-equity-v1-v3:resynthesize_report-1";
         state.setHarnessSnapshot(HarnessSnapshot.recovery(
                 DeepResearchCompletionPolicy.POLICY_ID,
                 Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION),

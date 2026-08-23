@@ -89,7 +89,7 @@ public class ResearchMemoryVectorIndex {
      * @param userId 当前用户 ID
      * @param ticker 可选 ticker
      * @param query 当前问题
-     * @param topK 结果数，限制在 1 至 3
+     * @param topK 初始候选数，限制在 1 至 100；最终注入数量由服务层策略控制
      * @return 记忆行 ID 与相似度；最终可见性仍由数据库回查决定
      */
     public List<Hit> search(String userId, String ticker, String query, int topK) {
@@ -101,7 +101,7 @@ public class ResearchMemoryVectorIndex {
         }
         return store().similaritySearch(SearchRequest.builder()
                         .query(query)
-                        .topK(Math.max(1, Math.min(3, topK)))
+                        .topK(Math.max(1, Math.min(100, topK)))
                         .similarityThreshold(0.0)
                         .filterExpression(filter.toString())
                         .build())

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -30,7 +31,7 @@ import java.util.Set;
 public class PlannerEvalService {
 
     /** 评估响应结构版本，供离线脚本做兼容检查。 */
-    public static final String SCHEMA_VERSION = "planner_eval_v1";
+    public static final String SCHEMA_VERSION = "planner_eval_v2";
     /** 被测的计划器入口。 */
     private final Coordinator coordinator;
 
@@ -47,7 +48,11 @@ public class PlannerEvalService {
      */
     public PlannerEvalResponse evaluate(PlannerEvalRequest request) {
         long startedAt = System.currentTimeMillis();
-        List<PlannerEvalResult> results = request.cases().stream()
+        List<PlannerEvalCase> evaluatedCases = request.cases().stream()
+                .filter(evalCase -> request.mode() != PlannerEvalMode.DETERMINISTIC || !evalCase.liveOnly())
+                .toList();
+        int skippedLiveOnlyCases = request.cases().size() - evaluatedCases.size();
+        List<PlannerEvalResult> results = evaluatedCases.stream()
                 .map(evalCase -> evaluateCase(request.mode(), evalCase))
                 .toList();
 
@@ -60,23 +65,55 @@ public class PlannerEvalService {
         int routeMatches = (int) results.stream()
                 .filter(result -> result.executable() && result.expectedRoute() == result.actualRoute())
                 .count();
-        long requiredTotal = request.cases().stream().mapToLong(item -> item.requiredActions().size()).sum();
+        long requiredTotal = evaluatedCases.stream().mapToLong(item -> item.requiredActions().size()).sum();
         long requiredMissing = results.stream().mapToLong(item -> item.missingRequiredActions().size()).sum();
-        long forbiddenTotal = request.cases().stream().mapToLong(item -> item.forbiddenActions().size()).sum();
+        long forbiddenTotal = evaluatedCases.stream().mapToLong(item -> item.forbiddenActions().size()).sum();
         long forbiddenMatched = results.stream().mapToLong(item -> item.matchedForbiddenActions().size()).sum();
+        int intentEvaluatedCases = (int) results.stream()
+                .filter(result -> result.expectedFineIntent() != null)
+                .count();
+        int intentMatches = (int) results.stream()
+                .filter(result -> result.expectedFineIntent() != null && result.fineIntentMatched())
+                .count();
+        int contextCases = (int) results.stream().filter(PlannerEvalResult::contextCase).count();
+        int contextRouteMatches = (int) results.stream()
+                .filter(result -> result.contextCase() && result.routeMatched())
+                .count();
+        int contextResolutionCases = (int) results.stream()
+                .filter(result -> result.expectedResolvedQueryContains() != null)
+                .count();
+        int contextResolutionMatches = (int) results.stream()
+                .filter(result -> result.expectedResolvedQueryContains() != null
+                        && result.contextResolutionMatched())
+                .count();
+        int nonFallbackCases = (int) results.stream().filter(this::hasNonFallbackSource).count();
+        int nonFallbackRouteMatches = (int) results.stream()
+                .filter(result -> hasNonFallbackSource(result) && result.routeMatched())
+                .count();
+        int llmSignalCases = (int) results.stream()
+                .filter(result -> hasNonFallbackSource(result) && result.rawRouteValid())
+                .count();
+        int llmSignalMatches = (int) results.stream()
+                .filter(result -> hasNonFallbackSource(result) && result.rawRouteMatched())
+                .count();
+        int fallbackCases = (int) results.stream().filter(PlannerEvalResult::fallback).count();
+        int invalidRawRouteCases = (int) results.stream()
+                .filter(result -> !result.rawRouteValid())
+                .count();
         Map<String, RouteEvalMetrics> perRoute = perRouteMetrics(results);
         double macroF1 = perRoute.values().stream()
                 .mapToDouble(RouteEvalMetrics::f1)
                 .average()
                 .orElse(0.0);
 
-        String status;
-        status = passed == total ? "passed" : "failed";
+        String status = total == 0 ? "not_run" : passed == total ? "passed" : "failed";
         return new PlannerEvalResponse(
                 SCHEMA_VERSION,
                 request.mode(),
                 status,
+                request.cases().size(),
                 total,
+                skippedLiveOnlyCases,
                 passed,
                 criticalFailures,
                 ratio(routeMatches, total),
@@ -85,6 +122,20 @@ public class PlannerEvalService {
                 requiredTotal == 0 ? 1.0 : ratio(requiredTotal - requiredMissing, requiredTotal),
                 forbiddenTotal == 0 ? 0.0 : ratio(forbiddenMatched, forbiddenTotal),
                 ratio(executable, total),
+                intentEvaluatedCases,
+                ratio(intentMatches, intentEvaluatedCases),
+                contextCases,
+                ratio(contextRouteMatches, contextCases),
+                contextResolutionCases,
+                ratio(contextResolutionMatches, contextResolutionCases),
+                nonFallbackCases,
+                ratio(nonFallbackRouteMatches, nonFallbackCases),
+                llmSignalCases,
+                ratio(llmSignalMatches, llmSignalCases),
+                fallbackCases,
+                ratio(fallbackCases, total),
+                invalidRawRouteCases,
+                ratio(invalidRawRouteCases, total),
                 System.currentTimeMillis() - startedAt,
                 LocalDateTime.now().toString(),
                 results
@@ -98,7 +149,7 @@ public class PlannerEvalService {
             // 根据评估模式调用确定性规则或完整 Coordinator 计划入口，不执行计划中的动作。
             ExecutionPlan plan = mode == PlannerEvalMode.DETERMINISTIC
                     ? coordinator.planDeterministically(evalCase.query(), evalCase.ragHitCount())
-                    : coordinator.plan(evalCase.query(), evalCase.ragHitCount());
+                    : coordinator.plan(evalCase.query(), evalCase.ragHitCount(), "", evalCase.recentTurns());
             List<PlanAction> planned = plan.actions() == null ? List.of() : List.copyOf(plan.actions());
             List<PlanAction> missing = evalCase.requiredActions().stream()
                     .filter(action -> !planned.contains(action))
@@ -106,29 +157,90 @@ public class PlannerEvalService {
             List<PlanAction> forbidden = evalCase.forbiddenActions().stream()
                     .filter(planned::contains)
                     .toList();
-            boolean passed = plan.route() == evalCase.expectedRoute()
-                    && missing.isEmpty()
-                    && forbidden.isEmpty();
             RoutingDecisionMetadata routing = plan.routingDecision();
+            String decisionSource = routing == null ? "" : routing.decisionSource().name();
+            String actualFineIntent = routing == null ? "" : routing.fineIntent();
+            boolean routeMatched = plan.route() == evalCase.expectedRoute();
+            boolean fineIntentMatched = matchesOptional(evalCase.expectedFineIntent(), actualFineIntent);
+            boolean decisionSourceMatched = matchesOptional(evalCase.expectedDecisionSource(), decisionSource);
+            boolean fallback = routing != null && routing.fallback();
+            boolean noFallbackMatched = !evalCase.requireNoFallback()
+                    || routing != null && !fallback;
+            String actualResolvedQuery = Objects.requireNonNullElse(plan.resolvedQuery(), "").trim();
+            boolean contextResolutionMatched = containsOptional(
+                    evalCase.expectedResolvedQueryContains(), actualResolvedQuery);
+            PlanRoute parsedRawRoute = routing == null
+                    ? null
+                    : PlanRoute.parse(routing.rawRoute()).orElse(null);
+            boolean rawRouteValid = parsedRawRoute != null;
+            boolean rawRouteMatched = parsedRawRoute == evalCase.expectedRoute();
+            boolean passed = routeMatched
+                    && missing.isEmpty()
+                    && forbidden.isEmpty()
+                    && fineIntentMatched
+                    && decisionSourceMatched
+                    && noFallbackMatched
+                    && contextResolutionMatched;
             return new PlannerEvalResult(
                     evalCase.id(), evalCase.expectedRoute(), plan.route(), planned,
                     missing, forbidden, evalCase.critical(), passed, true,
                     System.currentTimeMillis() - startedAt, "",
-                    routing == null ? "" : routing.decisionSource().name(),
+                    decisionSource,
                     routing == null ? "" : routing.rawRoute(),
                     routing == null ? "" : routing.intentSummary(),
                     routing == null ? "" : routing.rationale(),
                     routing == null ? 0.0 : routing.confidence(),
-                    routing == null ? "" : routing.fallbackReason()
+                    routing == null ? "" : routing.fallbackReason(),
+                    evalCase.expectedFineIntent(),
+                    actualFineIntent,
+                    fineIntentMatched,
+                    evalCase.expectedDecisionSource(),
+                    decisionSourceMatched,
+                    evalCase.requireNoFallback(),
+                    noFallbackMatched,
+                    routeMatched,
+                    !evalCase.recentTurns().isEmpty(),
+                    fallback,
+                    rawRouteValid,
+                    rawRouteMatched,
+                    evalCase.expectedResolvedQueryContains(),
+                    actualResolvedQuery,
+                    contextResolutionMatched
             );
         } catch (Exception ignored) {
             return new PlannerEvalResult(
                     evalCase.id(), evalCase.expectedRoute(), null, List.of(),
                     evalCase.requiredActions(), List.of(), evalCase.critical(),
                     false, false, System.currentTimeMillis() - startedAt,
-                    "PLANNER_EXECUTION_FAILED", "", "", "", "", 0.0, ""
+                    "PLANNER_EXECUTION_FAILED", "", "", "", "", 0.0, "",
+                    evalCase.expectedFineIntent(), "", evalCase.expectedFineIntent() == null,
+                    evalCase.expectedDecisionSource(), evalCase.expectedDecisionSource() == null,
+                    evalCase.requireNoFallback(), !evalCase.requireNoFallback(), false,
+                    !evalCase.recentTurns().isEmpty(), false, false, false,
+                    evalCase.expectedResolvedQueryContains(), "",
+                    evalCase.expectedResolvedQueryContains() == null
             );
         }
+    }
+
+    /** 非回退准确率只纳入带明确路由来源的 LLM/融合结果，不能把缺失元数据当作成功。 */
+    private boolean hasNonFallbackSource(PlannerEvalResult result) {
+        return result.decisionSource() != null
+                && !result.decisionSource().isBlank()
+                && !"DETERMINISTIC_FALLBACK".equalsIgnoreCase(result.decisionSource());
+    }
+
+    /** 可选枚举名使用忽略大小写的精确比较；未提供期望值时保持 V1 通过语义。 */
+    private boolean matchesOptional(String expected, String actual) {
+        return expected == null || expected.equalsIgnoreCase(Objects.requireNonNullElse(actual, "").trim());
+    }
+
+    /** 可选消歧断言忽略大小写；未声明时保持旧样例的通过语义。 */
+    private boolean containsOptional(String expected, String actual) {
+        return expected == null
+                || Objects.requireNonNullElse(actual, "")
+                .toLowerCase(java.util.Locale.ROOT)
+                .contains(expected.toLowerCase(java.util.Locale.ROOT));
     }
 
     /** 按 one-vs-rest 口径计算每个 route 的 precision、recall 和 F1。 */

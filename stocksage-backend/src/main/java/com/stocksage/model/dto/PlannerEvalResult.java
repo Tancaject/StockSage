@@ -25,6 +25,21 @@ import java.util.List;
  * @param rationale 路由决定理由
  * @param confidence 路由置信度，通常范围 0～1；无元数据时为 0
  * @param fallbackReason 使用回退路由时的原因；未回退时为空字符串
+ * @param expectedFineIntent 可选的期望细粒度意图
+ * @param actualFineIntent 实际细粒度意图；元数据缺失时为空字符串
+ * @param fineIntentMatched 未提供期望值或实际值匹配时为 true
+ * @param expectedDecisionSource 可选的期望路由来源
+ * @param decisionSourceMatched 未提供期望值或实际值匹配时为 true
+ * @param requireNoFallback 本例是否要求不得回退
+ * @param noFallbackMatched 未要求禁止回退或确实未回退时为 true
+ * @param routeMatched 最终执行路由是否命中期望
+ * @param contextCase 是否携带最近对话上下文
+ * @param fallback 是否实际使用确定性回退
+ * @param rawRouteValid 原始路由是否可严格解析为后端五选一路由
+ * @param rawRouteMatched 合法原始路由是否命中期望路由
+ * @param expectedResolvedQueryContains 可选的期望消歧片段
+ * @param actualResolvedQuery 执行计划实际使用的有界消歧问题
+ * @param contextResolutionMatched 未提供期望片段或实际消歧问题包含该片段时为 true
  */
 public record PlannerEvalResult(
         String id,
@@ -43,6 +58,21 @@ public record PlannerEvalResult(
         String intentSummary,
         String rationale,
         double confidence,
-        String fallbackReason
+        String fallbackReason,
+        String expectedFineIntent,
+        String actualFineIntent,
+        boolean fineIntentMatched,
+        String expectedDecisionSource,
+        boolean decisionSourceMatched,
+        boolean requireNoFallback,
+        boolean noFallbackMatched,
+        boolean routeMatched,
+        boolean contextCase,
+        boolean fallback,
+        boolean rawRouteValid,
+        boolean rawRouteMatched,
+        String expectedResolvedQueryContains,
+        String actualResolvedQuery,
+        boolean contextResolutionMatched
 ) {
 }

@@ -575,7 +575,7 @@ class InvestmentReportVersionServiceTest {
     }
 
     @Test
-    void approvalDoesNotRevokeMachineVerifiedResearchMemory() throws Exception {
+    void approvalReconcilesWithoutRevokingMachineVerifiedResearchMemory() throws Exception {
         InvestmentReportVersion reportVersion = reportVersion(
                 31L,
                 InvestmentReportVersion.ReviewStatus.IN_REVIEW,
@@ -602,6 +602,7 @@ class InvestmentReportVersionServiceTest {
         );
 
         verify(researchMemoryService, never()).revokeForReport(any());
+        verify(researchMemoryService).reconcileForReport(reportVersion);
     }
 
     @Test

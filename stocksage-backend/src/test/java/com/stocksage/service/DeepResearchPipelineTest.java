@@ -566,13 +566,13 @@ class DeepResearchPipelineTest {
         AnalysisState state = AnalysisState.builder().query("q").primaryTicker("AAPL").build();
         state.setHarnessSnapshot(HarnessSnapshot.recovery(
                 "deep-equity-v1",
-                "2",
+                Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION),
                 HarnessPhase.EVIDENCE,
                 recoverDecision,
                 Map.of(),
                 RecoveryLifecycle.PLANNED,
                 List.of(RecoveryAction.RETRY_FUNDAMENTALS),
-                "deep-evidence:901:deep-equity-v1-v2:retry_fundamentals-1"
+                "deep-evidence:901:deep-equity-v1-v3:retry_fundamentals-1"
         ));
         HarnessDecision passDecision =
                 new HarnessDecision(HarnessOutcome.PASS, List.of(), List.of());
@@ -619,7 +619,7 @@ class DeepResearchPipelineTest {
                 .isEqualTo(RecoveryLifecycle.REVALIDATED);
         assertThat(persistedSnapshots.get(0).recoveryEffectKey())
                 .isEqualTo(persistedSnapshots.get(1).recoveryEffectKey())
-                .isEqualTo("deep-evidence:901:deep-equity-v1-v2:retry_fundamentals-1");
+                .isEqualTo("deep-evidence:901:deep-equity-v1-v3:retry_fundamentals-1");
         assertThat(persistedSnapshots.get(1).recoveryAttempts())
                 .containsEntry(RecoveryAction.RETRY_FUNDAMENTALS, 1);
 
@@ -663,7 +663,7 @@ class DeepResearchPipelineTest {
         state.setDataSnapshotHash("old-data-hash");
         state.setContextHash("old-context-hash");
         String reportEffectKey =
-                "deep-report:trace-1:deep-equity-v1-v2:resynthesize_report-1";
+                "deep-report:trace-1:deep-equity-v1-v3:resynthesize_report-1";
         HarnessDecision reportPlan = new HarnessDecision(
                 HarnessOutcome.RECOVER,
                 List.of(new com.stocksage.harness.HarnessModels.HarnessViolation(
@@ -826,7 +826,7 @@ class DeepResearchPipelineTest {
                 .isEqualTo(RecoveryLifecycle.REVALIDATED);
         assertThat(persistedSnapshots)
                 .extracting(HarnessSnapshot::recoveryEffectKey)
-                .containsOnly("deep-evidence:904:deep-equity-v1-v2:retry_fundamentals-1");
+                .containsOnly("deep-evidence:904:deep-equity-v1-v3:retry_fundamentals-1");
         verify(evidenceCollector, times(2)).recover(
                 pending,
                 List.of(RecoveryAction.RETRY_FUNDAMENTALS),
@@ -848,13 +848,13 @@ class DeepResearchPipelineTest {
         AnalysisState state = AnalysisState.builder().query("q").primaryTicker("AAPL").build();
         state.setHarnessSnapshot(HarnessSnapshot.recovery(
                 "deep-equity-v1",
-                "2",
+                Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION),
                 HarnessPhase.EVIDENCE,
                 passDecision,
                 Map.of(RecoveryAction.RETRY_FUNDAMENTALS, 1),
                 RecoveryLifecycle.REVALIDATED,
                 List.of(RecoveryAction.RETRY_FUNDAMENTALS),
-                "deep-evidence:902:deep-equity-v1-v2:retry_fundamentals-1"
+                "deep-evidence:902:deep-equity-v1-v3:retry_fundamentals-1"
         ));
         DeepEvidenceCollector.EvidenceCollection revalidated = evidence(state, passDecision, true);
         AnalysisState completed = verifiedState("AAPL");
@@ -1050,13 +1050,13 @@ class DeepResearchPipelineTest {
             roundCheckpointer.onRoundCompleted(state, 1, 1);
             state.setHarnessSnapshot(HarnessSnapshot.recovery(
                     "deep-equity-v1",
-                    "2",
+                    Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION),
                     HarnessPhase.REPORT,
                     plannedDecision,
                     Map.of(),
                     RecoveryLifecycle.PLANNED,
                     List.of(RecoveryAction.RESYNTHESIZE_REPORT),
-                    "deep-report:trace-1:deep-equity-v1-v2:resynthesize_report-1"
+                    "deep-report:trace-1:deep-equity-v1-v3:resynthesize_report-1"
             ));
             @SuppressWarnings("unchecked")
             Consumer<AnalysisState> harnessCheckpointer = invocation.getArgument(7);

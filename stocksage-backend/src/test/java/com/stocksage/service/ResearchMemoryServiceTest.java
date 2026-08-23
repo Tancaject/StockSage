@@ -1,10 +1,16 @@
 package com.stocksage.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.agent.AgentStep;
+import com.stocksage.agent.intent.AnalysisDepth;
+import com.stocksage.agent.intent.TimeSensitivity;
+import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.model.entity.InvestmentReportVersion;
+import com.stocksage.model.entity.ResearchMemoryConflictGroup;
 import com.stocksage.model.entity.ResearchMemoryEntry;
 import com.stocksage.repository.InvestmentReportVersionRepository;
+import com.stocksage.repository.ResearchMemoryConflictGroupRepository;
 import com.stocksage.repository.ResearchMemoryEntryRepository;
 import com.stocksage.trace.TraceService;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,8 +27,13 @@ import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
@@ -42,7 +54,12 @@ import static org.mockito.Mockito.when;
 
 class ResearchMemoryServiceTest {
 
+    private static final Instant NOW_INSTANT = Instant.parse("2026-08-23T00:00:00Z");
+    private static final LocalDateTime NOW = LocalDateTime.ofInstant(NOW_INSTANT, ZoneOffset.UTC);
+
     private final ResearchMemoryEntryRepository repository = mock(ResearchMemoryEntryRepository.class);
+    private final ResearchMemoryConflictGroupRepository conflictGroupRepository =
+            mock(ResearchMemoryConflictGroupRepository.class);
     private final InvestmentReportVersionRepository reportVersionRepository =
             mock(InvestmentReportVersionRepository.class);
     private final ResearchMemoryVectorIndex vectorIndex = mock(ResearchMemoryVectorIndex.class);
@@ -51,8 +68,9 @@ class ResearchMemoryServiceTest {
     private final PlatformTransactionManager transactionManager =
             mock(PlatformTransactionManager.class);
     private final ResearchMemoryService service = new ResearchMemoryService(
-            repository, reportVersionRepository, vectorIndex, properties,
-            new ObjectMapper(), traceService, transactionManager);
+            repository, conflictGroupRepository, reportVersionRepository, vectorIndex, properties,
+            new ObjectMapper(), traceService, transactionManager,
+            Clock.fixed(NOW_INSTANT, ZoneOffset.UTC));
 
     @BeforeEach
     void setUp() {
@@ -62,6 +80,21 @@ class ResearchMemoryServiceTest {
         properties.setInject(false);
         when(transactionManager.getTransaction(any(TransactionDefinition.class)))
                 .thenReturn(new SimpleTransactionStatus());
+        when(conflictGroupRepository.ensureAndLock(
+                anyString(), anyString(), any(LocalDateTime.class)))
+                .thenAnswer(invocation -> {
+                    ResearchMemoryConflictGroup group = new ResearchMemoryConflictGroup();
+                    group.setId(1L);
+                    group.setUserId(invocation.getArgument(0));
+                    group.setConflictKey(invocation.getArgument(1));
+                    group.setResolutionStatus(
+                            ResearchMemoryConflictGroup.ResolutionStatus.UNRESOLVED);
+                    return group;
+                });
+        when(conflictGroupRepository.saveAndFlush(any(ResearchMemoryConflictGroup.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.findConflictCandidatesForUpdate(anyString(), anyString()))
+                .thenReturn(List.of());
         when(repository.saveAndFlush(any())).thenAnswer(invocation -> {
             ResearchMemoryEntry entry = invocation.getArgument(0);
             entry.setId(41L);
@@ -228,6 +261,7 @@ class ResearchMemoryServiceTest {
         when(repository.findByVectorStatusInOrderByUpdatedAtAsc(
                 anyCollection(), any())).thenReturn(List.of(staleCandidate));
         when(repository.findByIdAndUserId(41L, "u-a")).thenReturn(Optional.of(authoritative));
+        when(repository.findById(41L)).thenReturn(Optional.of(authoritative));
         org.mockito.Mockito.doAnswer(invocation -> {
             assertThat(service.revoke("u-a", 41L)).isTrue();
             return null;
@@ -249,7 +283,7 @@ class ResearchMemoryServiceTest {
     }
 
     @Test
-    void indexCasExceptionDeletesUncommittedVectorAndLeavesTruthPending() {
+    void indexCasExceptionKeepsOrphanVectorSafelyGatedByPendingTruth() {
         properties.setIndex(true);
         InvestmentReportVersion source = source("u-a", "STRONG", "qwen");
         when(repository.updateVectorStateIfIndexable(
@@ -261,26 +295,26 @@ class ResearchMemoryServiceTest {
 
         assertThat(captured.getVectorStatus()).isEqualTo(ResearchMemoryEntry.VectorStatus.PENDING);
         verify(vectorIndex).index(captured);
-        verify(vectorIndex).delete(41L);
+        verify(vectorIndex, never()).delete(41L);
     }
 
     @Test
-    void retrievalUsesTenantScopedTruthLookupAndShadowDoesNotInject() {
+    void retrievalUsesTenantScopedTruthLookupWithoutPromptInjection() {
         properties.setRetrieve(true);
         properties.setInject(false);
-        ResearchMemoryEntry own = new ResearchMemoryEntry();
-        own.setId(41L);
-        own.setUserId("u-a");
-        own.setTicker("NVDA");
-        own.setMemoryText("private sourced conclusion");
-        own.setSourceCitations("[\"SEC\"]");
-        own.setCreatedAt(LocalDateTime.now());
-        own.setVectorStatus(ResearchMemoryEntry.VectorStatus.INDEXED);
-        when(vectorIndex.search("u-a", "NVDA", "query", 3))
+        String conflictKey = "REPORT_RECOMMENDATION|NVDA|MEDIUM_TERM";
+        ResearchMemoryEntry own = indexedMemory(
+                41L, conflictKey, AnalysisHorizon.MEDIUM_TERM,
+                ResearchMemoryEntry.ResolutionStatus.CURRENT,
+                NOW, "private sourced conclusion", "HOLD");
+        when(vectorIndex.search("u-a", "NVDA", "query", 30))
                 .thenReturn(List.of(new ResearchMemoryVectorIndex.Hit(41L, 0.9)));
         when(repository.findByIdInAndUserIdAndRevokedAtIsNullAndVectorStatus(
                 anyCollection(), eq("u-a"), eq(ResearchMemoryEntry.VectorStatus.INDEXED)))
                 .thenReturn(List.of(own));
+        when(conflictGroupRepository.findByUserIdAndConflictKeyIn(
+                eq("u-a"), anyCollection()))
+                .thenReturn(List.of(resolvedGroup(conflictKey, 41L)));
 
         ResearchMemoryService.RetrievalResult result =
                 service.retrieve("u-a", "NVDA", "query", "trace");
@@ -288,10 +322,13 @@ class ResearchMemoryServiceTest {
         assertThat(result.hitCount()).isOne();
         assertThat(result.injected()).isFalse();
         assertThat(result.promptContext()).isBlank();
+        verify(vectorIndex).search("u-a", "NVDA", "query", 30);
         verify(repository).findByIdInAndUserIdAndRevokedAtIsNullAndVectorStatus(
                 org.mockito.ArgumentMatchers.argThat(ids -> ids.equals(java.util.Set.of(41L))),
                 eq("u-a"),
                 eq(ResearchMemoryEntry.VectorStatus.INDEXED));
+        verify(conflictGroupRepository)
+                .findByUserIdAndConflictKeyIn(eq("u-a"), anyCollection());
     }
 
     @Test
@@ -306,7 +343,7 @@ class ResearchMemoryServiceTest {
         pending.setSourceCitations("[\"SEC\"]");
         pending.setCreatedAt(LocalDateTime.now());
         pending.setVectorStatus(ResearchMemoryEntry.VectorStatus.PENDING);
-        when(vectorIndex.search("u-a", "NVDA", "query", 3))
+        when(vectorIndex.search("u-a", "NVDA", "query", 30))
                 .thenReturn(List.of(new ResearchMemoryVectorIndex.Hit(41L, 0.9)));
         when(repository.findByIdInAndUserIdAndRevokedAtIsNullAndVectorStatus(
                 anyCollection(), eq("u-a"), eq(ResearchMemoryEntry.VectorStatus.INDEXED)))
@@ -318,6 +355,154 @@ class ResearchMemoryServiceTest {
         assertThat(result.hitCount()).isZero();
         assertThat(result.injected()).isFalse();
         assertThat(result.promptContext()).isBlank();
+        verify(vectorIndex).search("u-a", "NVDA", "query", 30);
+    }
+
+    @Test
+    void retrievalUsesThirtyCandidatesCurrentWinnersDecayOrderAndUnifiedTrace() {
+        properties.setRetrieve(true);
+        properties.setInject(true);
+        String longTermKey = "REPORT_RECOMMENDATION|NVDA|LONG_TERM";
+        String shortTermKey = "REPORT_RECOMMENDATION|NVDA|SHORT_TERM";
+        ResearchMemoryEntry olderWinner = indexedMemory(
+                41L, longTermKey, AnalysisHorizon.LONG_TERM,
+                ResearchMemoryEntry.ResolutionStatus.CURRENT,
+                NOW.minusDays(180), "old winner text", "HOLD");
+        ResearchMemoryEntry freshWinner = indexedMemory(
+                42L, shortTermKey, AnalysisHorizon.SHORT_TERM,
+                ResearchMemoryEntry.ResolutionStatus.CURRENT,
+                NOW, "fresh winner text", "BUY");
+        ResearchMemoryEntry superseded = indexedMemory(
+                43L, shortTermKey, AnalysisHorizon.SHORT_TERM,
+                ResearchMemoryEntry.ResolutionStatus.SUPERSEDED,
+                NOW, "superseded opposite text", "SELL");
+        when(vectorIndex.search("u-a", "NVDA", "query", 30)).thenReturn(List.of(
+                new ResearchMemoryVectorIndex.Hit(41L, 0.95),
+                new ResearchMemoryVectorIndex.Hit(42L, 0.70),
+                new ResearchMemoryVectorIndex.Hit(43L, 0.99)
+        ));
+        when(repository.findByIdInAndUserIdAndRevokedAtIsNullAndVectorStatus(
+                anyCollection(), eq("u-a"), eq(ResearchMemoryEntry.VectorStatus.INDEXED)))
+                .thenReturn(List.of(superseded, olderWinner, freshWinner));
+        when(conflictGroupRepository.findByUserIdAndConflictKeyIn(
+                eq("u-a"), anyCollection()))
+                .thenReturn(List.of(
+                        resolvedGroup(longTermKey, 41L),
+                        resolvedGroup(shortTermKey, 42L)
+                ));
+
+        ResearchMemoryService.RetrievalResult result = service.retrieve(new ResearchMemoryQuery(
+                "u-a", "NVDA", "query", "trace",
+                AnalysisDepth.STANDARD, TimeSensitivity.RECENT));
+
+        assertThat(result.injected()).isTrue();
+        assertThat(result.hitCount()).isEqualTo(2);
+        assertThat(result.promptContext())
+                .contains("fresh winner text", "old winner text")
+                .doesNotContain("superseded opposite text");
+        assertThat(result.promptContext().indexOf("fresh winner text"))
+                .isLessThan(result.promptContext().indexOf("old winner text"));
+        verify(vectorIndex).search("u-a", "NVDA", "query", 30);
+        ArgumentCaptor<AgentStep> stepCaptor = ArgumentCaptor.forClass(AgentStep.class);
+        verify(traceService).addStep(eq("trace"), stepCaptor.capture());
+        assertThat(stepCaptor.getValue().getAttributes())
+                .containsEntry("candidateK", 30)
+                .containsEntry("shortlistK", 12)
+                .containsEntry("finalTopK", 6)
+                .containsEntry("candidateCount", 3)
+                .containsEntry("truthCount", 3)
+                .containsEntry("currentWinnerCount", 2)
+                .containsEntry("unresolvedGroupCount", 0)
+                .containsEntry("injected", true);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> traceHits = (List<Map<String, Object>>)
+                stepCaptor.getValue().getAttributes().get("hits");
+        assertThat(traceHits).extracting(hit -> hit.get("entryId"))
+                .containsExactly(42L, 41L);
+        assertThat(traceHits.get(1)).satisfies(hit -> {
+            assertThat(((Number) hit.get("freshness")).doubleValue()).isCloseTo(0.25,
+                    org.assertj.core.data.Offset.offset(1.0e-12));
+            assertThat(((Number) hit.get("effectiveScore")).doubleValue()).isCloseTo(0.2375,
+                    org.assertj.core.data.Offset.offset(1.0e-12));
+        });
+    }
+
+    @Test
+    void unresolvedConflictInjectsOnlySafeWarning() {
+        properties.setRetrieve(true);
+        properties.setInject(true);
+        String conflictKey = "REPORT_RECOMMENDATION|NVDA|MEDIUM_TERM";
+        ResearchMemoryEntry bullish = indexedMemory(
+                41L, conflictKey, AnalysisHorizon.MEDIUM_TERM,
+                ResearchMemoryEntry.ResolutionStatus.CONFLICTED,
+                NOW, "bullish conflicting body", "BUY");
+        ResearchMemoryEntry bearish = indexedMemory(
+                42L, conflictKey, AnalysisHorizon.MEDIUM_TERM,
+                ResearchMemoryEntry.ResolutionStatus.CONFLICTED,
+                NOW, "bearish conflicting body", "SELL");
+        when(vectorIndex.search("u-a", "NVDA", "query", 30)).thenReturn(List.of(
+                new ResearchMemoryVectorIndex.Hit(41L, 0.95),
+                new ResearchMemoryVectorIndex.Hit(42L, 0.94)
+        ));
+        when(repository.findByIdInAndUserIdAndRevokedAtIsNullAndVectorStatus(
+                anyCollection(), eq("u-a"), eq(ResearchMemoryEntry.VectorStatus.INDEXED)))
+                .thenReturn(List.of(bullish, bearish));
+        when(conflictGroupRepository.findByUserIdAndConflictKeyIn(
+                eq("u-a"), anyCollection()))
+                .thenReturn(List.of(unresolvedGroup(conflictKey)));
+
+        ResearchMemoryService.RetrievalResult result = service.retrieve(new ResearchMemoryQuery(
+                "u-a", "NVDA", "query", "trace",
+                AnalysisDepth.STANDARD, TimeSensitivity.RECENT));
+
+        assertThat(result.hitCount()).isZero();
+        assertThat(result.injected()).isTrue();
+        assertThat(result.promptContext())
+                .contains("未消解冲突", "系统已排除相反结论")
+                .doesNotContain("bullish conflicting body", "bearish conflicting body");
+        verify(vectorIndex).search("u-a", "NVDA", "query", 30);
+    }
+
+    @Test
+    void deepPromptFitsEightCompleteRowsInsideTheConfiguredBudget() {
+        properties.setRetrieve(true);
+        properties.setInject(true);
+        properties.setMaxPromptChars(4800);
+        List<ResearchMemoryVectorIndex.Hit> hits = new ArrayList<>();
+        List<ResearchMemoryEntry> entries = new ArrayList<>();
+        List<ResearchMemoryConflictGroup> groups = new ArrayList<>();
+        for (int index = 1; index <= 8; index++) {
+            long id = 40L + index;
+            String ticker = "T" + index;
+            String conflictKey = "REPORT_RECOMMENDATION|" + ticker + "|LONG_TERM";
+            ResearchMemoryEntry entry = indexedMemory(
+                    id, conflictKey, AnalysisHorizon.LONG_TERM,
+                    ResearchMemoryEntry.ResolutionStatus.CURRENT,
+                    NOW.minusDays(index), "body-" + index + "-" + "x".repeat(3000), "HOLD");
+            entry.setTicker(ticker);
+            entry.setSourceCitations("[\"" + "s".repeat(500) + "\"]");
+            hits.add(new ResearchMemoryVectorIndex.Hit(id, 1.0 - index / 100.0));
+            entries.add(entry);
+            groups.add(resolvedGroup(conflictKey, id));
+        }
+        when(vectorIndex.search("u-a", "", "portfolio history", 30)).thenReturn(hits);
+        when(repository.findByIdInAndUserIdAndRevokedAtIsNullAndVectorStatus(
+                anyCollection(), eq("u-a"), eq(ResearchMemoryEntry.VectorStatus.INDEXED)))
+                .thenReturn(entries);
+        when(conflictGroupRepository.findByUserIdAndConflictKeyIn(
+                eq("u-a"), anyCollection())).thenReturn(groups);
+
+        ResearchMemoryService.RetrievalResult result = service.retrieve(new ResearchMemoryQuery(
+                "u-a", "", "portfolio history", "trace",
+                AnalysisDepth.DEEP, TimeSensitivity.RECENT));
+
+        assertThat(result.injected()).isTrue();
+        assertThat(result.hitCount()).isEqualTo(8);
+        assertThat(result.promptContext().length()).isLessThanOrEqualTo(4800);
+        for (int index = 1; index <= 8; index++) {
+            String marker = "[M" + index + "]";
+            assertThat(result.promptContext()).containsOnlyOnce(marker);
+        }
     }
 
     @Test
@@ -366,6 +551,7 @@ class ResearchMemoryServiceTest {
     @Test
     void revokeForReportUsesTenantScopedSourceIdentity() {
         InvestmentReportVersion source = source("u-a", "STRONG", "qwen");
+        source.setReviewStatus(InvestmentReportVersion.ReviewStatus.REJECTED);
         ResearchMemoryEntry own = new ResearchMemoryEntry();
         own.setId(41L);
         own.setUserId("u-a");
@@ -377,7 +563,51 @@ class ResearchMemoryServiceTest {
 
         assertThat(own.getVectorStatus()).isEqualTo(ResearchMemoryEntry.VectorStatus.REVOKED);
         assertThat(own.getRevokedAt()).isNotNull();
-        verify(vectorIndex).delete(41L);
+        verify(vectorIndex, never()).delete(41L);
+    }
+
+    private ResearchMemoryEntry indexedMemory(
+            Long id,
+            String conflictKey,
+            AnalysisHorizon horizon,
+            ResearchMemoryEntry.ResolutionStatus resolutionStatus,
+            LocalDateTime referenceAt,
+            String memoryText,
+            String recommendation
+    ) {
+        ResearchMemoryEntry entry = new ResearchMemoryEntry();
+        entry.setId(id);
+        entry.setUserId("u-a");
+        entry.setTicker("NVDA");
+        entry.setSourceType("INVESTMENT_REPORT_VERSION");
+        entry.setSourceId(String.valueOf(id));
+        entry.setSourceCitations("[\"SEC filing\"]");
+        entry.setMemoryText(memoryText);
+        entry.setAnalysisHorizon(horizon);
+        entry.setRecommendation(recommendation);
+        entry.setConflictKey(conflictKey);
+        entry.setResolutionStatus(resolutionStatus);
+        entry.setDataCutoffAt(referenceAt);
+        entry.setCreatedAt(referenceAt);
+        entry.setVectorStatus(ResearchMemoryEntry.VectorStatus.INDEXED);
+        return entry;
+    }
+
+    private ResearchMemoryConflictGroup resolvedGroup(String conflictKey, Long winnerId) {
+        ResearchMemoryConflictGroup group = new ResearchMemoryConflictGroup();
+        group.setUserId("u-a");
+        group.setConflictKey(conflictKey);
+        group.setWinnerEntryId(winnerId);
+        group.setResolutionStatus(ResearchMemoryConflictGroup.ResolutionStatus.RESOLVED);
+        return group;
+    }
+
+    private ResearchMemoryConflictGroup unresolvedGroup(String conflictKey) {
+        ResearchMemoryConflictGroup group = new ResearchMemoryConflictGroup();
+        group.setUserId("u-a");
+        group.setConflictKey(conflictKey);
+        group.setResolutionStatus(ResearchMemoryConflictGroup.ResolutionStatus.UNRESOLVED);
+        return group;
     }
 
     private InvestmentReportVersion source(String userId, String tier, String model) {
@@ -408,7 +638,7 @@ class ResearchMemoryServiceTest {
         return InvestmentReport.builder()
                 .ticker("NVDA")
                 .qualityStatus(InvestmentReport.ReportQualityStatus.VERIFIED)
-                .recommendation("WATCH")
+                .recommendation("HOLD")
                 .rationale(List.of("Revenue growth remains strong"))
                 .riskFactors(List.of("Valuation risk"))
                 .citations(citations)

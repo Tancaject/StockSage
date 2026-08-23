@@ -7,6 +7,7 @@ project harness. Live LLM modes still require a running backend and provider.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import urllib.error
@@ -27,7 +28,22 @@ def load_cases(path: Path) -> list[dict]:
     ]
 
 
-def invoke(endpoint: str, mode: str, cases: list[dict], admin_token: str | None) -> dict:
+def cases_sha256(cases: list[dict]) -> str:
+    """Hash semantic JSONL content independent of whitespace and line endings."""
+    canonical = "\n".join(
+        json.dumps(case, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        for case in cases
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def invoke(
+    endpoint: str,
+    mode: str,
+    cases: list[dict],
+    admin_token: str | None,
+    timeout_seconds: float = 600.0,
+) -> dict:
     request = urllib.request.Request(
         endpoint,
         data=json.dumps({"mode": mode, "cases": cases}).encode("utf-8"),
@@ -36,7 +52,7 @@ def invoke(endpoint: str, mode: str, cases: list[dict], admin_token: str | None)
     )
     if admin_token:
         request.add_header("X-StockSage-Admin-Token", admin_token)
-    with urllib.request.urlopen(request, timeout=120) as response:
+    with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
         return json.loads(response.read().decode("utf-8"))
 
 
@@ -69,10 +85,26 @@ def main() -> int:
     )
     parser.add_argument("--output", type=Path, default=HERE / "agent_eval_result.json")
     parser.add_argument("--admin-token")
+    parser.add_argument(
+        "--timeout-seconds",
+        type=float,
+        default=600.0,
+        help="HTTP timeout for the sequential planner batch (default: 600 seconds)",
+    )
     args = parser.parse_args()
+    if args.timeout_seconds <= 0:
+        parser.error("--timeout-seconds must be greater than zero")
 
     try:
-        planner = invoke(args.endpoint, args.mode, load_cases(args.cases), args.admin_token)
+        cases = load_cases(args.cases)
+        planner = invoke(
+            args.endpoint,
+            args.mode,
+            cases,
+            args.admin_token,
+            args.timeout_seconds,
+        )
+        planner["datasetSha256"] = cases_sha256(cases)
         report = build_report(
             planner,
             load_json(args.gates),
@@ -87,8 +119,12 @@ def main() -> int:
             json.dumps(report, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
-        print(f"{report['schema_version']} {report['status']} -> {args.output}")
-        return 0 if report["status"] == "passed" else 2
+        planner_status = report["planner"]["gate_status"]
+        print(
+            f"{report['schema_version']} planner={planner_status} "
+            f"unified={report['status']} -> {args.output}"
+        )
+        return 0 if planner_status == "passed" else 2
     except (OSError, ValueError, urllib.error.URLError) as error:
         print(f"agent eval could not run: {type(error).__name__}", file=sys.stderr)
         return 3

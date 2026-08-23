@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -27,6 +28,12 @@ public interface InvestmentReportVersionRepository extends JpaRepository<Investm
      * @return 用户拥有的报告；不存在或不属于该用户时为空
      */
     Optional<InvestmentReportVersion> findByIdAndUserId(Long id, String userId);
+
+    /** 批量读取同一用户拥有的来源报告，供冲突组重选读取当前审核真相。 */
+    List<InvestmentReportVersion> findByIdInAndUserId(
+            Collection<Long> ids,
+            String userId
+    );
 
     /**
      * 按报告主键和所有者读取并获取悲观写锁。

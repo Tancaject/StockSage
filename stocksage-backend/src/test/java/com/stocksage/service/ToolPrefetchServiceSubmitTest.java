@@ -392,7 +392,7 @@ class ToolPrefetchServiceSubmitTest {
         assertThat(snapshots)
                 .extracting(HarnessSnapshot::recoveryEffectKey)
                 .containsOnly(
-                        "deep-evidence:89:deep-equity-v1-v2:retry_market-1"
+                        "deep-evidence:89:deep-equity-v1-v3:retry_market-1"
                 );
         assertThat(snapshots)
                 .allSatisfy(snapshot -> assertThat(snapshot.recoveryActions())

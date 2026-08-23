@@ -55,6 +55,15 @@ public class InvestmentReport {
     /** 研究经理给出的最终投资建议；证据不足时不应伪造明确结论。 */
     private String recommendation;
 
+    /**
+     * 投资建议适用的分析期限。
+     *
+     * <p>默认值保证旧版持久化 JSON 缺少该字段时仍能反序列化；新报告必须由
+     * Research Manager 显式输出一个合法枚举值。</p>
+     */
+    @Builder.Default
+    private AnalysisHorizon analysisHorizon = AnalysisHorizon.UNSPECIFIED;
+
     /** 支撑最终建议的核心理由。 */
     @Builder.Default
     private List<String> rationale = new ArrayList<>();

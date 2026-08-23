@@ -401,14 +401,21 @@ function formatAction(step) {
 }
 
 function formatRouteDecision(metadata = {}) {
+  const sourceScores = Object.entries(metadata.sourceScores || {})
+    .map(([source, score]) => `${source}=${Number(score || 0).toFixed(2)}`)
+    .join(', ')
   const lines = [
     `意图理解：${metadata.intentSummary || '未提供'}`,
+    `细粒度意图：${metadata.fineIntent || 'UNKNOWN'} / ${metadata.intentGroup || 'UNKNOWN'}`,
     `选择路由：${metadata.route || 'DIRECT'}`,
     `决策来源：${metadata.source || 'UNKNOWN'}`,
     `置信度：${Number(metadata.confidence || 0).toFixed(2)}`,
+    `时效/深度：${metadata.timeSensitivity || 'UNSPECIFIED'} / ${metadata.analysisDepth || 'UNSPECIFIED'}`,
     `依据：${metadata.rationale || '未提供'}`,
     `RAG 命中：${Number(metadata.ragHitCount || 0)}`,
   ]
+  if (sourceScores) lines.push(`信号分数：${sourceScores}`)
+  if (metadata.needsClarification) lines.push('需要澄清：是')
   if (metadata.fallbackReason) lines.push(`降级原因：${metadata.fallbackReason}`)
   return lines.join('\n')
 }

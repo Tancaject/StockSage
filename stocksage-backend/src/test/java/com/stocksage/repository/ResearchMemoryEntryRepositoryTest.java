@@ -1,5 +1,6 @@
 package com.stocksage.repository;
 
+import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.entity.ResearchMemoryEntry;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
@@ -80,6 +81,54 @@ class ResearchMemoryEntryRepositoryTest {
 
         assertThat(result).extracting(ResearchMemoryEntry::getId)
                 .containsExactly(indexed.getId());
+    }
+
+    @Test
+    void conflictCandidateLockOrdersByIdAndPersistsResolutionFields() {
+        String conflictKey = "REPORT_RECOMMENDATION|NVDA|MEDIUM_TERM";
+        ResearchMemoryEntry older = entry("older-report");
+        older.setAnalysisHorizon(AnalysisHorizon.MEDIUM_TERM);
+        older.setRecommendation("HOLD");
+        older.setConflictKey(conflictKey);
+        older = repository.saveAndFlush(older);
+
+        ResearchMemoryEntry newer = entry("newer-report");
+        newer.setAnalysisHorizon(AnalysisHorizon.MEDIUM_TERM);
+        newer.setRecommendation("BUY");
+        newer.setConflictKey(conflictKey);
+        newer.setResolutionStatus(ResearchMemoryEntry.ResolutionStatus.CURRENT);
+        newer = repository.saveAndFlush(newer);
+
+        LocalDateTime supersededAt = LocalDateTime.of(2026, 2, 1, 12, 0);
+        older.setResolutionStatus(ResearchMemoryEntry.ResolutionStatus.SUPERSEDED);
+        older.setSupersededById(newer.getId());
+        older.setSupersededAt(supersededAt);
+        older.setResolutionReason("NEWEST_DATA_CUTOFF");
+        repository.saveAndFlush(older);
+
+        ResearchMemoryEntry unrelated = entry("different-horizon");
+        unrelated.setAnalysisHorizon(AnalysisHorizon.LONG_TERM);
+        unrelated.setRecommendation("HOLD");
+        unrelated.setConflictKey("REPORT_RECOMMENDATION|NVDA|LONG_TERM");
+        repository.saveAndFlush(unrelated);
+        entityManager.clear();
+
+        List<ResearchMemoryEntry> locked = repository.findConflictCandidatesForUpdate(
+                "u-a", conflictKey);
+
+        assertThat(locked).extracting(ResearchMemoryEntry::getId)
+                .containsExactly(older.getId(), newer.getId());
+        ResearchMemoryEntry persistedOlder = locked.get(0);
+        assertThat(persistedOlder.getAnalysisHorizon()).isEqualTo(AnalysisHorizon.MEDIUM_TERM);
+        assertThat(persistedOlder.getRecommendation()).isEqualTo("HOLD");
+        assertThat(persistedOlder.getConflictKey()).isEqualTo(conflictKey);
+        assertThat(persistedOlder.getResolutionStatus())
+                .isEqualTo(ResearchMemoryEntry.ResolutionStatus.SUPERSEDED);
+        assertThat(persistedOlder.getSupersededById()).isEqualTo(newer.getId());
+        assertThat(persistedOlder.getSupersededAt()).isEqualTo(supersededAt);
+        assertThat(persistedOlder.getResolutionReason()).isEqualTo("NEWEST_DATA_CUTOFF");
+        assertThat(locked.get(1).getResolutionStatus())
+                .isEqualTo(ResearchMemoryEntry.ResolutionStatus.CURRENT);
     }
 
     private ResearchMemoryEntry entry(String sourceId) {

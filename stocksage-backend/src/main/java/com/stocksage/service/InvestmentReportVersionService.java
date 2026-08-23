@@ -8,6 +8,7 @@ import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
 import com.stocksage.harness.HarnessModels.ParseStatus;
 import com.stocksage.harness.HarnessModels.RunContext;
 import com.stocksage.harness.HarnessModels.SynthesisResult;
+import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.model.dto.InvestmentReportReviewRequest;
@@ -54,7 +55,8 @@ import java.util.Optional;
 public class InvestmentReportVersionService {
 
     /** 参与双哈希的提示词/报告契约版本，变更时自动使旧快照失效。 */
-    private static final String PROMPT_CONTRACT_VERSION = "investment-report-v3-harness-evidence-bound";
+    private static final String PROMPT_CONTRACT_VERSION =
+            "investment-report-v4-harness-evidence-horizon-bound";
     /** 历史报告列表的默认条数。 */
     private static final int DEFAULT_HISTORY_LIMIT = 20;
     /** 历史报告列表的最大条数。 */
@@ -409,6 +411,9 @@ public class InvestmentReportVersionService {
         if (isNegativeHumanReview(toStatus)) {
             // 调用研究记忆服务撤销被人工否定报告产生的长期偏好/研究线索。
             researchMemoryService.revokeForReport(entity);
+        } else {
+            // 审核通过或重新进入审核时，重新计算该来源所在冲突组。
+            researchMemoryService.reconcileForReport(entity);
         }
 
         return toDetail(entity);
@@ -446,6 +451,10 @@ public class InvestmentReportVersionService {
                 entity.getReportVersion(), entity.getModelTier(), entity.getModelName(), reusedFromCache);
         if (report.getQualityStatus() == null) {
             report.setQualityStatus(InvestmentReport.ReportQualityStatus.LEGACY_UNVERIFIED);
+        }
+        if (report.getAnalysisHorizon() == null) {
+            // 兼容旧版 JSON 缺失或显式写入 null 的期限字段；旧策略版本仍不能作为当前缓存复用。
+            report.setAnalysisHorizon(AnalysisHorizon.UNSPECIFIED);
         }
         return report;
     }

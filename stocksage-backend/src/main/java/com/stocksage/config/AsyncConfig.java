@@ -60,6 +60,26 @@ public class AsyncConfig {
     }
 
     /**
+     * 意图原型向量匹配的隔离线程池。
+     *
+     * <p>本地 embedding 客户端是同步调用且供应商超时可能很长；路由热路径只等待一个很短的
+     * deadline。隔离且有界的线程池可避免慢 embedding 占满普通 Agent 或 SSE 线程。</p>
+     */
+    @Bean("intentEmbeddingExecutor")
+    public ThreadPoolTaskExecutor intentEmbeddingExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setMaxPoolSize(2);
+        executor.setQueueCapacity(4);
+        executor.setKeepAliveSeconds(30);
+        executor.setAllowCoreThreadTimeOut(true);
+        executor.setThreadNamePrefix("intent-embedding-");
+        executor.setDaemon(true);
+        executor.setWaitForTasksToCompleteOnShutdown(false);
+        return executor;
+    }
+
+    /**
      * 创建深度研究任务的租约心跳调度器。
      *
      * <p>线程数与 worker 并发一致，避免一次慢续租拖过其他任务的 TTL。</p>

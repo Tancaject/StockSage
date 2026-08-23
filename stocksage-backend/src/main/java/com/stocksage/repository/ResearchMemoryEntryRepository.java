@@ -1,8 +1,10 @@
 package com.stocksage.repository;
 
 import com.stocksage.model.entity.ResearchMemoryEntry;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -76,6 +78,25 @@ public interface ResearchMemoryEntryRepository extends JpaRepository<ResearchMem
      */
     List<ResearchMemoryEntry> findByVectorStatusInOrderByUpdatedAtAsc(
             Collection<ResearchMemoryEntry.VectorStatus> statuses, Pageable pageable);
+
+    /**
+     * 按固定主键顺序读取并锁定同一用户、同一冲突组的全部候选。
+     *
+     * <p>必须在已经锁定 {@code research_memory_conflict_groups} 组行的事务内调用；
+     * 固定 ID 顺序用于避免并发捕获、审核和撤销之间形成 entry 锁环。</p>
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select entry
+            from ResearchMemoryEntry entry
+            where entry.userId = :userId
+              and entry.conflictKey = :conflictKey
+            order by entry.id asc
+            """)
+    List<ResearchMemoryEntry> findConflictCandidatesForUpdate(
+            @Param("userId") String userId,
+            @Param("conflictKey") String conflictKey
+    );
 
     /**
      * 检查记忆是否仍未撤销且处于允许的索引状态。

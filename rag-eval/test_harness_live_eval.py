@@ -32,7 +32,7 @@ def trace_with(*decisions):
         effect_key = decision[3] if len(decision) > 3 else ""
         attributes = {
             "policyId": "deep-equity-v1",
-            "policyVersion": "2",
+            "policyVersion": "3",
             "phase": phase,
             "decision": outcome,
             "policyAllowsRecommendation": outcome == "PASS",
@@ -58,7 +58,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
             "case_count": 30,
             "dataset_sha256": dataset_hash,
             "policy_id": "deep-equity-v1",
-            "policy_version": "2",
+            "policy_version": "3",
         }
 
     def live_case(self, case_id="live-1", ticker="AAPL", timeout_seconds=30):
@@ -663,7 +663,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
                 "decisions": [
                     {
                         "policy_id": "deep-equity-v1",
-                        "policy_version": 2,
+                        "policy_version": 3,
                     }
                 ],
             }
@@ -738,11 +738,11 @@ class HarnessLiveEvalTest(unittest.TestCase):
                     "decisions": [
                         {
                             "policy_id": "deep-equity-v1",
-                            "policy_version": "2",
+                            "policy_version": "3",
                         },
                         {
                             "policy_id": "deep-equity-v1",
-                            "policy_version": 2,
+                            "policy_version": 3,
                         },
                     ]
                 },
@@ -750,7 +750,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
             ]
         )
         self.assertEqual(["deep-equity-v1"], result["policy_ids"])
-        self.assertEqual(["2"], result["policy_versions"])
+        self.assertEqual(["3"], result["policy_versions"])
 
     def test_release_contract_rejects_single_case_diagnostic_dataset(self):
         violations = release_contract_violations(

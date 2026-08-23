@@ -9,6 +9,7 @@ import com.stocksage.harness.HarnessModels.RunContext;
 import com.stocksage.harness.HarnessModels.SynthesisResult;
 import com.stocksage.harness.HarnessModels.TargetResolutionStatus;
 import com.stocksage.harness.HarnessModels.ViolationCode;
+import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.InvestmentReport;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +32,7 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
     /** 持久化到 Trace/checkpoint 的稳定策略 ID。 */
     public static final String POLICY_ID = "deep-equity-v1";
     /** 当前规则版本；规则语义变化时递增，用于拒绝陈旧报告权威。 */
-    public static final int POLICY_VERSION = 2;
+    public static final int POLICY_VERSION = 3;
 
     @Override
     public String policyId() {
@@ -144,6 +145,8 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
         String recommendation = report.getRecommendation() == null
                 ? ""
                 : report.getRecommendation().strip().toUpperCase(Locale.ROOT);
+        // UNSPECIFIED 是合法的显式兼容值；null 表示新报告没有满足期限契约。
+        AnalysisHorizon analysisHorizon = report.getAnalysisHorizon();
         boolean requiredFieldsPresent = report.getAnalystSummary() != null
                 && !report.getAnalystSummary().isBlank()
                 && report.getDataFreshness() != null
@@ -151,6 +154,7 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
                 && report.getRationale() != null && !report.getRationale().isEmpty()
                 && report.getRiskFactors() != null && !report.getRiskFactors().isEmpty()
                 && report.getUnknowns() != null && !report.getUnknowns().isEmpty()
+                && analysisHorizon != null
                 && List.of("BUY", "OVERWEIGHT", "HOLD", "UNDERWEIGHT", "SELL")
                 .contains(recommendation);
         if (!requiredFieldsPresent) {

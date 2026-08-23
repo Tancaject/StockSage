@@ -7,6 +7,7 @@ import com.stocksage.agent.Coordinator;
 import com.stocksage.agent.ExecutionPlan;
 import com.stocksage.agent.RoutingDecisionMetadata;
 import com.stocksage.agent.RoutingDecisionObserver;
+import com.stocksage.agent.intent.IntentRecognitionResult;
 import com.stocksage.memory.LongTermMemory;
 import com.stocksage.memory.ShortTermMemory;
 import com.stocksage.model.dto.ChatChunk;
@@ -42,10 +43,13 @@ import reactor.core.scheduler.Schedulers;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -82,6 +86,12 @@ public class ChatService {
     private static final Set<String> INTENT_NON_TICKERS = Set.of(
             "AI", "PE", "PB", "ROE", "RSI", "MACD", "SEC", "ETF", "USD", "EPS", "EV", "FCF"
     );
+    /** 路由消歧最多读取三个已经完成的 user/assistant 轮次。 */
+    private static final int ROUTING_HISTORY_MAX_TURNS = 3;
+    /** 每条路由历史消息的字符上限，包含明确的角色前缀。 */
+    private static final int ROUTING_HISTORY_MAX_MESSAGE_CHARS = 600;
+    /** 交给路由模型的历史消息总字符上限。 */
+    private static final int ROUTING_HISTORY_MAX_TOTAL_CHARS = 3000;
 
     /** 从 Redis 短期记忆行解析出的角色和正文。 */
     private record MemoryEntry(String role, String content) {
@@ -95,6 +105,22 @@ public class ChatService {
             String candidate = matcher.group();
             if (!INTENT_NON_TICKERS.contains(candidate)) {
                 candidates.add(candidate);
+            }
+        }
+        return List.copyOf(candidates);
+    }
+
+    /** 当前消息优先，再从最近历史由近到远补充 ticker，供指代消歧和本地 fallback 使用。 */
+    private List<String> contextualTickerCandidates(String currentQuestion, List<String> recentTurns) {
+        LinkedHashSet<String> candidates = new LinkedHashSet<>(extractTickerCandidates(currentQuestion));
+        if (recentTurns != null) {
+            for (int i = recentTurns.size() - 1; i >= 0 && candidates.size() < 5; i--) {
+                for (String candidate : extractTickerCandidates(recentTurns.get(i))) {
+                    candidates.add(candidate);
+                    if (candidates.size() == 5) {
+                        break;
+                    }
+                }
             }
         }
         return List.copyOf(candidates);
@@ -165,18 +191,35 @@ public class ChatService {
         String traceId = traceService.startTrace(request.getUserId(), conversationId, request.getMessage());
 
         replaceLastTurnIfRequested(request, conversation);
+        // 路由历史必须在保存当前问题前读取，避免把尚未回答的本轮消息混入上下文。
+        List<String> routingTurns = recentRoutingTurns(conversationId);
         saveMessage(conversationId, "user", request.getMessage());
         shortTermMemory.addMessage(conversationId, "user", request.getMessage());
         touchConversation(conversation);
 
-        // 2. 注册按链路隔离的事件通道。@Tool 方法开始或完成时，
+        // 2. 先结合最近三轮识别意图并补全指代。该阶段只选择 targetRoute 和 resolvedQuery，
+        // 不允许模型选择任何工具、动作或具体模型。
+        List<String> intentTickerCandidates = contextualTickerCandidates(request.getMessage(), routingTurns);
+        IntentRecognitionResult intentRecognition = coordinator.recognizeIntent(
+                request.getMessage(), routingTurns, 0, hasImages, intentTickerCandidates);
+        String resolvedQuery = intentRecognition.decision().resolvedQuery().isBlank()
+                ? request.getMessage()
+                : intentRecognition.decision().resolvedQuery();
+        boolean needsIntentClarification = intentRecognition.decision().needsClarification();
+        List<String> tickerCandidates = extractTickerCandidates(resolvedQuery);
+        if (tickerCandidates.isEmpty()) {
+            tickerCandidates = intentTickerCandidates;
+        }
+
+        // 3. 注册按链路隔离的事件通道。@Tool 方法开始或完成时，
         // 工具调用切面会向该通道写入事件。
         ToolCallContext.register(traceId, conversationId, request.getMessage());
 
-        // 3. 路由前先检索知识库上下文。命中数量可为 Coordinator 提供信号，
-        // 但检索失败不应阻断对话体验。
+        // 4. 使用已经消歧的独立问题检索知识库；检索失败不阻断对话体验。
         long retrievalStart = System.currentTimeMillis();
-        List<Document> retrievedDocs = safeRetrieve(request.getMessage(), traceId, retrievalStart);
+        List<Document> retrievedDocs = needsIntentClarification
+                ? List.of()
+                : safeRetrieve(resolvedQuery, traceId, retrievalStart);
         long retrievalDuration = System.currentTimeMillis() - retrievalStart;
         if (!retrievedDocs.isEmpty()) {
             String sources = buildRagTraceSources(retrievedDocs);
@@ -190,22 +233,21 @@ public class ChatService {
                     .tokenCount(0)
                     .build());
         }
-        List<String> tickerCandidates = extractTickerCandidates(request.getMessage());
         // 调用用户隔离的研究记忆检索；结果明确服从当前 RAG/工具证据，不命中或失败即空上下文。
-        ResearchMemoryService.RetrievalResult researchMemory = researchMemoryService.retrieve(
-                request.getUserId(),
-                tickerCandidates.isEmpty() ? "" : tickerCandidates.get(0),
-                request.getMessage(),
-                traceId
-        );
+        ResearchMemoryService.RetrievalResult researchMemory = needsIntentClarification
+                ? ResearchMemoryService.RetrievalResult.empty()
+                : researchMemoryService.retrieve(new ResearchMemoryQuery(
+                        request.getUserId(),
+                        tickerCandidates.isEmpty() ? "" : tickerCandidates.get(0),
+                        resolvedQuery,
+                        traceId,
+                        intentRecognition.decision().analysisDepth(),
+                        intentRecognition.decision().timeSensitivity()
+                ));
 
-        // 4. 让 Coordinator 选择路由。它可以使用 LLM，
-        // 但在路由失败时会回退到确定性规则。
-        ExecutionPlan executionPlan = coordinator.plan(
-                request.getMessage(),
-                retrievedDocs.size(),
-                buildRoutingRagSummary(retrievedDocs)
-        );
+        // 5. targetRoute 已由意图融合直接给出；Coordinator 只查询服务器端计划目录。
+        ExecutionPlan executionPlan = coordinator.planRecognized(
+                intentRecognition, request.getMessage(), retrievedDocs.size());
         RoutingDecisionMetadata routingDecision = executionPlan.routingDecision();
         routingDecisionObserver.record(routingDecision);
         traceService.addStep(traceId, AgentStep.builder()
@@ -261,21 +303,24 @@ public class ChatService {
         Sinks.One<Object> heartbeatStop = Sinks.one();
 
         Flux<String> answerStream = Flux.defer(() -> {
-            ToolCallContext.set(traceId, conversationId, request.getMessage());
+            ToolCallContext.set(traceId, conversationId, resolvedQuery);
 
             // 5. 在发送最终回答提示词前执行确定性预取。
             // 深度研究会在最终阶段禁用模型工具调用，只让模型基于已准备证据综合回答。
             boolean preparedContextOnly = toolPrefetchService.isDeepResearchPlan(executionPlan.actions());
             Coordinator.SelectedModel selectedModel = coordinator.selectFinalAnswerModel(executionPlan.modelTier(), preparedContextOnly, hasImages);
-            // 调用预取服务执行计划动作；DEEP 可能在此转交后台队列并返回直接受理消息。
-            ToolPrefetchService.PreparedToolContext preparedToolContext = toolPrefetchService.prefetch(
-                    executionPlan,
-                    request.getMessage(),
-                    traceId,
-                    conversationId,
-                    request.getUserId(),
-                    selectedModel
-            );
+            // 澄清是硬执行闸门：不做 RAG/记忆/工具/Agent 预取，更不能提交 DEEP 后台任务。
+            ToolPrefetchService.PreparedToolContext preparedToolContext = needsIntentClarification
+                    ? new ToolPrefetchService.PreparedToolContext(
+                            "", buildIntentClarificationQuestion(routingDecision), null, traceId)
+                    : toolPrefetchService.prefetch(
+                            executionPlan,
+                            resolvedQuery,
+                            traceId,
+                            conversationId,
+                            request.getUserId(),
+                            selectedModel
+                    );
             String preparedEventTraceId = preparedToolContext.eventTraceId();
             if (preparedEventTraceId == null || preparedEventTraceId.isBlank()) {
                 preparedEventTraceId = traceId;
@@ -284,7 +329,7 @@ public class ChatService {
             backgroundTaskSubmitted.set(preparedToolContext.submittedTaskId() != null);
             relayTraceReady.tryEmitValue(preparedEventTraceId);
 
-            if (preparedContextOnly && preparedToolContext.hasDirectAnswer()) {
+            if ((preparedContextOnly || needsIntentClarification) && preparedToolContext.hasDirectAnswer()) {
                 return streamPreparedDirectAnswer(
                         preparedToolContext.directAnswer(),
                         request,
@@ -314,7 +359,7 @@ public class ChatService {
             Flux<String> responseTokens = coordinator.streamAnswer(promptMessages, preparedContextOnly, selectedModel.tier(), hasImages);
 
             return Flux.concat(modelStarted, responseTokens
-                .doFirst(() -> ToolCallContext.set(traceId, conversationId, request.getMessage()))
+                .doFirst(() -> ToolCallContext.set(traceId, conversationId, resolvedQuery))
                 .map(token -> {
                     fullResponse.append(token);
                     return toJson(ChatChunk.builder()
@@ -404,7 +449,9 @@ public class ChatService {
                 log.error("Chat preparation failed, conversationId={}, traceId={}", conversationId, traceId, error);
             }
             if (!backgroundTaskSubmitted.get()) {
+                ToolCallContext.unregister(traceId);
                 chatStreamEmitter.emit(traceId, conversationId, "stream-end", "");
+                toolCallEventBus.complete(traceId);
                 heartbeatStop.tryEmitValue(Boolean.TRUE);
             }
             return Flux.just(toJson(ChatChunk.builder()
@@ -798,39 +845,41 @@ public class ChatService {
         return sources.toString().trim();
     }
 
-    /**
-     * 给路由模型的 RAG 信号只保留前三条来源和短摘要，避免把完整文档或普通模型回答
-     * 当成路由依据。最终回答仍使用完整的受限 RAG 上下文。
-     */
-    private String buildRoutingRagSummary(List<Document> retrievedDocs) {
-        if (retrievedDocs == null || retrievedDocs.isEmpty()) {
-            return "";
-        }
-        StringBuilder summary = new StringBuilder();
-        int limit = Math.min(3, retrievedDocs.size());
-        for (int i = 0; i < limit; i++) {
-            Document doc = retrievedDocs.get(i);
-            String text = doc.getText() == null ? "" : doc.getText().replaceAll("\\s+", " ").trim();
-            summary.append(formatCitationSource(i + 1, doc))
-                    .append(" | ")
-                    .append(PromptText.truncate(text, 240))
-                    .append("\n");
-        }
-        return summary.toString().trim();
-    }
-
     private String formatRouteDecision(RoutingDecisionMetadata decision) {
         StringBuilder text = new StringBuilder()
                 .append("意图理解：").append(decision.intentSummary())
+                .append("\n细粒度意图：").append(decision.fineIntent())
+                .append(" / ").append(decision.intentGroup())
                 .append("\n选择路由：").append(decision.route().name())
                 .append("\n决策来源：").append(decision.decisionSource().name())
                 .append("\n置信度：").append(String.format(Locale.ROOT, "%.2f", decision.confidence()))
+                .append("\n时效/深度：").append(decision.timeSensitivity())
+                .append(" / ").append(decision.analysisDepth())
                 .append("\n依据：").append(decision.rationale())
                 .append("\nRAG 命中：").append(decision.ragHitCount());
+        if (!decision.sourceScores().isEmpty()) {
+            text.append("\n信号分数：").append(decision.sourceScores());
+        }
+        if (decision.needsClarification()) {
+            text.append("\n需要澄清：是");
+        }
         if (!decision.fallbackReason().isBlank()) {
             text.append("\n降级原因：").append(decision.fallbackReason());
         }
         return text.toString();
+    }
+
+    /** 低置信或冲突时直接返回一个可回答的澄清问题，不再调用工具或第二个模型。 */
+    private String buildIntentClarificationQuestion(RoutingDecisionMetadata decision) {
+        String subject = "";
+        if (decision != null) {
+            subject = decision.entities().getOrDefault(
+                    "ticker", decision.entities().getOrDefault("company", ""));
+        }
+        if (!subject.isBlank()) {
+            return "关于 " + subject + "，你希望我看行情、财报、最新新闻，还是做综合投资研究？";
+        }
+        return "请告诉我具体股票或公司，以及你希望看行情、财报、最新新闻，还是做综合研究？";
     }
 
     /**
@@ -1038,6 +1087,79 @@ public class ChatService {
             }
         }
         return -1;
+    }
+
+    /**
+     * 从 MySQL 真源读取最近三个完整问答轮次，供路由模型处理指代和省略表达。
+     *
+     * <p>仓储返回最多六条倒序消息。这里仅接受同一会话内相邻的 assistant/user 配对，
+     * 忽略没有助手回答的用户消息和多余角色，再把完整轮次恢复为时间正序。每条消息和
+     * 整体上下文都有限长，避免历史对话挤占路由提示词。</p>
+     */
+    private List<String> recentRoutingTurns(Long conversationId) {
+        if (conversationId == null) {
+            return List.of();
+        }
+        List<Message> newestMessages = messageRepository.findTop6ByConversationIdOrderByIdDesc(conversationId);
+        if (newestMessages == null || newestMessages.isEmpty()) {
+            return List.of();
+        }
+
+        List<List<Message>> newestTurns = new ArrayList<>();
+        Message pendingAssistant = null;
+        for (Message message : newestMessages) {
+            if (message == null || !Objects.equals(conversationId, message.getConversationId())) {
+                continue;
+            }
+            String role = normalizedRoutingRole(message.getRole());
+            if ("assistant".equals(role)) {
+                // 连续 assistant 消息只保留最新一条，避免后台重复发布占用一个完整轮次。
+                if (pendingAssistant == null) {
+                    pendingAssistant = message;
+                }
+            } else if ("user".equals(role) && pendingAssistant != null) {
+                newestTurns.add(List.of(message, pendingAssistant));
+                pendingAssistant = null;
+                if (newestTurns.size() == ROUTING_HISTORY_MAX_TURNS) {
+                    break;
+                }
+            }
+        }
+        if (newestTurns.isEmpty()) {
+            return List.of();
+        }
+
+        Collections.reverse(newestTurns);
+        List<Message> chronologicalMessages = newestTurns.stream()
+                .flatMap(List::stream)
+                .toList();
+        int separatorCharacters = chronologicalMessages.size() - 1;
+        int perMessageLimit = Math.min(
+                ROUTING_HISTORY_MAX_MESSAGE_CHARS,
+                (ROUTING_HISTORY_MAX_TOTAL_CHARS - separatorCharacters) / chronologicalMessages.size()
+        );
+        return chronologicalMessages.stream()
+                .map(message -> formatRoutingMessage(message, perMessageLimit))
+                .toList();
+    }
+
+    /** 只允许路由上下文使用 user/assistant 两种明确角色。 */
+    private String normalizedRoutingRole(String role) {
+        String normalized = role == null ? "" : role.trim().toLowerCase(Locale.ROOT);
+        return switch (normalized) {
+            case "user", "assistant" -> normalized;
+            default -> "";
+        };
+    }
+
+    /** 把单条持久化消息压平成有角色前缀、单行且有限长的路由上下文。 */
+    private String formatRoutingMessage(Message message, int maxLength) {
+        String role = normalizedRoutingRole(message.getRole());
+        String content = message.getContent() == null
+                ? ""
+                : message.getContent().replaceAll("\\s+", " ").trim();
+        String formatted = role + ": " + content;
+        return formatted.substring(0, Math.min(maxLength, formatted.length()));
     }
 
     /**

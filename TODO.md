@@ -10,7 +10,11 @@
 
 ### Agent 路由现场评测
 
-- [ ] 使用当前 provider 跑 `LIVE_COORDINATOR` 固定集，route accuracy `>= 0.95`
+- [ ] 使用当前 provider 跑 `LIVE_COORDINATOR` 115-case 固定集，route accuracy 与 Macro-F1 均 `>= 0.95`
+- [ ] 15 个上下文用例的 context route、typed intent 与 resolved-query ticker accuracy 均 `>= 0.95`
+- [ ] 固定集必须匹配 `planner_eval_v2`、115/100+15 精确计数与 canonical JSONL SHA-256
+- [ ] non-fallback route accuracy 与 raw LLM signal accuracy 均 `>= 0.95`
+- [ ] fallback rate `= 0`，invalid raw route rate `= 0`
 - [ ] required action recall `>= 0.98`，forbidden action rate `= 0`
 - [ ] critical 用例误路由 `= 0`，结构化输出可执行率 `= 1.00`
 - [ ] 相比确定性基线的关键指标下降不超过 `0.02`
@@ -21,7 +25,7 @@
 
 - [ ] 先跑一次最小断连复验，确认 durable task 与 Trace 均以 `success` 结束
 - [ ] 从全新 checkpoint 执行固定 30-case DEEP live gate，不复用历史 singleton、中断运行或 5-case smoke
-- [ ] 要求 30/30 完成、policy v2 与 manifest hash 精确匹配、safe-terminal rate `= 1.0`、release violations `= 0`
+- [ ] 要求 30/30 完成、policy v3 与 manifest hash 精确匹配、safe-terminal rate `= 1.0`、release violations `= 0`
 - [ ] 只有完整 live gate 明确通过后，才启动 H1 或将 G5 policy 接入真实 route
 
 ## P1：Capability、Skill 与 MCP 验收
@@ -37,9 +41,11 @@
 
 - [ ] tenant leakage `= 0`，无来源捕获 `= 0`，同一报告重复记录 `= 0`
 - [ ] Milvus 故障时报告保存成功率 `= 1.00`，恢复后可补偿索引
-- [ ] 记忆 golden set `Recall@3 >= 0.80`，暖机后新增 P95 `<= 300ms`
+- [ ] 记忆 candidate `Recall@30 >= 0.95`；默认 final `Recall@6 >= 0.85`，并记录 `nDCG@6`
+- [ ] 自适应最终记忆上限按 `BRIEF/STANDARD/DEEP` 使用 `4/6/8`，低相关时不得填充无关记忆
+- [ ] 记忆 Prompt 不超过 `4800` 字符，暖机后新增 P95 `<= 300ms`
 - [ ] 删除或撤销后立即不再召回
-- [ ] 新旧证据冲突时采用当前数据，并明确历史结论可能过期
+- [ ] 被替代旧结论、未消解冲突结论泄漏 `= 0`，不同投资期限的结论可以共存
 - [ ] 开启记忆后，现有 RAG Eval gate 不回退
 
 ## P1：RAG 质量实验与门禁

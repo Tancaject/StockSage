@@ -9,6 +9,7 @@ import com.stocksage.harness.HarnessModels.RecoveryAction;
 import com.stocksage.harness.HarnessModels.RunContext;
 import com.stocksage.harness.HarnessModels.TargetIdentity;
 import com.stocksage.harness.HarnessModels.ViolationCode;
+import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.InvestmentReport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -65,22 +66,7 @@ class DeepResearchCompletionPolicyTest {
 
     @Test
     void acceptsOnlyAValidReportBoundToKnownEvidence() {
-        InvestmentReport report = InvestmentReport.builder()
-                .ticker("AAPL")
-                .recommendation("HOLD")
-                .analystSummary("Balanced evidence.")
-                .dataFreshness("Observed 2026-07-24.")
-                .rationale(List.of("Revenue and market data are available."))
-                .riskFactors(List.of("Valuation risk."))
-                .unknowns(List.of("Future guidance."))
-                .evidenceItems(List.of(InvestmentReport.EvidenceItem.builder()
-                        .dimension("market")
-                        .evidence("Market evidence")
-                        .implication("Supports a bounded rating")
-                        .source("tool:market")
-                        .sourceEvidenceIds(List.of("e-MARKET-market"))
-                        .build()))
-                .build();
+        InvestmentReport report = validReport();
 
         var decision = policy.afterReport(
                 RunContext.deepResearch(),
@@ -89,6 +75,25 @@ class DeepResearchCompletionPolicyTest {
         );
 
         assertThat(decision.outcome()).isEqualTo(HarnessOutcome.PASS);
+    }
+
+    @Test
+    void rejectsReportWithoutAnAnalysisHorizonAsSchemaInvalid() {
+        InvestmentReport report = validReport();
+        report.setAnalysisHorizon(null);
+
+        var decision = policy.afterReport(
+                RunContext.deepResearch(),
+                completeLedger(),
+                new HarnessModels.SynthesisResult(report, ParseStatus.VALID, List.of())
+        );
+
+        assertThat(decision.outcome()).isEqualTo(HarnessOutcome.RECOVER);
+        assertThat(decision.violations())
+                .extracting(HarnessModels.HarnessViolation::code)
+                .containsExactly(ViolationCode.REPORT_SCHEMA_INVALID);
+        assertThat(decision.recoveryActions())
+                .containsExactly(RecoveryAction.RESYNTHESIZE_REPORT);
     }
 
     @Test
@@ -225,6 +230,26 @@ class DeepResearchCompletionPolicyTest {
                         RecoveryAction.RETURN_NOT_RATED
                 )
         );
+    }
+
+    private static InvestmentReport validReport() {
+        return InvestmentReport.builder()
+                .ticker("AAPL")
+                .recommendation("HOLD")
+                .analysisHorizon(AnalysisHorizon.LONG_TERM)
+                .analystSummary("Balanced evidence.")
+                .dataFreshness("Observed 2026-07-24.")
+                .rationale(List.of("Revenue and market data are available."))
+                .riskFactors(List.of("Valuation risk."))
+                .unknowns(List.of("Future guidance."))
+                .evidenceItems(List.of(InvestmentReport.EvidenceItem.builder()
+                        .dimension("market")
+                        .evidence("Market evidence")
+                        .implication("Supports a bounded rating")
+                        .source("tool:market")
+                        .sourceEvidenceIds(List.of("e-MARKET-market"))
+                        .build()))
+                .build();
     }
 
     private static EvidenceLedger completeLedger() {

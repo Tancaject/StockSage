@@ -102,7 +102,7 @@ class CoordinatorPlanTest {
     }
 
     @Test
-    void routingLlmOnlySelectsRouteAndBackendOwnsThePlan() {
+    void multiSignalIntentDirectlySelectsRouteAndBackendOwnsThePlan() {
         ChatClient routingClient = mock(ChatClient.class, RETURNS_DEEP_STUBS);
         when(routingClient.prompt().user(anyString()).call().content()).thenReturn("""
                 {
@@ -123,23 +123,25 @@ class CoordinatorPlanTest {
         assertThat(plan.route()).isEqualTo(PlanRoute.NEWS);
         assertThat(plan.taskType()).isEqualTo("新闻与事件分析");
         assertThat(plan.actions()).contains(PlanAction.NEWS_AGENT, PlanAction.SEARCH_NEWS, PlanAction.FINAL_ANSWER);
-        assertThat(plan.routingDecision().decisionSource()).isEqualTo(RoutingDecisionSource.ROUTING_LLM);
+        assertThat(plan.routingDecision().decisionSource()).isEqualTo(RoutingDecisionSource.INTENT_FUSION);
         assertThat(plan.routingDecision().route()).isEqualTo(PlanRoute.NEWS);
-        assertThat(plan.routingDecision().intentSummary()).isEqualTo("查询美联储最新事件");
+        assertThat(plan.routingDecision().intentSummary()).isEqualTo("新闻与事件");
+        assertThat(plan.routingDecision().fineIntent()).isEqualTo("NEWS_EVENT");
+        assertThat(plan.routingDecision().intentGroup()).isEqualTo("NEWS");
         assertThat(plan.routingDecision().rationale()).isEqualTo("用户询问最新事件");
-        assertThat(plan.routingDecision().confidence()).isEqualTo(0.91);
-        assertThat(plan.routingDecision().matchedSignals()).containsExactly("confidence-high");
+        assertThat(plan.routingDecision().confidence()).isBetween(0.7, 1.0);
+        assertThat(plan.routingDecision().sourceScores()).containsKeys("LLM", "PATTERN");
+        assertThat(plan.routingDecision().matchedSignals()).anyMatch(value -> value.startsWith("llm="));
         assertThat(plan.routingDecision().toAttributes())
                 .containsEntry("rawRoute", "NEWS")
-                .containsEntry("intentSummary", "查询美联储最新事件")
+                .containsEntry("fineIntent", "NEWS_EVENT")
                 .containsEntry("rationale", "用户询问最新事件")
-                .containsEntry("confidence", 0.91)
                 .containsEntry("ragHitCount", 0);
         assertThat(plan.routingDecision().fallbackReason()).isEmpty();
     }
 
     @Test
-    void llmFailureUsesStableFallbackReasonWithoutExceptionText() {
+    void llmFailureKeepsStableDegradationReasonWhileLocalSignalsContinue() {
         ChatClient routingClient = mock(ChatClient.class, RETURNS_DEEP_STUBS);
         when(routingClient.prompt().user(anyString()).call().content())
                 .thenThrow(new IllegalStateException("provider-secret-detail"));
@@ -151,8 +153,10 @@ class CoordinatorPlanTest {
 
         ExecutionPlan plan = llmCoordinator.plan("latest NVDA news", 0);
 
-        assertThat(plan.routingDecision().decisionSource()).isEqualTo(RoutingDecisionSource.DETERMINISTIC_FALLBACK);
-        assertThat(plan.routingDecision().fallbackReason()).isEqualTo("ROUTING_LLM_FAILED");
+        assertThat(plan.route()).isEqualTo(PlanRoute.NEWS);
+        assertThat(plan.routingDecision().decisionSource()).isEqualTo(RoutingDecisionSource.INTENT_FUSION);
+        assertThat(plan.routingDecision().fallbackReason()).isEqualTo("INTENT_LLM_FAILED");
+        assertThat(plan.routingDecision().sourceScores()).containsKey("PATTERN");
         assertThat(plan.routingDecision().toAttributes().toString()).doesNotContain("provider-secret-detail");
     }
 
@@ -183,38 +187,10 @@ class CoordinatorPlanTest {
         );
         assertThat(plan.modelTier()).isEqualTo(ModelTier.FAST);
         assertThat(plan.routingDecision().rawRoute()).isEqualTo("UNREGISTERED");
-        assertThat(plan.routingDecision().matchedSignals()).containsExactly("confidence-high");
-    }
-
-    @Test
-    void routeDecisionParserAcceptsFencedJsonAndClampsConfidence() throws Exception {
-        RouteDecision decision = coordinator.parseRouteDecision("""
-                ```json
-                {"intent":"current price","route":"MARKET","rationale":"price request","confidence":-2}
-                ```
-                """);
-
-        assertThat(decision.route()).isEqualTo(PlanRoute.MARKET);
-        assertThat(decision.intentSummary()).isEqualTo("current price");
-        assertThat(decision.rawRoute()).isEqualTo("MARKET");
-        assertThat(decision.rationale()).isEqualTo("price request");
-        assertThat(decision.confidence()).isZero();
-    }
-
-    @Test
-    void routingPromptContainsUserQuestionAndBoundedRagEvidence() {
-        String prompt = coordinator.buildRoutingPrompt(
-                "这份财报主要风险是什么？",
-                2,
-                "ticker=NVDA; filing_type=10-K; section=Risk Factors"
-        );
-
-        assertThat(prompt)
-                .contains("这份财报主要风险是什么？")
-                .contains("知识库命中数量：2")
-                .contains("ticker=NVDA; filing_type=10-K; section=Risk Factors");
-        assertThat(coordinator.buildRoutingPrompt("hello", 0, "x".repeat(2000)).length())
-                .isLessThan(1700);
+        assertThat(plan.routingDecision().decisionSource()).isEqualTo(RoutingDecisionSource.DETERMINISTIC_FALLBACK);
+        assertThat(plan.routingDecision().fallbackReason()).isEqualTo("INTENT_LLM_INVALID_ROUTE");
+        assertThat(plan.routingDecision().needsClarification()).isTrue();
+        assertThat(plan.routingDecision().matchedSignals()).contains("direct-rule");
     }
 
     @Test

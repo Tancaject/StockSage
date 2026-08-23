@@ -14,6 +14,8 @@ RAG evaluation should answer five questions:
 
 The current `rag-eval/run_retrieval_eval.py` is only a retrieval smoke test. It verifies that `/api/docs/search` can return contexts containing expected keywords. It is not a full answer-level RAG evaluation.
 
+The production lexical leg uses Apache Lucene 9.12.3 `BM25Similarity` with `CJKAnalyzer`, `k1=1.2`, and `b=0.75`. MySQL `vector_documents` remains the source of truth: the in-memory Lucene index is rebuilt at application startup and updated only after ingestion transactions commit. Its ranking is fused with Milvus by RRF before reranking. A Lucene failure disables only the lexical leg; it does not fall back to MySQL FULLTEXT scoring.
+
 ## Evaluation Layers
 
 ### 1. Ingestion Quality
@@ -380,6 +382,7 @@ Record:
 - git commit
 - chunking version
 - embedding model
+- lexical engine, analyzer, BM25 `k1` / `b`, and index version
 - rerank model
 - top-k
 - test set version
@@ -409,6 +412,7 @@ These gates should be tightened after the golden set stabilizes.
 Implemented:
 
 - Phoenix tracing for backend chat and `/api/docs/search`.
+- Standard Apache Lucene BM25 lexical retrieval with startup rebuild, after-commit synchronization, and vector-only degradation.
 - Retrieval smoke test in `rag-eval/run_retrieval_eval.py`.
 - Keyword-based retrieval metrics:
   - `context_recall`
@@ -449,3 +453,38 @@ Still missing / to improve:
 3. Summarize a run with `python .\rag-eval\eval_summary.py .\rag-eval\results\rag_eval_<timestamp>.json --fail-on-gate`.
 4. Run `python .\rag-eval\run_ragas_eval.py --dry-run`, then a limited judge run, before recording the full LLM-judge baseline.
 5. Run controlled experiments for rerank, top-k, query rewrite, and chunking.
+
+## Planner and Intent Evaluation V2
+
+Intent routing is evaluated separately from RAG answer quality. The production recognizer receives the
+current question and at most three completed recent turns, combines LLM, embedding-prototype, and bounded
+local pattern signals, and directly returns one validated `targetRoute`. The server-owned plan catalog then
+expands that route into fixed actions; the evaluator never executes those actions or specialist agents.
+
+The current contract is `planner_eval_v2`:
+
+- `rag-eval/agent_golden_set.jsonl` contains 115 cases: 100 single-turn route/action cases and 15 live-only
+  context cases, with three context cases for each route. The runner binds the semantic JSONL SHA-256, exact
+  115/100+15 counts, and `planner_eval_v2` fields, so a smaller or substituted set cannot report success.
+- `DETERMINISTIC` evaluates only the legacy 100 cases and reports the 15 live-only cases as skipped.
+- `LIVE_COORDINATOR` is required to evaluate the current provider, recent-turn resolution, typed fine intent,
+  decision source, raw LLM route validity, and no-fallback requirements.
+- Final route accuracy and action checks measure the executable fused decision. `llmSignalAccuracy` instead
+  compares the valid raw LLM route with the expected route, so embedding/pattern fusion cannot hide an LLM
+  classification error.
+- Additional gates cover `intentAccuracy`, `contextCaseAccuracy`, `nonFallbackRouteAccuracy`, `fallbackRate`,
+  `contextResolutionAccuracy` (the restored query must contain the historical ticker), and
+  `invalidRawRouteRate`, alongside route accuracy, macro-F1, required/forbidden actions, critical failures,
+  and executability. Baseline delta and latency-ratio gates apply only when a baseline file is supplied.
+
+Run the live planner gate against a healthy backend:
+
+```powershell
+python .\rag-eval\run_agent_eval.py --mode LIVE_COORDINATOR
+```
+
+For this command, use the `planner.gate_status` and per-case planner results as the routing verdict. A unified
+report can remain `incomplete` when independent RAG, Trace, Harness, or end-to-end sections were not supplied.
+The V2 code is implemented, but a current 115-case provider run has not yet been recorded. The main
+implementation checkpoint passed offline regressions; the final review hardening was intentionally not rerun
+after the user stopped further test cycles. Neither result proves live intent accuracy.

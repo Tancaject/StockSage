@@ -1,6 +1,7 @@
 package com.stocksage.agent;
 
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Coordinator 支持的路由分支。
@@ -22,11 +23,24 @@ public enum PlanRoute {
      * @return 后端可执行的有限路由
      */
     public static PlanRoute normalize(String route) {
-        String normalized = route == null ? "DIRECT" : route.trim().toUpperCase(Locale.ROOT);
+        return parse(route).orElse(DIRECT);
+    }
+
+    /**
+     * 严格解析路由；用于区分模型真的选择 DIRECT，还是输出了非法路由后被安全归一化。
+     *
+     * @param route 待解析文本
+     * @return 合法五选一路由；空值或未知值为空
+     */
+    public static Optional<PlanRoute> parse(String route) {
+        if (route == null || route.isBlank()) {
+            return Optional.empty();
+        }
+        String normalized = route.trim().toUpperCase(Locale.ROOT);
         try {
-            return PlanRoute.valueOf(normalized);
+            return Optional.of(PlanRoute.valueOf(normalized));
         } catch (IllegalArgumentException e) {
-            return DIRECT;
+            return Optional.empty();
         }
     }
 }

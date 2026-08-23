@@ -4,15 +4,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.model.dto.KnowledgeIngestionResult;
 import com.stocksage.model.entity.VectorDocument;
+import com.stocksage.rag.Bm25IndexUpdate;
+import com.stocksage.rag.Bm25IndexUpdate.IndexedDocument;
 import com.stocksage.repository.DocIndexRepository;
 import com.stocksage.repository.DocIndexRepository.DocIndexEntry;
 import com.stocksage.repository.VectorDocumentRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +44,6 @@ import java.util.Set;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class KnowledgeIngestionService {
 
     /**
@@ -53,10 +55,35 @@ public class KnowledgeIngestionService {
     private final VectorStore vectorStore;
     /** 保存每个来源的内容哈希、chunkId 列表和 TTL。 */
     private final DocIndexRepository docIndexRepository;
-    /** 保存全文和元数据镜像，供父块扩展、全文检索及审计。 */
+    /** 保存全文和元数据镜像，供父块扩展、Lucene BM25 重建及审计。 */
     private final VectorDocumentRepository vectorDocumentRepository;
     /** 将文档元数据序列化为关系库 JSON。 */
     private final ObjectMapper objectMapper;
+    /** 在 MySQL 事务提交后通知 Lucene 派生索引更新。 */
+    private final ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    public KnowledgeIngestionService(
+            VectorStore vectorStore,
+            DocIndexRepository docIndexRepository,
+            VectorDocumentRepository vectorDocumentRepository,
+            ObjectMapper objectMapper,
+            ApplicationEventPublisher eventPublisher) {
+        this.vectorStore = vectorStore;
+        this.docIndexRepository = docIndexRepository;
+        this.vectorDocumentRepository = vectorDocumentRepository;
+        this.objectMapper = objectMapper;
+        this.eventPublisher = eventPublisher;
+    }
+
+    /** 保留无 Spring 容器单元测试使用的构造入口。 */
+    public KnowledgeIngestionService(
+            VectorStore vectorStore,
+            DocIndexRepository docIndexRepository,
+            VectorDocumentRepository vectorDocumentRepository,
+            ObjectMapper objectMapper) {
+        this(vectorStore, docIndexRepository, vectorDocumentRepository, objectMapper, null);
+    }
 
     /** 可选语义去重的向量相似度阈值。 */
     @Value("${stocksage.rag.dedup-similarity-threshold:0.85}")
@@ -173,7 +200,9 @@ public class KnowledgeIngestionService {
             return KnowledgeIngestionResult.skippedUnchanged(normalizedSourceId, existing.get().chunkIds().size());
         }
 
-        existing.ifPresent(this::deleteIndexedChunks);
+        List<String> deletedChunkIds = existing
+                .map(this::deleteIndexedChunks)
+                .orElseGet(List::of);
 
         List<Document> documentsToAdd = new ArrayList<>();
         List<VectorDocument> metadataRows = new ArrayList<>();
@@ -228,6 +257,7 @@ public class KnowledgeIngestionService {
                 now,
                 expiresAt
         ));
+        publishBm25Update(deletedChunkIds, metadataRows);
 
         log.info(
                 "RAG source indexed: sourceId={}, sourceType={}, parsed={}, added={}, duplicates={}, semanticDedup={}, expiresAt={}",
@@ -255,7 +285,11 @@ public class KnowledgeIngestionService {
     @Transactional
     public int deleteExpiredDocuments() {
         List<DocIndexEntry> expired = docIndexRepository.findExpired(LocalDateTime.now());
-        expired.forEach(this::deleteIndexedChunks);
+        List<String> deletedChunkIds = new ArrayList<>();
+        for (DocIndexEntry entry : expired) {
+            deletedChunkIds.addAll(deleteIndexedChunks(entry));
+        }
+        publishBm25Update(deletedChunkIds, List.of());
         if (!expired.isEmpty()) {
             log.info("Expired RAG sources cleaned: {}", expired.size());
         }
@@ -267,14 +301,41 @@ public class KnowledgeIngestionService {
      *
      * @param entry 来源索引记录，包含全部 chunkId
      */
-    private void deleteIndexedChunks(DocIndexEntry entry) {
-        List<String> chunkIds = entry.chunkIds() == null ? List.of() : entry.chunkIds();
+    private List<String> deleteIndexedChunks(DocIndexEntry entry) {
+        List<String> chunkIds = entry.chunkIds() == null
+                ? List.of()
+                : entry.chunkIds().stream()
+                        .filter(chunkId -> chunkId != null && !chunkId.isBlank())
+                        .toList();
         if (!chunkIds.isEmpty()) {
             vectorStore.delete(chunkIds);
             vectorDocumentRepository.deleteByVectorIdIn(chunkIds);
         }
         docIndexRepository.deleteByFilePath(entry.filePath());
         log.debug("Deleted indexed RAG source: sourceId={}, chunks={}", entry.filePath(), chunkIds.size());
+        return chunkIds;
+    }
+
+    /**
+     * 发布不可变的 BM25 变更快照；监听器只会在当前事务提交后应用。
+     */
+    private void publishBm25Update(List<String> deletedChunkIds, List<VectorDocument> upsertedRows) {
+        if (eventPublisher == null) {
+            return;
+        }
+        List<String> deletedIds = deletedChunkIds == null ? List.of() : deletedChunkIds;
+        List<IndexedDocument> upserts = upsertedRows == null
+                ? List.of()
+                : upsertedRows.stream()
+                        .map(row -> new IndexedDocument(
+                                row.getVectorId(),
+                                row.getContentFull() != null ? row.getContentFull() : row.getContentPreview(),
+                                row.getMetadata()
+                        ))
+                        .toList();
+        if (!deletedIds.isEmpty() || !upserts.isEmpty()) {
+            eventPublisher.publishEvent(new Bm25IndexUpdate(deletedIds, upserts));
+        }
     }
 
     /**

@@ -20,6 +20,14 @@ import java.util.Map;
  * @param ragHitCount RAG 命中数
  * @param fallbackReason 兜底原因代码
  * @param durationMs 路由耗时
+ * @param fineIntent 细粒度意图枚举名
+ * @param intentGroup 意图分组枚举名
+ * @param timeSensitivity 时间敏感度枚举名
+ * @param analysisDepth 分析深度枚举名
+ * @param entities 仅包含有界、已抽取实体，不保存完整用户问题
+ * @param sourceScores 各有限识别来源的融合分数
+ * @param needsClarification 是否建议先向用户澄清
+ * @param reasonCodes 有界、可审计的理由代码
  */
 public record RoutingDecisionMetadata(
         RoutingDecisionSource decisionSource,
@@ -31,7 +39,15 @@ public record RoutingDecisionMetadata(
         List<String> matchedSignals,
         int ragHitCount,
         String fallbackReason,
-        long durationMs
+        long durationMs,
+        String fineIntent,
+        String intentGroup,
+        String timeSensitivity,
+        String analysisDepth,
+        Map<String, String> entities,
+        Map<String, Double> sourceScores,
+        boolean needsClarification,
+        List<String> reasonCodes
 ) {
     public RoutingDecisionMetadata {
         decisionSource = decisionSource == null ? RoutingDecisionSource.DETERMINISTIC_FALLBACK : decisionSource;
@@ -44,6 +60,33 @@ public record RoutingDecisionMetadata(
         ragHitCount = Math.max(0, ragHitCount);
         fallbackReason = fallbackReason == null ? "" : fallbackReason;
         durationMs = Math.max(0L, durationMs);
+        fineIntent = bounded(fineIntent, 48);
+        intentGroup = bounded(intentGroup, 48);
+        timeSensitivity = bounded(timeSensitivity, 32);
+        analysisDepth = bounded(analysisDepth, 32);
+        entities = boundedEntities(entities);
+        sourceScores = boundedScores(sourceScores);
+        reasonCodes = reasonCodes == null
+                ? List.of()
+                : reasonCodes.stream().map(value -> bounded(value, 64)).filter(value -> !value.isBlank()).limit(12).toList();
+    }
+
+    /** 保留原有十字段构造方式，避免已有 Trace/测试调用在迁移期失效。 */
+    public RoutingDecisionMetadata(
+            RoutingDecisionSource decisionSource,
+            String rawRoute,
+            PlanRoute route,
+            String intentSummary,
+            String rationale,
+            double confidence,
+            List<String> matchedSignals,
+            int ragHitCount,
+            String fallbackReason,
+            long durationMs
+    ) {
+        this(decisionSource, rawRoute, route, intentSummary, rationale, confidence,
+                matchedSignals, ragHitCount, fallbackReason, durationMs,
+                "", "", "", "", Map.of(), Map.of(), false, List.of());
     }
 
     /** @return 是否由确定性兜底产生 */
@@ -75,7 +118,48 @@ public record RoutingDecisionMetadata(
         attributes.put("fallbackReason", fallbackReason);
         attributes.put("outcome", outcome());
         attributes.put("durationMs", durationMs);
+        attributes.put("fineIntent", fineIntent);
+        attributes.put("intentGroup", intentGroup);
+        attributes.put("timeSensitivity", timeSensitivity);
+        attributes.put("analysisDepth", analysisDepth);
+        attributes.put("entities", entities);
+        attributes.put("sourceScores", sourceScores);
+        attributes.put("needsClarification", needsClarification);
+        attributes.put("reasonCodes", reasonCodes);
         return Map.copyOf(attributes);
+    }
+
+    private static Map<String, String> boundedEntities(Map<String, String> values) {
+        if (values == null || values.isEmpty()) {
+            return Map.of();
+        }
+        Map<String, String> bounded = new LinkedHashMap<>();
+        values.forEach((key, value) -> {
+            if (bounded.size() < 8) {
+                String safeKey = bounded(key, 32);
+                String safeValue = bounded(value, 96);
+                if (!safeKey.isBlank() && !safeValue.isBlank()) {
+                    bounded.put(safeKey, safeValue);
+                }
+            }
+        });
+        return Map.copyOf(bounded);
+    }
+
+    private static Map<String, Double> boundedScores(Map<String, Double> values) {
+        if (values == null || values.isEmpty()) {
+            return Map.of();
+        }
+        Map<String, Double> bounded = new LinkedHashMap<>();
+        values.forEach((key, value) -> {
+            if (bounded.size() < 8) {
+                String safeKey = bounded(key, 32);
+                if (!safeKey.isBlank() && value != null && Double.isFinite(value)) {
+                    bounded.put(safeKey, Math.max(0.0, Math.min(1.0, value)));
+                }
+            }
+        });
+        return Map.copyOf(bounded);
     }
 
     private static String bounded(String value, int maxLength) {

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * Contextual Retrieval 的情境说明（gist）生成器。
  *
  * <p>给定切片及其所在父块与结构化元信息，生成一句"这段在该财报中讲什么"的说明，
- * 供入库时拼进子块 embedding 文本，使向量与 FULLTEXT 两条检索腿都携带上下文。
+ * 供入库时拼进子块 embedding 文本，使向量与 Lucene BM25 两条检索腿都携带上下文。
  * gist 按目标文本 sha256 缓存，重新入库幂等；任何失败都返回 null（fail-open），
  * 由调用方回退到纯结构化前缀，绝不阻断入库。</p>
  */

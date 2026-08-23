@@ -245,10 +245,13 @@ function summarizePlanStage(content) {
 
 function summarizeRouteDecision(metadata = {}) {
   const intent = String(metadata.intentSummary || '').trim()
+  const fineIntent = String(metadata.fineIntent || '').trim()
+  const intentGroup = String(metadata.intentGroup || '').trim()
   const route = String(metadata.route || 'DIRECT').trim()
   const rationale = String(metadata.rationale || '').trim()
   const parts = []
   if (intent) parts.push(`意图：${intent}`)
+  if (fineIntent) parts.push(`分类：${fineIntent}${intentGroup ? `/${intentGroup}` : ''}`)
   parts.push(`路由：${route}`)
   if (rationale) parts.push(`依据：${rationale}`)
   return parts.join('；')
@@ -264,6 +267,7 @@ function summarizeRouteDecisionMeta(metadata = {}) {
     parts.push(`RAG ${Number(metadata.ragHitCount)} 条`)
   }
   if (metadata.fallbackReason) parts.push(`降级 ${metadata.fallbackReason}`)
+  if (metadata.needsClarification) parts.push('需澄清')
   return parts.join(' · ')
 }
 

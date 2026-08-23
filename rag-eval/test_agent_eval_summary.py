@@ -9,16 +9,33 @@ from agent_eval_summary import build_report
 
 
 GATES = {
+    "planner_schema_version_expected": "planner_eval_v2",
+    "planner_requested_cases_expected": 2,
+    "planner_live_total_cases_expected": 2,
+    "planner_live_skipped_live_only_cases_expected": 0,
+    "planner_live_context_cases_expected": 0,
+    "planner_live_intent_cases_expected": 0,
+    "planner_live_context_resolution_cases_expected": 0,
+    "planner_deterministic_total_cases_expected": 2,
+    "planner_deterministic_skipped_live_only_cases_expected": 0,
+    "planner_dataset_sha256_expected": "d" * 64,
     "route_accuracy_min": 0.95,
     "macro_f1_min": 0.95,
     "required_action_recall_min": 0.98,
     "forbidden_action_rate_max": 0.0,
     "critical_failures_max": 0,
     "executable_rate_min": 1.0,
+    "intent_accuracy_min": 0.95,
+    "context_case_accuracy_min": 0.95,
+    "context_resolution_accuracy_min": 0.95,
+    "non_fallback_route_accuracy_min": 0.95,
+    "llm_signal_accuracy_min": 0.95,
+    "fallback_rate_max": 0.0,
+    "invalid_raw_route_rate_max": 0.0,
     "baseline_delta_max_drop": 0.02,
     "p95_latency_ratio_max": 1.2,
     "harness_policy_id_expected": "deep-equity-v1",
-    "harness_policy_version_expected": 2,
+    "harness_policy_version_expected": 3,
     "harness_case_count_min": 60,
     "harness_exact_accuracy_min": 1.0,
     "harness_decision_contract_exact_match_rate_min": 1.0,
@@ -33,12 +50,51 @@ GATES = {
 }
 
 
-def planner(route=1.0, recall=1.0, forbidden=0.0, executable=1.0):
+def planner_result(duration_ms=10, **overrides):
+    result = {
+        "durationMs": duration_ms,
+        "expectedFineIntent": None,
+        "actualFineIntent": "",
+        "fineIntentMatched": True,
+        "expectedDecisionSource": None,
+        "decisionSourceMatched": True,
+        "requireNoFallback": False,
+        "noFallbackMatched": True,
+        "routeMatched": True,
+        "contextCase": False,
+        "fallback": False,
+        "rawRouteValid": True,
+        "rawRouteMatched": True,
+        "expectedResolvedQueryContains": None,
+        "actualResolvedQuery": "",
+        "contextResolutionMatched": True,
+    }
+    result.update(overrides)
+    return result
+
+
+def planner(
+    route=1.0,
+    recall=1.0,
+    forbidden=0.0,
+    executable=1.0,
+    *,
+    mode="LIVE_COORDINATOR",
+    total_cases=2,
+    requested_cases=None,
+    skipped_live_only_cases=0,
+    dataset_sha256="d" * 64,
+):
+    requested_cases = total_cases if requested_cases is None else requested_cases
     return {
+        "schemaVersion": "planner_eval_v2",
+        "datasetSha256": dataset_sha256,
         "status": "passed",
-        "mode": "LIVE_COORDINATOR",
-        "totalCases": 2,
-        "passedCases": 2,
+        "mode": mode,
+        "requestedCases": requested_cases,
+        "totalCases": total_cases,
+        "skippedLiveOnlyCases": skipped_live_only_cases,
+        "passedCases": total_cases,
         "criticalFailures": 0,
         "routeAccuracy": route,
         "macroF1": route,
@@ -54,9 +110,41 @@ def planner(route=1.0, recall=1.0, forbidden=0.0, executable=1.0):
         "requiredActionRecall": recall,
         "forbiddenActionRate": forbidden,
         "executableRate": executable,
+        "intentEvaluatedCases": 0,
+        "intentAccuracy": 0.0,
+        "contextCases": 0,
+        "contextCaseAccuracy": 0.0,
+        "contextResolutionCases": 0,
+        "contextResolutionAccuracy": 0.0,
+        "nonFallbackCases": total_cases,
+        "nonFallbackRouteAccuracy": route,
+        "llmSignalCases": total_cases,
+        "llmSignalAccuracy": route,
+        "fallbackCases": 0,
+        "fallbackRate": 0.0,
+        "invalidRawRouteCases": 0,
+        "invalidRawRouteRate": 0.0,
         "durationMs": 25,
-        "results": [{"durationMs": 10}, {"durationMs": 15}],
+        "results": [planner_result(10 + index * 5) for index in range(total_cases)],
     }
+
+
+def gates_for_cases(cases, *, mode="DETERMINISTIC", skipped_live_only_cases=0):
+    gates = dict(GATES)
+    case_count = len(cases)
+    gates["planner_requested_cases_expected"] = case_count + skipped_live_only_cases
+    gates["planner_dataset_sha256_expected"] = run_agent_eval.cases_sha256(cases)
+    if mode == "DETERMINISTIC":
+        gates["planner_deterministic_total_cases_expected"] = case_count
+        gates["planner_deterministic_skipped_live_only_cases_expected"] = (
+            skipped_live_only_cases
+        )
+    else:
+        gates["planner_live_total_cases_expected"] = case_count
+        gates["planner_live_skipped_live_only_cases_expected"] = (
+            skipped_live_only_cases
+        )
+    return gates
 
 
 def harness_result(**overrides):
@@ -65,7 +153,7 @@ def harness_result(**overrides):
         "case_schema_version": "harness_golden_case_v2",
         "engine": "java-production-policy",
         "policy_id": "deep-equity-v1",
-        "policy_version": 2,
+        "policy_version": 3,
         "status": "pass",
         "case_count": 60,
         "exact_accuracy": 1.0,
@@ -87,7 +175,7 @@ def live_harness_result(**overrides):
         "status": "pass",
         "dataset_sha256": "b" * 64,
         "policy_ids": ["deep-equity-v1"],
-        "policy_versions": ["2"],
+        "policy_versions": ["3"],
         "metrics": {
             "case_count": 30,
             "completed_count": 30,
@@ -120,6 +208,137 @@ class AgentEvalSummaryTest(unittest.TestCase):
         self.assertEqual("not_run", report["live_completion"]["status"])
         self.assertEqual("not_run", report["end_to_end"]["status"])
         self.assertEqual(1.0, report["planner"]["macro_f1"])
+        self.assertEqual("passed", report["planner"]["gate_status"])
+
+    def test_v2_intent_context_and_source_quality_metrics_are_hard_gated(self):
+        payload = planner()
+        payload.update(
+            {
+                "intentEvaluatedCases": 2,
+                "intentAccuracy": 0.5,
+                "contextCases": 2,
+                "contextCaseAccuracy": 0.5,
+                "contextResolutionCases": 2,
+                "contextResolutionAccuracy": 0.5,
+                "fallbackCases": 1,
+                "fallbackRate": 0.5,
+                "invalidRawRouteCases": 1,
+                "invalidRawRouteRate": 0.5,
+            }
+        )
+
+        report = build_report(payload, GATES)
+
+        failed = {gate["metric"] for gate in report["gates"] if gate["status"] == "failed"}
+        self.assertTrue(
+            {
+                "intent_accuracy",
+                "context_case_accuracy",
+                "context_resolution_accuracy",
+                "fallback_rate",
+                "invalid_raw_route_rate",
+            }.issubset(failed)
+        )
+        self.assertEqual("failed", report["planner"]["gate_status"])
+
+    def test_final_fused_route_and_raw_llm_signal_have_separate_accuracy(self):
+        payload = planner()
+        payload["nonFallbackRouteAccuracy"] = 1.0
+        payload["llmSignalAccuracy"] = 0.5
+
+        report = build_report(payload, GATES)
+
+        statuses = {gate["metric"]: gate["status"] for gate in report["gates"]}
+        self.assertEqual("passed", statuses["non_fallback_route_accuracy"])
+        self.assertEqual("failed", statuses["llm_signal_accuracy"])
+
+    def test_v1_schema_fails_even_when_optional_v2_gates_are_not_run(self):
+        payload = planner()
+        payload["schemaVersion"] = "planner_eval_v1"
+        for field in (
+            "intentEvaluatedCases",
+            "intentAccuracy",
+            "contextCases",
+            "contextCaseAccuracy",
+            "contextResolutionCases",
+            "contextResolutionAccuracy",
+            "nonFallbackCases",
+            "nonFallbackRouteAccuracy",
+            "llmSignalCases",
+            "llmSignalAccuracy",
+            "fallbackCases",
+            "fallbackRate",
+            "invalidRawRouteCases",
+            "invalidRawRouteRate",
+        ):
+            payload.pop(field)
+        payload["mode"] = "DETERMINISTIC"
+
+        report = build_report(payload, GATES)
+
+        optional = {
+            gate["metric"]: gate["status"]
+            for gate in report["gates"]
+            if gate["metric"] in {
+                "intent_accuracy",
+                "context_case_accuracy",
+                "context_resolution_accuracy",
+                "non_fallback_route_accuracy",
+                "llm_signal_accuracy",
+                "fallback_rate",
+                "invalid_raw_route_rate",
+            }
+        }
+        self.assertTrue(optional)
+        self.assertEqual({"not_run"}, set(optional.values()))
+        self.assertEqual("failed", report["planner"]["gate_status"])
+        statuses = {gate["metric"]: gate["status"] for gate in report["gates"]}
+        self.assertEqual("failed", statuses["planner_schema_version"])
+
+    def test_live_payload_fails_when_any_v2_summary_or_result_field_is_missing(self):
+        payload = planner()
+        payload.pop("fallbackRate")
+        payload["results"][0].pop("rawRouteValid")
+
+        report = build_report(payload, GATES)
+
+        self.assertFalse(report["planner"]["v2_fields_complete"])
+        self.assertIn("fallbackRate", report["planner"]["missing_v2_fields"])
+        self.assertIn(
+            "results[0].rawRouteValid",
+            report["planner"]["missing_v2_fields"],
+        )
+        statuses = {gate["metric"]: gate["status"] for gate in report["gates"]}
+        self.assertEqual("failed", statuses["planner_v2_fields_complete"])
+        self.assertEqual("failed", report["planner"]["gate_status"])
+
+    def test_rejects_wrong_case_count_or_planner_dataset_hash(self):
+        payload = planner(
+            total_cases=1,
+            requested_cases=1,
+            dataset_sha256="c" * 64,
+        )
+
+        report = build_report(payload, GATES)
+
+        statuses = {gate["metric"]: gate["status"] for gate in report["gates"]}
+        self.assertEqual("failed", statuses["planner_requested_cases"])
+        self.assertEqual("failed", statuses["planner_total_cases"])
+        self.assertEqual("failed", statuses["planner_dataset_sha256"])
+        self.assertEqual("failed", report["planner"]["gate_status"])
+
+    def test_supplied_failed_section_fails_unified_report(self):
+        evidence = complete_evidence()
+        evidence["rag_payload"] = {"status": "failed"}
+
+        report = build_report(
+            planner(),
+            GATES,
+            baseline_payload=planner(),
+            **evidence,
+        )
+
+        self.assertEqual("failed", report["status"])
 
     def test_fails_when_any_hard_gate_fails(self):
         report = build_report(planner(route=0.8), GATES, baseline_payload=planner())
@@ -197,7 +416,7 @@ class AgentEvalSummaryTest(unittest.TestCase):
 
     def test_completion_gate_contract_preserves_order_schema_and_thresholds(self):
         evidence = complete_evidence()
-        evidence["harness_payload"] = harness_result(policy_version="2")
+        evidence["harness_payload"] = harness_result(policy_version="3")
         report = build_report(
             planner(),
             GATES,
@@ -224,20 +443,38 @@ class AgentEvalSummaryTest(unittest.TestCase):
         )
         self.assertEqual(
             [
+                "planner_schema_version",
+                "planner_status",
+                "planner_requested_cases",
+                "planner_results_count",
                 "route_accuracy",
                 "macro_f1",
                 "required_action_recall",
                 "forbidden_action_rate",
                 "critical_failures",
                 "executable_rate",
+                "planner_dataset_sha256",
+                "planner_total_cases",
+                "planner_skipped_live_only_cases",
+                "planner_context_cases",
+                "planner_intent_evaluated_cases",
+                "planner_context_resolution_cases",
+                "planner_v2_fields_complete",
+                "intent_accuracy",
+                "context_case_accuracy",
+                "context_resolution_accuracy",
+                "non_fallback_route_accuracy",
+                "llm_signal_accuracy",
+                "fallback_rate",
+                "invalid_raw_route_rate",
                 "baseline_max_metric_drop",
                 "p95_latency_ratio",
             ],
-            [gate["metric"] for gate in report["gates"][:8]],
+            [gate["metric"] for gate in report["gates"][:26]],
         )
 
         fields = ("metric", "value", "operator", "threshold", "status")
-        completion_gates = report["gates"][8:]
+        completion_gates = report["gates"][26:]
         self.assertTrue(all(list(gate) == list(fields) for gate in completion_gates))
         self.assertEqual(
             [
@@ -269,7 +506,7 @@ class AgentEvalSummaryTest(unittest.TestCase):
                     "deep-equity-v1",
                     "passed",
                 ),
-                ("harness_policy_version", "2", "==", 2, "passed"),
+                ("harness_policy_version", "3", "==", 3, "passed"),
                 ("harness_status", "pass", "==", "pass", "passed"),
                 ("harness_case_count", 60, ">=", 60, "passed"),
                 ("harness_exact_accuracy", 1.0, ">=", 1.0, "passed"),
@@ -326,9 +563,9 @@ class AgentEvalSummaryTest(unittest.TestCase):
                 ),
                 (
                     "harness_live_policy_versions",
-                    ["2"],
+                    ["3"],
                     "==",
-                    ["2"],
+                    ["3"],
                     "passed",
                 ),
                 (
@@ -546,14 +783,74 @@ class AgentEvalSummaryTest(unittest.TestCase):
 
 
 class RunAgentEvalTest(unittest.TestCase):
-    def test_cli_returns_nonzero_for_incomplete_report(self):
+    def test_cli_uses_planner_gate_status_instead_of_unified_incomplete_status(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             cases_path = root / "cases.jsonl"
             gates_path = root / "gates.json"
             output_path = root / "result.json"
+            cases = [{"id": "case-1"}]
             cases_path.write_text('{"id":"case-1"}\n', encoding="utf-8")
-            gates_path.write_text(json.dumps(GATES), encoding="utf-8")
+            gates_path.write_text(
+                json.dumps(gates_for_cases(cases)),
+                encoding="utf-8",
+            )
+            argv = [
+                "run_agent_eval.py",
+                "--cases",
+                str(cases_path),
+                "--gates",
+                str(gates_path),
+                "--output",
+                str(output_path),
+            ]
+            planner_payload = planner(
+                mode="DETERMINISTIC",
+                total_cases=1,
+                requested_cases=1,
+            )
+            with (
+                patch.object(
+                    run_agent_eval,
+                    "invoke",
+                    return_value=planner_payload,
+                ) as invoke,
+                patch.object(run_agent_eval.sys, "argv", argv),
+                patch("builtins.print"),
+            ):
+                exit_code = run_agent_eval.main()
+
+            self.assertEqual(0, exit_code)
+            invoke.assert_called_once_with(
+                "http://localhost:8080/api/eval/agent/planner",
+                "DETERMINISTIC",
+                cases,
+                None,
+                600.0,
+            )
+            report = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual("incomplete", report["status"])
+            self.assertEqual("passed", report["planner"]["gate_status"])
+
+    def test_cli_returns_nonzero_when_planner_itself_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cases_path = root / "cases.jsonl"
+            gates_path = root / "gates.json"
+            output_path = root / "result.json"
+            cases = [{"id": "case-1"}]
+            cases_path.write_text('{"id":"case-1"}\n', encoding="utf-8")
+            gates_path.write_text(
+                json.dumps(gates_for_cases(cases)),
+                encoding="utf-8",
+            )
+            failed_planner = planner(
+                route=0.5,
+                mode="DETERMINISTIC",
+                total_cases=1,
+                requested_cases=1,
+            )
+            failed_planner["status"] = "failed"
             argv = [
                 "run_agent_eval.py",
                 "--cases",
@@ -564,7 +861,7 @@ class RunAgentEvalTest(unittest.TestCase):
                 str(output_path),
             ]
             with (
-                patch.object(run_agent_eval, "invoke", return_value=planner()),
+                patch.object(run_agent_eval, "invoke", return_value=failed_planner),
                 patch.object(run_agent_eval.sys, "argv", argv),
                 patch("builtins.print"),
             ):
@@ -572,7 +869,48 @@ class RunAgentEvalTest(unittest.TestCase):
 
             self.assertEqual(2, exit_code)
             report = json.loads(output_path.read_text(encoding="utf-8"))
-            self.assertEqual("incomplete", report["status"])
+            self.assertEqual("failed", report["planner"]["gate_status"])
+
+    def test_cli_passes_custom_timeout_to_planner_request(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cases_path = root / "cases.jsonl"
+            gates_path = root / "gates.json"
+            output_path = root / "result.json"
+            cases = [{"id": "case-1"}]
+            cases_path.write_text('{"id":"case-1"}\n', encoding="utf-8")
+            gates_path.write_text(
+                json.dumps(gates_for_cases(cases)),
+                encoding="utf-8",
+            )
+            argv = [
+                "run_agent_eval.py",
+                "--cases",
+                str(cases_path),
+                "--gates",
+                str(gates_path),
+                "--output",
+                str(output_path),
+                "--timeout-seconds",
+                "42",
+            ]
+            with (
+                patch.object(
+                    run_agent_eval,
+                    "invoke",
+                    return_value=planner(
+                        mode="DETERMINISTIC",
+                        total_cases=1,
+                        requested_cases=1,
+                    ),
+                ) as invoke,
+                patch.object(run_agent_eval.sys, "argv", argv),
+                patch("builtins.print"),
+            ):
+                exit_code = run_agent_eval.main()
+
+            self.assertEqual(0, exit_code)
+            self.assertEqual(42.0, invoke.call_args.args[-1])
 
 
 if __name__ == "__main__":

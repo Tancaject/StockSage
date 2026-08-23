@@ -6,8 +6,8 @@ StockSage 是一个本地可运行的 AI 股票研究工作台，整合多 Agent
 
 ## 核心能力
 
-- **多 Agent 研究**：Coordinator 在行情、基本面、新闻和深度研究间路由；DEEP 模式通过 Bull/Bear/Manager 协作与运行时 Harness 生成证据约束的结构化报告。
-- **可溯源 RAG**：SEC EDGAR 财报经过 Parent-Child 分块、向量与关键词混合检索、RRF 融合和 rerank 后，为回答提供编号引用。
+- **上下文意图识别与多 Agent 研究**：结合最近 3 轮对话、LLM、Embedding 与高精度规则，直接选择受控的五类研究路由；DEEP 模式通过 Bull/Bear/Manager 协作与运行时 Harness 生成证据约束的结构化报告。
+- **可溯源 RAG**：SEC EDGAR 财报经过 Parent-Child 分块、Milvus 向量与 Lucene 标准 BM25 混合检索、RRF 融合和 rerank 后，为回答提供编号引用。
 - **后台研究任务**：Redis Stream、MySQL checkpoint 与 SSE 回放支持后台执行、断线恢复和进度追踪；证据不足时返回 `NOT_RATED`。
 - **投研工作台**：提供自选股、K 线、事件与对比研究、报告版本/审核，以及 IBKR 只读持仓诊断。
 - **质量评估**：记录模型、工具和研究链路，并提供检索评估、RAGAS、Agent golden set 与可选 Phoenix trace。
@@ -17,12 +17,15 @@ StockSage 是一个本地可运行的 AI 股票研究工作台，整合多 Agent
 ```mermaid
 flowchart LR
     UI["Vue Chat / Workbench"] --> API["Spring Boot Backend"]
-    API --> CO["Coordinator"]
-    CO --> AG["Specialist Agents"]
-    CO --> RAG["Hybrid RAG"]
-    CO --> DEEP["DEEP Research"]
+    API --> INTENT["Intent Recognition<br/>LLM + Embedding + Pattern"]
+    HISTORY["Recent 3 Turns"] --> INTENT
+    INTENT -->|validated targetRoute| CO["Coordinator"]
+    INTENT -->|resolvedQuery| RAG["Hybrid RAG"]
+    CO --> PLAN["RoutePlanCatalog<br/>server-owned actions"]
+    PLAN --> AG["Specialist Agents"]
+    PLAN --> DEEP["DEEP Research"]
     AG --> DATA["FastAPI Data Service"]
-    RAG --> STORE["Milvus + MySQL FULLTEXT"]
+    RAG --> STORE["Milvus + Lucene BM25<br/>(MySQL source)"]
     DEEP --> QUEUE["Redis Stream"]
     QUEUE --> WORKER["Research Worker"]
     WORKER --> DB["MySQL Checkpoints / Reports"]

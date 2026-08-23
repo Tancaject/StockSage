@@ -1,5 +1,6 @@
 package com.stocksage.model.entity;
 
+import com.stocksage.model.dto.AnalysisHorizon;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -33,7 +34,11 @@ import java.time.LocalDateTime;
         indexes = {
                 @Index(name = "idx_research_memory_user_created", columnList = "user_id, created_at"),
                 @Index(name = "idx_research_memory_user_ticker_status",
-                        columnList = "user_id, ticker, vector_status")
+                        columnList = "user_id, ticker, vector_status"),
+                @Index(name = "idx_research_memory_conflict",
+                        columnList = "user_id, conflict_key, resolution_status"),
+                @Index(name = "idx_research_memory_superseded_by",
+                        columnList = "superseded_by_id")
         }
 )
 public class ResearchMemoryEntry {
@@ -50,6 +55,36 @@ public class ResearchMemoryEntry {
     /** 已归一化的报告标的代码。 */
     @Column(length = 32, nullable = false)
     private String ticker;
+
+    /** 该报告结论适用的分析期限；旧数据安全回退为 UNSPECIFIED。 */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "analysis_horizon", length = 16, nullable = false)
+    private AnalysisHorizon analysisHorizon;
+
+    /** 来源报告的五档投资建议；旧报告或无评级报告允许为 null。 */
+    @Column(length = 32)
+    private String recommendation;
+
+    /** 用户内结构化冲突键；尚未完成旧数据回填时允许为 null。 */
+    @Column(name = "conflict_key", length = 128)
+    private String conflictKey;
+
+    /** 当前业务冲突裁决状态，与 {@link #vectorStatus} 的索引生命周期分离。 */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "resolution_status", length = 16, nullable = false)
+    private ResolutionStatus resolutionStatus;
+
+    /** 取代当前记忆的更新记忆主键；非 SUPERSEDED 状态通常为 null。 */
+    @Column(name = "superseded_by_id")
+    private Long supersededById;
+
+    /** 当前记忆被取代的业务时间。 */
+    @Column(name = "superseded_at")
+    private LocalDateTime supersededAt;
+
+    /** 冲突裁决的稳定原因码，不保存自由文本模型判断。 */
+    @Column(name = "resolution_reason", length = 64)
+    private String resolutionReason;
 
     /** 来源类型；当前报告捕获路径使用 INVESTMENT_REPORT_VERSION。 */
     @Column(name = "source_type", length = 32, nullable = false)
@@ -71,7 +106,7 @@ public class ResearchMemoryEntry {
     @Column(name = "source_citations", columnDefinition = "JSON", nullable = false)
     private String sourceCitations;
 
-    /** 来源报告的数据截止或生成时间，用于提示记忆新鲜度。 */
+    /** 记忆衰减参考时点；当前报告来源写 generatedAt，尚不是底层证据的严格 as-of。 */
     @Column(name = "data_cutoff_at")
     private LocalDateTime dataCutoffAt;
 
@@ -119,6 +154,10 @@ public class ResearchMemoryEntry {
         createdAt = createdAt == null ? now : createdAt;
         updatedAt = now;
         vectorStatus = vectorStatus == null ? VectorStatus.PENDING : vectorStatus;
+        analysisHorizon = analysisHorizon == null
+                ? AnalysisHorizon.UNSPECIFIED : analysisHorizon;
+        resolutionStatus = resolutionStatus == null
+                ? ResolutionStatus.CURRENT : resolutionStatus;
     }
 
     /** 每次更新真相行前刷新 {@link #updatedAt}；由 JPA 自动调用。 */
@@ -136,6 +175,27 @@ public class ResearchMemoryEntry {
      */
     public boolean active() {
         return revokedAt == null && vectorStatus != VectorStatus.REVOKED;
+    }
+
+    /**
+     * 判断记忆是否同时通过撤销、向量生命周期和业务冲突状态门禁。
+     *
+     * @return 仅未撤销、向量未撤销且业务状态为 CURRENT 时返回 true
+     */
+    public boolean resolutionCurrent() {
+        return active() && resolutionStatus == ResolutionStatus.CURRENT;
+    }
+
+    /** 记忆条目的业务冲突裁决状态。 */
+    public enum ResolutionStatus {
+        /** 当前冲突组唯一可注入的赢家。 */
+        CURRENT,
+
+        /** 已由更新或更高优先级的记忆取代。 */
+        SUPERSEDED,
+
+        /** 同优先级相反结论尚未消解，不得注入。 */
+        CONFLICTED
     }
 
     /** 向量副本相对于 MySQL 真相行的索引状态。 */

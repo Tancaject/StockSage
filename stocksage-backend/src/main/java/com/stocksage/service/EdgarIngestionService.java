@@ -342,7 +342,7 @@ public class EdgarIngestionService {
      *
      * <p>这些前缀能让短切片在向量空间中保留公司身份和财报上下文，降低跨公司误召回。
      * 启用 Contextual Retrieval 时再追加一行 LLM 情境说明（Context:），
-     * 向量与 FULLTEXT 两条检索腿共用该文本。</p>
+     * 向量与 Lucene BM25 两条检索腿共用该文本。</p>
      *
      * @return 带公司、公告、章节和可选 gist 前缀的嵌入正文
      */

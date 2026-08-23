@@ -12,6 +12,41 @@ from typing import Any
 
 SCHEMA_VERSION = "agent_eval_v1"
 SHA256_PATTERN = re.compile(r"^[0-9a-fA-F]{64}$")
+PLANNER_V2_SUMMARY_FIELDS = (
+    "requestedCases",
+    "skippedLiveOnlyCases",
+    "intentEvaluatedCases",
+    "intentAccuracy",
+    "contextCases",
+    "contextCaseAccuracy",
+    "contextResolutionCases",
+    "contextResolutionAccuracy",
+    "nonFallbackCases",
+    "nonFallbackRouteAccuracy",
+    "llmSignalCases",
+    "llmSignalAccuracy",
+    "fallbackCases",
+    "fallbackRate",
+    "invalidRawRouteCases",
+    "invalidRawRouteRate",
+)
+PLANNER_V2_RESULT_FIELDS = (
+    "expectedFineIntent",
+    "actualFineIntent",
+    "fineIntentMatched",
+    "expectedDecisionSource",
+    "decisionSourceMatched",
+    "requireNoFallback",
+    "noFallbackMatched",
+    "routeMatched",
+    "contextCase",
+    "fallback",
+    "rawRouteValid",
+    "rawRouteMatched",
+    "expectedResolvedQueryContains",
+    "actualResolvedQuery",
+    "contextResolutionMatched",
+)
 
 
 def percentile(values: list[float], quantile: float) -> float | None:
@@ -71,10 +106,32 @@ def normalize_observed_values(values: Any) -> list[str]:
 def normalize_planner(payload: dict[str, Any]) -> dict[str, Any]:
     results = payload.get("results") or []
     per_route = payload.get("perRoute") or {}
+    missing_v2_fields = [
+        field for field in PLANNER_V2_SUMMARY_FIELDS if field not in payload
+    ]
+    if not isinstance(results, list):
+        missing_v2_fields.append("results[]")
+        results = []
+    else:
+        for index, result in enumerate(results):
+            if not isinstance(result, dict):
+                missing_v2_fields.append(f"results[{index}]")
+                continue
+            missing_v2_fields.extend(
+                f"results[{index}].{field}"
+                for field in PLANNER_V2_RESULT_FIELDS
+                if field not in result
+            )
     normalized = {
+        "schema_version": payload.get("schemaVersion"),
+        "dataset_sha256": payload.get("datasetSha256"),
         "status": payload.get("status", "failed"),
         "mode": payload.get("mode"),
+        "requested_cases": int(
+            payload.get("requestedCases", payload.get("totalCases", 0))
+        ),
         "total_cases": int(payload.get("totalCases", 0)),
+        "skipped_live_only_cases": int(payload.get("skippedLiveOnlyCases", 0)),
         "passed_cases": int(payload.get("passedCases", 0)),
         "critical_failures": int(payload.get("criticalFailures", 0)),
         "route_accuracy": float(payload.get("routeAccuracy", 0.0)),
@@ -83,6 +140,26 @@ def normalize_planner(payload: dict[str, Any]) -> dict[str, Any]:
         "required_action_recall": float(payload.get("requiredActionRecall", 0.0)),
         "forbidden_action_rate": float(payload.get("forbiddenActionRate", 0.0)),
         "executable_rate": float(payload.get("executableRate", 0.0)),
+        "intent_evaluated_cases": int(payload.get("intentEvaluatedCases", 0)),
+        "intent_accuracy": float(payload.get("intentAccuracy", 0.0)),
+        "context_cases": int(payload.get("contextCases", 0)),
+        "context_case_accuracy": float(payload.get("contextCaseAccuracy", 0.0)),
+        "context_resolution_cases": int(payload.get("contextResolutionCases", 0)),
+        "context_resolution_accuracy": float(
+            payload.get("contextResolutionAccuracy", 0.0)
+        ),
+        "non_fallback_cases": int(payload.get("nonFallbackCases", 0)),
+        "non_fallback_route_accuracy": float(
+            payload.get("nonFallbackRouteAccuracy", 0.0)
+        ),
+        "llm_signal_cases": int(payload.get("llmSignalCases", 0)),
+        "llm_signal_accuracy": float(payload.get("llmSignalAccuracy", 0.0)),
+        "fallback_cases": int(payload.get("fallbackCases", 0)),
+        "fallback_rate": float(payload.get("fallbackRate", 0.0)),
+        "invalid_raw_route_cases": int(payload.get("invalidRawRouteCases", 0)),
+        "invalid_raw_route_rate": float(payload.get("invalidRawRouteRate", 0.0)),
+        "v2_fields_complete": not missing_v2_fields,
+        "missing_v2_fields": missing_v2_fields,
         "duration_ms": int(payload.get("durationMs", 0)),
         "p95_latency_ms": percentile(
             [result.get("durationMs", 0) for result in results], 0.95
@@ -117,6 +194,25 @@ def evaluate_gates(
     gates: dict[str, Any],
 ) -> list[dict[str, Any]]:
     checks = [
+        (
+            "planner_schema_version",
+            planner["schema_version"],
+            "==",
+            gates["planner_schema_version_expected"],
+        ),
+        ("planner_status", planner["status"], "==", "passed"),
+        (
+            "planner_requested_cases",
+            planner["requested_cases"],
+            "==",
+            gates["planner_requested_cases_expected"],
+        ),
+        (
+            "planner_results_count",
+            len(planner["results"]),
+            "==",
+            planner["total_cases"],
+        ),
         ("route_accuracy", planner["route_accuracy"], ">=", gates["route_accuracy_min"]),
         ("macro_f1", planner["macro_f1"], ">=", gates["macro_f1_min"]),
         (
@@ -144,18 +240,152 @@ def evaluate_gates(
             gates["executable_rate_min"],
         ),
     ]
-    results = [
-        {
-            "metric": name,
-            "value": value,
-            "operator": operator,
-            "threshold": threshold,
-            "status": "passed"
-            if (value >= threshold if operator == ">=" else value <= threshold)
-            else "failed",
-        }
-        for name, value, operator, threshold in checks
+    results = [gate_result(name, value, operator, threshold) for name, value, operator, threshold in checks]
+    expected_dataset_hash = gates["planner_dataset_sha256_expected"]
+    results.append(
+        gate_result(
+            "planner_dataset_sha256",
+            planner["dataset_sha256"],
+            "==",
+            expected_dataset_hash,
+            passed=is_sha256(planner["dataset_sha256"])
+            and is_sha256(expected_dataset_hash)
+            and planner["dataset_sha256"] == expected_dataset_hash,
+        )
+    )
+    if planner["mode"] == "LIVE_COORDINATOR":
+        results.extend(
+            [
+                gate_result(
+                    "planner_total_cases",
+                    planner["total_cases"],
+                    "==",
+                    gates["planner_live_total_cases_expected"],
+                ),
+                gate_result(
+                    "planner_skipped_live_only_cases",
+                    planner["skipped_live_only_cases"],
+                    "==",
+                    gates["planner_live_skipped_live_only_cases_expected"],
+                ),
+                gate_result(
+                    "planner_context_cases",
+                    planner["context_cases"],
+                    "==",
+                    gates["planner_live_context_cases_expected"],
+                ),
+                gate_result(
+                    "planner_intent_evaluated_cases",
+                    planner["intent_evaluated_cases"],
+                    "==",
+                    gates["planner_live_intent_cases_expected"],
+                ),
+                gate_result(
+                    "planner_context_resolution_cases",
+                    planner["context_resolution_cases"],
+                    "==",
+                    gates["planner_live_context_resolution_cases_expected"],
+                ),
+                gate_result(
+                    "planner_v2_fields_complete",
+                    planner["v2_fields_complete"],
+                    "==",
+                    True,
+                ),
+            ]
+        )
+    elif planner["mode"] == "DETERMINISTIC":
+        results.extend(
+            [
+                gate_result(
+                    "planner_total_cases",
+                    planner["total_cases"],
+                    "==",
+                    gates["planner_deterministic_total_cases_expected"],
+                ),
+                gate_result(
+                    "planner_skipped_live_only_cases",
+                    planner["skipped_live_only_cases"],
+                    "==",
+                    gates["planner_deterministic_skipped_live_only_cases_expected"],
+                ),
+            ]
+        )
+    else:
+        results.append(
+            gate_result(
+                "planner_mode",
+                planner["mode"],
+                "in",
+                ["DETERMINISTIC", "LIVE_COORDINATOR"],
+                passed=False,
+            )
+        )
+    optional_checks = [
+        (
+            "intent_accuracy",
+            planner["intent_accuracy"],
+            ">=",
+            "intent_accuracy_min",
+            planner["intent_evaluated_cases"] > 0,
+            "no evaluated case supplied expectedFineIntent",
+        ),
+        (
+            "context_case_accuracy",
+            planner["context_case_accuracy"],
+            ">=",
+            "context_case_accuracy_min",
+            planner["context_cases"] > 0,
+            "no evaluated case supplied recentTurns",
+        ),
+        (
+            "context_resolution_accuracy",
+            planner["context_resolution_accuracy"],
+            ">=",
+            "context_resolution_accuracy_min",
+            planner["context_resolution_cases"] > 0,
+            "no evaluated case supplied expectedResolvedQueryContains",
+        ),
+        (
+            "non_fallback_route_accuracy",
+            planner["non_fallback_route_accuracy"],
+            ">=",
+            "non_fallback_route_accuracy_min",
+            planner["non_fallback_cases"] > 0,
+            "no non-fallback routing result was observed",
+        ),
+        (
+            "llm_signal_accuracy",
+            planner["llm_signal_accuracy"],
+            ">=",
+            "llm_signal_accuracy_min",
+            planner["llm_signal_cases"] > 0,
+            "no valid raw LLM route signal was observed",
+        ),
+        (
+            "fallback_rate",
+            planner["fallback_rate"],
+            "<=",
+            "fallback_rate_max",
+            planner["mode"] == "LIVE_COORDINATOR",
+            "fallback rate is not a live-LLM gate in DETERMINISTIC mode",
+        ),
+        (
+            "invalid_raw_route_rate",
+            planner["invalid_raw_route_rate"],
+            "<=",
+            "invalid_raw_route_rate_max",
+            planner["mode"] == "LIVE_COORDINATOR",
+            "raw LLM route validity is not gated in DETERMINISTIC mode",
+        ),
     ]
+    for metric, value, operator, gate_key, applicable, reason in optional_checks:
+        if gate_key not in gates:
+            continue
+        if not applicable:
+            results.append({"metric": metric, "status": "not_run", "reason": reason})
+            continue
+        results.append(gate_result(metric, value, operator, gates[gate_key]))
     if delta.get("status") == "completed":
         metric_values = delta["metrics"].values()
         max_drop = gates.get("baseline_delta_max_drop", gates.get("legacy_delta_max_drop", 0.02))
@@ -216,6 +446,11 @@ def build_report(
     baseline = normalize_planner(baseline_payload) if baseline_payload else None
     delta = metric_delta(planner, baseline)
     gate_results = evaluate_gates(planner, delta, gates)
+    planner["gate_status"] = (
+        "failed"
+        if any(gate["status"] == "failed" for gate in gate_results)
+        else "passed"
+    )
     expected_policy_id = gates.get("harness_policy_id_expected", "deep-equity-v1")
     expected_policy_version = gates.get("harness_policy_version_expected", 2)
     if harness_payload is not None:
@@ -439,7 +674,12 @@ def build_report(
         for name, section in sections.items()
         if section.get("status") == "not_run"
     ]
-    if any(gate["status"] == "failed" for gate in gate_results):
+    failed_sections = [
+        name
+        for name, section in sections.items()
+        if str(section.get("status", "")).strip().lower() in {"fail", "failed"}
+    ]
+    if any(gate["status"] == "failed" for gate in gate_results) or failed_sections:
         status = "failed"
     elif missing_sections:
         status = "incomplete"
@@ -473,6 +713,10 @@ def recommendations(planner: dict[str, Any], delta: dict[str, Any]) -> list[str]
         items.append("必要动作召回不足，检查后端 route 到固定执行计划的映射")
     if planner["forbidden_action_rate"] > 0:
         items.append("出现禁止动作，检查 Action 白名单和固定计划边界")
+    if planner["fallback_rate"] > 0:
+        items.append("LIVE 路由出现确定性回退，不能把 fallback 的正确路由计作 LLM 识别成功")
+    if planner["invalid_raw_route_rate"] > 0:
+        items.append("路由模型返回了非法或空 rawRoute，检查结构化输出约束和解析失败样例")
     if delta.get("status") == "completed" and any(
         float(value) < -0.05 for value in delta.get("metrics", {}).values()
     ):

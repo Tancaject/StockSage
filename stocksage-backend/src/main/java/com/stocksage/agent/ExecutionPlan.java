@@ -18,6 +18,7 @@ import java.util.List;
  * @param observation Coordinator 对当前上下文的观察摘要，会写入追踪面板
  * @param modelTier 最终回答应使用的模型能力层级，由后端映射到具体模型名
  * @param routingDecision 有界路由诊断元数据；历史调用可为空
+ * @param resolvedQuery 仅供当前请求内部执行的消歧问题，不写入路由 Trace 属性
  */
 public record ExecutionPlan(
         PlanRoute route,
@@ -26,8 +27,26 @@ public record ExecutionPlan(
         List<PlanAction> actions,
         String observation,
         ModelTier modelTier,
-        RoutingDecisionMetadata routingDecision
+        RoutingDecisionMetadata routingDecision,
+        String resolvedQuery
 ) {
+    public ExecutionPlan {
+        resolvedQuery = resolvedQuery == null ? "" : resolvedQuery.trim();
+        if (resolvedQuery.length() > 600) {
+            resolvedQuery = resolvedQuery.substring(0, 600);
+        }
+    }
+
+    /** 保留已有七字段主调用形式。 */
+    public ExecutionPlan(PlanRoute route,
+                         String taskType,
+                         String thought,
+                         List<PlanAction> actions,
+                         String observation,
+                         ModelTier modelTier,
+                         RoutingDecisionMetadata routingDecision) {
+        this(route, taskType, thought, actions, observation, modelTier, routingDecision, "");
+    }
     /**
      * 保留历史五参数构造形式；旧调用只在显式传入枚举名称时才能恢复对应路由。
      *
@@ -39,14 +58,14 @@ public record ExecutionPlan(
                          List<PlanAction> actions,
                          String observation,
                          ModelTier modelTier) {
-        this(PlanRoute.normalize(taskType), taskType, thought, actions, observation, modelTier, null);
+        this(PlanRoute.normalize(taskType), taskType, thought, actions, observation, modelTier, null, "");
     }
 
     /**
      * 保留旧构造形式，避免测试或小工具只关心路由动作时必须显式传 tier。
      */
     public ExecutionPlan(String taskType, String thought, List<PlanAction> actions, String observation) {
-        this(PlanRoute.normalize(taskType), taskType, thought, actions, observation, ModelTier.STANDARD, null);
+        this(PlanRoute.normalize(taskType), taskType, thought, actions, observation, ModelTier.STANDARD, null, "");
     }
 
     /**
@@ -58,7 +77,7 @@ public record ExecutionPlan(
                          String thought,
                          List<PlanAction> actions,
                          String observation) {
-        this(route, taskType, thought, actions, observation, ModelTier.STANDARD, null);
+        this(route, taskType, thought, actions, observation, ModelTier.STANDARD, null, "");
     }
 
     public ExecutionPlan(PlanRoute route,
@@ -67,7 +86,7 @@ public record ExecutionPlan(
                          List<PlanAction> actions,
                          String observation,
                          ModelTier modelTier) {
-        this(route, taskType, thought, actions, observation, modelTier, null);
+        this(route, taskType, thought, actions, observation, modelTier, null, "");
     }
 
     /**

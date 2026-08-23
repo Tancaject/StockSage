@@ -56,7 +56,7 @@ public class RagService {
     /** 对融合候选执行可选 DashScope 语义重排。 */
     private final DashScopeReranker dashScopeReranker;
 
-    /** MySQL FULLTEXT 精确术语召回入口。 */
+    /** Apache Lucene 标准 BM25 精确术语召回入口。 */
     private final KeywordSearchService keywordSearchService;
 
     /** 从 MySQL 镜像读取父级切片完整正文。 */
@@ -77,7 +77,7 @@ public class RagService {
     @Value("${stocksage.rag.similarity-threshold}")
     private double similarityThreshold;
 
-    /** 是否把 MySQL 关键词召回与向量召回融合。 */
+    /** 是否把 Lucene BM25 召回与向量召回融合。 */
     @Value("${stocksage.rag.hybrid-search.enabled:true}")
     private boolean hybridSearchEnabled;
 
@@ -145,7 +145,7 @@ public class RagService {
 
         if (hybridSearchEnabled) {
             keywordCandidates = keywordSearchService.search(retrievalQuery, keywordTopK, filterExpression);
-            // RRF 只使用各自排名，不直接混合向量分数与 FULLTEXT relevance 的不同量纲。
+            // RRF 只使用各自排名，不直接混合向量分数与 BM25 score 的不同量纲。
             fusedCandidates = rrfFusion(vectorCandidates, keywordCandidates);
         }
 

@@ -23,6 +23,17 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findByConversationIdOrderByCreatedAtAsc(Long conversationId);
 
     /**
+     * 读取同一会话最近六条持久化消息，供 Coordinator 路由前恢复最多三轮上下文。
+     *
+     * <p>结果按消息主键倒序返回；调用方在筛出完整 user/assistant 轮次后恢复为时间正序。
+     * 查询条件包含 conversationId，避免不同会话的消息进入同一次路由判断。</p>
+     *
+     * @param conversationId 会话主键
+     * @return 从最新到较早排列的最多六条消息
+     */
+    List<Message> findTop6ByConversationIdOrderByIdDesc(Long conversationId);
+
+    /**
      * 检查同一后台任务是否已经写入完全相同的最终消息。
      *
      * <p>恢复或接管任务在持久化报告前调用它，避免同一 trace 的最终答复重复插入。</p>

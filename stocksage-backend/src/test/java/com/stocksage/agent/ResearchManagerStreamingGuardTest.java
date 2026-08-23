@@ -5,6 +5,7 @@ import com.stocksage.harness.EvidenceLedger;
 import com.stocksage.harness.HarnessModels.EvidenceDimension;
 import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
 import com.stocksage.harness.HarnessModels.EvidenceStatus;
+import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.harness.HarnessModels.ParseStatus;
@@ -125,6 +126,63 @@ class ResearchManagerStreamingGuardTest {
     }
 
     @Test
+    void missingAnalysisHorizonIsReportedAsSchemaInvalid() {
+        Instant observedAt = Instant.parse("2026-07-28T02:00:00Z");
+        EvidenceEnvelope market = new EvidenceEnvelope(
+                "e-market",
+                EvidenceDimension.MARKET,
+                "getMarketData",
+                "AAPL",
+                EvidenceStatus.AVAILABLE,
+                "https://example.com/aapl-market",
+                "market-provider",
+                observedAt,
+                observedAt,
+                "d".repeat(64),
+                true
+        );
+        AnalysisState state = AnalysisState.builder()
+                .query("Should I buy AAPL?")
+                .primaryTicker("AAPL")
+                .evidenceLedger(new EvidenceLedger(
+                        TargetIdentity.resolved("AAPL"),
+                        List.of(market)
+                ))
+                .build();
+        String modelOutput = """
+                {
+                  "recommendation":"HOLD",
+                  "rationale":["bounded"],
+                  "riskFactors":["risk"],
+                  "analystSummary":"summary",
+                  "evidenceItems":[{
+                    "dimension":"market",
+                    "evidence":"market evidence",
+                    "implication":"neutral",
+                    "sourceEvidenceIds":["e-market"]
+                  }],
+                  "dataFreshness":"bounded"
+                }
+                """;
+        ResearchManager manager = new ResearchManager(
+                chatClientReturning(Flux.just(modelOutput)),
+                new ObjectMapper()
+        );
+
+        var result = manager.synthesizeStreamingResult(
+                state,
+                "trace",
+                1L,
+                mock(ChatStreamEmitter.class)
+        ).block();
+
+        assertThat(result).isNotNull();
+        assertThat(result.parseStatus()).isEqualTo(ParseStatus.INVALID_SCHEMA);
+        assertThat(result.validationIssues()).contains("analysisHorizon");
+        assertThat(result.report().getAnalysisHorizon()).isEqualTo(AnalysisHorizon.UNSPECIFIED);
+    }
+
+    @Test
     void bindsEvidenceSourcesAndCitationsFromUsableLedgerIds() {
         Instant observedAt = Instant.parse("2026-07-28T02:00:00Z");
         EvidenceEnvelope sec = new EvidenceEnvelope(
@@ -177,6 +235,7 @@ class ResearchManagerStreamingGuardTest {
         String modelOutput = """
                 {
                   "recommendation":"BUY",
+                  "analysisHorizon":"LONG_TERM",
                   "rationale":["supported"],
                   "riskFactors":["risk"],
                   "analystSummary":"summary",
@@ -212,14 +271,17 @@ class ResearchManagerStreamingGuardTest {
                 new ObjectMapper()
         );
 
-        InvestmentReport report = manager.synthesizeStreaming(
+        var result = manager.synthesizeStreamingResult(
                 state,
                 "trace",
                 1L,
                 mock(ChatStreamEmitter.class)
         ).block();
 
-        assertThat(report).isNotNull();
+        assertThat(result).isNotNull();
+        assertThat(result.parseStatus()).isEqualTo(ParseStatus.VALID);
+        InvestmentReport report = result.report();
+        assertThat(report.getAnalysisHorizon()).isEqualTo(AnalysisHorizon.LONG_TERM);
         assertThat(report.getEvidenceItems()).hasSize(2);
         assertThat(report.getEvidenceItems().get(0).getSourceEvidenceIds())
                 .containsExactly("e-sec");
