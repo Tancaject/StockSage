@@ -13,7 +13,12 @@ import com.stocksage.harness.HarnessModels.SynthesisResult;
 import com.stocksage.harness.HarnessModels.ViolationCode;
 import com.stocksage.harness.ResearchHarness;
 import com.stocksage.model.dto.AnalysisState;
-import com.stocksage.model.dto.AnalysisState.DebateTurn;
+import com.stocksage.model.dto.DebateModels.AssessmentParseStatus;
+import com.stocksage.model.dto.DebateModels.DebateTurn;
+import com.stocksage.model.dto.DebateModels.DebateVerdict;
+import com.stocksage.model.dto.DebateModels.LeadingSide;
+import com.stocksage.model.dto.DebateModels.ManagerAssessment;
+import com.stocksage.model.dto.DebateModels.Side;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.tool.ChatStreamEmitter;
 import com.stocksage.trace.TraceService;
@@ -32,6 +37,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
@@ -71,6 +77,10 @@ public class ResearchDebateService {
     private final BearResearcher bearResearcher;
     /** 把分析师与辩论证据综合为结构化报告。 */
     private final ResearchManager researchManager;
+    /** 把模型 JSON 严格转换为带 Evidence ID 的结构化论点。 */
+    private final DebateContractParser debateContractParser;
+    /** 根据 Manager 逐项评分确定性计算胜方和评级。 */
+    private final DebateDecisionPolicy debateDecisionPolicy;
     /** 用轻量模型选择 1 到配置上限的辩论轮数。 */
     private final DebateRoundPlanner debateRoundPlanner;
     /** 持久化每个规划、辩论和综合步骤。 */
@@ -218,9 +228,25 @@ public class ResearchDebateService {
                             traceId
                     );
 
-            applyRound(workingState, 1, round1.getT1(), round1.getT2());
-            addTraceStep(traceId, "Bull Researcher", "Round 1", round1.getT1(), round1Start);
-            addTraceStep(traceId, "Bear Researcher", "Round 1", round1.getT2(), round1Start);
+            List<DebateTurn> parsedRound;
+            try {
+                parsedRound = applyRound(
+                        workingState, 1, round1.getT1(), round1.getT2());
+            } catch (DebateContractParser.DebateContractException error) {
+                return failClosedDebate(
+                        workingState,
+                        traceId,
+                        conversationId,
+                        harnessCheckpointer,
+                        ViolationCode.DEBATE_CONTRACT_INVALID,
+                        "辩论结构或证据引用未通过契约校验：" + error.code().name(),
+                        round1Start
+                );
+            }
+            addTraceStep(traceId, "Bull Researcher", "Round 1",
+                    renderTurn(parsedRound.get(0)), round1Start);
+            addTraceStep(traceId, "Bear Researcher", "Round 1",
+                    renderTurn(parsedRound.get(1)), round1Start);
 
             DebateRoundPlanner.RoundDecision roundDecision = round1.getT3();
             rounds = roundDecision.rounds();
@@ -253,12 +279,28 @@ public class ResearchDebateService {
                     "debate-round-" + round,
                     traceId
             );
-            applyRound(workingState, round, roundResult.getT1(), roundResult.getT2());
+            List<DebateTurn> parsedRound;
+            try {
+                parsedRound = applyRound(
+                        workingState, round, roundResult.getT1(), roundResult.getT2());
+            } catch (DebateContractParser.DebateContractException error) {
+                return failClosedDebate(
+                        workingState,
+                        traceId,
+                        conversationId,
+                        harnessCheckpointer,
+                        ViolationCode.DEBATE_CONTRACT_INVALID,
+                        "辩论结构或证据引用未通过契约校验：" + error.code().name(),
+                        roundStart
+                );
+            }
             if (checkpointer != null) {
                 checkpointer.onRoundCompleted(workingState, round, rounds);
             }
-            addTraceStep(traceId, "Bull Researcher", "Round " + round, roundResult.getT1(), roundStart);
-            addTraceStep(traceId, "Bear Researcher", "Round " + round, roundResult.getT2(), roundStart);
+            addTraceStep(traceId, "Bull Researcher", "Round " + round,
+                    renderTurn(parsedRound.get(0)), roundStart);
+            addTraceStep(traceId, "Bear Researcher", "Round " + round,
+                    renderTurn(parsedRound.get(1)), roundStart);
         }
 
         // Research Manager 改为流式：自然语言综合判断逐 token 推送到推理面板（"manager-synthesis" 分组），
@@ -287,6 +329,41 @@ public class ResearchDebateService {
                     traceId);
             return workingState;
         }
+
+        DebateVerdict verdict = currentOrScoreVerdict(
+                workingState,
+                traceId,
+                conversationId,
+                guard,
+                harnessCheckpointer,
+                managerStart
+        );
+        ManagerAssessment managerAssessment = workingState.getManagerAssessment();
+        if (managerAssessment == null
+                || managerAssessment.parseStatus() != AssessmentParseStatus.VALID
+                || !managerAssessment.issues().isEmpty()) {
+            return failClosedDebate(
+                    workingState,
+                    traceId,
+                    conversationId,
+                    harnessCheckpointer,
+                    ViolationCode.DEBATE_ASSESSMENT_INVALID,
+                    "研究经理逐论点评分未通过结构校验。",
+                    managerStart
+            );
+        }
+        if (verdict.leadingSide() == LeadingSide.INSUFFICIENT) {
+            return failClosedDebate(
+                    workingState,
+                    traceId,
+                    conversationId,
+                    harnessCheckpointer,
+                    ViolationCode.DEBATE_DECISION_INSUFFICIENT,
+                    "有效根论点或证据不足，本轮不生成投资评级。",
+                    managerStart
+            );
+        }
+
         boolean resumingReportRecovery = isReportRecoveryCheckpoint(checkpointSnapshot);
         Map<RecoveryAction, Integer> reportRecoveryAttempts =
                 reportRecoveryAttempts(checkpointSnapshot);
@@ -307,9 +384,9 @@ public class ResearchDebateService {
         }
         Mono<SynthesisResult> synthesis = executionGuard == null
                 ? researchManager.synthesizeStreamingResult(
-                        workingState, traceId, conversationId, chatStreamEmitter)
+                        workingState, verdict, traceId, conversationId, chatStreamEmitter)
                 : researchManager.synthesizeStreamingResult(
-                        workingState, traceId, conversationId, chatStreamEmitter, guard);
+                        workingState, verdict, traceId, conversationId, chatStreamEmitter, guard);
         SynthesisResult synthesisResult = awaitModelStage(
                 synthesis,
                 "manager-synthesis",
@@ -348,9 +425,9 @@ public class ResearchDebateService {
                     "报告结构或证据引用未通过校验，正在重新综合一次。");
             Mono<SynthesisResult> repair = executionGuard == null
                     ? researchManager.synthesizeStreamingResult(
-                            workingState, traceId, conversationId, chatStreamEmitter)
+                            workingState, verdict, traceId, conversationId, chatStreamEmitter)
                     : researchManager.synthesizeStreamingResult(
-                            workingState, traceId, conversationId, chatStreamEmitter, guard);
+                            workingState, verdict, traceId, conversationId, chatStreamEmitter, guard);
             synthesisResult = awaitModelStage(
                     repair,
                     "manager-repair",
@@ -444,6 +521,8 @@ public class ResearchDebateService {
             );
         }
 
+        boolean currentVerdict = debateDecisionPolicy.isCurrentVerdict(
+                workingState, checkpointedReport.getDecisionAudit());
         HarnessDecision reportDecision = researchHarness.evaluateReport(
                 traceId,
                 completionPolicy,
@@ -451,7 +530,7 @@ public class ResearchDebateService {
                 workingState.getEvidenceLedger(),
                 new SynthesisResult(
                         checkpointedReport,
-                        hasCurrentPolicyMetadata(checkpointedReport)
+                        hasCurrentPolicyMetadata(checkpointedReport) && currentVerdict
                                 ? com.stocksage.harness.HarnessModels.ParseStatus.VALID
                                 : com.stocksage.harness.HarnessModels.ParseStatus.INVALID_SCHEMA,
                         List.of()
@@ -633,21 +712,22 @@ public class ResearchDebateService {
         if (state == null || state.getDebateTurns() == null) {
             return 0;
         }
-        Map<Integer, EnumSet<DebateTurn.Side>> sidesByRound = new HashMap<>();
+        Map<Integer, EnumSet<Side>> sidesByRound = new HashMap<>();
         for (DebateTurn turn : state.getDebateTurns()) {
-            if (turn == null || turn.round() <= 0 || turn.side() == null) {
+            if (turn == null || turn.round() <= 0 || turn.side() == null
+                    || turn.points() == null || turn.points().isEmpty()) {
                 continue;
             }
             sidesByRound.computeIfAbsent(
                     turn.round(),
-                    ignored -> EnumSet.noneOf(DebateTurn.Side.class)
+                    ignored -> EnumSet.noneOf(Side.class)
             ).add(turn.side());
         }
         int completed = 0;
         while (sidesByRound.getOrDefault(
                 completed + 1,
-                EnumSet.noneOf(DebateTurn.Side.class)
-        ).containsAll(EnumSet.allOf(DebateTurn.Side.class))) {
+                EnumSet.noneOf(Side.class)
+        ).containsAll(EnumSet.allOf(Side.class))) {
             completed++;
         }
         return completed;
@@ -783,6 +863,11 @@ public class ResearchDebateService {
                 .toList();
         return InvestmentReport.builder()
                 .ticker(state.getPrimaryTicker())
+                .dataSnapshotHash(state.getDataSnapshotHash())
+                .contextHash(state.getContextHash())
+                .decisionAudit(debateDecisionPolicy.isCurrentVerdict(state)
+                        ? state.getDebateVerdict()
+                        : null)
                 .qualityStatus(InvestmentReport.ReportQualityStatus.NOT_RATED)
                 .completionPolicyId(completionPolicy.policyId())
                 .completionPolicyVersion(completionPolicy.policyVersion())
@@ -797,26 +882,43 @@ public class ResearchDebateService {
                 .build();
     }
 
-    /**
-     * 把一位研究员的流式论证收集成完整文本，同时把每个 token 作为分组推理块实时推送到 SSE。
-     *
-     * <p>每个研究员用稳定的 {@code section} 标识，前端据此把同一研究员同一轮的连续 token
-     * 聚合成一个推理块——即便 Bull/Bear 的 token 在网络上交错到达也能各自归位。</p>
-     */
+    /** 收集研究员完整输出；只展示 JSON 边界前的摘要，结构化契约留在后端解析。 */
     private Mono<String> streamArgument(String traceId, Long conversationId,
-                                        boolean bull, int round, Flux<String> tokens,
-                                        Runnable executionGuard) {
+                                         boolean bull, int round, Flux<String> tokens,
+                                         Runnable executionGuard) {
         String section = "debate-" + (bull ? "bull" : "bear") + "-" + round;
         String label = (bull ? "看多方" : "看空方") + " · 第 " + round + " 轮";
         StringBuilder buffer = new StringBuilder();
+        AtomicBoolean jsonStarted = new AtomicBoolean(false);
         return tokens
                 .doOnNext(token -> {
-                    if (token != null && !token.isEmpty()) {
-                        executionGuard.run();
-                        buffer.append(token);
+                    if (token == null || token.isEmpty()) {
+                        return;
+                    }
+                    executionGuard.run();
+                    int previousLength = buffer.length();
+                    buffer.append(token);
+                    if (jsonStarted.get()) {
+                        return;
+                    }
+                    int fenceIndex = buffer.indexOf("```");
+                    int braceIndex = buffer.indexOf("{");
+                    int jsonAt = fenceIndex >= 0 && (braceIndex < 0 || fenceIndex < braceIndex)
+                            ? fenceIndex
+                            : braceIndex;
+                    if (jsonAt < 0) {
                         chatStreamEmitter.emitSection(traceId, conversationId, "thought",
                                 section, label, token);
+                        return;
                     }
+                    if (jsonAt > previousLength) {
+                        String visiblePart = token.substring(0, jsonAt - previousLength);
+                        if (!visiblePart.isEmpty()) {
+                            chatStreamEmitter.emitSection(traceId, conversationId, "thought",
+                                    section, label, visiblePart);
+                        }
+                    }
+                    jsonStarted.set(true);
                 })
                 .then(Mono.fromCallable(buffer::toString));
     }
@@ -854,24 +956,168 @@ public class ResearchDebateService {
         }
     }
 
+    /** 双方都通过严格 JSON/证据契约后，才原子追加本轮结构化论点。 */
+    private List<DebateTurn> applyRound(
+            AnalysisState state,
+            int round,
+            String bull,
+            String bear
+    ) {
+        DebateTurn bullTurn = debateContractParser.parse(bull, round, Side.BULL, state);
+        DebateTurn bearTurn = debateContractParser.parse(bear, round, Side.BEAR, state);
+        state.getDebateTurns().add(bullTurn);
+        state.getDebateTurns().add(bearTurn);
+        // 新轮次改变评分输入；checkpoint 不得携带与当前辩论不匹配的旧评分或旧裁决。
+        state.setManagerAssessment(null);
+        state.setDebateVerdict(null);
+        return List.of(bullTurn, bearTurn);
+    }
+
     /**
-     * 一轮辩论结束后才把双方观点写回状态，确保轮内 Bull/Bear 并行时读到的是上一轮的结果，
-     * 而不是对方本轮尚未定稿的中间文本。
-     *
-     * <p>写入两层：</p>
-     * <ul>
-     *   <li>{@code debateTurns}：完整发言流水，是下一轮 Bull/Bear 看到全部历史的依据；</li>
-     *   <li>{@code bullThesis / bearThesis / debateRounds}：保留向后兼容，
-     *       供 ResearchManager 现有 prompt 与历史下游消费者继续使用。</li>
-     * </ul>
+     * 复用仍绑定当前输入的裁决；否则只调用一次 Manager 评分，再由 Java 策略锁定结果并 checkpoint。
      */
-    private void applyRound(AnalysisState state, int round, String bull, String bear) {
-        state.getDebateTurns().add(new DebateTurn(round, DebateTurn.Side.BULL, bull));
-        state.getDebateTurns().add(new DebateTurn(round, DebateTurn.Side.BEAR, bear));
-        state.setBullThesis(bull);
-        state.setBearThesis(bear);
-        state.getDebateRounds().add("Round " + round + " Bull:\n" + bull);
-        state.getDebateRounds().add("Round " + round + " Bear:\n" + bear);
+    private DebateVerdict currentOrScoreVerdict(
+            AnalysisState state,
+            String traceId,
+            Long conversationId,
+            Runnable executionGuard,
+            Consumer<AnalysisState> harnessCheckpointer,
+            long startedAt
+    ) {
+        if (debateDecisionPolicy.isCurrentVerdict(state)) {
+            DebateVerdict current = state.getDebateVerdict();
+            addTraceStep(
+                    traceId,
+                    "Research Manager Scoring",
+                    "Reuse current assessment",
+                    verdictTraceSummary(current, state.getManagerAssessment()),
+                    startedAt
+            );
+            return current;
+        }
+
+        String inputHash = debateDecisionPolicy.computeInputHash(state);
+        ManagerAssessment assessment = awaitModelStage(
+                researchManager.scoreDebate(state, inputHash, executionGuard),
+                "manager-scoring",
+                traceId
+        );
+        state.setManagerAssessment(assessment);
+        DebateVerdict verdict = debateDecisionPolicy.decide(state, assessment);
+        state.setDebateVerdict(verdict);
+        // 评分与裁决必须先于报告生成落盘；崩溃恢复时相同输入直接复用，不重复打分。
+        checkpointHarnessState(harnessCheckpointer, state);
+        addTraceStep(
+                traceId,
+                "Research Manager Scoring",
+                "Anonymous per-thesis assessment",
+                verdictTraceSummary(verdict, assessment),
+                startedAt
+        );
+        chatStreamEmitter.emit(
+                traceId,
+                conversationId,
+                "observation",
+                verdict.leadingSide() == LeadingSide.INSUFFICIENT
+                        ? "逐论点评分完成，但有效证据不足，本轮不评级。"
+                        : "逐论点评分完成，确定性决策已锁定，正在生成研究报告。"
+        );
+        return verdict;
+    }
+
+    /** Trace 只记录有限状态、分数和原因代码，不记录模型隐藏推理。 */
+    private String verdictTraceSummary(
+            DebateVerdict verdict,
+            ManagerAssessment assessment
+    ) {
+        if (verdict == null) {
+            return "verdict=missing";
+        }
+        List<String> reasonCodes = assessment == null
+                ? List.of()
+                : assessment.assessments().stream()
+                .flatMap(item -> item.reasonCodes().stream())
+                .map(Enum::name)
+                .distinct()
+                .sorted()
+                .toList();
+        return "parseStatus=%s; bullScore=%.2f; bearScore=%.2f; leadingSide=%s; "
+                .concat("recommendation=%s; reasonCodes=%s")
+                .formatted(
+                        assessment == null ? "MISSING" : assessment.parseStatus(),
+                        verdict.bullScore(),
+                        verdict.bearScore(),
+                        verdict.leadingSide(),
+                        verdict.recommendation(),
+                        reasonCodes
+                );
+    }
+
+    /** 对辩论契约、Manager 评分或有效证据不足执行统一失败关闭。 */
+    private AnalysisState failClosedDebate(
+            AnalysisState state,
+            String traceId,
+            Long conversationId,
+            Consumer<AnalysisState> harnessCheckpointer,
+            ViolationCode violationCode,
+            String userMessage,
+            long startedAt
+    ) {
+        if (violationCode == ViolationCode.DEBATE_CONTRACT_INVALID) {
+            state.setManagerAssessment(null);
+            state.setDebateVerdict(null);
+        }
+        HarnessDecision decision = new HarnessDecision(
+                HarnessOutcome.DEGRADE,
+                List.of(new HarnessViolation(violationCode, null)),
+                List.of(RecoveryAction.RETURN_NOT_RATED)
+        );
+        InvestmentReport notRated = buildNotRatedReport(state, decision);
+        notRated.setAnalystSummary(userMessage);
+        notRated.setRationale(List.of(userMessage));
+        state.setInvestmentReport(notRated);
+        HarnessSnapshot previousSnapshot = state.getHarnessSnapshot();
+        applyFinalReportSnapshot(
+                state,
+                decision,
+                reportRecoveryAttempts(previousSnapshot),
+                previousSnapshot,
+                traceId,
+                conversationId
+        );
+        checkpointHarnessState(harnessCheckpointer, state);
+        chatStreamEmitter.emit(traceId, conversationId, "observation", userMessage);
+        String traceAction = violationCode == ViolationCode.DEBATE_CONTRACT_INVALID
+                ? "Research Debate Contract"
+                : "Research Manager Scoring";
+        addTraceStep(
+                traceId,
+                traceAction,
+                violationCode.name(),
+                userMessage,
+                startedAt
+        );
+        log.warn("Research debate failed closed, traceId={}, violation={}",
+                traceId, violationCode);
+        return state;
+    }
+
+    /** Trace 只保存结构化论点摘要，不复制模型的自由文本前言或内部 JSON。 */
+    private String renderTurn(DebateTurn turn) {
+        if (turn == null) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder();
+        turn.points().forEach(point -> builder.append('[').append(point.pointId()).append("] ")
+                .append(point.type()).append(" | ").append(point.claim())
+                .append(" | evidenceIds=")
+                .append(point.evidenceRefs().stream()
+                        .map(ref -> ref.evidenceId())
+                        .distinct()
+                        .toList())
+                .append(" | respondsTo=").append(point.respondsToPointIds())
+                .append('\n'));
+        return builder.toString().strip();
     }
 
     /** @return 文本非空且非纯空白 */

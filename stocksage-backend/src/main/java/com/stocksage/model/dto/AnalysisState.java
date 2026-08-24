@@ -2,6 +2,9 @@ package com.stocksage.model.dto;
 
 import com.stocksage.harness.EvidenceLedger;
 import com.stocksage.harness.HarnessModels.HarnessSnapshot;
+import com.stocksage.model.dto.DebateModels.DebateTurn;
+import com.stocksage.model.dto.DebateModels.DebateVerdict;
+import com.stocksage.model.dto.DebateModels.ManagerAssessment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,32 +47,23 @@ public class AnalysisState {
     /** 新闻分析师输出的近期新闻、政策和市场情绪信息。 */
     private String newsReport;
 
-    /** 多头研究员最后一轮的论点（向后兼容字段，等价于 debateTurns 中最近一条 BULL）。 */
-    private String bullThesis;
-
-    /** 空头研究员最后一轮的论点（向后兼容字段，等价于 debateTurns 中最近一条 BEAR）。 */
-    private String bearThesis;
-
     /** 研究经理生成的最终结构化投资研究报告。 */
     private InvestmentReport investmentReport;
 
     /**
      * 多空辩论的完整发言流水，按发生顺序追加。
      *
-     * <p>每一条都是单方单轮的完整原文，下一轮的 Bull/Bear 可以读到对方全部历史发言，
-     * 而不是只看到上一轮一段文字——这是消除"自说自话"的关键。</p>
+     * <p>每一条只保存经过后端契约校验的结构化论点。下一轮 Bull/Bear 读取这些带稳定 ID 的
+     * 论点并显式引用反驳目标，避免自由文本辩论无法核验或恢复。</p>
      */
     @Builder.Default
     private List<DebateTurn> debateTurns = new ArrayList<>();
 
-    /**
-     * 多空辩论的轮次记录（向后兼容字段）。
-     *
-     * <p>新代码应该读 {@link #debateTurns}；该字段仅供历史下游消费者使用，
-     * 内容由 {@code ResearchDebateService} 在写入 turn 时同步追加，格式与旧版保持一致。</p>
-     */
-    @Builder.Default
-    private List<String> debateRounds = new ArrayList<>();
+    /** Research Manager 对当前结构化论点的逐项语义评分；缺失时不得直接生成评级报告。 */
+    private ManagerAssessment managerAssessment;
+
+    /** Java 确定性策略依据评分、证据和时效性计算出的锁定裁决。 */
+    private DebateVerdict debateVerdict;
 
     /** 当前研究链路中收集到的引用或证据来源。 */
     @Builder.Default
@@ -87,18 +81,4 @@ public class AnalysisState {
     /** 最近一次持久化的完成策略决策及有界恢复计数，供任务接管后继续执行。 */
     private HarnessSnapshot harnessSnapshot;
 
-    /**
-     * 辩论中的一条单方发言。
-     *
-     * @param round    辩论轮次，从 1 开始
-     * @param side     发言方：BULL 或 BEAR
-     * @param fullText 该轮该方的完整论证原文
-     */
-    public record DebateTurn(int round, Side side, String fullText) {
-
-        /** 辩论发言方：BULL 表示看多观点，BEAR 表示看空观点。 */
-        public enum Side {
-            BULL, BEAR
-        }
-    }
 }

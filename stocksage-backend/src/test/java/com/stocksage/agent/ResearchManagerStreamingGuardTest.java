@@ -5,11 +5,23 @@ import com.stocksage.harness.EvidenceLedger;
 import com.stocksage.harness.HarnessModels.EvidenceDimension;
 import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
 import com.stocksage.harness.HarnessModels.EvidenceStatus;
-import com.stocksage.model.dto.AnalysisHorizon;
-import com.stocksage.model.dto.AnalysisState;
-import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.harness.HarnessModels.ParseStatus;
 import com.stocksage.harness.HarnessModels.TargetIdentity;
+import com.stocksage.model.dto.AnalysisHorizon;
+import com.stocksage.model.dto.AnalysisState;
+import com.stocksage.model.dto.DebateModels;
+import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
+import com.stocksage.model.dto.DebateModels.AssessmentParseStatus;
+import com.stocksage.model.dto.DebateModels.AssessmentReasonCode;
+import com.stocksage.model.dto.DebateModels.DebatePoint;
+import com.stocksage.model.dto.DebateModels.DebateTurn;
+import com.stocksage.model.dto.DebateModels.DebateVerdict;
+import com.stocksage.model.dto.DebateModels.EvidenceRef;
+import com.stocksage.model.dto.DebateModels.LeadingSide;
+import com.stocksage.model.dto.DebateModels.ManagerAssessment;
+import com.stocksage.model.dto.DebateModels.PointType;
+import com.stocksage.model.dto.DebateModels.Side;
+import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.service.DeepResearchPipeline;
 import com.stocksage.tool.ChatStreamEmitter;
 import org.junit.jupiter.api.Test;
@@ -56,7 +68,10 @@ class ResearchManagerStreamingGuardTest {
             }
             return null;
         }).when(emitter).emitSection(any(), any(), any(), any(), any(), any());
-        ResearchManager manager = new ResearchManager(chatClient, new ObjectMapper());
+        ResearchManager manager = new ResearchManager(chatClient, chatClient, new ObjectMapper());
+        AnalysisState state = AnalysisState.builder().query("q").build();
+        DebateVerdict verdict = lockedVerdict(
+                state, "HOLD", AnalysisHorizon.MEDIUM_TERM);
         Runnable guard = () -> {
             if (ownershipLost.get()) {
                 throw new DeepResearchPipeline.OwnershipLostException("lost");
@@ -64,7 +79,7 @@ class ResearchManagerStreamingGuardTest {
         };
 
         assertThatThrownBy(() -> manager.synthesizeStreaming(
-                AnalysisState.builder().query("q").build(), "trace", 1L, emitter, guard).block())
+                state, verdict, "trace", 1L, emitter, guard).block())
                 .isInstanceOf(DeepResearchPipeline.OwnershipLostException.class);
 
         verify(emitter).emitSection(any(), any(), any(), any(), any(), eq("first"));
@@ -76,7 +91,12 @@ class ResearchManagerStreamingGuardTest {
     void guardRunsAgainBeforeParsingBufferedJson() throws Exception {
         ObjectMapper objectMapper = spy(new ObjectMapper());
         ResearchManager manager = new ResearchManager(
-                chatClientReturning(Flux.just("{\"recommendation\":\"BUY\"}")), objectMapper);
+                chatClientReturning(Flux.just("{\"analystSummary\":\"ok\"}")),
+                chatClientReturning(Flux.just("{\"analystSummary\":\"ok\"}")),
+                objectMapper);
+        AnalysisState state = AnalysisState.builder().query("q").build();
+        DebateVerdict verdict = lockedVerdict(
+                state, "HOLD", AnalysisHorizon.MEDIUM_TERM);
         AtomicInteger checks = new AtomicInteger();
         Runnable guard = () -> {
             if (checks.incrementAndGet() > 1) {
@@ -85,7 +105,7 @@ class ResearchManagerStreamingGuardTest {
         };
 
         assertThatThrownBy(() -> manager.synthesizeStreaming(
-                AnalysisState.builder().query("q").build(), "trace", 1L,
+                state, verdict, "trace", 1L,
                 mock(ChatStreamEmitter.class), guard).block())
                 .isInstanceOf(DeepResearchPipeline.OwnershipLostException.class);
 
@@ -94,13 +114,16 @@ class ResearchManagerStreamingGuardTest {
 
     @Test
     void originalStreamingOverloadStillParsesAReportWithoutAGuard() {
+        ChatClient chatClient = chatClientReturning(Flux.just(
+                "{\"analystSummary\":\"ok\"}"));
         ResearchManager manager = new ResearchManager(
-                chatClientReturning(Flux.just(
-                        "{\"recommendation\":\"BUY\",\"analystSummary\":\"ok\"}")),
-                new ObjectMapper());
+                chatClient, chatClient, new ObjectMapper());
+        AnalysisState state = AnalysisState.builder().query("q").build();
+        DebateVerdict verdict = lockedVerdict(
+                state, "BUY", AnalysisHorizon.LONG_TERM);
 
         InvestmentReport report = manager.synthesizeStreaming(
-                AnalysisState.builder().query("q").build(), "trace", 1L,
+                state, verdict, "trace", 1L,
                 mock(ChatStreamEmitter.class)).block();
 
         assertThat(report).isNotNull();
@@ -109,12 +132,16 @@ class ResearchManagerStreamingGuardTest {
 
     @Test
     void invalidJsonIsReportedAsParseFailureInsteadOfFabricatingHold() {
+        ChatClient chatClient = chatClientReturning(Flux.just("not-json"));
         ResearchManager manager = new ResearchManager(
-                chatClientReturning(Flux.just("not-json")),
-                new ObjectMapper());
+                chatClient, chatClient, new ObjectMapper());
+        AnalysisState state = AnalysisState.builder().query("q").build();
+        DebateVerdict verdict = lockedVerdict(
+                state, "HOLD", AnalysisHorizon.MEDIUM_TERM);
 
         var result = manager.synthesizeStreamingResult(
-                AnalysisState.builder().query("q").build(),
+                state,
+                verdict,
                 "trace",
                 1L,
                 mock(ChatStreamEmitter.class)
@@ -126,7 +153,49 @@ class ResearchManagerStreamingGuardTest {
     }
 
     @Test
-    void missingAnalysisHorizonIsReportedAsSchemaInvalid() {
+    void validPerThesisScoringContractIsAccepted() {
+        AnalysisState state = AnalysisState.builder().query("q").build();
+        lockedVerdict(state, "HOLD", AnalysisHorizon.MEDIUM_TERM);
+        ChatClient scoringClient = chatClientReturning(
+                Flux.just(scoringJson(state, false)));
+        ResearchManager manager = new ResearchManager(
+                scoringClient,
+                chatClientReturning(Flux.empty()),
+                new ObjectMapper()
+        );
+
+        ManagerAssessment assessment = manager.scoreDebate(
+                state, "fixture-input-0").block();
+
+        assertThat(assessment).isNotNull();
+        assertThat(assessment.parseStatus()).isEqualTo(AssessmentParseStatus.VALID);
+        assertThat(assessment.issues()).isEmpty();
+        assertThat(assessment.assessments()).hasSize(6);
+    }
+
+    @Test
+    void scoringContractRejectsManagerWinnerField() {
+        AnalysisState state = AnalysisState.builder().query("q").build();
+        lockedVerdict(state, "HOLD", AnalysisHorizon.MEDIUM_TERM);
+        ChatClient scoringClient = chatClientReturning(
+                Flux.just(scoringJson(state, true)));
+        ResearchManager manager = new ResearchManager(
+                scoringClient,
+                chatClientReturning(Flux.empty()),
+                new ObjectMapper()
+        );
+
+        ManagerAssessment assessment = manager.scoreDebate(
+                state, "fixture-input-0").block();
+
+        assertThat(assessment).isNotNull();
+        assertThat(assessment.parseStatus())
+                .isEqualTo(AssessmentParseStatus.INVALID_SCHEMA);
+        assertThat(assessment.issues()).contains("root.unknownField:winner");
+    }
+
+    @Test
+    void analysisHorizonComesFromLockedVerdictInsteadOfManagerJson() {
         Instant observedAt = Instant.parse("2026-07-28T02:00:00Z");
         EvidenceEnvelope market = new EvidenceEnvelope(
                 "e-market",
@@ -151,7 +220,6 @@ class ResearchManagerStreamingGuardTest {
                 .build();
         String modelOutput = """
                 {
-                  "recommendation":"HOLD",
                   "rationale":["bounded"],
                   "riskFactors":["risk"],
                   "analystSummary":"summary",
@@ -159,27 +227,35 @@ class ResearchManagerStreamingGuardTest {
                     "dimension":"market",
                     "evidence":"market evidence",
                     "implication":"neutral",
+                    "source":"",
                     "sourceEvidenceIds":["e-market"]
                   }],
+                  "bullFactors":[],
+                  "bearFactors":[],
+                  "suitableFor":[],
+                  "notSuitableFor":[],
+                  "unknowns":["bounded unknown"],
                   "dataFreshness":"bounded"
                 }
                 """;
+        ChatClient chatClient = chatClientReturning(Flux.just(modelOutput));
         ResearchManager manager = new ResearchManager(
-                chatClientReturning(Flux.just(modelOutput)),
-                new ObjectMapper()
-        );
+                chatClient, chatClient, new ObjectMapper());
+        DebateVerdict verdict = lockedVerdict(
+                state, "HOLD", AnalysisHorizon.MEDIUM_TERM);
 
         var result = manager.synthesizeStreamingResult(
                 state,
+                verdict,
                 "trace",
                 1L,
                 mock(ChatStreamEmitter.class)
         ).block();
 
         assertThat(result).isNotNull();
-        assertThat(result.parseStatus()).isEqualTo(ParseStatus.INVALID_SCHEMA);
-        assertThat(result.validationIssues()).contains("analysisHorizon");
-        assertThat(result.report().getAnalysisHorizon()).isEqualTo(AnalysisHorizon.UNSPECIFIED);
+        assertThat(result.parseStatus()).isEqualTo(ParseStatus.VALID);
+        assertThat(result.validationIssues()).doesNotContain("analysisHorizon");
+        assertThat(result.report().getAnalysisHorizon()).isEqualTo(AnalysisHorizon.MEDIUM_TERM);
     }
 
     @Test
@@ -234,8 +310,6 @@ class ResearchManagerStreamingGuardTest {
                 .build();
         String modelOutput = """
                 {
-                  "recommendation":"BUY",
-                  "analysisHorizon":"LONG_TERM",
                   "rationale":["supported"],
                   "riskFactors":["risk"],
                   "analystSummary":"summary",
@@ -262,17 +336,23 @@ class ResearchManagerStreamingGuardTest {
                       "sourceEvidenceIds":["e-failed"]
                     }
                   ],
-                  "dataFreshness":"bounded",
-                  "citations":["generic model citation"]
+                  "bullFactors":[],
+                  "bearFactors":[],
+                  "suitableFor":[],
+                  "notSuitableFor":[],
+                  "unknowns":["bounded unknown"],
+                  "dataFreshness":"bounded"
                 }
                 """;
+        ChatClient chatClient = chatClientReturning(Flux.just(modelOutput));
         ResearchManager manager = new ResearchManager(
-                chatClientReturning(Flux.just(modelOutput)),
-                new ObjectMapper()
-        );
+                chatClient, chatClient, new ObjectMapper());
+        DebateVerdict verdict = lockedVerdict(
+                state, "HOLD", AnalysisHorizon.MEDIUM_TERM);
 
         var result = manager.synthesizeStreamingResult(
                 state,
+                verdict,
                 "trace",
                 1L,
                 mock(ChatStreamEmitter.class)
@@ -281,7 +361,8 @@ class ResearchManagerStreamingGuardTest {
         assertThat(result).isNotNull();
         assertThat(result.parseStatus()).isEqualTo(ParseStatus.VALID);
         InvestmentReport report = result.report();
-        assertThat(report.getAnalysisHorizon()).isEqualTo(AnalysisHorizon.LONG_TERM);
+        assertThat(report.getRecommendation()).isEqualTo("HOLD");
+        assertThat(report.getAnalysisHorizon()).isEqualTo(AnalysisHorizon.MEDIUM_TERM);
         assertThat(report.getEvidenceItems()).hasSize(2);
         assertThat(report.getEvidenceItems().get(0).getSourceEvidenceIds())
                 .containsExactly("e-sec");
@@ -305,7 +386,8 @@ class ResearchManagerStreamingGuardTest {
         String prompt = ReflectionTestUtils.invokeMethod(
                 manager,
                 "buildPrompt",
-                state
+                state,
+                verdict
         );
         assertThat(prompt)
                 .contains("provider=SEC EDGAR XBRL")
@@ -318,5 +400,130 @@ class ResearchManagerStreamingGuardTest {
         ChatClient chatClient = mock(ChatClient.class, RETURNS_DEEP_STUBS);
         when(chatClient.prompt().user(anyString()).stream().content()).thenReturn(tokens);
         return chatClient;
+    }
+
+    private String scoringJson(AnalysisState state, boolean includeWinner) {
+        String assessments = state.getDebateTurns().stream()
+                .filter(turn -> turn.round() == 1)
+                .flatMap(turn -> turn.points().stream())
+                .map(point -> """
+                        {
+                          "pointId":"%s",
+                          "evidenceSupport":3,
+                          "questionRelevance":3,
+                          "logicalCoherence":3,
+                          "rebuttalSurvival":3,
+                          "uncertaintyHandling":3,
+                          "acceptedEvidenceIds":["%s"],
+                          "decisiveRebuttalIds":[],
+                          "reasonCodes":["SUPPORTED"],
+                          "explanation":"fixture assessment"
+                        }
+                        """.formatted(
+                                point.pointId(),
+                                point.evidenceRefs().get(0).evidenceId()))
+                .collect(java.util.stream.Collectors.joining(","));
+        return includeWinner
+                ? "{\"winner\":\"A\",\"assessments\":[" + assessments + "]}"
+                : "{\"assessments\":[" + assessments + "]}";
+    }
+
+    private DebateVerdict lockedVerdict(
+            AnalysisState state,
+            String recommendation,
+            AnalysisHorizon horizon
+    ) {
+        if (state.getPrimaryTicker() == null) {
+            state.setPrimaryTicker("AAPL");
+        }
+        if (state.getDataSnapshotHash() == null) {
+            state.setDataSnapshotHash("fixture-snapshot");
+        }
+        if (state.getContextHash() == null) {
+            state.setContextHash("fixture-context");
+        }
+        if (state.getDebateTurns().isEmpty()) {
+            state.getDebateTurns().add(thesisTurn(Side.BULL, "bull", horizon));
+            state.getDebateTurns().add(thesisTurn(Side.BEAR, "bear", horizon));
+        }
+
+        List<ArgumentAssessment> assessments = state.getDebateTurns().stream()
+                .filter(turn -> turn.round() == 1)
+                .flatMap(turn -> turn.points().stream())
+                .map(point -> new ArgumentAssessment(
+                        point.pointId(),
+                        3,
+                        3,
+                        3,
+                        3,
+                        3,
+                        List.of(point.evidenceRefs().get(0).evidenceId()),
+                        List.of(),
+                        List.of(AssessmentReasonCode.SUPPORTED),
+                        "fixture assessment"
+                ))
+                .toList();
+        String inputHash = "fixture-input-0";
+        ManagerAssessment managerAssessment = new ManagerAssessment(
+                DebateModels.MANAGER_ASSESSMENT_CONTRACT_ID,
+                DebateModels.MANAGER_ASSESSMENT_CONTRACT_VERSION,
+                inputHash,
+                true,
+                assessments,
+                AssessmentParseStatus.VALID,
+                List.of()
+        );
+        state.setManagerAssessment(managerAssessment);
+
+        LeadingSide leadingSide = switch (recommendation) {
+            case "BUY", "OVERWEIGHT" -> LeadingSide.BULL;
+            case "SELL", "UNDERWEIGHT" -> LeadingSide.BEAR;
+            default -> LeadingSide.BALANCED;
+        };
+        DebateVerdict verdict = new DebateVerdict(
+                DebateDecisionPolicy.POLICY_ID,
+                DebateDecisionPolicy.POLICY_VERSION,
+                inputHash,
+                state.getDataSnapshotHash(),
+                leadingSide == LeadingSide.BULL ? 90.0 : 70.0,
+                leadingSide == LeadingSide.BEAR ? 90.0 : 70.0,
+                leadingSide,
+                leadingSide == LeadingSide.BALANCED ? 0.0 : 20.0,
+                recommendation,
+                horizon,
+                leadingSide == LeadingSide.BALANCED
+                        ? List.of()
+                        : state.getDebateTurns().stream()
+                        .filter(turn -> turn.round() == 1
+                                && (leadingSide == LeadingSide.BULL
+                                ? turn.side() == Side.BULL
+                                : turn.side() == Side.BEAR))
+                        .flatMap(turn -> turn.points().stream())
+                        .map(DebatePoint::pointId)
+                        .toList(),
+                List.of(),
+                assessments
+        );
+        state.setDebateVerdict(verdict);
+        return verdict;
+    }
+
+    private DebateTurn thesisTurn(Side side, String prefix, AnalysisHorizon horizon) {
+        List<DebatePoint> points = java.util.stream.IntStream.rangeClosed(1, 3)
+                .mapToObj(index -> new DebatePoint(
+                        prefix + "-thesis-" + index,
+                        PointType.THESIS,
+                        prefix + " claim " + index,
+                        horizon,
+                        List.of(new EvidenceRef(
+                                prefix + "-evidence-" + index,
+                                prefix + " evidence excerpt " + index)),
+                        prefix + " reasoning " + index,
+                        prefix + " assumption " + index,
+                        prefix + " invalidation " + index,
+                        List.of()
+                ))
+                .toList();
+        return new DebateTurn(1, side, points);
     }
 }

@@ -17,7 +17,13 @@ import com.stocksage.harness.HarnessModels.RecoveryLifecycle;
 import com.stocksage.harness.HarnessModels.RunContext;
 import com.stocksage.harness.HarnessModels.TargetIdentity;
 import com.stocksage.harness.HarnessModels.ViolationCode;
+import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.AnalysisState;
+import com.stocksage.model.dto.DebateModels.DebatePoint;
+import com.stocksage.model.dto.DebateModels.DebateTurn;
+import com.stocksage.model.dto.DebateModels.EvidenceRef;
+import com.stocksage.model.dto.DebateModels.PointType;
+import com.stocksage.model.dto.DebateModels.Side;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.model.entity.User;
@@ -56,6 +62,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class DeepResearchPipelineTest {
+
+    private static final String CURRENT_POLICY_TAG = DeepResearchCompletionPolicy.POLICY_ID
+            + "-v" + DeepResearchCompletionPolicy.POLICY_VERSION;
 
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
     private final InvestmentReportVersionService investmentReportVersionService = mock(InvestmentReportVersionService.class);
@@ -572,7 +581,7 @@ class DeepResearchPipelineTest {
                 Map.of(),
                 RecoveryLifecycle.PLANNED,
                 List.of(RecoveryAction.RETRY_FUNDAMENTALS),
-                "deep-evidence:901:deep-equity-v1-v3:retry_fundamentals-1"
+                "deep-evidence:901:" + CURRENT_POLICY_TAG + ":retry_fundamentals-1"
         ));
         HarnessDecision passDecision =
                 new HarnessDecision(HarnessOutcome.PASS, List.of(), List.of());
@@ -619,7 +628,8 @@ class DeepResearchPipelineTest {
                 .isEqualTo(RecoveryLifecycle.REVALIDATED);
         assertThat(persistedSnapshots.get(0).recoveryEffectKey())
                 .isEqualTo(persistedSnapshots.get(1).recoveryEffectKey())
-                .isEqualTo("deep-evidence:901:deep-equity-v1-v3:retry_fundamentals-1");
+                .isEqualTo("deep-evidence:901:" + CURRENT_POLICY_TAG
+                        + ":retry_fundamentals-1");
         assertThat(persistedSnapshots.get(1).recoveryAttempts())
                 .containsEntry(RecoveryAction.RETRY_FUNDAMENTALS, 1);
 
@@ -656,14 +666,11 @@ class DeepResearchPipelineTest {
         );
         EvidenceLedger recoveredLedger = completeLedger(marketEvidence);
         AnalysisState state = checkpointState("AAPL", incompleteLedger, true);
-        state.getDebateTurns().add(new AnalysisState.DebateTurn(
-                1, AnalysisState.DebateTurn.Side.BULL, "bull"));
-        state.getDebateTurns().add(new AnalysisState.DebateTurn(
-                1, AnalysisState.DebateTurn.Side.BEAR, "bear"));
+        addCompletedRoundOne(state);
         state.setDataSnapshotHash("old-data-hash");
         state.setContextHash("old-context-hash");
         String reportEffectKey =
-                "deep-report:trace-1:deep-equity-v1-v3:resynthesize_report-1";
+                "deep-report:trace-1:" + CURRENT_POLICY_TAG + ":resynthesize_report-1";
         HarnessDecision reportPlan = new HarnessDecision(
                 HarnessOutcome.RECOVER,
                 List.of(new com.stocksage.harness.HarnessModels.HarnessViolation(
@@ -826,7 +833,8 @@ class DeepResearchPipelineTest {
                 .isEqualTo(RecoveryLifecycle.REVALIDATED);
         assertThat(persistedSnapshots)
                 .extracting(HarnessSnapshot::recoveryEffectKey)
-                .containsOnly("deep-evidence:904:deep-equity-v1-v3:retry_fundamentals-1");
+                .containsOnly("deep-evidence:904:" + CURRENT_POLICY_TAG
+                        + ":retry_fundamentals-1");
         verify(evidenceCollector, times(2)).recover(
                 pending,
                 List.of(RecoveryAction.RETRY_FUNDAMENTALS),
@@ -854,7 +862,7 @@ class DeepResearchPipelineTest {
                 Map.of(RecoveryAction.RETRY_FUNDAMENTALS, 1),
                 RecoveryLifecycle.REVALIDATED,
                 List.of(RecoveryAction.RETRY_FUNDAMENTALS),
-                "deep-evidence:902:deep-equity-v1-v3:retry_fundamentals-1"
+                "deep-evidence:902:" + CURRENT_POLICY_TAG + ":retry_fundamentals-1"
         ));
         DeepEvidenceCollector.EvidenceCollection revalidated = evidence(state, passDecision, true);
         AnalysisState completed = verifiedState("AAPL");
@@ -954,10 +962,7 @@ class DeepResearchPipelineTest {
         ResearchTask task = runningTask(905L);
         ResearchTaskLeaseService.Lease lease = lease();
         AnalysisState state = verifiedState("AAPL");
-        state.getDebateTurns().add(new AnalysisState.DebateTurn(
-                1, AnalysisState.DebateTurn.Side.BULL, "bull"));
-        state.getDebateTurns().add(new AnalysisState.DebateTurn(
-                1, AnalysisState.DebateTurn.Side.BEAR, "bear"));
+        addCompletedRoundOne(state);
 
         when(checkpointService.load(905L)).thenReturn(Optional.of(
                 new ResearchTaskCheckpointService.CheckpointState(
@@ -990,10 +995,7 @@ class DeepResearchPipelineTest {
         ResearchTask task = runningTask(906L);
         ResearchTaskLeaseService.Lease lease = lease();
         AnalysisState state = verifiedState("AAPL");
-        state.getDebateTurns().add(new AnalysisState.DebateTurn(
-                1, AnalysisState.DebateTurn.Side.BULL, "bull"));
-        state.getDebateTurns().add(new AnalysisState.DebateTurn(
-                1, AnalysisState.DebateTurn.Side.BEAR, "bear"));
+        addCompletedRoundOne(state);
 
         when(checkpointService.load(906L)).thenReturn(Optional.of(
                 new ResearchTaskCheckpointService.CheckpointState(
@@ -1041,10 +1043,7 @@ class DeepResearchPipelineTest {
                 any(Runnable.class),
                 any()
         )).thenAnswer(invocation -> {
-            state.getDebateTurns().add(new AnalysisState.DebateTurn(
-                    1, AnalysisState.DebateTurn.Side.BULL, "bull"));
-            state.getDebateTurns().add(new AnalysisState.DebateTurn(
-                    1, AnalysisState.DebateTurn.Side.BEAR, "bear"));
+            addCompletedRoundOne(state);
             ResearchDebateService.RoundCheckpointer roundCheckpointer =
                     invocation.getArgument(5);
             roundCheckpointer.onRoundCompleted(state, 1, 1);
@@ -1056,7 +1055,7 @@ class DeepResearchPipelineTest {
                     Map.of(),
                     RecoveryLifecycle.PLANNED,
                     List.of(RecoveryAction.RESYNTHESIZE_REPORT),
-                    "deep-report:trace-1:deep-equity-v1-v3:resynthesize_report-1"
+                    "deep-report:trace-1:" + CURRENT_POLICY_TAG + ":resynthesize_report-1"
             ));
             @SuppressWarnings("unchecked")
             Consumer<AnalysisState> harnessCheckpointer = invocation.getArgument(7);
@@ -1111,10 +1110,7 @@ class DeepResearchPipelineTest {
                 .query("q")
                 .primaryTicker("AAPL")
                 .build();
-        state.getDebateTurns().add(new AnalysisState.DebateTurn(
-                1, AnalysisState.DebateTurn.Side.BULL, "bull"));
-        state.getDebateTurns().add(new AnalysisState.DebateTurn(
-                1, AnalysisState.DebateTurn.Side.BEAR, "bear"));
+        addCompletedRoundOne(state);
         state.setHarnessSnapshot(HarnessSnapshot.recovery(
                 "deep-equity-v1",
                 "2",
@@ -1127,7 +1123,7 @@ class DeepResearchPipelineTest {
                 Map.of(),
                 RecoveryLifecycle.PLANNED,
                 List.of(RecoveryAction.RESYNTHESIZE_REPORT),
-                "deep-report:trace-1:deep-equity-v1-v2:resynthesize_report-1"
+                "deep-report:trace-1:" + CURRENT_POLICY_TAG + ":resynthesize_report-1"
         ));
         HarnessDecision evidencePass =
                 new HarnessDecision(HarnessOutcome.PASS, List.of(), List.of());
@@ -1330,6 +1326,29 @@ class DeepResearchPipelineTest {
                         .qualityStatus(InvestmentReport.ReportQualityStatus.VERIFIED)
                         .build())
                 .build();
+    }
+
+    private void addCompletedRoundOne(AnalysisState state) {
+        state.getDebateTurns().add(thesisTurn(Side.BULL, "bull"));
+        state.getDebateTurns().add(thesisTurn(Side.BEAR, "bear"));
+    }
+
+    private DebateTurn thesisTurn(Side side, String prefix) {
+        List<DebatePoint> points = java.util.stream.IntStream.rangeClosed(1, 3)
+                .mapToObj(index -> new DebatePoint(
+                        prefix + "-thesis-" + index,
+                        PointType.THESIS,
+                        prefix + " claim " + index,
+                        AnalysisHorizon.MEDIUM_TERM,
+                        List.of(new EvidenceRef(prefix + "-evidence-" + index,
+                                prefix + " evidence excerpt " + index)),
+                        prefix + " reasoning " + index,
+                        prefix + " assumption " + index,
+                        prefix + " invalidation " + index,
+                        List.of()
+                ))
+                .toList();
+        return new DebateTurn(1, side, points);
     }
 
     private InvestmentReportVersionService reportHasher() {

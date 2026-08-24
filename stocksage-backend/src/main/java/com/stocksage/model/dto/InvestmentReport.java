@@ -1,5 +1,6 @@
 package com.stocksage.model.dto;
 
+import com.stocksage.model.dto.DebateModels.DebateVerdict;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -52,14 +53,23 @@ public class InvestmentReport {
     /** 完成策略版本号，用于策略升级后拒绝复用旧门禁结果。 */
     private Integer completionPolicyVersion;
 
-    /** 研究经理给出的最终投资建议；证据不足时不应伪造明确结论。 */
+    /**
+     * 生成本报告时使用的确定性辩论裁决快照。
+     *
+     * <p>它把逐论点评分、最终建议、分析期限和决定性证据固定为可审计输入。当前报告门
+     * 要求该快照存在且仍符合当前 {@code DebateDecisionPolicy}；旧报告缺失此字段时只能
+     * 作为历史记录展示，不能复用为新的投资结论。</p>
+     */
+    private DebateVerdict decisionAudit;
+
+    /** Java DebateDecisionPolicy 锁定的最终投资建议；Manager 只能解释，不能改写。 */
     private String recommendation;
 
     /**
      * 投资建议适用的分析期限。
      *
      * <p>默认值保证旧版持久化 JSON 缺少该字段时仍能反序列化；新报告必须由
-     * Research Manager 显式输出一个合法枚举值。</p>
+     * Java DebateDecisionPolicy 写入一个合法枚举值。</p>
      */
     @Builder.Default
     private AnalysisHorizon analysisHorizon = AnalysisHorizon.UNSPECIFIED;

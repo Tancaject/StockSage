@@ -6,7 +6,7 @@ StockSage 是一个本地可运行的 AI 股票研究工作台，整合多 Agent
 
 ## 核心能力
 
-- **上下文意图识别与多 Agent 研究**：结合最近 3 轮对话、LLM、Embedding 与高精度规则，直接选择受控的五类研究路由；DEEP 模式通过 Bull/Bear/Manager 协作与运行时 Harness 生成证据约束的结构化报告。
+- **上下文意图识别与多 Agent 研究**：结合最近 3 轮对话、LLM、Embedding 与高精度规则，直接选择受控的五类研究路由；DEEP 模式要求 Bull/Bear 提交绑定 Evidence ID 的结构化论点，由 Research Manager 匿名逐论点评分、Java 策略锁定评级，再由 Manager 解释裁决并接受运行时 Harness 验收。
 - **可溯源 RAG**：SEC EDGAR 财报经过 Parent-Child 分块、Milvus 向量与 Lucene 标准 BM25 混合检索、RRF 融合和 rerank 后，为回答提供编号引用。
 - **后台研究任务**：Redis Stream、MySQL checkpoint 与 SSE 回放支持后台执行、断线恢复和进度追踪；证据不足时返回 `NOT_RATED`。
 - **投研工作台**：提供自选股、K 线、事件与对比研究、报告版本/审核，以及 IBKR 只读持仓诊断。
@@ -28,7 +28,12 @@ flowchart LR
     RAG --> STORE["Milvus + Lucene BM25<br/>(MySQL source)"]
     DEEP --> QUEUE["Redis Stream"]
     QUEUE --> WORKER["Research Worker"]
-    WORKER --> DB["MySQL Checkpoints / Reports"]
+    WORKER --> SNAP["Evidence Snapshots<br/>stable Evidence IDs"]
+    SNAP --> DEBATE["Structured Bull / Bear<br/>THESIS + REBUTTAL"]
+    DEBATE --> SCORE["Manager Blind Scoring<br/>per thesis"]
+    SCORE --> DECIDE["Java DecisionPolicy<br/>locked verdict"]
+    DECIDE --> REPORT["Manager Narrative + Harness"]
+    REPORT --> DB["MySQL Checkpoints / Reports"]
 ```
 
 | 目录 | 技术与职责 |

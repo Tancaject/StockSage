@@ -1,5 +1,6 @@
 package com.stocksage.harness;
 
+import com.stocksage.agent.DebateDecisionPolicy;
 import com.stocksage.harness.HarnessModels.EvidenceDimension;
 import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
 import com.stocksage.harness.HarnessModels.EvidenceStatus;
@@ -10,6 +11,9 @@ import com.stocksage.harness.HarnessModels.RunContext;
 import com.stocksage.harness.HarnessModels.TargetIdentity;
 import com.stocksage.harness.HarnessModels.ViolationCode;
 import com.stocksage.model.dto.AnalysisHorizon;
+import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
+import com.stocksage.model.dto.DebateModels.DebateVerdict;
+import com.stocksage.model.dto.DebateModels.LeadingSide;
 import com.stocksage.model.dto.InvestmentReport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,6 +28,8 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DeepResearchCompletionPolicyTest {
+
+    private static final String DATA_SNAPSHOT_HASH = "snapshot-v1";
 
     private final DeepResearchCompletionPolicy policy = new DeepResearchCompletionPolicy();
 
@@ -78,6 +84,69 @@ class DeepResearchCompletionPolicyTest {
     }
 
     @Test
+    void acceptsBalancedHoldWithSixEvidenceBoundAssessments() {
+        InvestmentReport report = validReport();
+        report.setRecommendation("HOLD");
+        report.setAnalysisHorizon(AnalysisHorizon.LONG_TERM);
+        report.setDecisionAudit(validDecisionAudit(
+                DATA_SNAPSHOT_HASH,
+                "HOLD",
+                AnalysisHorizon.LONG_TERM,
+                null,
+                List.of("e-MARKET-market")
+        ));
+
+        var decision = policy.afterReport(
+                RunContext.deepResearch(),
+                completeLedger(),
+                new HarnessModels.SynthesisResult(report, ParseStatus.VALID, List.of())
+        );
+
+        assertThat(report.getDecisionAudit().leadingSide()).isEqualTo(LeadingSide.BALANCED);
+        assertThat(report.getDecisionAudit().assessments()).hasSize(6);
+        assertThat(decision.outcome()).isEqualTo(HarnessOutcome.PASS);
+    }
+
+    @Test
+    void rejectsInsufficientDecisionAuditInsteadOfPublishingHold() {
+        InvestmentReport report = validReport();
+        DebateVerdict balanced = validDecisionAudit(
+                DATA_SNAPSHOT_HASH,
+                "HOLD",
+                AnalysisHorizon.LONG_TERM,
+                null,
+                List.of("e-MARKET-market")
+        );
+        report.setRecommendation("HOLD");
+        report.setDecisionAudit(new DebateVerdict(
+                balanced.policyId(),
+                balanced.version(),
+                balanced.inputHash(),
+                balanced.dataSnapshotHash(),
+                balanced.bullScore(),
+                balanced.bearScore(),
+                LeadingSide.INSUFFICIENT,
+                balanced.scoreMargin(),
+                balanced.recommendation(),
+                balanced.analysisHorizon(),
+                balanced.decisivePointIds(),
+                balanced.unresolvedPointIds(),
+                balanced.assessments()
+        ));
+
+        var decision = policy.afterReport(
+                RunContext.deepResearch(),
+                completeLedger(),
+                new HarnessModels.SynthesisResult(report, ParseStatus.VALID, List.of())
+        );
+
+        assertThat(decision.outcome()).isNotEqualTo(HarnessOutcome.PASS);
+        assertThat(decision.violations())
+                .extracting(HarnessModels.HarnessViolation::code)
+                .contains(ViolationCode.DEBATE_DECISION_INSUFFICIENT);
+    }
+
+    @Test
     void rejectsReportWithoutAnAnalysisHorizonAsSchemaInvalid() {
         InvestmentReport report = validReport();
         report.setAnalysisHorizon(null);
@@ -91,9 +160,123 @@ class DeepResearchCompletionPolicyTest {
         assertThat(decision.outcome()).isEqualTo(HarnessOutcome.RECOVER);
         assertThat(decision.violations())
                 .extracting(HarnessModels.HarnessViolation::code)
-                .containsExactly(ViolationCode.REPORT_SCHEMA_INVALID);
+                .containsExactly(
+                        ViolationCode.REPORT_SCHEMA_INVALID,
+                        ViolationCode.REPORT_DECISION_OUTPUT_MISMATCH
+                );
         assertThat(decision.recoveryActions())
                 .containsExactly(RecoveryAction.RESYNTHESIZE_REPORT);
+    }
+
+    @Test
+    void rejectsReportWithoutCurrentDecisionAudit() {
+        InvestmentReport report = validReport();
+        report.setDecisionAudit(null);
+
+        var decision = policy.afterReport(
+                RunContext.deepResearch(),
+                completeLedger(),
+                new HarnessModels.SynthesisResult(report, ParseStatus.VALID, List.of())
+        );
+
+        assertThat(decision.outcome()).isEqualTo(HarnessOutcome.RECOVER);
+        assertThat(decision.violations())
+                .extracting(HarnessModels.HarnessViolation::code)
+                .containsExactly(ViolationCode.REPORT_DECISION_AUDIT_MISSING);
+    }
+
+    @Test
+    void rejectsStaleOrSnapshotMismatchedDecisionAudit() {
+        InvestmentReport report = validReport();
+        DebateVerdict current = report.getDecisionAudit();
+        report.setDecisionAudit(new DebateVerdict(
+                current.policyId(),
+                DebateDecisionPolicy.POLICY_VERSION + 1,
+                current.inputHash(),
+                "different-snapshot",
+                current.bullScore(),
+                current.bearScore(),
+                current.leadingSide(),
+                current.scoreMargin(),
+                current.recommendation(),
+                current.analysisHorizon(),
+                current.decisivePointIds(),
+                current.unresolvedPointIds(),
+                current.assessments()
+        ));
+
+        var decision = policy.afterReport(
+                RunContext.deepResearch(),
+                completeLedger(),
+                new HarnessModels.SynthesisResult(report, ParseStatus.VALID, List.of())
+        );
+
+        assertThat(decision.outcome()).isEqualTo(HarnessOutcome.RECOVER);
+        assertThat(decision.violations())
+                .extracting(HarnessModels.HarnessViolation::code)
+                .containsExactly(
+                        ViolationCode.REPORT_DECISION_POLICY_MISMATCH,
+                        ViolationCode.REPORT_DECISION_SNAPSHOT_MISMATCH
+                );
+    }
+
+    @Test
+    void rejectsReportThatOverridesDecisionOrUsesUnusableAssessmentEvidence() {
+        InvestmentReport report = validReport();
+        report.setRecommendation("BUY");
+        report.setDecisionAudit(validDecisionAudit(
+                DATA_SNAPSHOT_HASH,
+                "OVERWEIGHT",
+                AnalysisHorizon.LONG_TERM,
+                "thesis-bull-1",
+                List.of("e-unknown")
+        ));
+
+        var decision = policy.afterReport(
+                RunContext.deepResearch(),
+                completeLedger(),
+                new HarnessModels.SynthesisResult(report, ParseStatus.VALID, List.of())
+        );
+
+        assertThat(decision.outcome()).isEqualTo(HarnessOutcome.RECOVER);
+        assertThat(decision.violations())
+                .extracting(HarnessModels.HarnessViolation::code)
+                .containsExactly(
+                        ViolationCode.REPORT_DECISION_OUTPUT_MISMATCH,
+                        ViolationCode.REPORT_DECISION_EVIDENCE_REFERENCE_UNUSABLE
+                );
+    }
+
+    @Test
+    void rejectsDecisivePointWithoutAnAssessment() {
+        InvestmentReport report = validReport();
+        DebateVerdict current = report.getDecisionAudit();
+        report.setDecisionAudit(new DebateVerdict(
+                current.policyId(),
+                current.version(),
+                current.inputHash(),
+                current.dataSnapshotHash(),
+                current.bullScore(),
+                current.bearScore(),
+                current.leadingSide(),
+                current.scoreMargin(),
+                current.recommendation(),
+                current.analysisHorizon(),
+                List.of("missing-thesis"),
+                current.unresolvedPointIds(),
+                current.assessments()
+        ));
+
+        var decision = policy.afterReport(
+                RunContext.deepResearch(),
+                completeLedger(),
+                new HarnessModels.SynthesisResult(report, ParseStatus.VALID, List.of())
+        );
+
+        assertThat(decision.outcome()).isEqualTo(HarnessOutcome.RECOVER);
+        assertThat(decision.violations())
+                .extracting(HarnessModels.HarnessViolation::code)
+                .containsExactly(ViolationCode.REPORT_DECISION_EVIDENCE_REFERENCE_UNUSABLE);
     }
 
     @Test
@@ -128,10 +311,21 @@ class DeepResearchCompletionPolicyTest {
                 "hash-failed",
                 true
         );
-        EvidenceLedger ledger = ledger(failedEvidence);
+        EvidenceLedger ledger = ledger(
+                failedEvidence,
+                available(EvidenceDimension.MARKET, "market")
+        );
         InvestmentReport report = InvestmentReport.builder()
                 .ticker("AAPL")
+                .dataSnapshotHash(DATA_SNAPSHOT_HASH)
                 .recommendation("HOLD")
+                .decisionAudit(validDecisionAudit(
+                        DATA_SNAPSHOT_HASH,
+                        "HOLD",
+                        AnalysisHorizon.UNSPECIFIED,
+                        null,
+                        List.of("e-MARKET-market")
+                ))
                 .analystSummary("Bounded summary.")
                 .dataFreshness("Observed 2026-07-24.")
                 .rationale(List.of("A rationale must not rely on a failed call."))
@@ -235,8 +429,16 @@ class DeepResearchCompletionPolicyTest {
     private static InvestmentReport validReport() {
         return InvestmentReport.builder()
                 .ticker("AAPL")
-                .recommendation("HOLD")
+                .dataSnapshotHash(DATA_SNAPSHOT_HASH)
+                .recommendation("OVERWEIGHT")
                 .analysisHorizon(AnalysisHorizon.LONG_TERM)
+                .decisionAudit(validDecisionAudit(
+                        DATA_SNAPSHOT_HASH,
+                        "OVERWEIGHT",
+                        AnalysisHorizon.LONG_TERM,
+                        "thesis-bull-1",
+                        List.of("e-MARKET-market")
+                ))
                 .analystSummary("Balanced evidence.")
                 .dataFreshness("Observed 2026-07-24.")
                 .rationale(List.of("Revenue and market data are available."))
@@ -250,6 +452,47 @@ class DeepResearchCompletionPolicyTest {
                         .sourceEvidenceIds(List.of("e-MARKET-market"))
                         .build()))
                 .build();
+    }
+
+    private static DebateVerdict validDecisionAudit(
+            String dataSnapshotHash,
+            String recommendation,
+            AnalysisHorizon analysisHorizon,
+            String decisivePointId,
+            List<String> acceptedEvidenceIds
+    ) {
+        List<ArgumentAssessment> assessments = java.util.stream.IntStream.rangeClosed(1, 6)
+                .mapToObj(index -> new ArgumentAssessment(
+                        index == 1 && decisivePointId != null
+                                ? decisivePointId
+                                : "fixture-thesis-" + index,
+                        4,
+                        4,
+                        4,
+                        3,
+                        3,
+                        acceptedEvidenceIds,
+                        List.of(),
+                        List.of(com.stocksage.model.dto.DebateModels.AssessmentReasonCode.SUPPORTED),
+                        "The point is supported by the accepted evidence."
+                ))
+                .toList();
+        boolean directional = decisivePointId != null;
+        return new DebateVerdict(
+                DebateDecisionPolicy.POLICY_ID,
+                DebateDecisionPolicy.POLICY_VERSION,
+                "input-hash",
+                dataSnapshotHash,
+                directional ? 75.0 : 70.0,
+                directional ? 60.0 : 70.0,
+                directional ? LeadingSide.BULL : LeadingSide.BALANCED,
+                directional ? 15.0 : 0.0,
+                recommendation,
+                analysisHorizon,
+                decisivePointId == null ? List.of() : List.of(decisivePointId),
+                List.of(),
+                assessments
+        );
     }
 
     private static EvidenceLedger completeLedger() {

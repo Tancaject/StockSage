@@ -63,6 +63,15 @@ public class DeepEvidenceCollector {
 
     /** 仅用于容错解析工具响应来源信息的轻量 JSON 解析器。 */
     private static final ObjectMapper PROVENANCE_MAPPER = new ObjectMapper();
+    /** 有可引用资格审计信息的证据段边界；工具正文中的同名标记会被转义。 */
+    private static final String SNAPSHOT_EVIDENCE_BEGIN = "[[STOCKSAGE_EVIDENCE_BEGIN]]";
+    private static final String SNAPSHOT_EVIDENCE_END = "[[STOCKSAGE_EVIDENCE_END]]";
+    /** 证据段中真正可供论点引用的有界正文边界。 */
+    private static final String SNAPSHOT_CONTENT_BEGIN = "[[STOCKSAGE_CONTENT_BEGIN]]";
+    private static final String SNAPSHOT_CONTENT_END = "[[STOCKSAGE_CONTENT_END]]";
+    /** 仅用于解释调度/缺失原因、不能成为论据的段边界。 */
+    private static final String SNAPSHOT_NOTE_BEGIN = "[[STOCKSAGE_NOTE_BEGIN]]";
+    private static final String SNAPSHOT_NOTE_END = "[[STOCKSAGE_NOTE_END]]";
     /** 递归扫描工具 JSON 时视为业务数据时间的字段名白名单。 */
     private static final Set<String> BUSINESS_TIME_FIELDS = Set.of(
             "asof",
@@ -378,44 +387,39 @@ public class DeepEvidenceCollector {
     private EvidenceSnapshot buildFundamentalsSnapshot(String ticker) {
         StringBuilder report = new StringBuilder();
         List<EvidenceEnvelope> evidence = new ArrayList<>();
-        report.append("Ticker: ").append(ticker).append('\n');
+        appendNonCitableSnapshotNote(report, "snapshotMetadata", "Ticker: " + ticker, 256);
         boolean hasData = false;
 
         ToolObservation financialReports = runPrefetchTool("Fundamentals Agent/getFinancialReports",
                 () -> fundamentalsTools.getFinancialReports(ticker, "annual", 5));
         hasData |= financialReports.hasUsableData();
-        appendSnapshotItem(report, "getFinancialReports(annual,5)", financialReports.text(), 4500);
-        evidence.add(toEnvelope(
-                EvidenceDimension.FUNDAMENTALS, ticker, "getFinancialReports", financialReports));
+        captureSnapshotEvidence(
+                report, evidence, EvidenceDimension.FUNDAMENTALS, ticker,
+                "getFinancialReports", "getFinancialReports(annual,5)", financialReports, 4500);
 
         ToolObservation companyReports = runPrefetchTool("Fundamentals Agent/searchCompanyReports",
                 () -> fundamentalsTools.searchCompanyReports(ticker, "财报", toolPrefetchMaxSearchResults));
         hasData |= companyReports.hasUsableData();
-        appendSnapshotItem(report, "searchCompanyReports", companyReports.text(), 3000);
-        evidence.add(toEnvelope(
-                EvidenceDimension.FUNDAMENTALS, ticker, "searchCompanyReports", companyReports));
+        captureSnapshotEvidence(
+                report, evidence, EvidenceDimension.FUNDAMENTALS, ticker,
+                "searchCompanyReports", "searchCompanyReports", companyReports, 3000);
 
         if (tickerResolutionService.isLikelySecTicker(ticker)) {
             ToolObservation structured = runPrefetchTool("Fundamentals Agent/getStructuredFinancials",
                     () -> fundamentalsTools.getStructuredFinancials(ticker));
             hasData |= structured.hasUsableData();
-            appendSnapshotItem(report, "getStructuredFinancials(SEC XBRL)", structured.text(), 4500);
-            evidence.add(toEnvelope(
-                    EvidenceDimension.FUNDAMENTALS, ticker, "getStructuredFinancials", structured));
+            captureSnapshotEvidence(
+                    report, evidence, EvidenceDimension.FUNDAMENTALS, ticker,
+                    "getStructuredFinancials", "getStructuredFinancials(SEC XBRL)", structured, 4500);
             if (autoEdgarIngestEnabled) {
                 ToolObservation ingestion = runPrefetchTool("Fundamentals Agent/ingestCompanyFilings",
                         () -> fundamentalsTools.ingestCompanyFilings(ticker, "10-K", 1));
-                appendSnapshotItem(report, "ingestCompanyFilings(10-K x1)",
-                        ingestion.text(), 2000);
-                evidence.add(toEnvelope(
-                        EvidenceDimension.FUNDAMENTALS,
-                        ticker,
-                        "ingestCompanyFilings",
-                        ingestion,
-                        false
-                ));
+                captureSnapshotEvidence(
+                        report, evidence, EvidenceDimension.FUNDAMENTALS, ticker,
+                        "ingestCompanyFilings", "ingestCompanyFilings(10-K x1)",
+                        ingestion, 2000, false);
             } else {
-                appendSnapshotItem(report, "ingestCompanyFilings",
+                appendNonCitableSnapshotNote(report, "ingestCompanyFilings",
                         "Auto EDGAR ingestion is disabled for chat prefetch; use existing indexed filings or trigger manual ingestion if more filing context is needed.",
                         600);
             }
@@ -427,29 +431,32 @@ public class DeepEvidenceCollector {
     private EvidenceSnapshot buildMarketSnapshot(String ticker) {
         StringBuilder report = new StringBuilder();
         List<EvidenceEnvelope> evidence = new ArrayList<>();
-        report.append("Ticker: ").append(ticker).append('\n');
+        appendNonCitableSnapshotNote(report, "snapshotMetadata", "Ticker: " + ticker, 256);
         boolean hasData = false;
 
         String klineTool = marketKLineToolName(ticker);
         ToolObservation kline = runPrefetchTool("Market Agent/" + klineTool,
                 () -> getMarketKLine(ticker));
         hasData |= kline.hasUsableData();
-        appendSnapshotItem(report, klineTool, kline.text(), 4500);
-        evidence.add(toEnvelope(EvidenceDimension.MARKET, ticker, klineTool, kline));
+        captureSnapshotEvidence(
+                report, evidence, EvidenceDimension.MARKET, ticker,
+                klineTool, klineTool, kline, 4500);
 
         String financialTool = marketFinancialToolName(ticker);
         ToolObservation financial = runPrefetchTool("Market Agent/" + financialTool,
                 () -> getMarketFinancialContext(ticker));
         hasData |= financial.hasUsableData();
-        appendSnapshotItem(report, financialTool, financial.text(), 3000);
-        evidence.add(toEnvelope(EvidenceDimension.MARKET, ticker, financialTool, financial));
+        captureSnapshotEvidence(
+                report, evidence, EvidenceDimension.MARKET, ticker,
+                financialTool, financialTool, financial, 3000);
 
         String technicalTool = marketTechnicalToolName(ticker);
         ToolObservation technical = runPrefetchTool("Market Agent/" + technicalTool,
                 () -> getMarketTechnicalContext(ticker));
         hasData |= technical.hasUsableData();
-        appendSnapshotItem(report, technicalTool, technical.text(), 3000);
-        evidence.add(toEnvelope(EvidenceDimension.MARKET, ticker, technicalTool, technical));
+        captureSnapshotEvidence(
+                report, evidence, EvidenceDimension.MARKET, ticker,
+                technicalTool, technicalTool, technical, 3000);
 
         appendSectorContext(report, evidence, ticker);
         return new EvidenceSnapshot(report.toString().trim(), hasData, evidence);
@@ -495,13 +502,13 @@ public class DeepEvidenceCollector {
     ) {
         String sector = tickerResolutionService.resolveSectorForTicker(ticker);
         if (sector.isBlank()) {
-            appendSnapshotItem(report, "sectorContext",
+            appendNonCitableSnapshotNote(report, "sectorContext",
                     "No reliable sector mapping was resolved for this ticker, so sector performance was not fetched.",
                     600);
             return;
         }
         if (tickerResolutionService.isLikelySecTicker(ticker)) {
-            appendSnapshotItem(report, "sectorContext",
+            appendNonCitableSnapshotNote(report, "sectorContext",
                     "Resolved sector/industry context: " + sector
                             + ". US sector performance is not served by the current A/HK sector data source, so it was not fetched.",
                     700);
@@ -509,10 +516,9 @@ public class DeepEvidenceCollector {
         }
         ToolObservation sectorPerformance = runPrefetchTool("Market Agent/getSectorPerformance",
                 () -> marketTools.getSectorPerformance(sector));
-        appendSnapshotItem(report, "getSectorPerformance",
-                sectorPerformance.text(), 2500);
-        evidence.add(toEnvelope(
-                EvidenceDimension.MARKET, ticker, "getSectorPerformance", sectorPerformance));
+        captureSnapshotEvidence(
+                report, evidence, EvidenceDimension.MARKET, ticker,
+                "getSectorPerformance", "getSectorPerformance", sectorPerformance, 2500);
     }
 
     /** 构造新闻和网页搜索预取快照。 */
@@ -520,36 +526,134 @@ public class DeepEvidenceCollector {
         StringBuilder report = new StringBuilder();
         List<EvidenceEnvelope> evidence = new ArrayList<>();
         String query = buildNewsQuery(ticker);
-        report.append("Ticker: ").append(ticker).append('\n');
-        report.append("News query: ").append(query).append('\n');
+        appendNonCitableSnapshotNote(
+                report, "snapshotMetadata", "Ticker: " + ticker + "\nNews query: " + query, 600);
         boolean hasData = false;
 
         ToolObservation stockNews = runPrefetchTool("News Agent/getStockNews",
                 () -> newsTools.getStockNews(ticker, 7));
         hasData |= stockNews.hasUsableData();
-        appendSnapshotItem(report, "getStockNews(7d)", stockNews.text(), 3500);
-        evidence.add(toEnvelope(EvidenceDimension.NEWS, ticker, "getStockNews", stockNews));
+        captureSnapshotEvidence(
+                report, evidence, EvidenceDimension.NEWS, ticker,
+                "getStockNews", "getStockNews(7d)", stockNews, 3500);
 
         // 深度投研预取：搜索证据质量直接影响最终报告，这里显式开启 Tavily advanced 深度检索。
         ToolObservation searchNews = runPrefetchTool("News Agent/searchNews",
                 () -> newsTools.searchNews(query, toolPrefetchMaxSearchResults, true));
         hasData |= searchNews.hasUsableData();
-        appendSnapshotItem(report, "searchNews", searchNews.text(), 3500);
-        evidence.add(toEnvelope(EvidenceDimension.NEWS, ticker, "searchNews", searchNews));
+        captureSnapshotEvidence(
+                report, evidence, EvidenceDimension.NEWS, ticker,
+                "searchNews", "searchNews", searchNews, 3500);
 
         ToolObservation webSearch = runPrefetchTool("News Agent/webSearch",
                 () -> newsTools.webSearch(query, toolPrefetchMaxSearchResults, true));
         hasData |= webSearch.hasUsableData();
-        appendSnapshotItem(report, "webSearch", webSearch.text(), 3500);
-        evidence.add(toEnvelope(EvidenceDimension.NEWS, ticker, "webSearch", webSearch));
+        captureSnapshotEvidence(
+                report, evidence, EvidenceDimension.NEWS, ticker,
+                "webSearch", "webSearch", webSearch, 3500);
 
         return new EvidenceSnapshot(report.toString().trim(), hasData, evidence);
     }
 
-    private void appendSnapshotItem(StringBuilder report, String name, String value, int maxLength) {
-        report.append("\n### ").append(name).append('\n')
-                .append(PromptText.truncate(value, maxLength))
-                .append('\n');
+    /**
+     * 先构造证据元数据，再把同一 evidenceId 和有界正文写入快照。
+     *
+     * <p>这个顺序让辩论合同可以把引用 ID 确定性映射回模型实际看到的文本，
+     * 同时仍不把完整工具 payload 放入 EvidenceLedger。</p>
+     */
+    private void captureSnapshotEvidence(
+            StringBuilder report,
+            List<EvidenceEnvelope> evidence,
+            EvidenceDimension dimension,
+            String ticker,
+            String capabilityId,
+            String displayName,
+            ToolObservation observation,
+            int maxLength
+    ) {
+        captureSnapshotEvidence(
+                report, evidence, dimension, ticker, capabilityId, displayName,
+                observation, maxLength, true);
+    }
+
+    /** 支持显式标记非只读能力的证据快照重载。 */
+    private void captureSnapshotEvidence(
+            StringBuilder report,
+            List<EvidenceEnvelope> evidence,
+            EvidenceDimension dimension,
+            String ticker,
+            String capabilityId,
+            String displayName,
+            ToolObservation observation,
+            int maxLength,
+            boolean approvedReadOnly
+    ) {
+        EvidenceEnvelope envelope = toEnvelope(
+                dimension, ticker, capabilityId, observation, approvedReadOnly);
+        evidence.add(envelope);
+        appendEvidenceSnapshotItem(report, displayName, envelope, observation.text(), maxLength);
+    }
+
+    /** 写入可被 DebateContractParser 精确定位的有界证据段。 */
+    private void appendEvidenceSnapshotItem(
+            StringBuilder report,
+            String name,
+            EvidenceEnvelope envelope,
+            String value,
+            int maxLength
+    ) {
+        report.append('\n').append(SNAPSHOT_EVIDENCE_BEGIN).append('\n')
+                .append("name: ").append(snapshotMetadata(name, 160)).append('\n')
+                .append("evidenceId: ").append(envelope.evidenceId()).append('\n')
+                .append("status: ").append(envelope.status().name()).append('\n')
+                .append("provider: ").append(snapshotMetadata(envelope.provider(), 240)).append('\n')
+                .append("sourceRef: ").append(snapshotMetadata(envelope.sourceRef(), 500)).append('\n')
+                .append("asOf: ").append(envelope.asOf() == null ? "unknown" : envelope.asOf()).append('\n')
+                .append("citable: ").append(envelope.hasProvenance() && envelope.approvedReadOnly()).append('\n')
+                .append(SNAPSHOT_CONTENT_BEGIN).append('\n')
+                .append(snapshotContent(value, maxLength)).append('\n')
+                .append(SNAPSHOT_CONTENT_END).append('\n')
+                .append(SNAPSHOT_EVIDENCE_END).append('\n');
+    }
+
+    /** 写入无 EvidenceEnvelope 的说明段，并明确禁止模型引用。 */
+    private void appendNonCitableSnapshotNote(
+            StringBuilder report,
+            String name,
+            String value,
+            int maxLength
+    ) {
+        report.append('\n').append(SNAPSHOT_NOTE_BEGIN).append('\n')
+                .append("name: ").append(snapshotMetadata(name, 160)).append('\n')
+                .append("evidenceId: none\n")
+                .append("citable: false\n")
+                .append("instruction: This section is operational context only and MUST NOT be cited as evidence.\n")
+                .append(SNAPSHOT_CONTENT_BEGIN).append('\n')
+                .append(snapshotContent(value, maxLength)).append('\n')
+                .append(SNAPSHOT_CONTENT_END).append('\n')
+                .append(SNAPSHOT_NOTE_END).append('\n');
+    }
+
+    /** 把元数据收敛到单行，避免来源字段破坏快照边界。 */
+    private String snapshotMetadata(String value, int maxLength) {
+        String normalized = value == null ? "" : value.replace('\r', ' ').replace('\n', ' ').strip();
+        return escapeSnapshotMarkers(PromptText.truncate(normalized, maxLength));
+    }
+
+    /** 截断正文并转义协议标记，防止工具内容伪造证据段边界。 */
+    private String snapshotContent(String value, int maxLength) {
+        return escapeSnapshotMarkers(PromptText.truncate(value == null ? "" : value, maxLength));
+    }
+
+    /** 对工具返回中恰好出现的内部边界词做不可解析化转义。 */
+    private String escapeSnapshotMarkers(String value) {
+        return value
+                .replace(SNAPSHOT_EVIDENCE_BEGIN, "[[STOCKSAGE_EVIDENCE_BEGIN_ESCAPED]]")
+                .replace(SNAPSHOT_EVIDENCE_END, "[[STOCKSAGE_EVIDENCE_END_ESCAPED]]")
+                .replace(SNAPSHOT_CONTENT_BEGIN, "[[STOCKSAGE_CONTENT_BEGIN_ESCAPED]]")
+                .replace(SNAPSHOT_CONTENT_END, "[[STOCKSAGE_CONTENT_END_ESCAPED]]")
+                .replace(SNAPSHOT_NOTE_BEGIN, "[[STOCKSAGE_NOTE_BEGIN_ESCAPED]]")
+                .replace(SNAPSHOT_NOTE_END, "[[STOCKSAGE_NOTE_END_ESCAPED]]");
     }
 
     private ToolObservation runPrefetchTool(String name, ToolCall toolCall) {

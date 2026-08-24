@@ -17,7 +17,20 @@ import com.stocksage.harness.HarnessModels.SynthesisResult;
 import com.stocksage.harness.HarnessModels.TargetIdentity;
 import com.stocksage.harness.HarnessObserver;
 import com.stocksage.harness.ResearchHarness;
+import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.AnalysisState;
+import com.stocksage.model.dto.DebateModels;
+import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
+import com.stocksage.model.dto.DebateModels.AssessmentParseStatus;
+import com.stocksage.model.dto.DebateModels.AssessmentReasonCode;
+import com.stocksage.model.dto.DebateModels.DebatePoint;
+import com.stocksage.model.dto.DebateModels.DebateTurn;
+import com.stocksage.model.dto.DebateModels.DebateVerdict;
+import com.stocksage.model.dto.DebateModels.EvidenceRef;
+import com.stocksage.model.dto.DebateModels.LeadingSide;
+import com.stocksage.model.dto.DebateModels.ManagerAssessment;
+import com.stocksage.model.dto.DebateModels.PointType;
+import com.stocksage.model.dto.DebateModels.Side;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.service.DeepResearchPipeline;
 import com.stocksage.tool.ChatStreamEmitter;
@@ -40,6 +53,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.doAnswer;
@@ -49,9 +63,14 @@ import static org.mockito.Mockito.when;
 
 class ResearchDebateServiceResumeTest {
 
+    private static final String CURRENT_POLICY_TAG = DeepResearchCompletionPolicy.POLICY_ID
+            + "-v" + DeepResearchCompletionPolicy.POLICY_VERSION;
+
     private final BullResearcher bullResearcher = mock(BullResearcher.class);
     private final BearResearcher bearResearcher = mock(BearResearcher.class);
     private final ResearchManager researchManager = mock(ResearchManager.class);
+    private final DebateContractParser debateContractParser = mock(DebateContractParser.class);
+    private final DebateDecisionPolicy debateDecisionPolicy = mock(DebateDecisionPolicy.class);
     private final DebateRoundPlanner debateRoundPlanner = mock(DebateRoundPlanner.class);
     private final ChatStreamEmitter chatStreamEmitter = mock(ChatStreamEmitter.class);
     private final ResearchHarness researchHarness = mock(ResearchHarness.class);
@@ -60,6 +79,8 @@ class ResearchDebateServiceResumeTest {
             bullResearcher,
             bearResearcher,
             researchManager,
+            debateContractParser,
+            debateDecisionPolicy,
             debateRoundPlanner,
             mock(TraceService.class),
             chatStreamEmitter,
@@ -73,8 +94,37 @@ class ResearchDebateServiceResumeTest {
                 .thenAnswer(invocation -> Flux.just("bull-r" + invocation.getArgument(1, Integer.class)));
         when(bearResearcher.argue(any(), anyInt()))
                 .thenAnswer(invocation -> Flux.just("bear-r" + invocation.getArgument(1, Integer.class)));
-        InvestmentReport report = InvestmentReport.builder().analystSummary("done").build();
-        when(researchManager.synthesizeStreamingResult(any(), any(), any(), any()))
+        when(debateContractParser.parse(any(), anyInt(), any(Side.class), any()))
+                .thenAnswer(invocation -> structuredTurn(
+                        invocation.getArgument(1, Integer.class),
+                        invocation.getArgument(2, Side.class)));
+        when(debateDecisionPolicy.computeInputHash(any())).thenReturn("fixture-input-0");
+        when(debateDecisionPolicy.isCurrentVerdict(any(AnalysisState.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0, AnalysisState.class)
+                        .getDebateVerdict() != null);
+        when(debateDecisionPolicy.isCurrentVerdict(
+                any(AnalysisState.class), any(DebateVerdict.class)))
+                .thenAnswer(invocation -> {
+                    DebateVerdict current = invocation.getArgument(0, AnalysisState.class)
+                            .getDebateVerdict();
+                    return current != null && current.equals(
+                            invocation.getArgument(1, DebateVerdict.class));
+                });
+        when(researchManager.scoreDebate(any(), any(), any(Runnable.class)))
+                .thenAnswer(invocation -> Mono.just(managerAssessment(
+                        invocation.getArgument(0, AnalysisState.class))));
+        when(debateDecisionPolicy.decide(any(AnalysisState.class), any(ManagerAssessment.class)))
+                .thenAnswer(invocation -> fixtureVerdict(
+                        invocation.getArgument(0, AnalysisState.class),
+                        invocation.getArgument(1, ManagerAssessment.class)));
+        InvestmentReport report = InvestmentReport.builder()
+                .analystSummary("done")
+                .decisionAudit(fixtureVerdict(
+                        "fixture-snapshot",
+                        auditAssessments("e-MARKET-market")))
+                .build();
+        when(researchManager.synthesizeStreamingResult(
+                any(), any(), any(), any(), any()))
                 .thenReturn(Mono.just(new SynthesisResult(
                         report,
                         com.stocksage.harness.HarnessModels.ParseStatus.VALID,
@@ -112,8 +162,42 @@ class ResearchDebateServiceResumeTest {
         verify(debateRoundPlanner).decide(any(), anyInt());
         verify(bullResearcher).argue(any(), eq(1));
         verify(bullResearcher).argue(any(), eq(2));
+        verify(researchManager, times(1))
+                .scoreDebate(any(), any(), any(Runnable.class));
         assertThat(checkpoints).containsExactly(1, 2);
         assertThat(done.getDebateTurns()).hasSize(4);
+    }
+
+    @Test
+    void freshReportResynthesisReusesTheSingleManagerScore() {
+        when(debateRoundPlanner.decide(any(), anyInt()))
+                .thenReturn(new DebateRoundPlanner.RoundDecision(1, "one round"));
+        HarnessDecision repair = new HarnessDecision(
+                HarnessOutcome.RECOVER,
+                List.of(),
+                List.of(RecoveryAction.RESYNTHESIZE_REPORT)
+        );
+        HarnessDecision pass = new HarnessDecision(
+                HarnessOutcome.PASS,
+                List.of(),
+                List.of()
+        );
+        when(researchHarness.evaluateReport(any(), any(), any(), any(), any()))
+                .thenReturn(repair, pass);
+
+        service.runDebate(
+                "trace-repair",
+                20L,
+                AnalysisState.builder().query("q").build(),
+                1,
+                0,
+                null
+        );
+
+        verify(researchManager, times(1))
+                .scoreDebate(any(), any(), any(Runnable.class));
+        verify(researchManager, times(2))
+                .synthesizeStreamingResult(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -168,13 +252,13 @@ class ResearchDebateServiceResumeTest {
                 Map.of(RecoveryAction.RETRY_FUNDAMENTALS, 1),
                 RecoveryLifecycle.PLANNED,
                 List.of(RecoveryAction.RESYNTHESIZE_REPORT),
-                "deep-report:trace-1:deep-equity-v1-v3:resynthesize_report-1"
+                "deep-report:trace-1:" + CURRENT_POLICY_TAG + ":resynthesize_report-1"
         ));
 
         InvestmentReport invalidReport = InvestmentReport.builder()
                 .analystSummary("still invalid")
                 .build();
-        when(researchManager.synthesizeStreamingResult(any(), any(), any(), any()))
+        when(researchManager.synthesizeStreamingResult(any(), any(), any(), any(), any()))
                 .thenReturn(Mono.just(new SynthesisResult(
                         invalidReport,
                         com.stocksage.harness.HarnessModels.ParseStatus.INVALID_SCHEMA,
@@ -216,7 +300,10 @@ class ResearchDebateServiceResumeTest {
         );
 
         verify(researchManager, times(1))
-                .synthesizeStreamingResult(any(), any(), any(), any());
+                .synthesizeStreamingResult(any(), any(), any(), any(), any());
+        verify(researchManager, never())
+                .scoreDebate(any(), any(), any(Runnable.class));
+        verify(debateDecisionPolicy, atLeastOnce()).isCurrentVerdict(state);
         verify(researchHarness, times(1)).evaluateReport(
                 any(),
                 any(),
@@ -237,7 +324,8 @@ class ResearchDebateServiceResumeTest {
                 .containsEntry(RecoveryAction.RESYNTHESIZE_REPORT, 1)
                 .containsEntry(RecoveryAction.RETRY_FUNDAMENTALS, 1);
         assertThat(checkpoints.get(0).recoveryEffectKey())
-                .isEqualTo("deep-report:trace-1:deep-equity-v1-v3:resynthesize_report-1");
+                .isEqualTo("deep-report:trace-1:" + CURRENT_POLICY_TAG
+                        + ":resynthesize_report-1");
         assertThat(checkpointedReports).hasSize(1);
         assertThat(checkpointedReports.get(0).getQualityStatus())
                 .isEqualTo(InvestmentReport.ReportQualityStatus.NOT_RATED);
@@ -264,7 +352,7 @@ class ResearchDebateServiceResumeTest {
                 ),
                 RecoveryLifecycle.REVALIDATED,
                 List.of(RecoveryAction.RESYNTHESIZE_REPORT),
-                "deep-report:trace-1:deep-equity-v1-v3:resynthesize_report-1"
+                "deep-report:trace-1:" + CURRENT_POLICY_TAG + ":resynthesize_report-1"
         ));
         List<HarnessSnapshot> checkpoints = new ArrayList<>();
         List<InvestmentReport> checkpointedReports = new ArrayList<>();
@@ -284,7 +372,9 @@ class ResearchDebateServiceResumeTest {
         );
 
         verify(researchManager, never())
-                .synthesizeStreamingResult(any(), any(), any(), any());
+                .synthesizeStreamingResult(any(), any(), any(), any(), any());
+        verify(researchManager, never())
+                .scoreDebate(any(), any(), any(Runnable.class));
         verify(researchHarness, never())
                 .evaluateReport(any(), any(), any(), any(), any());
         assertThat(checkpoints).hasSize(1);
@@ -295,7 +385,8 @@ class ResearchDebateServiceResumeTest {
                 .containsEntry(RecoveryAction.RESYNTHESIZE_REPORT, 1)
                 .containsEntry(RecoveryAction.RETRY_MARKET, 1);
         assertThat(checkpoints.get(0).recoveryEffectKey())
-                .isEqualTo("deep-report:trace-1:deep-equity-v1-v3:resynthesize_report-1");
+                .isEqualTo("deep-report:trace-1:" + CURRENT_POLICY_TAG
+                        + ":resynthesize_report-1");
         assertThat(checkpointedReports).hasSize(1);
         assertThat(checkpointedReports.get(0).getQualityStatus())
                 .isEqualTo(InvestmentReport.ReportQualityStatus.NOT_RATED);
@@ -349,12 +440,13 @@ class ResearchDebateServiceResumeTest {
         );
 
         verify(researchManager, times(1))
-                .synthesizeStreamingResult(any(), any(), any(), any());
+                .synthesizeStreamingResult(any(), any(), any(), any(), any());
         assertThat(checkpoints).hasSize(1);
         assertThat(checkpoints.get(0).recoveryLifecycle())
                 .isEqualTo(RecoveryLifecycle.REVALIDATED);
         assertThat(checkpoints.get(0).recoveryEffectKey())
-                .isEqualTo("deep-report:conversation-20:deep-equity-v1-v2:resynthesize_report-1");
+                .isEqualTo("deep-report:conversation-20:" + CURRENT_POLICY_TAG
+                        + ":resynthesize_report-1");
         assertThat(done.getInvestmentReport().getQualityStatus())
                 .isEqualTo(InvestmentReport.ReportQualityStatus.VERIFIED);
     }
@@ -381,7 +473,7 @@ class ResearchDebateServiceResumeTest {
         );
 
         verify(researchManager, never())
-                .synthesizeStreamingResult(any(), any(), any(), any());
+                .synthesizeStreamingResult(any(), any(), any(), any(), any());
         verify(bullResearcher, never()).argue(any(), anyInt());
         verify(bearResearcher, never()).argue(any(), anyInt());
         assertThat(checkpoints).hasSize(1);
@@ -406,7 +498,7 @@ class ResearchDebateServiceResumeTest {
                 DeepResearchCompletionPolicy.POLICY_ID,
                 DeepResearchCompletionPolicy.POLICY_VERSION
         );
-        when(researchManager.synthesizeStreamingResult(any(), any(), any(), any()))
+        when(researchManager.synthesizeStreamingResult(any(), any(), any(), any(), any()))
                 .thenReturn(Mono.just(new SynthesisResult(
                         repaired,
                         com.stocksage.harness.HarnessModels.ParseStatus.VALID,
@@ -428,7 +520,7 @@ class ResearchDebateServiceResumeTest {
         );
 
         verify(researchManager, times(1))
-                .synthesizeStreamingResult(any(), any(), any(), any());
+                .synthesizeStreamingResult(any(), any(), any(), any(), any());
         verify(bullResearcher, never()).argue(any(), anyInt());
         verify(bearResearcher, never()).argue(any(), anyInt());
         verify(debateRoundPlanner, never()).decide(any(), anyInt());
@@ -472,7 +564,7 @@ class ResearchDebateServiceResumeTest {
                 DeepResearchCompletionPolicy.POLICY_ID,
                 DeepResearchCompletionPolicy.POLICY_VERSION
         );
-        when(researchManager.synthesizeStreamingResult(any(), any(), any(), any()))
+        when(researchManager.synthesizeStreamingResult(any(), any(), any(), any(), any()))
                 .thenReturn(Mono.just(new SynthesisResult(
                         repaired,
                         com.stocksage.harness.HarnessModels.ParseStatus.VALID,
@@ -489,7 +581,7 @@ class ResearchDebateServiceResumeTest {
         );
 
         verify(researchManager, times(1))
-                .synthesizeStreamingResult(any(), any(), any(), any());
+                .synthesizeStreamingResult(any(), any(), any(), any(), any());
         verify(bullResearcher, never()).argue(any(), anyInt());
         verify(bearResearcher, never()).argue(any(), anyInt());
         assertThat(done.getInvestmentReport().getQualityStatus())
@@ -509,7 +601,8 @@ class ResearchDebateServiceResumeTest {
                 DeepResearchCompletionPolicy.POLICY_VERSION
         ));
         String effectKey =
-                "deep-report:trace-exhausted:deep-equity-v1-v3:resynthesize_report-1";
+                "deep-report:trace-exhausted:" + CURRENT_POLICY_TAG
+                        + ":resynthesize_report-1";
         state.setHarnessSnapshot(HarnessSnapshot.recovery(
                 DeepResearchCompletionPolicy.POLICY_ID,
                 Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION),
@@ -534,7 +627,7 @@ class ResearchDebateServiceResumeTest {
         );
 
         verify(researchManager, never())
-                .synthesizeStreamingResult(any(), any(), any(), any());
+                .synthesizeStreamingResult(any(), any(), any(), any(), any());
         assertThat(done.getInvestmentReport().getQualityStatus())
                 .isEqualTo(InvestmentReport.ReportQualityStatus.NOT_RATED);
         assertThat(done.getHarnessSnapshot().outcome()).isEqualTo(HarnessOutcome.DEGRADE);
@@ -567,7 +660,7 @@ class ResearchDebateServiceResumeTest {
         );
 
         verify(researchManager, never())
-                .synthesizeStreamingResult(any(), any(), any(), any());
+                .synthesizeStreamingResult(any(), any(), any(), any(), any());
         verify(bullResearcher, never()).argue(any(), anyInt());
         verify(bearResearcher, never()).argue(any(), anyInt());
         assertThat(done.getInvestmentReport().getQualityStatus())
@@ -584,6 +677,8 @@ class ResearchDebateServiceResumeTest {
                 bullResearcher,
                 bearResearcher,
                 researchManager,
+                debateContractParser,
+                debateDecisionPolicy,
                 debateRoundPlanner,
                 mock(TraceService.class),
                 chatStreamEmitter,
@@ -600,6 +695,13 @@ class ResearchDebateServiceResumeTest {
         return InvestmentReport.builder()
                 .ticker("AAPL")
                 .recommendation("HOLD")
+                .analysisHorizon(AnalysisHorizon.MEDIUM_TERM)
+                .dataSnapshotHash("fixture-snapshot")
+                .contextHash("fixture-context")
+                .decisionAudit(fixtureVerdict(
+                        "fixture-snapshot",
+                        auditAssessments("e-MARKET-market")
+                ))
                 .analystSummary("Balanced evidence.")
                 .dataFreshness("Observed 2026-07-31.")
                 .rationale(List.of("Revenue and market data are available."))
@@ -649,13 +751,125 @@ class ResearchDebateServiceResumeTest {
     }
 
     private AnalysisState stateWithCompletedRounds(int rounds) {
-        AnalysisState state = AnalysisState.builder().query("q").build();
+        AnalysisState state = AnalysisState.builder()
+                .query("q")
+                .primaryTicker("AAPL")
+                .dataSnapshotHash("fixture-snapshot")
+                .contextHash("fixture-context")
+                .build();
         for (int round = 1; round <= rounds; round++) {
-            state.getDebateTurns().add(new AnalysisState.DebateTurn(
-                    round, AnalysisState.DebateTurn.Side.BULL, "old-bull-r" + round));
-            state.getDebateTurns().add(new AnalysisState.DebateTurn(
-                    round, AnalysisState.DebateTurn.Side.BEAR, "old-bear-r" + round));
+            state.getDebateTurns().add(structuredTurn(round, Side.BULL));
+            state.getDebateTurns().add(structuredTurn(round, Side.BEAR));
         }
+        ManagerAssessment assessment = managerAssessment(state);
+        state.setManagerAssessment(assessment);
+        state.setDebateVerdict(fixtureVerdict(state, assessment));
         return state;
+    }
+
+    private DebateTurn structuredTurn(int round, Side side) {
+        String prefix = side == Side.BULL ? "bull" : "bear";
+        if (round == 1) {
+            List<DebatePoint> theses = java.util.stream.IntStream.rangeClosed(1, 3)
+                    .mapToObj(index -> new DebatePoint(
+                            prefix + "-thesis-" + index,
+                            PointType.THESIS,
+                            prefix + " claim " + index,
+                            AnalysisHorizon.MEDIUM_TERM,
+                            List.of(new EvidenceRef(
+                                    "e-MARKET-market",
+                                    "market evidence excerpt " + index)),
+                            prefix + " reasoning " + index,
+                            prefix + " assumption " + index,
+                            prefix + " invalidation " + index,
+                            List.of()
+                    ))
+                    .toList();
+            return new DebateTurn(round, side, theses);
+        }
+        String opponent = side == Side.BULL ? "bear" : "bull";
+        List<DebatePoint> rebuttals = java.util.stream.IntStream.rangeClosed(1, 2)
+                .mapToObj(index -> new DebatePoint(
+                        prefix + "-rebuttal-r" + round + "-" + index,
+                        PointType.REBUTTAL,
+                        prefix + " rebuttal " + round + "-" + index,
+                        AnalysisHorizon.MEDIUM_TERM,
+                        List.of(new EvidenceRef(
+                                "e-MARKET-market",
+                                "market rebuttal excerpt " + index)),
+                        prefix + " rebuttal reasoning " + index,
+                        prefix + " rebuttal assumption " + index,
+                        prefix + " rebuttal invalidation " + index,
+                        List.of(opponent + "-thesis-" + index)
+                ))
+                .toList();
+        return new DebateTurn(round, side, rebuttals);
+    }
+
+    private ManagerAssessment managerAssessment(AnalysisState state) {
+        List<ArgumentAssessment> assessments = state.getDebateTurns().stream()
+                .filter(turn -> turn.round() == 1)
+                .flatMap(turn -> turn.points().stream())
+                .map(point -> new ArgumentAssessment(
+                        point.pointId(),
+                        3, 3, 3, 3, 3,
+                        List.of("e-MARKET-market"),
+                        List.of(),
+                        List.of(AssessmentReasonCode.SUPPORTED),
+                        "fixture assessment"
+                ))
+                .toList();
+        return new ManagerAssessment(
+                DebateModels.MANAGER_ASSESSMENT_CONTRACT_ID,
+                DebateModels.MANAGER_ASSESSMENT_CONTRACT_VERSION,
+                "fixture-input-0",
+                true,
+                assessments,
+                AssessmentParseStatus.VALID,
+                List.of()
+        );
+    }
+
+    private DebateVerdict fixtureVerdict(
+            AnalysisState state,
+            ManagerAssessment assessment
+    ) {
+        return fixtureVerdict(state.getDataSnapshotHash(), assessment.assessments());
+    }
+
+    private DebateVerdict fixtureVerdict(
+            String dataSnapshotHash,
+            List<ArgumentAssessment> assessments
+    ) {
+        return new DebateVerdict(
+                DebateDecisionPolicy.POLICY_ID,
+                DebateDecisionPolicy.POLICY_VERSION,
+                "fixture-input-0",
+                dataSnapshotHash,
+                72,
+                72,
+                LeadingSide.BALANCED,
+                0,
+                "HOLD",
+                AnalysisHorizon.MEDIUM_TERM,
+                List.of(),
+                List.of(),
+                assessments
+        );
+    }
+
+    private List<ArgumentAssessment> auditAssessments(String evidenceId) {
+        return java.util.stream.IntStream.rangeClosed(1, 6)
+                .mapToObj(index -> new ArgumentAssessment(
+                        index <= 3
+                                ? "bull-thesis-" + index
+                                : "bear-thesis-" + (index - 3),
+                        3, 3, 3, 3, 3,
+                        List.of(evidenceId),
+                        List.of(),
+                        List.of(AssessmentReasonCode.SUPPORTED),
+                        "fixture assessment"
+                ))
+                .toList();
     }
 }

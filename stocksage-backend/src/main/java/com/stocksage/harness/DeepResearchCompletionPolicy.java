@@ -1,5 +1,6 @@
 package com.stocksage.harness;
 
+import com.stocksage.agent.DebateDecisionPolicy;
 import com.stocksage.harness.HarnessModels.EvidenceDimension;
 import com.stocksage.harness.HarnessModels.HarnessDecision;
 import com.stocksage.harness.HarnessModels.HarnessOutcome;
@@ -10,19 +11,23 @@ import com.stocksage.harness.HarnessModels.SynthesisResult;
 import com.stocksage.harness.HarnessModels.TargetResolutionStatus;
 import com.stocksage.harness.HarnessModels.ViolationCode;
 import com.stocksage.model.dto.AnalysisHorizon;
+import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
+import com.stocksage.model.dto.DebateModels.DebateVerdict;
+import com.stocksage.model.dto.DebateModels.LeadingSide;
 import com.stocksage.model.dto.InvestmentReport;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * DEEP 股票研究的确定性完成策略。
  *
  * <p>{@link ResearchHarness} 在证据收集后和报告综合后分别调用本策略。证据阶段检查标的、
- * 基本面、行情、来源和能力审批；报告阶段检查结构、标的一致性以及引用是否来自
+ * 基本面、行情、来源和能力审批；报告阶段检查结构、标的一致性、当前辩论裁决审计以及引用是否来自
  * {@link EvidenceLedger#usableEvidenceIds()}。策略只返回 PASS/RECOVER/DEGRADE/BLOCK 决策，
  * 不调用工具、不写 checkpoint，也绝不在证据不足时编造评级。</p>
  */
@@ -32,7 +37,7 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
     /** 持久化到 Trace/checkpoint 的稳定策略 ID。 */
     public static final String POLICY_ID = "deep-equity-v1";
     /** 当前规则版本；规则语义变化时递增，用于拒绝陈旧报告权威。 */
-    public static final int POLICY_VERSION = 3;
+    public static final int POLICY_VERSION = 4;
 
     @Override
     public String policyId() {
@@ -167,6 +172,40 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
 
         Set<String> knownEvidenceIds = safeLedger.evidenceIds();
         Set<String> usableEvidenceIds = safeLedger.usableEvidenceIds();
+        DebateVerdict decisionAudit = report.getDecisionAudit();
+        if (decisionAudit == null) {
+            violations.add(new HarnessViolation(
+                    ViolationCode.REPORT_DECISION_AUDIT_MISSING, null));
+        } else {
+            if (decisionAudit.leadingSide() == LeadingSide.INSUFFICIENT) {
+                violations.add(new HarnessViolation(
+                        ViolationCode.DEBATE_DECISION_INSUFFICIENT, null));
+            }
+            if (!DebateDecisionPolicy.POLICY_ID.equals(decisionAudit.policyId())
+                    || decisionAudit.version() != DebateDecisionPolicy.POLICY_VERSION) {
+                violations.add(new HarnessViolation(
+                        ViolationCode.REPORT_DECISION_POLICY_MISMATCH, null));
+            }
+            if (report.getDataSnapshotHash() == null
+                    || report.getDataSnapshotHash().isBlank()
+                    || decisionAudit.dataSnapshotHash() == null
+                    || decisionAudit.dataSnapshotHash().isBlank()
+                    || !Objects.equals(
+                            report.getDataSnapshotHash(), decisionAudit.dataSnapshotHash())) {
+                violations.add(new HarnessViolation(
+                        ViolationCode.REPORT_DECISION_SNAPSHOT_MISMATCH, null));
+            }
+            if (!Objects.equals(report.getRecommendation(), decisionAudit.recommendation())
+                    || report.getAnalysisHorizon() != decisionAudit.analysisHorizon()) {
+                violations.add(new HarnessViolation(
+                        ViolationCode.REPORT_DECISION_OUTPUT_MISMATCH, null));
+            }
+            if (hasInvalidDecisionEvidence(decisionAudit, usableEvidenceIds)) {
+                violations.add(new HarnessViolation(
+                        ViolationCode.REPORT_DECISION_EVIDENCE_REFERENCE_UNUSABLE, null));
+            }
+        }
+
         boolean missingEvidenceReference =
                 report.getEvidenceItems() == null || report.getEvidenceItems().isEmpty()
                 || report.getEvidenceItems().stream()
@@ -197,6 +236,65 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
             return repairOrDegrade(safeContext, violations);
         }
         return decision(HarnessOutcome.PASS, List.of(), List.of());
+    }
+
+    /**
+     * 验证评分审计中的证据引用，并确保每个决定性论点都能映射到一条带可用证据的评分。
+     *
+     * <p>{@code decisivePointIds} 是论点 ID，不是 Evidence ID；必须先定位同 ID 的
+     * {@link ArgumentAssessment}，再验证其 {@code acceptedEvidenceIds}。所有 assessment
+     * 已接受的 Evidence ID 同样必须属于当前账本的可用集合。</p>
+     */
+    private boolean hasInvalidDecisionEvidence(
+            DebateVerdict decisionAudit,
+            Set<String> usableEvidenceIds
+    ) {
+        List<ArgumentAssessment> assessments = decisionAudit.assessments();
+        if (assessments == null || assessments.size() < 6
+                || decisionAudit.inputHash() == null
+                || decisionAudit.inputHash().isBlank()) {
+            return true;
+        }
+        Set<String> uniquePointIds = new java.util.LinkedHashSet<>();
+        int evidenceBackedAssessments = 0;
+        for (ArgumentAssessment assessment : assessments) {
+            if (assessment == null || assessment.pointId() == null
+                    || assessment.pointId().isBlank()
+                    || !uniquePointIds.add(assessment.pointId())
+                    || assessment.acceptedEvidenceIds() == null
+                    || assessment.acceptedEvidenceIds().stream()
+                    .anyMatch(id -> id == null || !usableEvidenceIds.contains(id))) {
+                return true;
+            }
+            if (!assessment.acceptedEvidenceIds().isEmpty()) {
+                evidenceBackedAssessments++;
+            }
+        }
+        // Java DecisionPolicy 至少需要多空各三条有效根论点；报告 audit 也必须留下相应评分证据。
+        if (evidenceBackedAssessments < 6) {
+            return true;
+        }
+
+        List<String> decisivePointIds = decisionAudit.decisivePointIds();
+        if (decisivePointIds == null) {
+            return true;
+        }
+        for (String decisivePointId : decisivePointIds) {
+            ArgumentAssessment decisiveAssessment = assessments.stream()
+                    .filter(Objects::nonNull)
+                    .filter(assessment -> Objects.equals(
+                            assessment.pointId(), decisivePointId))
+                    .findFirst()
+                    .orElse(null);
+            if (decisiveAssessment == null
+                    || decisiveAssessment.acceptedEvidenceIds() == null
+                    || decisiveAssessment.acceptedEvidenceIds().isEmpty()
+                    || decisiveAssessment.acceptedEvidenceIds().stream()
+                    .anyMatch(id -> id == null || !usableEvidenceIds.contains(id))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** 报告首次失败允许重综合一次，第二次仍失败则安全降级为不评级。 */

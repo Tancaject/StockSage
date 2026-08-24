@@ -73,6 +73,8 @@ class AnalysisStateHarnessSerializationTest {
 
     @Test
     void pendingRecoveryEffectRoundTripsWithStableKeyAndReservedAction() throws Exception {
+        String policyTag = DeepResearchCompletionPolicy.POLICY_ID
+                + "-v" + DeepResearchCompletionPolicy.POLICY_VERSION;
         AnalysisState original = AnalysisState.builder()
                 .query("Should I buy AAPL?")
                 .primaryTicker("AAPL")
@@ -89,14 +91,14 @@ class AnalysisStateHarnessSerializationTest {
                 Map.of(),
                 RecoveryLifecycle.PLANNED,
                 List.of(RecoveryAction.RETRY_FUNDAMENTALS),
-                "deep-evidence:42:deep-equity-v1-v3:retry_fundamentals-1",
+                "deep-evidence:42:" + policyTag + ":retry_fundamentals-1",
                 new SuspendedRecovery(
                         HarnessPhase.REPORT,
                         HarnessOutcome.RECOVER,
                         List.of(ViolationCode.REPORT_SCHEMA_INVALID),
                         RecoveryLifecycle.PLANNED,
                         List.of(RecoveryAction.RESYNTHESIZE_REPORT),
-                        "deep-report:trace-42:deep-equity-v1-v3:resynthesize_report-1"
+                        "deep-report:trace-42:" + policyTag + ":resynthesize_report-1"
                 )
         ));
 
@@ -110,14 +112,14 @@ class AnalysisStateHarnessSerializationTest {
         assertThat(restored.getHarnessSnapshot().recoveryActions())
                 .containsExactly(RecoveryAction.RETRY_FUNDAMENTALS);
         assertThat(restored.getHarnessSnapshot().recoveryEffectKey())
-                .isEqualTo("deep-evidence:42:deep-equity-v1-v3:retry_fundamentals-1");
+                .isEqualTo("deep-evidence:42:" + policyTag + ":retry_fundamentals-1");
         assertThat(restored.getHarnessSnapshot().suspendedRecovery()).isNotNull();
         assertThat(restored.getHarnessSnapshot().suspendedRecovery().recoveryLifecycle())
                 .isEqualTo(RecoveryLifecycle.PLANNED);
         assertThat(restored.getHarnessSnapshot().suspendedRecovery().recoveryActions())
                 .containsExactly(RecoveryAction.RESYNTHESIZE_REPORT);
         assertThat(restored.getHarnessSnapshot().suspendedRecovery().recoveryEffectKey())
-                .isEqualTo("deep-report:trace-42:deep-equity-v1-v3:resynthesize_report-1");
+                .isEqualTo("deep-report:trace-42:" + policyTag + ":resynthesize_report-1");
         assertThat(restored.getHarnessSnapshot().hasPendingEvidenceRecovery()).isTrue();
     }
 }

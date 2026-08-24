@@ -15,6 +15,7 @@ import com.stocksage.harness.HarnessModels.RecoveryAction;
 import com.stocksage.harness.HarnessModels.RecoveryLifecycle;
 import com.stocksage.harness.HarnessModels.SuspendedRecovery;
 import com.stocksage.model.dto.AnalysisState;
+import com.stocksage.model.dto.DebateModels.Side;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.tool.ChatStreamEmitter;
@@ -1086,8 +1087,8 @@ public class DeepResearchPipeline {
             return 0;
         }
         int completed = 0;
-        while (hasDebateTurn(state, completed + 1, AnalysisState.DebateTurn.Side.BULL)
-                && hasDebateTurn(state, completed + 1, AnalysisState.DebateTurn.Side.BEAR)) {
+        while (hasDebateTurn(state, completed + 1, Side.BULL)
+                && hasDebateTurn(state, completed + 1, Side.BEAR)) {
             completed++;
         }
         return completed;
@@ -1096,12 +1097,14 @@ public class DeepResearchPipeline {
     private boolean hasDebateTurn(
             AnalysisState state,
             int round,
-            AnalysisState.DebateTurn.Side side
+            Side side
     ) {
         return state.getDebateTurns().stream()
                 .anyMatch(turn -> turn != null
                         && turn.round() == round
-                        && turn.side() == side);
+                        && turn.side() == side
+                        && turn.points() != null
+                        && !turn.points().isEmpty());
     }
 
     private Map<RecoveryAction, Integer> checkpointRecoveryAttempts(AnalysisState state) {

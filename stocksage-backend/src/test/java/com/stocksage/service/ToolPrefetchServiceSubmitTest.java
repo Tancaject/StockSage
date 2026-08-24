@@ -9,6 +9,7 @@ import com.stocksage.agent.ModelTier;
 import com.stocksage.agent.NewsAgent;
 import com.stocksage.agent.PlanAction;
 import com.stocksage.agent.PlanRoute;
+import com.stocksage.harness.DeepResearchCompletionPolicy;
 import com.stocksage.harness.EvidenceLedger;
 import com.stocksage.harness.HarnessModels.HarnessDecision;
 import com.stocksage.harness.HarnessModels.HarnessOutcome;
@@ -392,7 +393,11 @@ class ToolPrefetchServiceSubmitTest {
         assertThat(snapshots)
                 .extracting(HarnessSnapshot::recoveryEffectKey)
                 .containsOnly(
-                        "deep-evidence:89:deep-equity-v1-v3:retry_market-1"
+                        "deep-evidence:89:"
+                                + DeepResearchCompletionPolicy.POLICY_ID
+                                + "-v"
+                                + DeepResearchCompletionPolicy.POLICY_VERSION
+                                + ":retry_market-1"
                 );
         assertThat(snapshots)
                 .allSatisfy(snapshot -> assertThat(snapshot.recoveryActions())

@@ -3,6 +3,8 @@ package com.stocksage.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.BearResearcher;
 import com.stocksage.agent.BullResearcher;
+import com.stocksage.agent.DebateContractParser;
+import com.stocksage.agent.DebateDecisionPolicy;
 import com.stocksage.agent.DebateRoundPlanner;
 import com.stocksage.agent.ModelTier;
 import com.stocksage.agent.ResearchDebateService;
@@ -13,7 +15,20 @@ import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.ParseStatus;
 import com.stocksage.harness.HarnessModels.SynthesisResult;
 import com.stocksage.harness.ResearchHarness;
+import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.AnalysisState;
+import com.stocksage.model.dto.DebateModels;
+import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
+import com.stocksage.model.dto.DebateModels.AssessmentParseStatus;
+import com.stocksage.model.dto.DebateModels.AssessmentReasonCode;
+import com.stocksage.model.dto.DebateModels.DebatePoint;
+import com.stocksage.model.dto.DebateModels.DebateTurn;
+import com.stocksage.model.dto.DebateModels.DebateVerdict;
+import com.stocksage.model.dto.DebateModels.EvidenceRef;
+import com.stocksage.model.dto.DebateModels.LeadingSide;
+import com.stocksage.model.dto.DebateModels.ManagerAssessment;
+import com.stocksage.model.dto.DebateModels.PointType;
+import com.stocksage.model.dto.DebateModels.Side;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.model.entity.ResearchTaskCheckpoint;
@@ -37,8 +52,8 @@ import org.springframework.scheduling.TaskScheduler;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -77,6 +92,8 @@ class CheckpointTakeoverIT {
         BullResearcher bullResearcher = mock(BullResearcher.class);
         BearResearcher bearResearcher = mock(BearResearcher.class);
         ResearchManager researchManager = mock(ResearchManager.class);
+        DebateContractParser debateContractParser = mock(DebateContractParser.class);
+        DebateDecisionPolicy debateDecisionPolicy = mock(DebateDecisionPolicy.class);
         DebateRoundPlanner roundPlanner = mock(DebateRoundPlanner.class);
         when(bullResearcher.argue(any(), anyInt()))
                 .thenAnswer(call -> Flux.just("bull-r" + call.getArgument(1, Integer.class)));
@@ -84,15 +101,28 @@ class CheckpointTakeoverIT {
                 .thenAnswer(call -> Flux.just("bear-r" + call.getArgument(1, Integer.class)));
         when(roundPlanner.decide(any(), anyInt()))
                 .thenReturn(new DebateRoundPlanner.RoundDecision(3, "takeover fixture"));
+        when(debateContractParser.parse(any(), anyInt(), any(Side.class), any()))
+                .thenAnswer(call -> structuredTurn(
+                        call.getArgument(1, Integer.class),
+                        call.getArgument(2, Side.class)));
+        when(debateDecisionPolicy.computeInputHash(any())).thenReturn("fixture-input-0");
+        when(researchManager.scoreDebate(any(), any(), any(Runnable.class)))
+                .thenAnswer(call -> Mono.just(managerAssessment(
+                        call.getArgument(0, AnalysisState.class))));
+        when(debateDecisionPolicy.decide(any(AnalysisState.class), any(ManagerAssessment.class)))
+                .thenAnswer(call -> fixtureVerdict(
+                        call.getArgument(0, AnalysisState.class),
+                        call.getArgument(1, ManagerAssessment.class)));
         InvestmentReport report = InvestmentReport.builder()
                 .ticker("AAPL")
                 .recommendation("HOLD")
                 .analystSummary("resumed report")
                 .build();
         SynthesisResult synthesisResult = new SynthesisResult(report, ParseStatus.VALID, List.of());
-        when(researchManager.synthesizeStreamingResult(any(), any(), any(), any()))
+        when(researchManager.synthesizeStreamingResult(any(), any(), any(), any(), any()))
                 .thenReturn(Mono.just(synthesisResult));
-        when(researchManager.synthesizeStreamingResult(any(), any(), any(), any(), any(Runnable.class)))
+        when(researchManager.synthesizeStreamingResult(
+                any(), any(), any(), any(), any(), any(Runnable.class)))
                 .thenReturn(Mono.just(synthesisResult));
         ResearchHarness researchHarness = mock(ResearchHarness.class);
         when(researchHarness.evaluateReport(any(), any(), any(), any(), any()))
@@ -102,6 +132,8 @@ class CheckpointTakeoverIT {
                 bullResearcher,
                 bearResearcher,
                 researchManager,
+                debateContractParser,
+                debateDecisionPolicy,
                 roundPlanner,
                 mock(TraceService.class),
                 mock(ChatStreamEmitter.class),
@@ -252,6 +284,75 @@ class CheckpointTakeoverIT {
             return null;
         }).when(repository).deleteByTaskId(TASK_ID);
         return repository;
+    }
+
+    private DebateTurn structuredTurn(int round, Side side) {
+        String prefix = side == Side.BULL ? "bull" : "bear";
+        PointType type = round == 1 ? PointType.THESIS : PointType.REBUTTAL;
+        int pointCount = round == 1 ? 3 : 2;
+        String opponent = side == Side.BULL ? "bear" : "bull";
+        List<DebatePoint> points = java.util.stream.IntStream.rangeClosed(1, pointCount)
+                .mapToObj(index -> new DebatePoint(
+                        prefix + "-" + type.name().toLowerCase() + "-r" + round + "-" + index,
+                        type,
+                        prefix + " claim " + round + "-" + index,
+                        AnalysisHorizon.MEDIUM_TERM,
+                        List.of(new EvidenceRef(
+                                "fixture-evidence-" + index,
+                                "fixture evidence excerpt " + index)),
+                        prefix + " reasoning " + index,
+                        prefix + " assumption " + index,
+                        prefix + " invalidation " + index,
+                        round == 1
+                                ? List.of()
+                                : List.of(opponent + "-thesis-r1-" + index)
+                ))
+                .toList();
+        return new DebateTurn(round, side, points);
+    }
+
+    private ManagerAssessment managerAssessment(AnalysisState state) {
+        List<ArgumentAssessment> assessments = state.getDebateTurns().stream()
+                .filter(turn -> turn.round() == 1)
+                .flatMap(turn -> turn.points().stream())
+                .map(point -> new ArgumentAssessment(
+                        point.pointId(), 3, 3, 3, 3, 3,
+                        List.of(point.evidenceRefs().get(0).evidenceId()),
+                        List.of(),
+                        List.of(AssessmentReasonCode.SUPPORTED),
+                        "fixture assessment"
+                ))
+                .toList();
+        return new ManagerAssessment(
+                DebateModels.MANAGER_ASSESSMENT_CONTRACT_ID,
+                DebateModels.MANAGER_ASSESSMENT_CONTRACT_VERSION,
+                "fixture-input-0",
+                true,
+                assessments,
+                AssessmentParseStatus.VALID,
+                List.of()
+        );
+    }
+
+    private DebateVerdict fixtureVerdict(
+            AnalysisState state,
+            ManagerAssessment assessment
+    ) {
+        return new DebateVerdict(
+                DebateDecisionPolicy.POLICY_ID,
+                DebateDecisionPolicy.POLICY_VERSION,
+                assessment.inputHash(),
+                state.getDataSnapshotHash(),
+                72,
+                72,
+                LeadingSide.BALANCED,
+                0,
+                "HOLD",
+                AnalysisHorizon.MEDIUM_TERM,
+                List.of(),
+                List.of(),
+                assessment.assessments()
+        );
     }
 
     private ResearchTask pendingTask() {

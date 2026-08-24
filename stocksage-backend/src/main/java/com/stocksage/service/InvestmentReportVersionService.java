@@ -2,6 +2,7 @@ package com.stocksage.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.agent.DebateDecisionPolicy;
 import com.stocksage.exception.ResourceNotFoundException;
 import com.stocksage.harness.DeepResearchCompletionPolicy;
 import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
@@ -33,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -56,7 +58,7 @@ public class InvestmentReportVersionService {
 
     /** 参与双哈希的提示词/报告契约版本，变更时自动使旧快照失效。 */
     private static final String PROMPT_CONTRACT_VERSION =
-            "investment-report-v4-harness-evidence-horizon-bound";
+            "investment-report-v6-debate-provenance-freshness-bound";
     /** 历史报告列表的默认条数。 */
     private static final int DEFAULT_HISTORY_LIMIT = 20;
     /** 历史报告列表的最大条数。 */
@@ -89,7 +91,7 @@ public class InvestmentReportVersionService {
     }
 
     /**
-     * 对策略版本、ticker、排序后的证据标识/内容哈希/业务时间及引用生成稳定哈希。
+     * 对完成/辩论策略版本、ticker、排序后的证据标识/内容哈希/业务时间及引用生成稳定哈希。
      *
      * @param state 当前分析状态
      * @return 64 位十六进制 SHA-256，用于判断底层研究数据是否相同
@@ -100,8 +102,17 @@ public class InvestmentReportVersionService {
         appendField(canonical, "policyId", DeepResearchCompletionPolicy.POLICY_ID);
         appendField(canonical, "policyVersion",
                 Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION));
+        appendField(canonical, "debateDecisionPolicyId", DebateDecisionPolicy.POLICY_ID);
+        appendField(canonical, "debateDecisionPolicyVersion",
+                Integer.toString(DebateDecisionPolicy.POLICY_VERSION));
         appendField(canonical, "ticker", normalizeTicker(state == null ? null : state.getPrimaryTicker()));
         if (state != null && state.getEvidenceLedger() != null) {
+            state.getEvidenceLedger().evidence().stream()
+                    .map(EvidenceEnvelope::observedAt)
+                    .filter(java.util.Objects::nonNull)
+                    .max(Comparator.naturalOrder())
+                    .map(observedAt -> observedAt.atZone(ZoneOffset.UTC).toLocalDate().toString())
+                    .ifPresent(day -> appendField(canonical, "freshnessEvaluationDayUtc", day));
             state.getEvidenceLedger().evidence().stream()
                     .sorted(Comparator
                             .comparing((EvidenceEnvelope item) -> item.dimension().name())
@@ -113,8 +124,12 @@ public class InvestmentReportVersionService {
                             String.join("|",
                                     item.dimension().name(),
                                     item.capabilityId(),
+                                    item.targetKey(),
                                     item.status().name(),
                                     item.evidenceId(),
+                                    item.provider(),
+                                    item.sourceRef(),
+                                    Boolean.toString(item.approvedReadOnly()),
                                     item.payloadHash(),
                                     item.asOf() == null ? "" : item.asOf().toString())
                     ));
@@ -485,6 +500,9 @@ public class InvestmentReportVersionService {
                 || !DeepResearchCompletionPolicy.POLICY_ID.equals(report.getCompletionPolicyId())
                 || !Integer.valueOf(DeepResearchCompletionPolicy.POLICY_VERSION)
                 .equals(report.getCompletionPolicyVersion())
+                || report.getDecisionAudit() == null
+                || !DebateDecisionPolicy.POLICY_ID.equals(report.getDecisionAudit().policyId())
+                || report.getDecisionAudit().version() != DebateDecisionPolicy.POLICY_VERSION
                 || state.getEvidenceLedger() == null) {
             return false;
         }

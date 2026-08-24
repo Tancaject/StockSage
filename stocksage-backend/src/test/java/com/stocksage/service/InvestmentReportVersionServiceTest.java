@@ -1,6 +1,7 @@
 package com.stocksage.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.agent.DebateDecisionPolicy;
 import com.stocksage.harness.DeepResearchCompletionPolicy;
 import com.stocksage.harness.EvidenceLedger;
 import com.stocksage.harness.HarnessModels.EvidenceDimension;
@@ -8,6 +9,11 @@ import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
 import com.stocksage.harness.HarnessModels.EvidenceStatus;
 import com.stocksage.harness.HarnessModels.TargetIdentity;
 import com.stocksage.model.dto.AnalysisState;
+import com.stocksage.model.dto.AnalysisHorizon;
+import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
+import com.stocksage.model.dto.DebateModels.AssessmentReasonCode;
+import com.stocksage.model.dto.DebateModels.DebateVerdict;
+import com.stocksage.model.dto.DebateModels.LeadingSide;
 import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.model.dto.InvestmentReportReviewRequest;
 import com.stocksage.model.entity.InvestmentReportReview;
@@ -172,7 +178,7 @@ class InvestmentReportVersionServiceTest {
         AnalysisState state = analysisState("NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
         service.prepareHashes(state);
 
-        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-market");
+        InvestmentReport storedReport = verifiedReusableReport(state, "NVDA", "e-market");
         InvestmentReportVersion existing = new InvestmentReportVersion();
         existing.setUserId("u_001");
         existing.setTicker("NVDA");
@@ -200,7 +206,7 @@ class InvestmentReportVersionServiceTest {
     void invalidReportSchemaPreventsCacheReuse() throws Exception {
         AnalysisState state = analysisState(
                 "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
-        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-market");
+        InvestmentReport storedReport = verifiedReusableReport(state, "NVDA", "e-market");
         storedReport.setRiskFactors(List.of());
 
         assertThat(findReusableReport(state, storedReport)).isEmpty();
@@ -210,7 +216,7 @@ class InvestmentReportVersionServiceTest {
     void nullEvidenceItemFailsClosedAsCacheMiss() throws Exception {
         AnalysisState state = analysisState(
                 "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
-        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-market");
+        InvestmentReport storedReport = verifiedReusableReport(state, "NVDA", "e-market");
         List<InvestmentReport.EvidenceItem> malformedEvidenceItems = new ArrayList<>();
         malformedEvidenceItems.add(null);
         storedReport.setEvidenceItems(malformedEvidenceItems);
@@ -227,10 +233,45 @@ class InvestmentReportVersionServiceTest {
     }
 
     @Test
+    void missingDecisionAuditFailsClosedAsCacheMiss() throws Exception {
+        AnalysisState state = analysisState(
+                "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
+        InvestmentReport storedReport = verifiedReusableReport(state, "NVDA", "e-market");
+        storedReport.setDecisionAudit(null);
+
+        assertThat(findReusableReport(state, storedReport)).isEmpty();
+    }
+
+    @Test
+    void staleDecisionAuditFailsClosedAsCacheMiss() throws Exception {
+        AnalysisState state = analysisState(
+                "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
+        InvestmentReport storedReport = verifiedReusableReport(state, "NVDA", "e-market");
+        DebateVerdict current = storedReport.getDecisionAudit();
+        storedReport.setDecisionAudit(new DebateVerdict(
+                current.policyId(),
+                DebateDecisionPolicy.POLICY_VERSION + 1,
+                current.inputHash(),
+                current.dataSnapshotHash(),
+                current.bullScore(),
+                current.bearScore(),
+                current.leadingSide(),
+                current.scoreMargin(),
+                current.recommendation(),
+                current.analysisHorizon(),
+                current.decisivePointIds(),
+                current.unresolvedPointIds(),
+                current.assessments()
+        ));
+
+        assertThat(findReusableReport(state, storedReport)).isEmpty();
+    }
+
+    @Test
     void reportTickerMismatchPreventsCacheReuse() throws Exception {
         AnalysisState state = analysisState(
                 "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
-        InvestmentReport storedReport = verifiedReusableReport("AAPL", "e-market");
+        InvestmentReport storedReport = verifiedReusableReport(state, "AAPL", "e-market");
 
         assertThat(findReusableReport(state, storedReport)).isEmpty();
     }
@@ -239,7 +280,7 @@ class InvestmentReportVersionServiceTest {
     void unknownEvidenceReferencePreventsCacheReuse() throws Exception {
         AnalysisState state = analysisState(
                 "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
-        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-unknown");
+        InvestmentReport storedReport = verifiedReusableReport(state, "NVDA", "e-unknown");
 
         assertThat(findReusableReport(state, storedReport)).isEmpty();
     }
@@ -254,7 +295,7 @@ class InvestmentReportVersionServiceTest {
                 "Should I buy NVDA?",
                 EvidenceStatus.FAILED
         );
-        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-market");
+        InvestmentReport storedReport = verifiedReusableReport(state, "NVDA", "e-market");
 
         assertThat(findReusableReport(state, storedReport)).isEmpty();
     }
@@ -271,7 +312,7 @@ class InvestmentReportVersionServiceTest {
                 "NVDA", "market-v1", "risks-v1", "news-v1", "Should I buy NVDA?");
         service.prepareHashes(state);
 
-        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-market");
+        InvestmentReport storedReport = verifiedReusableReport(state, "NVDA", "e-market");
         InvestmentReportVersion existing = new InvestmentReportVersion();
         existing.setUserId("u_001");
         existing.setTicker("NVDA");
@@ -301,8 +342,8 @@ class InvestmentReportVersionServiceTest {
                 .build());
         service.prepareHashes(state);
 
-        InvestmentReport storedReport = verifiedReusableReport("NVDA", "e-market");
-        storedReport.setRecommendation("BUY");
+        InvestmentReport storedReport = verifiedReusableReport(
+                state, "NVDA", "e-market", "BUY");
         InvestmentReportVersion existing = new InvestmentReportVersion();
         existing.setUserId("u_001");
         existing.setTicker("NVDA");
@@ -715,10 +756,58 @@ class InvestmentReportVersionServiceTest {
                 .build();
     }
 
-    private InvestmentReport verifiedReusableReport(String ticker, String evidenceId) {
+    private InvestmentReport verifiedReusableReport(
+            AnalysisState state,
+            String ticker,
+            String evidenceId
+    ) {
+        return verifiedReusableReport(state, ticker, evidenceId, "HOLD");
+    }
+
+    private InvestmentReport verifiedReusableReport(
+            AnalysisState state,
+            String ticker,
+            String evidenceId,
+            String recommendation
+    ) {
+        service.prepareHashes(state);
+        String dataSnapshotHash = state.getDataSnapshotHash();
+        String pointId = "thesis-bull-1";
+        List<ArgumentAssessment> assessments = java.util.stream.IntStream.rangeClosed(1, 6)
+                .mapToObj(index -> new ArgumentAssessment(
+                        index == 1 ? pointId : "fixture-thesis-" + index,
+                        4,
+                        4,
+                        4,
+                        3,
+                        3,
+                        List.of("e-fundamentals"),
+                        List.of(),
+                        List.of(AssessmentReasonCode.SUPPORTED),
+                        "The point is supported by the accepted evidence."
+                ))
+                .toList();
+        boolean directional = !"HOLD".equals(recommendation);
         return InvestmentReport.builder()
                 .ticker(ticker)
-                .recommendation("HOLD")
+                .dataSnapshotHash(dataSnapshotHash)
+                .recommendation(recommendation)
+                .analysisHorizon(AnalysisHorizon.UNSPECIFIED)
+                .decisionAudit(new DebateVerdict(
+                        DebateDecisionPolicy.POLICY_ID,
+                        DebateDecisionPolicy.POLICY_VERSION,
+                        "input-hash",
+                        dataSnapshotHash,
+                        directional ? 85.0 : 70.0,
+                        directional ? 60.0 : 70.0,
+                        directional ? LeadingSide.BULL : LeadingSide.BALANCED,
+                        directional ? 25.0 : 0.0,
+                        recommendation,
+                        AnalysisHorizon.UNSPECIFIED,
+                        directional ? List.of(pointId) : List.of(),
+                        List.of(),
+                        assessments
+                ))
                 .analystSummary("The evidence supports a bounded hold recommendation.")
                 .dataFreshness("Evidence observed at 2026-07-24T00:00:00Z.")
                 .rationale(List.of("The current valuation balances growth and execution risk."))
