@@ -16,13 +16,9 @@ BaoStock 是一个免费、开源的 A 股数据接口，提供：
 
 from datetime import datetime, timedelta
 import socket
-import zlib
 from threading import Event, RLock, Thread
 
 import baostock as bs
-import baostock.common.contants as bs_cons
-import baostock.common.context as bs_context
-import baostock.util.socketutil as bs_socket_util
 import pandas as pd
 
 from app.services.technical_indicators import calculate_technical_indicators
@@ -36,14 +32,12 @@ _BAOSTOCK_LOGIN_DONE = Event()
 _BAOSTOCK_RETRY_NOW = Event()
 _BAOSTOCK_MANAGER_STOP = Event()
 _BAOSTOCK_MANAGER_STARTED = False
-_BAOSTOCK_LOGIN_STARTED = False
 _BAOSTOCK_LOGIN_IN_PROGRESS = False
 _BAOSTOCK_LOGGED_IN = False
 _BAOSTOCK_LOGIN_ERROR = ""
 _BAOSTOCK_LAST_ATTEMPT_AT: str | None = None
 _BAOSTOCK_LAST_SUCCESS_AT: str | None = None
 _BAOSTOCK_LOGIN_ATTEMPTS = 0
-_BAOSTOCK_SOCKET_TIMEOUT_PATCHED = False
 
 SECTOR_SAMPLES = {
     "baijiu": {
@@ -164,7 +158,6 @@ def _baostock_login_worker() -> None:
 
     previous_timeout = socket.getdefaulttimeout()
     try:
-        _patch_baostock_socket_timeout()
         socket.setdefaulttimeout(BAOSTOCK_LOGIN_TIMEOUT_SECONDS)
         result = bs.login()
         error_code = getattr(result, "error_code", "")
@@ -186,82 +179,12 @@ def _baostock_login_worker() -> None:
         _BAOSTOCK_LOGIN_DONE.set()
 
 
-def _patch_baostock_socket_timeout() -> None:
-    """BaoStock 的 connect() 没有超时；这里补上超时，让登录失败后可重试。"""
-    global _BAOSTOCK_SOCKET_TIMEOUT_PATCHED
-    with BAOSTOCK_LOCK:
-        if _BAOSTOCK_SOCKET_TIMEOUT_PATCHED:
-            return
-
-        def connect_with_timeout(self):
-            """替换 BaoStock 原始连接逻辑，为 socket 建立阶段增加超时。"""
-            sock = None
-            try:
-                sock = socket.create_connection(
-                    (bs_cons.BAOSTOCK_SERVER_IP, bs_cons.BAOSTOCK_SERVER_PORT),
-                    timeout=BAOSTOCK_LOGIN_TIMEOUT_SECONDS,
-                )
-                sock.settimeout(BAOSTOCK_LOGIN_TIMEOUT_SECONDS)
-            except Exception as e:
-                print(f"BaoStock server connection failed: {e}")
-            setattr(bs_context, "default_socket", sock)
-
-        def send_msg_with_timeout(msg):
-            """替换 BaoStock 原始发送逻辑，为读取响应阶段增加超时。"""
-            try:
-                if not hasattr(bs_context, "default_socket"):
-                    print("you don't login.")
-                    return None
-
-                default_socket = getattr(bs_context, "default_socket")
-                if default_socket is None:
-                    return None
-
-                default_socket.settimeout(BAOSTOCK_LOGIN_TIMEOUT_SECONDS)
-                default_socket.send(bytes(msg + "\n", encoding="utf-8"))
-                receive = b""
-                while True:
-                    chunk = default_socket.recv(8192)
-                    if not chunk:
-                        return None
-                    receive += chunk
-                    if receive.endswith(b"<![CDATA[]]>\n") or receive.endswith(b"\n"):
-                        break
-
-                head_bytes = receive[0:bs_cons.MESSAGE_HEADER_LENGTH]
-                head_str = bytes.decode(head_bytes)
-                head_arr = head_str.split(bs_cons.MESSAGE_SPLIT)
-                if len(head_arr) > 2 and head_arr[1] in bs_cons.COMPRESSED_MESSAGE_TYPE_TUPLE:
-                    head_inner_length = int(head_arr[2])
-                    body_str = bytes.decode(
-                        zlib.decompress(
-                            receive[
-                                bs_cons.MESSAGE_HEADER_LENGTH:
-                                bs_cons.MESSAGE_HEADER_LENGTH + head_inner_length
-                            ]
-                        )
-                    )
-                    return head_str + body_str
-                return bytes.decode(receive)
-            except Exception as e:
-                print(e)
-                print("接收数据异常，请稍后再试。")
-                return None
-
-        bs_socket_util.SocketUtil.connect = connect_with_timeout
-        bs_socket_util.send_msg = send_msg_with_timeout
-        _BAOSTOCK_SOCKET_TIMEOUT_PATCHED = True
-
-
 def _ensure_baostock_login(timeout_seconds: int = BAOSTOCK_LOGIN_TIMEOUT_SECONDS) -> dict | None:
     """确保 BaoStock 已登录；无法及时登录时返回可并入业务响应的错误对象。"""
-    global _BAOSTOCK_LOGIN_STARTED
     start_baostock_login_manager()
     with BAOSTOCK_LOCK:
         if _BAOSTOCK_LOGGED_IN:
             return None
-        if not _BAOSTOCK_LOGIN_STARTED:
-            _BAOSTOCK_LOGIN_STARTED = True
         if not _BAOSTOCK_LOGIN_IN_PROGRESS:
             # 当前请求等待有限时间；真正的重试生命周期交给后台管理线程继续推进。
             _BAOSTOCK_LOGIN_DONE.clear()

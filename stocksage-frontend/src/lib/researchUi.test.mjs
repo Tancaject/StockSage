@@ -3,23 +3,8 @@ import assert from 'node:assert/strict'
 
 import {
   buildAssistantEvidenceSummary,
-  buildResearchStackStatus,
   buildResearchTimeline,
-  buildTickerDossier,
 } from './researchUi.js'
-
-test('buildResearchStackStatus summarizes required and optional data-source readiness', () => {
-  const status = buildResearchStackStatus([
-    { id: 'backend', label: '后端接口', required: true, ok: true, detail: '聊天接口已响应' },
-    { id: 'rag', label: 'RAG 检索', required: true, ok: false, detail: '检索接口不可用' },
-    { id: 'trace', label: '链路追踪', required: false, ok: true, detail: '消息链路可查看' },
-  ])
-
-  assert.equal(status.status, 'fail')
-  assert.equal(status.readyLabel, '1/2 服务就绪')
-  assert.deepEqual(status.sources.map(source => source.status), ['ready', 'blocked', 'ready'])
-  assert.equal(status.sources[1].tone, 'danger')
-})
 
 test('buildAssistantEvidenceSummary exposes model, trace, charts, and source hints', () => {
   const summary = buildAssistantEvidenceSummary({
@@ -132,27 +117,4 @@ test('buildResearchTimeline merges repeated tool calls and hides implementation 
     timeline.map(stage => `${stage.label} ${stage.detail}`).join('\n'),
     /getStockKLine|getTechnicalIndicators|\["meta/
   )
-})
-
-test('buildTickerDossier creates a workbench-ready summary for the selected ticker', () => {
-  const dossier = buildTickerDossier({
-    ticker: 'nvda',
-    watchlistItem: { ticker: 'NVDA', status: '进行中', lastAction: '驾驶舱已更新' },
-  })
-
-  assert.equal(dossier.ticker, 'NVDA')
-  assert.deepEqual(dossier.rows.map(row => row.label), ['覆盖范围'])
-  assert.equal(dossier.rows[0].value, '进行中 · 驾驶舱已更新')
-  assert.equal(dossier.rows[0].tone, 'info')
-  assert.deepEqual(dossier.nextActions, [])
-})
-
-test('buildTickerDossier omits the separator when there is no last action', () => {
-  const dossier = buildTickerDossier({
-    ticker: 'AAPL',
-    watchlistItem: { ticker: 'AAPL', status: '持仓', lastAction: '' },
-  })
-
-  assert.equal(dossier.rows[0].value, '持仓')
-  assert.equal(dossier.rows[0].tone, 'positive')
 })

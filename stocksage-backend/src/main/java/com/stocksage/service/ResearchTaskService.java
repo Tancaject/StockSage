@@ -131,11 +131,6 @@ public class ResearchTaskService {
         return leaseService.heartbeatInterval();
     }
 
-    /** @return 当前生效的租约 TTL。 */
-    public Duration leaseTtl() {
-        return leaseService.leaseTtl();
-    }
-
     /**
      * 以 leaseToken 为 owner fence，把 PENDING 任务原子启动为 RUNNING。
      *
@@ -401,20 +396,6 @@ public class ResearchTaskService {
     }
 
     /**
-     * 无 owner fence 的直接阶段保存，仅供同步/兼容调用；生产异步管线应使用 markStageForOwner。
-     *
-     * @param task 当前任务
-     * @param stage 目标阶段
-     * @return 保存后的任务
-     */
-    @Transactional
-    public ResearchTask markStage(ResearchTask task, ResearchTask.Stage stage) {
-        task.setStage(stage == null ? task.getStage() : stage);
-        task.setHeartbeatAt(LocalDateTime.now());
-        return repository.saveAndFlush(task);
-    }
-
-    /**
      * 仅当前 owner 可推进任务阶段并刷新数据库心跳。
      *
      * @param task 当前任务
@@ -460,29 +441,6 @@ public class ResearchTaskService {
             return true;
         }
         return false;
-    }
-
-    /**
-     * 无 owner fence 的成功保存，仅供同步/兼容调用；异步管线应使用 markSucceededForOwner。
-     *
-     * @param task 当前任务
-     * @param resultReportVersionId 报告版本 ID；null 表示证据不足结果
-     * @return 保存后的任务
-     */
-    @Transactional
-    public ResearchTask markSucceeded(ResearchTask task, Long resultReportVersionId) {
-        LocalDateTime now = LocalDateTime.now();
-        task.setStatus(ResearchTask.Status.SUCCEEDED);
-        task.setStage(ResearchTask.Stage.COMPLETE);
-        task.setResultReportVersionId(resultReportVersionId);
-        task.setResultKind(resultReportVersionId == null
-                ? ResearchTask.ResultKind.INSUFFICIENT_EVIDENCE
-                : ResearchTask.ResultKind.FULL_REPORT);
-        task.setCompletedAt(now);
-        task.setHeartbeatAt(now);
-        task.setLeaseToken(null);
-        task.setErrorMessage(null);
-        return repository.saveAndFlush(task);
     }
 
     /**
@@ -544,25 +502,6 @@ public class ResearchTaskService {
         task.setCompletedAt(LocalDateTime.now());
         task.setLeaseToken(null);
         task.setErrorMessage(null);
-    }
-
-    /**
-     * 无 owner fence 的失败保存，仅供同步/兼容调用；异步管线应使用 markFailedForOwner。
-     *
-     * @param task 当前任务
-     * @param errorMessage 失败原因
-     * @return 保存后的任务
-     */
-    @Transactional
-    public ResearchTask markFailed(ResearchTask task, String errorMessage) {
-        LocalDateTime now = LocalDateTime.now();
-        task.setStatus(ResearchTask.Status.FAILED);
-        task.setStage(ResearchTask.Stage.FAILED);
-        task.setErrorMessage(truncate(normalizeText(errorMessage), MAX_ERROR_LENGTH));
-        task.setCompletedAt(now);
-        task.setHeartbeatAt(now);
-        task.setLeaseToken(null);
-        return repository.saveAndFlush(task);
     }
 
     /**
@@ -767,49 +706,6 @@ public class ResearchTaskService {
                     : fallback;
         } catch (JsonProcessingException error) {
             return fallback;
-        }
-    }
-
-    /**
-     * 由用户、ticker 和双哈希构造报告生成任务幂等键。
-     *
-     * @return SHA-256 派生的报告幂等键
-     */
-    public String buildInvestmentReportKey(
-            String userId,
-            String ticker,
-            String dataSnapshotHash,
-            String contextHash
-    ) {
-        String canonical = String.join("|",
-                normalizeText(userId),
-                normalizeTicker(ticker),
-                normalizeText(dataSnapshotHash),
-                normalizeText(contextHash)
-        );
-        return "investment-report:" + sha256(canonical);
-    }
-
-    /**
-     * 构造报告任务载荷，记录查询和证据/上下文哈希。
-     *
-     * @return 可持久化 JSON
-     */
-    public String buildInvestmentReportPayload(
-            String ticker,
-            String query,
-            String dataSnapshotHash,
-            String contextHash
-    ) {
-        Map<String, String> payload = new LinkedHashMap<>();
-        payload.put("ticker", normalizeTicker(ticker));
-        payload.put("query", normalizeText(query));
-        payload.put("dataSnapshotHash", normalizeText(dataSnapshotHash));
-        payload.put("contextHash", normalizeText(contextHash));
-        try {
-            return objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Unable to serialize research task payload", e);
         }
     }
 

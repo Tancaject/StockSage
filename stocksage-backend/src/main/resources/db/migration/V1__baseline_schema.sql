@@ -1,4 +1,4 @@
--- Flyway V1 基线：完整的 StockSage 当前 schema（等价于 sql/init.sql，去掉 CREATE DATABASE/USE）。
+-- Flyway V1 基线：新建数据库所需的完整 StockSage schema。
 -- 既有数据库由 baseline-on-migrate 在版本 1 处 baseline，本文件不会重复执行；
 -- 全新空库则由本文件一次性建全。此后的 schema 变更请新增 V2__、V3__ 迁移文件。
 

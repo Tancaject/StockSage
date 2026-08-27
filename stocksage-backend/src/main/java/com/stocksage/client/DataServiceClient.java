@@ -235,44 +235,6 @@ public class DataServiceClient {
                 () -> get("/api/stock/market-overview"));
     }
 
-    // ===== 全球股票（美股 / 港股）=====
-
-    /**
-     * 获取美股/港股全局 K 线数据。
-     *
-     * @param symbol 全球市场代码
-     * @param period K 线周期
-     * @param days 回溯天数
-     * @return K 线 JSON
-     */
-    public String getGlobalKLine(String symbol, String period, int days) {
-        return cached("global-kline", new String[]{symbol, period, String.valueOf(days)}, TTL_KLINE,
-                () -> getOnce("/api/stock/global/kline?symbol={symbol}&period={period}&days={days}", symbol, period, days));
-    }
-
-    /**
-     * 获取美股/港股标的基础信息。
-     *
-     * @param symbol 全球市场代码
-     * @return 公司与交易所信息 JSON
-     */
-    public String getGlobalStockInfo(String symbol) {
-        return cached("global-info", new String[]{symbol}, TTL_FINANCIAL,
-                () -> getOnce("/api/stock/global/info?symbol={symbol}", symbol));
-    }
-
-    /**
-     * 获取美股/港股技术指标。
-     *
-     * @param symbol 全球市场代码
-     * @param indicators 逗号分隔的指标名
-     * @return 技术指标 JSON
-     */
-    public String getGlobalTechnicalIndicators(String symbol, String indicators) {
-        return cached("global-technical", new String[]{symbol, indicators}, TTL_TECHNICAL,
-                () -> getOnce("/api/stock/global/technical?symbol={symbol}&indicators={indicators}", symbol, indicators));
-    }
-
     // ===== 网页搜索 =====
 
     /**

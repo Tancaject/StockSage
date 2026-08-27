@@ -1126,38 +1126,6 @@ public class DeepEvidenceCollector {
             boolean newsOk,
             EvidenceLedger evidenceLedger,
             HarnessDecision harnessDecision) {
-
-        /**
-         * 兼容尚未提供 EvidenceLedger 的旧测试和调用方；生产新代码应使用完整构造器。
-         */
-        public EvidenceCollection(
-                String contextMarkdown,
-                AnalysisState state,
-                boolean sufficientForRecommendation,
-                boolean tickerResolved,
-                boolean fundamentalsOk,
-                boolean marketOk
-        ) {
-            this(
-                    contextMarkdown,
-                    state,
-                    sufficientForRecommendation,
-                    tickerResolved,
-                    fundamentalsOk,
-                    marketOk,
-                    false,
-                    state == null || state.getEvidenceLedger() == null
-                            ? EvidenceLedger.empty()
-                            : state.getEvidenceLedger(),
-                    new HarnessDecision(
-                            sufficientForRecommendation
-                                    ? HarnessOutcome.PASS
-                                    : HarnessOutcome.DEGRADE,
-                            List.of(),
-                            List.of()
-                    )
-            );
-        }
     }
 
     private record EvidenceSnapshot(

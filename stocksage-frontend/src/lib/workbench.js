@@ -17,16 +17,6 @@ const FOCUS_LABELS = {
   'technical setup': '技术形态',
 }
 
-const DIMENSION_LABELS = {
-  'business mix': '业务结构',
-  growth: '增长',
-  margin: '利润率',
-  valuation: '估值',
-  risk: '风险',
-  'capital allocation': '资本配置',
-  cloud: '云业务',
-}
-
 const CHART_STATUS_LABELS = {
   READY: '就绪',
   SAMPLE: '演示样本',
@@ -181,54 +171,6 @@ export function buildPortfolioDiagnosisPrompt(accountId = '') {
     'Do not place, cancel, modify, stage, or suggest executable orders. Do not call or invent trading APIs.',
     'Finish with watch items and questions for the user. This is not investment advice.',
   ].join('\n')
-}
-
-export function buildPromptBrief(kind, payload = {}) {
-  if (kind === 'compare') {
-    const tickers = normalizeList(payload.tickers).map(normalizeTicker).filter(Boolean)
-    const dimensions = normalizeList(payload.dimensions, ['business mix', 'growth', 'risk'])
-    return {
-      title: '对比研究设置',
-      rows: [
-        { label: '标的', value: tickers.join(' vs ') || '未选择' },
-        { label: '比较维度', value: dimensions.map(labelDimension).join('、') },
-        { label: '输出', value: '并列表格、强弱项、数据缺口和每个标的的多空理由' },
-      ],
-    }
-  }
-
-  if (kind === 'event') {
-    return {
-      title: '事件影响设置',
-      rows: [
-        { label: '标的', value: normalizeTicker(payload.ticker) || '待填写' },
-        { label: '来源', value: String(payload.eventSource || '用户输入').trim() || '用户输入' },
-        { label: '事件', value: summarizeText(payload.eventText, '等待粘贴事件、公告或新闻摘要') },
-        { label: '输出', value: '事件摘要、影响链路、财务指标、证据引用、不确定性和跟踪项' },
-      ],
-    }
-  }
-
-  if (kind === 'portfolio') {
-    return {
-      title: '持仓诊断设置',
-      rows: [
-        { label: '账户', value: String(payload.accountId || '').trim() || '默认 IBKR 账户' },
-        { label: '边界', value: '只读取认证状态、账户摘要、持仓、行情和历史 K 线' },
-        { label: '输出', value: '集中度、单股风险、主题暴露、需跟踪事件和用户问题' },
-      ],
-    }
-  }
-
-  const focus = normalizeList(payload.focusAreas, DEFAULT_FOCUS_AREAS)
-  return {
-    title: '单股研究设置',
-    rows: [
-      { label: '标的', value: normalizeTicker(payload.ticker) || '未选择' },
-      { label: '关注重点', value: focus.map(labelFocus).join('、') },
-      { label: '输出', value: '证据、推理、风险、数据缺口和观察/回避/继续研究结论' },
-    ],
-  }
 }
 
 export function buildWatchlistFromProfile(profile = {}, fallbackTickers = ['NVDA', 'AAPL', 'MSFT', 'AMZN', 'META']) {
@@ -1067,17 +1009,6 @@ function suggestionRank(item, tickerQuery, textQuery) {
 function labelFocus(value) {
   const key = String(value || '').trim().toLowerCase()
   return FOCUS_LABELS[key] || String(value || '').trim()
-}
-
-function labelDimension(value) {
-  const key = String(value || '').trim().toLowerCase()
-  return DIMENSION_LABELS[key] || String(value || '').trim()
-}
-
-function summarizeText(value, fallback) {
-  const text = String(value || '').trim()
-  if (!text) return fallback
-  return text.length > 90 ? `${text.slice(0, 90).trim()}...` : text
 }
 
 function uniqueList(values) {

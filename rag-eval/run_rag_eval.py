@@ -5,8 +5,8 @@
 """
 
 import argparse
+from collections import Counter
 import json
-import math
 import os
 import re
 import time
@@ -15,12 +15,18 @@ from pathlib import Path
 
 import requests
 
+from eval_utils import (
+    DEFAULT_PHOENIX_ENDPOINT,
+    DEFAULT_PHOENIX_PROJECT,
+    average_numeric_metrics,
+    binary_ranking_metrics,
+    setup_phoenix,
+)
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_GOLDEN_SET = ROOT / "rag-eval" / "golden_set.jsonl"
 DEFAULT_RESULTS_DIR = ROOT / "rag-eval" / "results"
-DEFAULT_PHOENIX_ENDPOINT = "http://localhost:6006/v1/traces"
-DEFAULT_PHOENIX_PROJECT = "stocksage-rag-eval"
 
 NO_ANSWER_MARKERS = [
     "does not disclose",
@@ -128,42 +134,12 @@ def retrieval_metrics(contexts, expected_evidence):
     for evidence in expected_evidence:
         evidence_hits.append(any(evidence_matches(context, evidence) for context in contexts))
 
-    retrieved_count = len(contexts)
-    relevant_count = sum(relevance_by_rank)
     context_recall = (
         sum(1 for hit in evidence_hits if hit) / len(evidence_hits)
         if evidence_hits else 0.0
     )
-    context_precision = relevant_count / retrieved_count if retrieved_count else 0.0
-    hit_rate = 1.0 if relevant_count else 0.0
-
-    first_relevant_rank = 0
-    for index, relevant in enumerate(relevance_by_rank, start=1):
-        if relevant:
-            first_relevant_rank = index
-            break
-    mrr = 1.0 / first_relevant_rank if first_relevant_rank else 0.0
-
-    dcg = sum(
-        relevant / math.log2(index + 2)
-        for index, relevant in enumerate(relevance_by_rank)
-    )
-    ideal = sorted(relevance_by_rank, reverse=True)
-    idcg = sum(
-        relevant / math.log2(index + 2)
-        for index, relevant in enumerate(ideal)
-    )
-    ndcg = dcg / idcg if idcg else 0.0
-
-    return {
+    return binary_ranking_metrics(relevance_by_rank) | {
         "context_recall": context_recall,
-        "context_precision": context_precision,
-        "hit_rate": hit_rate,
-        "mrr": mrr,
-        "ndcg": ndcg,
-        "retrieved_count": retrieved_count,
-        "relevant_context_count": relevant_count,
-        "first_relevant_rank": first_relevant_rank,
         "evidence_hits": evidence_hits,
         "relevance_by_rank": relevance_by_rank,
     }
@@ -267,14 +243,7 @@ def token_f1(answer, reference):
     reference_tokens = tokenize(reference)
     if not answer_tokens or not reference_tokens:
         return 0.0
-    common = 0
-    remaining = {}
-    for token in reference_tokens:
-        remaining[token] = remaining.get(token, 0) + 1
-    for token in answer_tokens:
-        if remaining.get(token, 0) > 0:
-            common += 1
-            remaining[token] -= 1
+    common = sum((Counter(answer_tokens) & Counter(reference_tokens)).values())
     if common == 0:
         return 0.0
     precision = common / len(answer_tokens)
@@ -284,26 +253,6 @@ def token_f1(answer, reference):
 
 def tokenize(text):
     return re.findall(r"[a-z0-9]+", str(text).casefold())
-
-
-def setup_phoenix(args):
-    if args.no_phoenix:
-        return None, None
-    try:
-        from opentelemetry import trace
-        from phoenix.otel import register
-
-        provider = register(
-            endpoint=args.phoenix_endpoint,
-            project_name=args.phoenix_project,
-            batch=False,
-            verbose=False,
-        )
-        tracer = trace.get_tracer("stocksage-rag-answer-eval")
-        return tracer, provider
-    except Exception as exc:
-        print(f"Phoenix export disabled: {exc}")
-        return None, None
 
 
 def emit_case_span(tracer, row):
@@ -408,30 +357,11 @@ def write_results(rows, output):
     summary = {
         "created_at": datetime.now().isoformat(timespec="seconds"),
         "case_count": len(rows),
-        "averages": average_metrics(rows),
+        "averages": average_numeric_metrics(rows),
         "cases": rows,
     }
     output.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     return summary
-
-
-def average_metrics(rows):
-    metric_names = sorted({
-        key
-        for row in rows
-        for key, value in row["metrics"].items()
-        if isinstance(value, (int, float)) and value is not None
-    })
-    averages = {}
-    for metric_name in metric_names:
-        values = [
-            row["metrics"][metric_name]
-            for row in rows
-            if isinstance(row["metrics"].get(metric_name), (int, float))
-            and row["metrics"].get(metric_name) is not None
-        ]
-        averages[metric_name] = sum(values) / len(values) if values else None
-    return averages
 
 
 def parse_args():
@@ -464,7 +394,7 @@ def main():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output = args.output or DEFAULT_RESULTS_DIR / f"rag_eval_{timestamp}.json"
 
-    tracer, provider = setup_phoenix(args)
+    tracer, provider = setup_phoenix(args, "stocksage-rag-answer-eval")
     rows = run_cases(args, cases, tracer)
     summary = write_results(rows, output)
     emit_summary_span(tracer, summary, output)

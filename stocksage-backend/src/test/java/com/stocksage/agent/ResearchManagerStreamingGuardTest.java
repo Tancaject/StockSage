@@ -78,7 +78,7 @@ class ResearchManagerStreamingGuardTest {
             }
         };
 
-        assertThatThrownBy(() -> manager.synthesizeStreaming(
+        assertThatThrownBy(() -> manager.synthesizeStreamingResult(
                 state, verdict, "trace", 1L, emitter, guard).block())
                 .isInstanceOf(DeepResearchPipeline.OwnershipLostException.class);
 
@@ -104,7 +104,7 @@ class ResearchManagerStreamingGuardTest {
             }
         };
 
-        assertThatThrownBy(() -> manager.synthesizeStreaming(
+        assertThatThrownBy(() -> manager.synthesizeStreamingResult(
                 state, verdict, "trace", 1L,
                 mock(ChatStreamEmitter.class), guard).block())
                 .isInstanceOf(DeepResearchPipeline.OwnershipLostException.class);
@@ -113,7 +113,7 @@ class ResearchManagerStreamingGuardTest {
     }
 
     @Test
-    void originalStreamingOverloadStillParsesAReportWithoutAGuard() {
+    void streamingResultParsesAReportWithoutAGuard() {
         ChatClient chatClient = chatClientReturning(Flux.just(
                 "{\"analystSummary\":\"ok\"}"));
         ResearchManager manager = new ResearchManager(
@@ -122,10 +122,12 @@ class ResearchManagerStreamingGuardTest {
         DebateVerdict verdict = lockedVerdict(
                 state, "BUY", AnalysisHorizon.LONG_TERM);
 
-        InvestmentReport report = manager.synthesizeStreaming(
+        var result = manager.synthesizeStreamingResult(
                 state, verdict, "trace", 1L,
                 mock(ChatStreamEmitter.class)).block();
 
+        assertThat(result).isNotNull();
+        InvestmentReport report = result.report();
         assertThat(report).isNotNull();
         assertThat(report.getRecommendation()).isEqualTo("BUY");
     }

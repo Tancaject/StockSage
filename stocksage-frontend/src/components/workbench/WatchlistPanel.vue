@@ -337,10 +337,4 @@ const filteredItems = computed(() => {
   color: #ffffff;
 }
 
-@media (max-width: 640px) {
-  .ticker-search {
-    width: 100%;
-  }
-}
 </style>
-

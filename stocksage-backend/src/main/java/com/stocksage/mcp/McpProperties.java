@@ -1,5 +1,7 @@
 package com.stocksage.mcp;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,8 @@ import java.util.Set;
  */
 @Component
 @ConfigurationProperties(prefix = "stocksage.mcp")
+@Getter
+@Setter
 public class McpProperties {
 
     /** MCP 总开关，关闭时不执行发现或调用。 */
@@ -32,63 +36,11 @@ public class McpProperties {
     /** 发现失败后再次访问远端前的最短等待秒数。 */
     private long discoveryRetrySeconds = 30;
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
     public Set<String> getAllowedTools() {
         return allowedTools == null ? Set.of() : allowedTools.stream()
                 .map(String::trim)
                 .filter(value -> !value.isBlank())
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
-    }
-
-    public void setAllowedTools(Set<String> allowedTools) {
-        this.allowedTools = allowedTools;
-    }
-
-    public String getNewsSearchServer() {
-        return newsSearchServer;
-    }
-
-    public void setNewsSearchServer(String newsSearchServer) {
-        this.newsSearchServer = newsSearchServer;
-    }
-
-    public String getNewsSearchTool() {
-        return newsSearchTool;
-    }
-
-    public void setNewsSearchTool(String newsSearchTool) {
-        this.newsSearchTool = newsSearchTool;
-    }
-
-    public String getNewsSearchQueryField() {
-        return newsSearchQueryField;
-    }
-
-    public void setNewsSearchQueryField(String newsSearchQueryField) {
-        this.newsSearchQueryField = newsSearchQueryField;
-    }
-
-    public String getNewsSearchLimitField() {
-        return newsSearchLimitField;
-    }
-
-    public void setNewsSearchLimitField(String newsSearchLimitField) {
-        this.newsSearchLimitField = newsSearchLimitField;
-    }
-
-    public long getDiscoveryRetrySeconds() {
-        return discoveryRetrySeconds;
-    }
-
-    public void setDiscoveryRetrySeconds(long discoveryRetrySeconds) {
-        this.discoveryRetrySeconds = discoveryRetrySeconds;
     }
 
     /** @return 当前配置目标的 {@code server/tool} 目录键 */

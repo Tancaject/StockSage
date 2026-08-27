@@ -23,13 +23,6 @@ export function getReportSurfaceLabels() {
   return { ...REPORT_SURFACE_LABELS }
 }
 
-export function getWorkbenchResponsiveMode(width) {
-  const numericWidth = Number(width)
-  if (Number.isFinite(numericWidth) && numericWidth <= 640) return 'mobile'
-  if (Number.isFinite(numericWidth) && numericWidth <= 1080) return 'tablet'
-  return 'desktop'
-}
-
 export function getRunPanelControls(status) {
   const value = String(status || '').toLowerCase()
   return {

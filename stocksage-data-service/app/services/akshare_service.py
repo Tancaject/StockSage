@@ -400,37 +400,12 @@ class AkshareService:
         digits = "".join(ch for ch in value if ch.isdigit())
         return digits[-6:].zfill(6)
 
-    def _hk_spot_row(self, code: str) -> dict:
-        try:
-            df = self._hk_spot()
-        except Exception:
-            df = self._hk_search_catalog()
-        if "代码" not in df.columns:
-            return {}
-        matched = df[df["代码"].astype(str).str.zfill(5) == code]
-        if matched.empty:
-            return {}
-        return {str(k): self._json_value(v) for k, v in matched.iloc[0].to_dict().items()}
-
-    def _hk_catalog_row(self, code: str) -> dict:
-        df = self._hk_search_catalog()
-        if "代码" not in df.columns:
-            return {}
-        matched = df[df["代码"].astype(str).str.zfill(5) == code]
-        if matched.empty:
-            return {}
-        return {str(k): self._json_value(v) for k, v in matched.iloc[0].to_dict().items()}
-
     def _hk_suggest_row(self, code: str) -> dict:
         result = self.search_symbols(f"{code}.HK", max_results=3)
         for item in result.get("results", []):
             if item.get("market") == "HK" and self._hk_code(item.get("symbol", "")) == code:
                 return item
         return {}
-
-    @lru_cache(maxsize=1)
-    def _hk_spot(self):
-        return self._ak().stock_hk_spot_em()
 
     @lru_cache(maxsize=1)
     def _hk_search_catalog(self):

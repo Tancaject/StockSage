@@ -814,28 +814,6 @@ function formatDuration(ms) {
   line-height: 1.65;
 }
 
-.reasoning-row {
-  white-space: pre-wrap;
-}
-
-.reasoning-label {
-  margin-right: 8px;
-  color: var(--accent-dark);
-  font-weight: 700;
-}
-
-.reasoning-text {
-  overflow-wrap: anywhere;
-}
-
-.reasoning-duration {
-  margin-left: 8px;
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 500;
-  opacity: 0.75;
-}
-
 .trace-summary {
   margin-top: 10px;
   padding-top: 8px;

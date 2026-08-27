@@ -6,23 +6,22 @@
 
 import argparse
 import json
-import math
 from datetime import datetime
 from pathlib import Path
 
 import requests
 
-try:
-    from ragas.metrics.collections import StringPresence
-except ImportError:  # pragma: no cover - 兼容旧版 ragas
-    from ragas.metrics import StringPresence
+from eval_utils import (
+    DEFAULT_PHOENIX_ENDPOINT,
+    DEFAULT_PHOENIX_PROJECT,
+    binary_ranking_metrics,
+    setup_phoenix,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_QUESTIONS = ROOT / "rag-eval" / "questions.jsonl"
 DEFAULT_RESULTS_DIR = ROOT / "rag-eval" / "results"
-DEFAULT_PHOENIX_ENDPOINT = "http://localhost:6006/v1/traces"
-DEFAULT_PHOENIX_PROJECT = "stocksage-rag-eval"
 
 
 def load_questions(path):
@@ -51,33 +50,12 @@ def fetch_contexts(base_url, query, timeout):
     return response.json()
 
 
-def flatten_contexts(contexts):
-    parts = []
-    for item in contexts:
-        parts.append(str(item.get("content", "")))
-        metadata = item.get("metadata")
-        if metadata:
-            parts.append(json.dumps(metadata, ensure_ascii=False, sort_keys=True))
-    return "\n".join(parts)
-
-
 def context_text(context):
     parts = [str(context.get("content", ""))]
     metadata = context.get("metadata")
     if metadata:
         parts.append(json.dumps(metadata, ensure_ascii=False, sort_keys=True))
     return "\n".join(parts).casefold()
-
-
-def score_presence(scorer, expected_terms, retrieved_text):
-    normalized_text = retrieved_text.casefold()
-    term_scores = {}
-    for term in expected_terms:
-        normalized_term = str(term).casefold()
-        result = scorer.score(reference=normalized_term, response=normalized_text)
-        term_scores[str(term)] = float(getattr(result, "value", result))
-    mean_score = sum(term_scores.values()) / len(term_scores) if term_scores else 0.0
-    return mean_score, term_scores
 
 
 def retrieval_metrics(contexts, expected_terms, relevance_terms):
@@ -101,65 +79,12 @@ def retrieval_metrics(contexts, expected_terms, relevance_terms):
         relevance_term_hits_by_rank.append(hits)
         relevance_by_rank.append(1 if hits else 0)
 
-    retrieved_count = len(contexts)
-    relevant_context_count = sum(relevance_by_rank)
-    context_precision = (
-        relevant_context_count / retrieved_count
-        if retrieved_count else 0.0
-    )
-    hit_rate = 1.0 if relevant_context_count > 0 else 0.0
-
-    first_relevant_rank = 0
-    for index, relevant in enumerate(relevance_by_rank, start=1):
-        if relevant:
-            first_relevant_rank = index
-            break
-    mrr = 1.0 / first_relevant_rank if first_relevant_rank else 0.0
-
-    dcg = sum(
-        relevant / math.log2(index + 2)
-        for index, relevant in enumerate(relevance_by_rank)
-    )
-    ideal = sorted(relevance_by_rank, reverse=True)
-    idcg = sum(
-        relevant / math.log2(index + 2)
-        for index, relevant in enumerate(ideal)
-    )
-    ndcg = dcg / idcg if idcg else 0.0
-
-    return {
+    return binary_ranking_metrics(relevance_by_rank) | {
         "context_recall": context_recall,
-        "context_precision": context_precision,
-        "hit_rate": hit_rate,
-        "mrr": mrr,
-        "ndcg": ndcg,
-        "relevant_context_count": relevant_context_count,
-        "retrieved_count": retrieved_count,
-        "first_relevant_rank": first_relevant_rank,
         "found_terms": found_terms,
         "relevance_by_rank": relevance_by_rank,
         "relevance_term_hits_by_rank": relevance_term_hits_by_rank,
     }
-
-
-def setup_phoenix(args):
-    if args.no_phoenix:
-        return None, None
-    try:
-        from opentelemetry import trace
-        from phoenix.otel import register
-
-        provider = register(
-            endpoint=args.phoenix_endpoint,
-            project_name=args.phoenix_project,
-            batch=False,
-            verbose=False,
-        )
-        tracer = trace.get_tracer("stocksage-rag-eval")
-        return tracer, provider
-    except Exception as exc:
-        print(f"Phoenix export disabled: {exc}")
-        return None, None
 
 
 def emit_phoenix_case(tracer, row):
@@ -231,21 +156,20 @@ def set_phoenix_run_attributes(span, summary, output):
 
 
 def run_eval(base_url, questions, timeout, tracer):
-    scorer = StringPresence()
     rows = []
     for record in questions:
         # 每行保留原始上下文和派生指标，方便运行后检查回归，而不只是看标准输出摘要。
         query = record["query"]
         contexts = fetch_contexts(base_url, query, timeout)
-        retrieved_text = flatten_contexts(contexts)
         expected_terms = record["expected"]
         relevance_terms = record.get("relevance") or expected_terms
-        mean_score, term_scores = score_presence(
-            scorer=scorer,
-            expected_terms=expected_terms,
-            retrieved_text=retrieved_text,
-        )
         metrics = retrieval_metrics(contexts, expected_terms, relevance_terms)
+        retrieved_text = "\n".join(context_text(context) for context in contexts)
+        term_scores = {
+            str(term): float(str(term).casefold() in retrieved_text)
+            for term in expected_terms
+        }
+        mean_score = sum(term_scores.values()) / len(term_scores) if term_scores else 0.0
         row = {
             "name": record.get("name", query),
             "query": query,
@@ -375,7 +299,7 @@ def main():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output = args.output or DEFAULT_RESULTS_DIR / f"retrieval_eval_{timestamp}.json"
 
-    tracer, provider = setup_phoenix(args)
+    tracer, provider = setup_phoenix(args, "stocksage-rag-eval")
     if tracer is None:
         rows = run_eval(args.base_url, questions, args.timeout, tracer)
         summary = write_results(rows, output)

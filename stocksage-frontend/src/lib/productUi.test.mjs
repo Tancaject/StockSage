@@ -5,7 +5,6 @@ import {
   buildPrimaryNavItems,
   getRunPanelControls,
   getReportSurfaceLabels,
-  getWorkbenchResponsiveMode,
 } from './productUi.js'
 
 test('buildPrimaryNavItems exposes the same top-level routes for chat and workbench', () => {
@@ -26,12 +25,6 @@ test('getReportSurfaceLabels separates AI reports, conversation exports, and mem
   assert.equal(labels.conversationExport, '对话导出')
   assert.equal(labels.memoDraft, '投资备忘录')
   assert.equal(labels.downloadMemoAction, '下载备忘录')
-})
-
-test('getWorkbenchResponsiveMode collapses dense workbench layouts before mobile widths', () => {
-  assert.equal(getWorkbenchResponsiveMode(1280), 'desktop')
-  assert.equal(getWorkbenchResponsiveMode(900), 'tablet')
-  assert.equal(getWorkbenchResponsiveMode(520), 'mobile')
 })
 
 test('getRunPanelControls allows finished runs to be dismissed without stopping active work', () => {

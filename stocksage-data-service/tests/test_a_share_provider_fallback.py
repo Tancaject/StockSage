@@ -54,11 +54,6 @@ fake_dotenv.load_dotenv = lambda *args, **kwargs: False
 sys.modules.setdefault("dotenv", fake_dotenv)
 
 fake_baostock = types.ModuleType("baostock")
-fake_common = types.ModuleType("baostock.common")
-fake_constants = types.ModuleType("baostock.common.contants")
-fake_context = types.ModuleType("baostock.common.context")
-fake_util = types.ModuleType("baostock.util")
-fake_socketutil = types.ModuleType("baostock.util.socketutil")
 
 fake_baostock.login = lambda: types.SimpleNamespace(error_code="0", error_msg="success")
 fake_baostock.logout = lambda: None
@@ -70,27 +65,7 @@ fake_baostock.query_balance_data = lambda *args, **kwargs: None
 fake_baostock.query_cash_flow_data = lambda *args, **kwargs: None
 fake_baostock.query_dupont_data = lambda *args, **kwargs: None
 
-fake_constants.BAOSTOCK_SERVER_IP = "127.0.0.1"
-fake_constants.BAOSTOCK_SERVER_PORT = 0
-fake_constants.MESSAGE_HEADER_LENGTH = 0
-fake_constants.MESSAGE_SPLIT = "|"
-fake_constants.COMPRESSED_MESSAGE_TYPE_TUPLE = ()
-fake_context.default_socket = None
-fake_socketutil.SocketUtil = types.SimpleNamespace()
-fake_socketutil.send_msg = lambda msg: None
-
-fake_baostock.common = fake_common
-fake_common.contants = fake_constants
-fake_common.context = fake_context
-fake_baostock.util = fake_util
-fake_util.socketutil = fake_socketutil
-
 sys.modules.setdefault("baostock", fake_baostock)
-sys.modules.setdefault("baostock.common", fake_common)
-sys.modules.setdefault("baostock.common.contants", fake_constants)
-sys.modules.setdefault("baostock.common.context", fake_context)
-sys.modules.setdefault("baostock.util", fake_util)
-sys.modules.setdefault("baostock.util.socketutil", fake_socketutil)
 
 from app.routers import stock
 from app.services.akshare_service import AkshareService

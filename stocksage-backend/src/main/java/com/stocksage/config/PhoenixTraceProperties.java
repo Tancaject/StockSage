@@ -1,5 +1,7 @@
 package com.stocksage.config;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -8,6 +10,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * <p>所有配置都使用 {@code stocksage.phoenix.*} 前缀，默认关闭，避免本地未启动 Phoenix 时影响后端运行。</p>
  */
 @ConfigurationProperties(prefix = "stocksage.phoenix")
+@Getter
+@Setter
 public class PhoenixTraceProperties {
 
     /**
@@ -28,43 +32,4 @@ public class PhoenixTraceProperties {
     /** OTLP 上报超时时间，单位毫秒。 */
     private long timeoutMs = 5000;
 
-    /** 是否启用 Phoenix OTLP 上报。 */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /** 设置是否启用 Phoenix OTLP 上报。 */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    /** 获取 Phoenix OTLP HTTP 端点。 */
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    /** 设置 Phoenix OTLP HTTP 端点。 */
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
-
-    /** 获取 Phoenix 项目名称。 */
-    public String getProjectName() {
-        return projectName;
-    }
-
-    /** 设置 Phoenix 项目名称。 */
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
-
-    /** 获取 OTLP 上报超时时间。 */
-    public long getTimeoutMs() {
-        return timeoutMs;
-    }
-
-    /** 设置 OTLP 上报超时时间。 */
-    public void setTimeoutMs(long timeoutMs) {
-        this.timeoutMs = timeoutMs;
-    }
 }

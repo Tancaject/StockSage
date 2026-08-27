@@ -23,36 +23,6 @@ const CALLED_TOOL_LABELS = {
 
 const KNOWN_SYMBOLS = ['META', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'NFLX', 'AMD']
 
-export function buildResearchStackStatus(checks = []) {
-  const sources = checks.map(check => {
-    const ready = check.ok === true
-    const blocked = check.ok === false
-    return {
-      id: check.id,
-      label: check.label || check.id,
-      required: check.required !== false,
-      detail: check.detail || (ready ? 'ready' : blocked ? 'blocked' : 'checking'),
-      status: ready ? 'ready' : blocked ? 'blocked' : 'checking',
-      tone: ready ? 'positive' : blocked ? 'danger' : 'warning',
-    }
-  })
-
-  const required = sources.filter(source => source.required)
-  const readyRequired = required.filter(source => source.status === 'ready').length
-  const totalRequired = required.length
-  const status = totalRequired > 0 && readyRequired === totalRequired ? 'pass' : 'fail'
-
-  return {
-    label: '研究栈',
-    status,
-    tone: status === 'pass' ? 'positive' : 'danger',
-    readyRequired,
-    totalRequired,
-    readyLabel: `${readyRequired}/${totalRequired} 服务就绪`,
-    sources,
-  }
-}
-
 export function buildAssistantEvidenceSummary(message = {}) {
   if (message.role !== 'assistant') {
     return { visible: false, badges: [] }
@@ -195,28 +165,6 @@ export function buildResearchTimeline({ reasoning = [], charts = [], hasAnswer =
   }
 
   return timeline
-}
-
-export function buildTickerDossier({ ticker, watchlistItem = null } = {}) {
-  const symbol = normalizeTicker(ticker || watchlistItem?.ticker || 'STOCK') || 'STOCK'
-  const coverageStatus = watchlistItem?.status || '未覆盖'
-  const lastAction = watchlistItem?.lastAction || ''
-
-  const rows = [
-    {
-      label: '覆盖范围',
-      value: lastAction ? `${coverageStatus} · ${lastAction}` : coverageStatus,
-      tone: coverageStatus === '进行中'
-        ? 'info'
-        : coverageStatus.includes('持仓') ? 'positive' : 'neutral',
-    },
-  ]
-
-  return {
-    ticker: symbol,
-    rows,
-    nextActions: [],
-  }
 }
 
 function normalizeReasoningList(reasoning) {

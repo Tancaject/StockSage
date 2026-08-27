@@ -144,6 +144,8 @@ class CheckpointTakeoverIT {
         ResearchTaskLeaseService.Lease firstLease = lease("instance-a-token");
         ResearchTaskLeaseService.Lease takeoverLease = lease("instance-b-token");
         when(researchTaskService.renewLease(takeoverLease)).thenReturn(true);
+        when(checkpointRepository.lockOwnedRunningTask(TASK_ID, firstLease.token()))
+                .thenReturn(Optional.of(TASK_ID));
         when(checkpointRepository.lockOwnedRunningTask(TASK_ID, takeoverLease.token()))
                 .thenReturn(Optional.of(TASK_ID));
         when(checkpointRepository.lockSucceededTask(TASK_ID)).thenReturn(Optional.of(TASK_ID));
@@ -166,7 +168,7 @@ class CheckpointTakeoverIT {
                             0,
                             (state, roundsCompleted, plannedRounds) -> {
                                 checkpointService.saveDebateRound(
-                                        TASK_ID, state, roundsCompleted, plannedRounds);
+                                        TASK_ID, firstLease.token(), state, roundsCompleted, plannedRounds);
                                 if (roundsCompleted == 2) {
                                     throw new SimulatedCrashException();
                                 }

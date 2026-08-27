@@ -1306,11 +1306,6 @@ function handleSearchSelect(raw) {
   overflow: auto;
 }
 
-.research-cockpit-grid {
-  grid-template-columns: 280px minmax(520px, 1fr) minmax(300px, 360px);
-  align-items: start;
-}
-
 .cockpit-main {
   display: grid;
   gap: 16px;
@@ -1400,21 +1395,12 @@ function handleSearchSelect(raw) {
   margin-top: 12px;
 }
 
-.cockpit-lower-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-  gap: 14px;
-}
-
-.task-list,
-.evidence-list {
+.task-list {
   display: grid;
   gap: 8px;
 }
 
-.task-row,
-.evidence-row,
-.report-brief-card {
+.task-row {
   border: 1px solid var(--border-soft);
   border-radius: 8px;
   background: var(--surface);
@@ -1436,8 +1422,6 @@ function handleSearchSelect(raw) {
 
 .task-row small,
 .task-row p,
-.evidence-row small,
-.evidence-row em,
 .empty-copy {
   color: var(--text-muted);
   font-size: 12px;
@@ -1450,117 +1434,9 @@ function handleSearchSelect(raw) {
   color: var(--danger);
 }
 
-.evidence-row {
-  display: grid;
-  gap: 6px;
-  padding: 10px;
-}
-
-.evidence-row span,
-.focus-caption,
-.provenance-grid span {
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.evidence-row strong {
-  color: var(--text-primary);
-  font-size: 13px;
-  line-height: 1.42;
-}
-
-.evidence-row em {
-  font-style: normal;
-  font-weight: 700;
-}
-
 .cockpit-brief-panel {
   position: sticky;
   top: 18px;
-}
-
-.report-brief-card {
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-  background: var(--surface);
-}
-
-.brief-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.brief-title-row strong {
-  font-size: 15px;
-}
-
-.brief-title-row span {
-  min-height: 26px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 8px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--positive);
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.report-brief-card p {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.provenance-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px;
-}
-
-.provenance-grid div {
-  min-width: 0;
-  padding: 8px;
-  border: 1px solid rgba(203, 215, 209, 0.84);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.provenance-grid strong {
-  display: block;
-  margin-top: 5px;
-  overflow-wrap: anywhere;
-  color: var(--text-primary);
-  font-size: 12px;
-}
-
-.dossier-card.compact {
-  margin-top: 12px;
-}
-
-.dossier-card.compact .dossier-hero strong {
-  font-size: 20px;
-}
-
-.dossier-card.compact .dossier-metrics {
-  grid-template-columns: 1fr;
-}
-
-.focus-caption {
-  display: block;
-  margin: 14px 0 7px;
-}
-
-.cockpit-prompt {
-  margin-top: 12px;
-  max-height: 190px;
-  overflow: auto;
 }
 
 .empty-copy {
@@ -1568,7 +1444,6 @@ function handleSearchSelect(raw) {
 }
 
 .compare-grid,
-.event-grid,
 .portfolio-grid {
   grid-template-columns: minmax(320px, 760px);
   justify-content: center;
@@ -1646,96 +1521,6 @@ function handleSearchSelect(raw) {
   transform: scale(1);
 }
 
-.dossier-card {
-  margin: 0 0 14px;
-  padding: 14px;
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-md);
-  background: var(--surface-raised);
-  transition: background-color 0.15s ease, border-color 0.15s ease;
-}
-
-.dossier-hero {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border-soft);
-}
-
-.dossier-hero span,
-.dossier-metric span,
-.dossier-actions span {
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.dossier-hero strong {
-  color: var(--text-primary);
-  font-size: 20px;
-  line-height: 1;
-}
-
-.dossier-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.dossier-metric {
-  min-width: 0;
-  padding: 9px;
-  border: 1px solid var(--border-soft);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.78);
-}
-
-.dossier-metric strong {
-  display: block;
-  margin-top: 6px;
-  overflow: hidden;
-  color: var(--text-primary);
-  font-size: 13px;
-  line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dossier-metric.positive strong {
-  color: var(--positive);
-}
-
-.dossier-metric.danger strong {
-  color: var(--danger);
-}
-
-.dossier-metric.info strong {
-  color: var(--info);
-}
-
-.dossier-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.dossier-actions span {
-  min-height: 24px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 8px;
-  border: 1px solid var(--border-soft);
-  border-radius: 999px;
-  background: var(--surface-raised);
-  color: var(--text-secondary);
-  text-transform: none;
-}
-
 .focus-grid {
   display: flex;
   flex-wrap: wrap;
@@ -1767,20 +1552,6 @@ function handleSearchSelect(raw) {
   background: var(--accent-soft);
   border-color: var(--accent);
   color: var(--text-primary);
-}
-
-.prompt-preview,
-.prompt-panel pre {
-  margin: 14px 0 0;
-  padding: 14px;
-  border: 1px solid var(--border-soft);
-  border-radius: 8px;
-  background: var(--surface-raised);
-  color: var(--text-primary);
-  font-family: Consolas, "Liberation Mono", monospace;
-  font-size: 13px;
-  line-height: 1.6;
-  white-space: pre-wrap;
 }
 
 .settings-summary {
@@ -1817,13 +1588,6 @@ function handleSearchSelect(raw) {
   font-size: 13px;
   line-height: 1.45;
   overflow-wrap: anywhere;
-}
-
-.report-stack {
-  min-width: 0;
-  display: grid;
-  gap: 14px;
-  align-self: start;
 }
 
 .report-version-list {
@@ -1965,16 +1729,6 @@ function handleSearchSelect(raw) {
   -webkit-box-orient: vertical;
 }
 
-.report-empty {
-  padding: 12px;
-  border: 1px dashed var(--border-strong);
-  border-radius: 8px;
-  background: var(--surface-raised);
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 600;
-}
-
 .action-strip {
   display: flex;
   flex-wrap: wrap;
@@ -2015,11 +1769,6 @@ function handleSearchSelect(raw) {
   padding: 11px;
   resize: vertical;
   text-transform: none;
-}
-
-.report-preview pre {
-  max-height: 620px;
-  overflow: auto;
 }
 
 .file-button {
@@ -2187,90 +1936,6 @@ function handleSearchSelect(raw) {
 }
 
 /* ==========================================================================
-   全球大盘指数 Banner (Market Ribbon)
-   ========================================================================== */
-.market-ribbon-container {
-  width: 100%;
-  overflow-x: auto;
-  background: var(--surface-raised);
-  border-bottom: 1px solid var(--border-soft);
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  scrollbar-width: none; /* Hide scrollbar for Firefox */
-}
-
-.market-ribbon-container::-webkit-scrollbar {
-  display: none; /* Hide scrollbar for Chrome/Safari */
-}
-
-.market-ribbon {
-  display: flex;
-  gap: 12px;
-  min-width: max-content;
-}
-
-.market-index-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 12px;
-  background: var(--surface);
-  border: 1px solid var(--border-soft);
-  border-radius: 6px;
-  box-shadow: var(--shadow-soft);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.market-index-card.up {
-  color: var(--positive);
-}
-
-.market-index-card.down {
-  color: var(--negative);
-}
-
-.index-meta {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-
-.index-name {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.index-code {
-  font-size: 9px;
-  color: var(--text-muted);
-}
-
-.index-data {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  line-height: 1.1;
-}
-
-.index-val {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.index-pct {
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.sparkline-svg {
-  opacity: 0.85;
-  margin-left: 4px;
-}
-
-/* ==========================================================================
    彭博终端风格三栏式宽屏布局 (Bloomberg Terminal Style)
    ========================================================================== */
 .terminal-three-column-grid {
@@ -2405,7 +2070,6 @@ function handleSearchSelect(raw) {
 
   .terminal-three-column-grid,
   .compare-grid,
-  .event-grid,
   .portfolio-grid,
   .report-library-grid,
   .ops-grid {
@@ -2425,9 +2089,6 @@ function handleSearchSelect(raw) {
     position: static;
   }
 
-  .cockpit-lower-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 640px) {

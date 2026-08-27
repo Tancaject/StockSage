@@ -16,7 +16,6 @@ import {
   buildComparisonPrompt,
   buildHealthChecks,
   buildPortfolioDiagnosisPrompt,
-  buildPromptBrief,
   buildReportMarkdown,
   buildResearchPrompt,
   buildTickerSuggestions,
@@ -256,18 +255,6 @@ test('markHealthCheck updates a stale cockpit health result after a successful d
   assert.equal(updated.find(check => check.id === 'cockpit').detail, '驾驶舱接口已响应')
   assert.equal(summary.status, 'pass')
   assert.equal(checks.find(check => check.id === 'cockpit').ok, false)
-})
-
-test('buildPromptBrief exposes user-facing settings instead of raw prompt text', () => {
-  const brief = buildPromptBrief('research', {
-    ticker: 'nvda',
-    focusAreas: ['valuation', 'risks'],
-  })
-
-  assert.equal(brief.title, '单股研究设置')
-  assert.deepEqual(brief.rows.map(row => row.label), ['标的', '关注重点', '输出'])
-  assert.match(brief.rows[1].value, /估值/)
-  assert.doesNotMatch(brief.rows.map(row => row.value).join('\n'), /Run a full StockSage/i)
 })
 
 test('buildWatchlistFromProfile prefers backend profile watch list and holdings', () => {

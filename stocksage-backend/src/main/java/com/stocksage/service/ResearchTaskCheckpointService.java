@@ -161,58 +161,6 @@ public class ResearchTaskCheckpointService {
     }
 
     /**
-     * 仅供旧内存测试使用：测试没有任务行，无法执行 owner fence。
-     * 生产代码必须使用带 leaseToken 的重载。
-     *
-     * @param taskId 任务 ID
-     * @param state 已包含证据的分析状态
-     */
-    @Deprecated(forRemoval = true)
-    public void saveEvidence(Long taskId, AnalysisState state) {
-        upsert(taskId, state, ResearchTask.Stage.DATA_PREFETCH, 0, 0);
-    }
-
-    /**
-     * 仅供旧内存测试使用：测试没有任务行，无法执行 owner fence。
-     * 生产代码必须使用带 leaseToken 的重载。
-     *
-     * @param taskId 任务 ID
-     * @param state 当前分析状态
-     * @param roundsCompleted 已完成轮数
-     * @param plannedRounds 计划轮数
-     */
-    @Deprecated(forRemoval = true)
-    public void saveDebateRound(Long taskId, AnalysisState state, int roundsCompleted, int plannedRounds) {
-        upsert(taskId, state, ResearchTask.Stage.AGENT_DEBATE, roundsCompleted, plannedRounds);
-    }
-
-    /**
-     * 仅供旧内存测试使用：测试没有任务行，无法执行 owner fence。
-     * 生产代码必须使用带 leaseToken 的重载。
-     *
-     * @param taskId 任务 ID
-     * @param state 已包含结构化报告的状态
-     */
-    @Deprecated(forRemoval = true)
-    public void saveSynthesis(Long taskId, AnalysisState state) {
-        ResearchTaskCheckpoint existing = repository.findByTaskId(taskId).orElse(null);
-        int rounds = existing == null ? 0 : safeInt(existing.getDebateRoundsCompleted());
-        int planned = existing == null ? 0 : safeInt(existing.getPlannedRounds());
-        upsert(taskId, state, ResearchTask.Stage.REPORT_SYNTHESIS, rounds, planned);
-    }
-
-    /**
-     * 仅供旧内存测试使用：测试没有任务行，无法执行 owner fence。
-     * 生产代码必须使用带 leaseToken 的重载。
-     *
-     * @param taskId 任务 ID
-     */
-    @Deprecated(forRemoval = true)
-    public void deleteForTask(Long taskId) {
-        repository.deleteByTaskId(taskId);
-    }
-
-    /**
      * 将分析状态序列化为新的检查点实体，主要供同包测试验证映射。
      *
      * @param taskId 任务 ID

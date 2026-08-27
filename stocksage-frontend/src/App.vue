@@ -37,9 +37,7 @@ onMounted(() => {
   --accent-soft: rgba(16, 185, 129, 0.08);
   
   --up: #089981;
-  --up-soft: rgba(8, 153, 129, 0.08);
   --down: #f23645;
-  --down-soft: rgba(242, 54, 69, 0.08);
   --positive: #089981;
   --positive-soft: rgba(8, 153, 129, 0.08);
   --negative: #f23645;
@@ -81,9 +79,7 @@ onMounted(() => {
   --accent-soft: rgba(52, 211, 153, 0.12);
   
   --up: #16c784;
-  --up-soft: rgba(22, 199, 132, 0.1);
   --down: #ea3943;
-  --down-soft: rgba(234, 57, 67, 0.1);
   --positive: #16c784;
   --positive-soft: rgba(22, 199, 132, 0.1);
   --negative: #ea3943;

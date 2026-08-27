@@ -82,7 +82,6 @@ public class KLinePayloadMapper {
      */
     public static boolean isKlineTool(String sourceTool) {
         return "getStockKLine".equals(sourceTool)
-                || "getGlobalKLine".equals(sourceTool)
                 || "getIbkrHistoricalBars".equals(sourceTool);
     }
 

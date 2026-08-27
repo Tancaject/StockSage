@@ -30,6 +30,13 @@ import warnings
 from datetime import datetime
 from pathlib import Path
 
+from eval_utils import (
+    DEFAULT_PHOENIX_ENDPOINT,
+    DEFAULT_PHOENIX_PROJECT,
+    average_numeric_metrics,
+    setup_phoenix,
+)
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RESULTS_DIR = ROOT / "rag-eval" / "results"
@@ -38,8 +45,6 @@ DEFAULT_LOCAL_PROPS = (
 )
 DASHSCOPE_API_KEY_PROPERTY = "spring.ai.dashscope.api-key"
 DASHSCOPE_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-DEFAULT_PHOENIX_ENDPOINT = "http://localhost:6006/v1/traces"
-DEFAULT_PHOENIX_PROJECT = "stocksage-rag-eval"
 
 # RAGAS LLM-judge 指标的验收门槛（与 RAG_EVALUATION.md 一致）。
 RAGAS_GATES = {
@@ -210,48 +215,13 @@ def merge_and_average(result, scored_cases, score_rows):
         if scores:
             case.setdefault("metrics", {}).update(scores)
 
-    rows = result.get("cases", [])
-    metric_names = sorted({
-        key
-        for row in rows
-        for key, value in row.get("metrics", {}).items()
-        if isinstance(value, (int, float)) and value is not None
-    })
-    averages = {}
-    for name in metric_names:
-        values = [
-            row["metrics"][name]
-            for row in rows
-            if isinstance(row.get("metrics", {}).get(name), (int, float))
-            and row["metrics"].get(name) is not None
-        ]
-        averages[name] = sum(values) / len(values) if values else None
+    averages = average_numeric_metrics(result.get("cases", []))
     result["averages"] = averages
     return averages
 
 
 def fmt_metric(value):
     return "--" if value is None else f"{value:.3f}"
-
-
-def setup_phoenix(args):
-    if args.no_phoenix:
-        return None, None
-    try:
-        from opentelemetry import trace
-        from phoenix.otel import register
-
-        provider = register(
-            endpoint=args.phoenix_endpoint,
-            project_name=args.phoenix_project,
-            batch=False,
-            verbose=False,
-        )
-        tracer = trace.get_tracer("stocksage-ragas-eval")
-        return tracer, provider
-    except Exception as exc:
-        print(f"Phoenix export disabled: {exc}")
-        return None, None
 
 
 def emit_summary_span(tracer, averages, output, metric_names):
@@ -367,7 +337,7 @@ def main():
 
     print(f"\n已写入: {output}")
 
-    tracer, provider = setup_phoenix(args)
+    tracer, provider = setup_phoenix(args, "stocksage-ragas-eval")
     emit_summary_span(tracer, averages, output, metric_names)
     if provider is not None:
         provider.force_flush()

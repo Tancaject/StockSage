@@ -218,7 +218,10 @@ class ToolPrefetchServiceSubmitTest {
                 true,
                 true,
                 true,
-                true
+                true,
+                false,
+                EvidenceLedger.empty(),
+                new HarnessDecision(HarnessOutcome.PASS, List.of(), List.of())
         );
         when(researchTaskService.countActiveTasks(USER_ID)).thenReturn(0);
         when(researchTaskService.buildSubmissionKey(USER_ID, TICKER, QUERY, CONVERSATION_ID)).thenReturn(SUBMISSION_KEY);
@@ -492,7 +495,10 @@ class ToolPrefetchServiceSubmitTest {
                         true,
                         true,
                         true,
-                        true
+                        true,
+                        false,
+                        EvidenceLedger.empty(),
+                        new HarnessDecision(HarnessOutcome.PASS, List.of(), List.of())
                 );
         when(researchTaskService.countActiveTasks(USER_ID)).thenReturn(0);
         when(researchTaskService.buildSubmissionKey(USER_ID, TICKER, QUERY, CONVERSATION_ID))

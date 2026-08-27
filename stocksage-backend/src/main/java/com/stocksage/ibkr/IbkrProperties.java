@@ -1,5 +1,7 @@
 package com.stocksage.ibkr;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConfigurationProperties(prefix = "stocksage.ibkr")
+@Getter
+@Setter
 public class IbkrProperties {
 
     /** 是否启用 IBKR Client Portal 集成；默认关闭，避免本地未登录时影响普通功能。 */
@@ -41,75 +45,4 @@ public class IbkrProperties {
     /** 市场快照字段列表，使用 IBKR Client Portal 的字段编号。 */
     private String snapshotFields = "31,55,70,71,73,84,86,87,88,6509,7059,7295,7633,7635";
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public String getBaseUrl() {
-        return baseUrl;
-    }
-
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
-
-    public long getTimeoutMs() {
-        return timeoutMs;
-    }
-
-    public void setTimeoutMs(long timeoutMs) {
-        this.timeoutMs = timeoutMs;
-    }
-
-    public boolean isInsecureSsl() {
-        return insecureSsl;
-    }
-
-    public void setInsecureSsl(boolean insecureSsl) {
-        this.insecureSsl = insecureSsl;
-    }
-
-    public boolean isKeepaliveEnabled() {
-        return keepaliveEnabled;
-    }
-
-    public void setKeepaliveEnabled(boolean keepaliveEnabled) {
-        this.keepaliveEnabled = keepaliveEnabled;
-    }
-
-    public long getKeepaliveIntervalMs() {
-        return keepaliveIntervalMs;
-    }
-
-    public void setKeepaliveIntervalMs(long keepaliveIntervalMs) {
-        this.keepaliveIntervalMs = keepaliveIntervalMs;
-    }
-
-    public long getKeepaliveInitialDelayMs() {
-        return keepaliveInitialDelayMs;
-    }
-
-    public void setKeepaliveInitialDelayMs(long keepaliveInitialDelayMs) {
-        this.keepaliveInitialDelayMs = keepaliveInitialDelayMs;
-    }
-
-    public String getDefaultAccountId() {
-        return defaultAccountId;
-    }
-
-    public void setDefaultAccountId(String defaultAccountId) {
-        this.defaultAccountId = defaultAccountId;
-    }
-
-    public String getSnapshotFields() {
-        return snapshotFields;
-    }
-
-    public void setSnapshotFields(String snapshotFields) {
-        this.snapshotFields = snapshotFields;
-    }
 }

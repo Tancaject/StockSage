@@ -37,7 +37,7 @@ public record ExecutionPlan(
         }
     }
 
-    /** 保留已有七字段主调用形式。 */
+    /** 保留不传内部消歧问题的七字段调用形式。 */
     public ExecutionPlan(PlanRoute route,
                          String taskType,
                          String thought,
@@ -47,39 +47,7 @@ public record ExecutionPlan(
                          RoutingDecisionMetadata routingDecision) {
         this(route, taskType, thought, actions, observation, modelTier, routingDecision, "");
     }
-    /**
-     * 保留历史五参数构造形式；旧调用只在显式传入枚举名称时才能恢复对应路由。
-     *
-     * <p>运行时 Coordinator 必须使用包含 {@link PlanRoute} 的主构造器，
-     * 不能再从自由文本 taskType 推断执行路由。</p>
-     */
-    public ExecutionPlan(String taskType,
-                         String thought,
-                         List<PlanAction> actions,
-                         String observation,
-                         ModelTier modelTier) {
-        this(PlanRoute.normalize(taskType), taskType, thought, actions, observation, modelTier, null, "");
-    }
-
-    /**
-     * 保留旧构造形式，避免测试或小工具只关心路由动作时必须显式传 tier。
-     */
-    public ExecutionPlan(String taskType, String thought, List<PlanAction> actions, String observation) {
-        this(PlanRoute.normalize(taskType), taskType, thought, actions, observation, ModelTier.STANDARD, null, "");
-    }
-
-    /**
-     * 允许显式路由调用省略模型层级。
-     */
-    /** 保留显式路由与模型层级、但不传路由诊断元数据的兼容构造形式。 */
-    public ExecutionPlan(PlanRoute route,
-                         String taskType,
-                         String thought,
-                         List<PlanAction> actions,
-                         String observation) {
-        this(route, taskType, thought, actions, observation, ModelTier.STANDARD, null, "");
-    }
-
+    /** 保留显式路由与模型层级、但不传路由诊断元数据的调用形式。 */
     public ExecutionPlan(PlanRoute route,
                          String taskType,
                          String thought,

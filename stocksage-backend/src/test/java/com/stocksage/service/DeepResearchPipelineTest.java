@@ -124,8 +124,8 @@ class DeepResearchPipelineTest {
         when(researchTaskService.startAttempt(task, lease.token(), ResearchTask.Stage.DATA_PREFETCH)).thenReturn(task);
         when(researchTaskService.leaseHeartbeatInterval()).thenReturn(heartbeatInterval);
         when(evidenceCollector.collect("AAPL", "q", "trace-1", 20L))
-                .thenReturn(new DeepEvidenceCollector.EvidenceCollection(
-                        "ctx", AnalysisState.builder().query("q").primaryTicker("AAPL").build(),
+                .thenReturn(evidence(
+                        AnalysisState.builder().query("q").primaryTicker("AAPL").build(),
                         false, true, false, false));
         when(reportRenderer.buildInsufficientEvidenceReport("AAPL", true, false, false))
                 .thenReturn("insufficient");
@@ -155,8 +155,7 @@ class DeepResearchPipelineTest {
                     clearInvocations(researchTaskService);
                     when(researchTaskService.renewLease(lease)).thenReturn(false);
                     heartbeatAction.get().run();
-                    return new DeepEvidenceCollector.EvidenceCollection(
-                            "ctx",
+                    return evidence(
                             AnalysisState.builder().query("q").primaryTicker("AAPL").build(),
                             true,
                             true,
@@ -225,8 +224,7 @@ class DeepResearchPipelineTest {
                 task, lease.token(), ResearchTask.Stage.DATA_PREFETCH)).thenReturn(task);
         when(checkpointService.load(603L)).thenReturn(Optional.empty());
         when(evidenceCollector.collect("AAPL", "q", "trace-1", 20L))
-                .thenReturn(new DeepEvidenceCollector.EvidenceCollection(
-                        "ctx", state, false, true, false, false));
+                .thenReturn(evidence(state, false, true, false, false));
         when(reportRenderer.buildInsufficientEvidenceReport("AAPL", true, false, false))
                 .thenReturn("insufficient");
         doThrow(new ResearchTaskCheckpointService.CheckpointCleanupRejectedException(603L))
@@ -273,7 +271,6 @@ class DeepResearchPipelineTest {
                 .hasCauseInstanceOf(IllegalStateException.class);
 
         verify(researchTaskService).markFailedIfPending(task, "fencing rejected");
-        verify(researchTaskService, never()).markFailed(task, "fencing rejected");
         verifyNoInteractions(chatStreamEmitter);
     }
 
@@ -300,7 +297,7 @@ class DeepResearchPipelineTest {
         when(checkpointService.load(7L)).thenReturn(Optional.empty());
         when(researchTaskService.startAttempt(task, lease.token(), ResearchTask.Stage.DATA_PREFETCH)).thenReturn(task);
         when(evidenceCollector.collect("AAPL", "q", "trace-1", 20L))
-                .thenReturn(new DeepEvidenceCollector.EvidenceCollection("ctx", evidenceState, true, true, true, true));
+                .thenReturn(evidence(evidenceState, true, true, true, true));
         when(investmentReportVersionService.findReusableReport("u_001", 20L, evidenceState))
                 .thenReturn(Optional.empty());
         when(researchDebateService.runDebate(
@@ -370,7 +367,7 @@ class DeepResearchPipelineTest {
         when(checkpointService.load(8L)).thenReturn(Optional.empty());
         when(researchTaskService.startAttempt(task, lease.token(), ResearchTask.Stage.DATA_PREFETCH)).thenReturn(task);
         when(evidenceCollector.collect("AAPL", "q", "trace-1", 20L))
-                .thenReturn(new DeepEvidenceCollector.EvidenceCollection("ctx", state, false, true, false, false));
+                .thenReturn(evidence(state, false, true, false, false));
         when(reportRenderer.buildInsufficientEvidenceReport("AAPL", true, false, false))
                 .thenReturn("insufficient");
 
@@ -1209,6 +1206,24 @@ class DeepResearchPipelineTest {
         verify(researchTaskService).markStageForOwner(task, "owner-token", ResearchTask.Stage.REPORT_PERSIST);
         verify(researchTaskService).markSucceededForOwner(
                 task, "owner-token", 99L, ResearchTask.ResultKind.OFFLINE_FALLBACK);
+    }
+
+    private DeepEvidenceCollector.EvidenceCollection evidence(
+            AnalysisState state,
+            boolean sufficient,
+            boolean tickerResolved,
+            boolean fundamentalsOk,
+            boolean marketOk
+    ) {
+        EvidenceLedger ledger = state == null || state.getEvidenceLedger() == null
+                ? EvidenceLedger.empty()
+                : state.getEvidenceLedger();
+        return new DeepEvidenceCollector.EvidenceCollection(
+                "ctx", state, sufficient, tickerResolved, fundamentalsOk, marketOk, false, ledger,
+                new HarnessDecision(
+                        sufficient ? HarnessOutcome.PASS : HarnessOutcome.DEGRADE,
+                        List.of(),
+                        List.of()));
     }
 
     private DeepEvidenceCollector.EvidenceCollection evidence(
