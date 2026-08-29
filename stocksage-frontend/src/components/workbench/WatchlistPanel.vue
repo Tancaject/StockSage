@@ -45,7 +45,12 @@
           >{{ formatRowChange(item.changePercent) }}</small>
           <small v-else class="quote-pending">—</small>
         </span>
-        <span class="remove-btn" draggable="false" @click.stop="emit('remove', item.ticker)">
+        <span
+          v-if="item.isWatched"
+          class="remove-btn"
+          draggable="false"
+          @click.stop="emit('remove', item.ticker)"
+        >
           <el-icon><Close /></el-icon>
         </span>
       </button>

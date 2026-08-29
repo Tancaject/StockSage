@@ -193,7 +193,9 @@ public class ChatService {
         replaceLastTurnIfRequested(request, conversation);
         // 路由历史必须在保存当前问题前读取，避免把尚未回答的本轮消息混入上下文。
         List<String> routingTurns = recentRoutingTurns(conversationId);
-        saveMessage(conversationId, "user", request.getMessage());
+        Message sourceMessage = saveMessage(conversationId, "user", request.getMessage());
+        Long sourceMessageId = sourceMessage.getId();
+        LocalDateTime sourceObservedAt = sourceMessage.getCreatedAt();
         shortTermMemory.addMessage(conversationId, "user", request.getMessage());
         touchConversation(conversation);
 
@@ -337,6 +339,8 @@ public class ChatService {
                         newConversation,
                         traceId,
                         conversationId,
+                        sourceMessageId,
+                        sourceObservedAt,
                         startTime,
                         fullResponse,
                         terminalRecorded,
@@ -379,7 +383,9 @@ public class ChatService {
                         maybeGenerateConversationTitle(conversationId, request.getUserId(), request.getMessage(),
                                 newConversation, conversation.getOrigin());
                         CompletableFuture.runAsync(() -> longTermMemory.extractAndUpdate(
-                                request.getUserId(), assistantText, request.getMessage()), agentTaskExecutor);
+                                request.getUserId(), assistantText, request.getMessage(),
+                                sourceMessageId, sourceObservedAt),
+                                agentTaskExecutor);
                         traceService.addStep(traceId, AgentStep.builder()
                                 .thought("Generated streamed assistant answer.")
                                 .action(null)
@@ -569,6 +575,8 @@ public class ChatService {
             boolean newConversation,
             String traceId,
             Long conversationId,
+            Long sourceMessageId,
+            LocalDateTime sourceObservedAt,
             long startTime,
             StringBuilder fullResponse,
             AtomicBoolean terminalRecorded,
@@ -609,7 +617,9 @@ public class ChatService {
                     }
                     if (terminalRecorded.compareAndSet(false, true)) {
                         CompletableFuture.runAsync(() -> longTermMemory.extractAndUpdate(
-                                request.getUserId(), assistantText, request.getMessage()), agentTaskExecutor);
+                                request.getUserId(), assistantText, request.getMessage(),
+                                sourceMessageId, sourceObservedAt),
+                                agentTaskExecutor);
                         traceService.endTrace(traceId, "success", 0, durationMs);
                         log.info("Direct chat answer completed, conversationId={}, traceId={}, responseLength={}",
                                 conversationId, traceId, fullResponse.length());
@@ -1197,21 +1207,21 @@ public class ChatService {
     /**
      * 保存不绑定 traceId 的聊天消息。
      */
-    private void saveMessage(Long conversationId, String role, String content) {
-        saveMessage(conversationId, role, content, null);
+    private Message saveMessage(Long conversationId, String role, String content) {
+        return saveMessage(conversationId, role, content, null);
     }
 
     /**
      * 保存聊天消息并关联追踪 ID。
      */
-    private void saveMessage(Long conversationId, String role, String content, String traceId) {
-        saveMessage(conversationId, role, content, traceId, null);
+    private Message saveMessage(Long conversationId, String role, String content, String traceId) {
+        return saveMessage(conversationId, role, content, traceId, null);
     }
 
     /**
      * 保存聊天消息，并在助手消息上记录最终回答模型。
      */
-    private void saveMessage(Long conversationId, String role, String content, String traceId, Coordinator.SelectedModel selectedModel) {
+    private Message saveMessage(Long conversationId, String role, String content, String traceId, Coordinator.SelectedModel selectedModel) {
         Message message = new Message();
         message.setConversationId(conversationId);
         message.setRole(role);
@@ -1221,7 +1231,7 @@ public class ChatService {
             message.setModelTier(selectedModel.tier().name());
             message.setModelName(selectedModel.modelName());
         }
-        messageRepository.save(message);
+        return messageRepository.save(message);
     }
 
     /**

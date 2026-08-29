@@ -2,16 +2,18 @@ package com.stocksage.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.DynamicUpdate;
 import java.time.LocalDateTime;
 
 /**
  * 用户长期偏好的持久化画像实体。
  *
- * <p>每个用户最多一行，保存持仓、关注列表、风险偏好和对话提炼摘要；
- * 聊天服务读取这些信息后注入个性化上下文。账号凭据由 {@link User} 单独保存。</p>
+ * <p>每个用户最多一行。关注列表是用户显式状态；持仓、风险偏好和摘要列保留为兼容投影，
+ * Prompt 可见性由事实表的确认时间和撤销状态决定。账号凭据由 {@link User} 单独保存。</p>
  */
 @Data
 @Entity
+@DynamicUpdate
 @Table(name = "user_profiles")
 public class UserProfile {
 
@@ -20,7 +22,7 @@ public class UserProfile {
     @Column(name = "user_id", length = 32)
     private String userId;
 
-    /** 用户当前持有证券代码的 JSON 字符串数组；新用户通常为 {@code []}。 */
+    /** 学习到的持仓兼容投影；事实级可见性由 user_memory_facts 决定。 */
     @Column(name = "holdings", columnDefinition = "JSON")
     private String holdings;
 
@@ -28,11 +30,11 @@ public class UserProfile {
     @Column(name = "watch_list", columnDefinition = "JSON")
     private String watchList;
 
-    /** 风险偏好，例如 conservative、moderate 或 aggressive。 */
+    /** 风险偏好兼容投影，例如 conservative、moderate 或 aggressive。 */
     @Column(name = "risk_preference", length = 32)
     private String riskPreference;
 
-    /** 从历史对话中提炼的长期背景与偏好摘要；没有已知事实时可为空。 */
+    /** 历史画像摘要兼容投影；没有已知事实时可为空。 */
     @Column(name = "profile_summary", columnDefinition = "TEXT")
     private String profileSummary;
 

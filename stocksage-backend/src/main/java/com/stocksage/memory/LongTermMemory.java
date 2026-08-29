@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -20,15 +21,16 @@ import java.util.regex.Pattern;
 /**
  * 持久化的用户投资画像记忆。
  *
- * <p>每次助手回答后，ChatService 会在后台调用该组件提取持仓、关注列表、风险偏好和画像摘要。
- * 只有画像非空时，才会注入后续提示词。</p>
+ * <p>每次助手回答后，ChatService 会在后台调用该组件提取持仓、风险偏好和画像摘要。
+ * 关注列表只接受用户显式管理；其他事实由 UserService 应用查询时遗忘后再注入提示词。</p>
  */
 @Slf4j
 @Component
 public class LongTermMemory {
 
-    /** 识别消息中 1 至 5 位大写美股代码的保守模式。 */
-    private static final Pattern TICKER_PATTERN = Pattern.compile("\\b([A-Z]{1,5})\\b");
+    /** 识别大写美股代码、类别股代码和带市场后缀的数字代码。 */
+    private static final Pattern TICKER_PATTERN = Pattern.compile(
+            "(?<![A-Z0-9.-])([A-Z]{1,5}(?:[.-][A-Z])?|[0-9]{4,6}\\.(?:HK|SH|SZ))(?![A-Z0-9.-])");
 
     /** 看似 ticker、实际是常见词或技术缩写的过滤表。 */
     private static final Set<String> NOISE_WORDS = Set.of(
@@ -105,48 +107,68 @@ public class LongTermMemory {
      * @return 可直接注入 SystemMessage 的画像文本；空画像返回空串
      */
     public String buildPromptContext(String userId) {
-        UserProfileDTO profile = loadUserProfile(userId);
-        if (isProfileEmpty(profile)) {
+        UserProfileDTO profile = userService.getPromptProfile(userId);
+        List<String> facts = new ArrayList<>();
+        if (profile.getHoldings() != null && !profile.getHoldings().isEmpty()) {
+            facts.add("- 持仓 (Holdings): " + formatList(profile.getHoldings()));
+        }
+        if (profile.getWatchList() != null && !profile.getWatchList().isEmpty()) {
+            facts.add("- 关注列表 (Watch list): " + formatList(profile.getWatchList()));
+        }
+        if (profile.getRiskPreference() != null && !profile.getRiskPreference().isBlank()) {
+            facts.add("- 风险偏好 (Risk preference): " + profile.getRiskPreference());
+        }
+        if (profile.getProfileSummary() != null && !profile.getProfileSummary().isBlank()) {
+            facts.add("- 画像摘要 (Summary): " + profile.getProfileSummary());
+        }
+        if (facts.isEmpty()) {
             return "";
         }
-        return """
-                以下是该用户的长期画像。当用户提到"我的持仓""我的关注"或涉及个人投资偏好的问题时，请结合此信息回答。
-                - 持仓 (Holdings): %s
-                - 关注列表 (Watch list): %s
-                - 风险偏好 (Risk preference): %s
-                - 画像摘要 (Summary): %s
-                """.formatted(
-                formatList(profile.getHoldings()),
-                formatList(profile.getWatchList()),
-                emptyToDefault(profile.getRiskPreference(), "moderate"),
-                emptyToDefault(profile.getProfileSummary(), "none")
-        ).trim();
+        return "以下是该用户的长期画像。当用户提到\"我的持仓\"\"我的关注\"或涉及个人投资偏好的问题时，请结合此信息回答。\n"
+                + String.join("\n", facts);
     }
 
     /**
-     * 从用户消息中提取持仓、关注列表、风险偏好等信息并更新长期画像。
-     * 使用关键词触发 + 正则提取美股代码的确定性方案，零 LLM 调用开销。
+     * 从用户消息中提取持仓、风险偏好和画像摘要并更新长期画像。
+     * 先用关键词与正则提取确定性事实；配置启用时再由记忆模型补充复杂表达和摘要。
      *
      * @param userId 当前用户 ID
      * @param assistantResponse 本轮助手回答，供可选 LLM 抽取补充上下文
      * @param userMessage 本轮用户消息
+     * @param sourceMessageId 持久化后的用户消息主键
+     * @param observedAt 用户消息的持久化时间
      */
-    public void extractAndUpdate(String userId, String assistantResponse, String userMessage) {
+    public void extractAndUpdate(
+            String userId,
+            String assistantResponse,
+            String userMessage,
+            Long sourceMessageId,
+            LocalDateTime observedAt
+    ) {
         if (userMessage == null || userMessage.isBlank()) {
             return;
         }
 
         UserProfileDTO update = new UserProfileDTO();
-        boolean hasUpdate = false;
         String lower = userMessage.toLowerCase();
+        List<String> tickers = extractTickers(userMessage);
+        boolean explicitHoldingRevocation = containsAny(lower,
+                "no longer hold", "no longer own", "don't hold", "don't own",
+                "do not hold", "do not own", "sold all", "fully sold",
+                "closed my position", "exited my position", "不再持有", "不持有",
+                "全部卖出", "全卖了", "清仓", "已清仓");
+        // ponytail: 多 ticker 混合动作交给 LLM；有真实样本后再增加分句解析器。
+        List<String> revokedHoldings = explicitHoldingRevocation
+                && tickers.size() == 1
+                && !containsAny(lower, "bought", "buy back", "买入", "买回")
+                ? tickers
+                : List.of();
 
         // 提取持仓
-        if (containsAny(lower, "hold", "holding", "bought", "own", "持有", "买了", "买入", "持仓", "仓位")) {
-            List<String> tickers = extractTickers(userMessage);
-            if (!tickers.isEmpty()) {
-                update.setHoldings(tickers);
-                hasUpdate = true;
-            }
+        if (!explicitHoldingRevocation
+                && containsAny(lower, "hold", "holding", "bought", "own", "持有", "买了", "买入", "持仓", "仓位")
+                && !tickers.isEmpty()) {
+            update.setHoldings(tickers);
         }
 
         // watchList 由用户在前端手动管理，不从对话中自动提取
@@ -154,22 +176,28 @@ public class LongTermMemory {
         // 提取风险偏好
         if (containsAny(lower, "conservative", "保守", "稳健", "低风险")) {
             update.setRiskPreference("conservative");
-            hasUpdate = true;
         } else if (containsAny(lower, "aggressive", "激进", "进取", "高风险")) {
             update.setRiskPreference("aggressive");
-            hasUpdate = true;
         } else if (containsAny(lower, "moderate", "中等风险", "平衡", "均衡")) {
             update.setRiskPreference("moderate");
-            hasUpdate = true;
         }
 
+        List<String> llmRevokedHoldings = new ArrayList<>();
         if (llmProfileEnabled) {
             // 调用 memoryChatClient 补充规则难以识别的摘要，同时保留前面的确定性结果。
-            hasUpdate = mergeLlmProfile(update, userMessage, assistantResponse) || hasUpdate;
+            mergeLlmProfile(update, llmRevokedHoldings, userMessage, assistantResponse);
         }
 
-        if (hasUpdate) {
-            mergeUserProfile(userId, update);
+        List<String> allRevokedHoldings = mergeLists(revokedHoldings, llmRevokedHoldings);
+        if (!allRevokedHoldings.isEmpty()) {
+            userService.revokeHoldings(userId, allRevokedHoldings, sourceMessageId, observedAt);
+            if (update.getHoldings() != null) {
+                update.getHoldings().removeIf(allRevokedHoldings::contains);
+            }
+        }
+
+        if (hasProfileUpdate(update)) {
+            userService.updateUserProfile(userId, update, sourceMessageId, observedAt);
             log.info("Extracted and updated long-term memory for userId={}, holdings={}, risk={}",
                     userId, update.getHoldings(), update.getRiskPreference());
         }
@@ -178,21 +206,27 @@ public class LongTermMemory {
     /**
      * 使用记忆模型从对话中抽取画像字段。
      *
-     * <p>抽取失败时返回 false，调用方保留正则/关键词规则已经得到的更新结果。</p>
+     * <p>抽取失败时调用方保留正则/关键词规则已经得到的更新结果。</p>
      *
      * @param update 待合并的本轮画像增量
+     * @param revokedHoldings 接收用户明确表示已经全部退出的持仓
      * @param userMessage 用户原话
      * @param assistantResponse 助手回答
-     * @return 是否抽取到了至少一个可持久化字段
      */
-    private boolean mergeLlmProfile(UserProfileDTO update, String userMessage, String assistantResponse) {
+    private void mergeLlmProfile(
+            UserProfileDTO update,
+            List<String> revokedHoldings,
+            String userMessage,
+            String assistantResponse
+    ) {
         try {
             // 调用独立记忆模型，避免主聊天模型承担后台画像抽取工作。
             String content = memoryChatClient.prompt()
                     .user("""
                             请从本轮对话中提取用户长期投资画像，输出严格 JSON：
                             {
-                              "holdings": ["用户明确持有的 ticker"],
+                              "holdings": ["用户明确表示当前仍持有的 ticker"],
+                              "revokedHoldings": ["用户明确表示已全部退出、不再持有的 ticker；部分卖出、期权交易或建议不要写入"],
                               "riskPreference": "conservative|moderate|aggressive|",
                               "profileSummary": "一句话画像摘要；无新增信息则空字符串"
                             }
@@ -206,31 +240,26 @@ public class LongTermMemory {
                     .call()
                     .content();
             JsonNode root = objectMapper.readTree(extractJson(content));
-            boolean changed = false;
 
             List<String> holdings = readStringArray(root.path("holdings"));
             if (!holdings.isEmpty()) {
                 update.setHoldings(mergeLists(update.getHoldings(), holdings));
-                changed = true;
             }
+            revokedHoldings.addAll(readStringArray(root.path("revokedHoldings")));
 
             // watchList 由用户在前端手动管理，不从 LLM 提取
 
             String riskPreference = root.path("riskPreference").asText("").trim();
             if (Set.of("conservative", "moderate", "aggressive").contains(riskPreference)) {
                 update.setRiskPreference(riskPreference);
-                changed = true;
             }
 
             String profileSummary = root.path("profileSummary").asText("").trim();
             if (!profileSummary.isBlank()) {
                 update.setProfileSummary(profileSummary);
-                changed = true;
             }
-            return changed;
         } catch (Exception e) {
             log.warn("LLM long-term profile extraction failed, using deterministic extraction only: {}", e.getMessage());
-            return false;
         }
     }
 
@@ -327,22 +356,15 @@ public class LongTermMemory {
         return false;
     }
 
-    /** 判断用户画像是否仍处于默认空状态。 */
-    private boolean isProfileEmpty(UserProfileDTO profile) {
-        boolean noHoldings = profile.getHoldings() == null || profile.getHoldings().isEmpty();
-        boolean noWatchList = profile.getWatchList() == null || profile.getWatchList().isEmpty();
-        boolean defaultRisk = "moderate".equals(profile.getRiskPreference());
-        boolean noSummary = profile.getProfileSummary() == null || profile.getProfileSummary().isBlank();
-        return noHoldings && noWatchList && defaultRisk && noSummary;
+    /** 判断增量画像中是否仍有需要确认的事实。 */
+    private boolean hasProfileUpdate(UserProfileDTO update) {
+        return update.getHoldings() != null && !update.getHoldings().isEmpty()
+                || update.getRiskPreference() != null && !update.getRiskPreference().isBlank()
+                || update.getProfileSummary() != null && !update.getProfileSummary().isBlank();
     }
 
     /** 将列表格式化为提示词可读文本。 */
     private String formatList(List<String> values) {
         return values == null || values.isEmpty() ? "none" : String.join(", ", values);
-    }
-
-    /** 空字符串兜底。 */
-    private String emptyToDefault(String value, String fallback) {
-        return value == null || value.isBlank() ? fallback : value;
     }
 }

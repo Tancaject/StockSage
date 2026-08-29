@@ -265,8 +265,14 @@ test('buildWatchlistFromProfile prefers backend profile watch list and holdings'
 
   assert.deepEqual(watchlist.map(item => item.ticker), ['NVDA', 'AMZN', 'VOO'])
   assert.equal(watchlist[0].status, '持仓/关注')
+  assert.equal(watchlist[0].isHeld, true)
+  assert.equal(watchlist[0].isWatched, true)
   assert.equal(watchlist[1].status, '关注')
+  assert.equal(watchlist[1].isHeld, false)
+  assert.equal(watchlist[1].isWatched, true)
   assert.equal(watchlist[2].status, '持仓')
+  assert.equal(watchlist[2].isHeld, true)
+  assert.equal(watchlist[2].isWatched, false)
 })
 
 test('buildTickerSuggestions matches ticker, company name, and market metadata', () => {

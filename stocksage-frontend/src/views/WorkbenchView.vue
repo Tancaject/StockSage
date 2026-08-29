@@ -442,7 +442,9 @@ const cockpit = computed(() => normalizeCockpit(cockpitRaw.value || {
   chartStatus: 'DEGRADED',
   chartMessage: cockpitError.value ? '行情数据暂时不可用，请稍后重试。' : '选择一个标的以加载 K 线数据。',
 }))
-const isTickerInWatchlist = computed(() => watchlist.value.some(item => item.ticker === selectedTicker.value))
+const isTickerInWatchlist = computed(() => Boolean(
+  watchlist.value.find(item => item.ticker === selectedTicker.value)?.isWatched,
+))
 const reportTickerNormalized = computed(() => normalizeTicker(reportTicker.value))
 const reportVersionRows = computed(() => summarizeReportVersions(reportVersions.value))
 // runPanelControls is provided by useResearchRun composable (bound above)
@@ -564,15 +566,25 @@ async function loadProfileWatchlist() {
 async function handleWatchlistAdd(raw) {
   const ticker = normalizeTicker(raw)
   if (!ticker) return
-  if (watchlist.value.some(item => item.ticker === ticker)) {
+  const existing = watchlist.value.find(item => item.ticker === ticker)
+  if (existing?.isWatched) {
     selectedTicker.value = ticker
     return
   }
   const previous = watchlist.value
-  watchlist.value = [
-    ...watchlist.value,
-    { ticker, status: '关注', lastAction: '' },
-  ]
+  watchlist.value = existing
+    ? watchlist.value.map(item => item.ticker === ticker
+      ? {
+          ...item,
+          isWatched: true,
+          isSample: false,
+          status: item.isHeld ? '持仓/关注' : '关注',
+        }
+      : item)
+    : [
+        ...watchlist.value,
+        { ticker, status: '关注', isHeld: false, isWatched: true, isSample: false, lastAction: '' },
+      ]
   selectedTicker.value = ticker
   try {
     // 持久化到后端 profile，否则刷新时 loadProfileWatchlist 会用服务端列表把它覆盖掉
@@ -584,8 +596,14 @@ async function handleWatchlistAdd(raw) {
 }
 
 async function handleWatchlistRemove(ticker) {
+  const existing = watchlist.value.find(item => item.ticker === ticker)
+  if (!existing?.isWatched) return
   const previous = watchlist.value
-  watchlist.value = watchlist.value.filter(item => item.ticker !== ticker)
+  watchlist.value = existing.isHeld
+    ? watchlist.value.map(item => item.ticker === ticker
+      ? { ...item, isWatched: false, status: '持仓' }
+      : item)
+    : watchlist.value.filter(item => item.ticker !== ticker)
   try {
     await removeFromWatchList(ticker)
   } catch (err) {
@@ -595,7 +613,7 @@ async function handleWatchlistRemove(ticker) {
 }
 
 function handleWatchlistToggle(ticker) {
-  if (watchlist.value.some(item => item.ticker === ticker)) {
+  if (watchlist.value.find(item => item.ticker === ticker)?.isWatched) {
     handleWatchlistRemove(ticker)
   } else {
     handleWatchlistAdd(ticker)

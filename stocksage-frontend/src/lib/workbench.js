@@ -187,6 +187,9 @@ export function buildWatchlistFromProfile(profile = {}, fallbackTickers = ['NVDA
     return {
       ticker,
       status: inHoldings && inWatch ? '持仓/关注' : inHoldings ? '持仓' : inWatch ? '关注' : '样例',
+      isHeld: inHoldings,
+      isWatched: inWatch,
+      isSample: !inHoldings && !inWatch,
       lastAction: '',
     }
   })

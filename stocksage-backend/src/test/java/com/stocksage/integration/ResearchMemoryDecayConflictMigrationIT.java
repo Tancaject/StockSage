@@ -1,9 +1,14 @@
 package com.stocksage.integration;
 
+import com.stocksage.repository.UserMemoryFactRepository;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationVersion;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -14,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +42,7 @@ class ResearchMemoryDecayConflictMigrationIT {
     private static final String REJECTED_CONFLICT_KEY = "REPORT_RECOMMENDATION|TSLA|MEDIUM_TERM";
     private static final String AMBIGUOUS_CONFLICT_KEY =
             "REPORT_RECOMMENDATION|AMZN|UNSPECIFIED";
+    private static final String PROFILE_USER_ID = "profile-v8-it";
 
     @Container
     static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8.0.36")
@@ -44,7 +51,7 @@ class ResearchMemoryDecayConflictMigrationIT {
             .withPassword("stocksage");
 
     @Test
-    void flywayV1ThroughV7BackfillsLegacyMemoryAndElectsNewestWinner() throws SQLException {
+    void flywayV1ThroughV8BackfillsLegacyMemoryAndProfileFacts() throws Exception {
         flyway(MigrationVersion.fromVersion("6")).migrate();
 
         LocalDateTime olderCutoff = LocalDateTime.of(2026, 1, 10, 9, 0);
@@ -75,13 +82,25 @@ class ResearchMemoryDecayConflictMigrationIT {
             insertReport(connection, AMBIGUOUS_HORIZON_MEMORY_ID, "AMZN",
                     "Compare AMZN short term and long term", "HOLD", "DRAFT", tiedCutoff);
             insertLegacyMemory(connection, AMBIGUOUS_HORIZON_MEMORY_ID, "AMZN", tiedCutoff);
+            insertLegacyProfile(connection, tiedCutoff);
         }
 
         flyway(null).migrate();
 
         try (Connection connection = connection()) {
             assertThat(appliedVersions(connection))
-                    .containsExactly("1", "2", "3", "4", "5", "6", "7");
+                    .containsExactly("1", "2", "3", "4", "5", "6", "7", "8");
+
+            assertThat(profileFacts(connection, PROFILE_USER_ID))
+                    .containsExactlyInAnyOrder(
+                            "HOLDING|AAPL|AAPL",
+                            "HOLDING|0700HK|0700.HK",
+                            "RISK_PREFERENCE|risk_preference|aggressive",
+                            "PROFILE_SUMMARY|profile_summary|Prefers technology leaders"
+                    );
+            assertThat(unconfirmedProfileFactCount(connection, PROFILE_USER_ID)).isEqualTo(4);
+            assertThat(profileFacts(connection, "u_001")).isEmpty();
+            assertMonotonicProfileFactWrites(connection);
 
             MemoryBackfill older = memoryBackfill(connection, OLDER_MEMORY_ID);
             assertThat(older.recommendation()).isEqualTo("BUY");
@@ -211,6 +230,20 @@ class ResearchMemoryDecayConflictMigrationIT {
         }
     }
 
+    private void insertLegacyProfile(Connection connection, LocalDateTime updatedAt) throws SQLException {
+        String sql = """
+                INSERT INTO user_profiles (
+                    user_id, holdings, watch_list, risk_preference, profile_summary, updated_at
+                ) VALUES (?, '["AAPL", "0700.HK"]', '["NVDA"]', 'aggressive', ?, ?)
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, PROFILE_USER_ID);
+            statement.setString(2, "Prefers technology leaders");
+            statement.setTimestamp(3, Timestamp.valueOf(updatedAt));
+            statement.executeUpdate();
+        }
+    }
+
     private List<String> appliedVersions(Connection connection) throws SQLException {
         String sql = """
                 SELECT version
@@ -226,6 +259,87 @@ class ResearchMemoryDecayConflictMigrationIT {
             }
         }
         return versions;
+    }
+
+    private List<String> profileFacts(Connection connection, String userId) throws SQLException {
+        String sql = """
+                SELECT CONCAT(fact_type, '|', fact_key, '|', fact_value) AS fact
+                FROM user_memory_facts
+                WHERE user_id = ?
+                ORDER BY id
+                """;
+        List<String> facts = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, userId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    facts.add(resultSet.getString("fact"));
+                }
+            }
+        }
+        return facts;
+    }
+
+    private long unconfirmedProfileFactCount(Connection connection, String userId) throws SQLException {
+        String sql = """
+                SELECT COUNT(*)
+                FROM user_memory_facts
+                WHERE user_id = ? AND last_confirmed_at IS NULL
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, userId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                assertThat(resultSet.next()).isTrue();
+                return resultSet.getLong(1);
+            }
+        }
+    }
+
+    private void assertMonotonicProfileFactWrites(Connection connection) throws Exception {
+        NamedParameterJdbcTemplate jdbc = new NamedParameterJdbcTemplate(
+                new SingleConnectionDataSource(connection, true));
+        LocalDateTime first = LocalDateTime.of(2026, 8, 29, 10, 0);
+        jdbc.update(repositorySql("confirm", String.class, String.class, String.class,
+                        String.class, LocalDateTime.class, Long.class),
+                factParameters("HOLDING", "AAPL", "AAPL", first, 100L, "confirmedAt"));
+        jdbc.update(repositorySql("revokeHolding", String.class, String.class, String.class,
+                        LocalDateTime.class, Long.class),
+                factParameters("HOLDING", "AAPL", "AAPL", first.plusMinutes(1), 101L, "revokedAt"));
+        jdbc.update(repositorySql("confirm", String.class, String.class, String.class,
+                        String.class, LocalDateTime.class, Long.class),
+                factParameters("HOLDING", "AAPL", "AAPL", first.plusMinutes(2), 99L, "confirmedAt"));
+
+        assertThat(jdbc.queryForMap("""
+                SELECT source_message_id, revoked_at
+                FROM user_memory_facts
+                WHERE user_id = :userId AND fact_type = 'HOLDING' AND fact_key = 'AAPL'
+                """, java.util.Map.of("userId", PROFILE_USER_ID)))
+                .satisfies(state -> {
+                    assertThat(state.get("source_message_id")).isEqualTo(101L);
+                    assertThat(state.get("revoked_at")).isNotNull();
+                });
+    }
+
+    private MapSqlParameterSource factParameters(
+            String factType,
+            String factKey,
+            String factValue,
+            LocalDateTime observedAt,
+            Long sourceMessageId,
+            String timeParameter
+    ) {
+        return new MapSqlParameterSource()
+                .addValue("userId", PROFILE_USER_ID)
+                .addValue("factType", factType)
+                .addValue("factKey", factKey)
+                .addValue("factValue", factValue)
+                .addValue(timeParameter, observedAt)
+                .addValue("sourceMessageId", sourceMessageId);
+    }
+
+    private String repositorySql(String methodName, Class<?>... parameterTypes) throws Exception {
+        Method method = UserMemoryFactRepository.class.getMethod(methodName, parameterTypes);
+        return method.getAnnotation(Query.class).value();
     }
 
     private MemoryBackfill memoryBackfill(Connection connection, long id) throws SQLException {
