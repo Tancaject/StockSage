@@ -1,6 +1,6 @@
 # StockSage RAG 与多 Agent 面试准备
 
-> 基于当前项目代码整理，日期：2026-07-16。
+> 基于当前项目代码整理，最后复核：2026-09-03。
 >
 > 高频题方向参考：[《大模型后端开发八股》](https://dcnz7910hv4k.feishu.cn/wiki/IEt9wPo70ipfxBkBTNzcWPW5nLg)。参考资料只用于筛选问题，回答以 StockSage 代码为准。
 
@@ -10,7 +10,7 @@
 
 ### 1.1 30 秒介绍
 
-> StockSage 是一个面向股票研究的 AI 应用，前端使用 Vue，Agent 后端使用 Spring Boot 和 Spring AI，行情及财务数据由 FastAPI 服务提供。项目的两个重点是 RAG 和多 Agent：RAG 将 SEC 财报和本地知识经过父子分块、混合检索、RRF 融合和 Rerank 后注入模型；多 Agent 由 Coordinator 规划任务，基本面、市场、新闻 Agent 收集证据，再由 Bull、Bear 和 Research Manager 完成多空辩论及报告综合。
+> StockSage 是一个面向股票研究的 AI 应用，前端使用 Vue，Agent 后端使用 Spring Boot 和 Spring AI，行情及财务数据由 FastAPI 服务提供。项目的两个重点是 RAG 和多 Agent：RAG 将 SEC 财报和本地知识经过父子分块、混合检索、RRF 融合和 Rerank 后注入模型；Coordinator 生成受约束计划，后端按计划取证，基本面、市场、新闻 Agent 归纳证据，DEEP 路径再由 Bull、Bear 和 Research Manager 完成多空辩论及报告综合。
 
 ### 1.2 飞书高频题与项目模块
 
@@ -29,8 +29,8 @@
 | 多 Agent 协作 | Fundamentals、Market、News、Bull、Bear、Manager | 已实现 |
 | Planning、终止条件 | 固定动作计划、动态辩论轮数、超时 | 已实现 |
 | Memory | Redis 短期记忆、MySQL 长期画像 | 已实现 |
-| Tool Calling | Spring AI `@Tool`、AOP Trace | 已实现 |
-| Agent 工具失败 | 超时、有限重试、缓存和降级 | 已实现 |
+| 服务器工具执行 | Spring AI `@Tool`、Capability Gateway、AOP Trace | 已实现 |
+| 工具执行失败 | 超时、有限重试、缓存和降级 | 已实现 |
 | 持久化 Trace | `TraceService`、MySQL `AgentTrace` | 已实现 |
 | 实时 Trace | Redis Stream、`TraceEventRelay`、SSE 回放 | 已实现 |
 | 外部观测平台 | Phoenix + OpenTelemetry OTLP | 可选，默认关闭 |
@@ -281,31 +281,31 @@ StockSage 中的 Agent 具备：
 
 - 明确角色和目标；
 - 独立 Prompt；
-- 限定工具；
+- 只接收服务器已取得的限定证据；
 - 输入状态和输出契约；
 - 由 Coordinator 或 Pipeline 调度；
 - 输出成为下一阶段的证据。
 
 面试回答：
 
-> Agent 是围绕目标进行多步决策和执行的组件，包含角色、状态、工具和反馈。StockSage 没有让一个模型拥有全部工具自由循环，而是先由 Coordinator 规划，再由专职 Agent 在最小权限下执行。
+> Agent 是围绕目标进行分析和决策的组件，包含角色、输入状态、输出契约和反馈。StockSage 没有让模型自由调用工具，而是先由 Coordinator 规划、后端确定性取证，再由无工具的专职 Agent 分析证据。
 
 ### 3.2 架构
 
 ```mermaid
 flowchart TD
     U["用户问题"] --> C["ChatService"]
-    C --> R["RAG"]
-    C --> CO["Coordinator"]
+    C --> I["意图识别 / 标的解析"]
+    I --> R["按路由门控 RAG"]
+    R --> CO["Coordinator"]
     CO --> P["ExecutionPlan"]
 
-    P --> F["Fundamentals Agent"]
-    P --> M["Market Agent"]
-    P --> N["News Agent"]
+    P --> T["服务器工具 / Capability 取证"]
+    T --> A["无工具领域 Agent"]
+    A --> ANSWER["无工具最终回答"]
 
-    F --> E["统一证据状态"]
-    M --> E
-    N --> E
+    P --> RT["DEEP ResearchTask"]
+    RT --> E["统一证据状态"]
 
     E --> BULL["Bull Researcher"]
     E --> BEAR["Bear Researcher"]
@@ -340,8 +340,8 @@ Coordinator 将问题路由为：
 主链不是纯 ReAct，而是 Plan-and-Execute：
 
 1. Coordinator 生成有限计划；
-2. 后端执行指定 Agent 和工具；
-3. 汇总结果后生成回答。
+2. 后端按动作顺序执行工具，再让指定的无工具 Agent 归纳；
+3. 无工具最终回答模型汇总结果。
 
 优点：
 
@@ -363,18 +363,14 @@ Coordinator 模型失败时，会使用本地关键词规则生成确定性计�
 - 角色立场污染；
 - 错误难以定位。
 
-项目为不同角色创建独立 `ChatClient`：
-
-- Fundamentals Agent 只获得财务工具；
-- Market Agent 只获得行情工具；
-- News Agent 只获得新闻工具；
-- Bull、Bear、Manager 默认不持有外部工具。
-
-这既是职责拆分，也是最小权限控制。
+项目为不同角色创建独立、无工具的 `ChatClient`。工具与 Capability 由服务器按固定计划先执行，
+Fundamentals、Market、News Agent 只归纳对应证据；Bull、Bear、Manager 同样不持有外部工具。
+这既是职责拆分，也是把执行权留在可审计后端边界内。
 
 ### 3.5 多 Agent 协作与并行
 
-普通请求中，`ToolPrefetchService` 根据计划，通过 `CompletableFuture` 并行执行 Fundamentals、Market 和 News Agent，因为三者没有严格依赖。
+普通请求中，`ToolPrefetchService` 先按 `ExecutionPlan` 顺序完成确定性取证，再运行该路由对应的无工具领域 Agent；
+多个相互独立的领域归纳任务存在时才通过 `CompletableFuture` 并行。
 
 DEEP 请求中：
 
@@ -414,25 +410,25 @@ DEEP 请求中：
 - Agent 和工具有超时；
 - 失败走后端降级，不让模型无限重试。
 
-### 3.7 Tool Calling
+### 3.7 服务器拥有工具执行权
 
 流程：
 
-1. 后端将工具 Schema 提供给模型。
-2. 模型返回工具名和结构化参数。
-3. 后端执行 `@Tool` 方法。
-4. Observation 返回模型。
-5. 模型继续生成。
+1. Coordinator 输出有限的 `PlanAction`。
+2. `ToolPrefetchService` 按计划调用本地 `@Tool` 或批准的 Capability。
+3. 后端记录 Action、Observation、状态和耗时。
+4. 领域 Agent 与最终回答模型只消费已经取得的证据，不接收工具 Schema。
 
-模型只决定调用意图，真正执行工具的是后端。
+模型参与路由和证据分析，具体工具选择、参数组装与执行顺序由后端契约控制。
 
 项目的稳定性设计：
 
-- 不同 Agent 只暴露必要工具；
+- Agent 和最终回答 ChatClient 不注册工具；
 - `ToolCallAspect` 记录 Action 和 Observation；
+- Capability 使用独立 observer，避免重复 Trace；
 - `DataServiceClient` 设置超时和有限重试；
 - `ToolResultCache` 减少重复请求；
-- Prepared Answer 阶段禁用工具，避免证据准备后再次调用。
+- 工具与 Skill 使用服务端白名单和预算边界。
 
 ### 3.8 Memory
 
@@ -448,7 +444,7 @@ Redis 不可用时可退化到 MySQL 历史。长期记忆只选择性保存高�
 
 ### 3.9 工具失败与长任务
 
-Agent 工具失败或超时时：
+服务器工具失败或超时时：
 
 - 单次数据请求有超时；
 - 可重试错误只做有限重试；
@@ -475,7 +471,7 @@ DEEP 研究时间更长，因此后台化：
 
 #### Q2：为什么使用多 Agent
 
-> 股票研究包含基本面、行情、新闻和风险等不同视角。拆分角色可以缩短 Prompt、减少单个 Agent 的工具数量、隔离权限，并让错误更容易定位。
+> 股票研究包含基本面、行情、新闻和风险等不同视角。拆分角色可以缩短 Prompt、限制每个 Agent 的证据范围、隔离立场，并让错误更容易定位；工具执行权统一留在后端。
 
 #### Q3：多 Agent 协作的难点是什么
 
@@ -483,7 +479,7 @@ DEEP 研究时间更长，因此后台化：
 
 #### Q4：如何避免 Agent 跑偏
 
-> 使用角色 Prompt、最小工具权限、枚举动作、结构化输出、有限轮次、超时和 Trace。最终结论由 Research Manager 综合，而不是直接采用任意一个 Agent 的输出。
+> 使用角色 Prompt、无工具 Agent、枚举动作、结构化输出、有限轮次、超时和 Trace。最终结论由 Research Manager 综合，而不是直接采用任意一个 Agent 的输出。
 
 #### Q5：如何防止死循环
 
@@ -491,7 +487,7 @@ DEEP 研究时间更长，因此后台化：
 
 #### Q6：Agent 频繁选错工具怎样排查
 
-> 先看工具描述是否重叠、参数 Schema 是否清楚、是否暴露过多工具，再通过 Trace 检查模型选择和参数。项目通过角色工具隔离、Prepared Answer 禁用工具和 Skill Allowlist 减少误选。
+> 当前 Agent 不直接选工具。应先检查 Coordinator 路由、`PlanAction` 映射和后端参数组装，再从 Trace 核对实际调用与 Capability Allowlist；不要通过增加模型兜底来掩盖错误计划。
 
 #### Q7：多 Agent 怎样并行
 
@@ -734,7 +730,7 @@ MCP、Skill 简洁区分：
 >
 > RAG 主要处理 SEC 财报和本地研究资料。入库阶段将文档解析为父块和子块；子块用于 Embedding 和召回，父块用于最终上下文。默认使用本地 bge-m3 生成 1024 维向量并写入 Milvus，同时把文本和元数据保存到 MySQL。查询时先 Query Rewrite，再分别执行 Milvus 向量检索和 MySQL FULLTEXT 关键词检索，用 RRF 融合排名，通过 gte-rerank-v2 精排，最后扩展父块。项目使用 Golden Set、Recall、Precision、MRR 和 RAGAS 分别评估检索和生成。
 >
-> 多 Agent 方面，ChatService 先调用 Coordinator 生成受约束的 ExecutionPlan，而不是让模型无限 ReAct。普通请求并行执行 Fundamentals、Market 和 News Agent；深度研究形成统一证据状态，让 Bull 和 Bear 基于同一证据进行轮内并行、轮间串行的辩论，最后由 Research Manager 输出结构化报告。不同 Agent 使用独立 ChatClient 和最小工具集合，减少工具误选和角色污染。
+> 多 Agent 方面，ChatService 先调用 Coordinator 生成受约束的 ExecutionPlan，而不是让模型无限 ReAct。普通请求由服务器先按计划取证，再交给对应的无工具领域 Agent 归纳；深度研究形成统一证据状态，让 Bull 和 Bear 基于同一证据进行轮内并行、轮间串行的辩论，最后由 Research Manager 输出结构化报告。不同 Agent 使用独立、无工具的 ChatClient，工具执行权集中在后端计划执行层，减少工具误选和角色污染。
 >
 > 工程可靠性上，模型路由、Query Rewrite、Rerank、Redis 和外部工具都有降级；Agent 和工具有超时；辩论最多 5 轮；DEEP 研究通过 Redis Stream、MySQL 状态、Lease、Fencing 和 Checkpoint 后台执行。项目用 Golden Set、RAGAS 和 Regression Eval 验证版本质量，用 MySQL Trace、Redis 事件流和可选 Phoenix 解释单次执行过程。项目追求的不是完全自治，而是金融场景下可验证、可控制、可恢复的 Agent 系统。
 
@@ -987,7 +983,7 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 
 | 可能的追问 | 回答方向 |
 |---|---|
-| 多 Agent 是否只是多套 Prompt？ | 还包括工具权限、输入状态、调度关系和输出契约 |
+| 多 Agent 是否只是多套 Prompt？ | 还包括证据输入边界、状态、调度关系和输出契约 |
 | 为什么一定要 Bull/Bear？ | 用对立角色暴露假设和风险，不代表角色越多越好 |
 | Bull/Bear 会不会制造无意义争论？ | 动态轮数、统一证据和 Manager 综合控制 |
 | Manager 会不会偏向某一方？ | Prompt 约束、结构化输出、证据引用和稳定性评测 |
@@ -1129,7 +1125,7 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 
 - 上传文档是不可信数据；
 - RAG 内容不能覆盖 System Prompt；
-- Agent 只拥有只读工具；
+- Agent 不拥有工具，后端 Capability 仅允许批准的只读能力；
 - MCP/Capability 经过 Allowlist 和风险策略；
 - 写操作需要额外审批或完全禁止；
 - Trace 保留调用证据。

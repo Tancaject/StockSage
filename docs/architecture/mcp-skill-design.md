@@ -1,7 +1,7 @@
 # StockSage MCP 与 Skill 模块设计
 
-> 状态：Phase 0–2 纵切面和 F4 脱敏运行状态已实现；真实 Streamable HTTP server 验收待完成
-> 最后复核：2026-08-12
+> 状态：NEWS 确定性 Capability Skill 和 F4 脱敏运行状态已实现；真实 Streamable HTTP server 验收待完成
+> 最后复核：2026-09-03
 > 适用仓库：`D:\programming\StockSage`
 
 ## 1. 结论
@@ -9,23 +9,23 @@
 推荐采用“统一能力层 + 声明式 Skill + 现有编排器”的三层结构：
 
 - **MCP 是外部能力接入协议**：StockSage 后端先作为 MCP Host/Client，连接可信的只读 MCP Server，将远程 tools/resources 适配成内部 capability。
-- **Skill 是业务工作流定义**：描述何时使用哪些本地工具、MCP 能力、Agent 和后台研究流程，以及超时、降级、模型层级和数据权限。
+- **Skill 是确定性能力工作流**：按顺序调用已注册的本地或 MCP capability，并声明超时、风险、预算和 fallback；它不编排 Agent 或最终回答。
 - **Coordinator 继续负责意图路由**：不让 MCP 或 Skill 再实现一套 Agent 调度器。
-- **`ResearchTask` 继续承载长任务**：DEEP Skill 复用当前 MySQL checkpoint、Redis Stream、lease、worker 和 SSE replay，不新增第二套任务系统。
+- **`ResearchTask` 继续承载 DEEP 长任务**：复用当前 MySQL checkpoint、Redis Stream、lease、worker 和 SSE replay，不新增第二套任务系统。
 - **V1 只允许版本库内置、只读、白名单 Skill**：不做在线安装、不执行 Skill 自带代码、不开放用户填写 MCP URL、不做“Skill 商店”。
 
 最重要的边界是：
 
 ```text
 MCP 解决“能力从哪里来”
-Skill 解决“这些能力怎样组合完成一个投研任务”
+Skill 解决“这些只读能力怎样按固定顺序取证”
 Coordinator 解决“本轮应该选择哪个任务路径”
-Agent 解决“在给定证据和工具范围内如何分析”
+Agent 解决“如何分析服务器已经取得的证据”
 ```
 
 这与 StockSage 当前结构兼容。现有 `Coordinator + ExecutionPlan + PlanAction + AgentConfig + @Tool` 已经具有固定的 skill-like 能力分区；新设计应把它们抽象成可声明、可审计的工作流，而不是推翻重写。
 
-### 1.1 当前实现状态（2026-08-12）
+### 1.1 当前实现状态（2026-09-03）
 
 已落地：
 
@@ -34,8 +34,10 @@ Agent 解决“在给定证据和工具范围内如何分析”
 - `capabilities/*.yml` 与代码 adapter 双重注册，`CapabilityPolicy` 默认拒绝未知、未授权、敏感读取和写能力。
 - `skills/*.yml` 启动加载并校验，已提供 `latest-news-mcp` 与 `local-latest-news`。
 - NEWS 路由在现有 `ToolPrefetchService` 内先执行 Skill；MCP 不可用时降级到原 `NewsTools.searchNews`，并保留最终 legacy NEWS 兜底。
+- Skill 清单只接受 `INLINE_DETERMINISTIC` 与 `CAPABILITY` 步骤；未知字段启动即失败，不再保留未执行的 Agent/Final 装饰步骤。
+- Agent 和最终回答 ChatClient 均无工具；`ToolPrefetchService` 先取证，再让对应领域 Agent 归纳，最后生成回答。
 - MCP capability 经过统一 timeout、结果大小限制、SSE/Trace/Micrometer observer；没有加入任何 Agent 的全局 `defaultTools`。
-- 自动化覆盖 MCP initialize/list/call、`placeOrder` 拒绝、Skill manifest、MCP up/down 和原 DEEP 提交回归；完整后端测试 184 个通过。
+- 自动化覆盖 MCP initialize/list/call、`placeOrder` 拒绝、Skill manifest、MCP up/down 和原 DEEP 提交回归。
 
 尚未完成：
 
@@ -73,7 +75,8 @@ ChatController
   -> Coordinator.plan()
   -> ExecutionPlan(List<PlanAction>)
   -> ToolPrefetchService.prefetch()
-  -> local @Tool / Agent
+  -> server-owned local @Tool / Capability
+  -> no-tool role Agent
   -> Coordinator.streamAnswer()
   -> SSE / TraceEventStore
 ```
@@ -105,8 +108,8 @@ V1 必须做到：
 
 - 能配置并连接至少一个可信的只读 MCP Server。
 - 能发现、过滤、命名和调用 MCP tools。
-- 能以声明式文件定义一个 Skill，并把本地 `@Tool` 与 MCP tool 组合成工作流。
-- 每次执行只向模型或执行器暴露当前 Skill 允许的能力。
+- 能以声明式文件定义一个 Skill，并把本地 `@Tool` adapter 与 MCP tool 组合成确定性取证流程。
+- 每次执行只允许执行器调用当前 Skill 步骤中声明的能力；模型不持有工具。
 - MCP 不可用时能明确降级，不影响现有聊天和 DEEP 路径。
 - MCP 调用进入现有 trace/SSE/metrics 链路。
 - 能通过一个端到端 walking skeleton 证明架构可行。
@@ -129,11 +132,11 @@ V1 不做：
 | Local Tool | 现有 `@Tool` 方法或确定性 Java service 调用 | 工作流选择、远程协议 |
 | MCP Capability | 从可信 MCP Server 发现并适配的 tool/resource | 全局自动授权、任务编排 |
 | Capability | 对 Local Tool 和 MCP Tool 的统一内部描述与调用接口 | 意图分类 |
-| Skill | 版本化的工作流清单：步骤、能力白名单、超时、降级、提示词和执行模式 | 执行任意代码、动态安装依赖 |
+| Skill | 版本化的工作流清单：能力步骤、超时、风险预算和降级 | 执行任意代码、编排 Agent、动态安装依赖 |
 | Coordinator | 识别 route、任务类型和模型层级 | 直接管理 MCP 连接、遍历所有 tools |
 | SkillResolver | 把 route 或显式业务动作解析为一个已注册 Skill | 使用 LLM 任意生成 Skill |
-| SkillExecutor | 按已验证计划执行 capability/agent/background step | 决定用户意图 |
-| ResearchTask | 持久化和执行长时 DEEP Skill | 普通同步工具调用 |
+| SkillExecutionService | 按已验证清单确定性执行 capability step | 决定用户意图、调用 Agent 或生成最终回答 |
+| ResearchTask | 持久化和执行 DEEP 长任务 | 普通同步工具调用、Skill 执行 |
 
 ## 4. 方案比较
 
@@ -185,12 +188,10 @@ flowchart TD
     UI["Vue Chat / Workbench"] --> CS["ChatService"]
     CS --> CO["Coordinator"]
     CO --> SR["SkillResolver"]
-    SR --> SP["Validated SkillPlan"]
-    SP --> SE["SkillExecutionService"]
+    SR --> SD["Validated SkillDefinition"]
+    SD --> SE["SkillExecutionService"]
 
-    SE --> AR["Existing Agent runners"]
     SE --> CG["CapabilityGateway"]
-    SE --> DRS["DEEP submit adapter"]
 
     CG --> LR["Local capability catalog"]
     LR --> LT["Existing @Tool / Java services"]
@@ -200,14 +201,8 @@ flowchart TD
     MC --> MS1["Trusted MCP Server A"]
     MC --> MS2["Trusted MCP Server B"]
 
-    DRS --> RT["MySQL ResearchTask"]
-    RT --> RQ["Redis Stream"]
-    RQ --> RW["ResearchTaskWorker"]
-    RW --> DRP["DeepResearchPipeline"]
-
     SE --> OBS["CapabilityInvocationObserver"]
     CG --> OBS
-    DRP --> OBS
     OBS --> TES["TraceEventStore / SSE / TraceService / Metrics"]
 ```
 
@@ -215,43 +210,41 @@ flowchart TD
 
 1. **Host 控制上下文**：完整 conversation、用户 session 和跨 server 数据聚合只留在 StockSage 后端。
 2. **默认拒绝**：没有本地策略描述的 capability 不可执行。
-3. **最小暴露**：一个 Skill 只能看到其 `allowedCapabilities`。
-4. **工作流先于模型自由调用**：能确定性预取的步骤由 SkillExecutor 调用；只有确实需要模型判断参数时才给 Agent tool callback。
+3. **最小执行面**：一个 Skill 只能调用其步骤显式列出的主能力和 fallback。
+4. **服务器拥有执行权**：`SkillExecutionService` 确定性调用能力，Agent 和最终回答模型不接收 tool callback。
 5. **只读优先**：V1 的 capability risk 只接受 `READ_ONLY` 和受控的 `EXTERNAL_READ`。
 6. **现有链路优先**：DEEP、trace、SSE、identity、quota、checkpoint 均复用现有实现。
 
 ## 6. 模块划分
 
-建议在 backend 内新增三个包，不新增独立服务：
+当前在 backend 内使用三个包，不新增独立服务：
 
 ```text
 com.stocksage.capability
+├─ CapabilityAdapter.java
 ├─ CapabilityDescriptor.java
 ├─ CapabilityRegistry.java
 ├─ CapabilityGateway.java
 ├─ CapabilityPolicy.java
 ├─ CapabilityInvocationContext.java
+├─ CapabilityException.java
 ├─ CapabilityResult.java
-└─ CapabilityInvocationObserver.java
+├─ CapabilityInvocationObserver.java
+└─ LocalNewsSearchCapabilityAdapter.java
 
 com.stocksage.mcp
-├─ McpClientConfig.java
-├─ McpServerProperties.java
+├─ McpProperties.java
 ├─ McpCapabilityProvider.java
-├─ McpCapabilityAdapter.java
+├─ McpNewsSearchCapabilityAdapter.java
 ├─ StockSageMcpToolFilter.java
-├─ StockSageMcpNameResolver.java
-└─ McpHealthService.java
 
 com.stocksage.skill
 ├─ SkillDefinition.java
 ├─ SkillRegistry.java
 ├─ SkillValidator.java
 ├─ SkillResolver.java
-├─ SkillPlan.java
-├─ SkillStep.java
 ├─ SkillExecutionService.java
-└─ LegacyPlanAdapter.java
+└─ SkillExecutionObserver.java
 ```
 
 资源文件：
@@ -259,12 +252,10 @@ com.stocksage.skill
 ```text
 stocksage-backend/src/main/resources/
 ├─ capabilities/
-│  └─ local-capabilities.yml
+│  └─ news-capabilities.yml
 └─ skills/
-   ├─ market-snapshot.yml
-   ├─ fundamentals-review.yml
    ├─ latest-news-mcp.yml
-   └─ deep-equity-research.yml
+   └─ local-latest-news.yml
 ```
 
 ### 6.1 CapabilityDescriptor
@@ -331,9 +322,6 @@ V1 Skill 是受版本控制的声明式工作流。它可以引用：
 
 - 已注册 local capability。
 - 已注册 MCP capability。
-- 固定 Agent 角色。
-- `SUBMIT_DEEP` 这类现有后台流程。
-- 最终回答阶段。
 
 它不能：
 
@@ -355,35 +343,28 @@ public record SkillDefinition(
         Set<PlanRoute> routes,
         ExecutionMode executionMode,
         ModelTier minimumModelTier,
-        List<SkillStep> steps,
         SkillPolicy policy,
-        String promptTemplate,
+        List<SkillStep> steps,
         List<String> fallbackSkillIds
 ) {}
 ```
 
-执行模式只保留三种：
-
-- `INLINE_DETERMINISTIC`：确定性预取，适合 MARKET/FUNDAMENTALS/NEWS。
-- `INLINE_AGENT`：有界 Agent tool loop，限制工具集合、次数和总时长。
-- `BACKGROUND_RESEARCH`：提交到现有 ResearchTask，适合 DEEP。
+当前执行模式只有 `INLINE_DETERMINISTIC`。DEEP 继续由 `ResearchTask` 管线承载，不伪装成尚未实现的 Skill 模式。
 
 ### 7.3 Typed SkillStep
 
-目标形态：
+当前形态：
 
 ```java
-sealed interface SkillStep {
-    record Capability(String capabilityId, boolean required, String fallbackCapabilityId)
-            implements SkillStep {}
-    record Agent(String role, Set<String> allowedCapabilities)
-            implements SkillStep {}
-    record SubmitDeepResearch() implements SkillStep {}
-    record FinalAnswer() implements SkillStep {}
-}
+public record SkillStep(
+        StepType type,
+        String capability,
+        boolean required,
+        String fallbackCapability
+) {}
 ```
 
-这样可替代当前 `ToolPrefetchService` 中不断增长的 `switch (PlanAction)`。但不能一次性重写：V1 用 `LegacyPlanAdapter` 把现有 `PlanAction` 映射为 typed step，新 Skill 才使用 capability step。
+`StepType` 当前只有 `CAPABILITY`。Agent、DEEP 提交和最终回答仍由现有 Java 路由契约负责，不在 YAML 中重复声明。
 
 ### 7.4 示例 Skill
 
@@ -398,30 +379,14 @@ minimumModelTier: STANDARD
 
 policy:
   allowedRiskLevels: [READ_ONLY, EXTERNAL_READ]
-  allowedDataClasses: [PUBLIC_MARKET_DATA, USER_QUERY]
-  maxCapabilityCalls: 6
-  maxDuration: 20s
+  maxCapabilityCalls: 3
+  maxDurationSeconds: 20
 
 steps:
-  - type: CAPABILITY
-    capability: local.market.searchStocks
-    required: true
-
   - type: CAPABILITY
     capability: mcp.news.search
     required: false
     fallbackCapability: local.news.searchNews
-
-  - type: AGENT
-    role: NEWS_AGENT
-    allowedCapabilities:
-      - mcp.news.search
-      - local.news.searchNews
-      - local.news.webSearch
-
-  - type: FINAL_ANSWER
-
-promptTemplate: classpath:skills/prompts/latest-news.md
 fallbackSkillIds: [local-latest-news]
 ```
 
@@ -429,10 +394,9 @@ fallbackSkillIds: [local-latest-news]
 
 SkillResolver 按以下优先级解析：
 
-1. Workbench 明确业务动作提供的 `requestedSkillId`，但必须在服务端 allowlist 中。
-2. Coordinator 产生的 `PlanRoute` 对应默认 Skill。
-3. Skill 不可用时按 `fallbackSkillIds` 选择本地 Skill。
-4. 都不可用时回到当前 legacy `ExecutionPlan`。
+1. NEWS 路由选择服务端配置的默认 Skill。
+2. 默认 Skill 不可用时，按其 `fallbackSkillIds` 选择第一个兼容的本地 Skill。
+3. 非 NEWS 或没有可用 Skill 时返回空，由现有 `ExecutionPlan` 继续执行。
 
 不允许模型返回任意字符串后直接加载文件。即使未来允许 Coordinator 推荐 Skill，也只能从服务端提前过滤后的候选 ID 中选择。
 
@@ -556,17 +520,17 @@ V1 建议：
 
 ## 9. 与现有代码的集成点
 
-| 现有文件 | 建议改动 | 原因 |
+| 现有文件 | 当前集成方式 | 边界 |
 |---|---|---|
-| `Coordinator.java` | V1 保持 route/modelTier；在 plan 后交给 SkillResolver | 不扩大 Coordinator 职责 |
-| `ExecutionPlan.java` | 先增加可选 `skillId` 或旁路 `SkillPlan`；保留旧构造 | 避免现有测试和 trace 一次性破坏 |
-| `PlanAction.java` | 保留为 legacy adapter 输入，不再为每个 MCP tool 增枚举 | 远程工具集合不适合编译期枚举 |
-| `ToolPrefetchService.java` | V1 由 SkillExecutionService 包装；逐步迁移 switch 分支 | 避免大爆炸重构 |
-| `AgentConfig.java` | 不把 MCP provider 加到 `defaultTools`；后续按 Skill request-scoped tool callbacks | 防止所有 Agent 看到全部远程工具 |
-| `ToolCallAspect.java` | 保留本地 `@Tool` 观测；提取共用 observer | AOP 捕获不到 MCP ToolCallback |
+| `Coordinator.java` | 保持 route/modelTier 和固定计划 | 不解析 Skill、不管理 MCP 连接 |
+| `ExecutionPlan.java` | 继续以 `PlanAction` 表达业务执行顺序 | 不预留未使用的 Skill 字段 |
+| `PlanAction.java` | 保留稳定的业务动作标签 | 不为每个远程 tool 增加枚举 |
+| `ToolPrefetchService.java` | 在 NEWS 动作处调用 `SkillResolver` 与 `SkillExecutionService` | 其他路线继续复用现有服务器工具 |
+| `AgentConfig.java` | Agent ChatClient 不注册工具 | Agent 只归纳服务器已取得的证据 |
+| `ToolCallAspect.java` | 继续观测本地 `@Tool`；Capability 使用独立 observer | 避免同一次调用生成两份 Trace |
 | `TraceEventStore.java` | 复用，不改变 event replay 语义 | 保持前端和跨实例行为 |
-| `DeepEvidenceCollector.java` | 后续通过 CapabilityGateway 显式加入 MCP evidence | 让 DEEP 证据仍可 checkpoint 和审计 |
-| `ResearchTaskWorker.java` | 不改任务语义，只执行编译后的 DEEP skill/evidence step | 复用 lease/retry/DLQ |
+| `DeepEvidenceCollector.java` | 当前继续显式调用服务器受控工具 | 后续如接 Capability 仍须保留 checkpoint 和审计 |
+| `ResearchTaskWorker.java` | 不改任务语义，与 Skill 执行相互独立 | 复用 lease/retry/DLQ |
 | `SecurityConfig.java` / `RequestIdentity.java` | capability context 必须来自后端认证身份 | 防止前端伪造 userId |
 
 ### 9.1 为什么不能只依赖 ToolCallAspect
@@ -589,34 +553,32 @@ MCP tool 通常以 `ToolCallback` 形式执行，不会经过本地 `@Tool` 方�
 ### 10.1 普通 NEWS Skill
 
 ```text
-1. ChatService 完成身份、conversation、trace、RAG 初始化
+1. ChatService 完成身份、conversation、trace 与意图识别
 2. Coordinator 输出 route=NEWS, modelTier=STANDARD
 3. SkillResolver 选择 latest-news-mcp
-4. SkillValidator/Compiler 生成不可变 SkillPlan
-5. CapabilityGateway 调 local.market.searchStocks
-6. CapabilityGateway 调 mcp.news.search
-7. MCP 失败则调 local.news.searchNews
-8. News Agent 只接收允许的 evidence/tool callbacks
-9. Coordinator 使用 prepared context 输出最终回答
+4. SkillRegistry 在启动期已校验不可变清单
+5. CapabilityGateway 调 mcp.news.search
+6. MCP 失败则调 local.news.searchNews
+7. ToolPrefetchService 完成计划中的其他服务器取证
+8. News Agent 无工具地归纳已取得证据
+9. Coordinator 使用 prepared context 输出无工具最终回答
 10. trace/SSE 展示实际 provider、降级和耗时
 ```
 
-### 10.2 DEEP Skill
+### 10.2 DEEP 仍是持久化研究任务
 
 ```text
 1. Coordinator 输出 route=DEEP
-2. SkillResolver 选择 deep-equity-research
-3. executionMode=BACKGROUND_RESEARCH
-4. SkillExecutionService 调用现有 submitDeepResearch
-5. ResearchTask 只在 payload 中携带 taskId，MySQL 为事实源
-6. Worker 恢复 Skill version + capability policy snapshot
-7. DeepEvidenceCollector 通过 CapabilityGateway 收集允许的证据
-8. checkpoint 保存 evidence provenance 和已完成阶段
-9. Bull/Bear/Research Manager 继续使用固定证据
-10. report/task-final 经现有 Redis trace stream 回放
+2. ToolPrefetchService 调用现有 submitDeepResearch
+3. MySQL ResearchTask 为任务事实源，Redis Stream 负责投递
+4. Worker 恢复 checkpoint，并在 owner fencing 下继续执行
+5. DeepEvidenceCollector 通过服务器受控工具收集证据
+6. checkpoint 保存 evidence provenance 和已完成阶段
+7. Bull/Bear/Research Manager 只使用固定证据
+8. report/task-final 经现有 trace stream 回放
 ```
 
-DEEP task 必须记录 `skillId` 和 `skillVersion`。若 V1 不立即改表，可先写入 checkpoint JSON；后续再决定是否新增列。
+只有在 DEEP 真正迁移为版本化 Skill 后才需要增加 `skillId/skillVersion`；当前不预留无效字段。
 
 ## 11. 安全设计
 
@@ -791,13 +753,11 @@ V1 不新增通用 `skills`、`mcp_servers`、`capability_invocations` 数据表
 
 ### 16.1 单元测试
 
-- `SkillRegistryTest`：重复 ID、未知版本、disabled skill。
-- `SkillValidatorTest`：未知 capability、WRITE risk、超时超界、循环 fallback。
-- `SkillResolverTest`：显式 Skill、route 默认、MCP unavailable fallback、legacy fallback。
+- `SkillRegistryTest`：加载、未知字段和清单校验。
+- `SkillResolverTest`：NEWS 默认、fallback、非 NEWS 与模型层级边界。
+- `SkillExecutionServiceTest`：主能力、fallback、required failure、预算和 observer。
 - `CapabilityPolicyTest`：risk 和 data-class fail-closed。
-- `McpToolCatalogTest`：allowlist/denylist、命名冲突、未知 tool 拒绝。
-- `CapabilityGatewayTest`：timeout、size limit、schema error、observer 总是执行。
-- `LegacyPlanAdapterTest`：现有所有 `PlanAction` 映射保持一致。
+- `McpCapabilityProviderTest`：initialize/list/call、allowlist 与不可用状态。
 
 ### 16.2 集成测试
 
@@ -859,7 +819,7 @@ cd stocksage-backend
 
 任务：
 
-- 加载 `local-capabilities.yml`。
+- 加载 `news-capabilities.yml`。
 - 为一个现有 local tool 建 adapter。
 - 把 observer 接入 TraceEventStore/TraceService/Micrometer。
 - 接入 MCP provider，但不加入任何 Agent defaultTools。
@@ -890,18 +850,16 @@ cd stocksage-backend
 
 退出条件：MCP up/down 都有自动化集成测试和人工 trace 证据。
 
-### Phase 3：把现有固定路由声明为 Skill（2–4 天）
+### Phase 3：按收益迁移更多只读 Capability（可选）
 
 按顺序迁移：
 
 1. `market-snapshot`。
 2. `fundamentals-review`。
 3. `local-latest-news`。
-4. `deep-equity-research`。
+每迁移一个 Skill，都必须保持当前 PlanAction 标签、SSE 顺序和输出语义，避免前端追踪回归。DEEP 不在本阶段迁移。
 
-每迁移一个 Skill，都必须保持当前 PlanAction 标签、SSE 顺序和输出语义，避免前端追踪回归。
-
-退出条件：Coordinator 只负责 route/modelTier；SkillResolver 决定工作流；legacy adapter 仍可回退。
+退出条件：新增路线确实需要远端/本地 capability fallback，且能复用当前确定性执行器；不为只调用现有 Java 方法的路线制造 YAML。
 
 ### Phase 4：DEEP 与可观测性完善（2–3 天）
 
@@ -929,7 +887,7 @@ cd stocksage-backend
 ```text
 stocksage-backend/pom.xml
 stocksage-backend/src/main/resources/application.properties
-stocksage-backend/src/main/resources/capabilities/local-capabilities.yml
+stocksage-backend/src/main/resources/capabilities/news-capabilities.yml
 stocksage-backend/src/main/resources/skills/latest-news-mcp.yml
 stocksage-backend/src/main/java/com/stocksage/capability/*
 stocksage-backend/src/main/java/com/stocksage/mcp/*
@@ -960,7 +918,7 @@ Walking skeleton 不需要先改 Vue，也不需要先建数据库表。
 - 反转成本：低。未来可以增加受控 step 类型。
 - 重新评估条件：确实出现第三方 Skill 开发者和签名/审批需求。
 
-### ADR-003：能力默认拒绝并按 Skill 最小暴露
+### ADR-003：能力默认拒绝并按 Skill 步骤最小执行
 
 - 决定：MCP tools/list 结果不能自动成为模型工具集。
 - 原因：安全、token 成本、模型选择准确率和可解释性。

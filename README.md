@@ -1,16 +1,17 @@
 # StockSage
 
-StockSage 是一个本地可运行的 AI 股票研究工作台，整合多 Agent 分析、SEC 财报 RAG、市场数据工具和可追踪的后台研究任务。
+StockSage 是一个本地可运行的 AI 股票研究工作台，采用“模型做受约束决策、后端确定性执行”的混合架构，整合多 Agent 分析、SEC 财报 RAG、市场数据工具和可追踪的后台研究任务。
 
 > 仅用于学习、研究和工程演示，不构成投资建议；IBKR 集成始终保持只读。
 
 ## 核心能力
 
-- **上下文意图识别与多 Agent 研究**：结合最近 3 轮对话、LLM、Embedding 与高精度规则，直接选择受控的五类研究路由；DEEP 模式要求 Bull/Bear 提交绑定 Evidence ID 的结构化论点，由 Research Manager 匿名逐论点评分、Java 策略锁定评级，再由 Manager 解释裁决并接受运行时 Harness 验收。
+- **上下文意图识别与多 Agent 研究**：结合最近 3 轮对话、LLM、Embedding 与高精度规则，直接选择受控的五类研究路由；MARKET、FUNDAMENTALS、NEWS 路线由后端先确定性取证，再交给无工具领域 Agent 归纳。DEEP 模式要求 Bull/Bear 提交绑定 Evidence ID 的结构化论点，由 Research Manager 匿名逐论点评分、Java 策略锁定评级，再由 Manager 解释裁决并接受运行时 Harness 验收。
 - **可溯源 RAG**：SEC EDGAR 财报经过 Parent-Child 分块、Milvus 向量与 Lucene 标准 BM25 混合检索、RRF 融合和 rerank 后，为回答提供编号引用。
+- **受控 Skill 与工具**：Skill 当前只接受 `INLINE_DETERMINISTIC` 的 `CAPABILITY` 步骤，按后端 allowlist、预算和 fallback 执行，不承载 Agent、最终回答或后台任务；模型不能调用写入知识库的工具。
 - **后台研究任务**：Redis Stream、MySQL checkpoint 与 SSE 回放支持后台执行、断线恢复和进度追踪；证据不足时返回 `NOT_RATED`。
-- **投研工作台**：提供自选股、K 线、事件与对比研究、报告版本/审核，以及 IBKR 只读持仓诊断。
-- **质量评估**：记录模型、工具和研究链路，并提供检索评估、RAGAS、Agent golden set 与可选 Phoenix trace。
+- **投研工作台**：提供自选股、K 线、单标的与事件研究、报告版本/审核，以及 IBKR 只读持仓诊断；多标的对比在真实执行器完成前明确标记为未开放。
+- **质量评估**：Trace 分开记录技术状态和业务 Task Outcome，并提供检索评估、RAGAS、Agent golden set 与可选 Phoenix trace；缺少标签时 Task Success 和 Tool Call F1 显示 `NO_DATA`，不按 0 或 PASS 处理。
 
 ## 架构
 
@@ -20,11 +21,15 @@ flowchart LR
     API --> INTENT["Intent Recognition<br/>LLM + Embedding + Pattern"]
     HISTORY["Recent 3 Turns"] --> INTENT
     INTENT -->|validated targetRoute| CO["Coordinator"]
-    INTENT -->|resolvedQuery| RAG["Hybrid RAG"]
+    INTENT -->|DIRECT / FUNDAMENTALS + resolvedQuery| RAG["Hybrid RAG"]
+    RAG -->|ragHitCount| CO
     CO --> PLAN["RoutePlanCatalog<br/>server-owned actions"]
-    PLAN --> AG["Specialist Agents"]
+    PLAN --> EVIDENCE["Server-owned read-only evidence"]
+    EVIDENCE --> AG["No-tool Specialist Agents"]
     PLAN --> DEEP["DEEP Research"]
-    AG --> DATA["FastAPI Data Service"]
+    EVIDENCE --> DATA["FastAPI Data Service"]
+    AG --> ANSWER["No-tool Final Answer"]
+    RAG --> ANSWER
     RAG --> STORE["Milvus + Lucene BM25<br/>(MySQL source)"]
     DEEP --> QUEUE["Redis Stream"]
     QUEUE --> WORKER["Research Worker"]
