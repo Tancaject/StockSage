@@ -39,9 +39,11 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class Coordinator {
 
+    public static final String MULTI_TARGET_UNSUPPORTED = "MULTI_TARGET_UNSUPPORTED";
+
     /** 统一执行语义、向量、模式和 n-gram 识别的意图服务。 */
     private final IntentRecognitionService intentRecognitionService;
-    /** 普通回答客户端，可按当前对话配置使用工具。 */
+    /** 普通路由的无工具最终回答客户端。 */
     private final ChatClient responseChatClient;
     /** 证据已固定后的无工具回答客户端，主要用于 DEEP 最终输出。 */
     private final ChatClient preparedAnswerChatClient;
@@ -153,8 +155,9 @@ public class Coordinator {
                                                     boolean hasImages,
                                                     List<String> tickerCandidates) {
         try {
-            return intentRecognitionService.recognize(new IntentRecognitionRequest(
+            IntentRecognitionResult recognition = intentRecognitionService.recognize(new IntentRecognitionRequest(
                     userQuery, recentTurns, ragHitCount, hasImages, tickerCandidates));
+            return enforceSingleTargetContract(recognition, userQuery);
         } catch (Exception e) {
             log.warn("Intent recognition pipeline failed; deterministic plan remains available. errorType={}",
                     e.getClass().getSimpleName());
@@ -171,7 +174,7 @@ public class Coordinator {
                     true,
                     List.of("INTENT_PIPELINE_FAILED")
             );
-            return new IntentRecognitionResult(
+            return enforceSingleTargetContract(new IntentRecognitionResult(
                     safeDecision,
                     "",
                     false,
@@ -179,7 +182,7 @@ public class Coordinator {
                     List.of(),
                     "INTENT_RECOGNITION_FAILED",
                     0L
-            );
+            ), userQuery);
         }
     }
 
@@ -192,7 +195,7 @@ public class Coordinator {
         }
         // 即使全部识别来源 abstain，IntentDecision 也会给出 DIRECT + needsClarification。
         // 这里必须执行该安全决定，不能再按关键词做第二次语义路由。
-        return buildPlan(recognition, originalQuery, ragHitCount);
+        return buildPlan(enforceSingleTargetContract(recognition, originalQuery), originalQuery, ragHitCount);
     }
 
     /**
@@ -214,8 +217,7 @@ public class Coordinator {
     }
 
     /**
-     * 流式输出最终回答。深度研究使用仅含预置上下文的客户端，
-     * 确保证据快照固定后最终模型不能再调用工具。
+     * 流式输出最终回答。两个客户端都不持有工具；深度研究使用专用证据整理提示。
      */
     public Flux<String> streamAnswer(List<Message> promptMessages, boolean usePreparedContextOnly) {
         return streamAnswer(promptMessages, usePreparedContextOnly, ModelTier.STANDARD);
@@ -239,7 +241,7 @@ public class Coordinator {
         ChatClient client = usePreparedContextOnly ? preparedAnswerChatClient : responseChatClient;
         String modelName = selectedModel.modelName();
         if (usePreparedContextOnly) {
-            log.info("Coordinator streaming final answer from prepared context only; tools disabled for this response.");
+            log.info("Coordinator streaming final answer from prepared context only.");
         }
         log.info("Coordinator selected final-answer model tier={}, model={}, preparedContextOnly={}",
                 effectiveTier, modelName, usePreparedContextOnly);
@@ -345,6 +347,30 @@ public class Coordinator {
                                        String fallbackReason,
                                        long startedNanos) {
         String query = userQuery == null ? "" : userQuery.trim();
+        if (hasMultipleExplicitTargets(query)) {
+            IntentDecision decision = new IntentDecision(
+                    FineIntent.COMPARISON,
+                    IntentGroup.RESEARCH,
+                    PlanRoute.DIRECT,
+                    1.0,
+                    TimeSensitivity.UNSPECIFIED,
+                    AnalysisDepth.UNSPECIFIED,
+                    Map.of(),
+                    query,
+                    Map.of(IntentSignalSource.FALLBACK, 1.0),
+                    true,
+                    List.of(MULTI_TARGET_UNSUPPORTED)
+            );
+            return buildPlan(new IntentRecognitionResult(
+                    decision,
+                    "",
+                    false,
+                    "当前执行链一次只支持一个明确标的。",
+                    List.of(),
+                    fallbackReason,
+                    elapsedMillis(startedNanos)
+            ), query, ragHitCount);
+        }
         String lower = query.toLowerCase(Locale.ROOT);
         boolean conceptQuestion = containsAny(lower, "what is", "什么是", "为什么", "解释", "概念");
         PlanRoute route;
@@ -398,6 +424,55 @@ public class Coordinator {
                 matchedSignals
         );
         return new ExecutionPlan(route, taskType, thought, actions, observation, modelTier, routingDecision, query);
+    }
+
+    /** 多标的尚无真实执行器时，在任何检索或工具执行前收敛为单标的澄清。 */
+    private IntentRecognitionResult enforceSingleTargetContract(IntentRecognitionResult recognition,
+                                                                 String userQuery) {
+        if (recognition == null || recognition.decision() == null) {
+            return recognition;
+        }
+        IntentDecision current = recognition.decision();
+        String resolvedQuery = current.resolvedQuery().isBlank() ? userQuery : current.resolvedQuery();
+        boolean comparisonIntent = current.fineIntent() == FineIntent.COMPARISON;
+        if (!comparisonIntent
+                && !hasMultipleExplicitTargets(userQuery)
+                && !hasMultipleExplicitTargets(resolvedQuery)) {
+            return recognition;
+        }
+        java.util.ArrayList<String> reasonCodes = new java.util.ArrayList<>(current.reasonCodes());
+        if (!reasonCodes.contains(MULTI_TARGET_UNSUPPORTED)) {
+            reasonCodes.add(MULTI_TARGET_UNSUPPORTED);
+        }
+        IntentDecision safeDecision = new IntentDecision(
+                FineIntent.COMPARISON,
+                IntentGroup.RESEARCH,
+                PlanRoute.DIRECT,
+                current.confidence(),
+                current.timeSensitivity(),
+                current.analysisDepth(),
+                current.entities(),
+                resolvedQuery,
+                current.sourceScores(),
+                true,
+                reasonCodes
+        );
+        return new IntentRecognitionResult(
+                safeDecision,
+                recognition.rawRoute(),
+                recognition.rawRouteValid(),
+                "当前执行链一次只支持一个明确标的。",
+                recognition.signals(),
+                recognition.degradationReason(),
+                recognition.durationMs()
+        );
+    }
+
+    private boolean hasMultipleExplicitTargets(String query) {
+        String safeQuery = query == null ? "" : query;
+        String primaryTicker = tickerResolutionService.resolveExplicitTicker(safeQuery);
+        return !primaryTicker.isBlank()
+                && tickerResolutionService.hasConflictingExplicitTicker(safeQuery, primaryTicker);
     }
 
     private String fineIntentLabel(FineIntent intent) {

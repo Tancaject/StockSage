@@ -81,4 +81,46 @@ public class AnalysisState {
     /** 最近一次持久化的完成策略决策及有界恢复计数，供任务接管后继续执行。 */
     private HarnessSnapshot harnessSnapshot;
 
+    /** 问题相关补证的单步计划和执行结果；旧 checkpoint 缺失该字段时保持未开始。 */
+    private EvidenceReplanState evidenceReplanState;
+
+    /** 单步补证只允许一个服务端映射的只读动作。 */
+    public enum EvidenceReplanAction {
+        FOCUSED_NEWS_SEARCH
+    }
+
+    /** 持久化生命周期；不存在状态即尚未开始。 */
+    public enum EvidenceReplanStatus {
+        SKIPPED,
+        PLANNED,
+        REVALIDATED
+    }
+
+    /**
+     * 崩溃接管时恢复 exact action，而不是重新请求模型。
+     *
+     * @param policyVersion 单步补证契约版本
+     * @param status 当前持久化生命周期
+     * @param action 服务端批准的动作；SKIPPED 时可为空
+     * @param normalizedQuery 服务端规范化后的查询；不保存原始模型输出
+     * @param reasonCode 可展示的有限原因码
+     * @param effectKey 服务端生成的逻辑副作用键
+     * @param addedEvidenceIds 最终新增的可用证据 ID
+     * @param stopReason 执行或停止结果
+     */
+    public record EvidenceReplanState(
+            int policyVersion,
+            EvidenceReplanStatus status,
+            EvidenceReplanAction action,
+            String normalizedQuery,
+            String reasonCode,
+            String effectKey,
+            List<String> addedEvidenceIds,
+            String stopReason
+    ) {
+        public EvidenceReplanState {
+            addedEvidenceIds = addedEvidenceIds == null ? List.of() : List.copyOf(addedEvidenceIds);
+        }
+    }
+
 }

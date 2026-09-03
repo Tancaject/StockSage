@@ -62,9 +62,7 @@ class SkillExecutionServiceTest {
                         SkillDefinition.StepType.CAPABILITY,
                         "mcp.news.search",
                         false,
-                        "local.news.searchNews",
-                        null,
-                        Set.of()
+                        "local.news.searchNews"
                 )),
                 List.of("local-latest-news")
         );

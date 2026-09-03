@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.stocksage.agent.DebateDecisionPolicy;
 import com.stocksage.harness.HarnessModels.EvidenceDimension;
 import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
 import com.stocksage.harness.HarnessModels.EvidenceStatus;
@@ -17,6 +18,11 @@ import com.stocksage.harness.HarnessModels.SynthesisResult;
 import com.stocksage.harness.HarnessModels.TargetIdentity;
 import com.stocksage.harness.HarnessModels.TargetResolutionStatus;
 import com.stocksage.harness.HarnessModels.ViolationCode;
+import com.stocksage.model.dto.AnalysisHorizon;
+import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
+import com.stocksage.model.dto.DebateModels.AssessmentReasonCode;
+import com.stocksage.model.dto.DebateModels.DebateVerdict;
+import com.stocksage.model.dto.DebateModels.LeadingSide;
 import com.stocksage.model.dto.InvestmentReport;
 import org.junit.jupiter.api.Test;
 
@@ -53,6 +59,7 @@ class HarnessGoldenSetTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final Instant OBSERVED_AT = Instant.parse("2026-07-24T00:00:00Z");
+    private static final String DATA_SNAPSHOT_HASH = "golden-snapshot-v1";
     private static final String CASE_SCHEMA_VERSION = "harness_golden_case_v2";
     private static final int MIN_CASES = 60;
     private static final int MIN_EVIDENCE_CASES = 40;
@@ -60,7 +67,11 @@ class HarnessGoldenSetTest {
     private static final Pattern CASE_ID = Pattern.compile("[a-z0-9][a-z0-9_-]{2,95}");
 
     private static final Set<ViolationCode> ACTIVE_VIOLATIONS =
-            EnumSet.complementOf(EnumSet.of(ViolationCode.RAG_MISSING));
+            EnumSet.complementOf(EnumSet.of(
+                    ViolationCode.RAG_MISSING,
+                    ViolationCode.DEBATE_CONTRACT_INVALID,
+                    ViolationCode.DEBATE_ASSESSMENT_INVALID
+            ));
     private static final Set<RecoveryAction> ACTIVE_RECOVERY_ACTIONS = EnumSet.of(
             RecoveryAction.RETRY_FUNDAMENTALS,
             RecoveryAction.RETRY_MARKET,
@@ -362,7 +373,8 @@ class HarnessGoldenSetTest {
     private static void validateReport(JsonNode report, int lineNumber) {
         requireAllowedFields(report, lineNumber, "report",
                 "ticker", "recommendation", "analyst_summary", "data_freshness",
-                "rationale", "risk_factors", "unknowns", "evidence_items");
+                "rationale", "risk_factors", "unknowns", "evidence_items",
+                "decision_audit");
         for (String field : List.of(
                 "ticker", "recommendation", "analyst_summary", "data_freshness",
                 "rationale", "risk_factors", "unknowns", "evidence_items")) {
@@ -389,6 +401,13 @@ class HarnessGoldenSetTest {
                     throw invalid(lineNumber,
                             "evidence item source_evidence_ids must be an array or null");
                 }
+            }
+        }
+        if (report.has("decision_audit")) {
+            String mode = requiredText(report, "decision_audit", lineNumber)
+                    .toUpperCase(Locale.ROOT);
+            if (!Set.of("VALID", "MISSING", "INVALID").contains(mode)) {
+                throw invalid(lineNumber, "unsupported decision_audit mode: " + mode);
             }
         }
     }
@@ -471,7 +490,11 @@ class HarnessGoldenSetTest {
                 recoveryCounts,
                 evidenceStatusCounts,
                 parseStatusCounts,
-                List.of(ViolationCode.RAG_MISSING.name()),
+                List.of(
+                        ViolationCode.RAG_MISSING.name(),
+                        ViolationCode.DEBATE_CONTRACT_INVALID.name(),
+                        ViolationCode.DEBATE_ASSESSMENT_INVALID.name()
+                ),
                 List.of(
                         RecoveryAction.RETRY_NEWS.name(),
                         RecoveryAction.USE_APPROVED_FALLBACK.name()
@@ -618,7 +641,7 @@ class HarnessGoldenSetTest {
         return new EvidenceLedger(target, evidence);
     }
 
-    private static SynthesisResult synthesisResult(JsonNode fixture) {
+    private static SynthesisResult synthesisResult(JsonNode fixture, EvidenceLedger ledger) {
         JsonNode synthesis = fixture.get("synthesis");
         String mode = synthesis.get("mode").asText().toUpperCase(Locale.ROOT);
         ParseStatus parseStatus = ParseStatus.valueOf(
@@ -630,9 +653,17 @@ class HarnessGoldenSetTest {
             return new SynthesisResult(null, parseStatus, List.of("golden null report"));
         }
         JsonNode reportNode = synthesis.get("report");
+        String rawRecommendation = nullableText(reportNode, "recommendation");
+        String recommendation = rawRecommendation == null
+                ? null
+                : rawRecommendation.strip().toUpperCase(Locale.ROOT);
+        AnalysisHorizon horizon = AnalysisHorizon.UNSPECIFIED;
         InvestmentReport report = InvestmentReport.builder()
                 .ticker(nullableText(reportNode, "ticker"))
-                .recommendation(nullableText(reportNode, "recommendation"))
+                .dataSnapshotHash(DATA_SNAPSHOT_HASH)
+                .recommendation(recommendation)
+                .analysisHorizon(horizon)
+                .decisionAudit(decisionAudit(reportNode, ledger, recommendation, horizon))
                 .analystSummary(nullableText(reportNode, "analyst_summary"))
                 .dataFreshness(nullableText(reportNode, "data_freshness"))
                 .rationale(nullableTextList(reportNode, "rationale"))
@@ -641,6 +672,49 @@ class HarnessGoldenSetTest {
                 .evidenceItems(evidenceItems(reportNode.get("evidence_items")))
                 .build();
         return new SynthesisResult(report, parseStatus, List.of());
+    }
+
+    private static DebateVerdict decisionAudit(
+            JsonNode reportNode,
+            EvidenceLedger ledger,
+            String recommendation,
+            AnalysisHorizon horizon
+    ) {
+        String mode = textOrDefault(reportNode, "decision_audit", "VALID")
+                .toUpperCase(Locale.ROOT);
+        if ("MISSING".equals(mode)) {
+            return null;
+        }
+        boolean invalid = "INVALID".equals(mode);
+        String evidenceId = invalid
+                ? "e-unknown"
+                : ledger.usableEvidenceIds().stream().sorted().findFirst().orElse("");
+        List<ArgumentAssessment> assessments = java.util.stream.IntStream.rangeClosed(1, 6)
+                .mapToObj(index -> new ArgumentAssessment(
+                        "golden-thesis-" + index,
+                        4, 4, 4, 3, 3,
+                        List.of(evidenceId),
+                        List.of(),
+                        List.of(AssessmentReasonCode.SUPPORTED),
+                        "Golden assessment"
+                ))
+                .toList();
+        return new DebateVerdict(
+                invalid ? "stale-decision-policy" : DebateDecisionPolicy.POLICY_ID,
+                invalid ? DebateDecisionPolicy.POLICY_VERSION + 1
+                        : DebateDecisionPolicy.POLICY_VERSION,
+                invalid ? "" : "golden-input-hash",
+                invalid ? "stale-snapshot" : DATA_SNAPSHOT_HASH,
+                70.0,
+                70.0,
+                invalid ? LeadingSide.INSUFFICIENT : LeadingSide.BALANCED,
+                0.0,
+                invalid ? "HOLD" : recommendation,
+                invalid ? AnalysisHorizon.SHORT_TERM : horizon,
+                List.of(),
+                List.of(),
+                assessments
+        );
     }
 
     private static List<InvestmentReport.EvidenceItem> evidenceItems(JsonNode items) {
@@ -885,7 +959,8 @@ class HarnessGoldenSetTest {
         private HarnessDecision evaluate(DeepResearchCompletionPolicy policy) {
             EvidenceLedger ledger = evidenceLedger(fixture, phase);
             if (phase == HarnessPhase.REPORT) {
-                return policy.afterReport(runContext(fixture), ledger, synthesisResult(fixture));
+                return policy.afterReport(
+                        runContext(fixture), ledger, synthesisResult(fixture, ledger));
             }
             return policy.afterEvidence(runContext(fixture), ledger);
         }

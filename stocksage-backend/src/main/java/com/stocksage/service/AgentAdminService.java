@@ -4,22 +4,30 @@ import com.stocksage.capability.CapabilityDescriptor;
 import com.stocksage.capability.CapabilityRegistry;
 import com.stocksage.mcp.McpCapabilityProvider;
 import com.stocksage.mcp.McpProperties;
+import com.stocksage.model.entity.AgentTrace;
+import com.stocksage.repository.AgentTraceRepository;
 import com.stocksage.skill.SkillDefinition;
 import com.stocksage.skill.SkillRegistry;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.lang.management.ManagementFactory;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 /**
  * 生成供管理接口展示的 Agent 技能、能力和 MCP 运行快照。
  *
- * <p>该服务只读取 {@link SkillRegistry}、{@link CapabilityRegistry} 和 Micrometer 当前进程指标，
+ * <p>该服务只读取注册表、Micrometer 当前进程指标和最近持久化 Trace，
  * 不修改 Agent 配置，也不会暴露密钥或原始 MCP 连接信息。</p>
  */
 @Service
@@ -33,8 +41,10 @@ public class AgentAdminService {
     private final McpCapabilityProvider mcpProvider;
     /** 判断 MCP 开关和目标端点是否完整配置。 */
     private final McpProperties mcpProperties;
-    /** 查询能力调用次数、成功率和耗时指标。 */
+    /** 查询能力和工具的当前进程指标。 */
     private final MeterRegistry meterRegistry;
+    /** 查询持久化 Agent Trace，以同一批样本计算端到端 P95。 */
+    private final AgentTraceRepository agentTraceRepository;
     /** 配置中指定的默认新闻技能 ID。 */
     private final String defaultNewsSkill;
 
@@ -46,6 +56,7 @@ public class AgentAdminService {
      * @param mcpProvider MCP 能力提供器
      * @param mcpProperties MCP 配置
      * @param meterRegistry 进程指标注册表
+     * @param agentTraceRepository Agent Trace 仓储
      * @param defaultNewsSkill 默认新闻技能 ID
      */
     public AgentAdminService(
@@ -54,6 +65,7 @@ public class AgentAdminService {
             McpCapabilityProvider mcpProvider,
             McpProperties mcpProperties,
             MeterRegistry meterRegistry,
+            AgentTraceRepository agentTraceRepository,
             @Value("${stocksage.skills.defaults.news:latest-news-mcp}") String defaultNewsSkill
     ) {
         this.skillRegistry = skillRegistry;
@@ -61,6 +73,7 @@ public class AgentAdminService {
         this.mcpProvider = mcpProvider;
         this.mcpProperties = mcpProperties;
         this.meterRegistry = meterRegistry;
+        this.agentTraceRepository = agentTraceRepository;
         this.defaultNewsSkill = defaultNewsSkill;
     }
 
@@ -90,6 +103,8 @@ public class AgentAdminService {
      * @return 当前进程的只读运行快照；无指标样本时明确标为 NO_DATA
      */
     public RuntimeSnapshot runtime() {
+        Instant generatedAt = Instant.now();
+        Instant processStartedAt = Instant.ofEpochMilli(ManagementFactory.getRuntimeMXBean().getStartTime());
         McpCapabilityProvider.Status rawMcp = mcpProvider.statusSnapshot();
         McpState mcpState;
         String errorCode;
@@ -116,7 +131,73 @@ public class AgentAdminService {
         List<CapabilityView> capabilities = capabilityRegistry.descriptors().stream()
                 .map(this::capabilityView)
                 .toList();
-        return new RuntimeSnapshot("agent_runtime_v1", capabilities, mcp);
+        return new RuntimeSnapshot(
+                "agent_runtime_v2",
+                generatedAt.toString(),
+                new RuntimeWindow(
+                        "PROCESS_LIFETIME",
+                        processStartedAt.toString(),
+                        generatedAt.toString()
+                ),
+                toolExecutionView(),
+                agentE2eView(processStartedAt, generatedAt),
+                capabilities,
+                mcp
+        );
+    }
+
+    /** 汇总 Trace 关联工具调用；没有样本时不把成功率伪装成 0。 */
+    private ToolExecutionView toolExecutionView() {
+        List<Counter> counters = meterRegistry.find("stocksage.agent.tool.executions")
+                .counters().stream().toList();
+        long attempts = (long) counters.stream().mapToDouble(Counter::count).sum();
+        long successes = (long) counters.stream()
+                .filter(counter -> "SUCCESS".equals(counter.getId().getTag("status")))
+                .mapToDouble(Counter::count)
+                .sum();
+        return new ToolExecutionView(
+                "LIVE",
+                attempts == 0 ? "NO_DATA" : "OBSERVED",
+                attempts,
+                successes,
+                attempts == 0 ? null : (double) successes / attempts,
+                "TRACE_LINKED_EXECUTIONS"
+        );
+    }
+
+    /** 从同一批持久化成功 Trace 计算样本数和端到端 P95。 */
+    private AgentE2eView agentE2eView(Instant processStartedAt, Instant generatedAt) {
+        LocalDateTime processStart = LocalDateTime.ofInstant(processStartedAt, ZoneId.systemDefault());
+        List<AgentTrace> traces = agentTraceRepository.findAll(PageRequest.of(
+                0,
+                500,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        )).stream()
+                .filter(trace -> "success".equalsIgnoreCase(trace.getStatus()))
+                .filter(trace -> trace.getCreatedAt() != null && !trace.getCreatedAt().isBefore(processStart))
+                .filter(trace -> trace.getDurationMs() != null)
+                .toList();
+        List<Long> durations = traces.stream()
+                .map(AgentTrace::getDurationMs)
+                .sorted()
+                .toList();
+        int sampleCount = durations.size();
+        Double p95 = sampleCount == 0
+                ? null
+                : durations.get((int) Math.ceil(sampleCount * 0.95) - 1).doubleValue();
+        Instant startedAt = traces.stream()
+                .map(AgentTrace::getCreatedAt)
+                .min(Comparator.naturalOrder())
+                .map(value -> value.atZone(ZoneId.systemDefault()).toInstant())
+                .orElse(processStartedAt);
+        return new AgentE2eView(
+                "LIVE",
+                sampleCount == 0 ? "NO_DATA" : "OBSERVED",
+                sampleCount,
+                p95,
+                "SUCCESSFUL_TRACES_IN_RECENT_500",
+                new RuntimeWindow("RECENT_SUCCESSFUL_TRACES", startedAt.toString(), generatedAt.toString())
+        );
     }
 
     /** 将单个能力描述与其 Micrometer 观测值合并为管理视图。 */
@@ -178,8 +259,38 @@ public class AgentAdminService {
     /** 管理接口的 Agent 运行快照根对象。 */
     public record RuntimeSnapshot(
             String schemaVersion,
+            String generatedAt,
+            RuntimeWindow window,
+            ToolExecutionView toolExecution,
+            AgentE2eView agentE2e,
             List<CapabilityView> capabilities,
             McpView mcp
+    ) {
+    }
+
+    /** 当前 JVM 指标窗口，避免被误读成最近 24 小时。 */
+    public record RuntimeWindow(String kind, String startedAt, String endedAt) {
+    }
+
+    /** Agent Trace 关联工具的执行成功率。 */
+    public record ToolExecutionView(
+            String evidenceKind,
+            String status,
+            long attempts,
+            long successes,
+            Double successRate,
+            String scope
+    ) {
+    }
+
+    /** 成功 Agent 链路的端到端耗时快照。 */
+    public record AgentE2eView(
+            String evidenceKind,
+            String status,
+            long sampleCount,
+            Double p95DurationMs,
+            String scope,
+            RuntimeWindow window
     ) {
     }
 

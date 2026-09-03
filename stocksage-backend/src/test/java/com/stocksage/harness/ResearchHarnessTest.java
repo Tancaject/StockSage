@@ -50,6 +50,9 @@ class ResearchHarnessTest {
         assertThat(step.getAttributes())
                 .containsEntry("policyId", "deep-equity-v1")
                 .containsEntry("decision", "RECOVER")
+                .containsEntry("stepKind", "harness_decision")
+                .containsEntry("recoveryLifecycle", "SUGGESTED")
+                .doesNotContainKey("recoveryEffectKey")
                 .doesNotContainKeys("query", "userId", "ticker", "traceId");
         assertThat(step.getActionInput()).doesNotContain("AAPL");
         assertThat(step.getObservation()).doesNotContain("AAPL");

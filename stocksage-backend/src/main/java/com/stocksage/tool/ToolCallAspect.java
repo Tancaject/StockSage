@@ -6,6 +6,8 @@ import com.stocksage.model.dto.ChatChunk;
 import com.stocksage.service.KLinePayloadMapper;
 import com.stocksage.trace.TraceEventStore;
 import com.stocksage.trace.TraceService;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -35,6 +37,8 @@ public class ToolCallAspect {
     private final ObjectMapper objectMapper;
     /** 把每次工具调用追加为可审计的 AgentStep。 */
     private final TraceService traceService;
+    /** 聚合当前进程中与 Agent Trace 关联的工具执行结果。 */
+    private final MeterRegistry meterRegistry;
     /** 仅把 K 线类工具结果转换为前端图表协议。 */
     private final KLinePayloadMapper kLinePayloadMapper;
 
@@ -90,20 +94,26 @@ public class ToolCallAspect {
         try {
             Object result = joinPoint.proceed();
             long duration = System.currentTimeMillis() - start;
+            boolean failed = ToolResultInspector.isErrorPayload(result, objectMapper);
+            recordToolExecution(failed ? "FAILED" : "SUCCESS");
 
             // 推送 observation 状态：工具返回摘要
-            String summary = summarizeResult(methodName, result, duration);
+            String summary = failed ? "工具返回错误 (" + duration + "ms)"
+                    : summarizeResult(methodName, result, duration);
             emitChunk(traceId, "observation", summary, conversationId);
             // K 线结果额外映射为 chart 分片；普通工具不会进入该分支。
-            emitChartChunk(traceId, methodName, joinPoint.getArgs(), result, conversationId);
-            recordTraceStep(traceId, methodName, label, joinPoint.getArgs(), result, duration, null);
+            if (!failed) {
+                emitChartChunk(traceId, methodName, joinPoint.getArgs(), result, conversationId);
+            }
+            recordTraceStep(traceId, methodName, label, joinPoint.getArgs(), result, duration, null, failed);
 
             return result;
         } catch (Throwable e) {
             long duration = System.currentTimeMillis() - start;
+            recordToolExecution("FAILED");
             String summary = "工具调用失败: " + truncate(e.getMessage(), 300) + " (" + duration + "ms)";
             emitChunk(traceId, "observation", summary, conversationId);
-            recordTraceStep(traceId, methodName, label, joinPoint.getArgs(), null, duration, e);
+            recordTraceStep(traceId, methodName, label, joinPoint.getArgs(), null, duration, e, true);
             throw e;
         }
     }
@@ -152,19 +162,33 @@ public class ToolCallAspect {
                                  Object[] args,
                                  Object result,
                                  long duration,
-                                 Throwable error) {
+                                 Throwable error,
+                                 boolean failed) {
         try {
             traceService.addStep(traceId, AgentStep.builder()
-                    .thought(error == null ? "Called tool: " + label : "Tool failed: " + label)
+                    .thought(failed ? "Tool failed: " + label : "Called tool: " + label)
                     .action(methodName)
                     .actionInput(summarizeTraceArgs(methodName, args))
-                    .observation(summarizeTraceObservation(methodName, result, duration, error))
+                    .observation(summarizeTraceObservation(methodName, result, duration, error, failed))
                     .durationMs(duration)
                     .tokenCount(0)
+                    .attributes(Map.of(
+                            "stepKind", "tool",
+                            "outcome", failed ? "FAILED" : "SUCCESS"
+                    ))
                     .build());
         } catch (Exception traceError) {
             log.warn("Failed to record tool call trace step, traceId={}, tool={}", traceId, methodName, traceError);
         }
+    }
+
+    /** 记录可直接汇总为 Tool Execution Success Rate 的低基数结果。 */
+    private void recordToolExecution(String status) {
+        Counter.builder("stocksage.agent.tool.executions")
+                .tag("kind", "spring_ai_tool")
+                .tag("status", status)
+                .register(meterRegistry)
+                .increment();
     }
 
     /**
@@ -177,9 +201,18 @@ public class ToolCallAspect {
     /**
      * 将工具结果或异常转换为追踪面板观察文本。
      */
-    private String summarizeTraceObservation(String methodName, Object result, long duration, Throwable error) {
+    private String summarizeTraceObservation(
+            String methodName,
+            Object result,
+            long duration,
+            Throwable error,
+            boolean failed
+    ) {
         if (error != null) {
             return "Error after " + duration + "ms: " + truncate(error.getMessage(), TRACE_TEXT_LIMIT);
+        }
+        if (failed) {
+            return "Error payload after " + duration + "ms: " + safeJson(result);
         }
         if (result == null) {
             return "No result (" + duration + "ms)";

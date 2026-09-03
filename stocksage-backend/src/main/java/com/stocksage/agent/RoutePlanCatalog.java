@@ -50,18 +50,18 @@ public final class RoutePlanCatalog {
     private List<PlanAction> actions(PlanRoute route) {
         List<PlanAction> routeActions = switch (route) {
             case MARKET -> List.of(
-                    PlanAction.MARKET_AGENT,
                     PlanAction.SEARCH_STOCKS,
                     PlanAction.GET_STOCK_KLINE,
                     PlanAction.GET_FINANCIAL_METRICS,
-                    PlanAction.GET_TECHNICAL_INDICATORS
+                    PlanAction.GET_TECHNICAL_INDICATORS,
+                    PlanAction.MARKET_AGENT
             );
             case FUNDAMENTALS -> List.of(
-                    PlanAction.FUNDAMENTALS_AGENT,
+                    PlanAction.KNOWLEDGE_RETRIEVAL,
                     PlanAction.SEARCH_STOCKS,
                     PlanAction.GET_FINANCIAL_REPORTS,
                     PlanAction.SEARCH_COMPANY_REPORTS,
-                    PlanAction.KNOWLEDGE_RETRIEVAL
+                    PlanAction.FUNDAMENTALS_AGENT
             );
             case DEEP -> List.of(
                     PlanAction.FUNDAMENTALS_AGENT,
@@ -72,11 +72,11 @@ public final class RoutePlanCatalog {
                     PlanAction.RESEARCH_MANAGER
             );
             case NEWS -> List.of(
-                    PlanAction.NEWS_AGENT,
                     PlanAction.SEARCH_STOCKS,
                     PlanAction.SEARCH_NEWS,
                     PlanAction.WEB_SEARCH,
-                    PlanAction.GET_MARKET_OVERVIEW
+                    PlanAction.GET_MARKET_OVERVIEW,
+                    PlanAction.NEWS_AGENT
             );
             case DIRECT -> List.of(PlanAction.KNOWLEDGE_RETRIEVAL);
         };

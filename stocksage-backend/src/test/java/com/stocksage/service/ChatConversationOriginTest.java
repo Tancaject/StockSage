@@ -44,7 +44,8 @@ class ChatConversationOriginTest {
             mock(ToolPrefetchService.class),
             mock(ConversationMessageService.class),
             mock(com.stocksage.agent.RoutingDecisionObserver.class),
-            mock(ResearchMemoryService.class)
+            mock(ResearchMemoryService.class),
+            mock(TickerResolutionService.class)
     );
 
     @Test

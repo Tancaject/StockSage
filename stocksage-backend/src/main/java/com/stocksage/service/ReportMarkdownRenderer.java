@@ -57,6 +57,15 @@ public class ReportMarkdownRenderer {
                 """.formatted(Math.max(0, activeCount), Math.max(1, maxActive)).trim();
     }
 
+    /** 同步降级路径也失败时，返回不掩盖终态的可操作说明。 */
+    public String buildResearchFailedAnswer() {
+        return """
+                ## 深度研究执行失败
+
+                任务队列不可用后启用的同步研究也未能完成，本次任务已经结束。请稍后重试；若仍失败，请先用单点行情或财报查询确认数据源是否恢复。
+                """.trim();
+    }
+
     /**
      * 构造最终回答顶部摘要（含面向用户的输出要求）。
      *

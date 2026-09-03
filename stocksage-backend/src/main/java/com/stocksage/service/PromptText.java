@@ -18,9 +18,16 @@ final class PromptText {
      * @return 截断文本；发生截断时追加可见标记，null 返回空串
      */
     static String truncate(String text, int maxLength) {
-        if (text == null) {
+        if (text == null || maxLength <= 0) {
             return "";
         }
-        return text.length() > maxLength ? text.substring(0, maxLength) + "\n...[truncated]" : text;
+        if (text.length() <= maxLength) {
+            return text;
+        }
+        String marker = "\n...[truncated]";
+        if (maxLength <= marker.length()) {
+            return text.substring(0, maxLength);
+        }
+        return text.substring(0, maxLength - marker.length()) + marker;
     }
 }

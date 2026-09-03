@@ -52,7 +52,8 @@ class ChatServiceRoutingHistoryTest {
             mock(ToolPrefetchService.class),
             mock(ConversationMessageService.class),
             mock(com.stocksage.agent.RoutingDecisionObserver.class),
-            mock(ResearchMemoryService.class)
+            mock(ResearchMemoryService.class),
+            mock(TickerResolutionService.class)
     );
 
     @Test
@@ -161,6 +162,34 @@ class ChatServiceRoutingHistoryTest {
         verify(shortTermMemory).replaceWithMessages(CONVERSATION_ID, List.of(
                 "user: first question",
                 "assistant: first answer"
+        ));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void staleRedisHistoryFallsBackToTheCurrentDatabaseTurn() {
+        List<Message> history = List.of(
+                message(1, CONVERSATION_ID, "assistant", "previous answer"),
+                message(2, CONVERSATION_ID, "user", "current question")
+        );
+        List<String> stale = List.of("user: previous question", "assistant: previous answer");
+        when(shortTermMemory.getContext(CONVERSATION_ID)).thenReturn(stale, stale);
+
+        List<org.springframework.ai.chat.messages.Message> promptHistory =
+                (List<org.springframework.ai.chat.messages.Message>) ReflectionTestUtils.invokeMethod(
+                        service,
+                        "buildShortTermPromptMessages",
+                        CONVERSATION_ID,
+                        history,
+                        List.of()
+                );
+
+        assertThat(promptHistory)
+                .extracting(org.springframework.ai.chat.messages.Message::getText)
+                .containsExactly("previous answer", "current question");
+        verify(shortTermMemory).replaceWithMessages(CONVERSATION_ID, List.of(
+                "assistant: previous answer",
+                "user: current question"
         ));
     }
 

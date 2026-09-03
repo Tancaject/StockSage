@@ -25,7 +25,7 @@ DEFAULT_OUTPUT = HERE / "results" / "harness_live_eval_result.json"
 RELEASE_MANIFEST_SCHEMA = "harness_live_manifest_v1"
 RELEASE_MIN_CASE_COUNT = 30
 RELEASE_POLICY_ID = "deep-equity-v1"
-RELEASE_POLICY_VERSION = "3"
+RELEASE_POLICY_VERSION = "4"
 CHECKPOINT_SCHEMA = "harness_live_checkpoint_v1"
 TERMINAL_EVENT_TYPES = {"task-final", "error"}
 TERMINAL_TASK_STATUSES = {"SUCCEEDED", "FAILED"}
@@ -443,6 +443,43 @@ def parse_steps(trace: dict[str, Any] | None) -> list[dict[str, Any]]:
     return [step for step in value or [] if isinstance(step, dict)]
 
 
+def extract_tool_actions(steps: list[dict[str, Any]]) -> list[str]:
+    """Return only trace steps emitted by an actual tool or capability call."""
+    return [
+        str(step["action"])
+        for step in steps
+        if step.get("action")
+        and isinstance(step.get("attributes"), dict)
+        and step["attributes"].get("stepKind") in {"tool", "capability"}
+    ]
+
+
+def summarize_tool_outcomes(steps: list[dict[str, Any]]) -> dict[str, int]:
+    """Count outcomes only for trace steps emitted by real tool/capability calls."""
+    attempts = successes = failures = unlabeled = 0
+    for step in steps:
+        attributes = step.get("attributes")
+        if not isinstance(attributes, dict) or attributes.get("stepKind") not in {
+            "tool",
+            "capability",
+        }:
+            continue
+        attempts += 1
+        outcome = str(attributes.get("outcome") or "").upper()
+        if outcome == "SUCCESS":
+            successes += 1
+        elif outcome == "FAILED":
+            failures += 1
+        else:
+            unlabeled += 1
+    return {
+        "tool_attempt_count": attempts,
+        "tool_success_count": successes,
+        "tool_failure_count": failures,
+        "unlabeled_tool_count": unlabeled,
+    }
+
+
 def harness_decisions(trace: dict[str, Any] | None) -> list[dict[str, Any]]:
     decisions: list[dict[str, Any]] = []
     for index, step in enumerate(parse_steps(trace)):
@@ -460,6 +497,7 @@ def harness_decisions(trace: dict[str, Any] | None) -> list[dict[str, Any]]:
         decisions.append(
             {
                 "index": index,
+                "step_kind": str(attributes.get("stepKind") or ""),
                 "policy_id": attributes.get("policyId"),
                 "policy_version": attributes.get("policyVersion"),
                 "phase": attributes.get("phase"),
@@ -471,6 +509,9 @@ def harness_decisions(trace: dict[str, Any] | None) -> list[dict[str, Any]]:
                     str(code) for code in attributes.get("violationCodes") or []
                 ],
                 "recovery_actions": recovery_actions,
+                "recovery_lifecycle": str(
+                    attributes.get("recoveryLifecycle") or ""
+                ),
                 "recovery_effect_key": recovery_effect_key,
                 "duration_ms": max(0, int(step.get("durationMs") or 0)),
             }
@@ -478,14 +519,21 @@ def harness_decisions(trace: dict[str, Any] | None) -> list[dict[str, Any]]:
     return decisions
 
 
+def is_recovery_execution(decision: dict[str, Any]) -> bool:
+    return (
+        str(decision.get("recovery_lifecycle") or "").upper() == "PLANNED"
+        or str(decision.get("step_kind") or "").lower()
+        in {"harness_recovery_execution", "recovery_execution"}
+    )
+
+
 def logical_recovery_counts(
     decisions: Iterable[dict[str, Any]],
 ) -> tuple[Counter[str], Counter[str]]:
     """Count recovery effects for diagnostics while tolerating trace replay.
 
-    Only explicit stable effect keys are release-trustworthy. Legacy keyless traces are folded when
-    immediately repeated and otherwise identical so operators retain a useful replay estimate, but
-    ``evaluate_case_result`` fails those cases closed regardless of the resulting diagnostic count.
+    Policy decisions only suggest recovery. Count an effect after the trace explicitly marks a
+    durable PLANNED/execution event; those events still fail closed when their effect key is absent.
     """
     logical_effects: dict[str, set[str]] = {}
     replay_counts: Counter[str] = Counter()
@@ -494,7 +542,7 @@ def logical_recovery_counts(
 
     for ordinal, decision in enumerate(decisions):
         actions = tuple(sorted(set(decision.get("recovery_actions") or [])))
-        if not actions:
+        if not actions or not is_recovery_execution(decision):
             previous_legacy_fingerprint = None
             previous_legacy_identity = ""
             continue
@@ -566,7 +614,8 @@ def evaluate_case_result(
     trace_complete = str((trace or {}).get("status") or "") == "success"
     recovery_budget_ok = all(count <= 1 for count in recovery_counter.values())
     recovery_effect_keys_complete = all(
-        not decision.get("recovery_actions")
+        not is_recovery_execution(decision)
+        or not decision.get("recovery_actions")
         or bool(str(decision.get("recovery_effect_key") or "").strip())
         for decision in decisions
     )
@@ -1008,12 +1057,8 @@ def run_case(
             task, trace, case["allowed_result_kinds"]
         )
         trace_steps = parse_steps(trace)
-        tool_actions = [
-            str(step.get("action"))
-            for step in trace_steps
-            if step.get("action")
-            and not str(step.get("action")).startswith("harness:")
-        ]
+        tool_actions = extract_tool_actions(trace_steps)
+        tool_outcomes = summarize_tool_outcomes(trace_steps)
         return {
             "id": case["id"],
             "ticker": case["ticker"],
@@ -1031,6 +1076,7 @@ def run_case(
             "trace_step_count": len(trace_steps),
             "tool_action_count": len(tool_actions),
             "tool_actions": tool_actions[:30],
+            **tool_outcomes,
             "submission_event_types": submission_event_types,
             "submission_stream_error": submission_stream_error,
             "task_event_types": task_event_types,
@@ -1051,6 +1097,7 @@ def run_case(
 
 def aggregate_results(cases: list[dict[str, Any]]) -> dict[str, Any]:
     count = len(cases)
+    passed = sum(1 for case in cases if case.get("status") == "pass")
     completed = sum(1 for case in cases if case.get("completed"))
     safe = sum(1 for case in cases if case.get("safe_terminal"))
     full = sum(1 for case in cases if case.get("result_kind") == "FULL_REPORT")
@@ -1068,8 +1115,14 @@ def aggregate_results(cases: list[dict[str, Any]]) -> dict[str, Any]:
         for case in cases
         if case.get("completed")
     ]
+    tool_attempts = sum(int(case.get("tool_attempt_count") or 0) for case in cases)
+    tool_successes = sum(int(case.get("tool_success_count") or 0) for case in cases)
+    tool_failures = sum(int(case.get("tool_failure_count") or 0) for case in cases)
+    unlabeled_tools = sum(int(case.get("unlabeled_tool_count") or 0) for case in cases)
+    labeled_tools = tool_successes + tool_failures
     return {
         "case_count": count,
+        "task_success_rate": round(passed / count, 4) if count else None,
         "completed_count": completed,
         "safe_terminal_rate": round(safe / count, 4) if count else 0.0,
         "full_report_rate": round(full / count, 4) if count else 0.0,
@@ -1079,6 +1132,13 @@ def aggregate_results(cases: list[dict[str, Any]]) -> dict[str, Any]:
         "p95_wall_seconds": percentile(latencies, 0.95),
         "mean_tool_action_count": (
             round(statistics.mean(tool_counts), 3) if tool_counts else None
+        ),
+        "tool_attempt_count": tool_attempts,
+        "tool_success_count": tool_successes,
+        "tool_failure_count": tool_failures,
+        "unlabeled_tool_count": unlabeled_tools,
+        "tool_execution_success_rate": (
+            round(tool_successes / labeled_tools, 4) if labeled_tools else None
         ),
     }
 

@@ -30,14 +30,31 @@ public class TickerResolutionService {
 
     /** 匹配用户显式输入的 1～5 位大写美股代码。 */
     private static final Pattern US_TICKER_PATTERN = Pattern.compile("\\b[A-Z]{1,5}\\b");
+    /** 匹配多标的检查中的美股代码，包含 BRK.B 一类份额后缀并排除市场代码前缀。 */
+    private static final Pattern EXPLICIT_US_TICKER_PATTERN = Pattern.compile(
+            "(?<![A-Z0-9.])[A-Z]{2,5}(?:\\.[A-Z])?(?![A-Z0-9]|\\.\\d)"
+    );
+    /** 匹配显式 A/H 股市场代码，不触发股票搜索。 */
+    private static final Pattern MARKET_TICKER_PATTERN = Pattern.compile(
+            "\\b(?:(?:SH|SZ|BJ)\\.\\d{6}|\\d{4,5}\\.HK|(?:HK|HKG):\\d{1,5})\\b",
+            Pattern.CASE_INSENSITIVE
+    );
+    private static final Pattern EXPLICIT_TOKEN_SPLIT = Pattern.compile("[^A-Z0-9.]+");
+    private static final Pattern COMPARISON_MARKER_PATTERN = Pattern.compile(
+            "(?i)(?:\\bvs\\.?\\b|\\bversus\\b|比较|对比|相比|和|与|/)"
+    );
+    private static final Set<String> SINGLE_LETTER_TICKERS = Set.of("F", "T", "C", "X");
 
     /**
      * 不应被当作美股 ticker 的常见缩写。
      * 该词表是原 ChatService 与 Coordinator 两份词表的并集（Coordinator 原词表为其子集）。
      */
     private static final Set<String> NON_TICKER_TERMS = Set.of(
-            "AI", "PE", "PB", "ROE", "RSI", "MACD", "MA", "K", "Q", "SEC", "HK", "IPO",
-            "ETF", "USD", "EPS", "EV", "FCF", "GDP", "CPI", "CEO", "CFO", "US", "QOQ", "YOY"
+            "AI", "I", "PE", "PB", "ROE", "RSI", "MACD", "MA", "K", "Q", "SEC", "HK", "IPO",
+            "ETF", "USD", "EPS", "EV", "FCF", "GDP", "CPI", "CEO", "CFO", "US", "QOQ", "YOY",
+            "HBM", "DRAM", "NAND", "GPU", "CPU", "NPU", "DCF", "WACC", "CAGR", "CAPEX", "OPEX",
+            "GAAP", "EBIT", "ASP", "TAM", "SAM", "SOM", "YTD", "MTD", "TTM", "LTM", "IRR", "NPV",
+            "BUY", "SELL", "HOLD", "LONG", "SHORT", "CALL", "PUT", "VS"
     );
 
     /** 搜索兜底前应从问题中剔除的泛化投资措辞。 */
@@ -167,6 +184,120 @@ public class TickerResolutionService {
     }
 
     /**
+     * 只解析文本中显式出现的公司别名或 ticker，不调用股票搜索。
+     * 用于模型输出等信任边界，避免“校验”本身产生外部读取。
+     */
+    public String resolveExplicitTicker(String query) {
+        String originalContract = resolveAliasOrUppercaseUsTicker(query);
+        if (!originalContract.isBlank()) {
+            return originalContract;
+        }
+        String upper = query == null ? "" : query.toUpperCase(Locale.ROOT);
+        for (String token : EXPLICIT_TOKEN_SPLIT.split(upper)) {
+            if (TICKER_SECTOR_MAP.containsKey(token)) {
+                return token;
+            }
+        }
+        Matcher marketMatcher = MARKET_TICKER_PATTERN.matcher(query);
+        if (marketMatcher.find()) {
+            return normalizeStructuredTicker(marketMatcher.group());
+        }
+        return "";
+    }
+
+    /** 判断当前文本是否还显式包含主标的之外的另一个标的。 */
+    public boolean hasConflictingExplicitTicker(String query, String primaryTicker) {
+        if (query == null || query.isBlank() || primaryTicker == null || primaryTicker.isBlank()) {
+            return false;
+        }
+        String expected = normalizeStructuredTicker(primaryTicker);
+        if (expected.isBlank()) {
+            expected = primaryTicker.strip().toUpperCase(Locale.ROOT);
+        }
+        String upper = query.toUpperCase(Locale.ROOT);
+        for (CompanyAlias company : COMPANY_ALIASES) {
+            if (company.matches(upper) && !company.ticker().equals(expected)) {
+                return true;
+            }
+        }
+        boolean comparison = COMPARISON_MARKER_PATTERN.matcher(query).find();
+        for (String token : EXPLICIT_TOKEN_SPLIT.split(upper)) {
+            boolean explicitTicker = TICKER_SECTOR_MAP.containsKey(token)
+                    || (comparison && SINGLE_LETTER_TICKERS.contains(token));
+            if (explicitTicker && !token.equals(expected)) {
+                return true;
+            }
+        }
+        Matcher marketMatcher = MARKET_TICKER_PATTERN.matcher(query);
+        while (marketMatcher.find()) {
+            if (!normalizeStructuredTicker(marketMatcher.group()).equals(expected)) {
+                return true;
+            }
+        }
+        Matcher usMatcher = EXPLICIT_US_TICKER_PATTERN.matcher(
+                MARKET_TICKER_PATTERN.matcher(query).replaceAll(" "));
+        while (usMatcher.find()) {
+            String candidate = usMatcher.group();
+            if (NON_TICKER_TERMS.contains(candidate)) {
+                continue;
+            }
+            for (CompanyAlias company : COMPANY_ALIASES) {
+                if (company.aliases().contains(candidate)) {
+                    candidate = company.ticker();
+                    break;
+                }
+            }
+            if (!candidate.equals(expected)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** 规范化结构化工具字段中的显式 ticker；纯数字供应商代码保持未解析。 */
+    public String normalizeStructuredTicker(String value) {
+        if (value == null || value.isBlank()) {
+            return "";
+        }
+        String normalized = value.strip().toUpperCase(Locale.ROOT);
+        if (normalized.matches("(?:HK|HKG):\\d{1,5}")) {
+            return canonicalHkTicker(normalized.substring(normalized.indexOf(':') + 1));
+        }
+        if (normalized.matches("\\d{4,5}\\.HK")) {
+            return canonicalHkTicker(normalized.substring(0, normalized.indexOf('.')));
+        }
+        if (normalized.matches("(?:SH|SZ|BJ)\\.\\d{6}") || isLikelySecTicker(normalized)) {
+            return normalized;
+        }
+        return "";
+    }
+
+    private String canonicalHkTicker(String digits) {
+        String significant = digits.replaceFirst("^0+(?!$)", "");
+        return "0".repeat(Math.max(0, 4 - significant.length())) + significant + ".HK";
+    }
+
+    private String resolveAliasOrUppercaseUsTicker(String query) {
+        if (query == null || query.isBlank()) {
+            return "";
+        }
+        String upper = query.toUpperCase(Locale.ROOT);
+        for (CompanyAlias company : COMPANY_ALIASES) {
+            if (company.matches(upper)) {
+                return company.ticker();
+            }
+        }
+        Matcher matcher = US_TICKER_PATTERN.matcher(query);
+        while (matcher.find()) {
+            String candidate = matcher.group();
+            if (!NON_TICKER_TERMS.contains(candidate)) {
+                return candidate;
+            }
+        }
+        return "";
+    }
+
+    /**
      * 判断 ticker 是否更像美股 SEC 标的。
      *
      * @param ticker 待分类的股票代码
@@ -206,24 +337,9 @@ public class TickerResolutionService {
      * 仅从当前文本中解析主 ticker：先中文公司名映射，再大写 ticker 提取，最后搜索兜底。
      */
     private String resolvePrimaryTickerFromText(String query) {
-        if (query == null || query.isBlank()) {
-            return "";
-        }
-        String upper = query.toUpperCase(Locale.ROOT);
-        for (CompanyAlias company : COMPANY_ALIASES) {
-            if (company.matches(upper)) {
-                return company.ticker();
-            }
-        }
-
-        // 在原始大小写文本上匹配：用户写 ticker 时本就是大写（NVDA），写普通词时是小写（Run）。
-        // 大小写本身就是区分 ticker 和普通词的信号，不能先把整句转大写后再匹配。
-        Matcher matcher = US_TICKER_PATTERN.matcher(query);
-        while (matcher.find()) {
-            String candidate = matcher.group();
-            if (!NON_TICKER_TERMS.contains(candidate)) {
-                return candidate;
-            }
+        String explicitTicker = resolveAliasOrUppercaseUsTicker(query);
+        if (!explicitTicker.isBlank()) {
+            return explicitTicker;
         }
         String searchQuery = stockSearchQuery(query);
         if (searchQuery.isBlank()) {

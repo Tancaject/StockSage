@@ -57,7 +57,7 @@ public class SkillRegistry {
     private List<SkillDefinition> loadSkills() {
         YAMLMapper mapper = YAMLMapper.builder()
                 .findAndAddModules()
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         try {

@@ -104,7 +104,7 @@ public class LongTermMemory {
      * <p>画像为空时返回空字符串，避免无意义的默认信息干扰模型回答。</p>
      *
      * @param userId 当前用户 ID
-     * @return 可直接注入 SystemMessage 的画像文本；空画像返回空串
+     * @return 由 ChatService 包装为不可信资料区段的画像文本；空画像返回空串
      */
     public String buildPromptContext(String userId) {
         UserProfileDTO profile = userService.getPromptProfile(userId);

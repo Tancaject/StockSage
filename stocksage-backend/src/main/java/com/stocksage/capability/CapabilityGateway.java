@@ -1,6 +1,8 @@
 package com.stocksage.capability;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.tool.ToolCallContext;
+import com.stocksage.tool.ToolResultInspector;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -34,6 +36,8 @@ public class CapabilityGateway {
     private final CapabilityInvocationObserver observer;
     /** 承载可能阻塞的提供方调用，使调用方线程可以施加硬超时。 */
     private final AsyncTaskExecutor agentTaskExecutor;
+    /** 识别正常返回值中的结构化提供方错误。 */
+    private final ObjectMapper objectMapper;
 
     /**
      * 执行一项已注册能力，并返回限长后的统一结果。
@@ -80,6 +84,14 @@ public class CapabilityGateway {
             long timeoutMs = effectiveTimeoutMs(descriptor, context);
             String raw = future.get(timeoutMs, TimeUnit.MILLISECONDS);
             long durationMs = elapsedMs(startNanos);
+            if (ToolResultInspector.isErrorPayload(raw, objectMapper)) {
+                CapabilityException capabilityError = new CapabilityException(
+                        CapabilityException.Reason.FAILED,
+                        "Capability provider returned an error payload: " + capabilityId
+                );
+                observer.failed(descriptor, context, safeArguments, capabilityError, durationMs);
+                throw capabilityError;
+            }
             // 在结果进入 Agent 上下文前按 UTF-8 字节限长，防止远端返回无限膨胀。
             LimitedContent limited = limit(raw, descriptor.maxResultBytes());
             CapabilityResult result = new CapabilityResult(

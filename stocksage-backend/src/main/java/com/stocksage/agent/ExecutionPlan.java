@@ -63,4 +63,26 @@ public record ExecutionPlan(
     public List<String> actionLabels() {
         return actions == null ? List.of() : actions.stream().map(PlanAction::label).toList();
     }
+
+    /** 主角色完全由既有动作目录派生；DEEP 以 Research Manager 为主。 */
+    public String primaryAgent() {
+        List<PlanAction> roles = agentActions();
+        if (roles.contains(PlanAction.RESEARCH_MANAGER)) {
+            return PlanAction.RESEARCH_MANAGER.label();
+        }
+        return roles.isEmpty() ? "" : roles.get(0).label();
+    }
+
+    /** 除主角色外的计划协作角色；这里只表示计划，不表示实际执行成功。 */
+    public List<String> supportingAgents() {
+        String primary = primaryAgent();
+        return agentActions().stream()
+                .map(PlanAction::label)
+                .filter(label -> !label.equals(primary))
+                .toList();
+    }
+
+    private List<PlanAction> agentActions() {
+        return actions == null ? List.of() : actions.stream().filter(PlanAction::isAgentRole).toList();
+    }
 }

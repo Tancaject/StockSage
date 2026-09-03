@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * 可由模型调用的基本面和公告工具。
+ * 基本面与公告能力。
  *
- * <p>SEC 摄取是明确的后端操作；常规财报查询则是通过 Python 数据服务发起的只读调用。</p>
+ * <p>SEC 摄取只供后端受控流程调用；暴露给模型的仅是只读查询能力。</p>
  */
 @Slf4j
 @Component
@@ -31,15 +31,11 @@ public class FundamentalsTools {
     /**
      * 将美股 SEC 财报摄取到 RAG 知识库。
      *
-     * <p>该工具是明确的后端摄取动作，只面向 EDGAR；A 股和港股公告检索应走报告搜索或财报数据服务。</p>
+     * <p>该后端动作只面向 EDGAR，不注册为模型工具；A 股和港股公告检索应走报告搜索或财报数据服务。</p>
      */
-    @Tool(description = "将指定美股公司的 SEC 财报（10-K/10-Q）入库到知识库。仅适用于美股 SEC EDGAR；港股/A 股不要调用此工具，应调用 getFinancialReports 或搜索公司公告/年报")
-    public String ingestCompanyFilings(
-            @ToolParam(description = "美股 ticker，如 AAPL、MSFT、NVDA") String ticker,
-            @ToolParam(description = "财报类型：10-K（年报）或 10-Q（季报）") String filingType,
-            @ToolParam(description = "入库最近几份，默认 1") int count) {
+    public String ingestCompanyFilings(String ticker, String filingType, int count) {
         try {
-            // 调用摄取服务完成 EDGAR 获取与入库；异常转成工具结果，避免模型流被直接打断。
+            // 受控研究流程以结构化文本记录摄取结果；异常不会中断后续证据降级。
             Map<String, Object> result = edgarIngestionService.ingestFilings(ticker, filingType, count);
             return objectMapper.writeValueAsString(result);
         } catch (Exception e) {

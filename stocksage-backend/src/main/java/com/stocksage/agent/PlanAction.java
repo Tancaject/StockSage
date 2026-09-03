@@ -40,4 +40,13 @@ public enum PlanAction {
         return label;
     }
 
+    /** 是否代表计划中的领域/研究角色，而不是工具或最终回答步骤。 */
+    public boolean isAgentRole() {
+        return switch (this) {
+            case FUNDAMENTALS_AGENT, MARKET_AGENT, NEWS_AGENT,
+                    BULL_RESEARCHER, BEAR_RESEARCHER, RESEARCH_MANAGER -> true;
+            default -> false;
+        };
+    }
+
 }

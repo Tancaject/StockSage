@@ -15,6 +15,7 @@ from run_harness_live_eval import (
     dataset_sha256,
     default_checkpoint_path,
     evaluate_case_result,
+    extract_tool_actions,
     exit_code_for_status,
     load_run_checkpoint,
     parse_sse_data,
@@ -22,6 +23,7 @@ from run_harness_live_eval import (
     release_contract_violations,
     run_case,
     save_run_checkpoint,
+    summarize_tool_outcomes,
 )
 
 
@@ -30,9 +32,22 @@ def trace_with(*decisions):
     for decision in decisions:
         phase, outcome, recoveries = decision[:3]
         effect_key = decision[3] if len(decision) > 3 else ""
+        lifecycle = (
+            decision[4]
+            if len(decision) > 4
+            else "PLANNED"
+            if effect_key
+            else "SUGGESTED"
+        )
         attributes = {
+            "stepKind": (
+                "harness_recovery_execution"
+                if lifecycle == "PLANNED"
+                else "harness_decision"
+            ),
+            "recoveryLifecycle": lifecycle,
             "policyId": "deep-equity-v1",
-            "policyVersion": "3",
+            "policyVersion": "4",
             "phase": phase,
             "decision": outcome,
             "policyAllowsRecommendation": outcome == "PASS",
@@ -58,7 +73,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
             "case_count": 30,
             "dataset_sha256": dataset_hash,
             "policy_id": "deep-equity-v1",
-            "policy_version": "3",
+            "policy_version": "4",
         }
 
     def live_case(self, case_id="live-1", ticker="AAPL", timeout_seconds=30):
@@ -187,8 +202,8 @@ class HarnessLiveEvalTest(unittest.TestCase):
         replayed = evaluate_case_result(
             {"status": "SUCCEEDED", "resultKind": "FULL_REPORT"},
             trace_with(
-                ("EVIDENCE", "RECOVER", ["REFRESH_MARKET"]),
-                ("EVIDENCE", "RECOVER", ["REFRESH_MARKET"]),
+                ("EVIDENCE", "RECOVER", ["REFRESH_MARKET"], "", "PLANNED"),
+                ("EVIDENCE", "RECOVER", ["REFRESH_MARKET"], "", "PLANNED"),
                 ("EVIDENCE", "PASS", []),
                 ("REPORT", "PASS", []),
             ),
@@ -207,7 +222,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
         result = evaluate_case_result(
             {"status": "SUCCEEDED", "resultKind": "FULL_REPORT"},
             trace_with(
-                ("EVIDENCE", "RECOVER", ["REFRESH_MARKET"]),
+                ("EVIDENCE", "RECOVER", ["REFRESH_MARKET"], "", "PLANNED"),
                 ("EVIDENCE", "PASS", []),
                 ("REPORT", "PASS", []),
             ),
@@ -223,6 +238,21 @@ class HarnessLiveEvalTest(unittest.TestCase):
             result["unsafe_reasons"],
         )
         self.assertEqual(1, exit_code_for_status(result["status"], fail_on_gate=True))
+
+    def test_recovery_suggestion_does_not_require_an_execution_effect_key(self):
+        result = evaluate_case_result(
+            {"status": "SUCCEEDED", "resultKind": "FULL_REPORT"},
+            trace_with(
+                ("EVIDENCE", "RECOVER", ["REFRESH_MARKET"]),
+                ("EVIDENCE", "PASS", []),
+                ("REPORT", "PASS", []),
+            ),
+            ["FULL_REPORT"],
+        )
+
+        self.assertEqual("pass", result["status"])
+        self.assertEqual({}, result["recovery_counts"])
+        self.assertTrue(result["recovery_effect_keys_complete"])
 
     def test_offline_fallback_is_safe_but_partial(self):
         result = evaluate_case_result(
@@ -663,7 +693,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
                 "decisions": [
                     {
                         "policy_id": "deep-equity-v1",
-                        "policy_version": 3,
+                        "policy_version": 4,
                     }
                 ],
             }
@@ -738,11 +768,11 @@ class HarnessLiveEvalTest(unittest.TestCase):
                     "decisions": [
                         {
                             "policy_id": "deep-equity-v1",
-                            "policy_version": "3",
+                            "policy_version": "4",
                         },
                         {
                             "policy_id": "deep-equity-v1",
-                            "policy_version": 3,
+                            "policy_version": 4,
                         },
                     ]
                 },
@@ -750,7 +780,40 @@ class HarnessLiveEvalTest(unittest.TestCase):
             ]
         )
         self.assertEqual(["deep-equity-v1"], result["policy_ids"])
-        self.assertEqual(["3"], result["policy_versions"])
+        self.assertEqual(["4"], result["policy_versions"])
+
+    def test_tool_actions_only_include_explicit_tool_steps(self):
+        steps = [
+            {
+                "action": "getStockNews",
+                "attributes": {"stepKind": "tool", "outcome": "SUCCESS"},
+            },
+            {
+                "action": "local.news.searchNews",
+                "attributes": {"stepKind": "capability", "outcome": "FAILED"},
+            },
+            {"action": "Bull Research Round 1"},
+            {"action": "Bear Research Round 1"},
+            {"action": "Research Manager Assessment"},
+            {
+                "action": "harness:deep-research",
+                "attributes": {"stepKind": "harness"},
+            },
+        ]
+
+        self.assertEqual(
+            ["getStockNews", "local.news.searchNews"],
+            extract_tool_actions(steps),
+        )
+        self.assertEqual(
+            {
+                "tool_attempt_count": 2,
+                "tool_success_count": 1,
+                "tool_failure_count": 1,
+                "unlabeled_tool_count": 0,
+            },
+            summarize_tool_outcomes(steps),
+        )
 
     def test_release_contract_rejects_single_case_diagnostic_dataset(self):
         violations = release_contract_violations(

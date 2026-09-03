@@ -48,12 +48,32 @@
         <span v-if="run.modelName">模型：{{ run.modelTier || '模型' }} / {{ run.modelName }}</span>
         <span v-if="run.conversationId">会话：#{{ run.conversationId }}</span>
         <span v-if="run.traceId">Trace：{{ run.traceId }}</span>
+        <span v-if="traceOutcomeLabel">业务完成结果：{{ traceOutcomeLabel }}</span>
       </div>
 
       <div v-if="runTimeline.length" class="run-timeline">
         <div
           v-for="item in runTimeline.slice(-6)"
           :key="`${item.kind}-${item.label}-${item.detail}`"
+          class="run-step"
+        >
+          <span>{{ item.label }}</span>
+          <p>{{ item.detail }}</p>
+          <small v-if="item.meta">{{ item.meta }}</small>
+        </div>
+      </div>
+
+      <div v-if="canLoadFullTrace" class="trace-detail-actions">
+        <button class="quiet-button" type="button" :disabled="traceLoading" @click="toggleFullTrace">
+          {{ traceLoading ? '加载中' : (traceOpen ? '收起完整链路' : '查看完整链路') }}
+        </button>
+        <span v-if="traceError" class="run-error">{{ traceError }}</span>
+      </div>
+
+      <div v-if="traceOpen && fullTraceTimeline.length" class="run-timeline full-trace-timeline">
+        <div
+          v-for="item in fullTraceTimeline"
+          :key="`full-${item.kind}-${item.label}-${item.detail}`"
           class="run-step"
         >
           <span>{{ item.label }}</span>
@@ -88,10 +108,12 @@
  *   dismiss — 用户点击关闭
  *   toggle  — 用户点击收起/展开
  */
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { ArrowDown, ArrowUp, Close, VideoPause } from '@element-plus/icons-vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
+import { getTrace } from '../../api/chat.js'
+import { buildResearchTimeline, formatTaskOutcome, traceToReasoning } from '../../lib/researchUi.js'
 
 const props = defineProps({
   run: {
@@ -112,7 +134,56 @@ const emit = defineEmits(['stop', 'dismiss', 'toggle'])
 
 const isCollapsed = computed(() => props.collapsed)
 
-const runTimeline = computed(() => props.run.timeline || [])
+const liveReasoning = computed(() => (props.run.timeline || []).map(item => ({
+  type: item.kind,
+  label: item.label || null,
+  content: item.detail || '',
+  metadata: item.metadata || null,
+  durationMs: Number(item.durationMs || 0),
+})))
+const runTimeline = computed(() => buildResearchTimeline({
+  reasoning: liveReasoning.value,
+  hasAnswer: Boolean(props.run.answer),
+}))
+const traceOpen = ref(false)
+const traceLoading = ref(false)
+const traceError = ref('')
+const traceFetched = ref(false)
+const traceReasoning = ref([])
+const traceOutcome = ref('')
+const traceOutcomeLabel = computed(() => formatTaskOutcome(traceOutcome.value))
+const fullTraceTimeline = computed(() => buildResearchTimeline({
+  reasoning: traceReasoning.value,
+  hasAnswer: Boolean(props.run.answer),
+}))
+const canLoadFullTrace = computed(() => Boolean(props.run.traceId)
+  && ['completed', 'failed', 'stopped'].includes(props.run.status))
+
+watch(() => props.run.traceId, () => {
+  traceOpen.value = false
+  traceLoading.value = false
+  traceError.value = ''
+  traceFetched.value = false
+  traceReasoning.value = []
+  traceOutcome.value = ''
+})
+
+async function toggleFullTrace() {
+  traceOpen.value = !traceOpen.value
+  if (!traceOpen.value || traceFetched.value || !props.run.traceId) return
+  traceLoading.value = true
+  traceError.value = ''
+  try {
+    const trace = await getTrace(props.run.traceId)
+    traceReasoning.value = traceToReasoning(trace)
+    traceOutcome.value = trace.taskOutcome || ''
+    traceFetched.value = true
+  } catch (error) {
+    traceError.value = `完整链路加载失败：${error.message}`
+  } finally {
+    traceLoading.value = false
+  }
+}
 
 const runStatusLabel = computed(() => ({
   idle: '待启动',
@@ -305,6 +376,17 @@ const renderedAnswer = computed(() => {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin-top: 14px;
+}
+
+.trace-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.full-trace-timeline {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .run-step {

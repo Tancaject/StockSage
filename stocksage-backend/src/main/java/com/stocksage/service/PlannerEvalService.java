@@ -91,10 +91,14 @@ public class PlannerEvalService {
                 .filter(result -> hasNonFallbackSource(result) && result.routeMatched())
                 .count();
         int llmSignalCases = (int) results.stream()
-                .filter(result -> hasNonFallbackSource(result) && result.rawRouteValid())
+                .filter(result -> hasNonFallbackSource(result)
+                        && !result.executionGuarded()
+                        && result.rawRouteValid())
                 .count();
         int llmSignalMatches = (int) results.stream()
-                .filter(result -> hasNonFallbackSource(result) && result.rawRouteMatched())
+                .filter(result -> hasNonFallbackSource(result)
+                        && !result.executionGuarded()
+                        && result.rawRouteMatched())
                 .count();
         int fallbackCases = (int) results.stream().filter(PlannerEvalResult::fallback).count();
         int invalidRawRouteCases = (int) results.stream()
@@ -164,6 +168,8 @@ public class PlannerEvalService {
             boolean fineIntentMatched = matchesOptional(evalCase.expectedFineIntent(), actualFineIntent);
             boolean decisionSourceMatched = matchesOptional(evalCase.expectedDecisionSource(), decisionSource);
             boolean fallback = routing != null && routing.fallback();
+            boolean executionGuarded = routing != null
+                    && routing.reasonCodes().contains(Coordinator.MULTI_TARGET_UNSUPPORTED);
             boolean noFallbackMatched = !evalCase.requireNoFallback()
                     || routing != null && !fallback;
             String actualResolvedQuery = Objects.requireNonNullElse(plan.resolvedQuery(), "").trim();
@@ -201,6 +207,7 @@ public class PlannerEvalService {
                     routeMatched,
                     !evalCase.recentTurns().isEmpty(),
                     fallback,
+                    executionGuarded,
                     rawRouteValid,
                     rawRouteMatched,
                     evalCase.expectedResolvedQueryContains(),
@@ -216,7 +223,7 @@ public class PlannerEvalService {
                     evalCase.expectedFineIntent(), "", evalCase.expectedFineIntent() == null,
                     evalCase.expectedDecisionSource(), evalCase.expectedDecisionSource() == null,
                     evalCase.requireNoFallback(), !evalCase.requireNoFallback(), false,
-                    !evalCase.recentTurns().isEmpty(), false, false, false,
+                    !evalCase.recentTurns().isEmpty(), false, false, false, false,
                     evalCase.expectedResolvedQueryContains(), "",
                     evalCase.expectedResolvedQueryContains() == null
             );

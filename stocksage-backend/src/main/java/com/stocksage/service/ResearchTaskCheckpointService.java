@@ -98,6 +98,13 @@ public class ResearchTaskCheckpointService {
         upsertStrict(taskId, state, ResearchTask.Stage.DATA_PREFETCH, 0, 0);
     }
 
+    /** 在调用补证能力前后严格保存 exact plan 和 effect key。 */
+    @Transactional
+    public void saveEvidenceReplan(Long taskId, String leaseToken, AnalysisState state) {
+        requireOwnership(taskId, leaseToken);
+        upsertStrict(taskId, state, ResearchTask.Stage.DATA_PREFETCH, 0, 0);
+    }
+
     /**
      * 保存一轮 Agent 辩论后的状态和轮次进度。
      *
@@ -228,7 +235,7 @@ public class ResearchTaskCheckpointService {
         }
     }
 
-    /** 严格持久化 Harness 快照；任何失败向上传播以阻止恢复副作用。 */
+    /** 严格持久化副作用计划；任何失败向上传播以阻止未落库的恢复或补证动作。 */
     private void upsertStrict(
             Long taskId,
             AnalysisState state,
@@ -250,7 +257,7 @@ public class ResearchTaskCheckpointService {
         try {
             entity.setPayloadJson(objectMapper.writeValueAsString(state));
         } catch (JsonProcessingException error) {
-            throw new IllegalStateException("Unable to serialize harness snapshot", error);
+            throw new IllegalStateException("Unable to serialize strict research checkpoint", error);
         }
         // 立即 flush，确保恢复动作开始前数据库已经确认该决策快照。
         repository.saveAndFlush(entity);

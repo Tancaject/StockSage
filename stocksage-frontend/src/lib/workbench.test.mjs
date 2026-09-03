@@ -13,7 +13,6 @@ import {
 
 import {
   buildEventImpactPrompt,
-  buildComparisonPrompt,
   buildHealthChecks,
   buildPortfolioDiagnosisPrompt,
   buildReportMarkdown,
@@ -32,8 +31,10 @@ import {
   shortHash,
   summarizeHealthChecks,
   summarizeAgentEval,
+  summarizeCanonicalQualityMetrics,
   summarizeEvalResult,
   summarizeRagEval,
+  summarizeRuntimeMetrics,
   summarizeReportVersions,
 } from './workbench.js'
 
@@ -57,15 +58,6 @@ test('buildResearchPrompt creates a single-stock deep research request', () => {
     ].join('\n'),
   )
   assert.doesNotMatch(prompt, /watch \/ avoid \/ investigate-more/)
-})
-
-test('buildComparisonPrompt keeps both tickers and requested dimensions', () => {
-  const prompt = buildComparisonPrompt(['msft', 'amzn'], ['cloud', 'margin'])
-
-  assert.match(prompt, /MSFT/)
-  assert.match(prompt, /AMZN/)
-  assert.match(prompt, /cloud/)
-  assert.match(prompt, /margin/)
 })
 
 test('buildEventImpactPrompt creates a filing-backed event analysis request', () => {
@@ -200,6 +192,106 @@ test('summarizeEvalResult imports agent_eval_v1 failures and optional sections',
   assert.equal(summary.ragasMetrics[1].metric, 'route_news_f1')
   assert.equal(summary.recommendations[0], '补充 NEWS 边界样本')
   assert.equal(summarizeAgentEval({ planner: {}, gates: [] }).kind, 'agent')
+})
+
+test('canonical quality metrics reject legacy retrieval proxies and accept explicit or RAGAS evidence', () => {
+  const metrics = summarizeCanonicalQualityMetrics({
+    created_at: '2026-08-29T10:00:00Z',
+    case_count: 50,
+    averages: {
+      context_recall: 0.91,
+      ndcg: 0.92,
+      ragas_faithfulness: 0.88,
+      ragas_answer_relevancy: 0.81,
+    },
+    ragas: {
+      judge_model: 'judge-v1',
+      created_at: '2026-08-29T10:01:00Z',
+      evidence_kind: 'GOLDEN_SET',
+      evaluator_version: 'ragas-0.3.9',
+      dataset_sha256: 'dataset-sha',
+      metrics: ['ragas_faithfulness', 'ragas_answer_relevancy'],
+      source_result: 'rag-eval-v1.json',
+    },
+    quality: {
+      evidence_kind: 'GOLDEN_SET',
+      dataset_version: 'qrels-v2',
+      evaluator_version: 'quality-contract-v1',
+      metrics: {
+        task_success_rate: { value: 0.75, sample_count: 20 },
+        recall_at_k: { value: 0.8, sample_count: 10, k: 5 },
+      },
+    },
+    cases: [
+      { metrics: { ragas_faithfulness: 0.9, ragas_answer_relevancy: 0.8 } },
+      { metrics: { ragas_faithfulness: 0.86 } },
+    ],
+  })
+
+  assert.equal(metrics.find(item => item.id === 'task_success_rate').value, 0.75)
+  assert.equal(metrics.find(item => item.id === 'tool_call_f1').value, null)
+  assert.equal(metrics.find(item => item.id === 'tool_call_f1').label, 'Tool Call F1')
+  assert.equal(metrics.find(item => item.id === 'tool_call_f1').requiredEvidenceKind, 'GOLDEN_SET')
+  assert.equal(metrics.find(item => item.id === 'recall_at_k').k, 5)
+  assert.equal(metrics.find(item => item.id === 'ndcg_at_k').value, null)
+  assert.equal(metrics.find(item => item.id === 'faithfulness').sampleCount, 2)
+  assert.equal(metrics.find(item => item.id === 'answer_relevancy').sampleCount, 1)
+  assert.equal(metrics.find(item => item.id === 'answer_relevancy').judgeModel, 'judge-v1')
+})
+
+test('canonical quality metrics reject scalars and missing K or provenance', () => {
+  const metrics = summarizeCanonicalQualityMetrics({
+    quality: {
+      metrics: {
+        task_success_rate: 0.9,
+        recall_at_k: { value: 0.8, sample_count: 10 },
+      },
+    },
+  })
+
+  assert.equal(metrics.find(item => item.id === 'task_success_rate').value, null)
+  assert.match(metrics.find(item => item.id === 'task_success_rate').requirement, /object metric/)
+  assert.equal(metrics.find(item => item.id === 'recall_at_k').value, null)
+  assert.match(metrics.find(item => item.id === 'recall_at_k').requirement, /k/)
+
+  const legacyRagas = summarizeCanonicalQualityMetrics({
+    averages: { ragas_faithfulness: 0.9 },
+    cases: [{ metrics: { ragas_faithfulness: 0.9 } }],
+  })
+  assert.equal(legacyRagas.find(item => item.id === 'faithfulness').value, null)
+
+  const unversionedRagas = summarizeCanonicalQualityMetrics({
+    averages: { ragas_faithfulness: 0.9 },
+    ragas: {
+      evidence_kind: 'SAMPLED',
+      judge_model: 'judge-v1',
+      created_at: '2026-08-29T10:01:00Z',
+      metrics: ['ragas_faithfulness'],
+    },
+    cases: [{ metrics: { ragas_faithfulness: 0.9 } }],
+  })
+  assert.equal(unversionedRagas.find(item => item.id === 'faithfulness').value, null)
+})
+
+test('runtime metrics preserve LIVE window and NO_DATA instead of zero', () => {
+  const [tool, e2e] = summarizeRuntimeMetrics({
+    window: { kind: 'PROCESS_LIFETIME', startedAt: 'start', endedAt: 'end' },
+    toolExecution: { status: 'OBSERVED', attempts: 4, successRate: 0.75 },
+    agentE2e: {
+      status: 'NO_DATA',
+      sampleCount: 0,
+      p95DurationMs: null,
+      window: { kind: 'RECENT_SUCCESSFUL_TRACES', startedAt: 'trace-start', endedAt: 'trace-end' },
+    },
+  })
+
+  assert.equal(tool.value, 0.75)
+  assert.equal(tool.sampleCount, 4)
+  assert.equal(tool.window.kind, 'PROCESS_LIFETIME')
+  assert.equal(e2e.value, null)
+  assert.equal(e2e.status, 'NO_DATA')
+  assert.equal(e2e.window.kind, 'RECENT_SUCCESSFUL_TRACES')
+  assert.equal(e2e.window.startedAt, 'trace-start')
 })
 
 test('summarizeHealthChecks returns fail when any required service fails', () => {

@@ -41,6 +41,7 @@ PLANNER_V2_RESULT_FIELDS = (
     "routeMatched",
     "contextCase",
     "fallback",
+    "executionGuarded",
     "rawRouteValid",
     "rawRouteMatched",
     "expectedResolvedQueryContains",
@@ -568,6 +569,7 @@ def build_report(
                 ),
             ]
         )
+    quality: dict[str, Any] = {}
     if harness_live_payload is not None:
         live_metrics = harness_live_payload.get("metrics") or {}
         live_engine = harness_live_payload.get("engine")
@@ -592,6 +594,39 @@ def build_report(
             live_metrics.get("safe_terminal_rate", 0.0)
         )
         live_unsafe = int(live_metrics.get("unsafe_result_count", 0))
+        live_task_success_rate = live_metrics.get("task_success_rate")
+        live_generated_at = str(harness_live_payload.get("generated_at") or "").strip()
+        live_planned_cases = int(harness_live_payload.get("planned_case_count", 0))
+        live_execution_cases = int(harness_live_payload.get("execution_case_count", 0))
+        quality_eligible = (
+            live_engine == "stocksage-live-http"
+            and live_schema == "harness_live_eval_v1"
+            and harness_live_payload.get("run_mode") == "release"
+            and harness_live_payload.get("run_state") == "complete"
+            and live_case_count > 0
+            and live_case_count == live_planned_cases == live_execution_cases
+            and is_sha256(live_dataset_hash)
+            and live_dataset_hash == expected_live_dataset_hash
+            and live_policy_ids == [str(expected_policy_id)]
+            and live_policy_versions == [str(expected_policy_version)]
+            and live_generated_at
+            and isinstance(live_task_success_rate, (int, float))
+            and not isinstance(live_task_success_rate, bool)
+            and 0.0 <= float(live_task_success_rate) <= 1.0
+        )
+        if quality_eligible:
+            quality = {
+                "evidence_kind": "GOLDEN_SET",
+                "dataset_version": live_dataset_hash,
+                "evaluator_version": live_schema,
+                "generated_at": live_generated_at,
+                "metrics": {
+                    "task_success_rate": {
+                        "value": float(live_task_success_rate),
+                        "sample_count": live_case_count,
+                    }
+                },
+            }
         gate_results.extend(
             [
                 gate_result(
@@ -690,6 +725,7 @@ def build_report(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": status,
         "planner": planner,
+        "quality": quality,
         **sections,
         "baseline_delta": delta,
         "gates": gate_results,

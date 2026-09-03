@@ -22,6 +22,7 @@
           class="prompt-input"
           type="textarea"
           :autosize="{ minRows: 1, maxRows: 5 }"
+          :maxlength="MAX_MESSAGE_CHARS"
           placeholder="询问股票、行业，或粘贴截图提问"
           :disabled="disabled"
           @keydown.enter.exact.prevent="sendFromEnter"
@@ -98,6 +99,7 @@ const fileInput = ref(null)
 const imageAttachments = ref([])
 
 const MAX_IMAGES = 4
+const MAX_MESSAGE_CHARS = 12000
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 const SUPPORTED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp']
 const acceptedImageTypes = SUPPORTED_IMAGE_TYPES.join(',')

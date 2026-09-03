@@ -96,9 +96,6 @@ public class SkillExecutionService {
         boolean fallbackUsed = false;
         try {
             for (SkillDefinition.SkillStep step : skill.steps()) {
-                if (step.type() != SkillDefinition.StepType.CAPABILITY) {
-                    continue;
-                }
                 calls = requireCallBudget(skill, calls + 1);
                 Map<String, Object> arguments = newsArguments(userQuery, maxSearchResults);
                 try {
@@ -158,7 +155,7 @@ public class SkillExecutionService {
         );
     }
 
-    /** 汇总主能力、fallback 和 Agent 步骤能力，形成单次调用不可变白名单。 */
+    /** 汇总主能力和 fallback，形成单次调用不可变白名单。 */
     private Set<String> collectAllowedCapabilities(SkillDefinition skill) {
         Set<String> allowed = new LinkedHashSet<>();
         for (SkillDefinition.SkillStep step : skill.steps()) {
@@ -168,7 +165,6 @@ public class SkillExecutionService {
             if (step.fallbackCapability() != null && !step.fallbackCapability().isBlank()) {
                 allowed.add(step.fallbackCapability());
             }
-            allowed.addAll(step.allowedCapabilities());
         }
         return Set.copyOf(allowed);
     }

@@ -1,5 +1,6 @@
 package com.stocksage.model.dto;
 
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class ChatRequest {
     private String title;
 
     /** 用户输入的自然语言问题；纯图片请求可由后端补成默认读图指令。 */
+    @Size(max = 12000, message = "消息不能超过 12000 个字符，请缩短后重试")
     private String message;
 
     /** 当前轮随问题提交的图片。原图只用于本轮模型调用，不写入长期历史。 */

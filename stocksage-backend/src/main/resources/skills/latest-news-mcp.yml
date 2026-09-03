@@ -17,10 +17,4 @@ steps:
     required: false
     fallbackCapability: local.news.searchNews
 
-  - type: AGENT
-    role: NEWS_AGENT
-    allowedCapabilities: [mcp.news.search, local.news.searchNews]
-
-  - type: FINAL_ANSWER
-
 fallbackSkillIds: [local-latest-news]

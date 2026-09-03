@@ -115,6 +115,10 @@ public class CapabilityInvocationObserver {
                     .observation(truncate(observation, 1200))
                     .durationMs(durationMs)
                     .tokenCount(0)
+                    .attributes(Map.of(
+                            "stepKind", "capability",
+                            "outcome", failed ? "FAILED" : "SUCCESS"
+                    ))
                     .build());
         } catch (Exception error) {
             log.debug("Failed to persist capability trace step, traceId={}, capability={}",
@@ -143,6 +147,14 @@ public class CapabilityInvocationObserver {
                 .publishPercentileHistogram()
                 .register(meterRegistry)
                 .record(Duration.ofMillis(Math.max(0, durationMs)));
+        if (context != null && context.traceId() != null && !context.traceId().isBlank()) {
+            Counter.builder("stocksage.agent.tool.executions")
+                    .tag("kind", "capability")
+                    .tag("status", "SUCCESS".equals(status) || "TRUNCATED".equals(status)
+                            ? "SUCCESS" : "FAILED")
+                    .register(meterRegistry)
+                    .increment();
+        }
     }
 
     private String truncate(String text, int maxLength) {

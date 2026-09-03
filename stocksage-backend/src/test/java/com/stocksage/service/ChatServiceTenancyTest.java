@@ -56,7 +56,8 @@ class ChatServiceTenancyTest {
             mock(ToolPrefetchService.class),
             mock(ConversationMessageService.class),
             mock(com.stocksage.agent.RoutingDecisionObserver.class),
-            mock(ResearchMemoryService.class)
+            mock(ResearchMemoryService.class),
+            mock(TickerResolutionService.class)
     );
 
     private Conversation conversationOwnedBy(String userId) {

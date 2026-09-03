@@ -47,11 +47,11 @@ class CoordinatorPlanTest {
         ExecutionPlan plan = coordinator.planDeterministically("NVDA 最近 K 线走势如何？", 0);
         assertThat(plan.route()).isEqualTo(PlanRoute.MARKET);
         assertThat(plan.actions()).containsExactly(
-                PlanAction.MARKET_AGENT,
                 PlanAction.SEARCH_STOCKS,
                 PlanAction.GET_STOCK_KLINE,
                 PlanAction.GET_FINANCIAL_METRICS,
                 PlanAction.GET_TECHNICAL_INDICATORS,
+                PlanAction.MARKET_AGENT,
                 PlanAction.FINAL_ANSWER
         );
         assertThat(plan.modelTier()).isEqualTo(ModelTier.STANDARD);
@@ -62,11 +62,11 @@ class CoordinatorPlanTest {
         ExecutionPlan plan = coordinator.planDeterministically("苹果的风险因素有哪些？", 0);
         assertThat(plan.route()).isEqualTo(PlanRoute.FUNDAMENTALS);
         assertThat(plan.actions()).containsExactly(
-                PlanAction.FUNDAMENTALS_AGENT,
+                PlanAction.KNOWLEDGE_RETRIEVAL,
                 PlanAction.SEARCH_STOCKS,
                 PlanAction.GET_FINANCIAL_REPORTS,
                 PlanAction.SEARCH_COMPANY_REPORTS,
-                PlanAction.KNOWLEDGE_RETRIEVAL,
+                PlanAction.FUNDAMENTALS_AGENT,
                 PlanAction.FINAL_ANSWER
         );
     }
@@ -92,11 +92,11 @@ class CoordinatorPlanTest {
         ExecutionPlan plan = coordinator.planDeterministically("美联储今天有什么最新消息？", 0);
         assertThat(plan.route()).isEqualTo(PlanRoute.NEWS);
         assertThat(plan.actions()).containsExactly(
-                PlanAction.NEWS_AGENT,
                 PlanAction.SEARCH_STOCKS,
                 PlanAction.SEARCH_NEWS,
                 PlanAction.WEB_SEARCH,
                 PlanAction.GET_MARKET_OVERVIEW,
+                PlanAction.NEWS_AGENT,
                 PlanAction.FINAL_ANSWER
         );
     }
@@ -181,16 +181,13 @@ class CoordinatorPlanTest {
         ExecutionPlan plan = llmCoordinator.plan("随便聊聊", 0);
 
         assertThat(plan.route()).isEqualTo(PlanRoute.DIRECT);
-        assertThat(plan.actions()).containsExactly(
-                PlanAction.KNOWLEDGE_RETRIEVAL,
-                PlanAction.FINAL_ANSWER
-        );
+        assertThat(plan.actions()).containsExactly(PlanAction.FINAL_ANSWER);
         assertThat(plan.modelTier()).isEqualTo(ModelTier.FAST);
         assertThat(plan.routingDecision().rawRoute()).isEqualTo("UNREGISTERED");
         assertThat(plan.routingDecision().decisionSource()).isEqualTo(RoutingDecisionSource.DETERMINISTIC_FALLBACK);
         assertThat(plan.routingDecision().fallbackReason()).isEqualTo("INTENT_LLM_INVALID_ROUTE");
         assertThat(plan.routingDecision().needsClarification()).isTrue();
-        assertThat(plan.routingDecision().matchedSignals()).contains("direct-rule");
+        assertThat(plan.routingDecision().matchedSignals()).containsExactly("confidence-low");
     }
 
     @Test
@@ -198,6 +195,81 @@ class CoordinatorPlanTest {
         // 词表统一后（ETF/EPS 等入列），纯指标缩写问题不应被误判为含 ticker 的行情查询。
         ExecutionPlan plan = coordinator.planDeterministically("什么是 ETF 和 EPS？", 0);
         assertThat(plan.actionLabels()).doesNotContain("getStockKLine");
+    }
+
+    @Test
+    void multiTargetComparisonStopsAtClarification() {
+        ExecutionPlan plan = coordinator.planDeterministically("比较 AAPL 和 MSFT 最新财报", 0);
+
+        assertThat(plan.route()).isEqualTo(PlanRoute.DIRECT);
+        assertThat(plan.actions()).containsExactly(PlanAction.FINAL_ANSWER);
+        assertThat(plan.routingDecision().needsClarification()).isTrue();
+        assertThat(plan.routingDecision().reasonCodes()).contains("MULTI_TARGET_UNSUPPORTED");
+    }
+
+    @Test
+    void comparisonIntentWithoutKnownTickerAliasesStillStopsAtClarification() {
+        ChatClient routingClient = mock(ChatClient.class, RETURNS_DEEP_STUBS);
+        when(routingClient.prompt().user(anyString()).call().content()).thenReturn("""
+                {
+                  "fineIntent": "COMPARISON",
+                  "intentGroup": "RESEARCH",
+                  "targetRoute": "DEEP",
+                  "resolvedQuery": "比较贵州茅台和宁德时代",
+                  "rationale": "用户要求比较两个标的",
+                  "confidence": 0.95
+                }
+                """);
+        Coordinator llmCoordinator = new Coordinator(
+                routingClient, null, null,
+                new ObjectMapper(),
+                new TickerResolutionService(null, null, new ObjectMapper())
+        );
+
+        ExecutionPlan plan = llmCoordinator.plan("比较贵州茅台和宁德时代", 0);
+
+        assertThat(plan.route()).isEqualTo(PlanRoute.DIRECT);
+        assertThat(plan.actions()).containsExactly(PlanAction.FINAL_ANSWER);
+        assertThat(plan.routingDecision().reasonCodes()).contains("MULTI_TARGET_UNSUPPORTED");
+    }
+
+    @Test
+    void resolvedMultiTargetFollowUpAlsoStopsAtClarification() {
+        ChatClient routingClient = mock(ChatClient.class, RETURNS_DEEP_STUBS);
+        when(routingClient.prompt().user(anyString()).call().content()).thenReturn("""
+                {
+                  "fineIntent": "COMPARISON",
+                  "intentGroup": "RESEARCH",
+                  "targetRoute": "DEEP",
+                  "resolvedQuery": "Compare AAPL and MSFT as long-term investments",
+                  "rationale": "用户要求比较两个标的",
+                  "confidence": 0.95
+                }
+                """);
+        Coordinator llmCoordinator = new Coordinator(
+                routingClient, null, null,
+                new ObjectMapper(),
+                new TickerResolutionService(null, null, new ObjectMapper())
+        );
+
+        ExecutionPlan plan = llmCoordinator.plan(
+                "compare it with MSFT", 0, "", List.of("user: Review AAPL first"));
+
+        assertThat(plan.route()).isEqualTo(PlanRoute.DIRECT);
+        assertThat(plan.actions()).containsExactly(PlanAction.FINAL_ANSWER);
+        assertThat(plan.routingDecision().reasonCodes()).contains("MULTI_TARGET_UNSUPPORTED");
+    }
+
+    @Test
+    void agentRolesAreDerivedFromTheRegisteredPlanActions() {
+        ExecutionPlan market = coordinator.planDeterministically("NVDA 当前股价", 0);
+        ExecutionPlan deep = coordinator.planDeterministically("NVDA 值不值得长期投资", 0);
+
+        assertThat(market.primaryAgent()).isEqualTo("Market Agent");
+        assertThat(market.supportingAgents()).isEmpty();
+        assertThat(deep.primaryAgent()).isEqualTo("Research Manager");
+        assertThat(deep.supportingAgents()).containsExactly(
+                "Fundamentals Agent", "Market Agent", "News Agent", "Bull Researcher", "Bear Researcher");
     }
 
     @Test

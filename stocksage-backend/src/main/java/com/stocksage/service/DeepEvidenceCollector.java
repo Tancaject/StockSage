@@ -2,7 +2,9 @@ package com.stocksage.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.client.DataServicePayloads;
 import com.stocksage.agent.PlanAction;
+import com.stocksage.capability.CapabilityResult;
 import com.stocksage.harness.DeepResearchCompletionPolicy;
 import com.stocksage.harness.EvidenceLedger;
 import com.stocksage.harness.HarnessModels.EvidenceDimension;
@@ -13,6 +15,7 @@ import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.RecoveryAction;
 import com.stocksage.harness.HarnessModels.RunContext;
 import com.stocksage.harness.HarnessModels.TargetIdentity;
+import com.stocksage.harness.HarnessModels.TargetResolutionStatus;
 import com.stocksage.harness.ResearchHarness;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.tool.ChatStreamEmitter;
@@ -63,6 +66,8 @@ public class DeepEvidenceCollector {
 
     /** 仅用于容错解析工具响应来源信息的轻量 JSON 解析器。 */
     private static final ObjectMapper PROVENANCE_MAPPER = new ObjectMapper();
+    /** DEEP 新闻查询的最大字符数；ticker 固定放在最前面，截断不会丢失标的。 */
+    private static final int NEWS_QUERY_MAX_LENGTH = 180;
     /** 有可引用资格审计信息的证据段边界；工具正文中的同名标记会被转义。 */
     private static final String SNAPSHOT_EVIDENCE_BEGIN = "[[STOCKSAGE_EVIDENCE_BEGIN]]";
     private static final String SNAPSHOT_EVIDENCE_END = "[[STOCKSAGE_EVIDENCE_END]]";
@@ -162,6 +167,21 @@ public class DeepEvidenceCollector {
                     context.toString(), agentState, false, false, false, false, false, ledger,
                     harnessDecision);
         }
+        if (tickerResolutionService.hasConflictingExplicitTicker(userQuery, ticker)) {
+            context.append("## resolvedStockIdentity\n")
+                    .append("Multiple stock targets were explicitly requested, but this DEEP run supports one target. No evidence was fetched.\n\n");
+            log.warn("DEEP deterministic prefetch blocked because multiple stock targets were resolved, traceId={}", traceId);
+            emitProgress(traceId, conversationId, "observation",
+                    "检测到多个分析标的；当前单标的 DEEP 流程已停止，避免混用不同公司的证据。");
+            EvidenceLedger ledger = new EvidenceLedger(
+                    new TargetIdentity(ticker, ticker, TargetResolutionStatus.AMBIGUOUS), List.of());
+            agentState.setEvidenceLedger(ledger);
+            HarnessDecision harnessDecision = researchHarness.observeEvidence(
+                    traceId, completionPolicy, RunContext.deepResearch(), ledger);
+            return new EvidenceCollection(
+                    context.toString(), agentState, false, false, false, false, false, ledger,
+                    harnessDecision);
+        }
 
         log.info("DEEP deterministic prefetch started, traceId={}, ticker={}, actions={}",
                 traceId, ticker, DEEP_ACTIONS);
@@ -183,7 +203,7 @@ public class DeepEvidenceCollector {
         emitProgress(traceId, conversationId, "observation",
                 "Market Agent data snapshot collected for " + ticker + ".");
 
-        EvidenceSnapshot news = buildNewsSnapshot(ticker);
+        EvidenceSnapshot news = buildNewsSnapshot(ticker, userQuery);
         agentState.setNewsReport(news.text());
         appendContextSection(context, "News Agent", news.text());
         boolean newsOk = news.hasUsableData();
@@ -293,7 +313,7 @@ public class DeepEvidenceCollector {
         }
         if (recoveryActions.contains(RecoveryAction.RETRY_NEWS)) {
             attempts.merge(RecoveryAction.RETRY_NEWS, 1, Integer::sum);
-            EvidenceSnapshot news = buildNewsSnapshot(ticker);
+            EvidenceSnapshot news = buildNewsSnapshot(ticker, state.getQuery());
             state.setNewsReport(news.text());
             replaceDimension(merged, EvidenceDimension.NEWS, news.evidence());
             newsOk = news.hasUsableData();
@@ -344,6 +364,16 @@ public class DeepEvidenceCollector {
         EvidenceLedger ledger = state.getEvidenceLedger() == null
                 ? EvidenceLedger.empty()
                 : state.getEvidenceLedger();
+        String checkpointTicker = state.getPrimaryTicker();
+        if ((checkpointTicker == null || checkpointTicker.isBlank()) && ledger.target().isResolved()) {
+            checkpointTicker = ledger.target().canonicalKey();
+        }
+        if (tickerResolutionService.hasConflictingExplicitTicker(state.getQuery(), checkpointTicker)) {
+            ledger = new EvidenceLedger(
+                    new TargetIdentity(checkpointTicker, checkpointTicker, TargetResolutionStatus.AMBIGUOUS),
+                    ledger.evidence());
+            state.setEvidenceLedger(ledger);
+        }
         boolean fundamentalsOk = ledger.hasUsable(EvidenceDimension.FUNDAMENTALS);
         boolean marketOk = ledger.hasUsable(EvidenceDimension.MARKET);
         boolean newsOk = ledger.hasUsable(EvidenceDimension.NEWS);
@@ -364,6 +394,66 @@ public class DeepEvidenceCollector {
                 ledger,
                 decision
         );
+    }
+
+    /**
+     * 把一次已授权的聚焦新闻搜索追加到现有快照，并重新执行当前 Evidence Gate。
+     *
+     * <p>不可引用、跨标的或重复结果不会进入报告和 Ledger；基础 NEWS 证据永远不被替换。</p>
+     */
+    EvidenceCollection appendFocusedNews(
+            EvidenceCollection existing,
+            CapabilityResult result,
+            String traceId
+    ) {
+        if (existing == null || result == null || existing.state() == null) {
+            return existing;
+        }
+        AnalysisState state = existing.state();
+        EvidenceLedger current = existing.evidenceLedger();
+        String ticker = state.getPrimaryTicker() == null ? "" : state.getPrimaryTicker().strip();
+        String content = result.content() == null ? "" : result.content();
+        ToolObservation observation = new ToolObservation(
+                content,
+                capabilityEvidenceStatus(content),
+                Instant.now()
+        );
+        EvidenceEnvelope envelope = toEnvelope(
+                EvidenceDimension.NEWS,
+                ticker,
+                result.capabilityId(),
+                observation,
+                true
+        );
+        if (!envelope.hasUsableData()
+                || !envelope.hasProvenance()
+                || !envelope.approvedReadOnly()
+                || current == null
+                || !current.target().isResolved()
+                || !current.target().canonicalKey().equals(envelope.targetKey())
+                || current.evidenceIds().contains(envelope.evidenceId())) {
+            return existing;
+        }
+
+        List<EvidenceEnvelope> merged = new ArrayList<>(current.evidence());
+        merged.add(envelope);
+        EvidenceLedger ledger = new EvidenceLedger(current.target(), merged);
+        state.setEvidenceLedger(ledger);
+
+        StringBuilder news = new StringBuilder(state.getNewsReport() == null ? "" : state.getNewsReport());
+        appendEvidenceSnapshotItem(
+                news,
+                "focusedNewsSearch",
+                envelope,
+                content,
+                3500
+        );
+        state.setNewsReport(news.toString().strip());
+
+        Map<RecoveryAction, Integer> recoveryAttempts = state.getHarnessSnapshot() == null
+                ? Map.of()
+                : state.getHarnessSnapshot().recoveryAttempts();
+        return reevaluateCheckpoint(state, recoveryAttempts, traceId);
     }
 
     private void replaceDimension(
@@ -522,10 +612,10 @@ public class DeepEvidenceCollector {
     }
 
     /** 构造新闻和网页搜索预取快照。 */
-    private EvidenceSnapshot buildNewsSnapshot(String ticker) {
+    private EvidenceSnapshot buildNewsSnapshot(String ticker, String userQuery) {
         StringBuilder report = new StringBuilder();
         List<EvidenceEnvelope> evidence = new ArrayList<>();
-        String query = buildNewsQuery(ticker);
+        String query = buildNewsQuery(ticker, userQuery);
         appendNonCitableSnapshotNote(
                 report, "snapshotMetadata", "Ticker: " + ticker + "\nNews query: " + query, 600);
         boolean hasData = false;
@@ -718,22 +808,23 @@ public class DeepEvidenceCollector {
             ToolObservation observation,
             boolean approvedReadOnly
     ) {
+        String evidenceTarget = structuredEvidenceTarget(ticker, observation.text());
         String payloadHash = sha256(observation.text());
         String evidenceId = sha256(
-                dimension.name() + "|" + capabilityId + "|" + ticker + "|" + payloadHash);
+                dimension.name() + "|" + capabilityId + "|" + evidenceTarget + "|" + payloadHash);
         EvidenceStatus structuredStatus = dimension == EvidenceDimension.NEWS
                 && observation.status() == EvidenceStatus.AVAILABLE
                 && isSuccessfulNoResults(observation.text())
                 ? EvidenceStatus.NO_RESULTS
                 : observation.status();
         EvidenceProvenance provenance = observation.status() == EvidenceStatus.AVAILABLE
-                ? extractProvenance(capabilityId, ticker, observation.text())
+                ? extractProvenance(capabilityId, evidenceTarget, observation.text())
                 : EvidenceProvenance.empty();
         return new EvidenceEnvelope(
                 evidenceId,
                 dimension,
                 capabilityId,
-                ticker,
+                evidenceTarget,
                 structuredStatus,
                 provenance.sourceRef(),
                 provenance.provider(),
@@ -742,6 +833,31 @@ public class DeepEvidenceCollector {
                 payloadHash,
                 approvedReadOnly
         );
+    }
+
+    private String structuredEvidenceTarget(String requestedTicker, String payload) {
+        String requested = tickerResolutionService.normalizeStructuredTicker(requestedTicker);
+        if (requested == null || requested.isBlank()) {
+            requested = TargetIdentity.resolved(requestedTicker).canonicalKey();
+        }
+        if (payload == null || payload.isBlank()) {
+            return requested;
+        }
+        try {
+            JsonNode root = PROVENANCE_MAPPER.readTree(payload);
+            for (String field : List.of("resolvedCode", "symbol", "ticker")) {
+                JsonNode value = root == null ? null : root.get(field);
+                String candidate = value == null || !value.isTextual()
+                        ? ""
+                        : tickerResolutionService.normalizeStructuredTicker(value.asText());
+                if (candidate != null && !candidate.isBlank() && !candidate.equals(requested)) {
+                    return candidate;
+                }
+            }
+        } catch (Exception ignored) {
+            // 非 JSON 工具正文没有可验证的结构化标的，沿用请求侧已解析身份。
+        }
+        return requested;
     }
 
     private EvidenceProvenance extractProvenance(
@@ -1074,6 +1190,16 @@ public class DeepEvidenceCollector {
                 || compact.contains("\"data\":[]");
     }
 
+    /** 将 Capability 的统一文本结果归一化为现有 Evidence 状态。 */
+    private EvidenceStatus capabilityEvidenceStatus(String content) {
+        if (content == null || content.isBlank()) {
+            return EvidenceStatus.EMPTY;
+        }
+        return DataServicePayloads.isFailure(content)
+                ? EvidenceStatus.FAILED
+                : EvidenceStatus.AVAILABLE;
+    }
+
     private String sha256(String value) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -1085,12 +1211,13 @@ public class DeepEvidenceCollector {
         }
     }
 
-    private String buildNewsQuery(String ticker) {
-        int year = LocalDate.now().getYear();
-        if ("MU".equals(ticker)) {
-            return "Micron MU earnings HBM AI memory export control latest " + year;
-        }
-        return ticker + " earnings stock latest " + year;
+    private String buildNewsQuery(String ticker, String userQuery) {
+        String target = ticker == null ? "" : ticker.strip();
+        String focus = userQuery == null ? "" : userQuery.replaceAll("\\s+", " ").strip();
+        String query = (target + " " + focus).strip();
+        return query.length() <= NEWS_QUERY_MAX_LENGTH
+                ? query
+                : query.substring(0, NEWS_QUERY_MAX_LENGTH).strip();
     }
 
     private void emitProgress(String traceId, Long conversationId, String type, String content) {

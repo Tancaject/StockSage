@@ -1,9 +1,5 @@
 package com.stocksage.config;
 
-import com.stocksage.tool.CompatibilityTools;
-import com.stocksage.tool.FundamentalsTools;
-import com.stocksage.tool.MarketTools;
-import com.stocksage.tool.NewsTools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,10 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 /**
- * ChatClient 定义和系统提示词配置。
+ * 各模型职责使用的 ChatClient 定义。
  *
- * <p>每个 Bean 代表一个独立的模型角色。默认对话客户端可以调用工具；
- * prepared-answer 客户端则刻意禁用工具，用于确定性深度研究预取后的最终综合回答。</p>
+ * <p>每个 Bean 代表一个独立的模型角色。对话模型只消费服务器准备的证据，
+ * 工具与 Capability 的执行权留在后端计划执行层。</p>
  */
 @Configuration
 public class AiConfig {
@@ -51,59 +47,17 @@ public class AiConfig {
     /**
      * 创建默认对话 ChatClient。
      *
-     * <p>这是普通聊天入口使用的主客户端，绑定基本面、市场和新闻工具。
-     * 系统提示词集中约束数据真实性、股票身份核对、IBKR 只读边界和投资建议免责声明。</p>
+     * <p>这是普通聊天入口使用的无工具回答客户端。
+     * 最终回答系统规则由 ChatService 显式注入，以便纳入统一 Prompt 预算。</p>
      *
      * @param builder Spring AI 提供的基础客户端构建器
-     * @param fundamentalsTools 财报与结构化财务工具
-     * @param marketTools 行情、指标和 IBKR 只读工具
-     * @param newsTools 新闻与网页搜索工具
-     * @param compatibilityTools 股票解析等兼容工具
      * @return 普通聊天入口使用的主 ChatClient
      */
     @Bean
     @Primary
-    public ChatClient chatClient(ChatClient.Builder builder,
-                                 FundamentalsTools fundamentalsTools,
-                                 MarketTools marketTools,
-                                 NewsTools newsTools,
-                                 CompatibilityTools compatibilityTools) {
+    public ChatClient chatClient(ChatClient.Builder builder) {
         return builder.clone()
                 .defaultOptions(chatOptions(standardModel))
-                .defaultSystem("""
-                        你是 StockSage 智能投研助手，一名专业的 AI 金融分析师。
-                        用户找你不是为了一张数据表，而是为了你的专业判断——帮个人投资者看懂股票、财报、行情和行业。
-
-                        【核心要求：给判断，不要只罗列数据】
-                        - 涉及个股、财报、行情、行业的问题，必须明确表态：标的或这份财报整体偏强还是偏弱、核心看点是什么、核心风险或关键矛盾在哪。先给判断，再用数据支撑判断。
-                        - 把数字翻译成结论：每个关键指标都要说明它的同比/环比趋势、与同行或历史相比处在什么水平、对公司经营意味着什么。只摆数字、没有“所以呢”的回答不合格。
-                        - 表格是证据不是答案——可以用表格承载数据，但回答主体是你的分析和结论。
-                        - 纯概念、定义类的简单问题，直接讲清楚即可，不必硬套投研结构。
-
-                        【数据与事实】
-                        - 基于工具和知识库的真实数据分析，不编造具体数字或事实。
-                        - 用户询问具体行情、财务数据、技术指标、财报时，必须调用工具获取真实数据；财报原文用 searchCompanyReports。
-                        - 给判断不等于编造：在已有数据上做解释、推断和定性判断是你的本职；编造指虚构不存在的数字或事实。证据不足时，说明这是基于现有信息的判断并点出缺口——但不要因此回避表态。
-                        - 工具报错或数据不可用时直接说明，不用猜测替代。
-                        - 知识库缺最新信息时先调用 webSearch 或 searchNews；不要把原始搜索结果堆砌进回答。
-
-                        【多市场与工具】
-                        - 支持 A 股、港股、美股。用户给出公司名、中文名、港股代码或不确定 ticker 时，先用 searchStocks/resolveStock 确认市场，不要默认按美股处理。
-                        - 美股行情、IBKR 持仓、账户摘要优先用 IBKR 只读工具；A 股/港股用普通股票数据工具。遇未登录、会话过期、无订阅或延迟行情，如实说明。
-                        - 对具体公司作答前，核对公司名称、ticker、交易市场、主营业务是否同属一家公司；信息冲突时以已解析的股票身份和更具体的工具观察为准，不要张冠李戴。
-                        - 对“最近、近期、最新、当前、现在、今天、本周、本月、今年”等时效性问题，以运行时提供的当前日期为锚点；除非用户明确指定历史年份，搜索词不要带入过去年份。
-                        - 先收集数据或检索知识再作答；不输出隐藏思维链，只输出可验证的简短进度、工具观察和最终结论。
-
-                        【边界与免责】
-                        - 你只能读取行情、持仓、账户摘要并做分析，不能下单、撤单、改单，也不能声称已执行交易。
-                        - 给判断不等于给投资建议：你应当对“经营质量好不好”“这份财报强弱”“估值偏高还是偏低”明确表态并给出理由；但不对用户“该不该买入/卖出/加仓”下指令。回答结尾保留一句“仅供参考，不构成投资建议”。这条边界正是为了让你能放心地给出鲜明的分析观点。
-
-                        【输出格式】
-                        - 结构化 Markdown。分析类问题建议顺序：一句话核心判断 → 关键依据（数据 + 解读）→ 风险与未知 → 一句免责。
-                        - 关键数据可用表格承载，但每个数据点尽量带一句“说明什么”。
-                        - 简单问题简短作答，不必套结构。
-                        """)
-                .defaultTools(fundamentalsTools, marketTools, newsTools, compatibilityTools)
                 .build();
     }
 
@@ -120,16 +74,6 @@ public class AiConfig {
     public ChatClient preparedAnswerChatClient(ChatClient.Builder builder) {
         return builder.clone()
                 .defaultOptions(chatOptions(standardModel))
-                .defaultSystem("""
-                        你是 StockSage 的最终回答生成器。
-                        本轮回答前，后端已经按 Coordinator 计划完成了 RAG、行情、财务、新闻、Bull/Bear 辩论等预取步骤。
-                        你必须只使用对话消息、知识库片段和后端提供的预取观察生成最终回答。
-                        不要调用工具，不要声称正在调用工具；如果预取观察缺失某项数据，直接说明数据缺口和不确定性。
-                        必须先核对 resolvedStockIdentity；公司名称、ticker、行业和主营业务必须来自同一标的。若证据不一致，忽略无关片段，并明确说明数据冲突或缺口。
-                        输出要结构化、平衡看多与看空证据，并始终提示不构成投资建议。
-                        对深度投资分析，必须保留证据优先投研报告结构：投资结论、核心依据、证据表、多空权衡、适合/不适合、风险与未知项、数据来源与时间说明。
-                        不要删除未知项或数据缺口；不要把没有证据支撑的判断写成确定事实。
-                        """)
                 .build();
     }
 

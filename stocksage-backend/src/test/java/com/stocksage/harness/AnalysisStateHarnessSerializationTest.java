@@ -101,6 +101,16 @@ class AnalysisStateHarnessSerializationTest {
                         "deep-report:trace-42:" + policyTag + ":resynthesize_report-1"
                 )
         ));
+        original.setEvidenceReplanState(new AnalysisState.EvidenceReplanState(
+                1,
+                AnalysisState.EvidenceReplanStatus.PLANNED,
+                AnalysisState.EvidenceReplanAction.FOCUSED_NEWS_SEARCH,
+                "AAPL regulatory risk",
+                "FRESHNESS_GAP",
+                "deep-replan:42:v1:focused-news:hash",
+                List.of(),
+                null
+        ));
 
         AnalysisState restored = objectMapper.readValue(
                 objectMapper.writeValueAsString(original),
@@ -121,5 +131,7 @@ class AnalysisStateHarnessSerializationTest {
         assertThat(restored.getHarnessSnapshot().suspendedRecovery().recoveryEffectKey())
                 .isEqualTo("deep-report:trace-42:" + policyTag + ":resynthesize_report-1");
         assertThat(restored.getHarnessSnapshot().hasPendingEvidenceRecovery()).isTrue();
+        assertThat(restored.getEvidenceReplanState())
+                .isEqualTo(original.getEvidenceReplanState());
     }
 }

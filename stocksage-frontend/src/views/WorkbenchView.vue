@@ -183,7 +183,7 @@
         </div>
       </section>
 
-      <CompareDesk v-else-if="activeTab === 'compare'" @start-compare="handleCompare" />
+      <CompareDesk v-else-if="activeTab === 'compare'" />
 
       <PortfolioDesk v-else-if="activeTab === 'portfolio'" @start-diagnosis="handleDiagnosis" />
 
@@ -345,7 +345,6 @@ import PanelEmpty from '../components/common/PanelEmpty.vue'
 import PanelError from '../components/common/PanelError.vue'
 import { buildPrimaryNavItems, getReportSurfaceLabels } from '../lib/productUi.js'
 import {
-  buildComparisonPrompt,
   buildEventImpactPrompt,
   buildHealthChecks,
   buildPortfolioDiagnosisPrompt,
@@ -675,16 +674,6 @@ function sendRiskPrompt() {
     title: `${selectedTicker.value} 风险证据复核`,
     ticker: selectedTicker.value,
     action: '风险复核中',
-  })
-}
-
-/** CompareDesk start-compare handler */
-function handleCompare({ tickers, dimensions }) {
-  const prompt = buildComparisonPrompt(tickers, dimensions)
-  startWorkbenchRun(prompt, {
-    title: `${tickers.join(' vs ') || '组合'} 对比研究`,
-    ticker: tickers[0] || selectedTicker.value,
-    action: '对比研究中',
   })
 }
 

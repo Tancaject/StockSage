@@ -61,17 +61,10 @@ public class SkillValidator {
             if (step.type() == null) {
                 throw new IllegalStateException("Skill step type is missing: " + skill.id());
             }
-            if (step.type() == SkillDefinition.StepType.CAPABILITY) {
-                capabilitySteps++;
-                validateCapability(skill, step.capability());
-                if (step.fallbackCapability() != null && !step.fallbackCapability().isBlank()) {
-                    validateCapability(skill, step.fallbackCapability());
-                }
-            }
-            if (step.type() == SkillDefinition.StepType.AGENT) {
-                for (String capabilityId : step.allowedCapabilities()) {
-                    validateCapability(skill, capabilityId);
-                }
+            capabilitySteps++;
+            validateCapability(skill, step.capability());
+            if (step.fallbackCapability() != null && !step.fallbackCapability().isBlank()) {
+                validateCapability(skill, step.fallbackCapability());
             }
         }
         if (capabilitySteps > skill.policy().maxCapabilityCalls()) {

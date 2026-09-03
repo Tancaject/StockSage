@@ -2,6 +2,7 @@ package com.stocksage.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.agent.AgentStep;
 import com.stocksage.agent.Coordinator;
 import com.stocksage.agent.ModelTier;
 import com.stocksage.agent.ResearchDebateService;
@@ -65,6 +66,8 @@ public class DeepResearchPipeline {
     private final ResearchTaskCheckpointService checkpointService;
     /** 收集/恢复确定性证据并执行首次 Harness 闸门。 */
     private final DeepEvidenceCollector evidenceCollector;
+    /** 在证据门禁通过后最多执行一次有界问题相关补证。 */
+    private final DeepEvidenceReplanService evidenceReplanService;
     /** 把结构化报告或证据不足状态渲染为用户 Markdown。 */
     private final ReportMarkdownRenderer reportRenderer;
     /** 在发布事务中按归属和幂等契约写入最终助手消息。 */
@@ -169,6 +172,21 @@ public class DeepResearchPipeline {
                         ownershipLost
                 );
                 workingState = evidence.state();
+                if ((checkpoint.isEmpty() || resumeFromEvidenceBoundary)
+                        && suspendedReportRecovery == null) {
+                    ResearchTask ownedTask = runningTask;
+                    evidence = evidenceReplanService.replan(
+                            runningTask.getId(),
+                            task.getUserId(),
+                            payload.conversationId(),
+                            payload.traceId(),
+                            evidence,
+                            () -> requireTaskOwnership(ownedTask, lease, ownershipLost),
+                            state -> saveEvidenceReplanForOwner(
+                                    ownedTask, lease, state, ownershipLost)
+                    );
+                    workingState = evidence.state();
+                }
                 if (evidence.harnessDecision().outcome() != HarnessOutcome.PASS) {
                     String text = reportRenderer.buildInsufficientEvidenceReport(
                             payload.ticker(), evidence.tickerResolved(), evidence.fundamentalsOk(), evidence.marketOk());
@@ -404,7 +422,8 @@ public class DeepResearchPipeline {
                     payload.traceId(),
                     status,
                     0,
-                    Math.max(0, durationMs)
+                    Math.max(0, durationMs),
+                    taskOutcome(task)
             );
         } catch (Exception error) {
             // 业务终态已经提交；可观测性更新失败不能触发研究重放或重复发布。
@@ -416,6 +435,22 @@ public class DeepResearchPipeline {
                     error.getMessage()
             );
         }
+    }
+
+    /** 将持久化任务终态映射为独立的业务结果，不把技术成功等同于完整报告。 */
+    String taskOutcome(ResearchTask task) {
+        if (task.getStatus() == ResearchTask.Status.FAILED) {
+            return "FAILED";
+        }
+        ResearchTask.ResultKind resultKind = task.getResultKind();
+        if (resultKind == null) {
+            return null;
+        }
+        return switch (resultKind) {
+            case FULL_REPORT -> "COMPLETED";
+            case INSUFFICIENT_EVIDENCE, OFFLINE_FALLBACK -> "DEGRADED";
+            case POLICY_BLOCKED -> "BLOCKED";
+        };
     }
 
     private void finishWithText(
@@ -870,6 +905,19 @@ public class DeepResearchPipeline {
         }
     }
 
+    private void saveEvidenceReplanForOwner(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            AnalysisState state,
+            AtomicBoolean ownershipLost
+    ) {
+        try {
+            checkpointService.saveEvidenceReplan(task.getId(), lease.token(), state);
+        } catch (ResearchTaskCheckpointService.OwnershipLostException error) {
+            throw checkpointOwnershipLost(task, ownershipLost, error);
+        }
+    }
+
     private DeepEvidenceCollector.EvidenceCollection executeEvidenceRecovery(
             ResearchTask task,
             ResearchTaskLeaseService.Lease lease,
@@ -915,6 +963,7 @@ public class DeepResearchPipeline {
                 suspendedReportRecovery
         );
         saveHarnessSnapshotForOwner(task, lease, evidence.state(), ownershipLost);
+        recordEvidenceRecoveryExecution(payload.traceId(), effectKey, recoveryActions);
         log.info("Resuming bounded evidence recovery, taskId={}, effectKey={}, actions={}",
                 task.getId(), effectKey, recoveryActions);
 
@@ -939,6 +988,37 @@ public class DeepResearchPipeline {
         // 立即写入 checkpoint，收窄只读恢复副作用与常规证据 checkpoint 之间的崩溃窗口。
         saveHarnessSnapshotForOwner(task, lease, recovered.state(), ownershipLost);
         return recovered;
+    }
+
+    void recordEvidenceRecoveryExecution(
+            String traceId,
+            String effectKey,
+            List<RecoveryAction> recoveryActions
+    ) {
+        if (traceId == null || traceId.isBlank()) {
+            return;
+        }
+        try {
+            traceService.addStep(traceId, AgentStep.builder()
+                    .thought("Harness recovery plan was durably checkpointed")
+                    .action("harness-evidence-recovery")
+                    .actionInput("{\"argumentKeys\":[\"recoveryActions\"]}")
+                    .observation("PLANNED")
+                    .durationMs(0)
+                    .tokenCount(0)
+                    .attributes(Map.of(
+                            "stepKind", "harness_recovery_execution",
+                            "policyId", DeepResearchCompletionPolicy.POLICY_ID,
+                            "policyVersion", Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION),
+                            "phase", HarnessPhase.EVIDENCE.name(),
+                            "recoveryLifecycle", RecoveryLifecycle.PLANNED.name(),
+                            "recoveryActions", List.copyOf(recoveryActions),
+                            "recoveryEffectKey", effectKey
+                    ))
+                    .build());
+        } catch (Exception error) {
+            log.debug("Failed to persist Harness recovery execution trace, traceId={}", traceId, error);
+        }
     }
 
     private void closeLegacyPendingRecoveryIfNeeded(

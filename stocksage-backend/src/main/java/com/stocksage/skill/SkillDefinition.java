@@ -45,11 +45,9 @@ public record SkillDefinition(
         fallbackSkillIds = fallbackSkillIds == null ? List.of() : List.copyOf(fallbackSkillIds);
     }
 
-    /** Skill 的运行承载方式；V1 预取链只执行确定性内联模式。 */
+    /** 当前 Skill executor 唯一支持的运行承载方式。 */
     public enum ExecutionMode {
-        INLINE_DETERMINISTIC,
-        INLINE_AGENT,
-        BACKGROUND_RESEARCH
+        INLINE_DETERMINISTIC
     }
 
     /**
@@ -76,27 +74,17 @@ public record SkillDefinition(
      * @param capability 主能力 ID，仅 CAPABILITY 步骤使用
      * @param required 主能力及其 fallback 都失败时是否终止 Skill
      * @param fallbackCapability 主能力不可用时的本地降级能力
-     * @param role Agent 步骤的角色名
-     * @param allowedCapabilities Agent 步骤可见的能力白名单
      */
     public record SkillStep(
             StepType type,
             String capability,
             boolean required,
-            String fallbackCapability,
-            String role,
-            Set<String> allowedCapabilities
+            String fallbackCapability
     ) {
-        public SkillStep {
-            allowedCapabilities = allowedCapabilities == null ? Set.of() : Set.copyOf(allowedCapabilities);
-        }
     }
 
     /** Skill 清单允许声明的有限步骤类型。 */
     public enum StepType {
-        CAPABILITY,
-        AGENT,
-        SUBMIT_DEEP_RESEARCH,
-        FINAL_ANSWER
+        CAPABILITY
     }
 }

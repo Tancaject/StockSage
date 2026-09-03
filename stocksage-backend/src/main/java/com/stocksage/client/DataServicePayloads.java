@@ -34,22 +34,27 @@ public final class DataServicePayloads {
         }
         try {
             JsonNode root = MAPPER.readTree(body);
-            if (!root.isObject()) {
-                return false;
-            }
-            JsonNode error = root.get("error");
-            if (error == null || error.isNull()) {
-                return false;
-            }
-            if (error.isBoolean()) {
-                return error.booleanValue();
-            }
-            if (error.isTextual()) {
-                return !error.asText().isBlank();
-            }
-            return true;
+            return hasTopLevelError(root);
         } catch (Exception e) {
             return true;
         }
+    }
+
+    /** 判断已解析 JSON 是否携带统一的顶层错误信号。 */
+    public static boolean hasTopLevelError(JsonNode root) {
+        if (root == null || !root.isObject()) {
+            return false;
+        }
+        JsonNode error = root.get("error");
+        if (error == null || error.isNull()) {
+            return false;
+        }
+        if (error.isBoolean()) {
+            return error.booleanValue();
+        }
+        if (error.isTextual()) {
+            return !error.asText().isBlank();
+        }
+        return true;
     }
 }

@@ -35,6 +35,7 @@ import java.util.List;
  * @param routeMatched 最终执行路由是否命中期望
  * @param contextCase 是否携带最近对话上下文
  * @param fallback 是否实际使用确定性回退
+ * @param executionGuarded 最终执行路由是否被服务器安全闸门覆盖；此时不拿原始语义路由与执行路由比较
  * @param rawRouteValid 原始路由是否可严格解析为后端五选一路由
  * @param rawRouteMatched 合法原始路由是否命中期望路由
  * @param expectedResolvedQueryContains 可选的期望消歧片段
@@ -69,6 +70,7 @@ public record PlannerEvalResult(
         boolean routeMatched,
         boolean contextCase,
         boolean fallback,
+        boolean executionGuarded,
         boolean rawRouteValid,
         boolean rawRouteMatched,
         String expectedResolvedQueryContains,

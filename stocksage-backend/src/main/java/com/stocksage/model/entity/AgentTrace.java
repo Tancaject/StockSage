@@ -44,6 +44,10 @@ public class AgentTrace {
     @Column(length = 16)
     private String status;
 
+    /** 业务任务结果；与传输/进程层的 {@link #status} 分开，未评估时为空。 */
+    @Column(name = "task_outcome", length = 32)
+    private String taskOutcome;
+
     /** {@code AgentStep} 的有序 JSON 数组；新链路初始化为 {@code []}。 */
     @Column(columnDefinition = "JSON")
     private String steps;

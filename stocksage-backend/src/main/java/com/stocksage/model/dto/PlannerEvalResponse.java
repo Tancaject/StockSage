@@ -28,7 +28,7 @@ import java.util.Map;
  * @param contextResolutionAccuracy 上下文消歧片段命中率；没有可评估样例时为 0
  * @param nonFallbackCases 未使用确定性回退的已评估样例数
  * @param nonFallbackRouteAccuracy 非回退样例最终路由准确率；没有此类样例时为 0
- * @param llmSignalCases 具有合法原始 LLM 路由候选的非回退样例数
+ * @param llmSignalCases 具有合法原始 LLM 路由候选、且未被服务器执行闸门覆盖的非回退样例数
  * @param llmSignalAccuracy 原始 LLM 路由候选准确率；没有此类样例时为 0
  * @param fallbackCases 使用确定性回退的样例数
  * @param fallbackRate 回退样例占全部已评估样例的比例

@@ -31,7 +31,7 @@ public class AgentAdminController {
     }
 
     /**
-     * 获取能力、MCP 与 Skill 执行状态。
+     * 获取能力、工具执行、端到端耗时与 MCP 状态。
      *
      * @return 脱敏后的 Agent 运行快照
      */

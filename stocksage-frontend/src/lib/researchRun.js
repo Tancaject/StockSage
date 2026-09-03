@@ -76,6 +76,8 @@ export function applyChunk(run, chunk = {}) {
       kind: type,
       label: chunk.sectionLabel || chunk.section || '',
       detail: chunk.content || '',
+      metadata: chunk.metadata || null,
+      durationMs: Number(chunk.durationMs || chunk.metadata?.durationMs || 0),
     }
     return { ...run, timeline: [...run.timeline, entry] }
   }

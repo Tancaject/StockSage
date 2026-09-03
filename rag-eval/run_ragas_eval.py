@@ -23,6 +23,8 @@
 """
 
 import argparse
+import hashlib
+import importlib.metadata
 import json
 import math
 import os
@@ -314,6 +316,9 @@ def main():
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     result["ragas"] = {
+        "evidence_kind": "SAMPLED" if args.limit is not None else "GOLDEN_SET",
+        "evaluator_version": f"ragas-{importlib.metadata.version('ragas')}",
+        "dataset_sha256": hashlib.sha256(input_path.read_bytes()).hexdigest(),
         "judge_model": args.judge_model,
         "embedding_model": args.embedding_model if args.with_relevancy else None,
         "metrics": [f"ragas_{name}" for name in metric_names],

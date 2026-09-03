@@ -233,6 +233,7 @@ class CheckpointTakeoverIT {
                     mock(TaskScheduler.class),
                     checkpointService,
                     evidenceCollector,
+                    mock(com.stocksage.service.DeepEvidenceReplanService.class),
                     reportRenderer,
                     conversationMessageService,
                     new ResearchTaskPublicationTransaction(userAccountRepository),

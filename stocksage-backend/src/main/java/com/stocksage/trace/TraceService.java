@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,6 @@ public class TraceService {
     private final ObjectMapper objectMapper;
     /** 可选地把同一生命周期镜像到 Phoenix/OpenTelemetry。 */
     private final PhoenixTraceService phoenixTraceService;
-
     /**
      * 开始一条新的智能体执行链路。
      *
@@ -100,15 +100,31 @@ public class TraceService {
      */
     @Transactional
     public void endTrace(String traceId, String status, int totalTokens, long durationMs) {
+        endTrace(traceId, status, totalTokens, durationMs, null);
+    }
+
+    /** 在同一次终态写入中保存技术状态与可选的业务完成结果。 */
+    @Transactional
+    public void endTrace(String traceId,
+                         String status,
+                         int totalTokens,
+                         long durationMs,
+                         String taskOutcome) {
         AgentTrace trace = findTrace(traceId);
+        long traceElapsedMs = Duration.between(trace.getCreatedAt(), LocalDateTime.now()).toMillis();
+        // DEEP 的调用方耗时从 worker 启动计算；持久化 Trace 起点更早，包含排队时间。
+        long endToEndDurationMs = Math.max(Math.max(0, durationMs), traceElapsedMs);
         trace.setStatus(status);
         trace.setTotalTokens(totalTokens);
-        trace.setDurationMs(durationMs);
+        trace.setDurationMs(endToEndDurationMs);
         trace.setTotalSteps(readSteps(trace).size());
+        if (taskOutcome != null && !taskOutcome.isBlank()) {
+            trace.setTaskOutcome(taskOutcome.trim());
+        }
         agentTraceRepository.save(trace);
-        phoenixTraceService.endTrace(traceId, status, totalTokens, durationMs);
+        phoenixTraceService.endTrace(traceId, status, totalTokens, endToEndDurationMs);
         traceLocks.remove(traceId);
-        log.debug("Trace ended, traceId={}, status={}, durationMs={}", traceId, status, durationMs);
+        log.debug("Trace ended, traceId={}, status={}, durationMs={}", traceId, status, endToEndDurationMs);
     }
 
     /**

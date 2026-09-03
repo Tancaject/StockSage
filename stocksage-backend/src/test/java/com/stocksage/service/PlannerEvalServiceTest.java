@@ -277,6 +277,45 @@ class PlannerEvalServiceTest {
     }
 
     @Test
+    void executionGuardDoesNotCountSemanticRawRouteAgainstExecutionRoute() {
+        RoutingDecisionMetadata guarded = new RoutingDecisionMetadata(
+                RoutingDecisionSource.INTENT_FUSION,
+                "DEEP",
+                PlanRoute.DIRECT,
+                "标的比较",
+                "一次只支持一个标的",
+                0.95,
+                List.of("comparison"),
+                0,
+                "",
+                3,
+                "COMPARISON",
+                "RESEARCH",
+                "CURRENT",
+                "DEEP",
+                java.util.Map.of(),
+                java.util.Map.of("LLM", 0.95),
+                true,
+                List.of(Coordinator.MULTI_TARGET_UNSUPPORTED)
+        );
+        when(coordinator.plan("Compare AAPL and MSFT", 0, "", List.of())).thenReturn(new ExecutionPlan(
+                PlanRoute.DIRECT, "clarify", "plan", List.of(PlanAction.FINAL_ANSWER),
+                "done", ModelTier.FAST, guarded
+        ));
+
+        PlannerEvalResponse response = service.evaluate(new PlannerEvalRequest(
+                PlannerEvalMode.LIVE_COORDINATOR,
+                List.of(new PlannerEvalCase(
+                        "guarded", "Compare AAPL and MSFT", 0, PlanRoute.DIRECT,
+                        List.of(PlanAction.FINAL_ANSWER), List.of(PlanAction.MARKET_AGENT), true))
+        ));
+
+        assertThat(response.routeAccuracy()).isEqualTo(1.0);
+        assertThat(response.llmSignalCases()).isZero();
+        assertThat(response.results().get(0).executionGuarded()).isTrue();
+    }
+
+    @Test
     void deterministicModeSkipsLiveOnlyCasesAndReportsTheirCount() {
         when(coordinator.planDeterministically("what is PE", 0)).thenReturn(new ExecutionPlan(
                 PlanRoute.DIRECT,

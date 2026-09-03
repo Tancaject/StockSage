@@ -116,6 +116,8 @@ public class HarnessObserver {
             // 属性只含枚举、版本和计数，前端/Eval 可复用且不会泄露原始证据。
             Map<String, Object> attributes = new LinkedHashMap<>();
             attributes.put("schemaVersion", 1);
+            attributes.put("stepKind", "harness_decision");
+            attributes.put("recoveryLifecycle", "SUGGESTED");
             attributes.put("policyId", policy.policyId());
             attributes.put("policyVersion", policy.policyVersion());
             attributes.put("phase", phase.name());

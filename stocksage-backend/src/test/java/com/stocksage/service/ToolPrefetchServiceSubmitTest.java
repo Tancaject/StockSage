@@ -42,7 +42,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -84,6 +83,8 @@ class ToolPrefetchServiceSubmitTest {
     @Mock
     private DeepEvidenceCollector deepEvidenceCollector;
     @Mock
+    private DeepEvidenceReplanService deepEvidenceReplanService;
+    @Mock
     private DeepResearchPipeline deepResearchPipeline;
     @Mock
     private InvestmentReportVersionService investmentReportVersionService;
@@ -122,9 +123,11 @@ class ToolPrefetchServiceSubmitTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(service, "toolPrefetchEnabled", true);
         ReflectionTestUtils.setField(service, "userMaxActive", 3);
         when(tickerResolutionService.resolvePrimaryTicker(QUERY, CONVERSATION_ID)).thenReturn(TICKER);
+        lenient().when(deepEvidenceReplanService.replan(
+                        any(), any(), any(), any(), any(), any(), any()))
+                .thenAnswer(call -> call.getArgument(4));
     }
 
     @Test
@@ -148,6 +151,7 @@ class ToolPrefetchServiceSubmitTest {
 
         assertThat(result.directAnswer()).contains("已受理");
         assertThat(result.submittedTaskId()).isEqualTo(42L);
+        assertThat(result.taskOutcome()).isNull();
         verify(researchTaskService).createIfAbsent(
                 SUBMISSION_KEY,
                 USER_ID,
@@ -169,6 +173,7 @@ class ToolPrefetchServiceSubmitTest {
 
         assertThat(result.directAnswer()).contains("3");
         assertThat(result.submittedTaskId()).isNull();
+        assertThat(result.taskOutcome()).isEqualTo("BLOCKED");
         verify(researchTaskService, never()).createIfAbsent(
                 anyString(), anyString(), any(), anyString(), any(), anyString());
         verifyNoInteractions(researchTaskQueue);
@@ -196,6 +201,7 @@ class ToolPrefetchServiceSubmitTest {
 
         assertThat(result.submittedTaskId()).isEqualTo(77L);
         assertThat(result.directAnswer()).contains("77");
+        assertThat(result.taskOutcome()).isNull();
         verifyNoInteractions(researchTaskQueue);
         verifyNoSubmissionWorkWasRun();
     }
@@ -271,6 +277,9 @@ class ToolPrefetchServiceSubmitTest {
         prefetch();
 
         verify(deepEvidenceCollector).collect(TICKER, QUERY, TRACE_ID, CONVERSATION_ID);
+        verify(deepEvidenceReplanService).replan(
+                eq(88L), eq(USER_ID), eq(CONVERSATION_ID), eq(TRACE_ID),
+                eq(evidence), any(Runnable.class), any());
         verify(researchTaskService, atLeastOnce()).renewLease(lease);
         verify(researchTaskService, atLeastOnce()).heartbeatForOwner(task, lease.token());
         verify(heartbeat).cancel(false);
@@ -444,12 +453,18 @@ class ToolPrefetchServiceSubmitTest {
         when(deepEvidenceCollector.collect(TICKER, QUERY, TRACE_ID, CONVERSATION_ID))
                 .thenThrow(new IllegalStateException("evidence down"));
         when(researchTaskService.markFailedForOwner(task, lease.token(), "evidence down"))
-                .thenReturn(true);
+                .thenAnswer(invocation -> {
+                    task.setStatus(ResearchTask.Status.FAILED);
+                    return true;
+                });
+        when(reportRenderer.buildResearchFailedAnswer()).thenReturn("research failed");
+        when(deepResearchPipeline.taskOutcome(task)).thenReturn("FAILED");
 
-        assertThatThrownBy(this::prefetch)
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("evidence down");
+        ToolPrefetchService.PreparedToolContext result = prefetch();
 
+        assertThat(result.submittedTaskId()).isNull();
+        assertThat(result.directAnswer()).isEqualTo("research failed");
+        assertThat(result.taskOutcome()).isEqualTo("FAILED");
         verify(researchTaskService).markFailedForOwner(task, lease.token(), "evidence down");
         verify(researchTaskService).release(lease);
     }

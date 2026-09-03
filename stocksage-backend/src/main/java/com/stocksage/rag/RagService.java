@@ -27,8 +27,7 @@ import java.util.regex.Pattern;
  *
  * <p>检索管线刻意显式展开，而不是隐藏在框架 advisor 后面：
  * 查询改写 -> 可选元数据过滤 -> 向量搜索 -> 可选关键词搜索 -> RRF 融合 -> 重排 ->
- * 父级切片扩展。最终文档随后由 {@code ChatService} 作为参考性 {@code SystemMessage}
- * 上下注入。</p>
+ * 父级切片扩展。最终文档随后由 {@code ChatService} 放入带信任边界和总预算的用户上下文。</p>
  */
 @Slf4j
 @Service
@@ -37,6 +36,8 @@ public class RagService {
 
     /** 从用户原文识别 2 到 5 位大写美股代码。 */
     private static final Pattern TICKER_PATTERN = Pattern.compile("\\b([A-Z]{2,5})\\b");
+    /** Ticker 过滤值只接受规范化市场代码字符，禁止把用户文本拼入过滤表达式。 */
+    private static final Pattern SAFE_TICKER_FILTER_VALUE = Pattern.compile("[A-Z0-9.:-]{1,16}");
 
     /** 允许自动生成元数据过滤器的保守 ticker 白名单。 */
     private static final Set<String> KNOWN_TICKERS = Set.of(
@@ -112,6 +113,15 @@ public class RagService {
      */
     public List<Document> retrieve(String query, String filterExpression) {
         return retrieveForEval(query, filterExpression).finalContexts();
+    }
+
+    /** 使用服务器已经规范化的单一 ticker 检索，不再受本类静态美股白名单限制。 */
+    public List<Document> retrieveForTicker(String query, String canonicalTicker) {
+        String ticker = canonicalTicker == null ? "" : canonicalTicker.strip().toUpperCase(java.util.Locale.ROOT);
+        if (!metadataFilterEnabled || !SAFE_TICKER_FILTER_VALUE.matcher(ticker).matches()) {
+            return retrieve(query);
+        }
+        return retrieve(query, "ticker == '" + ticker + "'");
     }
 
     /**

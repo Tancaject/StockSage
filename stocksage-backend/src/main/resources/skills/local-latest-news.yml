@@ -16,10 +16,4 @@ steps:
     capability: local.news.searchNews
     required: false
 
-  - type: AGENT
-    role: NEWS_AGENT
-    allowedCapabilities: [local.news.searchNews]
-
-  - type: FINAL_ANSWER
-
 fallbackSkillIds: []

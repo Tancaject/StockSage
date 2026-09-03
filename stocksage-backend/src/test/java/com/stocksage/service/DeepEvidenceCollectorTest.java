@@ -1,11 +1,18 @@
 package com.stocksage.service;
 
+import com.stocksage.capability.CapabilityResult;
+import com.stocksage.capability.LocalNewsSearchCapabilityAdapter;
 import com.stocksage.harness.DeepResearchCompletionPolicy;
 import com.stocksage.harness.EvidenceLedger;
 import com.stocksage.harness.HarnessModels.EvidenceDimension;
+import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
 import com.stocksage.harness.HarnessModels.EvidenceStatus;
+import com.stocksage.harness.HarnessModels.HarnessDecision;
+import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.RunContext;
+import com.stocksage.harness.HarnessModels.TargetIdentity;
 import com.stocksage.harness.ResearchHarness;
+import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.tool.ChatStreamEmitter;
 import com.stocksage.tool.FundamentalsTools;
 import com.stocksage.tool.MarketTools;
@@ -17,6 +24,7 @@ import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,6 +32,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class DeepEvidenceCollectorTest {
@@ -99,7 +108,7 @@ class DeepEvidenceCollectorTest {
                         }
                         """);
         when(newsTools.getStockNews("AAPL", 7)).thenReturn("");
-        when(newsTools.searchNews("AAPL earnings stock latest 2026", 5, true))
+        when(newsTools.searchNews("AAPL Should I buy AAPL?", 5, true))
                 .thenReturn("""
                         {
                           "provider":"tavily",
@@ -111,7 +120,7 @@ class DeepEvidenceCollectorTest {
                           ]
                         }
                         """);
-        when(newsTools.webSearch("AAPL earnings stock latest 2026", 5, true))
+        when(newsTools.webSearch("AAPL Should I buy AAPL?", 5, true))
                 .thenReturn("{\"provider\":\"ddg\",\"results\":[]}");
 
         DeepEvidenceCollector.EvidenceCollection result =
@@ -195,6 +204,25 @@ class DeepEvidenceCollectorTest {
                 ledgerCaptor.capture()
         );
         assertThat(ledgerCaptor.getValue()).isSameAs(ledger);
+    }
+
+    @Test
+    void focusedNewsQueryUsesResolvedQuestionWithoutTickerSpecialCases() {
+        String focus = "HBM 出口限制对毛利率的影响\n" + "以及竞争格局变化 ".repeat(30);
+        when(newsTools.getStockNews("MU", 7)).thenReturn("");
+        when(newsTools.searchNews(any(), eq(5), eq(true))).thenReturn("");
+        when(newsTools.webSearch(any(), eq(5), eq(true))).thenReturn("");
+
+        ReflectionTestUtils.invokeMethod(collector, "buildNewsSnapshot", "MU", focus);
+
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        verify(newsTools).searchNews(queryCaptor.capture(), eq(5), eq(true));
+        String query = queryCaptor.getValue();
+        assertThat(query)
+                .startsWith("MU HBM 出口限制对毛利率的影响")
+                .hasSize(180)
+                .doesNotContain("\n", "\r", "Micron MU earnings");
+        verify(newsTools).webSearch(query, 5, true);
     }
 
     @Test
@@ -324,5 +352,145 @@ class DeepEvidenceCollectorTest {
                 .getFinancialReports("AAPL", "annual", 5);
         verify(marketTools, times(1))
                 .getIbkrHistoricalBars("AAPL", "3m", "1d");
+    }
+
+    @Test
+    void focusedNewsAppendRejectsErrorsAndDeduplicatesUsableEvidence() {
+        HarnessDecision pass = new HarnessDecision(HarnessOutcome.PASS, List.of(), List.of());
+        when(researchHarness.observeEvidence(any(), eq(completionPolicy), any(), any()))
+                .thenReturn(pass);
+        EvidenceEnvelope baseline = new EvidenceEnvelope(
+                "baseline-news",
+                EvidenceDimension.NEWS,
+                "searchNews",
+                "AAPL",
+                EvidenceStatus.AVAILABLE,
+                "https://example.com/baseline",
+                "test",
+                Instant.parse("2026-08-27T00:00:00Z"),
+                Instant.parse("2026-08-26T00:00:00Z"),
+                "baseline-hash",
+                true
+        );
+        EvidenceLedger ledger = new EvidenceLedger(TargetIdentity.resolved("AAPL"), List.of(baseline));
+        AnalysisState state = AnalysisState.builder()
+                .query("Should I buy AAPL?")
+                .primaryTicker("AAPL")
+                .newsReport("baseline news")
+                .evidenceLedger(ledger)
+                .build();
+        DeepEvidenceCollector.EvidenceCollection existing = new DeepEvidenceCollector.EvidenceCollection(
+                "context", state, true, true, true, true, true, ledger, pass);
+        CapabilityResult error = new CapabilityResult(
+                LocalNewsSearchCapabilityAdapter.ID,
+                "local",
+                CapabilityResult.Status.SUCCESS,
+                "{\"error\":\"provider unavailable\"}",
+                32,
+                1
+        );
+        assertThat(collector.appendFocusedNews(existing, error, "trace-focused"))
+                .isSameAs(existing);
+
+        when(tickerResolutionService.normalizeStructuredTicker("MSFT")).thenReturn("MSFT");
+        CapabilityResult wrongTarget = new CapabilityResult(
+                LocalNewsSearchCapabilityAdapter.ID,
+                "local",
+                CapabilityResult.Status.SUCCESS,
+                "{\"provider\":\"tavily\",\"ticker\":\"MSFT\",\"results\":[{\"link\":\"https://example.com/msft\"}]}",
+                80,
+                1
+        );
+        assertThat(collector.appendFocusedNews(existing, wrongTarget, "trace-focused"))
+                .isSameAs(existing);
+
+        CapabilityResult usable = new CapabilityResult(
+                LocalNewsSearchCapabilityAdapter.ID,
+                "local",
+                CapabilityResult.Status.SUCCESS,
+                """
+                        {"provider":"tavily","results":[{
+                          "link":"https://example.com/aapl-regulation",
+                          "date":"2026-08-27T01:00:00Z"
+                        }]}
+                        """,
+                140,
+                2
+        );
+        DeepEvidenceCollector.EvidenceCollection appended =
+                collector.appendFocusedNews(existing, usable, "trace-focused");
+        DeepEvidenceCollector.EvidenceCollection duplicate =
+                collector.appendFocusedNews(appended, usable, "trace-focused");
+
+        assertThat(appended.evidenceLedger().evidence()).hasSize(2);
+        assertThat(appended.state().getNewsReport()).contains("focusedNewsSearch");
+        assertThat(duplicate).isSameAs(appended);
+    }
+
+    @Test
+    void ambiguousQueryBlocksBeforeCallingEvidenceTools() {
+        when(tickerResolutionService.hasConflictingExplicitTicker("比较 AAPL 和 MSFT", "AAPL"))
+                .thenReturn(true);
+
+        DeepEvidenceCollector.EvidenceCollection result = collector.collect(
+                "AAPL", "比较 AAPL 和 MSFT", "trace-ambiguous", 40L);
+
+        assertThat(result.harnessDecision().outcome()).isEqualTo(HarnessOutcome.BLOCK);
+        assertThat(result.harnessDecision().violations())
+                .extracting(violation -> violation.code().name())
+                .containsExactly("TARGET_AMBIGUOUS");
+        verifyNoInteractions(fundamentalsTools, marketTools, newsTools);
+    }
+
+    @Test
+    void oldCheckpointWithSecondTargetIsRevalidatedAsAmbiguous() {
+        when(tickerResolutionService.hasConflictingExplicitTicker("AAPL vs MSFT", "AAPL"))
+                .thenReturn(true);
+        EvidenceLedger ledger = new EvidenceLedger(TargetIdentity.resolved("AAPL"), List.of());
+        AnalysisState state = AnalysisState.builder()
+                .query("AAPL vs MSFT")
+                .primaryTicker("AAPL")
+                .evidenceLedger(ledger)
+                .build();
+
+        DeepEvidenceCollector.EvidenceCollection result = collector.reevaluateCheckpoint(
+                state, java.util.Map.of(), "trace-old-ambiguous");
+
+        assertThat(result.harnessDecision().outcome()).isEqualTo(HarnessOutcome.BLOCK);
+        assertThat(result.harnessDecision().violations())
+                .extracting(violation -> violation.code().name())
+                .containsExactly("TARGET_AMBIGUOUS");
+        verifyNoInteractions(fundamentalsTools, marketTools, newsTools);
+    }
+
+    @Test
+    void focusedNewsAcceptsEquivalentHkTickerFormats() {
+        when(tickerResolutionService.normalizeStructuredTicker("HK:0700")).thenReturn("0700.HK");
+        when(tickerResolutionService.normalizeStructuredTicker("00700.HK")).thenReturn("0700.HK");
+        HarnessDecision pass = new HarnessDecision(HarnessOutcome.PASS, List.of(), List.of());
+        when(researchHarness.observeEvidence(any(), eq(completionPolicy), any(), any())).thenReturn(pass);
+        EvidenceLedger ledger = new EvidenceLedger(TargetIdentity.resolved("0700.HK"), List.of());
+        AnalysisState state = AnalysisState.builder()
+                .query("腾讯监管")
+                .primaryTicker("HK:0700")
+                .evidenceLedger(ledger)
+                .build();
+        CapabilityResult result = new CapabilityResult(
+                LocalNewsSearchCapabilityAdapter.ID,
+                "local",
+                CapabilityResult.Status.SUCCESS,
+                "{\"provider\":\"tavily\",\"ticker\":\"00700.HK\",\"results\":[{\"link\":\"https://example.com/tencent\"}]}",
+                80,
+                1
+        );
+
+        DeepEvidenceCollector.EvidenceCollection appended = collector.appendFocusedNews(
+                new DeepEvidenceCollector.EvidenceCollection(
+                        "", state, true, true, true, true, true, ledger, pass),
+                result,
+                "trace-hk-focused");
+
+        assertThat(appended.evidenceLedger().evidence()).hasSize(1);
+        assertThat(appended.evidenceLedger().evidence().get(0).targetKey()).isEqualTo("0700.HK");
     }
 }

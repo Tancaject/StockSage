@@ -50,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.clearInvocations;
@@ -73,6 +74,7 @@ class DeepResearchPipelineTest {
     private final OfflineDemoSampleService offlineDemoSampleService = mock(OfflineDemoSampleService.class);
     private final ResearchTaskCheckpointService checkpointService = mock(ResearchTaskCheckpointService.class);
     private final DeepEvidenceCollector evidenceCollector = mock(DeepEvidenceCollector.class);
+    private final DeepEvidenceReplanService evidenceReplanService = mock(DeepEvidenceReplanService.class);
     private final ReportMarkdownRenderer reportRenderer = mock(ReportMarkdownRenderer.class);
     private final ConversationMessageService conversationMessageService = mock(ConversationMessageService.class);
     private final UserAccountRepository userAccountRepository = mock(UserAccountRepository.class);
@@ -90,6 +92,7 @@ class DeepResearchPipelineTest {
             researchHeartbeatScheduler,
             checkpointService,
             evidenceCollector,
+            evidenceReplanService,
             reportRenderer,
             conversationMessageService,
             publicationTransaction,
@@ -113,6 +116,9 @@ class DeepResearchPipelineTest {
                         new HarnessDecision(HarnessOutcome.PASS, List.of(), List.of()),
                         true
                 ));
+        when(evidenceReplanService.replan(
+                any(), any(), any(), any(), any(), any(), any()))
+                .thenAnswer(call -> call.getArgument(4));
     }
 
     @Test
@@ -330,6 +336,10 @@ class DeepResearchPipelineTest {
 
         pipeline.runFullPipeline(task, lease);
 
+        verify(evidenceReplanService).replan(
+                eq(7L), eq("u_001"), eq(20L), eq("trace-1"),
+                any(DeepEvidenceCollector.EvidenceCollection.class),
+                any(Runnable.class), any());
         verify(checkpointService).saveEvidence(7L, lease.token(), evidenceState);
         verify(researchTaskService).markStageForOwner(task, lease.token(), ResearchTask.Stage.AGENT_DEBATE);
         verify(checkpointService).saveSynthesis(7L, lease.token(), completed);
@@ -355,7 +365,8 @@ class DeepResearchPipelineTest {
                 eq("trace-1"),
                 eq("success"),
                 eq(0),
-                any(Long.class)
+                any(Long.class),
+                eq("COMPLETED")
         );
     }
 
@@ -630,9 +641,17 @@ class DeepResearchPipelineTest {
         assertThat(persistedSnapshots.get(1).recoveryAttempts())
                 .containsEntry(RecoveryAction.RETRY_FUNDAMENTALS, 1);
 
-        InOrder order = inOrder(evidenceCollector, checkpointService, researchDebateService);
+        InOrder order = inOrder(
+                evidenceCollector, checkpointService, traceService, researchDebateService);
         order.verify(evidenceCollector).reevaluateCheckpoint(state, Map.of(), "trace-1");
         order.verify(checkpointService).saveHarnessSnapshot(901L, lease.token(), state);
+        order.verify(traceService).addStep(eq("trace-1"), argThat(step ->
+                "harness_recovery_execution".equals(step.getAttributes().get("stepKind"))
+                        && RecoveryLifecycle.PLANNED.name().equals(
+                        step.getAttributes().get("recoveryLifecycle"))
+                        && ("deep-evidence:901:" + CURRENT_POLICY_TAG
+                        + ":retry_fundamentals-1").equals(
+                        step.getAttributes().get("recoveryEffectKey"))));
         order.verify(evidenceCollector).recover(
                 any(DeepEvidenceCollector.EvidenceCollection.class),
                 eq(List.of(RecoveryAction.RETRY_FUNDAMENTALS)),

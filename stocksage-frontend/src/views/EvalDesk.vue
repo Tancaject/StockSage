@@ -3,7 +3,7 @@
     <header class="eval-topbar">
       <div>
         <p class="eyebrow">开发者工具</p>
-        <h1>RAG 评估台</h1>
+        <h1>Agent / RAG 评估台</h1>
       </div>
       <div class="topbar-actions">
         <router-link class="quiet-button" to="/workbench">← 返回工作台</router-link>
@@ -15,8 +15,8 @@
         <div class="panel">
           <div class="panel-header">
             <div>
-              <span class="panel-kicker">质量门禁</span>
-              <h2>{{ evalSummary.kind === 'agent' ? 'Agent 评估' : 'RAG 评估' }}</h2>
+              <span class="panel-kicker">经典质量指标</span>
+              <h2>Agent / RAG Quality</h2>
             </div>
             <label class="file-button">
               <input type="file" accept="application/json,.json" @change="importEvalResult" />
@@ -25,35 +25,42 @@
             </label>
           </div>
 
-          <div class="score-strip">
-            <div>
-              <span>状态</span>
-              <strong :class="evalSummary.status">{{ evalSummary.status }}</strong>
+          <p class="panel-note">
+            只展示可由 Golden Set、抽样 Judge 或显式 quality 契约支撑的指标；缺标签时显示 NO_DATA。
+          </p>
+          <div class="score-strip quality-strip">
+            <div v-for="metric in qualityMetrics" :key="metric.id">
+              <span>{{ metric.label }}</span>
+              <strong :class="metric.status.toLowerCase()">{{ formatQualityMetric(metric) }}</strong>
+              <small>
+                {{ metric.status === 'NO_DATA' ? `REQUIRES ${metric.requiredEvidenceKind}` : metric.evidenceKind }}
+                · {{ formatSampleCount(metric.sampleCount) }}
+                <template v-if="metric.k !== null"> · K={{ metric.k }}</template>
+              </small>
+              <p>{{ qualityMetricDetail(metric) }}</p>
             </div>
-            <div>
-              <span>用例</span>
-              <strong>{{ evalSummary.caseCount }}</strong>
-            </div>
-            <div>
-              <span>{{ evalSummary.kind === 'agent' ? '路由准确率' : '召回' }}</span>
-              <strong>{{ formatMetric(evalSummary.averages.context_recall) }}</strong>
-            </div>
-            <div>
-              <span>{{ evalSummary.kind === 'agent' ? '动作召回率' : '引用' }}</span>
-              <strong>{{ formatMetric(evalSummary.averages.citation_precision) }}</strong>
-            </div>
+          </div>
+
+          <div class="optional-strip">
+            <span>{{ importedEvalResult ? 'IMPORTED' : 'HISTORICAL SNAPSHOT' }}</span>
+            <span>{{ evalSummary.kind.toUpperCase() }} · {{ evalSummary.caseCount }} cases</span>
+            <span>generated {{ evalSummary.createdAt || 'unknown' }}</span>
           </div>
 
           <div v-if="evalSummary.optionalSections" class="optional-strip">
             <span>RAG: {{ evalSummary.optionalSections.rag }}</span>
             <span>Trace: {{ evalSummary.optionalSections.trace }}</span>
+            <span>E2E: {{ evalSummary.optionalSections.endToEnd }}</span>
             <span>Baseline: {{ evalSummary.optionalSections.baseline }}</span>
           </div>
 
-          <div class="gate-list">
-            <div v-for="gate in evalSummary.gates" :key="gate.metric" class="gate-row" :class="gate.status">
-              <span>{{ gate.label }}</span>
-              <strong>{{ formatMetric(gate.value) }}</strong>
+          <div class="metric-section">
+            <span class="panel-kicker">原始评测诊断（非经典指标口径）</span>
+            <div class="gate-list compact">
+              <div v-for="gate in evalSummary.gates" :key="gate.metric" class="gate-row" :class="gate.status">
+                <span>{{ gate.label }}</span>
+                <strong>{{ formatMetric(gate.value) }}</strong>
+              </div>
             </div>
           </div>
 
@@ -165,6 +172,19 @@
               · protocol {{ adminSnapshot.runtime.mcp.protocolVersions.join(', ') || '--' }}
               · {{ adminSnapshot.runtime.mcp.errorCode || 'READY' }}
             </p>
+            <div class="score-strip live-strip">
+              <div v-for="metric in runtimeMetrics" :key="metric.id">
+                <span>{{ metric.label }}</span>
+                <strong :class="metric.status.toLowerCase()">{{ formatRuntimeMetric(metric) }}</strong>
+                <small>{{ metric.evidenceKind }} · {{ formatSampleCount(metric.sampleCount) }}</small>
+                <p>{{ runtimeMetricDetail(metric) }}</p>
+              </div>
+            </div>
+            <div class="optional-strip">
+              <span>{{ adminSnapshot.runtime.window?.kind || 'UNKNOWN_WINDOW' }}</span>
+              <span>{{ adminSnapshot.runtime.schemaVersion }}</span>
+              <span>generated {{ adminSnapshot.runtime.generatedAt || 'unknown' }}</span>
+            </div>
             <div class="case-list">
               <div
                 v-for="capability in adminSnapshot.runtime.capabilities"
@@ -196,7 +216,11 @@ import { Upload } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { RECENT_RAG_EVAL_SNAPSHOT } from '../data/ragEvalSnapshot.js'
 import { fetchAgentAdminSnapshot } from '../api/agentAdmin.js'
-import { summarizeEvalResult } from '../lib/workbench.js'
+import {
+  summarizeCanonicalQualityMetrics,
+  summarizeEvalResult,
+  summarizeRuntimeMetrics,
+} from '../lib/workbench.js'
 
 const importedEvalResult = ref(null)
 const adminToken = ref('')
@@ -204,7 +228,10 @@ const adminSnapshot = ref(null)
 const adminLoading = ref(false)
 const adminState = ref({ status: 'idle', message: '' })
 
-const evalSummary = computed(() => summarizeEvalResult(importedEvalResult.value || RECENT_RAG_EVAL_SNAPSHOT))
+const activeEvalResult = computed(() => importedEvalResult.value || RECENT_RAG_EVAL_SNAPSHOT)
+const evalSummary = computed(() => summarizeEvalResult(activeEvalResult.value))
+const qualityMetrics = computed(() => summarizeCanonicalQualityMetrics(activeEvalResult.value))
+const runtimeMetrics = computed(() => summarizeRuntimeMetrics(adminSnapshot.value?.runtime))
 
 async function importEvalResult(event) {
   const file = event.target.files?.[0]
@@ -224,6 +251,41 @@ function formatMetric(value) {
   if (!Number.isFinite(number)) return '--'
   if (Math.abs(number) <= 1) return number.toFixed(3)
   return number.toFixed(1)
+}
+
+function formatQualityMetric(metric) {
+  return metric.value === null ? 'NO_DATA' : `${(Number(metric.value) * 100).toFixed(1)}%`
+}
+
+function formatSampleCount(value) {
+  return value === null || value === undefined ? 'n=unknown' : `n=${value}`
+}
+
+function qualityMetricDetail(metric) {
+  if (metric.value === null) return metric.requirement
+  return [
+    `dataset ${metric.datasetVersion || 'unknown'}`,
+    `evaluator ${metric.evaluatorVersion || 'unknown'}`,
+    metric.judgeModel && `judge ${metric.judgeModel}`,
+    `generated ${metric.generatedAt || 'unknown'}`,
+  ].filter(Boolean).join(' · ')
+}
+
+function formatRuntimeMetric(metric) {
+  if (metric.value === null) return 'NO_DATA'
+  return metric.format === 'duration'
+    ? formatDuration(metric.value)
+    : formatRate(metric.value)
+}
+
+function runtimeMetricDetail(metric) {
+  const scope = {
+    TRACE_LINKED_EXECUTIONS: 'Trace 关联工具执行',
+    SUCCESSFUL_TRACES: '成功 Agent 链路',
+    SUCCESSFUL_TRACES_IN_RECENT_500: '最近 500 条中的成功 Agent 链路',
+  }[metric.scope] || metric.scope
+  const window = metric.window || {}
+  return `${scope} · ${window.kind || 'unknown window'} · ${window.startedAt || 'unknown'} → ${window.endedAt || 'unknown'}`
 }
 
 async function loadAdminSnapshot() {
@@ -495,9 +557,16 @@ function formatDuration(value) {
   letter-spacing: 0;
 }
 
+.panel-note {
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .score-strip {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
 }
 
@@ -522,6 +591,36 @@ function formatDuration(value) {
   display: block;
   margin-top: 8px;
   font-size: 20px;
+}
+
+.score-strip small,
+.score-strip p {
+  display: block;
+  margin: 7px 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.quality-strip div {
+  min-height: 146px;
+}
+
+.live-strip {
+  margin-top: 12px;
+}
+
+.live-strip div {
+  min-height: 124px;
+}
+
+.score-strip strong.observed {
+  color: var(--positive);
+}
+
+.score-strip strong.no_data {
+  color: var(--text-muted);
+  font-size: 16px;
 }
 
 .score-strip strong.pass,

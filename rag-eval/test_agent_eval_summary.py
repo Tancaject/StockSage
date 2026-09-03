@@ -35,7 +35,7 @@ GATES = {
     "baseline_delta_max_drop": 0.02,
     "p95_latency_ratio_max": 1.2,
     "harness_policy_id_expected": "deep-equity-v1",
-    "harness_policy_version_expected": 3,
+    "harness_policy_version_expected": 4,
     "harness_case_count_min": 60,
     "harness_exact_accuracy_min": 1.0,
     "harness_decision_contract_exact_match_rate_min": 1.0,
@@ -63,6 +63,7 @@ def planner_result(duration_ms=10, **overrides):
         "routeMatched": True,
         "contextCase": False,
         "fallback": False,
+        "executionGuarded": False,
         "rawRouteValid": True,
         "rawRouteMatched": True,
         "expectedResolvedQueryContains": None,
@@ -153,7 +154,7 @@ def harness_result(**overrides):
         "case_schema_version": "harness_golden_case_v2",
         "engine": "java-production-policy",
         "policy_id": "deep-equity-v1",
-        "policy_version": 3,
+        "policy_version": 4,
         "status": "pass",
         "case_count": 60,
         "exact_accuracy": 1.0,
@@ -173,14 +174,20 @@ def live_harness_result(**overrides):
         "schema": "harness_live_eval_v1",
         "engine": "stocksage-live-http",
         "status": "pass",
+        "generated_at": "2026-09-03T12:00:00+00:00",
         "dataset_sha256": "b" * 64,
         "policy_ids": ["deep-equity-v1"],
-        "policy_versions": ["3"],
+        "policy_versions": ["4"],
+        "run_mode": "release",
+        "run_state": "complete",
+        "planned_case_count": 30,
+        "execution_case_count": 30,
         "metrics": {
             "case_count": 30,
             "completed_count": 30,
             "safe_terminal_rate": 1.0,
             "unsafe_result_count": 0,
+            "task_success_rate": 1.0,
         },
     }
     result.update(overrides)
@@ -416,7 +423,7 @@ class AgentEvalSummaryTest(unittest.TestCase):
 
     def test_completion_gate_contract_preserves_order_schema_and_thresholds(self):
         evidence = complete_evidence()
-        evidence["harness_payload"] = harness_result(policy_version="3")
+        evidence["harness_payload"] = harness_result(policy_version="4")
         report = build_report(
             planner(),
             GATES,
@@ -430,6 +437,7 @@ class AgentEvalSummaryTest(unittest.TestCase):
                 "generated_at",
                 "status",
                 "planner",
+                "quality",
                 "rag",
                 "trace",
                 "completion",
@@ -506,7 +514,7 @@ class AgentEvalSummaryTest(unittest.TestCase):
                     "deep-equity-v1",
                     "passed",
                 ),
-                ("harness_policy_version", "3", "==", 3, "passed"),
+                ("harness_policy_version", "4", "==", 4, "passed"),
                 ("harness_status", "pass", "==", "pass", "passed"),
                 ("harness_case_count", 60, ">=", 60, "passed"),
                 ("harness_exact_accuracy", 1.0, ">=", 1.0, "passed"),
@@ -563,9 +571,9 @@ class AgentEvalSummaryTest(unittest.TestCase):
                 ),
                 (
                     "harness_live_policy_versions",
-                    ["3"],
+                    ["4"],
                     "==",
-                    ["3"],
+                    ["4"],
                     "passed",
                 ),
                 (
@@ -694,6 +702,10 @@ class AgentEvalSummaryTest(unittest.TestCase):
         self.assertEqual("incomplete", report["status"])
         self.assertTrue(live_gates)
         self.assertTrue(all(value == "passed" for value in live_gates.values()))
+        self.assertEqual(
+            {"value": 1.0, "sample_count": 30},
+            report["quality"]["metrics"]["task_success_rate"],
+        )
 
     def test_rejects_single_live_case(self):
         report = build_report(
@@ -769,10 +781,12 @@ class AgentEvalSummaryTest(unittest.TestCase):
                     "completed_count": 30,
                     "safe_terminal_rate": 1.0,
                     "unsafe_result_count": 1,
+                    "task_success_rate": 0.9,
                 },
             ),
         )
         self.assertEqual("failed", report["status"])
+        self.assertEqual(0.9, report["quality"]["metrics"]["task_success_rate"]["value"])
         failed = {
             gate["metric"]
             for gate in report["gates"]

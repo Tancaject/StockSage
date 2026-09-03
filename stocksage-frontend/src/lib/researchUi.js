@@ -22,6 +22,17 @@ const CALLED_TOOL_LABELS = {
 }
 
 const KNOWN_SYMBOLS = ['META', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'NFLX', 'AMD']
+const TASK_OUTCOME_LABELS = {
+  COMPLETED: '已完成',
+  DEGRADED: '降级完成',
+  BLOCKED: '已阻止',
+  FAILED: '失败',
+}
+
+export function formatTaskOutcome(value) {
+  const outcome = String(value || '').trim().toUpperCase()
+  return TASK_OUTCOME_LABELS[outcome] || outcome
+}
 
 export function buildAssistantEvidenceSummary(message = {}) {
   if (message.role !== 'assistant') {
@@ -167,6 +178,48 @@ export function buildResearchTimeline({ reasoning = [], charts = [], hasAnswer =
   return timeline
 }
 
+/** 把持久化 Trace 压平为聊天页和工作台共用的 reasoning 契约。 */
+export function traceToReasoning(trace = {}) {
+  let steps = []
+  try {
+    steps = Array.isArray(trace.steps) ? trace.steps : JSON.parse(trace.steps || '[]')
+  } catch {
+    return []
+  }
+
+  return steps.flatMap((step) => {
+    const rows = []
+    const durationMs = Number(step.durationMs || 0)
+    if (step.attributes?.kind === 'routing-decision') {
+      return [{
+        type: 'route_decision',
+        content: formatTraceRouteDecision(step.attributes),
+        metadata: step.attributes,
+        durationMs,
+      }]
+    }
+    if (step.thought) rows.push({
+      type: 'thought',
+      content: textFrom(step.thought),
+      metadata: step.attributes || null,
+      durationMs: 0,
+    })
+    if (step.action) rows.push({
+      type: 'action',
+      content: formatTraceAction(step),
+      metadata: step.attributes || null,
+      durationMs,
+    })
+    if (step.observation) rows.push({
+      type: 'observation',
+      content: textFrom(step.observation),
+      metadata: step.attributes || null,
+      durationMs: 0,
+    })
+    return rows
+  })
+}
+
 function normalizeReasoningList(reasoning) {
   return (Array.isArray(reasoning) ? reasoning : [])
     .map(normalizeReasoningItem)
@@ -216,7 +269,36 @@ function summarizeRouteDecisionMeta(metadata = {}) {
   }
   if (metadata.fallbackReason) parts.push(`降级 ${metadata.fallbackReason}`)
   if (metadata.needsClarification) parts.push('需澄清')
+  if (metadata.plannedPrimaryAgent) parts.push(`计划主角色 ${metadata.plannedPrimaryAgent}`)
+  if (Array.isArray(metadata.plannedSupportingAgents) && metadata.plannedSupportingAgents.length > 0) {
+    parts.push(`计划协作角色 ${metadata.plannedSupportingAgents.join('、')}`)
+  }
   return parts.join(' · ')
+}
+
+function formatTraceAction(step = {}) {
+  const actionInput = textFrom(step.actionInput)
+  return actionInput ? `${step.action}：${actionInput}` : textFrom(step.action)
+}
+
+function formatTraceRouteDecision(metadata = {}) {
+  const sourceScores = Object.entries(metadata.sourceScores || {})
+    .map(([source, score]) => `${source}=${Number(score || 0).toFixed(2)}`)
+    .join(', ')
+  const lines = [
+    `意图理解：${metadata.intentSummary || '未提供'}`,
+    `细粒度意图：${metadata.fineIntent || 'UNKNOWN'} / ${metadata.intentGroup || 'UNKNOWN'}`,
+    `选择路由：${metadata.route || 'DIRECT'}`,
+    `决策来源：${metadata.source || 'UNKNOWN'}`,
+    `置信度：${Number(metadata.confidence || 0).toFixed(2)}`,
+    `时效/深度：${metadata.timeSensitivity || 'UNSPECIFIED'} / ${metadata.analysisDepth || 'UNSPECIFIED'}`,
+    `依据：${metadata.rationale || '未提供'}`,
+    `RAG 命中：${Number(metadata.ragHitCount || 0)}`,
+  ]
+  if (sourceScores) lines.push(`信号分数：${sourceScores}`)
+  if (metadata.needsClarification) lines.push('需要澄清：是')
+  if (metadata.fallbackReason) lines.push(`降级原因：${metadata.fallbackReason}`)
+  return lines.join('\n')
 }
 
 function summarizeDataStage(actions, observations) {

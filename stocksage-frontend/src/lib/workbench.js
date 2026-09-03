@@ -99,10 +99,10 @@ const TICKER_SUGGESTION_CATALOG = [
 ]
 
 export const DEFAULT_GATE_TARGETS = {
-  context_recall: { min: 0.85, label: 'Recall@K' },
-  context_precision: { min: 0.5, label: 'Precision@K' },
+  context_recall: { min: 0.85, label: '证据条目覆盖率（legacy）' },
+  context_precision: { min: 0.5, label: '检索精度代理（legacy）' },
   mrr: { min: 0.7, label: 'MRR' },
-  ndcg: { min: 0.75, label: 'nDCG@K' },
+  ndcg: { min: 0.75, label: '返回集排序代理（legacy nDCG）' },
   citation_precision: { min: 0.85, label: 'Citation precision' },
   no_answer_accuracy: { min: 0.9, label: 'No-answer accuracy' },
   latency_seconds: { max: 45, label: 'Average latency' },
@@ -124,17 +124,6 @@ export function buildResearchPrompt(ticker, focusAreas = DEFAULT_FOCUS_AREAS) {
     'Use SEC filing evidence, market/K-line data, news context when useful, and the bull/bear/research-manager structure.',
     'Separate supported facts, model inference, data gaps, and risks. Include citations when SEC/RAG evidence is used.',
     'Finish with exactly one supported recommendation: BUY, OVERWEIGHT, HOLD, UNDERWEIGHT, or SELL. If the evidence is insufficient, do not force a recommendation or use HOLD as a fallback; mark the report NOT_RATED / 暂不评级. This is not investment advice.',
-  ].join('\n')
-}
-
-export function buildComparisonPrompt(tickers, dimensions = ['business mix', 'growth', 'margin', 'risk']) {
-  const symbols = normalizeList(tickers).map(normalizeTicker).filter(Boolean)
-  const dims = normalizeList(dimensions, ['business mix', 'growth', 'margin', 'risk'])
-  return [
-    `Compare ${symbols.join(' vs ')} as investable businesses.`,
-    `Dimensions: ${dims.join(', ')}.`,
-    'Use company-specific SEC evidence and do not mix ticker identities. Prefer tables for side-by-side evidence.',
-    'Call out where data is stale, missing, or not directly disclosed. End with the strongest bull and bear case for each ticker.',
   ].join('\n')
 }
 
@@ -812,8 +801,8 @@ export function summarizeAgentEval(result) {
     createdAt: result?.generated_at || '',
     caseCount: Number(planner.total_cases || 0),
     averages: {
-      context_recall: planner.route_accuracy,
-      citation_precision: planner.required_action_recall,
+      route_accuracy: planner.route_accuracy,
+      required_action_recall: planner.required_action_recall,
     },
     ragasMetrics: [
       { metric: 'route_macro_f1', value: numberOrNull(planner.macro_f1) },
@@ -827,10 +816,10 @@ export function summarizeAgentEval(result) {
     worstCases: failedCases,
     status: result?.status === 'passed' ? 'pass' : 'fail',
     optionalSections: {
-      rag: result?.rag?.status || 'completed',
-      trace: result?.trace?.status || 'completed',
-      endToEnd: result?.end_to_end?.status || 'completed',
-      baseline: result?.baseline_delta?.status || 'completed',
+      rag: result?.rag?.status || 'not_run',
+      trace: result?.trace?.status || 'not_run',
+      endToEnd: result?.end_to_end?.status || 'not_run',
+      baseline: result?.baseline_delta?.status || 'not_run',
     },
     recommendations: Array.isArray(result?.recommendations) ? result.recommendations : [],
   }
@@ -840,6 +829,163 @@ export function summarizeEvalResult(result) {
   return result?.schema_version === 'agent_eval_v1'
     ? summarizeAgentEval(result)
     : { ...summarizeRagEval(result), kind: 'rag' }
+}
+
+const CANONICAL_QUALITY_METRICS = [
+  {
+    id: 'task_success_rate',
+    label: 'Task Success / pass@1',
+    requiredEvidenceKind: 'GOLDEN_SET',
+    requirement: '需要逐任务 outcome verifier，Trace success 不能替代。',
+  },
+  {
+    id: 'tool_call_f1',
+    label: 'Tool Call F1',
+    requiredEvidenceKind: 'GOLDEN_SET',
+    requirement: '需要 expected tool calls 与实际 Trace 工具调用。',
+  },
+  {
+    id: 'recall_at_k',
+    label: 'Recall@K',
+    requiredEvidenceKind: 'GOLDEN_SET',
+    requirement: '需要基于 doc/chunk qrels 的完整相关集合。',
+  },
+  {
+    id: 'ndcg_at_k',
+    label: 'nDCG@K',
+    requiredEvidenceKind: 'GOLDEN_SET',
+    requirement: '需要带 relevance grade 的 qrels。',
+  },
+  {
+    id: 'faithfulness',
+    label: 'Faithfulness',
+    requiredEvidenceKind: 'SAMPLED',
+    ragasAliases: ['ragas_faithfulness'],
+    requirement: '需要带上下文的 RAGAS / LLM-as-Judge 样本。',
+  },
+  {
+    id: 'answer_relevancy',
+    label: 'Answer Relevancy',
+    requiredEvidenceKind: 'SAMPLED',
+    ragasAliases: ['ragas_answer_relevancy', 'ragas_response_relevancy'],
+    requirement: '需要 RAGAS Answer Relevancy 样本。',
+  },
+]
+
+/**
+ * 归一化六项经典离线质量指标。只有显式 quality 契约或真实 RAGAS 字段能进入指标卡；
+ * 旧 context_recall / ndcg 仍保留在诊断区，不能冒充基于 qrels 的 Recall@K / nDCG@K。
+ */
+export function summarizeCanonicalQualityMetrics(result) {
+  const quality = result?.quality || {}
+  const explicitMetrics = quality.metrics || {}
+  const averages = result?.averages || {}
+
+  return CANONICAL_QUALITY_METRICS.map(definition => {
+    const rawMetric = explicitMetrics[definition.id]
+    const explicit = rawMetric && typeof rawMetric === 'object' && !Array.isArray(rawMetric)
+      ? rawMetric : {}
+    const rawValue = numberOrNull(explicit.value)
+    let sampleCount = numberOrNull(explicit.sample_count ?? explicit.sampleCount)
+    const suppliedEvidenceKind = explicit.evidence_kind || explicit.evidenceKind || quality.evidence_kind
+      || quality.evidenceKind || ''
+    let evidenceKind = suppliedEvidenceKind
+    let evaluatorVersion = explicit.evaluator_version || explicit.evaluatorVersion
+      || quality.evaluator_version || quality.evaluatorVersion || ''
+    let generatedAt = explicit.generated_at || explicit.generatedAt
+      || quality.generated_at || quality.generatedAt || result?.created_at || result?.generated_at || ''
+    let datasetVersion = explicit.dataset_version || explicit.datasetVersion
+      || quality.dataset_version || quality.datasetVersion || ''
+    let judgeModel = ''
+    const missingFields = []
+    if (rawMetric !== undefined && explicit !== rawMetric) missingFields.push('object metric')
+    if (explicit === rawMetric) {
+      if (rawValue === null || rawValue < 0 || rawValue > 1) missingFields.push('value 0..1')
+      if (!Number.isInteger(sampleCount) || sampleCount <= 0) missingFields.push('sample_count')
+      if (!['GOLDEN_SET', 'SAMPLED'].includes(suppliedEvidenceKind)) missingFields.push('evidence_kind')
+      if (!datasetVersion) missingFields.push('dataset_version')
+      if (!evaluatorVersion) missingFields.push('evaluator_version')
+      if (!generatedAt) missingFields.push('generated_at')
+      if (['recall_at_k', 'ndcg_at_k'].includes(definition.id)
+          && (!Number.isInteger(numberOrNull(explicit.k)) || numberOrNull(explicit.k) <= 0)) {
+        missingFields.push('k')
+      }
+    }
+    let value = explicit === rawMetric && missingFields.length === 0 ? rawValue : null
+    let requirement = missingFields.length
+      ? `quality.metrics.${definition.id} 无效或缺少：${missingFields.join(', ')}`
+      : definition.requirement
+
+    if (value === null && definition.ragasAliases) {
+      const alias = definition.ragasAliases.find(key => numberOrNull(averages[key]) !== null)
+      const evaluatedCases = alias && Array.isArray(result?.cases)
+        ? result.cases.filter(item => numberOrNull(item?.metrics?.[alias]) !== null).length
+        : 0
+      const ragas = result?.ragas || {}
+      const ragasMetrics = Array.isArray(ragas.metrics) ? ragas.metrics : []
+      const ragasEvidenceKind = ragas.evidence_kind || ''
+      const ragasEvaluatorVersion = ragas.evaluator_version || ragas.package_version || ''
+      if (alias && ragasMetrics.includes(alias) && evaluatedCases > 0
+          && ['GOLDEN_SET', 'SAMPLED'].includes(ragasEvidenceKind)
+          && ragasEvaluatorVersion && ragas.dataset_sha256
+          && ragas.judge_model && ragas.created_at) {
+        value = numberOrNull(averages[alias])
+        sampleCount = evaluatedCases
+        evidenceKind = ragasEvidenceKind
+        evaluatorVersion = ragasEvaluatorVersion
+        judgeModel = ragas.judge_model
+        generatedAt = ragas.created_at
+        datasetVersion = ragas.dataset_sha256
+      }
+    }
+
+    return {
+      id: definition.id,
+      label: definition.label,
+      value,
+      status: value === null ? 'NO_DATA' : 'OBSERVED',
+      evidenceKind,
+      requiredEvidenceKind: definition.requiredEvidenceKind,
+      sampleCount,
+      k: numberOrNull(explicit.k),
+      datasetVersion,
+      evaluatorVersion,
+      judgeModel,
+      generatedAt,
+      requirement,
+    }
+  })
+}
+
+/** 归一化受 Admin Token 保护的两项当前进程 LIVE 指标。 */
+export function summarizeRuntimeMetrics(runtime) {
+  const tool = runtime?.toolExecution || {}
+  const e2e = runtime?.agentE2e || {}
+  const window = runtime?.window || {}
+  return [
+    {
+      id: 'tool_execution_success_rate',
+      label: 'Tool Execution Success Rate',
+      format: 'rate',
+      value: numberOrNull(tool.successRate),
+      status: tool.status || 'NO_DATA',
+      evidenceKind: tool.evidenceKind || 'LIVE',
+      sampleCount: numberOrNull(tool.attempts),
+      scope: tool.scope || 'TRACE_LINKED_EXECUTIONS',
+      window,
+    },
+    {
+      id: 'agent_e2e_p95',
+      label: 'Agent E2E P95',
+      format: 'duration',
+      value: numberOrNull(e2e.p95DurationMs),
+      status: e2e.status || 'NO_DATA',
+      evidenceKind: e2e.evidenceKind || 'LIVE',
+      sampleCount: numberOrNull(e2e.sampleCount),
+      scope: e2e.scope || 'SUCCESSFUL_TRACES',
+      window: e2e.window || window,
+    },
+  ]
 }
 
 export function summarizeHealthChecks(checks) {
@@ -1025,6 +1171,7 @@ function normalizeList(value, fallback = []) {
 }
 
 function numberOrNull(value) {
+  if (value === null || value === undefined || value === '') return null
   const number = Number(value)
   return Number.isFinite(number) ? number : null
 }

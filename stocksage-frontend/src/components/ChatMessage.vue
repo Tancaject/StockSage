@@ -76,6 +76,10 @@
               <span class="trace-sep">·</span>
               <span>~{{ traceSummary.tokens.toLocaleString() }} tokens</span>
             </template>
+            <template v-if="traceSummary.taskOutcome">
+              <span class="trace-sep">·</span>
+              <span>业务完成结果 {{ traceSummary.taskOutcome }}</span>
+            </template>
           </div>
         </div>
       </section>
@@ -95,6 +99,7 @@
           v-model="editText"
           class="edit-input"
           rows="3"
+          maxlength="12000"
           @keydown.enter.exact.prevent="submitEdit"
           @keydown.escape="cancelEdit"
         ></textarea>
@@ -170,7 +175,12 @@ import { ElMessage } from 'element-plus'
 import { ArrowRight, DocumentCopy, EditPen, RefreshRight, TrendCharts, UserFilled } from '@element-plus/icons-vue'
 import { getTrace } from '../api/chat.js'
 import { markdownToPlainText, normalizeMarkdownEmphasis } from '../lib/markdown.js'
-import { buildAssistantEvidenceSummary, buildResearchTimeline } from '../lib/researchUi.js'
+import {
+  buildAssistantEvidenceSummary,
+  buildResearchTimeline,
+  formatTaskOutcome,
+  traceToReasoning,
+} from '../lib/researchUi.js'
 import KLineChart from './KLineChart.vue'
 
 const props = defineProps({
@@ -268,6 +278,7 @@ const reasoningLoading = ref(false)
 const reasoningError = ref(null)
 const traceReasoning = ref([])
 const traceTokens = ref(0)
+const traceTaskOutcome = ref('')
 let traceFetched = false
 
 const inlineReasoning = computed(() => normalizeReasoning(props.message.reasoning || []))
@@ -301,6 +312,7 @@ watch(
     traceFetched = false
     traceReasoning.value = []
     traceTokens.value = 0
+    traceTaskOutcome.value = ''
     reasoningError.value = null
   }
 )
@@ -319,6 +331,7 @@ async function loadTraceReasoning() {
   try {
     const trace = await getTrace(props.message.traceId)
     traceTokens.value = trace.totalTokens || 0
+    traceTaskOutcome.value = trace.taskOutcome || ''
     traceReasoning.value = traceToReasoning(trace)
     traceFetched = true
   } catch (e) {
@@ -340,49 +353,6 @@ function normalizeReasoning(items) {
     .filter(item => item.content)
 }
 
-function traceToReasoning(trace) {
-  let steps = []
-  try {
-    steps = JSON.parse(trace.steps || '[]')
-  } catch {
-    return []
-  }
-
-  // 持久化链路步骤比流式数据块更丰富；这里压平成实时界面共用的 thought/action/observation 形态。
-  return steps.flatMap((step) => {
-    const rows = []
-    const dur = step.durationMs || 0
-    if (step.attributes?.kind === 'routing-decision') {
-      rows.push({
-        type: 'route_decision',
-        content: formatRouteDecision(step.attributes),
-        metadata: step.attributes,
-        durationMs: dur,
-      })
-      return rows
-    }
-    if (step.thought) rows.push({
-      type: 'thought',
-      content: textFrom(step.thought),
-      durationMs: 0,
-      metadata: step.attributes || null,
-    })
-    if (step.action) rows.push({
-      type: 'action',
-      content: formatAction(step),
-      durationMs: dur,
-      metadata: step.attributes || null,
-    })
-    if (step.observation) rows.push({
-      type: 'observation',
-      content: textFrom(step.observation),
-      durationMs: 0,
-      metadata: step.attributes || null,
-    })
-    return rows
-  })
-}
-
 const traceSummary = computed(() => {
   if (!traceFetched || traceReasoning.value.length === 0) return null
   // 重新解析链路步骤，拿到摘要需要的原始数据。
@@ -392,33 +362,13 @@ const traceSummary = computed(() => {
   const totalDuration = allItems.reduce((sum, i) => sum + (i.durationMs || 0), 0)
   // 令牌数来自加载期间保存的链路对象。
   const tokens = traceTokens.value
-  return { steps, durationMs: totalDuration, tokens }
+  return {
+    steps,
+    durationMs: totalDuration,
+    tokens,
+    taskOutcome: formatTaskOutcome(traceTaskOutcome.value),
+  }
 })
-
-function formatAction(step) {
-  const actionInput = textFrom(step.actionInput)
-  return actionInput ? `${step.action}：${actionInput}` : textFrom(step.action)
-}
-
-function formatRouteDecision(metadata = {}) {
-  const sourceScores = Object.entries(metadata.sourceScores || {})
-    .map(([source, score]) => `${source}=${Number(score || 0).toFixed(2)}`)
-    .join(', ')
-  const lines = [
-    `意图理解：${metadata.intentSummary || '未提供'}`,
-    `细粒度意图：${metadata.fineIntent || 'UNKNOWN'} / ${metadata.intentGroup || 'UNKNOWN'}`,
-    `选择路由：${metadata.route || 'DIRECT'}`,
-    `决策来源：${metadata.source || 'UNKNOWN'}`,
-    `置信度：${Number(metadata.confidence || 0).toFixed(2)}`,
-    `时效/深度：${metadata.timeSensitivity || 'UNSPECIFIED'} / ${metadata.analysisDepth || 'UNSPECIFIED'}`,
-    `依据：${metadata.rationale || '未提供'}`,
-    `RAG 命中：${Number(metadata.ragHitCount || 0)}`,
-  ]
-  if (sourceScores) lines.push(`信号分数：${sourceScores}`)
-  if (metadata.needsClarification) lines.push('需要澄清：是')
-  if (metadata.fallbackReason) lines.push(`降级原因：${metadata.fallbackReason}`)
-  return lines.join('\n')
-}
 
 function textFrom(value) {
   if (value === null || value === undefined) return ''

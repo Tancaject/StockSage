@@ -26,7 +26,7 @@ public class ShortTermMemory {
 
     /** Redis 会话窗口键前缀。 */
     private static final String KEY_PREFIX = "chat:conv:";
-    /** 压缩摘要写回列表时使用的消息角色。 */
+    /** 压缩摘要写回缓存的内部角色；ChatService 注入时会降为不可信用户上下文。 */
     private static final String SUMMARY_ROLE = "system";
 
     /** 读写会话消息列表和 TTL 的 Redis 客户端。 */

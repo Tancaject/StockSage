@@ -72,6 +72,8 @@ public class ToolPrefetchService {
     private final ReportMarkdownRenderer reportRenderer;
     /** 收集深度研究所需的多源证据。 */
     private final DeepEvidenceCollector deepEvidenceCollector;
+    /** 在证据门禁通过后最多执行一次有界问题相关补证。 */
+    private final DeepEvidenceReplanService deepEvidenceReplanService;
     /** 执行 Bull/Bear/Manager 深度研究流水线。 */
     private final DeepResearchPipeline deepResearchPipeline;
     /** 查询与发布可复用的投资报告版本。 */
@@ -94,10 +96,6 @@ public class ToolPrefetchService {
     private final AsyncTaskExecutor agentTaskExecutor;
     /** 同步降级执行期间定时续租任务所有权。 */
     private final TaskScheduler researchHeartbeatScheduler;
-
-    /** 是否启用计划预取；关闭时直接返回空上下文。 */
-    @Value("${stocksage.chat.tool-prefetch.enabled:true}")
-    private boolean toolPrefetchEnabled;
 
     /** 单次搜索预取允许返回的最大结果数。 */
     @Value("${stocksage.chat.tool-prefetch.max-search-results:5}")
@@ -139,7 +137,7 @@ public class ToolPrefetchService {
             String userId,
             Coordinator.SelectedModel selectedModel
     ) {
-        if (!toolPrefetchEnabled || executionPlan == null || executionPlan.actions() == null) {
+        if (executionPlan == null || executionPlan.actions() == null) {
             return PreparedToolContext.empty();
         }
 
@@ -156,80 +154,12 @@ public class ToolPrefetchService {
         // 先放标的身份，便于下游提示词在股票代码/公司解析不确定时拒绝无关 RAG 或搜索片段。
         appendResolvedStockIdentity(context, primaryTicker);
 
-        SkillExecutionService.ExecutionResult skillResult = skillExecutionService.executePrefetch(
-                executionPlan,
-                userQuery,
-                toolPrefetchMaxSearchResults,
-                traceId,
-                conversationId,
-                userId
-        );
-        if (!skillResult.context().isBlank()) {
-            context.append(skillResult.context()).append("\n\n");
-        }
+        emitProgress(traceId, conversationId, "thought", "正在按服务器计划获取本轮证据。");
 
-        emitProgress(traceId, conversationId, "thought",
-                "正在执行深度分析预取：Fundamentals / Market / News / Bull-Bear Debate。");
-
-        AnalysisState agentState = AnalysisState.builder()
-                    .query(userQuery)
-                    .primaryTicker(primaryTicker)
-                    .build();
-            // 阶段 1：并行运行分析师智能体，因为它们的输入不依赖彼此生成的文本。
-            boolean needsFundamentals = actions.contains(PlanAction.FUNDAMENTALS_AGENT);
-            boolean needsMarket = actions.contains(PlanAction.MARKET_AGENT);
-            boolean needsNews = actions.contains(PlanAction.NEWS_AGENT);
-            String agentInputContext = context.toString();
-
-            if (needsFundamentals || needsMarket || needsNews) {
-            CompletableFuture<String> fundamentalsFuture = needsFundamentals
-                    ? CompletableFuture.supplyAsync(() -> safeAgentCall("Fundamentals Agent",
-                            () -> fundamentalsAgent.analyze(userQuery, agentInputContext)), agentTaskExecutor)
-                    : CompletableFuture.completedFuture(null);
-
-            CompletableFuture<String> marketFuture = needsMarket
-                    ? CompletableFuture.supplyAsync(() -> safeAgentCall("Market Agent",
-                            () -> marketAgent.analyze(userQuery, agentInputContext)), agentTaskExecutor)
-                    : CompletableFuture.completedFuture(null);
-
-            CompletableFuture<String> newsFuture = needsNews
-                    ? CompletableFuture.supplyAsync(() -> safeAgentCall("News Agent",
-                            () -> newsAgent.analyze(userQuery, agentInputContext)), agentTaskExecutor)
-                    : CompletableFuture.completedFuture(null);
-
-            try {
-                CompletableFuture.allOf(fundamentalsFuture, marketFuture, newsFuture)
-                        .get(agentPrefetchTimeoutSeconds, TimeUnit.SECONDS);
-            } catch (Exception e) {
-                log.warn("Analyst prefetch timed out or failed after {}s: {}",
-                        agentPrefetchTimeoutSeconds, e.getMessage());
-                emitProgress(traceId, conversationId, "observation",
-                        "部分 Analyst 预取超时，系统将基于已完成的数据继续生成回答。");
-            }
-
-            String fundamentalsResult = completedValue(fundamentalsFuture);
-            String marketResult = completedValue(marketFuture);
-            String newsResult = completedValue(newsFuture);
-
-            if (fundamentalsResult != null) {
-                agentState.setFundamentalsReport(fundamentalsResult);
-                appendContextSection(context, "Fundamentals Agent", fundamentalsResult);
-            }
-            if (marketResult != null) {
-                agentState.setMarketReport(marketResult);
-                appendContextSection(context, "Market Agent", marketResult);
-            }
-            if (newsResult != null) {
-                agentState.setNewsReport(newsResult);
-                appendContextSection(context, "News Agent", newsResult);
-            }
-            }
-
-        // 阶段 2：顺序执行依赖分析师结果的步骤，
-        // 或者需要按可预测顺序使用已解析股票代码/工具观测的步骤。
+        // 阶段 1：后端按固定计划执行只读工具与 Capability，模型不参与工具选择。
         for (PlanAction action : actions) {
             switch (action) {
-                case FUNDAMENTALS_AGENT, MARKET_AGENT, NEWS_AGENT -> { /* 已经在前面处理 */ }
+                case FUNDAMENTALS_AGENT, MARKET_AGENT, NEWS_AGENT -> { /* 在证据获取后处理 */ }
                 case RESEARCH_MANAGER -> { /* DEEP plans return through submitDeepResearch above. */ }
                 case SEARCH_STOCKS -> appendToolObservation(context, "searchStocks",
                         () -> marketTools.searchStocks(userQuery, toolPrefetchMaxSearchResults));
@@ -255,6 +185,17 @@ public class ToolPrefetchService {
                         () -> withResolvedTicker(primaryTicker,
                                 this::getMarketTechnicalContext));
                 case SEARCH_NEWS -> {
+                    SkillExecutionService.ExecutionResult skillResult = skillExecutionService.executePrefetch(
+                            executionPlan,
+                            userQuery,
+                            toolPrefetchMaxSearchResults,
+                            traceId,
+                            conversationId,
+                            userId
+                    );
+                    if (!skillResult.context().isBlank()) {
+                        context.append(skillResult.context()).append("\n\n");
+                    }
                     if (!skillResult.handled(PlanAction.SEARCH_NEWS)) {
                         String result = appendToolObservation(context, "searchNews",
                                 () -> newsTools.searchNews(userQuery, toolPrefetchMaxSearchResults));
@@ -269,8 +210,52 @@ public class ToolPrefetchService {
                 case GET_MARKET_OVERVIEW -> appendToolObservation(
                         context, "getMarketOverview", marketTools::getMarketOverview);
                 default -> {
-                    // 部分计划动作需要结构化股票代码抽取，仍交给模型工具调用处理。
+                    // Agent 与最终回答在证据获取后执行；DEEP 已在上方交给持久化流水线。
                 }
+            }
+        }
+
+        // 阶段 2：无工具分析师只消费已经取得的证据，不再拥有第二套取数决策权。
+        boolean needsFundamentals = actions.contains(PlanAction.FUNDAMENTALS_AGENT);
+        boolean needsMarket = actions.contains(PlanAction.MARKET_AGENT);
+        boolean needsNews = actions.contains(PlanAction.NEWS_AGENT);
+        if (needsFundamentals || needsMarket || needsNews) {
+            emitProgress(traceId, conversationId, "thought", "证据获取完成，正在生成角色分析。");
+            String agentInputContext = context.toString();
+            CompletableFuture<String> fundamentalsFuture = needsFundamentals
+                    ? CompletableFuture.supplyAsync(() -> safeAgentCall("Fundamentals Agent",
+                            () -> fundamentalsAgent.analyze(userQuery, agentInputContext)), agentTaskExecutor)
+                    : CompletableFuture.completedFuture(null);
+            CompletableFuture<String> marketFuture = needsMarket
+                    ? CompletableFuture.supplyAsync(() -> safeAgentCall("Market Agent",
+                            () -> marketAgent.analyze(userQuery, agentInputContext)), agentTaskExecutor)
+                    : CompletableFuture.completedFuture(null);
+            CompletableFuture<String> newsFuture = needsNews
+                    ? CompletableFuture.supplyAsync(() -> safeAgentCall("News Agent",
+                            () -> newsAgent.analyze(userQuery, agentInputContext)), agentTaskExecutor)
+                    : CompletableFuture.completedFuture(null);
+
+            try {
+                CompletableFuture.allOf(fundamentalsFuture, marketFuture, newsFuture)
+                        .get(agentPrefetchTimeoutSeconds, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                log.warn("Analyst synthesis timed out or failed after {}s: {}",
+                        agentPrefetchTimeoutSeconds, e.getMessage());
+                emitProgress(traceId, conversationId, "observation",
+                        "部分角色分析超时，系统将基于已取得的证据继续回答。");
+            }
+
+            String fundamentalsResult = completedValue(fundamentalsFuture);
+            String marketResult = completedValue(marketFuture);
+            String newsResult = completedValue(newsFuture);
+            if (fundamentalsResult != null) {
+                appendContextSection(context, "Fundamentals Agent", fundamentalsResult);
+            }
+            if (marketResult != null) {
+                appendContextSection(context, "Market Agent", marketResult);
+            }
+            if (newsResult != null) {
+                appendContextSection(context, "News Agent", newsResult);
             }
         }
         return new PreparedToolContext(context.toString().trim(), directAnswer);
@@ -290,7 +275,7 @@ public class ToolPrefetchService {
         int active = researchTaskService.countActiveTasks(userId);
         if (active >= Math.max(1, userMaxActive)) {
             String answer = reportRenderer.buildQuotaExceededAnswer(active, Math.max(1, userMaxActive));
-            return new PreparedToolContext("", answer, null, traceId);
+            return new PreparedToolContext("", answer, null, traceId, "BLOCKED");
         }
 
         String submissionKey = researchTaskService.buildSubmissionKey(
@@ -421,6 +406,8 @@ public class ToolPrefetchService {
                 requireInlineOwnership(
                         runningTask, acquired, ownershipLost, "planned recovery checkpoint");
                 saveInlineHarnessSnapshot(runningTask, acquired, evidence.state());
+                deepResearchPipeline.recordEvidenceRecoveryExecution(
+                        traceId, recoveryEffectKey, recoveryActions);
                 requireInlineOwnership(
                         runningTask, acquired, ownershipLost, "evidence recovery");
                 evidence = deepEvidenceCollector.recover(
@@ -449,6 +436,17 @@ public class ToolPrefetchService {
                         runningTask, acquired, ownershipLost, "revalidated recovery checkpoint");
                 saveInlineHarnessSnapshot(runningTask, acquired, evidence.state());
             }
+            ResearchTask ownedTask = runningTask;
+            evidence = deepEvidenceReplanService.replan(
+                    runningTask.getId(),
+                    userId,
+                    conversationId,
+                    traceId,
+                    evidence,
+                    () -> requireInlineOwnership(
+                            ownedTask, acquired, ownershipLost, "evidence replan"),
+                    state -> saveInlineEvidenceReplan(ownedTask, acquired, state)
+            );
             context.append(evidence.contextMarkdown());
             AnalysisState agentState = evidence.state();
             if (evidence.harnessDecision().outcome() != HarnessOutcome.PASS) {
@@ -464,7 +462,9 @@ public class ToolPrefetchService {
                                 : ResearchTask.ResultKind.INSUFFICIENT_EVIDENCE;
                 completeInlineTaskForOwner(
                         runningTask, acquired, ownershipLost, null, resultKind);
-                return new PreparedToolContext(context.toString().trim(), answer, null, traceId);
+                return new PreparedToolContext(
+                        context.toString().trim(), answer, null, traceId,
+                        deepResearchPipeline.taskOutcome(runningTask));
             }
 
             investmentReportVersionService.prepareHashes(agentState);
@@ -482,7 +482,8 @@ public class ToolPrefetchService {
                         ResearchTask.ResultKind.FULL_REPORT
                 );
                 return new PreparedToolContext(
-                        context.toString().trim(), reportRenderer.buildFinalAnswerBrief(agentState), null, traceId);
+                        context.toString().trim(), reportRenderer.buildFinalAnswerBrief(agentState), null, traceId,
+                        deepResearchPipeline.taskOutcome(runningTask));
             }
 
             requireInlineOwnership(runningTask, acquired, ownershipLost, "debate start");
@@ -519,12 +520,20 @@ public class ToolPrefetchService {
             String answer = agentState.getInvestmentReport() == null
                     ? reportJson
                     : reportRenderer.buildFinalAnswerBrief(agentState);
-            return new PreparedToolContext(context.toString().trim(), answer, null, traceId);
+            return new PreparedToolContext(
+                    context.toString().trim(), answer, null, traceId,
+                    deepResearchPipeline.taskOutcome(runningTask));
         } catch (DeepResearchPipeline.OwnershipLostException error) {
             log.info("Inline research stopped after ownership loss; switching to task observation, "
                     + "taskId={}, error={}", runningTask.getId(), error.getMessage());
             return observeInlineTask(context, runningTask, traceId);
         } catch (RuntimeException error) {
+            if (runningTask.getStatus() == ResearchTask.Status.FAILED) {
+                emitProgress(traceId, conversationId, "error", "同步深度研究执行失败，本次任务已经结束。");
+                return new PreparedToolContext(
+                        context.toString().trim(), reportRenderer.buildResearchFailedAnswer(), null, traceId,
+                        deepResearchPipeline.taskOutcome(runningTask));
+            }
             try {
                 requireInlineOwnership(
                         runningTask, acquired, ownershipLost, "failure publication");
@@ -539,8 +548,10 @@ public class ToolPrefetchService {
                             runningTask, acquired.token(), error.getMessage());
             if (failed) {
                 emitProgress(traceId, conversationId, "error",
-                        "同步深度研究执行失败：" + error.getMessage());
-                throw error;
+                        "同步深度研究执行失败，本次任务已经结束。");
+                return new PreparedToolContext(
+                        context.toString().trim(), reportRenderer.buildResearchFailedAnswer(), null, traceId,
+                        deepResearchPipeline.taskOutcome(runningTask));
             }
             log.info("Inline research failure arrived after ownership changed; switching to task "
                     + "observation, taskId={}, error={}", runningTask.getId(), error.getMessage());
@@ -581,6 +592,23 @@ public class ToolPrefetchService {
                     task.getId(), lease.token(), state);
         } catch (ResearchTaskCheckpointService.OwnershipLostException error) {
             throw inlineOwnershipLost(task, "harness checkpoint", error);
+        }
+    }
+
+    private void saveInlineEvidenceReplan(
+            ResearchTask task,
+            ResearchTaskLeaseService.Lease lease,
+            AnalysisState state
+    ) {
+        try {
+            researchTaskCheckpointService.saveEvidenceReplan(
+                    task.getId(), lease.token(), state);
+        } catch (ResearchTaskCheckpointService.OwnershipLostException error) {
+            throw new DeepResearchPipeline.OwnershipLostException(
+                    "inline research lost ownership before evidence replan checkpoint, taskId="
+                            + task.getId(),
+                    error
+            );
         }
     }
 
@@ -821,27 +849,6 @@ public class ToolPrefetchService {
     }
 
     /**
-     * 执行智能体并把观察结果追加到上下文。
-     */
-    private String appendAgentObservation(StringBuilder context, String agentName, AgentCall agentCall) {
-        try {
-            String result = agentCall.call();
-            if (result == null || result.isBlank()) {
-                return null;
-            }
-            context.append("## ").append(agentName).append("\n")
-                    .append(PromptText.truncate(result, 4500))
-                    .append("\n\n");
-            return result;
-        } catch (Exception e) {
-            context.append("## ").append(agentName).append("\n")
-                    .append("Agent failed: ").append(e.getMessage())
-                    .append("\n\n");
-            return null;
-        }
-    }
-
-    /**
      * 执行工具并把观察结果追加到上下文。
      */
     private String appendToolObservation(StringBuilder context, String toolName, ToolCall toolCall) {
@@ -923,12 +930,14 @@ public class ToolPrefetchService {
      * @param directAnswer 可以直接发送给用户的答案；为空时继续走模型生成
      * @param submittedTaskId 已提交的研究任务 ID；普通预取时为空
      * @param eventTraceId SSE 事件链路标识；普通预取时为空
+     * @param taskOutcome 同步完成的业务结果；后台任务与普通预取时为空
      */
     public record PreparedToolContext(
             String context,
             String directAnswer,
             Long submittedTaskId,
-            String eventTraceId
+            String eventTraceId,
+            String taskOutcome
     ) {
         /**
          * 构造普通预取结果，任务 ID 与事件 trace 均为空。
@@ -937,7 +946,7 @@ public class ToolPrefetchService {
          * @param directAnswer 可选直答
          */
         public PreparedToolContext(String context, String directAnswer) {
-            this(context, directAnswer, null, null);
+            this(context, directAnswer, null, null, null);
         }
 
         /**
@@ -948,12 +957,21 @@ public class ToolPrefetchService {
          * @param submittedTaskId 已提交的研究任务 ID
          */
         public PreparedToolContext(String context, String directAnswer, Long submittedTaskId) {
-            this(context, directAnswer, submittedTaskId, null);
+            this(context, directAnswer, submittedTaskId, null, null);
+        }
+
+        public PreparedToolContext(
+                String context,
+                String directAnswer,
+                Long submittedTaskId,
+                String eventTraceId
+        ) {
+            this(context, directAnswer, submittedTaskId, eventTraceId, null);
         }
 
         /** 空预取结果。 */
         static PreparedToolContext empty() {
-            return new PreparedToolContext("", "", null, null);
+            return new PreparedToolContext("", "", null, null, null);
         }
 
         /** 是否包含可直接返回的答案。 */
