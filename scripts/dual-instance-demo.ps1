@@ -178,7 +178,7 @@ function Show-VerificationChecklist {
    docker exec stocksage-mysql mysql -uroot -p12345 stocksage -e "SELECT id,idempotency_key,status,stage,attempts,lease_token FROM research_tasks ORDER BY id DESC LIMIT 5;"
 
 2. 强杀实例后接管
-   等 checkpoint 显示 debate_rounds_completed=2 后，在本脚本提示符输入 A 或 B 强停当前执行实例。
+   等 checkpoint 显示 debate_rounds_completed=2、planned_rounds=3（Manager 已授权第 3 轮）后，在本脚本提示符输入 A 或 B 强停当前执行实例。
    docker exec stocksage-mysql mysql -uroot -p12345 stocksage -e "SELECT task_id,stage_completed,debate_rounds_completed,planned_rounds,updated_at FROM research_task_checkpoints WHERE task_id=<TASK_ID>;"
    docker exec stocksage-redis redis-cli XPENDING $taskStream $taskGroup - + 10
    观察：约 12 秒演示 claim idle + 调度间隔后，pending consumer 改变；任务最终 SUCCEEDED。记录实际接管耗时，不能用配置值代替实测值。
@@ -189,10 +189,10 @@ function Show-VerificationChecklist {
    docker exec stocksage-redis redis-cli XRANGE stream:trace-events:<TRACE_ID> - + COUNT 20
    观察：worker 所在实例持续 XADD；持有 SSE 的另一实例持续收到 thought/section/task-final，entry id 单调递增。
 
-4. 前两轮不重烧
+4. 已完成轮次不重烧
    Get-ChildItem .\tmp\dual-instance\instance-*.out.log | Select-String "Research Debate round started"
    docker exec stocksage-mysql mysql -uroot -p12345 stocksage -e "SELECT status,stage,attempts,result_report_version_id FROM research_tasks WHERE id=<TASK_ID>;"
-   观察：接管实例从 round=3 开始，round=1/2 各只出现一次。token 省量必须等 WS2 usage 记录落地后再填，不从日志字数推算。
+   观察：上述 2/3 checkpoint 下，接管实例从 round=3 开始，round=1/2 各只出现一次；后续轮数仍由 Manager 每轮决定。token 省量必须等 WS2 usage 记录落地后再填，不从日志字数推算。
 
 演示专用参数：lease TTL=10s、claim min idle=12s、reclaim interval=2s；队列隔离为 $taskStream / $taskGroup；生产默认值未被修改。
 基础设施模式：$(if ($ExternalInfrastructure) { "外部 localhost MySQL:$MySqlPort / Redis:$RedisPort" } else { "Docker Compose MySQL/Redis" })。

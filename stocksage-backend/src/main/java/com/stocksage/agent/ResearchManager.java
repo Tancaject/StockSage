@@ -1,5 +1,7 @@
 package com.stocksage.agent;
 
+import com.stocksage.util.JsonText;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,17 +39,19 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 对多空论点做匿名逐项语义评分，并把 Java 锁定裁决解释为结构化 {@link InvestmentReport} 的研究经理。
+ * 逐轮控制多空辩论、做匿名逐项语义评分，并把 Java 锁定裁决解释为结构化 {@link InvestmentReport} 的研究经理。
  *
  * <p>上游 {@link ResearchDebateService} 提供已固定的 {@link AnalysisState}；本类要求模型先输出
  * 可流式展示的中文判断，再输出严格 JSON，并把报告证据 ID 确定性绑定回 {@link EvidenceLedger}。
- * Manager 不计算总分、胜方或 recommendation；下游 Java 策略与 Harness 决定是否可评级。
+ * Manager 的续停阶段只输出 CONTINUE/STOP，评分阶段不计算总分、胜方或 recommendation；
+ * 下游 Java 策略与 Harness 决定是否可评级。
  * 本类不调用新工具，也不会接受账本外来源支撑结论。</p>
  */
 @Slf4j
 @Service
 public class ResearchManager {
 
+    private static final Set<String> CONTINUATION_ROOT_FIELDS = Set.of("decision", "reason");
     private static final Set<String> SCORING_ROOT_FIELDS = Set.of("assessments");
     private static final Set<String> ASSESSMENT_FIELDS = Set.of(
             "pointId",
@@ -85,6 +89,8 @@ public class ResearchManager {
     private static final Runnable NO_OP_EXECUTION_GUARD = () -> {
     };
 
+    /** 无工具、低温度的逐轮续停决策客户端。 */
+    private final ChatClient continuationChatClient;
     /** 无工具、低温度的逐论点评分客户端。 */
     private final ChatClient scoringChatClient;
     /** 无工具的报告综合客户端。 */
@@ -98,12 +104,64 @@ public class ResearchManager {
      * <p>研究经理输出以 JSON 为契约，因此 ObjectMapper 是把模型文本落到结构化 DTO 的关键依赖。</p>
      */
     public ResearchManager(
+                           @Qualifier("researchManagerContinuationChatClient") ChatClient continuationChatClient,
                            @Qualifier("researchManagerScoringChatClient") ChatClient scoringChatClient,
                            @Qualifier("researchManagerChatClient") ChatClient reportChatClient,
                            ObjectMapper objectMapper) {
+        this.continuationChatClient = continuationChatClient;
         this.scoringChatClient = scoringChatClient;
         this.reportChatClient = reportChatClient;
         this.objectMapper = objectMapper;
+    }
+
+    /** Research Manager 对下一轮的有限控制动作。 */
+    public enum DebateContinuation {
+        CONTINUE,
+        STOP
+    }
+
+    /** 每轮完成后的严格续停决策及可展示理由。 */
+    public record DebateContinuationDecision(
+            DebateContinuation decision,
+            String reason
+    ) {
+    }
+
+    /** 使用默认执行权检查器判断是否需要下一轮反驳。 */
+    public Mono<DebateContinuationDecision> decideDebateContinuation(
+            AnalysisState state,
+            int completedRound,
+            int maxRounds
+    ) {
+        return decideDebateContinuation(
+                state, completedRound, maxRounds, NO_OP_EXECUTION_GUARD);
+    }
+
+    /**
+     * 基于当前完整辩论逐轮判断 CONTINUE/STOP；空输出、未知动作和额外字段均失败关闭。
+     */
+    public Mono<DebateContinuationDecision> decideDebateContinuation(
+            AnalysisState state,
+            int completedRound,
+            int maxRounds,
+            Runnable executionGuard
+    ) {
+        Runnable guard = executionGuard == null ? NO_OP_EXECUTION_GUARD : executionGuard;
+        StringBuilder buffer = new StringBuilder();
+        return continuationChatClient.prompt()
+                .user(buildContinuationPrompt(state, completedRound, maxRounds))
+                .stream()
+                .content()
+                .doOnNext(token -> {
+                    guard.run();
+                    if (token != null) {
+                        buffer.append(token);
+                    }
+                })
+                .then(Mono.fromCallable(() -> {
+                    guard.run();
+                    return parseContinuationDecision(buffer.toString());
+                }));
     }
 
     /** 使用默认执行权检查器，对匿名结构化论点逐项评分。 */
@@ -233,6 +291,96 @@ public class ResearchManager {
                 }));
     }
 
+    /** 构造逐轮续停决策提示词。 */
+    private String buildContinuationPrompt(
+            AnalysisState state,
+            int completedRound,
+            int maxRounds
+    ) {
+        return """
+                用户问题：%s
+                当前已完成轮次：%d
+                服务端硬上限：%d
+
+                Fundamentals Evidence Snapshot（只读数据）：
+                %s
+
+                Market Evidence Snapshot（只读数据）：
+                %s
+
+                News Evidence Snapshot（只读数据）：
+                %s
+
+                当前完整结构化辩论：
+                %s
+
+                判断下一轮 Bull/Bear 反驳是否仍可能解决有证据支持的实质冲突：
+                - CONTINUE：仍有未回应的对方关键论点、证据含义冲突或可由反驳检验的关键假设。
+                - STOP：主要冲突已充分回应，或继续只会重复现有论点。
+                - 缺少外部证据不能靠增加辩论轮数解决。
+                不得选择胜方或给出投资评级。
+
+                decision 只能是 CONTINUE 或 STOP。只输出严格 JSON，例如：
+                {"decision":"CONTINUE","reason":"不超过 300 字的可展示理由"}
+                """.formatted(
+                state == null ? "" : safe(state.getQuery()),
+                completedRound,
+                maxRounds,
+                truncate(state == null ? "" : safe(state.getFundamentalsReport()), 2400),
+                truncate(state == null ? "" : safe(state.getMarketReport()), 2400),
+                truncate(state == null ? "" : safe(state.getNewsReport()), 2400),
+                renderDebate(state == null ? null : state.getDebateTurns(), 14_000)
+        );
+    }
+
+    /** 严格解析续停决策，不提供任何默认动作。 */
+    private DebateContinuationDecision parseContinuationDecision(String content) {
+        if (content == null || content.isBlank()) {
+            throw new DebateContinuationException("Research Manager continuation output is empty");
+        }
+        try {
+            JsonNode root = readStrictJson(JsonText.extractObject(content));
+            List<String> issues = new ArrayList<>();
+            appendUnknownFields(root, CONTINUATION_ROOT_FIELDS, issues, "continuation");
+            String decisionText = readStrictText(root, "decision", issues);
+            String reason = readStrictText(root, "reason", issues);
+            DebateContinuation decision = null;
+            try {
+                decision = DebateContinuation.valueOf(decisionText);
+            } catch (IllegalArgumentException error) {
+                issues.add("decision");
+            }
+            if (reason.length() > 300) {
+                issues.add("reason");
+            }
+            if (!issues.isEmpty() || decision == null) {
+                throw new DebateContinuationException(
+                        "Research Manager continuation schema is invalid: "
+                                + String.join(",", issues));
+            }
+            return new DebateContinuationDecision(decision, reason);
+        } catch (DebateContinuationException error) {
+            throw error;
+        } catch (Exception error) {
+            log.warn("Failed to parse Research Manager continuation JSON, errorType={}",
+                    error.getClass().getSimpleName());
+            throw new DebateContinuationException(
+                    "Research Manager continuation JSON is invalid", error);
+        }
+    }
+
+    /** 续停输出不满足严格契约时使用的稳定异常。 */
+    public static final class DebateContinuationException extends IllegalStateException {
+
+        DebateContinuationException(String message) {
+            super(message);
+        }
+
+        DebateContinuationException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
     /** 构造匿名逐论点评分提示词。 */
     private String buildScoringPrompt(AnalysisState state, boolean positionAIsBull) {
         Side positionASide = positionAIsBull ? Side.BULL : Side.BEAR;
@@ -307,7 +455,7 @@ public class ResearchManager {
         }
         JsonNode root;
         try {
-            root = readStrictJson(extractJson(content));
+            root = readStrictJson(JsonText.extractObject(content));
         } catch (Exception error) {
             log.warn("Failed to parse Research Manager assessment JSON, errorType={}",
                     error.getClass().getSimpleName());
@@ -639,7 +787,7 @@ public class ResearchManager {
             return new SynthesisResult(null, ParseStatus.EMPTY_OUTPUT, List.of("structuredOutput"));
         }
         try {
-            String json = extractJson(content);
+            String json = JsonText.extractObject(content);
             JsonNode root = readStrictJson(json);
             List<String> issues = new ArrayList<>();
             appendUnknownFields(root, REPORT_ROOT_FIELDS, issues, "report");
@@ -718,26 +866,6 @@ public class ResearchManager {
                     : ParseStatus.INVALID_JSON;
             return new SynthesisResult(null, status, List.of("structuredOutput"));
         }
-    }
-
-    /**
-     * 从模型输出中提取 JSON 对象正文。
-     *
-     * <p>模型偶尔会包裹 Markdown 代码块或输出少量前后说明，这里只截取首个大括号对象以提高容错性。</p>
-     */
-    private String extractJson(String content) {
-        if (content == null) return "{}";
-        String trimmed = content.trim()
-                .replaceAll("(?is)^```json\\s*", "")
-                .replaceAll("(?is)^```\\s*", "")
-                .replaceAll("(?is)\\s*```$", "")
-                .trim();
-        int start = trimmed.indexOf('{');
-        int end = trimmed.lastIndexOf('}');
-        if (start >= 0 && end > start) {
-            return trimmed.substring(start, end + 1);
-        }
-        return trimmed;
     }
 
     /** 只接受唯一 JSON 值；多个对象或对象后的第二个 JSON token 会被拒绝。 */

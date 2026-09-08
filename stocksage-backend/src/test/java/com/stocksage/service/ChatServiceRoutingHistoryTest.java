@@ -31,6 +31,19 @@ class ChatServiceRoutingHistoryTest {
 
     private static final long CONVERSATION_ID = 55L;
 
+    @Test
+    void ordinaryEvidenceMustFitAsAWholeInsteadOfLeavingPartialCitations() {
+        String content = "本轮标的：AAPL\n[E1] " + "evidence".repeat(100);
+        StringBuilder target = new StringBuilder();
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> ReflectionTestUtils.invokeMethod(service,
+                "appendContextSection", target, "TOOL_OBSERVATIONS", content, 300, 300))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("上下文预算");
+        assertThat(target).isEmpty();
+        ReflectionTestUtils.invokeMethod(service, "appendContextSection", target,
+                "TOOL_OBSERVATIONS", content, 2000, 2000);
+        assertThat(target.toString()).contains(content);
+    }
+
     private final ConversationRepository conversationRepository = mock(ConversationRepository.class);
     private final MessageRepository messageRepository = mock(MessageRepository.class);
     private final ShortTermMemory shortTermMemory = mock(ShortTermMemory.class);

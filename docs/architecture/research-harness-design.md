@@ -1188,15 +1188,15 @@ stocksage-frontend/src/
 
 前置条件：G0–G4 完成且 DEEP live/eval 门禁通过。
 
-当前状态：Policy 骨架与单元测试已加入，但未接入 MARKET/NEWS/RAG route。
+普通路线统一使用 [OrdinaryCompletionPolicy](../../stocksage-backend/src/main/java/com/stocksage/harness/OrdinaryCompletionPolicy.java)，执行约束见[普通路线说明](ordinary-agent-execution.md)。RAG 完成验收尚未接入。
 离线门禁与恢复/Trace 语义变更后的完整 Testcontainers/PIT 已通过；5-case smoke
 不能替代尚未完成的 30-case provider gate，因此 G5 仍不得激活，H1 也不提前开始。
 本次验收没有改变这些 route 的运行时行为。
 
 任务：
 
-- [ ] `MarketCompletionPolicy`：canonical target、as-of、实时/延迟状态、最新交易日 K 线、指标样本量。
-- [ ] `NewsCompletionPolicy`：URL/source、发布时间、target/topic/time-window 匹配，零结果与失败分离。
+- [ ] 扩展普通行情验收：as-of、实时/延迟状态、最新交易日 K 线、指标样本量。
+- [ ] 扩展普通新闻验收：发布时间、target/topic/time-window 匹配。
 - [ ] RAG gate：统一 target filter、过期/source_id/空内容过滤、citation membership 和 no-answer。
 - [ ] 将 DEEP evidence 调用逐步迁移到 `CapabilityGateway`，复用已实现的授权、超时、截断和 observer。
 - [ ] 出现第二个稳定策略后，再给 Skill manifest 增加 `completionPolicyId`，并由 `SkillValidator` 校验本地注册策略。

@@ -9,9 +9,14 @@ import com.stocksage.agent.ModelTier;
 import com.stocksage.agent.NewsAgent;
 import com.stocksage.agent.PlanAction;
 import com.stocksage.agent.PlanRoute;
+import com.stocksage.capability.CapabilityException;
+import com.stocksage.capability.CapabilityGateway;
+import com.stocksage.capability.LocalNewsSearchCapabilityAdapter;
 import com.stocksage.harness.DeepResearchCompletionPolicy;
 import com.stocksage.harness.EvidenceLedger;
 import com.stocksage.harness.HarnessModels.HarnessDecision;
+import com.stocksage.harness.HarnessModels.EvidenceDimension;
+import com.stocksage.harness.HarnessModels.RunContext;
 import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.HarnessSnapshot;
 import com.stocksage.harness.HarnessModels.RecoveryAction;
@@ -19,6 +24,10 @@ import com.stocksage.harness.HarnessModels.RecoveryLifecycle;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.skill.SkillExecutionService;
+import com.stocksage.skill.SkillExecutionObserver;
+import com.stocksage.skill.SkillRegistry;
+import com.stocksage.skill.SkillResolver;
+import com.stocksage.skill.SkillValidator;
 import com.stocksage.tool.ChatStreamEmitter;
 import com.stocksage.tool.FundamentalsTools;
 import com.stocksage.tool.MarketTools;
@@ -43,12 +52,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -208,6 +221,8 @@ class ToolPrefetchServiceSubmitTest {
 
     @Test
     void queueUnavailableFallsBackToInlineDeepResearch() throws Exception {
+        String identity = "{\"symbol\":\"AAPL\",\"description\":\"" + "x".repeat(3600) + "\"}";
+        when(marketTools.resolveStock(TICKER)).thenReturn(identity);
         ResearchTask task = task(88L, ResearchTask.Status.PENDING);
         ResearchTaskLeaseService.Lease lease = new ResearchTaskLeaseService.Lease(
                 SUBMISSION_KEY,
@@ -274,8 +289,10 @@ class ToolPrefetchServiceSubmitTest {
                 lease
         )).thenReturn("inline report");
 
-        prefetch();
+        ToolPrefetchService.PreparedToolContext result = prefetch();
 
+        assertThat(result.context()).contains(identity);
+        verify(marketTools).resolveStock(TICKER);
         verify(deepEvidenceCollector).collect(TICKER, QUERY, TRACE_ID, CONVERSATION_ID);
         verify(deepEvidenceReplanService).replan(
                 eq(88L), eq(USER_ID), eq(CONVERSATION_ID), eq(TRACE_ID),
@@ -685,6 +702,169 @@ class ToolPrefetchServiceSubmitTest {
         verify(chatStreamEmitter, never())
                 .emit(eq(TRACE_ID), eq(CONVERSATION_ID), eq("error"), anyString());
         verify(researchTaskService).release(lease);
+    }
+
+    @Test
+    void exhaustedNewsSkillDoesNotInvokeTheSameLocalToolAgain() {
+        configureOrdinary();
+        SkillResolver resolver = mock(SkillResolver.class);
+        CapabilityGateway gateway = mock(CapabilityGateway.class);
+        SkillExecutionService skills = new SkillExecutionService(
+                resolver, gateway, chatStreamEmitter, mock(SkillExecutionObserver.class));
+        ReflectionTestUtils.setField(service, "skillExecutionService", skills);
+        ReflectionTestUtils.setField(service, "toolPrefetchMaxSearchResults", 5);
+        var skill = new SkillRegistry(mock(SkillValidator.class)).find("latest-news-mcp").orElseThrow();
+        ExecutionPlan plan = new ExecutionPlan(PlanRoute.NEWS, "news", "", List.of(PlanAction.SEARCH_NEWS),
+                "", ModelTier.STANDARD);
+        when(resolver.resolve(plan)).thenReturn(Optional.of(skill));
+        when(gateway.invoke(eq("mcp.news.search"), anyMap(), any()))
+                .thenThrow(new CapabilityException(CapabilityException.Reason.UNAVAILABLE, "MCP down"));
+        when(newsTools.searchNews(QUERY, 5)).thenReturn("{\"error\":true}");
+        when(gateway.invoke(eq("local.news.searchNews"), anyMap(), any())).thenAnswer(call -> {
+            new LocalNewsSearchCapabilityAdapter(newsTools).invoke(call.getArgument(1), call.getArgument(2));
+            throw new CapabilityException(CapabilityException.Reason.FAILED, "local down");
+        });
+
+        var result = service.prefetch(plan, QUERY, TRACE_ID, CONVERSATION_ID, USER_ID, selectedModel);
+
+        verify(newsTools, times(1)).searchNews(QUERY, 5);
+        assertThat(result.taskOutcome()).isEqualTo("FAILED");
+        assertThat(result.hasDirectAnswer()).isTrue();
+    }
+
+    @Test
+    void newsWithoutSelectedSkillStillUsesTheLocalTool() {
+        configureOrdinary();
+        ExecutionPlan plan = new ExecutionPlan(PlanRoute.NEWS, "news", "", List.of(PlanAction.SEARCH_NEWS),
+                "", ModelTier.STANDARD);
+        when(skillExecutionService.executePrefetch(eq(plan), eq(QUERY), any(Integer.class),
+                eq(TRACE_ID), eq(CONVERSATION_ID), eq(USER_ID)))
+                .thenReturn(SkillExecutionService.ExecutionResult.empty());
+        when(newsTools.searchNews(QUERY, 0)).thenReturn("{\"provider\":\"tavily\",\"results\":[{\"link\":\"https://example.com/news\",\"title\":\"news evidence\"}]}");
+
+        var result = service.prefetch(plan, QUERY, TRACE_ID, CONVERSATION_ID, USER_ID, selectedModel);
+
+        verify(newsTools).searchNews(QUERY, 0);
+        assertThat(result.context()).contains("news evidence");
+    }
+
+    @Test
+    void ordinaryRoutesRunOnlyTheirPlannedAnalystAfterEvidence() {
+        configureOrdinary();
+        doAnswer(call -> {
+            call.<Runnable>getArgument(0).run();
+            return null;
+        }).when(agentTaskExecutor).execute(any(Runnable.class));
+        when(fundamentalsAgent.analyze(eq(QUERY), anyString())).thenReturn("fundamentals synthesis");
+        when(marketAgent.analyze(eq(QUERY), anyString())).thenReturn("market synthesis");
+        when(newsAgent.analyze(eq(QUERY), anyString())).thenReturn("news synthesis");
+        for (PlanAction action : List.of(PlanAction.FUNDAMENTALS_AGENT, PlanAction.MARKET_AGENT, PlanAction.NEWS_AGENT)) {
+            PlanAction tool = action == PlanAction.NEWS_AGENT ? PlanAction.WEB_SEARCH : PlanAction.GET_FINANCIAL_REPORTS;
+            lenient().when(newsTools.webSearch(QUERY, 0)).thenReturn("{\"provider\":\"tavily\",\"results\":[{\"link\":\"https://example.com/news\"}]}");
+            lenient().when(fundamentalsTools.getFinancialReports(TICKER, "annual", 5)).thenReturn("{\"provider\":\"sec\",\"period\":\"annual\",\"revenue\":123}");
+            ExecutionPlan plan = new ExecutionPlan(PlanRoute.valueOf(action.name().replace("_AGENT", "")),
+                    "analyst", "", List.of(tool, action), "", ModelTier.STANDARD);
+            var result = service.prefetch(plan, QUERY, TRACE_ID, CONVERSATION_ID, USER_ID, selectedModel);
+            assertThat(result.context()).contains("## " + action.label(), "synthesis");
+        }
+        verify(agentTaskExecutor, times(3)).execute(any(Runnable.class));
+        verify(fundamentalsAgent).analyze(eq(QUERY), anyString());
+        verify(marketAgent).analyze(eq(QUERY), anyString());
+        verify(newsAgent).analyze(eq(QUERY), anyString());
+    }
+
+    @Test
+    void ordinaryEvidenceRejectsWrongTargetsQuarterSubstitutionAndBudgetLoss() {
+        org.mockito.Mockito.reset(tickerResolutionService);
+        configureOrdinary();
+        var mapper = (EvidenceEnvelopeMapper) ReflectionTestUtils.getField(service, "evidenceEnvelopeMapper");
+        var read = com.stocksage.agent.ReadRequest.parse(PlanRoute.FUNDAMENTALS, "最近两个季度财报", java.util.Map.of());
+        var evidence = new OrdinaryEvidence(TICKER, read, new ObjectMapper(), mapper);
+        evidence.add("getFinancialReports", EvidenceDimension.FUNDAMENTALS,
+                "{\"provider\":\"sec\",\"symbol\":\"" + TICKER + "\",\"period\":\"annual\",\"revenue\":123}");
+        assertThat(evidence.citationIds()).isEmpty();
+        assertThat(evidence.context()).contains("REPORT_PERIOD_MISMATCH");
+
+        evidence = new OrdinaryEvidence(TICKER, read, new ObjectMapper(), mapper);
+        evidence.add("webSearch", EvidenceDimension.NEWS,
+                "{\"provider\":\"tavily\",\"symbol\":\"MSFT\",\"results\":[{\"link\":\"https://example.com/news\"}]}");
+        assertThat(evidence.citationIds()).isEmpty();
+        assertThat(new com.stocksage.harness.OrdinaryCompletionPolicy().afterEvidence(
+                new RunContext("FUNDAMENTALS", java.util.Map.of()), evidence.ledger()).outcome()).isEqualTo(HarnessOutcome.BLOCK);
+
+        evidence = new OrdinaryEvidence(TICKER, read, new ObjectMapper(), mapper);
+        evidence.add("webSearch", EvidenceDimension.NEWS,
+                "{\"provider\":\"tavily\",\"results\":[{\"link\":\"https://example.com/news\",\"content\":\"" + "a".repeat(3000) + "\"}]}");
+        assertThat(evidence.allIncluded()).isFalse();
+        assertThat(evidence.context().length()).isLessThan(3000);
+
+        evidence = new OrdinaryEvidence(TICKER, read, new ObjectMapper(), mapper);
+        evidence.add("searchNews", EvidenceDimension.NEWS, "{\"provider\":\"tavily\",\"results\":[]}");
+        assertThat(new com.stocksage.harness.OrdinaryCompletionPolicy().afterEvidence(
+                new RunContext("NEWS", java.util.Map.of()), evidence.ledger()).outcome()).isEqualTo(HarnessOutcome.PASS);
+        evidence.add("webSearch", EvidenceDimension.NEWS, "{\"error\":true}");
+        assertThat(new com.stocksage.harness.OrdinaryCompletionPolicy().afterEvidence(
+                new RunContext("NEWS", java.util.Map.of()), evidence.ledger()).outcome()).isEqualTo(HarnessOutcome.DEGRADE);
+        evidence = new OrdinaryEvidence(TICKER, read, new ObjectMapper(), mapper);
+        evidence.add("webSearch", EvidenceDimension.NEWS, "{\"provider\":\"tavily\"}");
+        assertThat(evidence.hasUsefulResult()).isFalse();
+        evidence.add(new com.stocksage.capability.CapabilityResult("local.news.searchNews", "local",
+                com.stocksage.capability.CapabilityResult.Status.TRUNCATED,
+                "{\"results\":[]}", 14, 1));
+        assertThat(evidence.hasUsefulResult()).isFalse();
+    }
+
+    private void configureOrdinary() {
+        ReflectionTestUtils.setField(service, "evidenceEnvelopeMapper",
+                new EvidenceEnvelopeMapper(tickerResolutionService));
+        ReflectionTestUtils.setField(service, "objectMapper", new ObjectMapper());
+        ReflectionTestUtils.setField(service, "researchHarness", new com.stocksage.harness.ResearchHarness(mock(com.stocksage.harness.HarnessObserver.class)));
+        ReflectionTestUtils.setField(service, "ordinaryCompletionPolicy", new com.stocksage.harness.OrdinaryCompletionPolicy());
+        ReflectionTestUtils.setField(service, "traceService", mock(com.stocksage.trace.TraceService.class));
+        ReflectionTestUtils.setField(service, "agentPrefetchTimeoutSeconds", 1L);
+        lenient().when(tickerResolutionService.normalizeStructuredTicker(anyString())).thenAnswer(call -> call.getArgument(0));
+    }
+
+    @Test void ordinaryBarsUseRequestedParametersAndRejectPeriodSubstitution() {
+        configureOrdinary();
+        when(tickerResolutionService.isLikelySecTicker(TICKER)).thenReturn(true);
+        var plan = new ExecutionPlan(PlanRoute.MARKET, "bars", "", List.of(PlanAction.GET_STOCK_KLINE),
+                "", ModelTier.STANDARD, null, "AAPL最近一周的小时线");
+        when(marketTools.getIbkrHistoricalBars(TICKER, "1w", "1h")).thenReturn("""
+                {"symbol":"AAPL","provider":"IBKR_WEB_API","period":"1w","bar":"1h",
+                "data":[{"t":1788768000000,"o":100,"h":102,"l":99,"c":101}]}
+                """);
+        var result = service.prefetch(plan, QUERY, TRACE_ID, CONVERSATION_ID, USER_ID, selectedModel);
+        assertThat(result.taskOutcome()).isEqualTo("COMPLETED");
+        assertThat(result.outcomeForAnswer("价格101 [E1]")).isEqualTo("COMPLETED");
+        assertThat(result.outcomeForAnswer("价格101 [E99]")).isEqualTo("DEGRADED");
+        assertThat(result.outcomeForAnswer("价格101")).isEqualTo("DEGRADED");
+        verifyNoInteractions(marketAgent, fundamentalsAgent, newsAgent);
+        when(marketTools.getIbkrHistoricalBars(TICKER, "1w", "1h")).thenReturn("""
+                {"symbol":"AAPL","provider":"IBKR_WEB_API","period":"3m","bar":"1d",
+                "data":[{"t":1788768000000,"o":100,"h":102,"l":99,"c":101}]}
+                """);
+        var mismatch = service.prefetch(plan, QUERY, TRACE_ID, CONVERSATION_ID, USER_ID, selectedModel);
+        assertThat(mismatch.taskOutcome()).isEqualTo("FAILED");
+        assertThat(mismatch.context()).contains("PERIOD_MISMATCH");
+        assertThat(mismatch.context()).doesNotContain("\"c\":101");
+        var quarterly = new ExecutionPlan(PlanRoute.FUNDAMENTALS, "reports", "", List.of(PlanAction.GET_FINANCIAL_REPORTS),
+                "", ModelTier.STANDARD, null, "AAPL最近两个季度财报");
+        when(fundamentalsTools.getFinancialReports(TICKER, "quarterly", 1)).thenReturn("""
+                {"provider":"sec","symbol":"AAPL","period":"quarterly","reports":[{"quarter":1,"revenue":1},{"quarter":2,"revenue":2}]}
+                """);
+        assertThat(service.prefetch(quarterly, QUERY, TRACE_ID, CONVERSATION_ID, USER_ID, selectedModel).taskOutcome())
+                .isEqualTo("COMPLETED");
+        verify(fundamentalsTools).getFinancialReports(TICKER, "quarterly", 1);
+    }
+
+    @Test void unsupportedIntradayStopsBeforeToolCalls() {
+        configureOrdinary();
+        var plan = new ExecutionPlan(PlanRoute.MARKET, "bars", "", List.of(PlanAction.GET_STOCK_KLINE),
+                "", ModelTier.STANDARD, null, "最近一周的小时线");
+        var result = service.prefetch(plan, QUERY, TRACE_ID, CONVERSATION_ID, USER_ID, selectedModel);
+        assertThat(result.taskOutcome()).isEqualTo("BLOCKED");
+        verifyNoInteractions(marketTools, fundamentalsTools, newsTools);
     }
 
     private ToolPrefetchService.PreparedToolContext prefetch() {

@@ -33,14 +33,7 @@ public class SkillRegistry {
      * @param validator Skill 元数据、预算和能力引用校验器
      */
     public SkillRegistry(SkillValidator validator) {
-        Map<String, SkillDefinition> loaded = new LinkedHashMap<>();
-        for (SkillDefinition skill : loadSkills()) {
-            validator.validate(skill);
-            if (loaded.putIfAbsent(skill.id(), skill) != null) {
-                throw new IllegalStateException("Duplicate Skill id: " + skill.id());
-            }
-        }
-        this.skills = Map.copyOf(loaded);
+        this.skills = loadSkills(validator);
     }
 
     /** @return 指定 ID 的已启用或禁用定义；不存在时为空 */
@@ -54,7 +47,7 @@ public class SkillRegistry {
     }
 
     /** 从所有 classpath YAML 读取并去重 Skill 定义。 */
-    private List<SkillDefinition> loadSkills() {
+    private Map<String, SkillDefinition> loadSkills(SkillValidator validator) {
         YAMLMapper mapper = YAMLMapper.builder()
                 .findAndAddModules()
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
@@ -69,12 +62,13 @@ public class SkillRegistry {
             for (Resource resource : resources) {
                 try (var input = resource.getInputStream()) {
                     SkillDefinition skill = mapper.readValue(input, SkillDefinition.class);
+                    validator.validate(skill);
                     if (loaded.putIfAbsent(skill.id(), skill) != null) {
                         throw new IllegalStateException("Duplicate Skill id: " + skill.id());
                     }
                 }
             }
-            return List.copyOf(loaded.values());
+            return Map.copyOf(loaded);
         } catch (IOException error) {
             throw new IllegalStateException("Failed to load Skill manifests", error);
         }

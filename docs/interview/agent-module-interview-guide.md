@@ -27,7 +27,7 @@
 | 路由与检索回归 | `CoordinatorRegressionService`、`RagRegressionService` | 已实现 |
 | Agent 与 Workflow | `Coordinator`、`ExecutionPlan` | 核心 |
 | 多 Agent 协作 | Fundamentals、Market、News、Bull、Bear、Manager | 已实现 |
-| Planning、终止条件 | 固定动作计划、动态辩论轮数、超时 | 已实现 |
+| Planning、终止条件 | 固定动作计划、Research Manager 每轮自适应终止、超时 | 已实现 |
 | Memory | Redis 短期记忆、MySQL 长期画像 | 已实现 |
 | 服务器工具执行 | Spring AI `@Tool`、Capability Gateway、AOP Trace | 已实现 |
 | 工具执行失败 | 超时、有限重试、缓存和降级 | 已实现 |
@@ -323,7 +323,7 @@ flowchart TD
 - News Agent：新闻和催化剂；
 - Bull Researcher：看多论证；
 - Bear Researcher：风险和看空论证；
-- Research Manager：证据审查和最终报告。
+- Research Manager：每轮续停判断、匿名论点评分和最终报告。
 
 ### 3.3 Coordinator 与 Plan-and-Execute
 
@@ -376,9 +376,10 @@ DEEP 请求中：
 
 1. 先形成包含基本面、市场和新闻的统一 `AnalysisState`。
 2. Bull 和 Bear 在同一轮内并行生成。
-3. 两方结果写入共享状态。
-4. 下一轮才能读取上一轮完整观点。
-5. Research Manager 综合证据和辩论，生成结构化报告。
+3. 两方结果原子写入共享状态。
+4. Research Manager 根据本轮完整结果严格输出 `CONTINUE` 或 `STOP`。
+5. 只有 `CONTINUE` 才进入下一轮，因此下一轮总能读取上一轮完整观点。
+6. `STOP` 或达到服务端 5 轮硬上限后，Research Manager 再完成匿名评分和结构化报告。
 
 这种方式是：
 
@@ -390,25 +391,24 @@ DEEP 请求中：
 
 ### 3.6 辩论轮数与终止
 
-`DebateRoundPlanner` 根据证据冲突程度选择轮数：
+系统不会在开始时预选总轮数。每轮 Bull/Bear 并行完成后，Research Manager 根据当前完整辩论状态输出严格 JSON：
 
-- 证据一致时 1 轮；
-- 常规投资判断通常 2 轮；
-- 证据明显冲突时增加轮次；
-- 配置上限最多 5 轮。
+`{"decision":"CONTINUE|STOP","reason":"..."}`
 
-规划器失败时：
+- 仍有关键对立主张、证据含义冲突或未经检验的重要假设时，选择 `CONTINUE`；
+- 当前证据已足够，或继续讨论只会重复已有观点时，选择 `STOP`；
+- 服务端最多允许 5 轮，这是防止失控的硬上限，不是默认轮数；
+- 决策缺失、字段非法、存在未知字段或模型调用失败时直接 fail closed，返回 `NOT_RATED`，不会回退到默认轮数。
 
-- 投资、估值、买卖类问题回退到最多 2 轮；
-- 普通问题回退到 1 轮。
+Checkpoint 中的 `planned_rounds` 不是预选总数，而是 Research Manager 当前滚动授权到的轮次上界：`CONTINUE` 将它推进一轮，`STOP` 将它固定在当前完成轮次，恢复任务时不会跳过新的续停判断。
 
 防止死循环的措施：
 
 - 主链使用有限 ExecutionPlan；
 - 动作是枚举；
-- 辩论有轮数上限；
+- Research Manager 每轮显式决定续停，服务端另有 5 轮硬上限；
 - Agent 和工具有超时；
-- 失败走后端降级，不让模型无限重试。
+- 续停决策失败直接 fail closed，不让模型猜测轮数或无限重试。
 
 ### 3.7 服务器拥有工具执行权
 
@@ -475,7 +475,7 @@ DEEP 研究时间更长，因此后台化：
 
 #### Q3：多 Agent 协作的难点是什么
 
-> 难点不是创建多个 Prompt，而是共享状态、证据一致性、执行顺序、失败隔离和终止条件。项目使用统一 AnalysisState、相同证据快照、轮内并行轮间串行和有限轮数解决。
+> 难点不是创建多个 Prompt，而是共享状态、证据一致性、执行顺序、失败隔离和终止条件。项目使用统一 AnalysisState、相同证据快照、轮内并行轮间串行，以及 Research Manager 每轮 `CONTINUE`/`STOP` 决策解决。
 
 #### Q4：如何避免 Agent 跑偏
 
@@ -483,7 +483,7 @@ DEEP 研究时间更长，因此后台化：
 
 #### Q5：如何防止死循环
 
-> 主链是有限 Plan-and-Execute，不是无限 ReAct；辩论最多 5 轮；工具和 Agent 有超时；失败由后端确定性降级。
+> 主链是有限 Plan-and-Execute，不是无限 ReAct；Research Manager 每轮判断续停，服务端最多允许 5 轮；工具和 Agent 有超时；续停决策非法或调用失败时直接 `NOT_RATED`，不猜默认轮数。
 
 #### Q6：Agent 频繁选错工具怎样排查
 
@@ -730,9 +730,9 @@ MCP、Skill 简洁区分：
 >
 > RAG 主要处理 SEC 财报和本地研究资料。入库阶段将文档解析为父块和子块；子块用于 Embedding 和召回，父块用于最终上下文。默认使用本地 bge-m3 生成 1024 维向量并写入 Milvus，同时把文本和元数据保存到 MySQL。查询时先 Query Rewrite，再分别执行 Milvus 向量检索和 MySQL FULLTEXT 关键词检索，用 RRF 融合排名，通过 gte-rerank-v2 精排，最后扩展父块。项目使用 Golden Set、Recall、Precision、MRR 和 RAGAS 分别评估检索和生成。
 >
-> 多 Agent 方面，ChatService 先调用 Coordinator 生成受约束的 ExecutionPlan，而不是让模型无限 ReAct。普通请求由服务器先按计划取证，再交给对应的无工具领域 Agent 归纳；深度研究形成统一证据状态，让 Bull 和 Bear 基于同一证据进行轮内并行、轮间串行的辩论，最后由 Research Manager 输出结构化报告。不同 Agent 使用独立、无工具的 ChatClient，工具执行权集中在后端计划执行层，减少工具误选和角色污染。
+> 多 Agent 方面，ChatService 先调用 Coordinator 生成受约束的 ExecutionPlan，而不是让模型无限 ReAct。普通请求由服务器先按计划取证，再交给对应的无工具领域 Agent 归纳；深度研究形成统一证据状态，让 Bull 和 Bear 基于同一证据进行轮内并行、轮间串行的辩论，每轮后由 Research Manager 判断 `CONTINUE` 或 `STOP`，最后再输出结构化报告。不同 Agent 使用独立、无工具的 ChatClient，工具执行权集中在后端计划执行层，减少工具误选和角色污染。
 >
-> 工程可靠性上，模型路由、Query Rewrite、Rerank、Redis 和外部工具都有降级；Agent 和工具有超时；辩论最多 5 轮；DEEP 研究通过 Redis Stream、MySQL 状态、Lease、Fencing 和 Checkpoint 后台执行。项目用 Golden Set、RAGAS 和 Regression Eval 验证版本质量，用 MySQL Trace、Redis 事件流和可选 Phoenix 解释单次执行过程。项目追求的不是完全自治，而是金融场景下可验证、可控制、可恢复的 Agent 系统。
+> 工程可靠性上，模型路由、Query Rewrite、Rerank、Redis 和外部工具都有降级；Agent 和工具有超时；辩论轮数由 Research Manager 逐轮判断，服务端硬上限为 5；DEEP 研究通过 Redis Stream、MySQL 状态、Lease、Fencing 和 Checkpoint 后台执行。项目用 Golden Set、RAGAS 和 Regression Eval 验证版本质量，用 MySQL Trace、Redis 事件流和可选 Phoenix 解释单次执行过程。项目追求的不是完全自治，而是金融场景下可验证、可控制、可恢复的 Agent 系统。
 
 ---
 
@@ -985,7 +985,7 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 |---|---|
 | 多 Agent 是否只是多套 Prompt？ | 还包括证据输入边界、状态、调度关系和输出契约 |
 | 为什么一定要 Bull/Bear？ | 用对立角色暴露假设和风险，不代表角色越多越好 |
-| Bull/Bear 会不会制造无意义争论？ | 动态轮数、统一证据和 Manager 综合控制 |
+| Bull/Bear 会不会制造无意义争论？ | 每轮后由 Manager 根据未决冲突严格判断 `CONTINUE`/`STOP`，服务端硬上限 5 轮 |
 | Manager 会不会偏向某一方？ | Prompt 约束、结构化输出、证据引用和稳定性评测 |
 | 为什么轮内并行、轮间串行？ | 同轮互不依赖；下一轮必须看到上一轮完整观点 |
 | 如果 Bull 成功、Bear 失败怎么办？ | 可降级为单边报告但必须标记证据缺失；当前实现需结合具体异常路径说明 |
@@ -1005,7 +1005,7 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 1. 简单请求不进入 DEEP；
 2. Fundamentals、Market、News 并行；
 3. Bull、Bear 同轮并行；
-4. 根据证据冲突动态选择轮数；
+4. 每轮后仅在仍有实质未决冲突时继续；
 5. 使用更轻模型完成路由和规划；
 6. 缓存确定性工具结果；
 7. 用质量、延迟和成本联合决定是否保留某个 Agent。
@@ -1201,7 +1201,6 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 - `stocksage-backend/src/main/java/com/stocksage/service/ToolPrefetchService.java`
 - `stocksage-backend/src/main/java/com/stocksage/service/DeepEvidenceCollector.java`
 - `stocksage-backend/src/main/java/com/stocksage/agent/ResearchDebateService.java`
-- `stocksage-backend/src/main/java/com/stocksage/agent/DebateRoundPlanner.java`
 - `stocksage-backend/src/main/java/com/stocksage/agent/BullResearcher.java`
 - `stocksage-backend/src/main/java/com/stocksage/agent/BearResearcher.java`
 - `stocksage-backend/src/main/java/com/stocksage/agent/ResearchManager.java`

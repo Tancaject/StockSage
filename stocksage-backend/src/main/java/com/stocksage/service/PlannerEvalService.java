@@ -153,7 +153,7 @@ public class PlannerEvalService {
             // 根据评估模式调用确定性规则或完整 Coordinator 计划入口，不执行计划中的动作。
             ExecutionPlan plan = mode == PlannerEvalMode.DETERMINISTIC
                     ? coordinator.planDeterministically(evalCase.query(), evalCase.ragHitCount())
-                    : coordinator.plan(evalCase.query(), evalCase.ragHitCount(), "", evalCase.recentTurns());
+                    : coordinator.plan(evalCase.query(), evalCase.ragHitCount(), evalCase.recentTurns());
             List<PlanAction> planned = plan.actions() == null ? List.of() : List.copyOf(plan.actions());
             List<PlanAction> missing = evalCase.requiredActions().stream()
                     .filter(action -> !planned.contains(action))

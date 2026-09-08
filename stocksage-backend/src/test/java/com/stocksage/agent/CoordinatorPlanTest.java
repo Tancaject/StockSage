@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 class CoordinatorPlanTest {
 
     private final Coordinator coordinator = new Coordinator(
-            null, null, null,
+            null, null,
             new ObjectMapper(),
             new TickerResolutionService(null, null, new ObjectMapper())
     );
@@ -47,7 +47,6 @@ class CoordinatorPlanTest {
         ExecutionPlan plan = coordinator.planDeterministically("NVDA 最近 K 线走势如何？", 0);
         assertThat(plan.route()).isEqualTo(PlanRoute.MARKET);
         assertThat(plan.actions()).containsExactly(
-                PlanAction.SEARCH_STOCKS,
                 PlanAction.GET_STOCK_KLINE,
                 PlanAction.GET_FINANCIAL_METRICS,
                 PlanAction.GET_TECHNICAL_INDICATORS,
@@ -63,7 +62,6 @@ class CoordinatorPlanTest {
         assertThat(plan.route()).isEqualTo(PlanRoute.FUNDAMENTALS);
         assertThat(plan.actions()).containsExactly(
                 PlanAction.KNOWLEDGE_RETRIEVAL,
-                PlanAction.SEARCH_STOCKS,
                 PlanAction.GET_FINANCIAL_REPORTS,
                 PlanAction.SEARCH_COMPANY_REPORTS,
                 PlanAction.FUNDAMENTALS_AGENT,
@@ -92,10 +90,8 @@ class CoordinatorPlanTest {
         ExecutionPlan plan = coordinator.planDeterministically("美联储今天有什么最新消息？", 0);
         assertThat(plan.route()).isEqualTo(PlanRoute.NEWS);
         assertThat(plan.actions()).containsExactly(
-                PlanAction.SEARCH_STOCKS,
                 PlanAction.SEARCH_NEWS,
                 PlanAction.WEB_SEARCH,
-                PlanAction.GET_MARKET_OVERVIEW,
                 PlanAction.NEWS_AGENT,
                 PlanAction.FINAL_ANSWER
         );
@@ -113,7 +109,7 @@ class CoordinatorPlanTest {
                 }
                 """);
         Coordinator llmCoordinator = new Coordinator(
-                routingClient, null, null,
+                routingClient, null,
                 new ObjectMapper(),
                 new TickerResolutionService(null, null, new ObjectMapper())
         );
@@ -146,7 +142,7 @@ class CoordinatorPlanTest {
         when(routingClient.prompt().user(anyString()).call().content())
                 .thenThrow(new IllegalStateException("provider-secret-detail"));
         Coordinator llmCoordinator = new Coordinator(
-                routingClient, null, null,
+                routingClient, null,
                 new ObjectMapper(),
                 new TickerResolutionService(null, null, new ObjectMapper())
         );
@@ -173,7 +169,7 @@ class CoordinatorPlanTest {
                 }
                 """);
         Coordinator llmCoordinator = new Coordinator(
-                routingClient, null, null,
+                routingClient, null,
                 new ObjectMapper(),
                 new TickerResolutionService(null, null, new ObjectMapper())
         );
@@ -221,7 +217,7 @@ class CoordinatorPlanTest {
                 }
                 """);
         Coordinator llmCoordinator = new Coordinator(
-                routingClient, null, null,
+                routingClient, null,
                 new ObjectMapper(),
                 new TickerResolutionService(null, null, new ObjectMapper())
         );
@@ -247,13 +243,13 @@ class CoordinatorPlanTest {
                 }
                 """);
         Coordinator llmCoordinator = new Coordinator(
-                routingClient, null, null,
+                routingClient, null,
                 new ObjectMapper(),
                 new TickerResolutionService(null, null, new ObjectMapper())
         );
 
         ExecutionPlan plan = llmCoordinator.plan(
-                "compare it with MSFT", 0, "", List.of("user: Review AAPL first"));
+                "compare it with MSFT", 0, List.of("user: Review AAPL first"));
 
         assertThat(plan.route()).isEqualTo(PlanRoute.DIRECT);
         assertThat(plan.actions()).containsExactly(PlanAction.FINAL_ANSWER);

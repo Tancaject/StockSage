@@ -10,11 +10,13 @@ import com.stocksage.harness.HarnessModels.HarnessDecision;
 import com.stocksage.harness.HarnessModels.HarnessPhase;
 import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.HarnessSnapshot;
+import com.stocksage.harness.HarnessModels.HarnessViolation;
 import com.stocksage.harness.HarnessModels.RecoveryAction;
 import com.stocksage.harness.HarnessModels.RecoveryLifecycle;
 import com.stocksage.harness.HarnessModels.RunContext;
 import com.stocksage.harness.HarnessModels.SynthesisResult;
 import com.stocksage.harness.HarnessModels.TargetIdentity;
+import com.stocksage.harness.HarnessModels.ViolationCode;
 import com.stocksage.harness.HarnessObserver;
 import com.stocksage.harness.ResearchHarness;
 import com.stocksage.model.dto.AnalysisHorizon;
@@ -38,6 +40,7 @@ import com.stocksage.trace.TraceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -71,7 +74,6 @@ class ResearchDebateServiceResumeTest {
     private final ResearchManager researchManager = mock(ResearchManager.class);
     private final DebateContractParser debateContractParser = mock(DebateContractParser.class);
     private final DebateDecisionPolicy debateDecisionPolicy = mock(DebateDecisionPolicy.class);
-    private final DebateRoundPlanner debateRoundPlanner = mock(DebateRoundPlanner.class);
     private final ChatStreamEmitter chatStreamEmitter = mock(ChatStreamEmitter.class);
     private final ResearchHarness researchHarness = mock(ResearchHarness.class);
     private final DeepResearchCompletionPolicy completionPolicy = new DeepResearchCompletionPolicy();
@@ -81,7 +83,6 @@ class ResearchDebateServiceResumeTest {
             researchManager,
             debateContractParser,
             debateDecisionPolicy,
-            debateRoundPlanner,
             mock(TraceService.class),
             chatStreamEmitter,
             researchHarness,
@@ -90,6 +91,7 @@ class ResearchDebateServiceResumeTest {
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(service, "maxRounds", 5);
         when(bullResearcher.argue(any(), anyInt()))
                 .thenAnswer(invocation -> Flux.just("bull-r" + invocation.getArgument(1, Integer.class)));
         when(bearResearcher.argue(any(), anyInt()))
@@ -110,6 +112,12 @@ class ResearchDebateServiceResumeTest {
                     return current != null && current.equals(
                             invocation.getArgument(1, DebateVerdict.class));
                 });
+        when(researchManager.decideDebateContinuation(
+                any(), anyInt(), anyInt(), any(Runnable.class)))
+                .thenReturn(Mono.just(new ResearchManager.DebateContinuationDecision(
+                        ResearchManager.DebateContinuation.STOP,
+                        "fixture stop"
+                )));
         when(researchManager.scoreDebate(any(), any(), any(Runnable.class)))
                 .thenAnswer(invocation -> Mono.just(managerAssessment(
                         invocation.getArgument(0, AnalysisState.class))));
@@ -135,43 +143,79 @@ class ResearchDebateServiceResumeTest {
     }
 
     @Test
-    void resumeFromRound3SkipsPlannerAndEarlierRounds() {
+    void resumeFromRound3SkipsEarlierRoundsAndStopsAtTheAuthorizedRound() {
         AnalysisState state = stateWithCompletedRounds(2);
-        List<Integer> checkpoints = new ArrayList<>();
+        List<String> checkpoints = new ArrayList<>();
 
         AnalysisState done = service.runDebate(null, null, state, 3, 3,
-                (current, rounds, planned) -> checkpoints.add(rounds));
+                (current, rounds, authorized) -> checkpoints.add(rounds + ":" + authorized));
 
-        verify(debateRoundPlanner, never()).decide(any(), anyInt());
         verify(bullResearcher, never()).argue(any(), eq(1));
         verify(bullResearcher, never()).argue(any(), eq(2));
         verify(bullResearcher).argue(any(), eq(3));
-        assertThat(checkpoints).containsExactly(3);
+        verify(researchManager).decideDebateContinuation(
+                any(), eq(3), eq(5), any(Runnable.class));
+        assertThat(checkpoints).containsExactly("3:3");
         assertThat(done.getDebateTurns()).hasSize(6);
     }
 
     @Test
-    void freshRunStillPlansConcurrentlyWithRound1() {
-        when(debateRoundPlanner.decide(any(), anyInt()))
-                .thenReturn(new DebateRoundPlanner.RoundDecision(2, "two rounds"));
-        List<Integer> checkpoints = new ArrayList<>();
+    void freshRunContinuesThenStopsFromManagerDecisions() {
+        when(researchManager.decideDebateContinuation(
+                any(), anyInt(), anyInt(), any(Runnable.class)))
+                .thenReturn(
+                        Mono.just(new ResearchManager.DebateContinuationDecision(
+                                ResearchManager.DebateContinuation.CONTINUE,
+                                "one rebuttal is needed"
+                        )),
+                        Mono.just(new ResearchManager.DebateContinuationDecision(
+                                ResearchManager.DebateContinuation.STOP,
+                                "the disagreement is resolved"
+                        ))
+                );
+        List<String> checkpoints = new ArrayList<>();
 
         AnalysisState done = service.runDebate(null, null, AnalysisState.builder().query("q").build(),
-                1, 0, (current, rounds, planned) -> checkpoints.add(rounds));
+                1, 0, (current, rounds, authorized) -> checkpoints.add(rounds + ":" + authorized));
 
-        verify(debateRoundPlanner).decide(any(), anyInt());
         verify(bullResearcher).argue(any(), eq(1));
         verify(bullResearcher).argue(any(), eq(2));
+        verify(researchManager).decideDebateContinuation(
+                any(), eq(1), eq(5), any(Runnable.class));
+        verify(researchManager).decideDebateContinuation(
+                any(), eq(2), eq(5), any(Runnable.class));
         verify(researchManager, times(1))
                 .scoreDebate(any(), any(), any(Runnable.class));
-        assertThat(checkpoints).containsExactly(1, 2);
+        assertThat(checkpoints).containsExactly("1:2", "2:2");
         assertThat(done.getDebateTurns()).hasSize(4);
     }
 
     @Test
+    void hardCapStopsAfterRoundFiveWithoutAnotherManagerDecision() {
+        when(researchManager.decideDebateContinuation(
+                any(), anyInt(), anyInt(), any(Runnable.class)))
+                .thenReturn(Mono.just(new ResearchManager.DebateContinuationDecision(
+                        ResearchManager.DebateContinuation.CONTINUE,
+                        "continue"
+                )));
+        List<String> checkpoints = new ArrayList<>();
+
+        AnalysisState done = service.runDebate(null, null, AnalysisState.builder().query("q").build(),
+                1, 0, (current, rounds, authorized) -> checkpoints.add(rounds + ":" + authorized));
+
+        verify(researchManager, times(4)).decideDebateContinuation(
+                any(), anyInt(), eq(5), any(Runnable.class));
+        verify(researchManager, never()).decideDebateContinuation(
+                any(), eq(5), eq(5), any(Runnable.class));
+        verify(bullResearcher, never()).argue(any(), eq(6));
+        verify(bearResearcher, never()).argue(any(), eq(6));
+        assertThat(checkpoints).containsExactly(
+                "1:2", "2:3", "3:4", "4:5", "5:5");
+        assertThat(done.getDebateTurns()).hasSize(10);
+    }
+
+    @Test
     void freshReportResynthesisReusesTheSingleManagerScore() {
-        when(debateRoundPlanner.decide(any(), anyInt()))
-                .thenReturn(new DebateRoundPlanner.RoundDecision(1, "one round"));
         HarnessDecision repair = new HarnessDecision(
                 HarnessOutcome.RECOVER,
                 List.of(),
@@ -198,6 +242,30 @@ class ResearchDebateServiceResumeTest {
                 .scoreDebate(any(), any(), any(Runnable.class));
         verify(researchManager, times(2))
                 .synthesizeStreamingResult(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void invalidContinuationFailsClosedWithoutScoring() {
+        when(researchManager.decideDebateContinuation(
+                any(), anyInt(), anyInt(), any(Runnable.class)))
+                .thenReturn(Mono.error(new IllegalArgumentException("invalid continuation JSON")));
+
+        AnalysisState done = service.runDebate(
+                "trace-invalid-continuation",
+                20L,
+                AnalysisState.builder().query("q").build(),
+                1,
+                0,
+                null
+        );
+
+        assertThat(done.getInvestmentReport().getQualityStatus())
+                .isEqualTo(InvestmentReport.ReportQualityStatus.NOT_RATED);
+        assertThat(done.getHarnessSnapshot().outcome()).isEqualTo(HarnessOutcome.DEGRADE);
+        assertThat(done.getHarnessSnapshot().violations())
+                .containsExactly(ViolationCode.DEBATE_ASSESSMENT_INVALID);
+        verify(researchManager, never())
+                .scoreDebate(any(), any(), any(Runnable.class));
     }
 
     @Test
@@ -523,7 +591,6 @@ class ResearchDebateServiceResumeTest {
                 .synthesizeStreamingResult(any(), any(), any(), any(), any());
         verify(bullResearcher, never()).argue(any(), anyInt());
         verify(bearResearcher, never()).argue(any(), anyInt());
-        verify(debateRoundPlanner, never()).decide(any(), anyInt());
         ArgumentCaptor<HarnessDecision> observedDecisions =
                 ArgumentCaptor.forClass(HarnessDecision.class);
         verify(observer, times(2)).reportDecision(
@@ -588,6 +655,52 @@ class ResearchDebateServiceResumeTest {
                 .isEqualTo(InvestmentReport.ReportQualityStatus.VERIFIED);
         assertThat(done.getHarnessSnapshot().recoveryAttempts())
                 .containsEntry(RecoveryAction.RESYNTHESIZE_REPORT, 1);
+    }
+
+    @Test
+    void checkpointedContinuationFailureRemainsNotRatedWithoutReportRepair() {
+        AnalysisState state = stateWithCompletedRounds(1);
+        InvestmentReport notRated = InvestmentReport.builder()
+                .ticker("AAPL")
+                .qualityStatus(InvestmentReport.ReportQualityStatus.NOT_RATED)
+                .analystSummary("续停决策失败，本轮不评级。")
+                .recommendation(null)
+                .build();
+        state.setInvestmentReport(notRated);
+        state.setHarnessSnapshot(HarnessSnapshot.from(
+                DeepResearchCompletionPolicy.POLICY_ID,
+                Integer.toString(DeepResearchCompletionPolicy.POLICY_VERSION),
+                HarnessPhase.REPORT,
+                new HarnessDecision(
+                        HarnessOutcome.DEGRADE,
+                        List.of(new HarnessViolation(
+                                ViolationCode.DEBATE_ASSESSMENT_INVALID, null)),
+                        List.of(RecoveryAction.RETURN_NOT_RATED)
+                ),
+                Map.of()
+        ));
+
+        AnalysisState done = serviceWithRealHarness().revalidateCheckpointedReport(
+                "trace-continuation-failure",
+                20L,
+                state,
+                null,
+                current -> {
+                }
+        );
+
+        assertThat(done.getInvestmentReport()).isSameAs(notRated);
+        assertThat(done.getInvestmentReport().getQualityStatus())
+                .isEqualTo(InvestmentReport.ReportQualityStatus.NOT_RATED);
+        assertThat(done.getInvestmentReport().getRecommendation()).isNull();
+        assertThat(done.getHarnessSnapshot().violations())
+                .contains(ViolationCode.DEBATE_ASSESSMENT_INVALID);
+        verify(researchManager, never())
+                .scoreDebate(any(), any(), any(Runnable.class));
+        verify(researchManager, never())
+                .synthesizeStreamingResult(any(), any(), any(), any(), any());
+        verify(bullResearcher, never()).argue(any(), anyInt());
+        verify(bearResearcher, never()).argue(any(), anyInt());
     }
 
     @Test
@@ -679,7 +792,6 @@ class ResearchDebateServiceResumeTest {
                 researchManager,
                 debateContractParser,
                 debateDecisionPolicy,
-                debateRoundPlanner,
                 mock(TraceService.class),
                 chatStreamEmitter,
                 new ResearchHarness(observer),

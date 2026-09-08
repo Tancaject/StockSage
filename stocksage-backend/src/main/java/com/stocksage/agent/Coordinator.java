@@ -43,10 +43,8 @@ public class Coordinator {
 
     /** 统一执行语义、向量、模式和 n-gram 识别的意图服务。 */
     private final IntentRecognitionService intentRecognitionService;
-    /** 普通路由的无工具最终回答客户端。 */
+    /** 各路由共用的无工具最终回答客户端。 */
     private final ChatClient responseChatClient;
-    /** 证据已固定后的无工具回答客户端，主要用于 DEEP 最终输出。 */
-    private final ChatClient preparedAnswerChatClient;
     /** 确定性兜底中识别问题是否包含股票标的。 */
     private final TickerResolutionService tickerResolutionService;
     /** 唯一的 route -> actions/taskType/modelTier 后端目录。 */
@@ -76,16 +74,14 @@ public class Coordinator {
     @Value("${stocksage.chat.model-routing.max-output-tokens:${STOCKSAGE_CHAT_MAX_OUTPUT_TOKENS:4096}}")
     private int modelRoutingMaxOutputTokens;
 
-    /** 注入意图识别、普通回答和预取上下文回答三个职责。 */
+    /** 注入意图识别、最终回答和服务器计划目录。 */
     @Autowired
     public Coordinator(IntentRecognitionService intentRecognitionService,
                        @Qualifier("chatClient") ChatClient responseChatClient,
-                       @Qualifier("preparedAnswerChatClient") ChatClient preparedAnswerChatClient,
                        TickerResolutionService tickerResolutionService,
                        RoutePlanCatalog routePlanCatalog) {
         this.intentRecognitionService = intentRecognitionService;
         this.responseChatClient = responseChatClient;
-        this.preparedAnswerChatClient = preparedAnswerChatClient;
         this.tickerResolutionService = tickerResolutionService;
         this.routePlanCatalog = routePlanCatalog;
     }
@@ -95,11 +91,10 @@ public class Coordinator {
      */
     public Coordinator(@Qualifier("coordinatorChatClient") ChatClient routingChatClient,
                        @Qualifier("chatClient") ChatClient responseChatClient,
-                       @Qualifier("preparedAnswerChatClient") ChatClient preparedAnswerChatClient,
                        ObjectMapper objectMapper,
                        TickerResolutionService tickerResolutionService) {
         this(new IntentRecognitionService(routingChatClient, objectMapper), responseChatClient,
-                preparedAnswerChatClient, tickerResolutionService, new RoutePlanCatalog());
+                tickerResolutionService, new RoutePlanCatalog());
     }
 
     /**
@@ -110,32 +105,17 @@ public class Coordinator {
      * @return 服务器拥有动作列表和模型层级的执行计划
      */
     public ExecutionPlan plan(String userQuery, int ragHitCount) {
-        return plan(userQuery, ragHitCount, "", List.of());
-    }
-
-    /**
-     * 让一次轻量模型调用只选择执行路由。
-     *
-     * <p>模型不能选择工具、动作、Agent 或具体模型名；这些都由 {@link #buildPlan} 按后端固定表生成。</p>
-     *
-     * @param userQuery 用户原始问题
-     * @param ragHitCount 知识库命中数
-     * @param ragSummary 兼容旧调用的参数，不进入意图提示词
-     * @return 由直接 targetRoute 生成的服务器计划
-     */
-    public ExecutionPlan plan(String userQuery, int ragHitCount, String ragSummary) {
-        return plan(userQuery, ragHitCount, ragSummary, List.of());
+        return plan(userQuery, ragHitCount, List.of());
     }
 
     /**
      * 使用最近三轮上下文识别意图，并由识别结果的 targetRoute 直接生成计划。
      *
-     * <p>{@code ragSummary} 与命中数量都不进入意图提示词，避免检索结果反过来污染任务分类；
+     * <p>命中数量不进入意图提示词，避免检索结果反过来污染任务分类；
      * {@code ragHitCount} 只用于计划的模型层级和诊断元数据。</p>
      */
     public ExecutionPlan plan(String userQuery,
                               int ragHitCount,
-                              String ragSummary,
                               List<String> recentTurns) {
         try {
             IntentRecognitionResult recognition = recognizeIntent(
@@ -210,35 +190,11 @@ public class Coordinator {
     }
 
     /**
-     * 使用默认对话客户端流式生成回答。
-     */
-    public Flux<String> streamAnswer(List<Message> promptMessages) {
-        return streamAnswer(promptMessages, false, ModelTier.STANDARD);
-    }
-
-    /**
-     * 流式输出最终回答。两个客户端都不持有工具；深度研究使用专用证据整理提示。
-     */
-    public Flux<String> streamAnswer(List<Message> promptMessages, boolean usePreparedContextOnly) {
-        return streamAnswer(promptMessages, usePreparedContextOnly, ModelTier.STANDARD);
-    }
-
-    /**
-     * 按 Coordinator 选出的能力层级流式输出最终回答。
-     *
-     * <p>层级只在后端映射为白名单模型名；即使路由模型建议了层级，也不能直接指定任意模型。</p>
-     */
-    public Flux<String> streamAnswer(List<Message> promptMessages, boolean usePreparedContextOnly, ModelTier modelTier) {
-        return streamAnswer(promptMessages, usePreparedContextOnly, modelTier, false);
-    }
-
-    /**
      * 按能力层级和输入模态流式输出最终回答。
      */
     public Flux<String> streamAnswer(List<Message> promptMessages, boolean usePreparedContextOnly, ModelTier modelTier, boolean useVisionModel) {
         SelectedModel selectedModel = selectFinalAnswerModel(modelTier, usePreparedContextOnly, useVisionModel);
         ModelTier effectiveTier = selectedModel.tier();
-        ChatClient client = usePreparedContextOnly ? preparedAnswerChatClient : responseChatClient;
         String modelName = selectedModel.modelName();
         if (usePreparedContextOnly) {
             log.info("Coordinator streaming final answer from prepared context only.");
@@ -246,7 +202,7 @@ public class Coordinator {
         log.info("Coordinator selected final-answer model tier={}, model={}, preparedContextOnly={}",
                 effectiveTier, modelName, usePreparedContextOnly);
 
-        ChatClient.ChatClientRequestSpec requestSpec = client.prompt()
+        ChatClient.ChatClientRequestSpec requestSpec = responseChatClient.prompt()
                 .messages(promptMessages);
         if (modelName != null && !modelName.isBlank()) {
             String resolvedModel = modelName.trim();
@@ -259,13 +215,6 @@ public class Coordinator {
         return requestSpec
                 .stream()
                 .content();
-    }
-
-    /**
-     * 解析最终回答会实际使用的模型层级和模型名，供 SSE 元数据与持久化复用。
-     */
-    public SelectedModel selectFinalAnswerModel(ModelTier modelTier, boolean usePreparedContextOnly) {
-        return selectFinalAnswerModel(modelTier, usePreparedContextOnly, false);
     }
 
     /**
@@ -335,8 +284,17 @@ public class Coordinator {
                 decision.needsClarification(),
                 decision.reasonCodes()
         );
+        ReadRequest readRequest = ReadRequest.parse(route, resolvedQuery, decision.entities());
+        // 当前消息的显式约束不能被模型改写覆盖；省略的约束仍从已消歧问题取得。
+        ReadRequest explicit = ReadRequest.parse(route, originalQuery, readRequest.attributes().entrySet().stream()
+                .collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, entry -> String.valueOf(entry.getValue()))));
+        if (explicit.clarification().isBlank() && !readRequest.clarification().isBlank()) explicit = readRequest;
+        if (explicit.barsOnly()) {
+            actions = List.of(PlanAction.GET_STOCK_KLINE, PlanAction.FINAL_ANSWER);
+        }
+        observation = buildPlanObservation(route, modelTier, actions);
         return new ExecutionPlan(
-                route, taskType, thought, actions, observation, modelTier, routingDecision, resolvedQuery);
+                route, taskType, thought, actions, observation, modelTier, routingDecision, resolvedQuery, explicit);
     }
 
     /**
@@ -423,7 +381,10 @@ public class Coordinator {
                 false,
                 matchedSignals
         );
-        return new ExecutionPlan(route, taskType, thought, actions, observation, modelTier, routingDecision, query);
+        ReadRequest read = ReadRequest.parse(route, query, Map.of());
+        if (read.barsOnly()) actions = List.of(PlanAction.GET_STOCK_KLINE, PlanAction.FINAL_ANSWER);
+        return new ExecutionPlan(route, taskType, thought, actions, buildPlanObservation(route, modelTier, actions),
+                modelTier, routingDecision, query, read);
     }
 
     /** 多标的尚无真实执行器时，在任何检索或工具执行前收敛为单标的澄清。 */

@@ -57,7 +57,8 @@ class DeepEvidenceCollectorTest {
                 chatStreamEmitter,
                 new TaskExecutorAdapter(Runnable::run),
                 researchHarness,
-                completionPolicy
+                completionPolicy,
+                new EvidenceEnvelopeMapper(tickerResolutionService)
         );
         ReflectionTestUtils.setField(collector, "toolPrefetchMaxSearchResults", 5);
         ReflectionTestUtils.setField(collector, "toolPrefetchPerToolTimeoutSeconds", 1L);
@@ -169,6 +170,13 @@ class DeepEvidenceCollectorTest {
                 .filter(item -> item.capabilityId().equals("getStructuredFinancials"))
                 .findFirst()
                 .orElseThrow();
+        var ordinary = new OrdinaryEvidence("AAPL",
+                com.stocksage.agent.ReadRequest.parse(com.stocksage.agent.PlanRoute.FUNDAMENTALS, "财报", java.util.Map.of()),
+                new com.fasterxml.jackson.databind.ObjectMapper(), new EvidenceEnvelopeMapper(tickerResolutionService));
+        ordinary.add("getStructuredFinancials", EvidenceDimension.FUNDAMENTALS,
+                fundamentalsTools.getStructuredFinancials("AAPL"));
+        assertThat(ordinary.ledger().evidence().get(0)).usingRecursiveComparison()
+                .ignoringFields("observedAt").isEqualTo(structuredFinancials);
         assertThat(structuredFinancials.provider()).isEqualTo("SEC EDGAR XBRL");
         assertThat(structuredFinancials.sourceRef()).isEqualTo(
                 "https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json");

@@ -62,22 +62,6 @@ public class AiConfig {
     }
 
     /**
-     * 创建最终回答生成器。
-     *
-     * <p>该客户端不绑定工具，只消费后端已经预取好的 RAG、行情、财务、新闻和辩论上下文。
-     * 它用于把确定性执行结果整理成面向用户的最终回答，避免在最后一步再次触发不可控工具调用。</p>
-     *
-     * @param builder Spring AI 提供的基础客户端构建器
-     * @return 不具备工具调用能力的最终回答客户端
-     */
-    @Bean("preparedAnswerChatClient")
-    public ChatClient preparedAnswerChatClient(ChatClient.Builder builder) {
-        return builder.clone()
-                .defaultOptions(chatOptions(standardModel))
-                .build();
-    }
-
-    /**
      * 创建 RAG 查询改写客户端。
      *
      * <p>该客户端只负责把自然语言问题压缩成检索词，不回答问题、不调用工具，
@@ -214,7 +198,7 @@ public class AiConfig {
                           "targetRoute": "DIRECT|MARKET|FUNDAMENTALS|NEWS|DEEP",
                           "timeSensitivity": "NONE|REAL_TIME|RECENT|HISTORICAL|UNSPECIFIED",
                           "analysisDepth": "BRIEF|STANDARD|DEEP|UNSPECIFIED",
-                          "entities": {"ticker":"可选ticker", "company":"可选公司", "timeRange":"可选时间范围"},
+                          "entities": {"ticker":"可选ticker", "company":"可选公司", "timeRange":"可选时间范围", "period":"可选最近范围，如1w或3m", "bar":"可选粒度，如1h或1d", "reportPeriod":"可选annual或quarterly", "reportCount":"可选报告期数量", "unsupportedTimeRange":"指定历史起止日期等无法表达的范围填true"},
                           "resolvedQuery": "结合历史补全指代后的独立问题，不超过600字",
                           "rationale": "一句话说明分流依据",
                           "reasonCodes": ["1到4个简短稳定理由代码"],
@@ -235,6 +219,7 @@ public class AiConfig {
                         - confidence 标尺：0.90-1.00 表示当前问题明确且上下文实体无歧义；0.70-0.89 表示可由最近对话可靠补全；0.55-0.69 表示仍有轻微边界不确定；低于 0.55 表示需要澄清。不要为了触发执行而虚高打分。
                         - 无法可靠补全时使用 UNKNOWN、DIRECT、低 confidence；不得编造 ticker 或公司。
                         - resolvedQuery 必须保持用户原意，不能替用户新增投资目标或事实。
+                        - period/bar/reportPeriod/reportCount 只提取用户明确要求或近期对话省略的参数，未要求时省略；最近两个季度为 reportPeriod=quarterly、reportCount=2。绝不能把指定历史日期改写成最近范围。
 
                         Few-shot：
                         1) 当前“什么是市盈率？” -> KNOWLEDGE_EXPLANATION / KNOWLEDGE / DIRECT / NONE / BRIEF。

@@ -50,7 +50,7 @@ public class ResearchTaskCheckpoint {
     @Column(name = "debate_rounds_completed", nullable = false)
     private Integer debateRoundsCompleted = 0;
 
-    /** 当前管线计划执行的辩论总轮数；尚未规划时为 0。 */
+    /** Research Manager 当前授权到的轮次上界；0 表示尚未完成首轮续停决策。 */
     @Column(name = "planned_rounds", nullable = false)
     private Integer plannedRounds = 0;
 

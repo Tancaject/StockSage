@@ -28,13 +28,24 @@ public record ExecutionPlan(
         String observation,
         ModelTier modelTier,
         RoutingDecisionMetadata routingDecision,
-        String resolvedQuery
+        String resolvedQuery,
+        ReadRequest readRequest
 ) {
     public ExecutionPlan {
         resolvedQuery = resolvedQuery == null ? "" : resolvedQuery.trim();
         if (resolvedQuery.length() > 600) {
             resolvedQuery = resolvedQuery.substring(0, 600);
         }
+        if (readRequest == null) {
+            readRequest = ReadRequest.parse(route, resolvedQuery,
+                    routingDecision == null ? java.util.Map.of() : routingDecision.entities());
+        }
+    }
+
+    public ExecutionPlan(PlanRoute route, String taskType, String thought, List<PlanAction> actions,
+                         String observation, ModelTier modelTier, RoutingDecisionMetadata routingDecision,
+                         String resolvedQuery) {
+        this(route, taskType, thought, actions, observation, modelTier, routingDecision, resolvedQuery, null);
     }
 
     /** 保留不传内部消歧问题的七字段调用形式。 */

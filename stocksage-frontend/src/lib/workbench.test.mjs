@@ -38,6 +38,17 @@ import {
   summarizeReportVersions,
 } from './workbench.js'
 
+test('EvalDesk formats missing metrics separately from measured zero', () => {
+  const source = fs.readFileSync(new URL('../views/EvalDesk.vue', import.meta.url), 'utf8')
+  const [, body] = source.match(/function formatMetric\(value\) \{([\s\S]*?)\n\}/)
+  const formatMetric = new Function('value', body)
+  for (const missing of [null, undefined, '', ' ']) {
+    assert.equal(formatMetric(missing), 'NO_DATA')
+  }
+  assert.equal(formatMetric(0), '0.000')
+  assert.equal(formatMetric(0.5), '0.500')
+})
+
 test('normalizeTicker uppercases symbols and strips noisy characters', () => {
   assert.equal(normalizeTicker('  nvda.us '), 'NVDAUS')
   assert.equal(normalizeTicker('brk-b'), 'BRKB')
@@ -97,6 +108,13 @@ test('summarizeRagEval extracts averages, failures, and gate status', () => {
       no_answer_accuracy: 1,
       latency_seconds: 12,
     },
+    gate_evaluation: {
+      schema_version: 'rag_gates_v1',
+      status: 'fail',
+      gates: [
+        { metric: 'citation_precision', value: 0.7, operator: '>=', threshold: 0.85, required: true, status: 'fail' },
+      ],
+    },
     cases: [
       { id: 'good', metrics: { context_recall: 1, citation_precision: 1 } },
       { id: 'bad', metrics: { context_recall: 0.4, citation_precision: 0.2 } },
@@ -107,6 +125,29 @@ test('summarizeRagEval extracts averages, failures, and gate status', () => {
   assert.equal(summary.status, 'fail')
   assert.deepEqual(summary.failedMetrics.map(item => item.metric), ['citation_precision'])
   assert.equal(summary.worstCases[0].id, 'bad')
+})
+
+test('RAG gates display evaluator decisions and leave legacy files unrated', () => {
+  for (const status of ['pass', 'fail', 'missing']) {
+    const gate = { metric: 'mrr', value: status === 'missing' ? null : 0.6,
+      operator: '>=', threshold: 0.5, required: true, status }
+    const summary = summarizeRagEval({
+      averages: { mrr: 0.6, latency_seconds: 60 },
+      gate_evaluation: { schema_version: 'rag_gates_v1', status, gates: [gate] },
+    })
+    assert.equal(summary.status, status)
+    assert.equal(summary.gates[0].status, status)
+    assert.deepEqual(summary.gates[0].target, { operator: '>=', threshold: 0.5 })
+    assert.equal(summary.gates.length, 2)
+    assert.equal(summary.gates[1].metric, 'latency_seconds')
+    assert.equal(summary.gates[1].value, 60)
+    assert.equal(summary.gates[1].status, 'unrated')
+    assert.equal(summary.gates[1].target, null)
+  }
+  const legacy = summarizeRagEval({ averages: { mrr: 0.9, citation_precision: null } })
+  assert.equal(legacy.status, 'unrated')
+  assert.deepEqual(legacy.gates.map(row => row.status), ['unrated', 'missing'])
+  assert.equal(summarizeRagEval({}).status, 'unrated')
 })
 
 test('summarizeRagEval exposes RAGAS metrics and failed case details', () => {

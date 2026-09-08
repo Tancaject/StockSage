@@ -56,10 +56,19 @@
 
           <div class="metric-section">
             <span class="panel-kicker">原始评测诊断（非经典指标口径）</span>
+            <p v-if="evalSummary.kind === 'rag'" class="panel-note">
+              门禁：{{ { pass: '通过', fail: '未通过', missing: '证据不足', unrated: '未评定' }[evalSummary.status] || '未评定' }}
+              <template v-if="evalSummary.status === 'unrated'"> · 结果未提供门禁判定，仅展示原始指标。</template>
+            </p>
             <div class="gate-list compact">
               <div v-for="gate in evalSummary.gates" :key="gate.metric" class="gate-row" :class="gate.status">
                 <span>{{ gate.label }}</span>
                 <strong>{{ formatMetric(gate.value) }}</strong>
+                <small v-if="evalSummary.kind === 'rag' && gate.target">
+                  {{ gate.target.operator }} {{ formatMetric(gate.target.threshold) }}
+                  · {{ gate.required ? '必需' : '可选' }}
+                  · {{ gate.status === 'missing' ? 'NO_DATA' : gate.status.toUpperCase() }}
+                </small>
               </div>
             </div>
           </div>
@@ -247,6 +256,7 @@ async function importEvalResult(event) {
 }
 
 function formatMetric(value) {
+  if (value === null || value === undefined || String(value).trim() === '') return 'NO_DATA'
   const number = Number(value)
   if (!Number.isFinite(number)) return '--'
   if (Math.abs(number) <= 1) return number.toFixed(3)

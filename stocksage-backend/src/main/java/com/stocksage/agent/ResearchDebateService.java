@@ -28,9 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
-import reactor.util.function.Tuple3;
 
 import java.time.Duration;
 import java.util.EnumSet;
@@ -43,14 +41,14 @@ import java.util.function.Consumer;
 /**
  * 编排深度研究中的多空辩论循环。
  *
- * <p>分析师报告已经写入 AnalysisState。本服务负责决定辩论轮数、生成多头和空头论证、
+ * <p>分析师报告已经写入 AnalysisState。本服务负责生成多头和空头论证、执行 Research Manager 的续停决策、
  * 记录链路步骤，并调用 ResearchManager 生成最终结构化报告。</p>
  *
  * <p>为压缩深度研究的端到端耗时，辩论按如下方式调度：</p>
  * <ul>
- *   <li>轮次规划器与第 1 轮辩论<b>并发</b>执行——第 1 轮无论如何都会发生，因此规划器延迟被完全掩盖；</li>
  *   <li>每一轮内 Bull 与 Bear <b>并行</b>生成（“同时交卷”式辩论），轮间仍串行，
  *       使第 2 轮起双方都能读到上一轮对方的完整观点；</li>
+ *   <li>每轮双方定稿后由 Research Manager 判断 CONTINUE/STOP，第五轮由服务端硬停止；</li>
  *   <li>Bull/Bear 的论证<b>流式</b>实时推送到前端推理面板，让用户看着辩论展开而非空等。</li>
  * </ul>
  */
@@ -67,8 +65,8 @@ public class ResearchDebateService {
     @FunctionalInterface
     public interface RoundCheckpointer {
 
-        /** 每轮双方定稿后保存完整状态，避免恢复时重烧已经完成的模型轮次。 */
-        void onRoundCompleted(AnalysisState state, int roundsCompleted, int plannedRounds);
+        /** 每轮双方和续停决策定稿后保存完整状态，第三个参数是当前授权到的轮次上界。 */
+        void onRoundCompleted(AnalysisState state, int roundsCompleted, int authorizedThroughRound);
     }
 
     /** 只基于现有证据生成看多论证。 */
@@ -81,9 +79,7 @@ public class ResearchDebateService {
     private final DebateContractParser debateContractParser;
     /** 根据 Manager 逐项评分确定性计算胜方和评级。 */
     private final DebateDecisionPolicy debateDecisionPolicy;
-    /** 用轻量模型选择 1 到配置上限的辩论轮数。 */
-    private final DebateRoundPlanner debateRoundPlanner;
-    /** 持久化每个规划、辩论和综合步骤。 */
+    /** 持久化每个辩论、续停和综合步骤。 */
     private final TraceService traceService;
     /** 把逐 token 辩论与恢复提示写入 SSE/Trace 事件流。 */
     private final ChatStreamEmitter chatStreamEmitter;
@@ -92,9 +88,9 @@ public class ResearchDebateService {
     /** DEEP 证据/报告的权威完成规则。 */
     private final DeepResearchCompletionPolicy completionPolicy;
 
-    /** 可配置辩论轮数上限，RoundPlanner 还会硬限制到五轮。 */
+    /** 可配置辩论轮数硬上限，服务端最终仍限制为五轮。 */
     @Value("${stocksage.agent.debate.max-rounds:5}")
-    private int maxRounds;
+    private int maxRounds = 5;
 
     /**
      * 单个模型阶段的外层硬截止时间。
@@ -126,19 +122,17 @@ public class ResearchDebateService {
         return runDebate(traceId, conversationId, state, 1, 0, null);
     }
 
-    /**
-     * 从指定轮次继续辩论；既定总轮数来自 checkpoint，恢复时不再让 planner 改写历史决策。
-     */
+    /** 从指定轮次继续辩论；checkpoint 只授权下一轮，不预先固定总轮数。 */
     public AnalysisState runDebate(
             String traceId,
             Long conversationId,
             AnalysisState state,
             int startRound,
-            int fixedPlannedRounds,
+            int authorizedThroughRound,
             RoundCheckpointer checkpointer
     ) {
         return runDebate(
-                traceId, conversationId, state, startRound, fixedPlannedRounds,
+                traceId, conversationId, state, startRound, authorizedThroughRound,
                 checkpointer, null, null);
     }
 
@@ -153,7 +147,7 @@ public class ResearchDebateService {
             Long conversationId,
             AnalysisState state,
             int startRound,
-            int fixedPlannedRounds,
+            int authorizedThroughRound,
             RoundCheckpointer checkpointer,
             Runnable executionGuard
     ) {
@@ -162,7 +156,7 @@ public class ResearchDebateService {
                 conversationId,
                 state,
                 startRound,
-                fixedPlannedRounds,
+                authorizedThroughRound,
                 checkpointer,
                 executionGuard,
                 null
@@ -172,16 +166,17 @@ public class ResearchDebateService {
     /**
      * 从指定轮次运行或恢复完整辩论、报告综合与报告 Harness。
      *
-     * <p>首次运行会并行执行 Round 1 的 Bull、Bear 和轮次规划；恢复运行严格沿用 checkpoint 的
-     * {@code fixedPlannedRounds}，不重新规划历史。每轮完成后才写回状态并 checkpoint，随后执行
+     * <p>首次运行直接执行 Round 1 的 Bull/Bear；此后每轮由 Research Manager 根据完整辩论
+     * 自适应判断 CONTINUE/STOP。恢复运行只沿用 checkpoint 已持久化的单轮授权，不重新判断历史决策。
+     * 每轮双方和续停决策完成后才写回 checkpoint，随后执行
      * Research Manager、最多一次报告修复和 NOT_RATED 安全降级。</p>
      *
      * @param traceId 当前任务链路 ID；为空时跳过 Trace/SSE
      * @param conversationId 会话 ID
      * @param state 已包含分析师报告、证据账本和可选历史轮次的状态
      * @param startRound 首个待执行轮次；首次运行传 1
-     * @param fixedPlannedRounds 恢复时的既定总轮数；首次规划时传非正数
-     * @param checkpointer 每轮双方定稿后的 checkpoint 回调
+     * @param authorizedThroughRound checkpoint 当前授权到的轮次；首次运行传 0
+     * @param checkpointer 每轮双方和续停决策定稿后的 checkpoint 回调
      * @param executionGuard 每个模型 token 前的非阻塞执行权检查器
      * @param harnessCheckpointer Harness 生命周期与报告产物的原子持久化回调
      * @return 原状态对象，已补充辩论、报告和 Harness 快照
@@ -191,7 +186,7 @@ public class ResearchDebateService {
             Long conversationId,
             AnalysisState state,
             int startRound,
-            int fixedPlannedRounds,
+            int authorizedThroughRound,
             RoundCheckpointer checkpointer,
             Runnable executionGuard,
             Consumer<AnalysisState> harnessCheckpointer
@@ -199,75 +194,17 @@ public class ResearchDebateService {
         Runnable guard = executionGuard == null ? NO_OP_EXECUTION_GUARD : executionGuard;
         AnalysisState workingState = state == null ? AnalysisState.builder().build() : state;
 
-        int firstRound;
-        int rounds;
+        int cappedMaxRounds = Math.max(1, Math.min(maxRounds, 5));
+        int firstRound = Math.max(1, startRound);
+        int currentAuthorization = Math.max(0, authorizedThroughRound);
+        log.info("Research Debate started or resumed, traceId={}, startRound={}, "
+                        + "authorizedThroughRound={}, hardLimit={}",
+                traceId, firstRound, currentAuthorization, cappedMaxRounds);
 
-        if (startRound == 1 && fixedPlannedRounds <= 0) {
-            // 第 1 轮辩论无论如何都会发生（轮数 >= 1），因此让轮次规划器与第 1 轮并发执行，
-            // 把规划器延迟完全藏到第 1 轮之后；轮内 Bull/Bear 也并行流式生成。
-            long round1Start = System.currentTimeMillis();
-            log.info("Research Debate started, traceId={}, round=1 with planner running concurrently, "
-                            + "hasFundamentals={}, hasMarket={}, hasNews={}",
-                    traceId,
-                    isPresent(workingState.getFundamentalsReport()),
-                    isPresent(workingState.getMarketReport()),
-                    isPresent(workingState.getNewsReport()));
-
-            Mono<String> bullRound1 = streamArgument(traceId, conversationId, true, 1,
-                    bullResearcher.argue(workingState, 1), guard);
-            Mono<String> bearRound1 = streamArgument(traceId, conversationId, false, 1,
-                    bearResearcher.argue(workingState, 1), guard);
-            Mono<DebateRoundPlanner.RoundDecision> plannerMono = Mono.fromCallable(
-                            () -> debateRoundPlanner.decide(workingState, maxRounds))
-                    .subscribeOn(Schedulers.boundedElastic());
-
-            Tuple3<String, String, DebateRoundPlanner.RoundDecision> round1 =
-                    awaitModelStage(
-                            Mono.zip(bullRound1, bearRound1, plannerMono),
-                            "debate-round-1",
-                            traceId
-                    );
-
-            List<DebateTurn> parsedRound;
-            try {
-                parsedRound = applyRound(
-                        workingState, 1, round1.getT1(), round1.getT2());
-            } catch (DebateContractParser.DebateContractException error) {
-                return failClosedDebate(
-                        workingState,
-                        traceId,
-                        conversationId,
-                        harnessCheckpointer,
-                        ViolationCode.DEBATE_CONTRACT_INVALID,
-                        "辩论结构或证据引用未通过契约校验：" + error.code().name(),
-                        round1Start
-                );
-            }
-            addTraceStep(traceId, "Bull Researcher", "Round 1",
-                    renderTurn(parsedRound.get(0)), round1Start);
-            addTraceStep(traceId, "Bear Researcher", "Round 1",
-                    renderTurn(parsedRound.get(1)), round1Start);
-
-            DebateRoundPlanner.RoundDecision roundDecision = round1.getT3();
-            rounds = roundDecision.rounds();
-            if (checkpointer != null) {
-                checkpointer.onRoundCompleted(workingState, 1, rounds);
-            }
-            addTraceStep(traceId, "Debate Round Planner",
-                    "maxRounds=" + Math.max(1, Math.min(maxRounds, 5)),
-                    "Selected rounds=" + rounds + ". Reason: " + roundDecision.reason(), round1Start);
-            log.info("Research Debate round 1 completed, traceId={}, totalRounds={}, roundReason={}",
-                    traceId, rounds, roundDecision.reason());
-            firstRound = 2;
-        } else {
-            firstRound = Math.max(1, startRound);
-            rounds = Math.max(1, fixedPlannedRounds);
-            log.info("Research Debate resumed, traceId={}, startRound={}, totalRounds={}",
-                    traceId, firstRound, rounds);
-        }
-
-        // 轮间串行（双方都能读到上一轮对方的完整观点），轮内 Bull/Bear 并行。
-        for (int round = firstRound; round <= rounds; round++) {
+        // 首轮总会执行；恢复后的后续轮次必须已经由上一轮 Manager 决策授权。
+        for (int round = firstRound;
+             round <= cappedMaxRounds && (round == 1 || round <= currentAuthorization);
+             round++) {
             long roundStart = System.currentTimeMillis();
             log.info("Research Debate round started, traceId={}, round={}", traceId, round);
             Mono<String> bullN = streamArgument(traceId, conversationId, true, round,
@@ -294,13 +231,68 @@ public class ResearchDebateService {
                         roundStart
                 );
             }
-            if (checkpointer != null) {
-                checkpointer.onRoundCompleted(workingState, round, rounds);
-            }
             addTraceStep(traceId, "Bull Researcher", "Round " + round,
                     renderTurn(parsedRound.get(0)), roundStart);
             addTraceStep(traceId, "Bear Researcher", "Round " + round,
                     renderTurn(parsedRound.get(1)), roundStart);
+
+            boolean hardLimitReached = round >= cappedMaxRounds;
+            ResearchManager.DebateContinuationDecision continuation;
+            if (hardLimitReached) {
+                continuation = new ResearchManager.DebateContinuationDecision(
+                        ResearchManager.DebateContinuation.STOP,
+                        "已达到服务端辩论硬上限 " + cappedMaxRounds + " 轮。"
+                );
+            } else {
+                try {
+                    continuation = awaitModelStage(
+                            researchManager.decideDebateContinuation(
+                                    workingState, round, cappedMaxRounds, guard),
+                            "manager-debate-control",
+                            traceId
+                    );
+                } catch (RuntimeException error) {
+                    log.warn("Research Manager continuation decision failed, traceId={}, round={}, errorType={}",
+                            traceId, round, error.getClass().getSimpleName());
+                    return failClosedDebate(
+                            workingState,
+                            traceId,
+                            conversationId,
+                            harnessCheckpointer,
+                            ViolationCode.DEBATE_ASSESSMENT_INVALID,
+                            "Research Manager 未能生成合法的继续/停止决策，本轮不生成投资评级。",
+                            roundStart
+                    );
+                }
+            }
+
+            currentAuthorization = continuation.decision()
+                    == ResearchManager.DebateContinuation.CONTINUE
+                    ? round + 1
+                    : round;
+            if (checkpointer != null) {
+                checkpointer.onRoundCompleted(workingState, round, currentAuthorization);
+            }
+            addTraceStep(
+                    traceId,
+                    hardLimitReached ? "Research Debate Hard Limit" : "Research Manager Debate Control",
+                    "Round " + round + " / max=" + cappedMaxRounds,
+                    "decision=" + continuation.decision() + "; reason=" + continuation.reason(),
+                    roundStart
+            );
+            chatStreamEmitter.emit(
+                    traceId,
+                    conversationId,
+                    "observation",
+                    continuation.decision() == ResearchManager.DebateContinuation.CONTINUE
+                            ? "Research Manager 判断仍有实质冲突，继续下一轮反驳。"
+                            : "Research Manager 判断本轮辩论已充分，进入评分与报告阶段。"
+            );
+            log.info("Research Debate round completed, traceId={}, round={}, decision={}, reason={}",
+                    traceId, round, continuation.decision(), continuation.reason());
+            if (continuation.decision() == ResearchManager.DebateContinuation.STOP) {
+                break;
+            }
         }
 
         // Research Manager 改为流式：自然语言综合判断逐 token 推送到推理面板（"manager-synthesis" 分组），
@@ -507,6 +499,38 @@ public class ResearchDebateService {
         Map<RecoveryAction, Integer> previousAttempts =
                 reportRecoveryAttempts(previousSnapshot);
 
+        // 辩论契约或 Manager 决策已经失败关闭时，报告修复不得把 NOT_RATED 重新变成评级。
+        if (hasFailClosedDebateViolation(previousSnapshot)) {
+            HarnessDecision failClosed = new HarnessDecision(
+                    HarnessOutcome.DEGRADE,
+                    previousSnapshot.violations().stream()
+                            .map(code -> new HarnessViolation(code, null))
+                            .toList(),
+                    List.of(RecoveryAction.RETURN_NOT_RATED)
+            );
+            InvestmentReport notRated = checkpointedReport;
+            if (checkpointedReport.getQualityStatus()
+                    != InvestmentReport.ReportQualityStatus.NOT_RATED
+                    || checkpointedReport.getRecommendation() != null) {
+                notRated = buildNotRatedReport(workingState, failClosed);
+            }
+            notRated.setQualityStatus(InvestmentReport.ReportQualityStatus.NOT_RATED);
+            notRated.setRecommendation(null);
+            notRated.setCompletionPolicyId(completionPolicy.policyId());
+            notRated.setCompletionPolicyVersion(completionPolicy.policyVersion());
+            workingState.setInvestmentReport(notRated);
+            applyFinalReportSnapshot(
+                    workingState,
+                    failClosed,
+                    previousAttempts,
+                    previousSnapshot,
+                    traceId,
+                    conversationId
+            );
+            checkpointHarnessState(harnessCheckpointer, workingState);
+            return workingState;
+        }
+
         // 持久化 PLANNED 已预留唯一一次 Manager 修复；旧 writer 留下的陈旧产物不能取消该副作用。
         if (isReportRecoveryCheckpoint(previousSnapshot)) {
             HarnessDecision plannedDecision = recoveryDecisionFrom(previousSnapshot);
@@ -579,6 +603,14 @@ public class ResearchDebateService {
         );
         checkpointHarnessState(harnessCheckpointer, workingState);
         return workingState;
+    }
+
+    /** 已持久化的辩论失败属于终态，不能通过报告重综合绕过。 */
+    private boolean hasFailClosedDebateViolation(HarnessSnapshot snapshot) {
+        return snapshot != null && snapshot.violations().stream().anyMatch(code ->
+                code == ViolationCode.DEBATE_CONTRACT_INVALID
+                        || code == ViolationCode.DEBATE_ASSESSMENT_INVALID
+                        || code == ViolationCode.DEBATE_DECISION_INSUFFICIENT);
     }
 
     /**
@@ -1053,7 +1085,7 @@ public class ResearchDebateService {
                 );
     }
 
-    /** 对辩论契约、Manager 评分或有效证据不足执行统一失败关闭。 */
+    /** 对辩论契约、Manager 决策/评分或有效证据不足执行统一失败关闭。 */
     private AnalysisState failClosedDebate(
             AnalysisState state,
             String traceId,
@@ -1089,7 +1121,7 @@ public class ResearchDebateService {
         chatStreamEmitter.emit(traceId, conversationId, "observation", userMessage);
         String traceAction = violationCode == ViolationCode.DEBATE_CONTRACT_INVALID
                 ? "Research Debate Contract"
-                : "Research Manager Scoring";
+                : "Research Manager Assessment";
         addTraceStep(
                 traceId,
                 traceAction,

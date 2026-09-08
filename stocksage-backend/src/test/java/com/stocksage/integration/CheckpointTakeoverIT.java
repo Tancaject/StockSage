@@ -5,7 +5,6 @@ import com.stocksage.agent.BearResearcher;
 import com.stocksage.agent.BullResearcher;
 import com.stocksage.agent.DebateContractParser;
 import com.stocksage.agent.DebateDecisionPolicy;
-import com.stocksage.agent.DebateRoundPlanner;
 import com.stocksage.agent.ModelTier;
 import com.stocksage.agent.ResearchDebateService;
 import com.stocksage.agent.ResearchManager;
@@ -49,6 +48,7 @@ import com.stocksage.tool.ChatStreamEmitter;
 import com.stocksage.trace.TraceService;
 import org.junit.jupiter.api.Test;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -94,13 +94,26 @@ class CheckpointTakeoverIT {
         ResearchManager researchManager = mock(ResearchManager.class);
         DebateContractParser debateContractParser = mock(DebateContractParser.class);
         DebateDecisionPolicy debateDecisionPolicy = mock(DebateDecisionPolicy.class);
-        DebateRoundPlanner roundPlanner = mock(DebateRoundPlanner.class);
         when(bullResearcher.argue(any(), anyInt()))
                 .thenAnswer(call -> Flux.just("bull-r" + call.getArgument(1, Integer.class)));
         when(bearResearcher.argue(any(), anyInt()))
                 .thenAnswer(call -> Flux.just("bear-r" + call.getArgument(1, Integer.class)));
-        when(roundPlanner.decide(any(), anyInt()))
-                .thenReturn(new DebateRoundPlanner.RoundDecision(3, "takeover fixture"));
+        when(researchManager.decideDebateContinuation(
+                any(), anyInt(), anyInt(), any(Runnable.class)))
+                .thenReturn(
+                        Mono.just(new ResearchManager.DebateContinuationDecision(
+                                ResearchManager.DebateContinuation.CONTINUE,
+                                "round 2 is needed"
+                        )),
+                        Mono.just(new ResearchManager.DebateContinuationDecision(
+                                ResearchManager.DebateContinuation.CONTINUE,
+                                "round 3 is needed"
+                        )),
+                        Mono.just(new ResearchManager.DebateContinuationDecision(
+                                ResearchManager.DebateContinuation.STOP,
+                                "the debate is resolved"
+                        ))
+                );
         when(debateContractParser.parse(any(), anyInt(), any(Side.class), any()))
                 .thenAnswer(call -> structuredTurn(
                         call.getArgument(1, Integer.class),
@@ -134,12 +147,12 @@ class CheckpointTakeoverIT {
                 researchManager,
                 debateContractParser,
                 debateDecisionPolicy,
-                roundPlanner,
                 mock(TraceService.class),
                 mock(ChatStreamEmitter.class),
                 researchHarness,
                 new DeepResearchCompletionPolicy()
         ));
+        ReflectionTestUtils.setField(debateService, "maxRounds", 5);
         ResearchTaskService researchTaskService = mock(ResearchTaskService.class);
         ResearchTaskLeaseService.Lease firstLease = lease("instance-a-token");
         ResearchTaskLeaseService.Lease takeoverLease = lease("instance-b-token");
@@ -262,6 +275,14 @@ class CheckpointTakeoverIT {
             verify(bearResearcher, times(1)).argue(any(), eq(1));
             verify(bearResearcher, times(1)).argue(any(), eq(2));
             verify(bearResearcher, times(1)).argue(any(), eq(3));
+            verify(researchManager, times(1)).decideDebateContinuation(
+                    any(), eq(1), eq(5), any(Runnable.class));
+            verify(researchManager, times(1)).decideDebateContinuation(
+                    any(), eq(2), eq(5), any(Runnable.class));
+            verify(researchManager, times(1)).decideDebateContinuation(
+                    any(), eq(3), eq(5), any(Runnable.class));
+            verify(researchManager, never()).decideDebateContinuation(
+                    any(), eq(4), eq(5), any(Runnable.class));
             verify(researchTaskService).release(firstLease);
             verify(researchTaskService).release(takeoverLease);
         } finally {
@@ -276,7 +297,7 @@ class CheckpointTakeoverIT {
         ResearchTaskCheckpointRepository repository = mock(ResearchTaskCheckpointRepository.class);
         when(repository.findByTaskId(TASK_ID))
                 .thenAnswer(call -> Optional.ofNullable(persistedCheckpoint.get()));
-        when(repository.save(any(ResearchTaskCheckpoint.class)))
+        when(repository.saveAndFlush(any(ResearchTaskCheckpoint.class)))
                 .thenAnswer(call -> {
                     ResearchTaskCheckpoint checkpoint = call.getArgument(0);
                     persistedCheckpoint.set(checkpoint);

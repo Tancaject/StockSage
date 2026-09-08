@@ -1,3 +1,55 @@
+import { apiFetch, responseMessage } from '../api/http.js'
+
+const STREAM_IDLE_TIMEOUT_MS = 90_000
+
+/** 共用聊天与任务 SSE 的取消、空闲超时和事件分发；续传参数由调用方提供。 */
+export function openSseStream(url, options, { onChunk, onDone, onError, timeoutMessage }) {
+  const controller = new AbortController()
+  let idleTimer = null
+  let timedOut = false
+
+  function clearIdleTimer() {
+    clearTimeout(idleTimer)
+    idleTimer = null
+  }
+
+  function resetIdleTimer() {
+    clearIdleTimer()
+    idleTimer = setTimeout(() => {
+      timedOut = true
+      controller.abort()
+    }, STREAM_IDLE_TIMEOUT_MS)
+  }
+
+  apiFetch(url, { ...options, signal: controller.signal })
+    .then(async response => {
+      if (!response.ok) throw new Error(await responseMessage(response))
+      resetIdleTimer()
+      await readSseEvents(response.body, {
+        onActivity: resetIdleTimer,
+        onEvent(event) {
+          const data = event.data.trim()
+          if (!data || data === '[DONE]') return
+          try {
+            const chunk = JSON.parse(data)
+            onChunk?.(event.id ? { ...chunk, entryId: event.id } : chunk)
+          } catch {
+            // 心跳和非 JSON 诊断不作为业务分片。
+          }
+        },
+      })
+      clearIdleTimer()
+      onDone?.()
+    })
+    .catch(error => {
+      clearIdleTimer()
+      if (timedOut) onError?.(new Error(timeoutMessage))
+      else if (error.name !== 'AbortError') onError?.(error)
+    })
+
+  return controller
+}
+
 /**
  * Read an SSE response body while preserving event ids across arbitrary byte chunks.
  */

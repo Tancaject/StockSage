@@ -50,6 +50,60 @@ import static org.mockito.Mockito.when;
 class ResearchManagerStreamingGuardTest {
 
     @Test
+    void validDebateContinuationDecisionIsAccepted() {
+        ResearchManager manager = new ResearchManager(
+                chatClientReturning(Flux.just(
+                        "{\"decision\":\"CONTINUE\",\"reason\":\"仍有关键反驳待验证\"}")),
+                chatClientReturning(Flux.empty()),
+                chatClientReturning(Flux.empty()),
+                new ObjectMapper()
+        );
+
+        ResearchManager.DebateContinuationDecision decision = manager
+                .decideDebateContinuation(
+                        AnalysisState.builder().query("q").build(),
+                        1,
+                        5,
+                        () -> {
+                        })
+                .block();
+
+        assertThat(decision).isNotNull();
+        assertThat(decision.decision())
+                .isEqualTo(ResearchManager.DebateContinuation.CONTINUE);
+        assertThat(decision.reason()).isEqualTo("仍有关键反驳待验证");
+    }
+
+    @Test
+    void invalidDebateContinuationDoesNotDefaultToStop() {
+        List<String> invalidOutputs = List.of(
+                "",
+                "not-json",
+                "{\"reason\":\"missing decision\"}",
+                "{\"decision\":\"STOP\",\"reason\":\"\"}",
+                "{\"decision\":\"WAIT\",\"reason\":\"unknown decision\"}",
+                "{\"decision\":\"STOP\",\"reason\":\"done\",\"rounds\":1}"
+        );
+
+        for (String output : invalidOutputs) {
+            ResearchManager manager = new ResearchManager(
+                    chatClientReturning(Flux.just(output)),
+                    chatClientReturning(Flux.empty()),
+                    chatClientReturning(Flux.empty()),
+                    new ObjectMapper()
+            );
+
+            assertThatThrownBy(() -> manager.decideDebateContinuation(
+                    AnalysisState.builder().query("q").build(),
+                    1,
+                    5,
+                    () -> {
+                    }).block())
+                    .isInstanceOf(RuntimeException.class);
+        }
+    }
+
+    @Test
     void ownershipGuardCancelsManagerStreamBeforeASecondTokenIsEmitted() {
         AtomicBoolean ownershipLost = new AtomicBoolean(false);
         AtomicBoolean upstreamCancelled = new AtomicBoolean(false);
@@ -68,7 +122,8 @@ class ResearchManagerStreamingGuardTest {
             }
             return null;
         }).when(emitter).emitSection(any(), any(), any(), any(), any(), any());
-        ResearchManager manager = new ResearchManager(chatClient, chatClient, new ObjectMapper());
+        ResearchManager manager = new ResearchManager(
+                chatClient, chatClient, chatClient, new ObjectMapper());
         AnalysisState state = AnalysisState.builder().query("q").build();
         DebateVerdict verdict = lockedVerdict(
                 state, "HOLD", AnalysisHorizon.MEDIUM_TERM);
@@ -91,6 +146,7 @@ class ResearchManagerStreamingGuardTest {
     void guardRunsAgainBeforeParsingBufferedJson() throws Exception {
         ObjectMapper objectMapper = spy(new ObjectMapper());
         ResearchManager manager = new ResearchManager(
+                chatClientReturning(Flux.just("{\"analystSummary\":\"ok\"}")),
                 chatClientReturning(Flux.just("{\"analystSummary\":\"ok\"}")),
                 chatClientReturning(Flux.just("{\"analystSummary\":\"ok\"}")),
                 objectMapper);
@@ -117,7 +173,7 @@ class ResearchManagerStreamingGuardTest {
         ChatClient chatClient = chatClientReturning(Flux.just(
                 "{\"analystSummary\":\"ok\"}"));
         ResearchManager manager = new ResearchManager(
-                chatClient, chatClient, new ObjectMapper());
+                chatClient, chatClient, chatClient, new ObjectMapper());
         AnalysisState state = AnalysisState.builder().query("q").build();
         DebateVerdict verdict = lockedVerdict(
                 state, "BUY", AnalysisHorizon.LONG_TERM);
@@ -136,7 +192,7 @@ class ResearchManagerStreamingGuardTest {
     void invalidJsonIsReportedAsParseFailureInsteadOfFabricatingHold() {
         ChatClient chatClient = chatClientReturning(Flux.just("not-json"));
         ResearchManager manager = new ResearchManager(
-                chatClient, chatClient, new ObjectMapper());
+                chatClient, chatClient, chatClient, new ObjectMapper());
         AnalysisState state = AnalysisState.builder().query("q").build();
         DebateVerdict verdict = lockedVerdict(
                 state, "HOLD", AnalysisHorizon.MEDIUM_TERM);
@@ -161,6 +217,7 @@ class ResearchManagerStreamingGuardTest {
         ChatClient scoringClient = chatClientReturning(
                 Flux.just(scoringJson(state, false)));
         ResearchManager manager = new ResearchManager(
+                chatClientReturning(Flux.empty()),
                 scoringClient,
                 chatClientReturning(Flux.empty()),
                 new ObjectMapper()
@@ -182,6 +239,7 @@ class ResearchManagerStreamingGuardTest {
         ChatClient scoringClient = chatClientReturning(
                 Flux.just(scoringJson(state, true)));
         ResearchManager manager = new ResearchManager(
+                chatClientReturning(Flux.empty()),
                 scoringClient,
                 chatClientReturning(Flux.empty()),
                 new ObjectMapper()
@@ -242,7 +300,7 @@ class ResearchManagerStreamingGuardTest {
                 """;
         ChatClient chatClient = chatClientReturning(Flux.just(modelOutput));
         ResearchManager manager = new ResearchManager(
-                chatClient, chatClient, new ObjectMapper());
+                chatClient, chatClient, chatClient, new ObjectMapper());
         DebateVerdict verdict = lockedVerdict(
                 state, "HOLD", AnalysisHorizon.MEDIUM_TERM);
 
@@ -348,7 +406,7 @@ class ResearchManagerStreamingGuardTest {
                 """;
         ChatClient chatClient = chatClientReturning(Flux.just(modelOutput));
         ResearchManager manager = new ResearchManager(
-                chatClient, chatClient, new ObjectMapper());
+                chatClient, chatClient, chatClient, new ObjectMapper());
         DebateVerdict verdict = lockedVerdict(
                 state, "HOLD", AnalysisHorizon.MEDIUM_TERM);
 

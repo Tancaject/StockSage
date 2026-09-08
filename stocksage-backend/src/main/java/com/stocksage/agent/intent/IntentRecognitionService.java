@@ -1,5 +1,7 @@
 package com.stocksage.agent.intent;
 
+import com.stocksage.util.JsonText;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.PlanRoute;
@@ -144,7 +146,7 @@ public class IntentRecognitionService {
     }
 
     private ParsedLlm parseLlm(String content, IntentRecognitionRequest request) throws Exception {
-        JsonNode root = objectMapper.readTree(extractJson(content));
+        JsonNode root = objectMapper.readTree(JsonText.extractObject(content));
         String rawRoute = text(root, "targetRoute", text(root, "route", ""));
         Optional<PlanRoute> parsedRoute = PlanRoute.parse(rawRoute);
         String rationale = text(root, "rationale", "");
@@ -262,20 +264,6 @@ public class IntentRecognitionService {
 
     private String text(JsonNode root, String field, String fallback) {
         return root.path(field).asText(fallback == null ? "" : fallback);
-    }
-
-    private String extractJson(String content) {
-        if (content == null) {
-            return "{}";
-        }
-        String trimmed = content.trim()
-                .replaceAll("(?is)^```json\\s*", "")
-                .replaceAll("(?is)^```\\s*", "")
-                .replaceAll("(?is)\\s*```$", "")
-                .trim();
-        int start = trimmed.indexOf('{');
-        int end = trimmed.lastIndexOf('}');
-        return start >= 0 && end > start ? trimmed.substring(start, end + 1) : trimmed;
     }
 
     private record ParsedLlm(

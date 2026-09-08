@@ -5,11 +5,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from eval_http import LiveEvalError, LiveEvalStreamError, StockSageClient, parse_sse_data
 import run_harness_live_eval as harness_live
 from run_harness_live_eval import (
     CaseReconciliationPending,
-    LiveEvalError,
-    LiveEvalStreamError,
     RELEASE_MANIFEST_SCHEMA,
     aggregate_policy_metadata,
     dataset_sha256,
@@ -18,7 +17,6 @@ from run_harness_live_eval import (
     extract_tool_actions,
     exit_code_for_status,
     load_run_checkpoint,
-    parse_sse_data,
     percentile,
     release_contract_violations,
     run_case,
@@ -294,7 +292,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
                 return self.response
 
         response = HeartbeatResponse()
-        client = harness_live.StockSageClient("http://localhost:8080")
+        client = StockSageClient("http://localhost:8080")
         client.opener = HeartbeatOpener(response)
         with patch.object(
             harness_live.time,

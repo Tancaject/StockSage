@@ -126,7 +126,7 @@ class InvestmentReportVersionServiceTest {
         when(repository.saveAndFlush(any(InvestmentReportVersion.class)))
                 .thenAnswer(invocation -> (InvestmentReportVersion) invocation.getArgument(0));
 
-        InvestmentReport persisted = service.persistReportVersion("u_001", 10L, state, "STRONG", "qwen3.6-max");
+        InvestmentReport persisted = service.persistReportVersionWithMetadata("u_001", 10L, state, "STRONG", "qwen3.6-max").report();
 
         assertThat(persisted.getReportVersion()).isEqualTo(3);
         assertThat(persisted.getDataSnapshotHash()).isEqualTo(state.getDataSnapshotHash());
@@ -366,7 +366,7 @@ class InvestmentReportVersionServiceTest {
         when(repository.saveAndFlush(any(InvestmentReportVersion.class)))
                 .thenThrow(new DataIntegrityViolationException("duplicate snapshot"));
 
-        InvestmentReport reused = service.persistReportVersion("u_001", 10L, state, "STRONG", "qwen3.6-max");
+        InvestmentReport reused = service.persistReportVersionWithMetadata("u_001", 10L, state, "STRONG", "qwen3.6-max").report();
 
         assertThat(reused.getReportVersion()).isEqualTo(4);
         assertThat(reused.getReusedFromCache()).isTrue();

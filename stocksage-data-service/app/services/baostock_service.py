@@ -452,14 +452,6 @@ class BaostockService:
             "message": None,
         }
 
-    def compare_stocks(self, codes: list[str], dimensions: list[str]) -> dict:
-        """按指定维度对比多只股票。"""
-        results = []
-        for code in codes:
-            metrics = self.get_financial_metrics(code)
-            results.append({"code": code, "metrics": metrics.get("metrics", {})})
-        return {"codes": codes, "dimensions": dimensions, "comparison": results}
-
     def get_market_overview(self) -> dict:
         """获取主要 A 股指数数据。"""
         end_date = datetime.now().strftime("%Y-%m-%d")

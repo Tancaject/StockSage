@@ -98,16 +98,6 @@ const TICKER_SUGGESTION_CATALOG = [
   { ticker: '300750', name: '宁德时代', market: 'A股', keywords: ['catl', 'battery', '新能源', 'a股'] },
 ]
 
-export const DEFAULT_GATE_TARGETS = {
-  context_recall: { min: 0.85, label: '证据条目覆盖率（legacy）' },
-  context_precision: { min: 0.5, label: '检索精度代理（legacy）' },
-  mrr: { min: 0.7, label: 'MRR' },
-  ndcg: { min: 0.75, label: '返回集排序代理（legacy nDCG）' },
-  citation_precision: { min: 0.85, label: 'Citation precision' },
-  no_answer_accuracy: { min: 0.9, label: 'No-answer accuracy' },
-  latency_seconds: { max: 45, label: 'Average latency' },
-}
-
 export function normalizeTicker(value) {
   return String(value || '')
     .trim()
@@ -714,30 +704,35 @@ function buildReportProvenance(messages) {
   ]
 }
 
-export function summarizeRagEval(result, gates = DEFAULT_GATE_TARGETS) {
+export function summarizeRagEval(result) {
   const averages = result?.averages || {}
+  const evaluation = result?.gate_evaluation?.schema_version === 'rag_gates_v1'
+    ? result.gate_evaluation : null
   const ragasMetrics = Object.entries(averages)
     .filter(([metric]) => metric.startsWith('ragas_'))
     .map(([metric, value]) => ({
       metric,
       label: readableMetricLabel(metric),
       value: numberOrNull(value),
-      status: numberOrNull(value) === null ? 'missing' : 'pass',
+      status: numberOrNull(value) === null ? 'missing' : 'unrated',
     }))
-  const gateRows = Object.entries(gates).map(([metric, target]) => {
-    const value = numberOrNull(averages[metric])
-    const failed = value !== null && (
-      target.min !== undefined && value < target.min
-      || target.max !== undefined && value > target.max
-    )
-    return {
+  const gateRows = (evaluation?.gates || []).map(gate => ({
+    metric: gate.metric,
+    label: gate.label || readableMetricLabel(gate.metric),
+    value: numberOrNull(gate.value),
+    target: { operator: gate.operator, threshold: gate.threshold },
+    required: gate.required,
+    status: gate.status,
+  }))
+  gateRows.push(...Object.entries(averages)
+    .filter(([metric]) => !metric.startsWith('ragas_') && !gateRows.some(row => row.metric === metric))
+    .map(([metric, value]) => ({
       metric,
-      label: target.label || metric,
-      value,
-      target,
-      status: value === null ? 'missing' : failed ? 'fail' : 'pass',
-    }
-  })
+      label: readableMetricLabel(metric),
+      value: numberOrNull(value),
+      target: null,
+      status: numberOrNull(value) === null ? 'missing' : 'unrated',
+    })))
   const failedMetrics = gateRows.filter(row => row.status === 'fail')
   const worstCases = [...(result?.cases || [])]
     .map(item => ({
@@ -762,7 +757,7 @@ export function summarizeRagEval(result, gates = DEFAULT_GATE_TARGETS) {
     gates: gateRows,
     failedMetrics,
     worstCases,
-    status: failedMetrics.length > 0 ? 'fail' : 'pass',
+    status: evaluation?.status || 'unrated',
   }
 }
 

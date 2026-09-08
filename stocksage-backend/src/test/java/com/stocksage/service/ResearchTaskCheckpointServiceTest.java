@@ -53,13 +53,13 @@ class ResearchTaskCheckpointServiceTest {
         )));
 
         ResearchTaskCheckpoint saved = service.toEntity(42L, state,
-                ResearchTask.Stage.AGENT_DEBATE, 1, 3);
+                ResearchTask.Stage.AGENT_DEBATE, 1, 2);
         when(repository.findByTaskId(42L)).thenReturn(Optional.of(saved));
 
         ResearchTaskCheckpointService.CheckpointState loaded = service.load(42L).orElseThrow();
         assertThat(loaded.stageCompleted()).isEqualTo(ResearchTask.Stage.AGENT_DEBATE);
         assertThat(loaded.debateRoundsCompleted()).isEqualTo(1);
-        assertThat(loaded.plannedRounds()).isEqualTo(3);
+        assertThat(loaded.plannedRounds()).isEqualTo(2);
         assertThat(loaded.state().getDebateTurns()).hasSize(1);
         assertThat(loaded.state().getDebateTurns().get(0).points().get(0).claim())
                 .isEqualTo("bull-r1");
@@ -93,6 +93,19 @@ class ResearchTaskCheckpointServiceTest {
                 .thenThrow(new IllegalStateException("database unavailable"));
 
         assertThatThrownBy(() -> service.saveHarnessSnapshot(42L, "lease", state))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("database unavailable");
+    }
+
+    @Test
+    void debateRoundPersistenceFailsClosed() {
+        AnalysisState state = AnalysisState.builder().query("q").build();
+        when(repository.lockOwnedRunningTask(42L, "lease")).thenReturn(Optional.of(42L));
+        when(repository.findByTaskId(42L)).thenReturn(Optional.empty());
+        when(repository.saveAndFlush(any()))
+                .thenThrow(new IllegalStateException("database unavailable"));
+
+        assertThatThrownBy(() -> service.saveDebateRound(42L, "lease", state, 1, 2))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("database unavailable");
     }

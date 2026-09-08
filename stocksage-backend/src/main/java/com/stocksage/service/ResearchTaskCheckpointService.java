@@ -17,8 +17,8 @@ import java.util.Optional;
  * 持久化长时研究任务的可恢复 {@link AnalysisState} 检查点。
  *
  * <p>{@link DeepResearchPipeline} 在证据、每轮辩论和综合阶段调用本服务；生产写入必须携带
- * 当前 leaseToken，并通过数据库 owner fence。普通可恢复检查点写入失败时 fail-open，
- * Harness 决策快照则 fail-closed，防止未持久化恢复决定就执行副作用。</p>
+ * 当前 leaseToken，并通过数据库 owner fence。普通证据/报告检查点写入失败时 fail-open；
+ * Harness 决策和辩论续停快照则 fail-closed，防止未持久化决定后继续执行副作用。</p>
  */
 @Slf4j
 @Service
@@ -35,7 +35,7 @@ public class ResearchTaskCheckpointService {
      *
      * @param stageCompleted 已持久化完成的最高阶段
      * @param debateRoundsCompleted 已完成辩论轮数
-     * @param plannedRounds 计划辩论轮数
+     * @param plannedRounds Research Manager 当前授权到的轮次上界
      * @param state 可继续执行的分析状态
      */
     public record CheckpointState(
@@ -95,24 +95,24 @@ public class ResearchTaskCheckpointService {
     @Transactional
     public void saveHarnessSnapshot(Long taskId, String leaseToken, AnalysisState state) {
         requireOwnership(taskId, leaseToken);
-        upsertStrict(taskId, state, ResearchTask.Stage.DATA_PREFETCH, 0, 0);
+        upsertStrict(taskId, state, ResearchTask.Stage.DATA_PREFETCH, 0, 0, false);
     }
 
     /** 在调用补证能力前后严格保存 exact plan 和 effect key。 */
     @Transactional
     public void saveEvidenceReplan(Long taskId, String leaseToken, AnalysisState state) {
         requireOwnership(taskId, leaseToken);
-        upsertStrict(taskId, state, ResearchTask.Stage.DATA_PREFETCH, 0, 0);
+        upsertStrict(taskId, state, ResearchTask.Stage.DATA_PREFETCH, 0, 0, false);
     }
 
     /**
-     * 保存一轮 Agent 辩论后的状态和轮次进度。
+     * 严格保存一轮 Agent 辩论及其续停决策；失败时不得开始下一轮。
      *
      * @param taskId 任务 ID
      * @param leaseToken 当前 owner token
      * @param state 当前分析状态
      * @param roundsCompleted 已完成轮数
-     * @param plannedRounds 计划轮数
+     * @param plannedRounds 当前授权上界；STOP 等于已完成轮次，CONTINUE 等于已完成轮次加一
      */
     @Transactional
     public void saveDebateRound(
@@ -122,8 +122,20 @@ public class ResearchTaskCheckpointService {
             int roundsCompleted,
             int plannedRounds
     ) {
+        if (roundsCompleted < 1
+                || (plannedRounds != roundsCompleted && plannedRounds != roundsCompleted + 1)) {
+            throw new IllegalArgumentException(
+                    "Debate checkpoint must encode STOP=N or CONTINUE=N+1");
+        }
         requireOwnership(taskId, leaseToken);
-        upsert(taskId, state, ResearchTask.Stage.AGENT_DEBATE, roundsCompleted, plannedRounds);
+        upsertStrict(
+                taskId,
+                state,
+                ResearchTask.Stage.AGENT_DEBATE,
+                roundsCompleted,
+                plannedRounds,
+                true
+        );
     }
 
     /**
@@ -174,7 +186,7 @@ public class ResearchTaskCheckpointService {
      * @param state 当前分析状态
      * @param stage 已完成阶段
      * @param roundsCompleted 已完成辩论轮数
-     * @param plannedRounds 计划辩论轮数
+     * @param plannedRounds 当前授权到的轮次上界
      * @return 尚未持久化的检查点实体
      */
     ResearchTaskCheckpoint toEntity(
@@ -241,19 +253,26 @@ public class ResearchTaskCheckpointService {
             AnalysisState state,
             ResearchTask.Stage stage,
             int roundsCompleted,
-            int plannedRounds
+            int plannedRounds,
+            boolean replaceDebateProgress
     ) {
         Optional<ResearchTaskCheckpoint> existing = repository.findByTaskId(taskId);
         ResearchTaskCheckpoint entity = existing.orElseGet(ResearchTaskCheckpoint::new);
+        if (replaceDebateProgress && isRegression(entity, stage, roundsCompleted)) {
+            throw new IllegalStateException("Refusing stale debate checkpoint update");
+        }
         ResearchTask.Stage effectiveStage = entity.getStageCompleted() != null
                 && entity.getStageCompleted().ordinal() > stage.ordinal()
                 ? entity.getStageCompleted()
                 : stage;
         entity.setTaskId(taskId);
         entity.setStageCompleted(effectiveStage);
-        entity.setDebateRoundsCompleted(Math.max(
-                safeInt(entity.getDebateRoundsCompleted()), roundsCompleted));
-        entity.setPlannedRounds(Math.max(safeInt(entity.getPlannedRounds()), plannedRounds));
+        entity.setDebateRoundsCompleted(replaceDebateProgress
+                ? roundsCompleted
+                : Math.max(safeInt(entity.getDebateRoundsCompleted()), roundsCompleted));
+        entity.setPlannedRounds(replaceDebateProgress
+                ? plannedRounds
+                : Math.max(safeInt(entity.getPlannedRounds()), plannedRounds));
         try {
             entity.setPayloadJson(objectMapper.writeValueAsString(state));
         } catch (JsonProcessingException error) {

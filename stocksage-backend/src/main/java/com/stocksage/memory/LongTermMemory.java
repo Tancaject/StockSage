@@ -1,5 +1,7 @@
 package com.stocksage.memory;
 
+import com.stocksage.util.JsonText;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.model.dto.UserProfileDTO;
@@ -239,7 +241,7 @@ public class LongTermMemory {
                             """.formatted(userMessage, assistantResponse == null ? "" : assistantResponse))
                     .call()
                     .content();
-            JsonNode root = objectMapper.readTree(extractJson(content));
+            JsonNode root = objectMapper.readTree(JsonText.extractObject(content));
 
             List<String> holdings = readStringArray(root.path("holdings"));
             if (!holdings.isEmpty()) {
@@ -261,29 +263,6 @@ public class LongTermMemory {
         } catch (Exception e) {
             log.warn("LLM long-term profile extraction failed, using deterministic extraction only: {}", e.getMessage());
         }
-    }
-
-    /**
-     * 从模型输出中提取 JSON 对象正文。
-     *
-     * @param content 可能带 Markdown 代码围栏的模型输出
-     * @return 可交给 ObjectMapper 解析的 JSON 文本
-     */
-    private String extractJson(String content) {
-        if (content == null) {
-            return "{}";
-        }
-        String trimmed = content.trim()
-                .replaceAll("(?is)^```json\\s*", "")
-                .replaceAll("(?is)^```\\s*", "")
-                .replaceAll("(?is)\\s*```$", "")
-                .trim();
-        int start = trimmed.indexOf('{');
-        int end = trimmed.lastIndexOf('}');
-        if (start >= 0 && end > start) {
-            return trimmed.substring(start, end + 1);
-        }
-        return trimmed;
     }
 
     /**

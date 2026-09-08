@@ -1,7 +1,9 @@
 package com.stocksage.agent;
 
 import com.stocksage.harness.DeepResearchCompletionPolicy;
+import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.SynthesisResult;
+import com.stocksage.harness.HarnessModels.ViolationCode;
 import com.stocksage.harness.ResearchHarness;
 import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.AnalysisState;
@@ -16,6 +18,7 @@ import com.stocksage.model.dto.DebateModels.LeadingSide;
 import com.stocksage.model.dto.DebateModels.ManagerAssessment;
 import com.stocksage.model.dto.DebateModels.PointType;
 import com.stocksage.model.dto.DebateModels.Side;
+import com.stocksage.model.dto.InvestmentReport;
 import com.stocksage.tool.ChatStreamEmitter;
 import com.stocksage.trace.TraceService;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,14 +47,12 @@ class ResearchDebateServiceTimeoutTest {
     private final ResearchManager researchManager = mock(ResearchManager.class);
     private final DebateContractParser debateContractParser = mock(DebateContractParser.class);
     private final DebateDecisionPolicy debateDecisionPolicy = mock(DebateDecisionPolicy.class);
-    private final DebateRoundPlanner debateRoundPlanner = mock(DebateRoundPlanner.class);
     private final ResearchDebateService service = new ResearchDebateService(
             bullResearcher,
             bearResearcher,
             researchManager,
             debateContractParser,
             debateDecisionPolicy,
-            debateRoundPlanner,
             mock(TraceService.class),
             mock(ChatStreamEmitter.class),
             mock(ResearchHarness.class),
@@ -61,6 +62,7 @@ class ResearchDebateServiceTimeoutTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(service, "modelStageTimeoutMs", 50L);
+        ReflectionTestUtils.setField(service, "maxRounds", 5);
     }
 
     @Test
@@ -125,6 +127,42 @@ class ResearchDebateServiceTimeoutTest {
         assertThat(managerCancelled).isTrue();
         verify(bullResearcher, never()).argue(any(), anyInt());
         verify(bearResearcher, never()).argue(any(), anyInt());
+    }
+
+    @Test
+    void stalledManagerContinuationIsCancelledAndReturnsNotRated() {
+        AtomicBoolean managerCancelled = new AtomicBoolean();
+        when(bullResearcher.argue(any(), anyInt())).thenReturn(Flux.just("bull-r1"));
+        when(bearResearcher.argue(any(), anyInt())).thenReturn(Flux.just("bear-r1"));
+        when(debateContractParser.parse(any(), anyInt(), any(Side.class), any()))
+                .thenAnswer(invocation -> thesisTurn(
+                        invocation.getArgument(2, Side.class),
+                        invocation.getArgument(2, Side.class) == Side.BULL ? "bull" : "bear"));
+        when(researchManager.decideDebateContinuation(
+                any(), anyInt(), anyInt(), any(Runnable.class)))
+                .thenReturn(Mono.<ResearchManager.DebateContinuationDecision>never()
+                        .doOnCancel(() -> managerCancelled.set(true)));
+
+        long startedAt = System.nanoTime();
+
+        AnalysisState done = service.runDebate(
+                "trace-timeout",
+                1L,
+                AnalysisState.builder().query("q").build(),
+                1,
+                0,
+                null
+        );
+
+        assertThat(Duration.ofNanos(System.nanoTime() - startedAt)).isLessThan(Duration.ofSeconds(2));
+        assertThat(managerCancelled).isTrue();
+        assertThat(done.getInvestmentReport().getQualityStatus())
+                .isEqualTo(InvestmentReport.ReportQualityStatus.NOT_RATED);
+        assertThat(done.getHarnessSnapshot().outcome()).isEqualTo(HarnessOutcome.DEGRADE);
+        assertThat(done.getHarnessSnapshot().violations())
+                .containsExactly(ViolationCode.DEBATE_ASSESSMENT_INVALID);
+        verify(researchManager, never())
+                .scoreDebate(any(), any(), any(Runnable.class));
     }
 
     private AnalysisState structuredRoundOneState() {
