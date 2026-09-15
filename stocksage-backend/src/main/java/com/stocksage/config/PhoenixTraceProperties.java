@@ -19,6 +19,9 @@ public class PhoenixTraceProperties {
      */
     private boolean enabled = false;
 
+    /** 显式允许向观测端导出问题、工具正文和路由说明；默认只导出长度与运行元数据。 */
+    private boolean captureContent = false;
+
     /**
      * Phoenix OTLP HTTP 链路端点。
      */

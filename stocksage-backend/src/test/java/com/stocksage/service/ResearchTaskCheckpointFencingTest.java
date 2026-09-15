@@ -44,15 +44,21 @@ class ResearchTaskCheckpointFencingTest {
 
     @Test
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    void oldOwnerCannotOverwriteOrDeleteCheckpointAfterTakeover() {
+    void takeoverCanShrinkLegacyPlanAndOldOwnerCannotOverwriteOrDeleteCheckpoint() {
         ResearchTask task = taskRepository.saveAndFlush(runningTask("owner-a"));
-        service.saveDebateRound(task.getId(), "owner-a", state("owner-a-r2"), 2, 3);
+        checkpointRepository.saveAndFlush(service.toEntity(
+                task.getId(),
+                state("owner-a-r2"),
+                ResearchTask.Stage.AGENT_DEBATE,
+                2,
+                5
+        ));
 
         ResearchTask takenOver = taskRepository.findById(task.getId()).orElseThrow();
         takenOver.setLeaseToken("owner-b");
         takenOver.setAttempts(2);
         taskRepository.saveAndFlush(takenOver);
-        service.saveDebateRound(task.getId(), "owner-b", state("owner-b-r3"), 3, 3);
+        service.saveDebateRound(task.getId(), "owner-b", state("owner-b-r2"), 2, 2);
 
         assertThatThrownBy(() -> service.saveDebateRound(
                 task.getId(), "owner-a", state("stale-owner-r4"), 4, 4))
@@ -66,9 +72,9 @@ class ResearchTaskCheckpointFencingTest {
                 .hasMessageContaining("taskId=" + task.getId());
 
         ResearchTaskCheckpointService.CheckpointState checkpoint = service.load(task.getId()).orElseThrow();
-        assertThat(checkpoint.debateRoundsCompleted()).isEqualTo(3);
-        assertThat(checkpoint.plannedRounds()).isEqualTo(3);
-        assertThat(checkpoint.state().getFundamentalsReport()).isEqualTo("owner-b-r3");
+        assertThat(checkpoint.debateRoundsCompleted()).isEqualTo(2);
+        assertThat(checkpoint.plannedRounds()).isEqualTo(2);
+        assertThat(checkpoint.state().getFundamentalsReport()).isEqualTo("owner-b-r2");
         assertThat(checkpointRepository.findByTaskId(task.getId())).isPresent();
 
         ResearchTask completed = taskRepository.findById(task.getId()).orElseThrow();
@@ -86,7 +92,10 @@ class ResearchTaskCheckpointFencingTest {
     void lateRoundFromCurrentOwnerCannotMoveCheckpointBackwards() {
         ResearchTask task = taskRepository.saveAndFlush(runningTask("owner-a"));
         service.saveDebateRound(task.getId(), "owner-a", state("round-2"), 2, 3);
-        service.saveDebateRound(task.getId(), "owner-a", state("late-round-1"), 1, 3);
+        assertThatThrownBy(() -> service.saveDebateRound(
+                task.getId(), "owner-a", state("late-round-1"), 1, 2))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("stale debate checkpoint");
 
         ResearchTaskCheckpointService.CheckpointState checkpoint = service.load(task.getId()).orElseThrow();
         assertThat(checkpoint.debateRoundsCompleted()).isEqualTo(2);

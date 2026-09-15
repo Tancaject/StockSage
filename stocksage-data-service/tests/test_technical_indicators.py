@@ -1,4 +1,5 @@
 import sys
+import json
 import types
 import unittest
 from unittest.mock import patch
@@ -47,22 +48,13 @@ class TechnicalIndicatorCalculationTest(unittest.TestCase):
             calculate_technical_indicators(constant, ["MACD"]),
         )
 
-    def test_rounder_preserves_provider_specific_nan_behavior(self):
-        close = pd.Series([100.0])
-        baostock_result = calculate_technical_indicators(close, ["MA"])
-        akshare_result = calculate_technical_indicators(
-            close,
-            ["MA"],
-            lambda value, digits: (
-                None if pd.isna(value) else round(float(value), digits)
-            ),
-        )
-
-        self.assertTrue(all(pd.isna(value) for value in baostock_result.values()))
-        self.assertEqual(
-            {"MA5": None, "MA10": None, "MA20": None, "MA60": None},
-            akshare_result,
-        )
+    def test_missing_and_nonfinite_indicators_are_json_null_without_losing_zero(self):
+        for close, indicators in (([100.0], ["MA"]), ([100.0] * 80, ["RSI"]),
+                                  ([float("inf")] * 80, ["MA"])):
+            result = calculate_technical_indicators(pd.Series(close), indicators)
+            self.assertTrue(all(value is None for value in result.values()))
+            json.dumps(result, allow_nan=False)
+        self.assertEqual(0.0, calculate_technical_indicators(pd.Series([100.0] * 80), ["MACD"])["MACD"])
 
 
 class TechnicalIndicatorProviderTest(unittest.TestCase):
@@ -167,7 +159,7 @@ class TechnicalIndicatorProviderTest(unittest.TestCase):
                 self.baostock.get_technical_indicators("sh.600519", ["MA"]),
             )
 
-    def test_provider_wrappers_keep_distinct_nan_serialization(self):
+    def test_provider_wrappers_share_json_null_serialization(self):
         with patch.object(
             self.akshare,
             "get_a_share_kline",
@@ -189,7 +181,8 @@ class TechnicalIndicatorProviderTest(unittest.TestCase):
             )
 
         self.assertIsNone(akshare_result["indicators"]["MA60"])
-        self.assertTrue(pd.isna(baostock_result["indicators"]["MA60"]))
+        self.assertIsNone(baostock_result["indicators"]["MA60"])
+        json.dumps([akshare_result, baostock_result], allow_nan=False)
 
 
 if __name__ == "__main__":

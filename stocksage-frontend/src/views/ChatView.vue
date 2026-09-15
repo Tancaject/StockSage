@@ -294,6 +294,7 @@ let activeTaskDiscoveryAttempted = false
 let lastStreamEntryId = ''
 let lastTaskEntryId = ''
 let taskStreamTerminal = false
+let messagesRequestId = 0
 const reasoningChunkTypes = new Set(['route_decision', 'thought', 'action', 'observation'])
 const BOTTOM_LOCK_DISTANCE = 120
 const TASK_RECONNECT_DELAY_MS = 1_200
@@ -349,6 +350,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  messagesRequestId += 1
   abortController?.abort()
   abortController = null
   cancelTaskWatch()
@@ -375,6 +377,8 @@ async function handleLogout() {
 
 /** 新建对话：清空消息，conversationId 置 null 让后端创建 */
 function newConversation() {
+  messagesRequestId += 1
+  isLoadingMessages.value = false
   if (isStreaming.value) handleStop()
   else cancelTaskWatch()
   currentConversationId.value = null
@@ -400,30 +404,37 @@ async function switchConversation(id, { stopStream = true } = {}) {
   if (stopStream && isStreaming.value) handleStop()
   else if (stopStream) cancelTaskWatch()
 
+  const requestId = ++messagesRequestId
+  const isCurrent = () => requestId === messagesRequestId && currentConversationId.value === id
   currentConversationId.value = id
+  messages.value = []
   closeMobileSidebar()
   isLoadingMessages.value = true
   try {
     const history = await getConversationMessages(id)
+    if (!isCurrent()) return
     messages.value = history.map(toChatMessage)
     await resumeActiveTask(id)
+    if (!isCurrent()) return
     scrollToBottom({ force: true })
   } catch (err) {
+    if (!isCurrent()) return
     messages.value = [{ role: 'assistant', content: err.message }]
     ElMessage.error(`加载消息失败：${err.message}`)
     scrollToBottom({ force: true })
   } finally {
-    isLoadingMessages.value = false
+    if (isCurrent()) isLoadingMessages.value = false
   }
 }
 
 /** 从后端加载会话列表，可在首次进入页面时自动打开最近一条 */
 async function loadConversations({ selectLatest = false } = {}) {
+  const requestId = messagesRequestId
   isLoadingConversations.value = true
   try {
     const list = await listConversations()
     conversations.value = list
-    if (selectLatest && list.length > 0 && currentConversationId.value === null) {
+    if (selectLatest && requestId === messagesRequestId && list.length > 0 && currentConversationId.value === null) {
       await switchConversation(list[0].id, { stopStream: false })
     }
   } catch (err) {
@@ -517,10 +528,11 @@ function cancelTaskWatch() {
 }
 
 async function resumeActiveTask(conversationId, { connect = true } = {}) {
+  const requestId = messagesRequestId
   if (conversationId === null || conversationId === undefined) return null
   try {
     const task = normalizeActiveTask(await getActiveTask(conversationId))
-    if (currentConversationId.value !== conversationId || !task) return null
+    if (requestId !== messagesRequestId || currentConversationId.value !== conversationId || !task) return null
 
     if (activeTask?.taskId !== task.taskId) {
       lastTaskEntryId = ''
@@ -625,9 +637,10 @@ async function recoverTaskEventStream(conversationId) {
 }
 
 async function refreshConversationFromHistory(conversationId) {
+  const requestId = messagesRequestId
   try {
     const history = await getConversationMessages(conversationId)
-    if (currentConversationId.value !== conversationId) return
+    if (requestId !== messagesRequestId || currentConversationId.value !== conversationId) return
     messages.value = history.map(toChatMessage)
     scrollToBottom()
   } catch (error) {

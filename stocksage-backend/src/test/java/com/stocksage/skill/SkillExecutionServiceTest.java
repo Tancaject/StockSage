@@ -109,7 +109,7 @@ class SkillExecutionServiceTest {
     }
 
     @Test
-    void keepsTheLegacyNewsPathAvailableWhenBothOptionalCapabilitiesFail() {
+    void recordsFailureAndRetainsOwnershipWhenBothOptionalCapabilitiesFail() {
         when(gateway.invoke(eq("mcp.news.search"), anyMap(), any(CapabilityInvocationContext.class)))
                 .thenThrow(new CapabilityException(CapabilityException.Reason.UNAVAILABLE, "mcp down"));
         when(gateway.invoke(eq("local.news.searchNews"), anyMap(), any(CapabilityInvocationContext.class)))
@@ -118,11 +118,12 @@ class SkillExecutionServiceTest {
         SkillExecutionService.ExecutionResult result = execute();
 
         assertThat(result.handled(PlanAction.SEARCH_NEWS)).isFalse();
-        assertThat(result.context()).isBlank();
+        assertThat(result.skillId()).isEqualTo("latest-news-mcp");
+        assertThat(result.context()).contains("未取得可用新闻证据");
         verify(emitter).emit("trace", 7L, "observation",
-                "本地降级能力暂不可用，继续使用原有 NEWS 执行路径");
+                "新闻检索失败：本地降级能力也不可用。本轮使用其他已取得的证据，请稍后重试新闻查询。");
         verify(observer).record(eq("latest-news-mcp"),
-                eq(SkillExecutionObserver.Outcome.LEGACY_PATH), anyLong());
+                eq(SkillExecutionObserver.Outcome.FAILED), anyLong());
     }
 
     private SkillExecutionService.ExecutionResult execute() {

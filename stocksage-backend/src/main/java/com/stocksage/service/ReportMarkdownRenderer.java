@@ -135,27 +135,6 @@ public class ReportMarkdownRenderer {
     }
 
     /**
-     * 构造“同一深度研究任务已在运行”的确定性回答。
-     *
-     * @param task 已在运行的任务
-     * @return 避免重复执行的状态说明
-     */
-    public String buildResearchTaskAlreadyRunningAnswer(ResearchTask task) {
-        String stage = task == null || task.getStage() == null ? "unknown" : task.getStage().name();
-        Integer attempts = task == null ? null : task.getAttempts();
-        return """
-                ## Research task status
-                The same DEEP research task is already running. StockSage skipped a duplicate Bull/Bear debate for this request.
-
-                - status: RUNNING
-                - stage: %s
-                - attempts: %s
-
-                Please check the report history or retry after the running task finishes. This preserves idempotency and avoids spending the same expensive debate twice.
-                """.formatted(stage, attempts == null ? "unknown" : attempts.toString()).trim();
-    }
-
-    /**
      * 构造证据优先的投资研究报告正文。
      *
      * @param state 已完成综合裁决的研究状态
@@ -415,20 +394,6 @@ public class ReportMarkdownRenderer {
             case "SELL" -> "看空风险明显占优，应优先回避或离场，等待估值、盈利或行业周期出现更清晰的安全边际。";
             default -> "多空证据基本平衡，先观察关键财报、指引和价格回撤，等证据更充分后再决定是否加仓。";
         };
-    }
-
-    /**
-     * 返回默认证据来源说明。
-     *
-     * @return 数据类别说明列表
-     */
-    private List<String> evidenceBasis() {
-        return List.of(
-                "结构化财务数据：收入、净利润、资产负债、现金流等年度指标",
-                "行情与技术指标：近 60 日价格、成交量、均线、RSI、MACD",
-                "知识库召回片段：可用财报、研报或已入库文档",
-                "新闻与网页搜索：近期公司新闻、公告、行业事件和市场情绪"
-        );
     }
 
     /**

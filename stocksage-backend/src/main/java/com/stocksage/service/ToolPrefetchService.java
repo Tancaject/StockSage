@@ -6,6 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.Coordinator;
 import com.stocksage.agent.ExecutionPlan;
 import com.stocksage.agent.PlanAction;
+import com.stocksage.agent.PlanRoute;
+import com.stocksage.agent.ReadRequest;
+import com.stocksage.agent.AgentStep;
+import com.stocksage.harness.OrdinaryCompletionPolicy;
+import com.stocksage.harness.ResearchHarness;
+import com.stocksage.harness.HarnessModels.EvidenceDimension;
+import com.stocksage.harness.HarnessModels.RunContext;
+import com.stocksage.trace.TraceService;
 import com.stocksage.harness.DeepResearchCompletionPolicy;
 import com.stocksage.harness.HarnessModels.HarnessPhase;
 import com.stocksage.harness.HarnessModels.HarnessOutcome;
@@ -72,6 +80,7 @@ public class ToolPrefetchService {
     private final ReportMarkdownRenderer reportRenderer;
     /** 收集深度研究所需的多源证据。 */
     private final DeepEvidenceCollector deepEvidenceCollector;
+    private final EvidenceEnvelopeMapper evidenceEnvelopeMapper;
     /** 在证据门禁通过后最多执行一次有界问题相关补证。 */
     private final DeepEvidenceReplanService deepEvidenceReplanService;
     /** 执行 Bull/Bear/Manager 深度研究流水线。 */
@@ -96,6 +105,9 @@ public class ToolPrefetchService {
     private final AsyncTaskExecutor agentTaskExecutor;
     /** 同步降级执行期间定时续租任务所有权。 */
     private final TaskScheduler researchHeartbeatScheduler;
+    private final ResearchHarness researchHarness;
+    private final OrdinaryCompletionPolicy ordinaryCompletionPolicy;
+    private final TraceService traceService;
 
     /** 单次搜索预取允许返回的最大结果数。 */
     @Value("${stocksage.chat.tool-prefetch.max-search-results:5}")
@@ -109,7 +121,7 @@ public class ToolPrefetchService {
     @Value("${stocksage.chat.search-ingest.ttl-days:7}")
     private long searchIngestTtlDays;
 
-    /** 并行分析师预取的整体等待上限，单位为秒。 */
+    /** 普通路由分析师的等待上限，单位为秒。 */
     @Value("${stocksage.agent.prefetch.timeout-seconds:120}")
     private long agentPrefetchTimeoutSeconds;
 
@@ -141,6 +153,7 @@ public class ToolPrefetchService {
             return PreparedToolContext.empty();
         }
 
+        if (executionPlan.route() == PlanRoute.DIRECT) return PreparedToolContext.empty();
         List<PlanAction> actions = executionPlan.actions();
         String primaryTicker = tickerResolutionService.resolvePrimaryTicker(userQuery, conversationId);
         if (isDeepResearchPlan(actions)) {
@@ -149,116 +162,105 @@ public class ToolPrefetchService {
                     userQuery, traceId, conversationId, userId, selectedModel, primaryTicker);
         }
 
-        StringBuilder context = new StringBuilder();
-        String directAnswer = "";
-        // 先放标的身份，便于下游提示词在股票代码/公司解析不确定时拒绝无关 RAG 或搜索片段。
-        appendResolvedStockIdentity(context, primaryTicker);
-
-        emitProgress(traceId, conversationId, "thought", "正在按服务器计划获取本轮证据。");
-
-        // 阶段 1：后端按固定计划执行只读工具与 Capability，模型不参与工具选择。
+        ReadRequest read = executionPlan.readRequest();
+        String clarification = read.clarification();
+        boolean us = tickerResolutionService.isLikelySecTicker(primaryTicker);
+        if (executionPlan.route() == PlanRoute.MARKET && read.intraday() && !us) {
+            clarification = "当前 A 股/港股取数只支持日、周、月线，无法提供本次小时或分钟线。请改用日线或选择支持的美股标的。";
+        }
+        if (!clarification.isBlank()) return new PreparedToolContext("", clarification, null, traceId, "BLOCKED");
+        OrdinaryEvidence evidence = new OrdinaryEvidence(primaryTicker, read, objectMapper, evidenceEnvelopeMapper);
+        emitProgress(traceId, conversationId, "thought", "正在按已校验的周期与粒度获取证据。");
         for (PlanAction action : actions) {
             switch (action) {
-                case FUNDAMENTALS_AGENT, MARKET_AGENT, NEWS_AGENT -> { /* 在证据获取后处理 */ }
-                case RESEARCH_MANAGER -> { /* DEEP plans return through submitDeepResearch above. */ }
-                case SEARCH_STOCKS -> appendToolObservation(context, "searchStocks",
-                        () -> marketTools.searchStocks(userQuery, toolPrefetchMaxSearchResults));
-                case GET_FINANCIAL_REPORTS, GET_STRUCTURED_FINANCIALS -> appendToolObservation(
-                        context, "getFinancialReports",
-                        () -> withResolvedTicker(primaryTicker,
-                                ticker -> fundamentalsTools.getFinancialReports(ticker, "annual", 5)));
+                case GET_FINANCIAL_REPORTS, GET_STRUCTURED_FINANCIALS -> evidence.call("getFinancialReports", EvidenceDimension.FUNDAMENTALS,
+                        () -> withResolvedTicker(primaryTicker, ticker -> fundamentalsTools.getFinancialReports(ticker, read.reportPeriod(), read.reportYears())));
                 case SEARCH_COMPANY_REPORTS -> {
-                    String result = appendToolObservation(context, "searchCompanyReports",
-                            () -> withResolvedTicker(primaryTicker,
-                                    ticker -> fundamentalsTools.searchCompanyReports(ticker, "财报", toolPrefetchMaxSearchResults)));
+                    String result = evidence.call("searchCompanyReports", EvidenceDimension.FUNDAMENTALS,
+                            () -> withResolvedTicker(primaryTicker, ticker -> fundamentalsTools.searchCompanyReports(ticker,
+                                    read.reportPeriod().equals("quarterly") ? "10-Q 季报" : "10-K 年报", toolPrefetchMaxSearchResults)));
                     asyncIngestSearchResults("searchCompanyReports", result, userQuery);
                 }
-                case GET_STOCK_KLINE -> appendToolObservation(
-                        context, marketKLineToolName(primaryTicker),
-                        () -> withResolvedTicker(primaryTicker,
-                                this::getMarketKLine));
-                case GET_FINANCIAL_METRICS -> appendToolObservation(
-                        context, marketFinancialToolName(primaryTicker),
+                case GET_STOCK_KLINE -> evidence.call(us ? "getIbkrHistoricalBars" : "getStockKLine", EvidenceDimension.MARKET,
+                        () -> withResolvedTicker(primaryTicker, ticker -> us
+                                ? marketTools.getIbkrHistoricalBars(ticker, read.period(), read.bar())
+                                : marketTools.getStockKLine(ticker, read.klinePeriod(), read.days())));
+                case GET_FINANCIAL_METRICS -> evidence.call(us ? "getStructuredFinancials" : "getFinancialMetrics", EvidenceDimension.MARKET,
                         () -> withResolvedTicker(primaryTicker, this::getMarketFinancialContext));
-                case GET_TECHNICAL_INDICATORS -> appendToolObservation(
-                        context, marketTechnicalToolName(primaryTicker),
-                        () -> withResolvedTicker(primaryTicker,
-                                this::getMarketTechnicalContext));
-                case SEARCH_NEWS -> {
-                    SkillExecutionService.ExecutionResult skillResult = skillExecutionService.executePrefetch(
-                            executionPlan,
-                            userQuery,
-                            toolPrefetchMaxSearchResults,
-                            traceId,
-                            conversationId,
-                            userId
-                    );
-                    if (!skillResult.context().isBlank()) {
-                        context.append(skillResult.context()).append("\n\n");
+                case GET_TECHNICAL_INDICATORS -> {
+                    // 美股分析复用本轮 K 线，不再额外取固定 6 个月日线。
+                    if (!us) evidence.call("getTechnicalIndicators", EvidenceDimension.MARKET,
+                            () -> withResolvedTicker(primaryTicker, ticker -> marketTools.getTechnicalIndicators(ticker, "MA,MACD,RSI")));
+                    else if (userQuery.toLowerCase(java.util.Locale.ROOT).matches("(?s).*(指标|macd|rsi|ma[0-9]|均线|kdj).*")) {
+                        evidence.add("getTechnicalIndicators", EvidenceDimension.MARKET,
+                                "{\"error\":true,\"message\":\"美股指标尚无确定性计算工具，已有 K 线不能替代指标结果\"}");
                     }
-                    if (!skillResult.handled(PlanAction.SEARCH_NEWS)) {
-                        String result = appendToolObservation(context, "searchNews",
+                }
+                case SEARCH_NEWS -> {
+                    SkillExecutionService.ExecutionResult skill = skillExecutionService.executePrefetch(
+                            executionPlan, userQuery, toolPrefetchMaxSearchResults, traceId, conversationId, userId);
+                    if (skill.skillId().isBlank()) {
+                        String result = evidence.call("searchNews", EvidenceDimension.NEWS,
                                 () -> newsTools.searchNews(userQuery, toolPrefetchMaxSearchResults));
                         asyncIngestSearchResults("searchNews", result, userQuery);
+                    } else if (skill.evidence().isEmpty()) {
+                        evidence.add("searchNews", EvidenceDimension.NEWS, "{\"error\":true,\"message\":\"未取得可用新闻证据\"}");
+                    } else {
+                        for (var result : skill.evidence()) evidence.add(result);
                     }
                 }
                 case WEB_SEARCH -> {
-                    String result = appendToolObservation(context, "webSearch",
+                    String result = evidence.call("webSearch", EvidenceDimension.NEWS,
                             () -> newsTools.webSearch(userQuery, toolPrefetchMaxSearchResults));
                     asyncIngestSearchResults("webSearch", result, userQuery);
                 }
-                case GET_MARKET_OVERVIEW -> appendToolObservation(
-                        context, "getMarketOverview", marketTools::getMarketOverview);
-                default -> {
-                    // Agent 与最终回答在证据获取后执行；DEEP 已在上方交给持久化流水线。
-                }
+                default -> { /* 标的已解析；角色分析在取证完成后执行。 */ }
             }
         }
-
-        // 阶段 2：无工具分析师只消费已经取得的证据，不再拥有第二套取数决策权。
-        boolean needsFundamentals = actions.contains(PlanAction.FUNDAMENTALS_AGENT);
-        boolean needsMarket = actions.contains(PlanAction.MARKET_AGENT);
-        boolean needsNews = actions.contains(PlanAction.NEWS_AGENT);
-        if (needsFundamentals || needsMarket || needsNews) {
-            emitProgress(traceId, conversationId, "thought", "证据获取完成，正在生成角色分析。");
-            String agentInputContext = context.toString();
-            CompletableFuture<String> fundamentalsFuture = needsFundamentals
-                    ? CompletableFuture.supplyAsync(() -> safeAgentCall("Fundamentals Agent",
-                            () -> fundamentalsAgent.analyze(userQuery, agentInputContext)), agentTaskExecutor)
-                    : CompletableFuture.completedFuture(null);
-            CompletableFuture<String> marketFuture = needsMarket
-                    ? CompletableFuture.supplyAsync(() -> safeAgentCall("Market Agent",
-                            () -> marketAgent.analyze(userQuery, agentInputContext)), agentTaskExecutor)
-                    : CompletableFuture.completedFuture(null);
-            CompletableFuture<String> newsFuture = needsNews
-                    ? CompletableFuture.supplyAsync(() -> safeAgentCall("News Agent",
-                            () -> newsAgent.analyze(userQuery, agentInputContext)), agentTaskExecutor)
-                    : CompletableFuture.completedFuture(null);
-
+        var decision = researchHarness.observeEvidence(traceId, ordinaryCompletionPolicy,
+                new RunContext(executionPlan.route().name(), Map.of()), evidence.ledger());
+        String outcome = decision.outcome() == HarnessOutcome.BLOCK ? "BLOCKED"
+                : decision.outcome() == HarnessOutcome.PASS && evidence.allIncluded() ? "COMPLETED"
+                : evidence.hasUsefulResult() ? "DEGRADED" : "FAILED";
+        StringBuilder context = new StringBuilder("本轮标的：" + primaryTicker + "\n请求参数：" + read.attributes()
+                + "\n证据验收：" + outcome + "。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n"
+                + evidence.context());
+        PlanAction analyst = actions.stream().filter(PlanAction::isAgentRole).findFirst().orElse(null);
+        if (analyst != null && evidence.hasUsefulResult() && !outcome.equals("BLOCKED")) {
+            String agentInput = context.toString();
+            CompletableFuture<String> future = CompletableFuture.supplyAsync(
+                    () -> safeAgentCall(analyst.label(), () -> switch (analyst) {
+                        case FUNDAMENTALS_AGENT -> fundamentalsAgent.analyze(userQuery, agentInput);
+                        case MARKET_AGENT -> marketAgent.analyze(userQuery, agentInput);
+                        case NEWS_AGENT -> newsAgent.analyze(userQuery, agentInput);
+                        default -> throw new IllegalStateException("Unsupported analyst: " + analyst);
+                    }), agentTaskExecutor);
             try {
-                CompletableFuture.allOf(fundamentalsFuture, marketFuture, newsFuture)
-                        .get(agentPrefetchTimeoutSeconds, TimeUnit.SECONDS);
-            } catch (Exception e) {
-                log.warn("Analyst synthesis timed out or failed after {}s: {}",
-                        agentPrefetchTimeoutSeconds, e.getMessage());
-                emitProgress(traceId, conversationId, "observation",
-                        "部分角色分析超时，系统将基于已取得的证据继续回答。");
-            }
-
-            String fundamentalsResult = completedValue(fundamentalsFuture);
-            String marketResult = completedValue(marketFuture);
-            String newsResult = completedValue(newsFuture);
-            if (fundamentalsResult != null) {
-                appendContextSection(context, "Fundamentals Agent", fundamentalsResult);
-            }
-            if (marketResult != null) {
-                appendContextSection(context, "Market Agent", marketResult);
-            }
-            if (newsResult != null) {
-                appendContextSection(context, "News Agent", newsResult);
+                String result = future.get(agentPrefetchTimeoutSeconds, TimeUnit.SECONDS);
+                if (result == null || result.isBlank()) outcome = "DEGRADED";
+                else {
+                    appendContextSection(context, analyst.label(), result);
+                    if (result.length() > 4500) outcome = "DEGRADED";
+                }
+            } catch (Exception error) {
+                future.cancel(true);
+                outcome = "DEGRADED";
+                context.append("\n领域分析未完成，仅使用已取得的原始证据。\n");
             }
         }
-        return new PreparedToolContext(context.toString().trim(), directAnswer);
+        context.append("\n最终执行验收：").append(outcome).append("。不得将此状态升级。\n");
+        traceService.addStep(traceId, AgentStep.builder().action("Ordinary Evidence")
+                .observation("普通路线证据验收：" + outcome)
+                .attributes(Map.of("kind", "ordinary-evidence", "route", executionPlan.route().name(),
+                        "request", read.attributes(), "observations", evidence.observations(), "taskOutcome", outcome,
+                        "contextChars", context.length(), "analystPlanned", analyst != null)).build());
+        emitProgress(traceId, conversationId, "observation", "证据验收：" + outcome + "；回答将保留来源和数据缺口。");
+        String direct = switch (outcome) {
+            case "BLOCKED" -> "本次取证的标的或权限不符合请求，已停止生成分析。请确认股票代码后重试。";
+            case "FAILED" -> "本轮未取得符合请求的可用证据，无法完成查询。请检查数据服务或稍后重试；不会使用其他周期或公司的数据替代。";
+            default -> "";
+        };
+        return new PreparedToolContext(context.toString(), direct, null, traceId, outcome, evidence.citationIds());
     }
 
     /**
@@ -323,12 +325,8 @@ public class ToolPrefetchService {
                     "", reportRenderer.buildTaskAcceptedAnswer(task), task.getId(), traceId);
         } catch (ResearchTaskQueue.QueueUnavailableException error) {
             log.warn("Task queue unavailable, falling back to inline DEEP execution: {}", error.getMessage());
-            try {
-                return runInlineDeepFallback(
-                        primaryTicker, userQuery, traceId, conversationId, userId, selectedModel, task);
-            } catch (RuntimeException inlineError) {
-                throw inlineError;
-            }
+            return runInlineDeepFallback(
+                    primaryTicker, userQuery, traceId, conversationId, userId, selectedModel, task);
         }
     }
 
@@ -732,37 +730,6 @@ public class ToolPrefetchService {
     }
 
     /**
-     * 根据市场选择 K 线工具名称。
-     */
-    private String marketKLineToolName(String ticker) {
-        return tickerResolutionService.isLikelySecTicker(ticker) ? "getIbkrHistoricalBars(3m,1d)" : "getStockKLine(daily,60)";
-    }
-
-    /**
-     * 根据市场选择财务指标工具名称。
-     */
-    private String marketFinancialToolName(String ticker) {
-        return tickerResolutionService.isLikelySecTicker(ticker) ? "getStructuredFinancials(SEC XBRL)" : "getFinancialMetrics";
-    }
-
-    /**
-     * 根据市场选择技术指标工具名称。
-     */
-    private String marketTechnicalToolName(String ticker) {
-        return tickerResolutionService.isLikelySecTicker(ticker) ? "getIbkrHistoricalBars(6m,1d)" : "getTechnicalIndicators(MA,MACD,RSI)";
-    }
-
-    /**
-     * 获取指定 ticker 的市场 K 线上下文。
-     */
-    private String getMarketKLine(String ticker) {
-        if (tickerResolutionService.isLikelySecTicker(ticker)) {
-            return marketTools.getIbkrHistoricalBars(ticker, "3m", "1d");
-        }
-        return marketTools.getStockKLine(ticker, "daily", 60);
-    }
-
-    /**
      * 获取指定 ticker 的财务/估值上下文。
      */
     private String getMarketFinancialContext(String ticker) {
@@ -770,16 +737,6 @@ public class ToolPrefetchService {
             return fundamentalsTools.getStructuredFinancials(ticker);
         }
         return marketTools.getFinancialMetrics(ticker);
-    }
-
-    /**
-     * 获取指定 ticker 的技术指标上下文。
-     */
-    private String getMarketTechnicalContext(String ticker) {
-        if (tickerResolutionService.isLikelySecTicker(ticker)) {
-            return marketTools.getIbkrHistoricalBars(ticker, "6m", "1d");
-        }
-        return marketTools.getTechnicalIndicators(ticker, "MA,MACD,RSI");
     }
 
     /**
@@ -791,8 +748,12 @@ public class ToolPrefetchService {
             context.append("No supported stock target was resolved. Do not use unrelated company facts.\n\n");
             return;
         }
-        String identity = appendToolObservation(new StringBuilder(), "resolveStock",
-                () -> marketTools.resolveStock(primaryTicker));
+        String identity = null;
+        try {
+            identity = marketTools.resolveStock(primaryTicker);
+        } catch (Exception ignored) {
+            // 身份读取失败只产生空观察，不替代后续证据的标的验收。
+        }
         context.append(identity == null || identity.isBlank() ? "(empty result)" : identity)
                 .append("\n\n");
     }
@@ -823,16 +784,6 @@ public class ToolPrefetchService {
     }
 
     /**
-     * 读取已完成 Future 的结果，失败时返回空字符串。
-     */
-    private String completedValue(CompletableFuture<String> future) {
-        if (future == null || !future.isDone() || future.isCancelled() || future.isCompletedExceptionally()) {
-            return null;
-        }
-        return future.getNow(null);
-    }
-
-    /**
      * 向 SSE 事件总线推送进度分片。
      */
     private void emitProgress(String traceId, Long conversationId, String type, String content) {
@@ -846,27 +797,6 @@ public class ToolPrefetchService {
         context.append("## ").append(name).append("\n")
                 .append(PromptText.truncate(content, 4500))
                 .append("\n\n");
-    }
-
-    /**
-     * 执行工具并把观察结果追加到上下文。
-     */
-    private String appendToolObservation(StringBuilder context, String toolName, ToolCall toolCall) {
-        try {
-            String result = toolCall.call();
-            if (result == null || result.isBlank()) {
-                return null;
-            }
-            context.append("## ").append(toolName).append("\n")
-                    .append(PromptText.truncate(result, 3500))
-                    .append("\n\n");
-            return result;
-        } catch (Exception e) {
-            context.append("## ").append(toolName).append("\n")
-                    .append("Tool failed: ").append(e.getMessage())
-                    .append("\n\n");
-            return null;
-        }
     }
 
     /**
@@ -937,29 +867,25 @@ public class ToolPrefetchService {
             String directAnswer,
             Long submittedTaskId,
             String eventTraceId,
-            String taskOutcome
+            String taskOutcome,
+            List<String> citationIds
     ) {
-        /**
-         * 构造普通预取结果，任务 ID 与事件 trace 均为空。
-         *
-         * @param context 待注入的工具上下文
-         * @param directAnswer 可选直答
-         */
-        public PreparedToolContext(String context, String directAnswer) {
-            this(context, directAnswer, null, null, null);
+        public PreparedToolContext(String context, String directAnswer, Long submittedTaskId,
+                                   String eventTraceId, String taskOutcome) {
+            this(context, directAnswer, submittedTaskId, eventTraceId, taskOutcome, List.of());
         }
 
-        /**
-         * 构造已提交任务的结果，事件 trace 默认留空。
-         *
-         * @param context 待注入的工具上下文
-         * @param directAnswer 可选直答
-         * @param submittedTaskId 已提交的研究任务 ID
-         */
-        public PreparedToolContext(String context, String directAnswer, Long submittedTaskId) {
-            this(context, directAnswer, submittedTaskId, null, null);
+        /** 生成成功仍需引用本轮可用证据；未知或缺失编号不能记作完整完成。 */
+        public String outcomeForAnswer(String answer) {
+            if (!"COMPLETED".equals(taskOutcome) || citationIds.isEmpty()) return taskOutcome;
+            java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\[E([0-9]+)\\]").matcher(answer == null ? "" : answer);
+            boolean cited = false;
+            while (matcher.find()) {
+                if (!citationIds.contains("E" + matcher.group(1))) return "DEGRADED";
+                cited = true;
+            }
+            return cited ? taskOutcome : "DEGRADED";
         }
-
         public PreparedToolContext(
                 String context,
                 String directAnswer,
@@ -978,11 +904,6 @@ public class ToolPrefetchService {
         public boolean hasDirectAnswer() {
             return directAnswer != null && !directAnswer.isBlank();
         }
-    }
-
-    @FunctionalInterface
-    private interface ToolCall {
-        String call();
     }
 
     @FunctionalInterface

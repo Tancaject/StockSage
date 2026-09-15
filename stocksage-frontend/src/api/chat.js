@@ -12,10 +12,8 @@
  * - 所以用 fetch + ReadableStream 手动解析 SSE 协议
  */
 
-import { BASE_URL, apiFetch, getJson, requestOk } from './http.js'
-import { readSseEvents } from '../lib/sse-stream.js'
-
-const STREAM_IDLE_TIMEOUT_MS = 90_000
+import { BASE_URL, getJson, requestOk } from './http.js'
+import { openSseStream } from '../lib/sse-stream.js'
 
 /**
  * 发送对话消息，接收 SSE 流式回复。
@@ -26,72 +24,15 @@ const STREAM_IDLE_TIMEOUT_MS = 90_000
  * @param {Function} onError     出错时的回调
  * @returns {AbortController}    返回控制器，调用 .abort() 可中断请求
  */
-export function streamChat(request, { onChunk, onDone, onError }) {
-  // AbortController 允许调用方随时取消请求（如用户切换对话）
-  const controller = new AbortController()
-  let idleTimer = null
-  let timedOut = false
-
-  function clearIdleTimer() {
-    if (idleTimer !== null) {
-      window.clearTimeout(idleTimer)
-      idleTimer = null
-    }
-  }
-
-  function resetIdleTimer() {
-    clearIdleTimer()
-    idleTimer = window.setTimeout(() => {
-      timedOut = true
-      controller.abort()
-    }, STREAM_IDLE_TIMEOUT_MS)
-  }
-
-  apiFetch(`${BASE_URL}/chat/stream`, {
+export function streamChat(request, callbacks) {
+  return openSseStream(`${BASE_URL}/chat/stream`, {
     method: 'POST',
     headers: { Accept: 'text/event-stream', 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
-    signal: controller.signal,
+  }, {
+    ...callbacks,
+    timeoutMessage: '流式响应长时间没有新数据，已自动中断。',
   })
-    .then(async (response) => {
-      if (!response.ok) {
-        let message = `HTTP ${response.status}`
-        try {
-          const body = await response.json()
-          if (body?.message) message = body.message
-        } catch { /* 非 JSON 错误响应 */ }
-        throw new Error(message)
-      }
-
-      resetIdleTimer()
-      await readSseEvents(response.body, {
-        onActivity: resetIdleTimer,
-        onEvent(event) {
-          const data = event.data.trim()
-          if (!data || data === '[DONE]') return
-          try {
-            const chunk = JSON.parse(data)
-            // task-final 与其他业务 chunk 一样交给视图分发；SSE id 用于后台任务断点续传。
-            onChunk(event.id ? { ...chunk, entryId: event.id } : chunk)
-          } catch {
-            // 非 JSON 数据（如心跳），忽略
-          }
-        },
-      })
-      clearIdleTimer()
-      onDone?.()
-    })
-    .catch((err) => {
-      clearIdleTimer()
-      if (timedOut) {
-        onError?.(new Error('流式响应长时间没有新数据，已自动中断。'))
-        return
-      }
-      // AbortError 是主动取消，不算错误
-      if (err.name !== 'AbortError') onError?.(err)
-    })
-
-  return controller
 }
 
 /**

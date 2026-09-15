@@ -33,7 +33,7 @@ Agent 解决“如何分析服务器已经取得的证据”
 - Spring AI 只创建 transport；StockSage 使用 `McpSyncClient` 延迟执行 initialize、tools/list 和 tools/call，连接失败时不阻止应用启动。
 - `capabilities/*.yml` 与代码 adapter 双重注册，`CapabilityPolicy` 默认拒绝未知、未授权、敏感读取和写能力。
 - `skills/*.yml` 启动加载并校验，已提供 `latest-news-mcp` 与 `local-latest-news`。
-- NEWS 路由在现有 `ToolPrefetchService` 内先执行 Skill；MCP 不可用时降级到原 `NewsTools.searchNews`，并保留最终 legacy NEWS 兜底。
+- NEWS 路由在现有 `ToolPrefetchService` 内先执行 Skill；MCP 不可用时降级到 `NewsTools.searchNews`。本地能力也失败时记录失败和证据缺口，不再重复调用；只有未选中 Skill 时才使用原直接 NEWS 路径。
 - Skill 清单只接受 `INLINE_DETERMINISTIC` 与 `CAPABILITY` 步骤；未知字段启动即失败，不再保留未执行的 Agent/Final 装饰步骤。
 - Agent 和最终回答 ChatClient 均无工具；`ToolPrefetchService` 先取证，再让对应领域 Agent 归纳，最后生成回答。
 - MCP capability 经过统一 timeout、结果大小限制、SSE/Trace/Micrometer observer；没有加入任何 Agent 的全局 `defaultTools`。
@@ -953,7 +953,7 @@ Phase 0–2 的 `CapabilityGateway`、fail-closed policy、统一 observer 和 `
 
 1. 配置一个可信、只读的 Streamable HTTP MCP server。
 2. 现场验证 initialize、tools/list、tools/call 和 exact allowlist。
-3. 验证 MCP 成功、MCP → 本地 fallback、双失败回 legacy 三条路径的脱敏 Trace、指标和前端状态。
+3. 验证 MCP 成功、MCP → 本地 fallback、双失败记录缺口三条路径的脱敏 Trace、指标和前端状态；未选中 Skill 时原直接 NEWS 路径仍可用。
 4. 通过真实验收后，再决定是否迁移其他 route 或调整 Spring AI 版本；不得把框架升级与 route 重构混在同一切片。
 
 ## 22. 官方参考

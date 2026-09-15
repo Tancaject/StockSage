@@ -56,18 +56,16 @@ public class SkillValidator {
             throw new IllegalStateException("Skill requests a forbidden risk level: " + skill.id());
         }
 
-        long capabilitySteps = 0;
         for (SkillDefinition.SkillStep step : skill.steps()) {
             if (step.type() == null) {
                 throw new IllegalStateException("Skill step type is missing: " + skill.id());
             }
-            capabilitySteps++;
             validateCapability(skill, step.capability());
             if (step.fallbackCapability() != null && !step.fallbackCapability().isBlank()) {
                 validateCapability(skill, step.fallbackCapability());
             }
         }
-        if (capabilitySteps > skill.policy().maxCapabilityCalls()) {
+        if (skill.steps().size() > skill.policy().maxCapabilityCalls()) {
             throw new IllegalStateException("Skill has more capability steps than its call limit: " + skill.id());
         }
     }

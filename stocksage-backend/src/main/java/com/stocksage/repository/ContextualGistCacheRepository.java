@@ -1,6 +1,5 @@
 package com.stocksage.repository;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,26 +20,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ContextualGistCacheRepository {
 
-    /** 执行缓存表 DDL 和参数化读写 SQL 的 Spring JDBC 入口。 */
+    /** 执行缓存表参数化读写 SQL 的 Spring JDBC 入口。 */
     private final JdbcTemplate jdbcTemplate;
-
-    /**
-     * 应用启动时确保缓存表存在，与 doc_index 一样免去本地环境手工迁移。
-     *
-     * <p>{@link PostConstruct} 自动调用；建表失败会阻止该仓储完成初始化。</p>
-     */
-    @PostConstruct
-    public void ensureTable() {
-        jdbcTemplate.execute("""
-                CREATE TABLE IF NOT EXISTS contextual_gist_cache (
-                    child_text_hash CHAR(64) PRIMARY KEY,
-                    gist            TEXT NOT NULL,
-                    model           VARCHAR(64) NOT NULL,
-                    granularity     VARCHAR(16) NOT NULL,
-                    created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-                """);
-    }
 
     /**
      * 按切片文本哈希查询已缓存的 gist。

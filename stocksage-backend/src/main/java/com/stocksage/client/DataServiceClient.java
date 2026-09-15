@@ -45,8 +45,6 @@ public class DataServiceClient {
     private static final Duration TTL_KLINE      = Duration.ofMinutes(30);
     /** 技术指标缓存时间。 */
     private static final Duration TTL_TECHNICAL   = Duration.ofMinutes(30);
-    /** 多标的比较结果缓存时间。 */
-    private static final Duration TTL_COMPARE     = Duration.ofMinutes(30);
     /** 市场概览和板块数据缓存时间。 */
     private static final Duration TTL_MARKET      = Duration.ofMinutes(10);
     /** 股票目录、新闻和网页搜索结果缓存时间。 */
@@ -215,18 +213,6 @@ public class DataServiceClient {
     public String getSectorPerformance(String sector) {
         return cached("sector", new String[]{sector}, TTL_MARKET,
                 () -> get("/api/stock/sector?sector={sector}", sector));
-    }
-
-    /**
-     * 多股票横向对比。
-     *
-     * @param codes 逗号分隔的股票代码
-     * @param dimensions 逗号分隔的比较维度
-     * @return 对比结果 JSON
-     */
-    public String compareStocks(String codes, String dimensions) {
-        return cached("compare", new String[]{codes, dimensions}, TTL_COMPARE,
-                () -> get("/api/stock/compare?codes={codes}&dimensions={dimensions}", codes, dimensions));
     }
 
     /** @return 主要指数和市场状态等概览 JSON。 */

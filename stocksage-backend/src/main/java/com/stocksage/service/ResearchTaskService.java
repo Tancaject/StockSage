@@ -559,6 +559,9 @@ public class ResearchTaskService {
         );
 
         LinkedHashSet<Long> retriedTaskIds = new LinkedHashSet<>();
+        repository.findByStatusAndUpdatedAtBefore(ResearchTask.Status.PENDING, cutoff).stream()
+                .map(ResearchTask::getId)
+                .forEach(retriedTaskIds::add);
         if (pendingRecoveredTasks != null) {
             pendingRecoveredTasks.stream()
                     .map(ResearchTask::getId)

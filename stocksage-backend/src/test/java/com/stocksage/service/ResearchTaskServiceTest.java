@@ -230,6 +230,22 @@ class ResearchTaskServiceTest {
     }
 
     @Test
+    void initialPendingTaskRemainsRecoverableWithoutAnErrorMarker() {
+        ResearchTask pending = researchTask("rt:pending:no-message", ResearchTask.Status.PENDING,
+                ResearchTask.Stage.CREATED, 0);
+        pending.setId(61L);
+        when(repository.findByStatusAndUpdatedAtBefore(eq(ResearchTask.Status.PENDING), any(LocalDateTime.class)))
+                .thenReturn(List.of(pending));
+
+        assertThat(service.recoverStaleRunningTasks(Duration.ofMinutes(15), 3).retriedTaskIds())
+                .containsExactly(61L);
+        assertThat(service.recoverStaleRunningTasks(Duration.ofMinutes(15), 3).retriedTaskIds())
+                .containsExactly(61L);
+        assertThat(pending.getAttempts()).isZero();
+        assertThat(pending.getErrorMessage()).isNull();
+    }
+
+    @Test
     void recoverStaleRunningTasksRetriesBeforeAttemptLimitAndFailsAtLimit() {
         ResearchTask retryable = researchTask("rt:nvda:retry", ResearchTask.Status.RUNNING, ResearchTask.Stage.AGENT_DEBATE, 1);
         retryable.setId(41L);

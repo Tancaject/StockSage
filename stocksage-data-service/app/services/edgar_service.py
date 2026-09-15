@@ -11,6 +11,8 @@ https://www.sec.gov/os/accessing-edgar-data
 import re
 import time
 import logging
+from datetime import date
+from math import isfinite
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -37,7 +39,7 @@ class EdgarService:
 
     def __init__(self):
         """初始化共享 HTTP 客户端，复用连接并统一请求头。"""
-        self._client = httpx.Client(headers=_HEADERS, timeout=30, follow_redirects=True)
+        self._client = httpx.Client(headers=_HEADERS, timeout=30, follow_redirects=False)
         self._last_request_time = 0.0
 
     def _throttle(self):
@@ -51,9 +53,9 @@ class EdgarService:
         """执行带限流和 URL 校验的 SEC GET 请求。"""
         self._validate_sec_url(url)
         self._throttle()
-        resp = self._client.get(url)
+        # 自动跟随会在目标校验前发出下一跳；SEC 端点变更时应明确更新调用地址。
+        resp = self._client.get(url, follow_redirects=False)
         resp.raise_for_status()
-        self._validate_sec_url(str(resp.url))
         return resp
 
     @staticmethod
@@ -497,12 +499,13 @@ class EdgarService:
             "us-gaap:LongTermDebtNoncurrent",
         ],
     }
+    _INSTANT_METRICS = {"TotalAssets", "TotalLiabilities", "StockholdersEquity", "TotalDebt"}
 
     def get_xbrl(self, ticker: str) -> dict:
         """
         从 XBRL companyfacts API 获取结构化财务数据。
 
-        返回关键财务指标的时间序列数据。
+        返回按实际 start/end 排列的年度指标；filing_fiscal_year 只表示公告标签。
         """
         cik = self._resolve_cik(ticker)
         url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
@@ -510,6 +513,16 @@ class EdgarService:
 
         company_name = data.get("entityName", ticker)
         facts = data.get("facts", {}).get("us-gaap", {})
+
+        # 10-K 的资产负债事实也可能含季度时点；以同份公司事实中的全年期间确认年末。
+        annual_ends = set()
+        for label, concepts in self._XBRL_CONCEPTS.items():
+            if label in self._INSTANT_METRICS:
+                continue
+            for concept in concepts:
+                units = facts.get(concept.split(":")[-1], {}).get("units", {})
+                for entries in units.values():
+                    annual_ends.update(row["end"] for row in self._filter_annual(entries))
 
         metrics = {}
         for label, concept_keys in self._XBRL_CONCEPTS.items():
@@ -522,12 +535,17 @@ class EdgarService:
                 for unit_key in ["USD", "USD/shares"]:
                     if unit_key not in units_data:
                         continue
-                    annual = self._filter_annual(units_data[unit_key])
+                    annual = self._filter_annual(
+                        units_data[unit_key],
+                        instant=label in self._INSTANT_METRICS,
+                        annual_ends=annual_ends,
+                    )
                     if not annual:
                         continue
-                    # 选择最近财年的概念。
-                    latest_fy = annual[-1]["fiscal_year"]
-                    if best is None or latest_fy > best["data"][-1]["fiscal_year"]:
+                    # 公告 fy 不是每条比较期事实的财年，最新概念按实际期间结束日选择。
+                    if best is None or annual[-1]["end"] > best["data"][-1]["end"]:
+                        for row in annual:
+                            row["source_url"] = url
                         best = {
                             "concept": concept,
                             "unit": unit_key,
@@ -545,21 +563,48 @@ class EdgarService:
         }
 
     @staticmethod
-    def _filter_annual(entries: list[dict]) -> list[dict]:
-        """筛选 XBRL 条目，只保留 10-K 年度公告，并按财年去重。"""
+    def _filter_annual(
+        entries: list[dict], *, instant: bool = False, annual_ends: set[str] | None = None,
+    ) -> list[dict]:
+        """按实际期间取最新年度事实；公告 fy 保留为来源，不猜测事实的 fiscal_year。"""
         annual = {}
         for e in entries:
-            form = e.get("form", "")
-            if form != "10-K":
+            if e.get("form") not in {"10-K", "10-K/A"}:
                 continue
-            fy = e.get("fy")
-            if fy is None:
+            value = e.get("val")
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not isfinite(value):
                 continue
-            # 每个财年保留最新公告，修订版覆盖原版。
-            key = f"{fy}"
-            annual[key] = {
-                "fiscal_year": fy,
-                "filed": e.get("filed", ""),
-                "value": e.get("val"),
+            try:
+                end = date.fromisoformat(e["end"])
+                filed = date.fromisoformat(e["filed"])
+                start = date.fromisoformat(e["start"]) if e.get("start") else None
+            except (KeyError, TypeError, ValueError):
+                continue
+            if instant:
+                if start is not None or end.isoformat() not in (annual_ends or set()):
+                    continue
+            # SEC annual-frame tolerance includes 52/53-week and non-calendar fiscal years.
+            # https://www.sec.gov/search-filings/edgar-application-programming-interfaces
+            elif start is None or not 335 <= (end - start).days <= 395:
+                continue
+            if filed < end:
+                continue
+            key = (start.isoformat() if start else None, end.isoformat())
+            row = {
+                "fiscal_year": None,
+                "filing_fiscal_year": e.get("fy"),
+                "start": key[0], "end": key[1],
+                "period_type": "instant" if instant else "duration",
+                "filed": filed.isoformat(), "form": e["form"],
+                "accn": e.get("accn", ""), "fp": e.get("fp"), "frame": e.get("frame"),
+                "value": value,
             }
-        return sorted(annual.values(), key=lambda x: x["fiscal_year"])
+            annual.setdefault(key, []).append(row)
+        result = []
+        for versions in annual.values():
+            newest = max((row["filed"], row["accn"]) for row in versions)
+            latest = [row for row in versions if (row["filed"], row["accn"]) == newest]
+            # 同一次公告同一期间的冲突值没有可证明的赢家，不能依赖数组顺序任选。
+            if len({row["value"] for row in latest}) == 1:
+                result.append(latest[0])
+        return sorted(result, key=lambda row: (row["end"], row["start"] or ""))

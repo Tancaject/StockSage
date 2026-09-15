@@ -90,7 +90,7 @@ class PlannerEvalServiceTest {
 
     @Test
     void liveModeEvaluatesTheSingleRoutingCoordinator() {
-        when(coordinator.plan("latest news", 0, "", List.of())).thenReturn(new ExecutionPlan(
+        when(coordinator.plan("latest news", 0, List.of())).thenReturn(new ExecutionPlan(
                 PlanRoute.NEWS,
                 "news",
                 "plan",
@@ -124,7 +124,7 @@ class PlannerEvalServiceTest {
         assertThat(response.results().get(0).intentSummary()).isEqualTo("查询最新新闻");
         assertThat(response.results().get(0).rationale()).isEqualTo("需要新鲜事件信息");
         assertThat(response.results().get(0).confidence()).isEqualTo(0.94);
-        verify(coordinator).plan("latest news", 0, "", List.of());
+        verify(coordinator).plan("latest news", 0, List.of());
     }
 
     @Test
@@ -133,7 +133,7 @@ class PlannerEvalServiceTest {
                 "user: 先看看英伟达最近一季财报",
                 "assistant: 已为你总结 NVDA 最近一季财报"
         );
-        when(coordinator.plan("那它今天有什么新消息？", 0, "", recentTurns)).thenReturn(new ExecutionPlan(
+        when(coordinator.plan("那它今天有什么新消息？", 0, recentTurns)).thenReturn(new ExecutionPlan(
                 PlanRoute.NEWS,
                 "news",
                 "plan",
@@ -174,7 +174,7 @@ class PlannerEvalServiceTest {
     @Test
     void contextCaseFailsWhenResolvedQueryDoesNotCarryTheHistoryTicker() {
         List<String> recentTurns = List.of("user: 关注 NVDA", "assistant: 已记录 NVDA");
-        when(coordinator.plan("它今天多少钱？", 0, "", recentTurns)).thenReturn(new ExecutionPlan(
+        when(coordinator.plan("它今天多少钱？", 0, recentTurns)).thenReturn(new ExecutionPlan(
                 PlanRoute.MARKET,
                 "market",
                 "plan",
@@ -203,7 +203,7 @@ class PlannerEvalServiceTest {
 
     @Test
     void correctFallbackRouteCannotPassANoFallbackCase() {
-        when(coordinator.plan("它今天多少钱？", 0, "", List.of("user: 关注 NVDA"))).thenReturn(new ExecutionPlan(
+        when(coordinator.plan("它今天多少钱？", 0, List.of("user: 关注 NVDA"))).thenReturn(new ExecutionPlan(
                 PlanRoute.MARKET,
                 "market",
                 "plan",
@@ -237,7 +237,7 @@ class PlannerEvalServiceTest {
 
     @Test
     void separatesFinalFusionAccuracyFromRawLlmSignalAccuracyAndValidity() {
-        when(coordinator.plan("结合上下文查最新消息", 0, "", List.of())).thenReturn(new ExecutionPlan(
+        when(coordinator.plan("结合上下文查最新消息", 0, List.of())).thenReturn(new ExecutionPlan(
                 PlanRoute.NEWS,
                 "news",
                 "plan",
@@ -246,7 +246,7 @@ class PlannerEvalServiceTest {
                 ModelTier.STANDARD,
                 routingMetadata(RoutingDecisionSource.INTENT_FUSION, "MARKET", PlanRoute.NEWS, "NEWS_EVENT", "")
         ));
-        when(coordinator.plan("另一个最新消息", 0, "", List.of())).thenReturn(new ExecutionPlan(
+        when(coordinator.plan("另一个最新消息", 0, List.of())).thenReturn(new ExecutionPlan(
                 PlanRoute.NEWS,
                 "news",
                 "plan",
@@ -298,7 +298,7 @@ class PlannerEvalServiceTest {
                 true,
                 List.of(Coordinator.MULTI_TARGET_UNSUPPORTED)
         );
-        when(coordinator.plan("Compare AAPL and MSFT", 0, "", List.of())).thenReturn(new ExecutionPlan(
+        when(coordinator.plan("Compare AAPL and MSFT", 0, List.of())).thenReturn(new ExecutionPlan(
                 PlanRoute.DIRECT, "clarify", "plan", List.of(PlanAction.FINAL_ANSWER),
                 "done", ModelTier.FAST, guarded
         ));

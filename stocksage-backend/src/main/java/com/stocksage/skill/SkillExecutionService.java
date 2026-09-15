@@ -22,7 +22,7 @@ import java.util.Set;
  *
  * <p>上游工具预取服务传入 {@link ExecutionPlan}；本类解析对应 Skill、建立能力 allowlist 与总截止时间，
  * 按清单顺序经 {@link CapabilityGateway} 执行能力，并把结果标记为“不可信证据”交给后续 Agent 综合。
- * 当前仅承接 NEWS 的确定性内联 walking skeleton，其他模式继续走既有执行路径。</p>
+ * 当前仅承接 NEWS 的确定性内联步骤，其他路由继续走既有执行路径。</p>
  */
 @Service
 public class SkillExecutionService {
@@ -49,8 +49,9 @@ public class SkillExecutionService {
     /**
      * 执行计划对应的确定性能力预取。
      *
-     * <p>没有可用 Skill 或执行模式不匹配时返回空结果，让调用方继续旧路径；策略拒绝、未知能力以及
-     * required 步骤完全失败时抛出异常。普通提供方故障可按清单尝试一次 fallback。</p>
+     * <p>没有可用 Skill 时返回空结果，让调用方继续旧路径；策略拒绝、未知能力以及
+     * required 步骤完全失败时抛出异常。普通提供方故障可按清单尝试一次 fallback；
+     * 已选 Skill 的可选步骤失败时记录缺口，不再从旧路径重复调用同一本地能力。</p>
      *
      * @param executionPlan Coordinator 生成的受控计划
      * @param userQuery 用户原始问题，将作为新闻能力查询词
@@ -74,10 +75,6 @@ public class SkillExecutionService {
             return ExecutionResult.empty();
         }
         SkillDefinition skill = resolved.get();
-        if (skill.executionMode() != SkillDefinition.ExecutionMode.INLINE_DETERMINISTIC) {
-            executionObserver.record(skill.id(), SkillExecutionObserver.Outcome.LEGACY_PATH, elapsedMs(startedAt));
-            return ExecutionResult.empty();
-        }
 
         // allowlist 来自服务器持有的清单，而不是模型输出或远端 MCP 的发现结果。
         Set<String> allowedCapabilities = collectAllowedCapabilities(skill);
@@ -91,6 +88,7 @@ public class SkillExecutionService {
         );
 
         StringBuilder context = new StringBuilder();
+        java.util.List<CapabilityResult> evidence = new java.util.ArrayList<>();
         EnumSet<PlanAction> handledActions = EnumSet.noneOf(PlanAction.class);
         int calls = 0;
         boolean fallbackUsed = false;
@@ -102,6 +100,7 @@ public class SkillExecutionService {
                     CapabilityResult result = capabilityGateway.invoke(
                             step.capability(), arguments, invocationContext);
                     appendEvidence(context, skill.id(), result, false);
+                    evidence.add(result);
                     markHandled(step.capability(), handledActions);
                 } catch (CapabilityException primaryError) {
                     // 策略或注册表错误不能降级绕过；只有提供方故障才允许走声明式 fallback。
@@ -118,6 +117,7 @@ public class SkillExecutionService {
                             CapabilityResult fallback = capabilityGateway.invoke(
                                     fallbackCapability, arguments, invocationContext);
                             appendEvidence(context, skill.id(), fallback, true);
+                            evidence.add(fallback);
                             markHandled(fallbackCapability, handledActions);
                             fallbackUsed = true;
                         } catch (CapabilityException fallbackError) {
@@ -127,13 +127,13 @@ public class SkillExecutionService {
                                 throw fallbackError;
                             }
                             emit(traceId, conversationId,
-                                    "本地降级能力暂不可用，继续使用原有 NEWS 执行路径");
+                                    "新闻检索失败：本地降级能力也不可用。本轮使用其他已取得的证据，请稍后重试新闻查询。");
                         }
                     } else if (step.required()) {
                         throw primaryError;
                     } else {
                         emit(traceId, conversationId,
-                                "可选能力 " + step.capability() + " 不可用，继续使用现有本地流程");
+                                "可选能力 " + step.capability() + " 不可用，本轮使用其他已取得的证据，请稍后重试。");
                     }
                 }
             }
@@ -144,14 +144,17 @@ public class SkillExecutionService {
         SkillExecutionObserver.Outcome outcome = fallbackUsed
                 ? SkillExecutionObserver.Outcome.FALLBACK_SUCCESS
                 : context.isEmpty()
-                ? SkillExecutionObserver.Outcome.LEGACY_PATH
+                ? SkillExecutionObserver.Outcome.FAILED
                 : SkillExecutionObserver.Outcome.SUCCESS;
         executionObserver.record(skill.id(), outcome, elapsedMs(startedAt));
         return new ExecutionResult(
-                context.toString().trim(),
+                context.isEmpty()
+                        ? "## News evidence gap\n本轮新闻检索失败，未取得可用新闻证据；不得据此补编新闻事实。"
+                        : context.toString().trim(),
                 Set.copyOf(handledActions),
                 skill.id(),
-                fallbackUsed
+                fallbackUsed,
+                java.util.List.copyOf(evidence)
         );
     }
 
@@ -247,8 +250,12 @@ public class SkillExecutionService {
             String context,
             Set<PlanAction> handledActions,
             String skillId,
-            boolean fallbackUsed
+            boolean fallbackUsed,
+            java.util.List<CapabilityResult> evidence
     ) {
+        public ExecutionResult(String context, Set<PlanAction> handledActions, String skillId, boolean fallbackUsed) {
+            this(context, handledActions, skillId, fallbackUsed, java.util.List.of());
+        }
         /** @return 未选择 Skill 时使用的空结果 */
         public static ExecutionResult empty() {
             return new ExecutionResult("", Set.of(), "", false);

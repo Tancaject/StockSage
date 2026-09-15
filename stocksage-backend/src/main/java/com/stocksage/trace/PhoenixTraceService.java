@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Locale;
 
 /**
  * 向 Phoenix 发送 OpenInference 风格的链路片段，用于对话和 RAG 可观测性。
@@ -24,13 +25,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class PhoenixTraceService {
 
-    /** OpenInference 与 StockSage 自定义属性键；所有值都经过受控摘要，不写完整隐私上下文。 */
+    /** 正文通过 capture-content 单独授权；不把用户标识写入观测存储。 */
     private static final AttributeKey<String> SPAN_KIND = AttributeKey.stringKey("openinference.span.kind");
     private static final AttributeKey<String> INPUT_VALUE = AttributeKey.stringKey("input.value");
     private static final AttributeKey<String> OUTPUT_VALUE = AttributeKey.stringKey("output.value");
     private static final AttributeKey<String> TRACE_ID = AttributeKey.stringKey("stocksage.trace_id");
-    private static final AttributeKey<String> USER_ID = AttributeKey.stringKey("stocksage.user_id");
-    private static final AttributeKey<Long> CONVERSATION_ID = AttributeKey.longKey("stocksage.conversation_id");
     private static final AttributeKey<Long> DURATION_MS = AttributeKey.longKey("stocksage.duration_ms");
     private static final AttributeKey<Long> TOKEN_COUNT = AttributeKey.longKey("llm.token_count.total");
 
@@ -45,8 +44,8 @@ public class PhoenixTraceService {
      * 为单轮对话启动根链路片段。
      *
      * @param traceId StockSage 持久化链路 ID
-     * @param userId 当前用户 ID
-     * @param conversationId 会话 ID，可为空
+     * @param userId 当前用户 ID，不导出到 Phoenix
+     * @param conversationId 会话 ID，不导出到 Phoenix
      * @param userQuery 用户问题，作为根 span 输入
      */
     public void startTrace(String traceId, String userId, Long conversationId, String userQuery) {
@@ -56,11 +55,9 @@ public class PhoenixTraceService {
         try {
             Span span = tracer.spanBuilder("stocksage.chat")
                     .setAttribute(SPAN_KIND, "CHAIN")
-                    .setAttribute(INPUT_VALUE, safe(userQuery))
                     .setAttribute(TRACE_ID, traceId)
-                    .setAttribute(USER_ID, safe(userId))
-                    .setAttribute(CONVERSATION_ID, conversationId == null ? 0L : conversationId)
                     .startSpan();
+            setTextAttribute(span, INPUT_VALUE.getKey(), userQuery);
             rootSpans.put(traceId, span);
         } catch (Exception e) {
             log.warn("Failed to start Phoenix trace, traceId={}", traceId, e);
@@ -87,11 +84,12 @@ public class PhoenixTraceService {
                     .setParent(Context.root().with(parent))
                     .setAttribute(SPAN_KIND, spanKind(step))
                     .setAttribute(TRACE_ID, traceId)
-                    .setAttribute(INPUT_VALUE, safe(step.getActionInput()))
-                    .setAttribute(OUTPUT_VALUE, safe(step.getObservation()))
                     .setAttribute(DURATION_MS, step.getDurationMs())
                     .setAttribute(TOKEN_COUNT, (long) step.getTokenCount())
                     .startSpan();
+            setTextAttribute(span, INPUT_VALUE.getKey(), step.getActionInput());
+            setTextAttribute(span, OUTPUT_VALUE.getKey(), step.getObservation());
+            setTextAttribute(span, "stocksage.action", step.getAction());
             addRoutingAttributes(span, step);
             span.end();
         } catch (Exception e) {
@@ -99,25 +97,25 @@ public class PhoenixTraceService {
         }
     }
 
-    /** 仅为 routing-decision 步骤添加有界路由字段，避免导出原始 prompt 或思维链。 */
+    /** 路由说明也属于正文，统一受 capture-content 开关控制。 */
     private void addRoutingAttributes(Span span, AgentStep step) {
         if (step.getAttributes() == null
                 || !"routing-decision".equals(step.getAttributes().get("kind"))) {
             return;
         }
-        setStringAttribute(span, "stocksage.routing.source", step.getAttributes().get("source"));
-        setStringAttribute(span, "stocksage.routing.raw_route", step.getAttributes().get("rawRoute"));
-        setStringAttribute(span, "stocksage.routing.route", step.getAttributes().get("route"));
-        setStringAttribute(span, "stocksage.routing.intent_summary", step.getAttributes().get("intentSummary"));
-        setStringAttribute(span, "stocksage.routing.fine_intent", step.getAttributes().get("fineIntent"));
-        setStringAttribute(span, "stocksage.routing.intent_group", step.getAttributes().get("intentGroup"));
-        setStringAttribute(span, "stocksage.routing.time_sensitivity", step.getAttributes().get("timeSensitivity"));
-        setStringAttribute(span, "stocksage.routing.analysis_depth", step.getAttributes().get("analysisDepth"));
-        setStringAttribute(span, "stocksage.routing.rationale", step.getAttributes().get("rationale"));
-        setStringAttribute(span, "stocksage.routing.source_scores", step.getAttributes().get("sourceScores"));
-        setStringAttribute(span, "stocksage.routing.reason_codes", step.getAttributes().get("reasonCodes"));
-        setStringAttribute(span, "stocksage.routing.outcome", step.getAttributes().get("outcome"));
-        setStringAttribute(span, "stocksage.routing.fallback_reason", step.getAttributes().get("fallbackReason"));
+        setTextAttribute(span, "stocksage.routing.source", step.getAttributes().get("source"));
+        setTextAttribute(span, "stocksage.routing.raw_route", step.getAttributes().get("rawRoute"));
+        setTextAttribute(span, "stocksage.routing.route", step.getAttributes().get("route"));
+        setTextAttribute(span, "stocksage.routing.intent_summary", step.getAttributes().get("intentSummary"));
+        setTextAttribute(span, "stocksage.routing.fine_intent", step.getAttributes().get("fineIntent"));
+        setTextAttribute(span, "stocksage.routing.intent_group", step.getAttributes().get("intentGroup"));
+        setTextAttribute(span, "stocksage.routing.time_sensitivity", step.getAttributes().get("timeSensitivity"));
+        setTextAttribute(span, "stocksage.routing.analysis_depth", step.getAttributes().get("analysisDepth"));
+        setTextAttribute(span, "stocksage.routing.rationale", step.getAttributes().get("rationale"));
+        setTextAttribute(span, "stocksage.routing.source_scores", step.getAttributes().get("sourceScores"));
+        setTextAttribute(span, "stocksage.routing.reason_codes", step.getAttributes().get("reasonCodes"));
+        setTextAttribute(span, "stocksage.routing.outcome", step.getAttributes().get("outcome"));
+        setTextAttribute(span, "stocksage.routing.fallback_reason", step.getAttributes().get("fallbackReason"));
         Object confidence = step.getAttributes().get("confidence");
         if (confidence instanceof Number number) {
             span.setAttribute("stocksage.routing.confidence", number.doubleValue());
@@ -129,12 +127,6 @@ public class PhoenixTraceService {
         Object needsClarification = step.getAttributes().get("needsClarification");
         if (needsClarification instanceof Boolean value) {
             span.setAttribute("stocksage.routing.needs_clarification", value);
-        }
-    }
-
-    private void setStringAttribute(Span span, String key, Object value) {
-        if (value != null) {
-            span.setAttribute(key, String.valueOf(value));
         }
     }
 
@@ -155,11 +147,17 @@ public class PhoenixTraceService {
             return;
         }
         try {
-            span.setAttribute("stocksage.status", safe(status));
+            String finalStatus = switch (status == null ? "" : status.toLowerCase(Locale.ROOT)) {
+                case "success" -> "success";
+                case "error" -> "error";
+                case "cancelled" -> "cancelled";
+                default -> "unknown";
+            };
+            span.setAttribute("stocksage.status", finalStatus);
             span.setAttribute(DURATION_MS, durationMs);
             span.setAttribute(TOKEN_COUNT, (long) totalTokens);
-            if (!"success".equalsIgnoreCase(status)) {
-                span.setStatus(StatusCode.ERROR, safe(status));
+            if (!"success".equals(finalStatus)) {
+                span.setStatus(StatusCode.ERROR);
             }
             span.end();
         } catch (Exception e) {
@@ -182,11 +180,11 @@ public class PhoenixTraceService {
         try {
             Span span = tracer.spanBuilder("stocksage.docs_search")
                     .setAttribute(SPAN_KIND, "RETRIEVER")
-                    .setAttribute(INPUT_VALUE, safe(query))
-                    .setAttribute(OUTPUT_VALUE, safe(output))
                     .setAttribute("retrieval.documents.count", resultCount)
                     .setAttribute(DURATION_MS, durationMs)
                     .startSpan();
+            setTextAttribute(span, INPUT_VALUE.getKey(), query);
+            setTextAttribute(span, OUTPUT_VALUE.getKey(), output);
             span.end();
         } catch (Exception e) {
             log.warn("Failed to record Phoenix retrieval span", e);
@@ -194,14 +192,10 @@ public class PhoenixTraceService {
     }
 
     /**
-     * 根据追踪步骤动作生成 Phoenix span 名称。
+     * 使用受控类型作名称，避免动态动作文本成为旁路正文出口。
      */
     private String spanName(AgentStep step) {
-        String action = step.getAction();
-        if (action == null || action.isBlank()) {
-            return "stocksage.step";
-        }
-        return "stocksage." + action.toLowerCase().replaceAll("[^a-z0-9]+", "_").replaceAll("^_|_$", "");
+        return "stocksage." + spanKind(step).toLowerCase(Locale.ROOT);
     }
 
     /**
@@ -212,7 +206,7 @@ public class PhoenixTraceService {
         if (action == null) {
             return "CHAIN";
         }
-        String normalized = action.toLowerCase();
+        String normalized = action.toLowerCase(Locale.ROOT);
         if (normalized.contains("retrieval")) {
             return "RETRIEVER";
         }
@@ -223,9 +217,14 @@ public class PhoenixTraceService {
     }
 
     /**
-     * Phoenix 属性不接受 null，统一转为空字符串。
+     * 只记录正文长度；原文导出需要独立、显式的配置授权。
      */
-    private String safe(String value) {
-        return value == null ? "" : value;
+    private void setTextAttribute(Span span, String key, Object value) {
+        if (value == null) return;
+        String text = String.valueOf(value);
+        span.setAttribute(key + ".length", (long) text.length());
+        if (properties.isCaptureContent()) {
+            span.setAttribute(key, text);
+        }
     }
 }

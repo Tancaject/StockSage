@@ -184,26 +184,6 @@ public class InvestmentReportVersionService {
     }
 
     /**
-     * 持久化或复用报告版本，并只返回结构化报告。
-     *
-     * @param userId 所属用户
-     * @param conversationId 来源会话
-     * @param state 已包含报告的分析状态
-     * @param modelTier 生成模型档位
-     * @param modelName 生成模型名称
-     * @return 新报告或安全复用报告；输入不完整时为 null
-     */
-    public InvestmentReport persistReportVersion(
-            String userId,
-            Long conversationId,
-            AnalysisState state,
-            String modelTier,
-            String modelName
-    ) {
-        return persistReportVersionWithMetadata(userId, conversationId, state, modelTier, modelName).report();
-    }
-
-    /**
      * 持久化或复用报告，并返回版本 ID 与复用标记。
      *
      * <p>并发插入同快照时依赖数据库唯一键裁决，冲突后回读赢家并再次执行复用策略校验。</p>

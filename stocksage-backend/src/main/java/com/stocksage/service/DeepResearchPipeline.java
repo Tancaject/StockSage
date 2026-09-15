@@ -128,14 +128,14 @@ public class DeepResearchPipeline {
             int roundsDone = checkpoint
                     .map(ResearchTaskCheckpointService.CheckpointState::debateRoundsCompleted)
                     .orElse(0);
-            int plannedRounds = checkpoint
+            int authorizedThroughRound = checkpoint
                     .map(ResearchTaskCheckpointService.CheckpointState::plannedRounds)
                     .orElse(0);
             if (hasPendingReportRecovery(workingState)) {
                 // 旧同步 checkpoint 的列仍是 DATA_PREFETCH/0；从成对辩论记录恢复轮次，接管后直接进入 Manager。
                 int durableRounds = completedDebateRounds(workingState);
                 roundsDone = Math.max(roundsDone, durableRounds);
-                plannedRounds = Math.max(plannedRounds, durableRounds);
+                authorizedThroughRound = roundsDone;
             }
 
             DeepEvidenceCollector.EvidenceCollection evidence = null;
@@ -249,9 +249,9 @@ public class DeepResearchPipeline {
                 ResearchTask ownedTask = runningTask;
                 AnalysisState completed = researchDebateService.runDebate(
                         payload.traceId(), payload.conversationId(), workingState,
-                        roundsDone + 1, plannedRounds,
-                        (state, rounds, planned) -> saveDebateRoundForOwner(
-                                ownedTask, lease, state, rounds, planned, ownershipLost),
+                        roundsDone + 1, authorizedThroughRound,
+                        (state, rounds, authorized) -> saveDebateRoundForOwner(
+                                ownedTask, lease, state, rounds, authorized, ownershipLost),
                         ownershipGuard(ownedTask, ownershipLost),
                         state -> saveHarnessSnapshotForOwner(
                                 ownedTask, lease, state, ownershipLost));
@@ -587,8 +587,8 @@ public class DeepResearchPipeline {
             // 调用辩论服务；每轮回调先保存 checkpoint，并在关键副作用前再次检查 ownership。
             AnalysisState completed = researchDebateService.runDebate(
                     traceId, conversationId, agentState, 1, 0,
-                    (state, rounds, planned) -> saveDebateRoundForOwner(
-                            reportTask, lease, state, rounds, planned, ownershipLost),
+                    (state, rounds, authorized) -> saveDebateRoundForOwner(
+                            reportTask, lease, state, rounds, authorized, ownershipLost),
                     ownershipGuard(reportTask, ownershipLost),
                     state -> saveHarnessSnapshotForOwner(
                             reportTask, lease, state, ownershipLost));
@@ -1276,13 +1276,13 @@ public class DeepResearchPipeline {
             ResearchTaskLeaseService.Lease lease,
             AnalysisState state,
             int roundsCompleted,
-            int plannedRounds,
+            int authorizedThroughRound,
             AtomicBoolean ownershipLost
     ) {
         requireTaskOwnership(task, lease, ownershipLost);
         try {
             checkpointService.saveDebateRound(
-                    task.getId(), lease.token(), state, roundsCompleted, plannedRounds);
+                    task.getId(), lease.token(), state, roundsCompleted, authorizedThroughRound);
         } catch (ResearchTaskCheckpointService.OwnershipLostException error) {
             throw checkpointOwnershipLost(task, ownershipLost, error);
         }

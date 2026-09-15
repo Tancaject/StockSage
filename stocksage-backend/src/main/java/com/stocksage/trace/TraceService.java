@@ -8,7 +8,6 @@ import com.stocksage.model.entity.AgentTrace;
 import com.stocksage.repository.AgentTraceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -150,19 +149,6 @@ public class TraceService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Trace does not belong to current user");
         }
         return trace;
-    }
-
-    /**
-     * 读取用户最近的追踪记录列表。
-     *
-     * @param userId 当前租户用户 ID
-     * @param limit 请求条数，最小收敛为 1
-     * @return 按创建时间倒序的链路列表
-     */
-    @Transactional(readOnly = true)
-    public List<AgentTrace> listTraces(String userId, int limit) {
-        int pageSize = Math.max(1, limit);
-        return agentTraceRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, pageSize));
     }
 
     /**

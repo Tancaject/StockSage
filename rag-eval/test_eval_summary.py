@@ -1,6 +1,6 @@
 import unittest
 
-from eval_summary import evaluate_gates, summarize_results
+from eval_summary import DEFAULT_GATES, evaluate_gates, summarize_results
 
 
 class EvalSummaryTest(unittest.TestCase):
@@ -25,11 +25,31 @@ class EvalSummaryTest(unittest.TestCase):
         self.assertEqual(result["gate_status"], "fail")
 
     def test_evaluate_gates_allows_missing_optional_metrics(self):
-        gates = evaluate_gates({"context_recall": 0.9}, {"context_recall": 0.85, "faithfulness": 0.85})
+        gates = evaluate_gates({"context_recall": 0.9}, {
+            "context_recall": {"minimum": 0.85, "required": True},
+            "faithfulness": {"minimum": 0.85, "required": False},
+        })
 
         self.assertEqual(gates["status"], "pass")
         self.assertEqual(gates["missing"], ["faithfulness"])
         self.assertEqual(gates["failed"], [])
+
+    def test_gate_contract_preserves_authority_and_rejects_missing_evidence(self):
+        good = {metric: target["minimum"] for metric, target in DEFAULT_GATES.items()}
+        good["latency_seconds"] = 60
+        for values, expected in [(good, "pass"), ({**good, "mrr": 0}, "fail"),
+                                 ({}, "missing"), ({**good, "mrr": None}, "missing"),
+                                 ({**good, "mrr": float("nan")}, "missing")]:
+            with self.subTest(values=values):
+                evaluation = evaluate_gates(values)
+                self.assertEqual(evaluation["status"], expected)
+                self.assertEqual(evaluation["schema_version"], "rag_gates_v1")
+                self.assertNotIn("latency_seconds", [row["metric"] for row in evaluation["gates"]])
+                summary = summarize_results({"averages": values, "gate_evaluation": evaluation})
+                self.assertEqual(summary["gate_status"], expected)
+                self.assertEqual(summary["gate_evaluation"], evaluation)
+        custom = evaluate_gates({"mrr": 0.6}, {"mrr": {"minimum": 0.5, "required": True}})
+        self.assertEqual(summarize_results({"gate_evaluation": custom})["gate_status"], "pass")
 
 
 if __name__ == "__main__":

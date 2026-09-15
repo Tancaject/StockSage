@@ -31,6 +31,21 @@ test('applyChunk accumulates answer content across multiple answer chunks', () =
   assert.equal(after2.answer, 'Hello world')
 })
 
+test('task-final replaces acceptance text and preserves failed or stopped runs', () => {
+  for (const content of ['Actual completed report', 'NOT_RATED：证据不足']) {
+    let run = { ...createInitialRun(), status: 'running' }
+    run = applyChunk(run, { type: 'answer', content: 'Research accepted' })
+    run = applyChunk(run, { type: 'task-final', content })
+    assert.equal(run.answer, content)
+    assert.equal(run.status, 'completed')
+    assert.equal(resolveStatus(run, 'done').answer, content)
+  }
+  for (const status of ['failed', 'stopped']) {
+    const run = { ...createInitialRun(), status, answer: 'Preserved state' }
+    assert.equal(applyChunk(run, { type: 'task-final', content: 'Late report' }), run)
+  }
+})
+
 test('applyChunk handles an answer chunk with no content without crashing', () => {
   const run = createInitialRun()
   const result = applyChunk(run, { type: 'answer' })

@@ -5,11 +5,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from eval_http import LiveEvalError, LiveEvalStreamError, StockSageClient, parse_sse_data
 import run_harness_live_eval as harness_live
 from run_harness_live_eval import (
     CaseReconciliationPending,
-    LiveEvalError,
-    LiveEvalStreamError,
     RELEASE_MANIFEST_SCHEMA,
     aggregate_policy_metadata,
     dataset_sha256,
@@ -18,7 +17,6 @@ from run_harness_live_eval import (
     extract_tool_actions,
     exit_code_for_status,
     load_run_checkpoint,
-    parse_sse_data,
     percentile,
     release_contract_violations,
     run_case,
@@ -47,7 +45,7 @@ def trace_with(*decisions):
             ),
             "recoveryLifecycle": lifecycle,
             "policyId": "deep-equity-v1",
-            "policyVersion": "4",
+            "policyVersion": "5",
             "phase": phase,
             "decision": outcome,
             "policyAllowsRecommendation": outcome == "PASS",
@@ -73,7 +71,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
             "case_count": 30,
             "dataset_sha256": dataset_hash,
             "policy_id": "deep-equity-v1",
-            "policy_version": "4",
+            "policy_version": "5",
         }
 
     def live_case(self, case_id="live-1", ticker="AAPL", timeout_seconds=30):
@@ -294,7 +292,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
                 return self.response
 
         response = HeartbeatResponse()
-        client = harness_live.StockSageClient("http://localhost:8080")
+        client = StockSageClient("http://localhost:8080")
         client.opener = HeartbeatOpener(response)
         with patch.object(
             harness_live.time,
@@ -693,7 +691,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
                 "decisions": [
                     {
                         "policy_id": "deep-equity-v1",
-                        "policy_version": 4,
+                        "policy_version": 5,
                     }
                 ],
             }
@@ -768,11 +766,11 @@ class HarnessLiveEvalTest(unittest.TestCase):
                     "decisions": [
                         {
                             "policy_id": "deep-equity-v1",
-                            "policy_version": "4",
+                            "policy_version": "5",
                         },
                         {
                             "policy_id": "deep-equity-v1",
-                            "policy_version": 4,
+                            "policy_version": 5,
                         },
                     ]
                 },
@@ -780,7 +778,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
             ]
         )
         self.assertEqual(["deep-equity-v1"], result["policy_ids"])
-        self.assertEqual(["4"], result["policy_versions"])
+        self.assertEqual(["5"], result["policy_versions"])
 
     def test_tool_actions_only_include_explicit_tool_steps(self):
         steps = [

@@ -1,17 +1,26 @@
-"""Summarize StockSage RAG evaluation result files and apply quality gates."""
+"""Summarize StockSage RAG results and export the authoritative rag_gates_v1 decision.
+
+DEFAULT_GATES defines required quality minima; latency is diagnostic only. An
+explicit required=False gate may be absent. Missing required or entirely absent
+evidence yields missing, never pass. --fail-on-gate rejects fail and missing.
+Generated results carry gate_evaluation (thresholds, required flags and statuses)
+for EvalDesk to display. Older files can acquire this contract via --output;
+until evaluated, the UI labels them unrated rather than inventing thresholds.
+"""
 
 import argparse
 import json
+import math
 from pathlib import Path
 
 
 DEFAULT_GATES = {
-    "context_recall": 0.85,
-    "context_precision": 0.50,
-    "mrr": 0.70,
-    "ndcg": 0.75,
-    "citation_precision": 0.85,
-    "no_answer_accuracy": 0.90,
+    "context_recall": {"minimum": 0.85, "required": True},
+    "context_precision": {"minimum": 0.50, "required": True},
+    "mrr": {"minimum": 0.70, "required": True},
+    "ndcg": {"minimum": 0.75, "required": True},
+    "citation_precision": {"minimum": 0.85, "required": True},
+    "no_answer_accuracy": {"minimum": 0.90, "required": True},
 }
 
 
@@ -21,35 +30,52 @@ def load_result(path):
 
 
 def summarize_results(result, gates=None):
-    gates = gates or DEFAULT_GATES
     averages = result.get("averages", {})
-    gate_result = evaluate_gates(averages, gates)
+    gate_result = result.get("gate_evaluation") if gates is None else None
+    if gate_result is None:
+        gate_result = evaluate_gates(averages, gates)
+    if gate_result.get("schema_version") != "rag_gates_v1":
+        raise ValueError("Unsupported RAG gate evaluation schema; regenerate the evaluation result.")
     cases = result.get("cases", [])
     return {
         "created_at": result.get("created_at", ""),
         "case_count": int(result.get("case_count", len(cases))),
         "averages": averages,
+        "gate_evaluation": gate_result,
         "gate_status": gate_result["status"],
         "failed_gates": gate_result["failed"],
         "missing_gates": gate_result["missing"],
         "category_counts": category_counts(cases),
         "worst_cases": worst_cases(cases),
+        "cases": cases,
     }
 
 
 def evaluate_gates(averages, gates=None):
-    gates = gates or DEFAULT_GATES
+    gates = DEFAULT_GATES if gates is None else gates
     failed = []
     missing = []
-    for metric, minimum in gates.items():
-        if metric not in averages or averages[metric] is None:
+    rows = []
+    for metric, target in gates.items():
+        minimum = target["minimum"]
+        value = averages.get(metric)
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+            value = None
+        if value is None:
             missing.append(metric)
-            continue
-        value = float(averages[metric])
-        if value < minimum:
+        elif value < minimum:
             failed.append({"metric": metric, "value": value, "minimum": minimum})
+        rows.append({
+            "metric": metric, "value": value, "operator": ">=", "threshold": minimum,
+            "required": target["required"],
+            "status": "missing" if value is None else "fail" if value < minimum else "pass",
+        })
+    incomplete = (not any(row["value"] is not None for row in rows)
+                  or any(row["required"] and row["status"] == "missing" for row in rows))
     return {
-        "status": "fail" if failed else "pass",
+        "schema_version": "rag_gates_v1",
+        "status": "fail" if failed else "missing" if incomplete else "pass",
+        "gates": rows,
         "failed": failed,
         "missing": missing,
     }
@@ -114,7 +140,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Summarize a StockSage RAG eval JSON result.")
     parser.add_argument("result", help="Path to rag_eval_<timestamp>.json")
     parser.add_argument("--output", help="Optional summary JSON path")
-    parser.add_argument("--fail-on-gate", action="store_true", help="Exit 1 when required gates fail")
+    parser.add_argument("--fail-on-gate", action="store_true", help="Exit 1 when gates fail or required evidence is missing")
     return parser.parse_args()
 
 

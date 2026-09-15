@@ -17,7 +17,6 @@ class RoutePlanCatalogTest {
                         PlanAction.KNOWLEDGE_RETRIEVAL,
                         PlanAction.FINAL_ANSWER),
                 PlanRoute.MARKET, java.util.List.of(
-                        PlanAction.SEARCH_STOCKS,
                         PlanAction.GET_STOCK_KLINE,
                         PlanAction.GET_FINANCIAL_METRICS,
                         PlanAction.GET_TECHNICAL_INDICATORS,
@@ -25,16 +24,13 @@ class RoutePlanCatalogTest {
                         PlanAction.FINAL_ANSWER),
                 PlanRoute.FUNDAMENTALS, java.util.List.of(
                         PlanAction.KNOWLEDGE_RETRIEVAL,
-                        PlanAction.SEARCH_STOCKS,
                         PlanAction.GET_FINANCIAL_REPORTS,
                         PlanAction.SEARCH_COMPANY_REPORTS,
                         PlanAction.FUNDAMENTALS_AGENT,
                         PlanAction.FINAL_ANSWER),
                 PlanRoute.NEWS, java.util.List.of(
-                        PlanAction.SEARCH_STOCKS,
                         PlanAction.SEARCH_NEWS,
                         PlanAction.WEB_SEARCH,
-                        PlanAction.GET_MARKET_OVERVIEW,
                         PlanAction.NEWS_AGENT,
                         PlanAction.FINAL_ANSWER),
                 PlanRoute.DEEP, java.util.List.of(

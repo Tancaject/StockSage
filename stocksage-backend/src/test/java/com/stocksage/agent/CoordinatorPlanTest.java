@@ -21,8 +21,42 @@ import static org.mockito.Mockito.when;
  */
 class CoordinatorPlanTest {
 
+    @Test
+    void explicitTickerCannotBeChangedOrLostDuringRewrite() {
+        for (String rewritten : List.of("MSFT 最近一周日线", "最近一周日线", "苹果最近一周日线")) {
+            var decision = new com.stocksage.agent.intent.IntentDecision(
+                    com.stocksage.agent.intent.FineIntent.MARKET_DATA, com.stocksage.agent.intent.IntentGroup.MARKET,
+                    PlanRoute.MARKET, 0.99, null, null, java.util.Map.of(), rewritten, java.util.Map.of(), false, List.of());
+            var recognition = new com.stocksage.agent.intent.IntentRecognitionResult(decision, "MARKET", true, "", List.of(), "", 0);
+            var plan = coordinator.planRecognized(recognition, "AAPL 最近一周日线", 0);
+            if (rewritten.startsWith("MSFT")) {
+                assertThat(plan.route()).isEqualTo(PlanRoute.DIRECT);
+                assertThat(plan.routingDecision().needsClarification()).isTrue();
+                assertThat(plan.routingDecision().reasonCodes()).contains(Coordinator.TARGET_REWRITE_MISMATCH);
+                assertThat(plan.actions()).containsExactly(PlanAction.FINAL_ANSWER);
+                assertThat(plan.resolvedQuery()).isEqualTo("AAPL 最近一周日线");
+            } else {
+                assertThat(plan.route()).isEqualTo(PlanRoute.MARKET);
+                assertThat(new TickerResolutionService(null, null, new ObjectMapper()).resolveExplicitTicker(plan.resolvedQuery()))
+                        .isEqualTo("AAPL");
+            }
+        }
+    }
+
+    @Test
+    void intervalOnlyFollowupKeepsBarsOnlyButExplicitAnalysisOverridesIt() {
+        var decision = new com.stocksage.agent.intent.IntentDecision(
+                com.stocksage.agent.intent.FineIntent.MARKET_DATA, com.stocksage.agent.intent.IntentGroup.MARKET,
+                PlanRoute.MARKET, 0.99, null, null, java.util.Map.of(), "AAPL 最近一周小时线", java.util.Map.of(), false, List.of());
+        var recognition = new com.stocksage.agent.intent.IntentRecognitionResult(decision, "MARKET", true, "", List.of(), "", 0);
+        var plan = coordinator.planRecognized(recognition, "改成一小时", 0);
+        assertThat(plan.actions()).containsExactly(PlanAction.GET_STOCK_KLINE, PlanAction.FINAL_ANSWER);
+        assertThat(plan.readRequest().bar()).isEqualTo("1h");
+        assertThat(coordinator.planRecognized(recognition, "改成一小时并分析风险", 0).actions()).contains(PlanAction.MARKET_AGENT);
+    }
+
     private final Coordinator coordinator = new Coordinator(
-            null, null, null,
+            null, null,
             new ObjectMapper(),
             new TickerResolutionService(null, null, new ObjectMapper())
     );
@@ -47,7 +81,6 @@ class CoordinatorPlanTest {
         ExecutionPlan plan = coordinator.planDeterministically("NVDA 最近 K 线走势如何？", 0);
         assertThat(plan.route()).isEqualTo(PlanRoute.MARKET);
         assertThat(plan.actions()).containsExactly(
-                PlanAction.SEARCH_STOCKS,
                 PlanAction.GET_STOCK_KLINE,
                 PlanAction.GET_FINANCIAL_METRICS,
                 PlanAction.GET_TECHNICAL_INDICATORS,
@@ -63,7 +96,6 @@ class CoordinatorPlanTest {
         assertThat(plan.route()).isEqualTo(PlanRoute.FUNDAMENTALS);
         assertThat(plan.actions()).containsExactly(
                 PlanAction.KNOWLEDGE_RETRIEVAL,
-                PlanAction.SEARCH_STOCKS,
                 PlanAction.GET_FINANCIAL_REPORTS,
                 PlanAction.SEARCH_COMPANY_REPORTS,
                 PlanAction.FUNDAMENTALS_AGENT,
@@ -92,10 +124,8 @@ class CoordinatorPlanTest {
         ExecutionPlan plan = coordinator.planDeterministically("美联储今天有什么最新消息？", 0);
         assertThat(plan.route()).isEqualTo(PlanRoute.NEWS);
         assertThat(plan.actions()).containsExactly(
-                PlanAction.SEARCH_STOCKS,
                 PlanAction.SEARCH_NEWS,
                 PlanAction.WEB_SEARCH,
-                PlanAction.GET_MARKET_OVERVIEW,
                 PlanAction.NEWS_AGENT,
                 PlanAction.FINAL_ANSWER
         );
@@ -113,7 +143,7 @@ class CoordinatorPlanTest {
                 }
                 """);
         Coordinator llmCoordinator = new Coordinator(
-                routingClient, null, null,
+                routingClient, null,
                 new ObjectMapper(),
                 new TickerResolutionService(null, null, new ObjectMapper())
         );
@@ -146,7 +176,7 @@ class CoordinatorPlanTest {
         when(routingClient.prompt().user(anyString()).call().content())
                 .thenThrow(new IllegalStateException("provider-secret-detail"));
         Coordinator llmCoordinator = new Coordinator(
-                routingClient, null, null,
+                routingClient, null,
                 new ObjectMapper(),
                 new TickerResolutionService(null, null, new ObjectMapper())
         );
@@ -173,7 +203,7 @@ class CoordinatorPlanTest {
                 }
                 """);
         Coordinator llmCoordinator = new Coordinator(
-                routingClient, null, null,
+                routingClient, null,
                 new ObjectMapper(),
                 new TickerResolutionService(null, null, new ObjectMapper())
         );
@@ -221,7 +251,7 @@ class CoordinatorPlanTest {
                 }
                 """);
         Coordinator llmCoordinator = new Coordinator(
-                routingClient, null, null,
+                routingClient, null,
                 new ObjectMapper(),
                 new TickerResolutionService(null, null, new ObjectMapper())
         );
@@ -247,13 +277,13 @@ class CoordinatorPlanTest {
                 }
                 """);
         Coordinator llmCoordinator = new Coordinator(
-                routingClient, null, null,
+                routingClient, null,
                 new ObjectMapper(),
                 new TickerResolutionService(null, null, new ObjectMapper())
         );
 
         ExecutionPlan plan = llmCoordinator.plan(
-                "compare it with MSFT", 0, "", List.of("user: Review AAPL first"));
+                "compare it with MSFT", 0, List.of("user: Review AAPL first"));
 
         assertThat(plan.route()).isEqualTo(PlanRoute.DIRECT);
         assertThat(plan.actions()).containsExactly(PlanAction.FINAL_ANSWER);

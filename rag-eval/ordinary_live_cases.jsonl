@@ -1,0 +1,6 @@
+{"id":"hourly","conversation":"apple","question":"给我AAPL最近一周的小时线","route":"MARKET","request":{"period":"1w","bar":"1h"},"calls":[{"tool":"getIbkrHistoricalBars","args":["AAPL","1w","1h"]}],"outcomes":["COMPLETED"],"require_citations":true}
+{"id":"followup","conversation":"apple","question":"改成最近两周的日线","route":"MARKET","request":{"period":"2w","bar":"1d"},"calls":[{"tool":"getIbkrHistoricalBars","args":["AAPL","2w","1d"]}],"outcomes":["COMPLETED"],"require_citations":true}
+{"id":"unsupported-bar","question":"给我贵州茅台sh.600519最近一周的小时线","route":"MARKET","request":{"period":"1w","bar":"1h"},"no_tools":true,"outcomes":["BLOCKED"]}
+{"id":"historical-window","question":"给我AAPL 2024年1月到3月的日线","route":"MARKET","no_tools":true,"outcomes":["BLOCKED"]}
+{"id":"quarterly","question":"查AAPL最近两个季度财报","route":"FUNDAMENTALS","request":{"reportPeriod":"quarterly","reportCount":2},"calls":[{"tool":"getFinancialReports","args":["AAPL","quarterly",1]}],"outcomes":["DEGRADED","FAILED"]}
+{"id":"multiple-targets","question":"比较AAPL和MSFT最近一周的股价","route":"DIRECT","no_tools":true,"outcomes":["BLOCKED"]}

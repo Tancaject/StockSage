@@ -15,6 +15,7 @@ from pathlib import Path
 
 import requests
 
+from eval_summary import evaluate_gates
 from eval_utils import (
     DEFAULT_PHOENIX_ENDPOINT,
     DEFAULT_PHOENIX_PROJECT,
@@ -360,6 +361,7 @@ def write_results(rows, output):
         "averages": average_numeric_metrics(rows),
         "cases": rows,
     }
+    summary["gate_evaluation"] = evaluate_gates(summary["averages"])
     output.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     return summary
 

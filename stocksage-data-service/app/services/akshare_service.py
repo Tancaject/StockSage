@@ -355,7 +355,6 @@ class AkshareService:
         result = calculate_technical_indicators(
             df["Close"],
             indicators,
-            self._rounded,
         )
 
         return {"symbol": self._hk_code(symbol), "indicators": result, "provider": "akshare"}
@@ -377,7 +376,6 @@ class AkshareService:
         result = calculate_technical_indicators(
             df["close"],
             indicators,
-            self._rounded,
         )
 
         return {"code": symbol, "symbol": code, "indicators": result, "provider": "akshare"}
@@ -624,12 +622,6 @@ class AkshareService:
             {str(k): self._json_value(v) for k, v in row.items()}
             for row in normalized.head(max_rows).to_dict(orient="records")
         ]
-
-    @staticmethod
-    def _rounded(value, digits: int = 2):
-        if pd.isna(value):
-            return None
-        return round(float(value), digits)
 
     @staticmethod
     def _json_value(value):

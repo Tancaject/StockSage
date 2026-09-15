@@ -67,7 +67,7 @@ class SkillResolverTest {
     void resolvesNewsSkillForDeterministicCoordinatorFallbackPlan() {
         ObjectMapper objectMapper = new ObjectMapper();
         Coordinator coordinator = new Coordinator(
-                null, null, null,
+                null, null,
                 objectMapper,
                 new TickerResolutionService(null, null, objectMapper)
         );

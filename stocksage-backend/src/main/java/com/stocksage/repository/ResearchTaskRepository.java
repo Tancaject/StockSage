@@ -95,6 +95,12 @@ public interface ResearchTaskRepository extends JpaRepository<ResearchTask, Long
             String errorMessage
     );
 
+    /** 初始或重提任务可能在数据库提交后、Redis 入队前宕机；只扫描足够老的待执行行。 */
+    List<ResearchTask> findByStatusAndUpdatedAtBefore(
+            ResearchTask.Status status,
+            LocalDateTime updatedBefore
+    );
+
     /**
      * 分页读取用户某标的的任务时间线，创建时间新的在前。
      *
