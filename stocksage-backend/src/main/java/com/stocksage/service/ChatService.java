@@ -396,6 +396,7 @@ public class ChatService {
                     ? new ToolPrefetchService.PreparedToolContext(
                             "", parameterClarification.isBlank() ? buildIntentClarificationQuestion(routingDecision) : parameterClarification, null, traceId,
                             !parameterClarification.isBlank() || routingDecision.reasonCodes().contains(Coordinator.MULTI_TARGET_UNSUPPORTED)
+                                    || routingDecision.reasonCodes().contains(Coordinator.TARGET_REWRITE_MISMATCH)
                                     ? "BLOCKED"
                                     : null)
                     : toolPrefetchService.prefetch(
@@ -1081,6 +1082,9 @@ public class ChatService {
 
     /** 低置信或冲突时直接返回一个可回答的澄清问题，不再调用工具或第二个模型。 */
     private String buildIntentClarificationQuestion(RoutingDecisionMetadata decision) {
+        if (decision != null && decision.reasonCodes().contains(Coordinator.TARGET_REWRITE_MISMATCH)) {
+            return "识别结果中的股票与本轮明确指定的标的不一致，已停止检索和取证。请重新发送股票代码及查询要求。";
+        }
         if (decision != null && decision.reasonCodes().contains(Coordinator.MULTI_TARGET_UNSUPPORTED)) {
             return "当前一次只支持分析一个股票或公司。请先选择一个标的，再告诉我你要看行情、财报、新闻还是综合研究。";
         }

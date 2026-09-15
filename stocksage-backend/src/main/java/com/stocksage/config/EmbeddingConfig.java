@@ -30,7 +30,7 @@ public class EmbeddingConfig {
      * @param baseUrl Ollama 服务地址
      * @param model Ollama 中已安装的向量模型名
      * @param timeoutMs 单次 HTTP 调用超时，单位毫秒
-     * @param fallbackDimension 服务不可探测时使用的向量维度
+     * @param dimension 与向量库保持一致、用于校验响应的向量维度
      * @return 对接 Ollama {@code /api/embed} 的向量模型实现
      */
     @Bean
@@ -40,7 +40,7 @@ public class EmbeddingConfig {
             @Value("${stocksage.embedding.ollama.base-url:http://localhost:11434}") String baseUrl,
             @Value("${stocksage.embedding.ollama.model:bge-m3}") String model,
             @Value("${stocksage.embedding.ollama.timeout-ms:120000}") long timeoutMs,
-            @Value("${spring.ai.vectorstore.milvus.embedding-dimension:1024}") int fallbackDimension) {
-        return new LocalEmbeddingModel(baseUrl, model, Duration.ofMillis(timeoutMs), fallbackDimension);
+            @Value("${spring.ai.vectorstore.milvus.embedding-dimension:1024}") int dimension) {
+        return new LocalEmbeddingModel(baseUrl, model, Duration.ofMillis(timeoutMs), dimension);
     }
 }

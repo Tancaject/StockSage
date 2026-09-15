@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import run_agent_eval
 from agent_eval_summary import build_report
+from eval_summary import DEFAULT_GATES, evaluate_gates, summarize_results
 
 
 GATES = {
@@ -35,7 +36,7 @@ GATES = {
     "baseline_delta_max_drop": 0.02,
     "p95_latency_ratio_max": 1.2,
     "harness_policy_id_expected": "deep-equity-v1",
-    "harness_policy_version_expected": 4,
+    "harness_policy_version_expected": 5,
     "harness_case_count_min": 60,
     "harness_exact_accuracy_min": 1.0,
     "harness_decision_contract_exact_match_rate_min": 1.0,
@@ -154,7 +155,7 @@ def harness_result(**overrides):
         "case_schema_version": "harness_golden_case_v2",
         "engine": "java-production-policy",
         "policy_id": "deep-equity-v1",
-        "policy_version": 4,
+        "policy_version": 5,
         "status": "pass",
         "case_count": 60,
         "exact_accuracy": 1.0,
@@ -177,7 +178,7 @@ def live_harness_result(**overrides):
         "generated_at": "2026-09-03T12:00:00+00:00",
         "dataset_sha256": "b" * 64,
         "policy_ids": ["deep-equity-v1"],
-        "policy_versions": ["4"],
+        "policy_versions": ["5"],
         "run_mode": "release",
         "run_state": "complete",
         "planned_case_count": 30,
@@ -196,7 +197,7 @@ def live_harness_result(**overrides):
 
 def complete_evidence():
     return {
-        "rag_payload": {"status": "passed"},
+        "rag_payload": {"gate_evaluation": evaluate_gates({metric: 1.0 for metric in DEFAULT_GATES})},
         "trace_payload": {"status": "passed"},
         "dialog_payload": {"status": "passed"},
         "harness_payload": harness_result(),
@@ -334,18 +335,24 @@ class AgentEvalSummaryTest(unittest.TestCase):
         self.assertEqual("failed", statuses["planner_dataset_sha256"])
         self.assertEqual("failed", report["planner"]["gate_status"])
 
-    def test_supplied_failed_section_fails_unified_report(self):
-        evidence = complete_evidence()
-        evidence["rag_payload"] = {"status": "failed"}
-
-        report = build_report(
-            planner(),
-            GATES,
-            baseline_payload=planner(),
-            **evidence,
-        )
-
-        self.assertEqual("failed", report["status"])
+    def test_rag_producer_decision_controls_unified_report(self):
+        good = {metric: 1.0 for metric in DEFAULT_GATES}
+        for averages, expected in [(good, "passed"), ({**good, "mrr": 0.0}, "failed"), ({}, "incomplete")]:
+            raw = {"averages": averages, "gate_evaluation": evaluate_gates(averages)}
+            for payload in [raw, summarize_results(raw)]:
+                with self.subTest(expected=expected, payload=payload):
+                    evidence = {**complete_evidence(), "rag_payload": payload}
+                    report = build_report(planner(), GATES, baseline_payload=planner(), **evidence)
+                    self.assertEqual(expected, report["status"])
+                    self.assertEqual(expected, report["rag"]["status"])
+                    self.assertEqual(raw["gate_evaluation"], report["rag"]["gate_evaluation"])
+        for payload in [{"status": "passed"}, {"gate_status": "pass"},
+                        {"gate_evaluation": {"schema_version": "future", "status": "pass"}},
+                        {"gate_evaluation": {"schema_version": "rag_gates_v1", "status": "unknown"}}]:
+            with self.subTest(payload=payload):
+                report = build_report(planner(), GATES, baseline_payload=planner(),
+                                      **{**complete_evidence(), "rag_payload": payload})
+                self.assertEqual("incomplete", report["status"])
 
     def test_fails_when_any_hard_gate_fails(self):
         report = build_report(planner(route=0.8), GATES, baseline_payload=planner())
@@ -423,7 +430,7 @@ class AgentEvalSummaryTest(unittest.TestCase):
 
     def test_completion_gate_contract_preserves_order_schema_and_thresholds(self):
         evidence = complete_evidence()
-        evidence["harness_payload"] = harness_result(policy_version="4")
+        evidence["harness_payload"] = harness_result(policy_version="5")
         report = build_report(
             planner(),
             GATES,
@@ -514,7 +521,7 @@ class AgentEvalSummaryTest(unittest.TestCase):
                     "deep-equity-v1",
                     "passed",
                 ),
-                ("harness_policy_version", "4", "==", 4, "passed"),
+                ("harness_policy_version", "5", "==", 5, "passed"),
                 ("harness_status", "pass", "==", "pass", "passed"),
                 ("harness_case_count", 60, ">=", 60, "passed"),
                 ("harness_exact_accuracy", 1.0, ">=", 1.0, "passed"),
@@ -571,9 +578,9 @@ class AgentEvalSummaryTest(unittest.TestCase):
                 ),
                 (
                     "harness_live_policy_versions",
-                    ["4"],
+                    ["5"],
                     "==",
-                    ["4"],
+                    ["5"],
                     "passed",
                 ),
                 (

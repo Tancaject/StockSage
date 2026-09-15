@@ -68,7 +68,7 @@ public record ReadRequest(String period, String bar, String reportPeriod, int re
                 return invalid("当前取数支持相对最近范围，尚不能保证指定历史起止区间。请改用“最近一周”等范围。");
             }
             boolean barsOnly = route == PlanRoute.MARKET
-                    && (text.contains("k线") || text.contains("日线") || text.contains("周线") || text.contains("月线") || text.contains("小时线") || text.contains("分钟线") || text.contains("candles") || text.contains("bars"))
+                    && (Boolean.parseBoolean(values.get("barsOnly")) || text.contains("k线") || text.contains("日线") || text.contains("周线") || text.contains("月线") || text.contains("小时线") || text.contains("分钟线") || text.contains("candles") || text.contains("bars"))
                     && !text.matches("(?s).*(分析|原因|为什么|估值|指标|风险|建议|走势|analysis|why|risk|valuation|rsi|macd).*" );
             return new ReadRequest(period, bar, reportPeriod, count, barsOnly, "");
         } catch (IllegalArgumentException error) {

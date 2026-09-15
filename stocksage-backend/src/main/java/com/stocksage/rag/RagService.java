@@ -154,7 +154,7 @@ public class RagService {
         List<Document> fusedCandidates = vectorCandidates;
 
         if (hybridSearchEnabled) {
-            keywordCandidates = keywordSearchService.search(retrievalQuery, keywordTopK, filterExpression);
+            keywordCandidates = committedCandidates(keywordSearchService.search(retrievalQuery, keywordTopK, filterExpression));
             // RRF 只使用各自排名，不直接混合向量分数与 BM25 score 的不同量纲。
             fusedCandidates = rrfFusion(vectorCandidates, keywordCandidates);
         }
@@ -279,7 +279,10 @@ public class RagService {
             seenParents.add(parentId);
 
             Document parent = findParentDocument(parentId);
-            expanded.add(parent != null ? parent : doc);
+            boolean sameVersion = parent != null
+                    && java.util.Objects.equals(parent.getMetadata().get("source_id"), doc.getMetadata().get("source_id"))
+                    && java.util.Objects.equals(parent.getMetadata().get("file_hash"), doc.getMetadata().get("file_hash"));
+            expanded.add(sameVersion ? parent : doc);
         }
         return expanded;
     }
@@ -287,10 +290,10 @@ public class RagService {
     /**
      * 根据父级向量 ID 查找父级上下文切片。
      *
-     * <p>优先从 MySQL 镜像表读取完整文本；如果历史数据没有镜像，再尝试向量库过滤查询。</p>
+     * <p>只从已提交的 MySQL 镜像读取；历史向量缺少镜像时需重新摄取，不能绕过发布边界。</p>
      *
      * @param parentVectorId 父块向量 ID
-     * @return 父块文档；两种存储都未命中或查询失败时返回 {@code null}
+     * @return 父块文档；关系库未命中或查询失败时返回 {@code null}
      */
     private Document findParentDocument(String parentVectorId) {
         try {
@@ -303,15 +306,7 @@ public class RagService {
                 );
             }
 
-            // 历史数据可能只有 Milvus 记录；用 doc_id 过滤做兼容性回查。
-            SearchRequest request = SearchRequest.builder()
-                    .query("")
-                    .topK(1)
-                    .filterExpression("doc_id == '" + parentVectorId + "'")
-                    .similarityThreshold(0.0)
-                    .build();
-            List<Document> found = vectorStore.similaritySearch(request);
-            return found.isEmpty() ? null : found.get(0);
+            return null;
         } catch (Exception e) {
             log.debug("Parent chunk lookup failed for {}: {}", parentVectorId, e.getMessage());
             return null;
@@ -385,7 +380,31 @@ public class RagService {
             builder.filterExpression(filterExpression);
         }
         // VectorStore.similaritySearch 最终由 Milvus 实现执行 embedding 与近邻检索。
-        return vectorStore.similaritySearch(builder.build());
+        return committedCandidates(vectorStore.similaritySearch(builder.build()));
+    }
+
+    /** 向量和 BM25 都是派生索引；未提交或已移除的 ID 不得进入回答证据。 */
+    private List<Document> committedCandidates(List<Document> candidates) {
+        if (candidates.isEmpty()) return candidates;
+        Map<String, VectorDocument> committed = vectorDocumentRepository.findByVectorIdIn(
+                        candidates.stream().map(this::documentKey).toList()).stream()
+                .collect(java.util.stream.Collectors.toMap(VectorDocument::getVectorId, row -> row));
+        List<Document> result = new ArrayList<>();
+        for (Document candidate : candidates) {
+            VectorDocument row = committed.get(documentKey(candidate));
+            if (row == null) continue;
+            // 排名来自派生索引，正文及版本必须来自同一次读取的 SQL 快照。
+            Map<String, Object> metadata = parseMetadata(row.getMetadata(), row.getVectorId());
+            candidate.getMetadata().forEach((key, value) -> {
+                if (key.startsWith("bm25_") || key.equals("keyword_relevance") || key.equals("retrieval_engine")) {
+                    metadata.put(key, value);
+                }
+            });
+            result.add(Document.builder().id(row.getVectorId())
+                    .text(row.getContentFull() == null ? row.getContentPreview() : row.getContentFull())
+                    .metadata(metadata).score(candidate.getScore()).build());
+        }
+        return result;
     }
 
     /**

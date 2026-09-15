@@ -99,9 +99,9 @@ public class BullResearcher {
                 - assumption 和 invalidationCondition 不得为空；证据不足的观点不要输出。
                 """.formatted(
                 state.getQuery(),
-                truncate(safe(state.getFundamentalsReport()), 2500),
-                truncate(safe(state.getMarketReport()), 2500),
-                truncate(safe(state.getNewsReport()), 2500)
+                safe(state.getFundamentalsReport()),
+                safe(state.getMarketReport()),
+                safe(state.getNewsReport())
         );
     }
 
@@ -155,9 +155,9 @@ public class BullResearcher {
                 """.formatted(
                 state.getQuery(),
                 round,
-                truncate(safe(state.getFundamentalsReport()), 2500),
-                truncate(safe(state.getMarketReport()), 2500),
-                truncate(safe(state.getNewsReport()), 2500),
+                safe(state.getFundamentalsReport()),
+                safe(state.getMarketReport()),
+                safe(state.getNewsReport()),
                 renderDebateHistory(state.getDebateTurns(), 6000)
         );
     }
@@ -213,15 +213,4 @@ public class BullResearcher {
         return value == null ? "" : value;
     }
 
-    /**
-     * 截断过长上下文，控制单轮辩论提示词长度。
-     *
-     * <p>辩论阶段只需要上游报告的核心证据，保留过长原文会挤占模型输出预算。</p>
-     */
-    private String truncate(String value, int maxLength) {
-        if (value == null || value.length() <= maxLength) {
-            return value;
-        }
-        return value.substring(0, maxLength) + "\n...[truncated]";
-    }
 }

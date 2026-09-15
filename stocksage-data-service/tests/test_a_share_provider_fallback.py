@@ -1,4 +1,5 @@
 import sys
+import importlib.util
 import types
 import unittest
 from unittest.mock import patch
@@ -18,7 +19,8 @@ class FakeAPIRouter:
 
 fake_fastapi.APIRouter = FakeAPIRouter
 fake_fastapi.Query = lambda default, *args, **kwargs: default
-sys.modules.setdefault("fastapi", fake_fastapi)
+if importlib.util.find_spec("fastapi") is None:
+    sys.modules.setdefault("fastapi", fake_fastapi)
 
 fake_httpx = types.ModuleType("httpx")
 
@@ -37,13 +39,15 @@ class FakeHttpxClient:
 fake_httpx.Client = FakeHttpxClient
 fake_httpx.Response = object
 fake_httpx.get = lambda *args, **kwargs: None
-sys.modules.setdefault("httpx", fake_httpx)
+if importlib.util.find_spec("httpx") is None:
+    sys.modules.setdefault("httpx", fake_httpx)
 
 fake_bs4 = types.ModuleType("bs4")
 fake_bs4.BeautifulSoup = object
 fake_bs4.NavigableString = str
 fake_bs4.Tag = object
-sys.modules.setdefault("bs4", fake_bs4)
+if importlib.util.find_spec("bs4") is None:
+    sys.modules.setdefault("bs4", fake_bs4)
 
 fake_ddg = types.ModuleType("duckduckgo_search")
 fake_ddg.DDGS = object

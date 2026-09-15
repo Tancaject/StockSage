@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 public class Coordinator {
 
     public static final String MULTI_TARGET_UNSUPPORTED = "MULTI_TARGET_UNSUPPORTED";
+    public static final String TARGET_REWRITE_MISMATCH = "TARGET_REWRITE_MISMATCH";
 
     /** 统一执行语义、向量、模式和 n-gram 识别的意图服务。 */
     private final IntentRecognitionService intentRecognitionService;
@@ -395,16 +396,28 @@ public class Coordinator {
         }
         IntentDecision current = recognition.decision();
         String resolvedQuery = current.resolvedQuery().isBlank() ? userQuery : current.resolvedQuery();
+        String explicitTicker = tickerResolutionService.resolveExplicitTicker(userQuery);
+        String rewrittenTicker = tickerResolutionService.resolveExplicitTicker(resolvedQuery);
+        boolean targetChanged = !explicitTicker.isBlank() && !rewrittenTicker.isBlank()
+                && !explicitTicker.equals(rewrittenTicker);
         boolean comparisonIntent = current.fineIntent() == FineIntent.COMPARISON;
         if (!comparisonIntent
                 && !hasMultipleExplicitTargets(userQuery)
                 && !hasMultipleExplicitTargets(resolvedQuery)) {
-            return recognition;
+            if (!targetChanged) {
+                if (explicitTicker.isBlank() || !rewrittenTicker.isBlank()) return recognition;
+                // 改写可以省略原文，但不能因此重新从历史中选择另一只股票。
+                IntentDecision bound = new IntentDecision(current.fineIntent(), current.intentGroup(),
+                        current.targetRoute(), current.confidence(), current.timeSensitivity(), current.analysisDepth(),
+                        current.entities(), "[ticker=" + explicitTicker + "] " + resolvedQuery, current.sourceScores(),
+                        current.needsClarification(), current.reasonCodes());
+                return new IntentRecognitionResult(bound, recognition.rawRoute(), recognition.rawRouteValid(),
+                        recognition.rationale(), recognition.signals(), recognition.degradationReason(), recognition.durationMs());
+            }
         }
         java.util.ArrayList<String> reasonCodes = new java.util.ArrayList<>(current.reasonCodes());
-        if (!reasonCodes.contains(MULTI_TARGET_UNSUPPORTED)) {
-            reasonCodes.add(MULTI_TARGET_UNSUPPORTED);
-        }
+        String reason = targetChanged ? TARGET_REWRITE_MISMATCH : MULTI_TARGET_UNSUPPORTED;
+        if (!reasonCodes.contains(reason)) reasonCodes.add(reason);
         IntentDecision safeDecision = new IntentDecision(
                 FineIntent.COMPARISON,
                 IntentGroup.RESEARCH,
@@ -413,7 +426,7 @@ public class Coordinator {
                 current.timeSensitivity(),
                 current.analysisDepth(),
                 current.entities(),
-                resolvedQuery,
+                targetChanged ? userQuery : resolvedQuery,
                 current.sourceScores(),
                 true,
                 reasonCodes
@@ -422,7 +435,7 @@ public class Coordinator {
                 safeDecision,
                 recognition.rawRoute(),
                 recognition.rawRouteValid(),
-                "当前执行链一次只支持一个明确标的。",
+                targetChanged ? "改写标的与用户明确指定的股票不一致，已停止取证。" : "当前执行链一次只支持一个明确标的。",
                 recognition.signals(),
                 recognition.degradationReason(),
                 recognition.durationMs()

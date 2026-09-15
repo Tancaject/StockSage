@@ -809,7 +809,7 @@ export function summarizeAgentEval(result) {
     gates: gateRows,
     failedMetrics: gateRows.filter(row => row.status === 'fail'),
     worstCases: failedCases,
-    status: result?.status === 'passed' ? 'pass' : 'fail',
+    status: { passed: 'pass', failed: 'fail' }[result?.status] || 'missing',
     optionalSections: {
       rag: result?.rag?.status || 'not_run',
       trace: result?.trace?.status || 'not_run',

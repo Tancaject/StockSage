@@ -761,7 +761,7 @@ class ToolPrefetchServiceSubmitTest {
         for (PlanAction action : List.of(PlanAction.FUNDAMENTALS_AGENT, PlanAction.MARKET_AGENT, PlanAction.NEWS_AGENT)) {
             PlanAction tool = action == PlanAction.NEWS_AGENT ? PlanAction.WEB_SEARCH : PlanAction.GET_FINANCIAL_REPORTS;
             lenient().when(newsTools.webSearch(QUERY, 0)).thenReturn("{\"provider\":\"tavily\",\"results\":[{\"link\":\"https://example.com/news\"}]}");
-            lenient().when(fundamentalsTools.getFinancialReports(TICKER, "annual", 5)).thenReturn("{\"provider\":\"sec\",\"period\":\"annual\",\"revenue\":123}");
+            lenient().when(fundamentalsTools.getFinancialReports(TICKER, "annual", 5)).thenReturn("{\"provider\":\"sec\",\"period\":\"annual\",\"metrics\":{\"revenue\":{\"data\":[{\"value\":123}]}}}");
             ExecutionPlan plan = new ExecutionPlan(PlanRoute.valueOf(action.name().replace("_AGENT", "")),
                     "analyst", "", List.of(tool, action), "", ModelTier.STANDARD);
             var result = service.prefetch(plan, QUERY, TRACE_ID, CONVERSATION_ID, USER_ID, selectedModel);
@@ -781,7 +781,7 @@ class ToolPrefetchServiceSubmitTest {
         var read = com.stocksage.agent.ReadRequest.parse(PlanRoute.FUNDAMENTALS, "最近两个季度财报", java.util.Map.of());
         var evidence = new OrdinaryEvidence(TICKER, read, new ObjectMapper(), mapper);
         evidence.add("getFinancialReports", EvidenceDimension.FUNDAMENTALS,
-                "{\"provider\":\"sec\",\"symbol\":\"" + TICKER + "\",\"period\":\"annual\",\"revenue\":123}");
+                "{\"provider\":\"sec\",\"symbol\":\"" + TICKER + "\",\"period\":\"annual\",\"metrics\":{\"revenue\":{\"data\":[{\"value\":123}]}}}");
         assertThat(evidence.citationIds()).isEmpty();
         assertThat(evidence.context()).contains("REPORT_PERIOD_MISMATCH");
 

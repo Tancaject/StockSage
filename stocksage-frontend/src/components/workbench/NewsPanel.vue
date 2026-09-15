@@ -48,7 +48,7 @@
  * props:
  *   ticker {String} 当前标的，组件自取 /api/workbench/stocks/{ticker}/news
  */
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Refresh } from '@element-plus/icons-vue'
 import { fetchStockNews } from '../../api/workbench.js'
 import PanelSkeleton from '../common/PanelSkeleton.vue'
@@ -62,27 +62,34 @@ const props = defineProps({
 const loading = ref(false)
 const error = ref('')
 const data = ref(null)
+let newsRequestId = 0
 
 const items = computed(() => data.value?.items || [])
 const isEmpty = computed(() => !data.value || data.value.empty)
 
 async function load() {
+  const requestId = ++newsRequestId
   const symbol = String(props.ticker || '').trim()
-  if (!symbol) return
-  loading.value = true
+  const isCurrent = () => requestId === newsRequestId && symbol === String(props.ticker || '').trim()
+  data.value = null
   error.value = ''
+  loading.value = Boolean(symbol)
+  if (!symbol) return
   try {
-    data.value = await fetchStockNews(symbol, 7)
+    const result = await fetchStockNews(symbol, 7)
+    if (isCurrent()) data.value = result
   } catch (err) {
+    if (!isCurrent()) return
     error.value = err.message || '读取新闻失败'
     data.value = null
   } finally {
-    loading.value = false
+    if (isCurrent()) loading.value = false
   }
 }
 
 onMounted(load)
 watch(() => props.ticker, load)
+onBeforeUnmount(() => { newsRequestId += 1 })
 </script>
 
 <style scoped>

@@ -233,6 +233,7 @@ test('summarizeEvalResult imports agent_eval_v1 failures and optional sections',
   assert.equal(summary.ragasMetrics[1].metric, 'route_news_f1')
   assert.equal(summary.recommendations[0], '补充 NEWS 边界样本')
   assert.equal(summarizeAgentEval({ planner: {}, gates: [] }).kind, 'agent')
+  assert.equal(summarizeAgentEval({ status: 'incomplete' }).status, 'missing')
 })
 
 test('canonical quality metrics reject legacy retrieval proxies and accept explicit or RAGAS evidence', () => {

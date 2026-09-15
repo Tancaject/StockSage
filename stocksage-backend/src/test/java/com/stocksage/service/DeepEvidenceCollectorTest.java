@@ -37,6 +37,100 @@ import static org.mockito.Mockito.when;
 
 class DeepEvidenceCollectorTest {
 
+    @Test
+    void oldEvidenceContractsRequireFreshDataWithoutResettingRecoveryBudgets() {
+        var items = List.of(
+                new EvidenceEnvelope("old-finance", EvidenceDimension.FUNDAMENTALS, "getFinancialReports", "AAPL",
+                        EvidenceStatus.AVAILABLE, "sec://facts", "sec", Instant.now(), Instant.now(), "empty-finance", true),
+                new EvidenceEnvelope("old-market", EvidenceDimension.MARKET, "getStructuredFinancials", "AAPL",
+                        EvidenceStatus.AVAILABLE, "sec://facts", "sec", Instant.now(), Instant.now(), "finance-only", true));
+        var ledger = new EvidenceLedger(TargetIdentity.resolved("AAPL"), items);
+        for (boolean exhausted : List.of(false, true)) {
+            var attempts = exhausted
+                    ? java.util.Map.of(com.stocksage.harness.HarnessModels.RecoveryAction.RETRY_FUNDAMENTALS, 1,
+                    com.stocksage.harness.HarnessModels.RecoveryAction.RETRY_MARKET, 1)
+                    : java.util.Map.<com.stocksage.harness.HarnessModels.RecoveryAction, Integer>of();
+            var snapshot = com.stocksage.harness.HarnessModels.HarnessSnapshot.from(
+                    completionPolicy.policyId(), Integer.toString(completionPolicy.policyVersion() - 1),
+                    com.stocksage.harness.HarnessModels.HarnessPhase.EVIDENCE,
+                    new HarnessDecision(HarnessOutcome.PASS, List.of(), List.of()), attempts);
+            var state = AnalysisState.builder().query("AAPL 投资分析").primaryTicker("AAPL")
+                    .evidenceLedger(ledger).harnessSnapshot(snapshot).fundamentalsReport("old finance")
+                    .marketReport("old financial-as-market").newsReport("old news").build();
+            var result = collector.reevaluateCheckpoint(state, attempts, "trace-old-contract");
+            assertThat(result.evidenceLedger().evidence()).isEmpty();
+            assertThat(state.getMarketReport()).isEmpty();
+            assertThat(state.getFundamentalsReport()).isEmpty();
+            assertThat(state.getNewsReport()).isEmpty();
+            assertThat(state.getHarnessSnapshot()).isSameAs(snapshot);
+            assertThat(result.harnessDecision().outcome()).isEqualTo(exhausted ? HarnessOutcome.DEGRADE : HarnessOutcome.RECOVER);
+            if (!exhausted) assertThat(result.harnessDecision().recoveryActions()).containsExactly(
+                    com.stocksage.harness.HarnessModels.RecoveryAction.RETRY_FUNDAMENTALS,
+                    com.stocksage.harness.HarnessModels.RecoveryAction.RETRY_MARKET);
+        }
+        verifyNoInteractions(fundamentalsTools, marketTools, newsTools);
+    }
+
+    @Test
+    void financialEvidenceCannotFillAnUnavailableMarketDimension() {
+        when(tickerResolutionService.isLikelySecTicker("AAPL")).thenReturn(true);
+        when(tickerResolutionService.resolveSectorForTicker("AAPL")).thenReturn("");
+        when(fundamentalsTools.getFinancialReports("AAPL", "annual", 5)).thenReturn(
+                "{\"cik\":\"320193\",\"metrics\":{\"revenue\":{\"data\":[{\"value\":100}]}}}");
+        when(marketTools.getIbkrHistoricalBars(eq("AAPL"), any(), eq("1d")))
+                .thenReturn("{\"error\":true,\"message\":\"IBKR unavailable\"}");
+        var result = collector.collect("AAPL", "AAPL 投资分析", "trace-no-market", 20L);
+        assertThat(result.harnessDecision().outcome()).isEqualTo(HarnessOutcome.RECOVER);
+        assertThat(result.harnessDecision().recoveryActions()).containsExactly(
+                com.stocksage.harness.HarnessModels.RecoveryAction.RETRY_MARKET);
+        assertThat(result.marketOk()).isFalse();
+        verify(fundamentalsTools, times(1)).getFinancialReports("AAPL", "annual", 5);
+        verify(fundamentalsTools, org.mockito.Mockito.never()).getStructuredFinancials(any());
+        assertThat(result.evidenceLedger().evidence()).filteredOn(EvidenceEnvelope::hasProvenance)
+                .allMatch(item -> item.dimension() == EvidenceDimension.FUNDAMENTALS);
+    }
+
+    @Test
+    void focusedEvidenceIsVisibleInEveryActualDebatePromptWithinOneSnapshotBudget() {
+        var baseline = new EvidenceEnvelope("base", EvidenceDimension.NEWS, "searchNews", "AAPL",
+                EvidenceStatus.AVAILABLE, "https://example.com/base", "test", Instant.now(), Instant.now(), "hash", true);
+        StringBuilder news = new StringBuilder();
+        ReflectionTestUtils.invokeMethod(collector, "appendEvidenceSnapshotItem", news, "getStockNews", baseline,
+                "X".repeat(5000), 3500);
+        var ledger = new EvidenceLedger(TargetIdentity.resolved("AAPL"), List.of(baseline));
+        var state = AnalysisState.builder().primaryTicker("AAPL").query("AAPL 召回风险")
+                .newsReport(news.toString()).evidenceLedger(ledger).build();
+        var existing = new DeepEvidenceCollector.EvidenceCollection("", state, true, true, true, true, true, ledger,
+                new HarnessDecision(HarnessOutcome.PASS, List.of(), List.of()));
+        String longUrl = "https://example.com/focused?detail=" + "y".repeat(30_000);
+        String focusedPayload = "{\"provider\":\"tavily\",\"results\":[{\"content\":\"FOCUSED_RECALL_RISK_SEPTEMBER\",\"url\":\"" + longUrl + "\"}]}";
+        var result = new CapabilityResult(LocalNewsSearchCapabilityAdapter.ID, "local", CapabilityResult.Status.SUCCESS,
+                focusedPayload, focusedPayload.length(), 1);
+        collector.appendFocusedNews(existing, result, "trace-focused-budget");
+        assertThat(state.getNewsReport()).hasSizeLessThanOrEqualTo(20_000).contains("FOCUSED_RECALL_RISK_SEPTEMBER");
+        String bull = ReflectionTestUtils.invokeMethod(new com.stocksage.agent.BullResearcher(null), "renderOpeningPrompt", state);
+        String bear = ReflectionTestUtils.invokeMethod(new com.stocksage.agent.BearResearcher(null), "renderOpeningPrompt", state);
+        var manager = new com.stocksage.agent.ResearchManager(null, null, null, new com.fasterxml.jackson.databind.ObjectMapper());
+        String scoring = ReflectionTestUtils.invokeMethod(manager, "buildScoringPrompt", state, true);
+        String report = ReflectionTestUtils.invokeMethod(manager, "buildPrompt", state, null);
+        String continuation = ReflectionTestUtils.invokeMethod(manager, "buildContinuationPrompt", state, 1, 3);
+        for (String prompt : List.of(bull, bear, scoring, report, continuation)) {
+            assertThat(prompt).contains(state.getNewsReport()).doesNotContain(longUrl).hasSizeLessThanOrEqualTo(20_000);
+        }
+        assertThat(state.getEvidenceLedger().evidence()).anyMatch(item -> longUrl.equals(item.sourceRef()));
+        java.util.Map<String, String> bodies = ReflectionTestUtils.invokeMethod(
+                new com.stocksage.agent.DebateContractParser(new com.fasterxml.jackson.databind.ObjectMapper()),
+                "snapshotContentByEvidenceId", state);
+        assertThat(bodies).hasSize(2);
+        assertThat(bodies.values()).anyMatch(body -> body.contains("FOCUSED_RECALL_RISK_SEPTEMBER"));
+        var second = new CapabilityResult(LocalNewsSearchCapabilityAdapter.ID, "local", CapabilityResult.Status.SUCCESS,
+                "{\"provider\":\"tavily\",\"results\":[{\"url\":\"https://example.com/second\",\"content\":\"SECOND\"}]}", 120, 1);
+        var appended = new DeepEvidenceCollector.EvidenceCollection("", state, true, true, true, true, true,
+                state.getEvidenceLedger(), existing.harnessDecision());
+        assertThat(collector.appendFocusedNews(appended, second, "trace-focused-budget")).isSameAs(appended);
+        assertThat(state.getEvidenceLedger().evidence()).hasSize(2);
+    }
+
     private final MarketTools marketTools = mock(MarketTools.class);
     private final NewsTools newsTools = mock(NewsTools.class);
     private final FundamentalsTools fundamentalsTools = mock(FundamentalsTools.class);
@@ -74,20 +168,10 @@ class DeepEvidenceCollectorTest {
         when(tickerResolutionService.resolveSectorForTicker("AAPL")).thenReturn("");
         when(fundamentalsTools.getFinancialReports("AAPL", "annual", 5))
                 .thenReturn("""
-                        {"cik":"320193","metrics":{"revenue":{"data":[{"value":100}]}}}
+                        {"cik":"320193","period":"annual","metrics":{"revenue":{"data":[{"filed":"2025-02-01","value":100}]}}}
                         """);
         when(fundamentalsTools.searchCompanyReports("AAPL", "财报", 5))
                 .thenReturn("");
-        when(fundamentalsTools.getStructuredFinancials("AAPL"))
-                .thenReturn("""
-                        {
-                          "cik":"320193",
-                          "metrics":{"revenue":{"data":[
-                            {"filed":"2024-02-02","value":90},
-                            {"filed":"2025-02-01","value":100}
-                          ]}}
-                        }
-                        """);
         when(marketTools.getIbkrHistoricalBars("AAPL", "3m", "1d"))
                 .thenReturn("""
                         {
@@ -95,7 +179,7 @@ class DeepEvidenceCollectorTest {
                           "conid":"265598",
                           "period":"3m",
                           "bar":"1d",
-                          "data":{"data":[{"t":1753488000000},{"t":1753574400000}]}
+                          "data":{"data":[{"t":1753488000000,"o":98,"h":102,"l":97,"c":100},{"t":1753574400000,"o":100,"h":103,"l":99,"c":102}]}
                         }
                         """);
         when(marketTools.getIbkrHistoricalBars("AAPL", "6m", "1d"))
@@ -105,7 +189,7 @@ class DeepEvidenceCollectorTest {
                           "conid":"265598",
                           "period":"6m",
                           "bar":"1d",
-                          "data":{"data":[{"t":1753574400000}]}
+                          "data":{"data":[{"t":1753574400000,"o":100,"h":103,"l":99,"c":102}]}
                         }
                         """);
         when(newsTools.getStockNews("AAPL", 7)).thenReturn("");
@@ -131,13 +215,13 @@ class DeepEvidenceCollectorTest {
         assertThat(result.sufficientForRecommendation()).isTrue();
         assertThat(result.newsOk()).isTrue();
         assertThat(result.state().getEvidenceLedger()).isSameAs(ledger);
-        assertThat(ledger.evidence()).hasSize(9);
+        assertThat(ledger.evidence()).hasSize(7);
         assertThat(ledger.evidence())
                 .filteredOn(item -> item.dimension() == EvidenceDimension.FUNDAMENTALS)
-                .hasSize(3);
+                .hasSize(2);
         assertThat(ledger.evidence())
                 .filteredOn(item -> item.dimension() == EvidenceDimension.MARKET)
-                .hasSize(3);
+                .hasSize(2);
         assertThat(ledger.evidence())
                 .filteredOn(item -> item.dimension() == EvidenceDimension.NEWS)
                 .extracting(item -> item.status())
@@ -163,24 +247,17 @@ class DeepEvidenceCollectorTest {
         assertThat(financialReports.provider()).isEqualTo("SEC EDGAR XBRL");
         assertThat(financialReports.sourceRef()).isEqualTo(
                 "https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json");
-        assertThat(financialReports.asOf()).isNull();
-
-        var structuredFinancials = ledger.evidence().stream()
-                .filter(item -> item.dimension() == EvidenceDimension.FUNDAMENTALS)
-                .filter(item -> item.capabilityId().equals("getStructuredFinancials"))
-                .findFirst()
-                .orElseThrow();
         var ordinary = new OrdinaryEvidence("AAPL",
                 com.stocksage.agent.ReadRequest.parse(com.stocksage.agent.PlanRoute.FUNDAMENTALS, "财报", java.util.Map.of()),
                 new com.fasterxml.jackson.databind.ObjectMapper(), new EvidenceEnvelopeMapper(tickerResolutionService));
-        ordinary.add("getStructuredFinancials", EvidenceDimension.FUNDAMENTALS,
-                fundamentalsTools.getStructuredFinancials("AAPL"));
+        ordinary.add("getFinancialReports", EvidenceDimension.FUNDAMENTALS,
+                fundamentalsTools.getFinancialReports("AAPL", "annual", 5));
         assertThat(ordinary.ledger().evidence().get(0)).usingRecursiveComparison()
-                .ignoringFields("observedAt").isEqualTo(structuredFinancials);
-        assertThat(structuredFinancials.provider()).isEqualTo("SEC EDGAR XBRL");
-        assertThat(structuredFinancials.sourceRef()).isEqualTo(
+                .ignoringFields("observedAt").isEqualTo(financialReports);
+        assertThat(financialReports.provider()).isEqualTo("SEC EDGAR XBRL");
+        assertThat(financialReports.sourceRef()).isEqualTo(
                 "https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json");
-        assertThat(structuredFinancials.asOf()).isEqualTo(
+        assertThat(financialReports.asOf()).isEqualTo(
                 Instant.parse("2025-02-01T00:00:00Z"));
 
         var ibkrBars = ledger.evidence().stream()
@@ -212,6 +289,11 @@ class DeepEvidenceCollectorTest {
                 ledgerCaptor.capture()
         );
         assertThat(ledgerCaptor.getValue()).isSameAs(ledger);
+        var restored = collector.reevaluateCheckpoint(result.state(), java.util.Map.of(), "trace-current-checkpoint");
+        assertThat(restored.evidenceLedger()).isSameAs(ledger);
+        assertThat(restored.harnessDecision().outcome()).isEqualTo(HarnessOutcome.PASS);
+        assertThat(result.state().getHarnessSnapshot().policyVersion())
+                .isEqualTo(Integer.toString(completionPolicy.policyVersion()));
     }
 
     @Test
@@ -262,7 +344,7 @@ class DeepEvidenceCollectorTest {
                           "provider":"akshare",
                           "source":"baostock",
                           "symbol":"00700",
-                          "statements":[{"reportDate":"2025-12-31"}]
+                          "statements":[{"reportDate":"2025-12-31","revenue":100}]
                         }
                         """);
         when(fundamentalsTools.searchCompanyReports("0700.HK", "财报", 5))
@@ -273,12 +355,8 @@ class DeepEvidenceCollectorTest {
                           "provider":"akshare",
                           "source":"baostock",
                           "resolvedCode":"00700",
-                          "data":[{"Date":"2026-07-24"},{"Date":"2026-07-25"}]
+                          "data":[{"Date":"2026-07-24","Open":98,"High":102,"Low":97,"Close":100},{"Date":"2026-07-25","Open":100,"High":103,"Low":99,"Close":102}]
                         }
-                        """);
-        when(marketTools.getFinancialMetrics("0700.HK"))
-                .thenReturn("""
-                        {"provider":"akshare","symbol":"00700","metrics":{"pe":20}}
                         """);
         when(marketTools.getTechnicalIndicators("0700.HK", "MA,MACD,RSI"))
                 .thenReturn("""
@@ -309,12 +387,12 @@ class DeepEvidenceCollectorTest {
                 Instant.parse("2026-07-25T00:00:00Z"));
 
         var metrics = ledger.evidence().stream()
-                .filter(item -> item.capabilityId().equals("getFinancialMetrics"))
+                .filter(item -> item.capabilityId().equals("getTechnicalIndicators(MA,MACD,RSI)"))
                 .findFirst()
                 .orElseThrow();
         assertThat(metrics.provider()).isEqualTo("akshare");
         assertThat(metrics.sourceRef()).isEqualTo(
-                "provider://akshare/getFinancialMetrics?target=00700");
+                "provider://akshare/getTechnicalIndicators-MA-MACD-RSI?target=00700");
         assertThat(metrics.asOf()).isNull();
     }
 
@@ -325,19 +403,18 @@ class DeepEvidenceCollectorTest {
         when(fundamentalsTools.getFinancialReports("AAPL", "annual", 5))
                 .thenReturn(
                         "",
-                        "{\"cik\":\"320193\",\"metrics\":{\"revenue\":{\"data\":[{\"filed\":\"2025-02-01\"}]}}}"
+                        "{\"cik\":\"320193\",\"metrics\":{\"revenue\":{\"data\":[{\"filed\":\"2025-02-01\",\"value\":100}]}}}"
                 );
         when(fundamentalsTools.searchCompanyReports("AAPL", "财报", 5)).thenReturn("");
-        when(fundamentalsTools.getStructuredFinancials("AAPL")).thenReturn("");
         when(marketTools.getIbkrHistoricalBars("AAPL", "3m", "1d"))
                 .thenReturn("""
                         {"provider":"IBKR_WEB_API","conid":"265598","period":"3m",
-                         "bar":"1d","data":{"data":[{"t":1753574400000}]}}
+                         "bar":"1d","data":{"data":[{"t":1753574400000,"o":100,"h":103,"l":99,"c":102}]}}
                         """);
         when(marketTools.getIbkrHistoricalBars("AAPL", "6m", "1d"))
                 .thenReturn("""
                         {"provider":"IBKR_WEB_API","conid":"265598","period":"6m",
-                         "bar":"1d","data":{"data":[{"t":1753574400000}]}}
+                         "bar":"1d","data":{"data":[{"t":1753574400000,"o":100,"h":103,"l":99,"c":102}]}}
                         """);
         when(newsTools.getStockNews("AAPL", 7)).thenReturn("");
         when(newsTools.searchNews(any(), any(Integer.class), eq(true))).thenReturn("");

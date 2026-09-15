@@ -37,7 +37,7 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
     /** 持久化到 Trace/checkpoint 的稳定策略 ID。 */
     public static final String POLICY_ID = "deep-equity-v1";
     /** 当前规则版本；规则语义变化时递增，用于拒绝陈旧报告权威。 */
-    public static final int POLICY_VERSION = 4;
+    public static final int POLICY_VERSION = 5;
 
     @Override
     public String policyId() {

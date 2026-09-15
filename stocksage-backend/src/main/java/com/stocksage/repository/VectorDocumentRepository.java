@@ -33,6 +33,9 @@ public interface VectorDocumentRepository extends JpaRepository<VectorDocument, 
      */
     Optional<VectorDocument> findByVectorId(String vectorId);
 
+    /** 向量候选只有在关系库已提交后才可用于检索。 */
+    List<VectorDocument> findByVectorIdIn(Collection<String> vectorIds);
+
     /**
      * 批量删除指定向量 ID 的文本镜像。
      *

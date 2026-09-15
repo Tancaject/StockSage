@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.stocksage.agent.ReadRequest;
 import com.stocksage.harness.EvidenceLedger;
 import com.stocksage.harness.HarnessModels.*;
-import com.stocksage.tool.ToolResultInspector;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Supplier;
@@ -54,20 +53,11 @@ final class OrdinaryEvidence {
     }
 
     void add(String name, EvidenceDimension dimension, String raw) {
-        EvidenceStatus status = EvidenceStatus.AVAILABLE;
+        EvidenceStatus status = evidenceEnvelopeMapper.inspectStatus(name, raw);
         String gap = "";
         JsonNode root = null;
         try {
             root = raw == null ? null : mapper.readTree(raw);
-            if (root == null || root.isNull()) status = EvidenceStatus.EMPTY;
-            else if (ToolResultInspector.isErrorPayload(raw, mapper)) status = EvidenceStatus.FAILED;
-            else if (root.isEmpty() || emptyRows(root)) status = dimension == EvidenceDimension.NEWS ? EvidenceStatus.NO_RESULTS : EvidenceStatus.EMPTY;
-            else if (root.isObject()) {
-                ObjectNode data = ((ObjectNode) root).deepCopy();
-                data.remove(List.of("symbol", "code", "ticker", "resolvedCode", "route", "input", "period", "bar",
-                        "provider", "source", "sourceRef", "timestamp", "asOf", "as_of", "status", "message", "error", "count"));
-                if (data.isEmpty()) status = EvidenceStatus.EMPTY;
-            }
             if (root != null && root.isObject() && !root.has("symbol") && root.has("code")) {
                 // 数据服务的 A/H 股响应使用 code；共享证据解析器使用 symbol。
                 ((ObjectNode) root).set("symbol", root.get("code"));
@@ -94,7 +84,7 @@ final class OrdinaryEvidence {
             gap = "REPORT_COUNT_UNVERIFIED";
         }
         EvidenceEnvelope item = evidenceEnvelopeMapper.map(dimension, ticker, name, raw == null ? "" : raw,
-                status == EvidenceStatus.NO_RESULTS ? EvidenceStatus.AVAILABLE : status, Instant.now(), true);
+                status, Instant.now(), true);
         evidence.add(item);
         String id = "E" + evidence.size();
         boolean usable = item.hasProvenance() && (ticker == null || ticker.isBlank()
@@ -115,14 +105,6 @@ final class OrdinaryEvidence {
         row.put("reduced", reduced);
         row.put("citable", usable && included); row.put("droppedReason", included ? "" : "CONTEXT_BUDGET");
         observations.add(Map.copyOf(row));
-    }
-
-    private boolean emptyRows(JsonNode root) {
-        for (String key : List.of("results", "data", "reports", "bars")) {
-            if (root.path(key).isArray()) return root.path(key).isEmpty();
-        }
-        if (root.path("data").isObject()) return root.path("data").isEmpty() || emptyRows(root.path("data"));
-        return false;
     }
 
     /** JSON 按完整字段/记录缩减；K 线点集由已有图表事件单独提供。 */

@@ -34,7 +34,9 @@ class KnowledgeIngestionServiceTest {
                 new ObjectMapper()
         );
 
-        when(docIndexRepository.findByFilePath("edgar:AAPL:10-K:2025-10-31")).thenReturn(Optional.empty());
+        when(docIndexRepository.lockByFilePath("edgar:AAPL:10-K:2025-10-31")).thenReturn(Optional.of(
+                new DocIndexEntry("edgar:AAPL:10-K:2025-10-31", "", List.of(), "edgar",
+                        java.time.LocalDateTime.now(), null)));
 
         Document parent = new Document(
                 "parent filing context",

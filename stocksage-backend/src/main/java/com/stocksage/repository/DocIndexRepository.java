@@ -3,12 +3,13 @@ package com.stocksage.repository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -29,7 +30,7 @@ public class DocIndexRepository {
     /** Jackson 反序列化 {@code chunk_ids} JSON 数组所需的泛型类型。 */
     private static final TypeReference<List<String>> STRING_LIST = new TypeReference<>() {};
 
-    /** 执行索引表 DDL 和参数化 SQL 的 Spring JDBC 入口。 */
+    /** 执行索引表参数化 SQL 的 Spring JDBC 入口。 */
     private final JdbcTemplate jdbcTemplate;
 
     /** 负责切片 ID 列表与 JSON 字符串互转。 */
@@ -45,25 +46,24 @@ public class DocIndexRepository {
             rs.getTimestamp("expires_at") == null ? null : rs.getTimestamp("expires_at").toLocalDateTime()
     );
 
-    /**
-     * 应用启动时确保轻量索引表存在，避免本地演示环境需要手工执行额外迁移。
-     *
-     * <p>{@link PostConstruct} 自动调用；建表失败会阻止该仓储完成初始化。</p>
-     */
-    @PostConstruct
-    public void ensureTable() {
-        jdbcTemplate.execute("""
-                CREATE TABLE IF NOT EXISTS doc_index (
-                    file_path   VARCHAR(768) PRIMARY KEY,
-                    file_hash   CHAR(64) NOT NULL,
-                    chunk_ids   JSON NOT NULL,
-                    source_type VARCHAR(32) NOT NULL,
-                    ingested_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    expires_at  DATETIME NULL,
-                    INDEX idx_source_type (source_type),
-                    INDEX idx_expires_at (expires_at)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-                """);
+    /** 独立提交来源占位；即使首次写向量时进程退出，维护任务仍能找到该来源。 */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void ensureSource(String sourceId, String sourceType) {
+        jdbcTemplate.update("""
+                INSERT INTO doc_index (file_path, file_hash, chunk_ids, source_type)
+                VALUES (?, '', '[]', ?)
+                ON DUPLICATE KEY UPDATE file_path = VALUES(file_path)
+                """, sourceId, sourceType);
+    }
+
+    /** 摄取和清理共用来源行锁，避免清理另一个正在写入的版本。 */
+    public Optional<DocIndexEntry> lockByFilePath(String sourceId) {
+        return jdbcTemplate.query("SELECT * FROM doc_index WHERE file_path = ? FOR UPDATE",
+                rowMapper, sourceId).stream().findFirst();
+    }
+
+    public List<String> findSourceIds() {
+        return jdbcTemplate.query("SELECT file_path FROM doc_index", (rs, row) -> rs.getString(1));
     }
 
     /**

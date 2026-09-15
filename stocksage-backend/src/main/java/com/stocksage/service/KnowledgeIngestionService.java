@@ -13,11 +13,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -61,6 +67,7 @@ public class KnowledgeIngestionService {
     private final ObjectMapper objectMapper;
     /** 在 MySQL 事务提交后通知 Lucene 派生索引更新。 */
     private final ApplicationEventPublisher eventPublisher;
+    private final TransactionTemplate cleanupTransaction;
 
     @Autowired
     public KnowledgeIngestionService(
@@ -68,12 +75,17 @@ public class KnowledgeIngestionService {
             DocIndexRepository docIndexRepository,
             VectorDocumentRepository vectorDocumentRepository,
             ObjectMapper objectMapper,
-            ApplicationEventPublisher eventPublisher) {
+            ApplicationEventPublisher eventPublisher,
+            PlatformTransactionManager transactionManager) {
         this.vectorStore = vectorStore;
         this.docIndexRepository = docIndexRepository;
         this.vectorDocumentRepository = vectorDocumentRepository;
         this.objectMapper = objectMapper;
         this.eventPublisher = eventPublisher;
+        this.cleanupTransaction = transactionManager == null ? null : new TransactionTemplate(transactionManager);
+        if (cleanupTransaction != null) {
+            cleanupTransaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        }
     }
 
     /** 保留无 Spring 容器单元测试使用的构造入口。 */
@@ -82,7 +94,7 @@ public class KnowledgeIngestionService {
             DocIndexRepository docIndexRepository,
             VectorDocumentRepository vectorDocumentRepository,
             ObjectMapper objectMapper) {
-        this(vectorStore, docIndexRepository, vectorDocumentRepository, objectMapper, null);
+        this(vectorStore, docIndexRepository, vectorDocumentRepository, objectMapper, null, null);
     }
 
     /** 可选语义去重的向量相似度阈值。 */
@@ -185,14 +197,18 @@ public class KnowledgeIngestionService {
             boolean semanticDedupEnabled) {
         String normalizedSourceId = normalize(sourceId, "unknown-source");
         String normalizedSourceType = normalize(sourceType, "manual");
-        String normalizedHash = normalize(contentHash, sha256(normalizedSourceId));
+        // 契约版本使旧版可能包含零向量的来源在下一次摄取时重新生成，旧版仍保留到成功提交。
+        String normalizedHash = sha256("finite-embedding-v1:" + normalize(contentHash, sha256(normalizedSourceId)));
         List<Document> candidates = parsedDocuments == null ? List.of() : parsedDocuments;
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime expiresAt = ttl == null ? null : now.plus(ttl);
 
         // 来源哈希是成本最低的保护：如果来源未变化且 TTL 未过期，
         // 就不需要触碰 Milvus 或 MySQL。
-        Optional<DocIndexEntry> existing = docIndexRepository.findByFilePath(normalizedSourceId);
+        docIndexRepository.ensureSource(normalizedSourceId, normalizedSourceType);
+        Optional<DocIndexEntry> existing = docIndexRepository.lockByFilePath(normalizedSourceId);
+        if (existing.isEmpty()) throw new IllegalStateException("RAG source registration disappeared: " + normalizedSourceId);
+        removeUncommittedVectors(existing.get());
         if (existing.isPresent()
                 && normalizedHash.equals(existing.get().fileHash())
                 && !existing.get().isExpired(now)) {
@@ -201,7 +217,7 @@ public class KnowledgeIngestionService {
         }
 
         List<String> deletedChunkIds = existing
-                .map(this::deleteIndexedChunks)
+                .map(DocIndexEntry::chunkIds)
                 .orElseGet(List::of);
 
         List<Document> documentsToAdd = new ArrayList<>();
@@ -219,13 +235,16 @@ public class KnowledgeIngestionService {
 
             String exactChunkHash = sha256(text);
             if (!candidateChunkHashes.add(exactChunkHash)
-                    || (semanticDedupEnabled && isSemanticDuplicate(text))) {
+                    || (semanticDedupEnabled && isSemanticDuplicate(text, normalizedSourceId))) {
                 duplicateCount++;
                 continue;
             }
 
             Map<String, Object> metadata = new LinkedHashMap<>(candidate.getMetadata());
             String chunkId = resolveChunkId(metadata, buildChunkId(normalizedSourceId, normalizedHash, i));
+            if (shouldVectorize(metadata) && metadata.containsKey("doc_id")) {
+                chunkId = buildChunkId(normalizedSourceId, normalizedHash + ":" + chunkId, i);
+            }
             // 这些归一化字段是 RagService、评估脚本和引用格式化共同依赖的检索契约。
             metadata.put("doc_id", chunkId);
             metadata.put("source_id", normalizedSourceId);
@@ -244,8 +263,12 @@ public class KnowledgeIngestionService {
             metadataRows.add(toVectorDocument(metadata, text, i));
         }
 
-        // 先调用向量库按供应商上限分批写入，再保存 MySQL 全文镜像和来源索引。
+        // 写入不同版本的向量，不覆盖旧版；关系库提交后才切换可检索版本。
         addToVectorStoreInBatches(documentsToAdd);
+        if (!deletedChunkIds.isEmpty()) {
+            vectorDocumentRepository.deleteByVectorIdIn(deletedChunkIds);
+            vectorDocumentRepository.flush();
+        }
         if (!metadataRows.isEmpty()) {
             vectorDocumentRepository.saveAll(metadataRows);
         }
@@ -258,6 +281,7 @@ public class KnowledgeIngestionService {
                 expiresAt
         ));
         publishBm25Update(deletedChunkIds, metadataRows);
+        cleanupAfterCommit(normalizedSourceId);
 
         log.info(
                 "RAG source indexed: sourceId={}, sourceType={}, parsed={}, added={}, duplicates={}, semanticDedup={}, expiresAt={}",
@@ -286,34 +310,59 @@ public class KnowledgeIngestionService {
     public int deleteExpiredDocuments() {
         List<DocIndexEntry> expired = docIndexRepository.findExpired(LocalDateTime.now());
         List<String> deletedChunkIds = new ArrayList<>();
-        for (DocIndexEntry entry : expired) {
-            deletedChunkIds.addAll(deleteIndexedChunks(entry));
+        int cleaned = 0;
+        for (DocIndexEntry candidate : expired) {
+            DocIndexEntry entry = docIndexRepository.lockByFilePath(candidate.filePath()).orElseThrow();
+            if (!entry.isExpired(LocalDateTime.now()) || entry.chunkIds().isEmpty()) continue;
+            vectorDocumentRepository.deleteByVectorIdIn(entry.chunkIds());
+            deletedChunkIds.addAll(entry.chunkIds());
+            // 保留空来源记录作为可恢复的清理标记；向量删除失败不会丢失清理范围。
+            docIndexRepository.save(new DocIndexEntry(entry.filePath(), "", List.of(), entry.sourceType(),
+                    LocalDateTime.now(), entry.expiresAt()));
+            cleanupAfterCommit(entry.filePath());
+            cleaned++;
         }
         publishBm25Update(deletedChunkIds, List.of());
-        if (!expired.isEmpty()) {
-            log.info("Expired RAG sources cleaned: {}", expired.size());
-        }
-        return expired.size();
+        return cleaned;
     }
 
-    /**
-     * 删除某个来源在向量库、MySQL 元数据和索引表中的全部切片。
-     *
-     * @param entry 来源索引记录，包含全部 chunkId
-     */
-    private List<String> deleteIndexedChunks(DocIndexEntry entry) {
-        List<String> chunkIds = entry.chunkIds() == null
-                ? List.of()
-                : entry.chunkIds().stream()
-                        .filter(chunkId -> chunkId != null && !chunkId.isBlank())
-                        .toList();
-        if (!chunkIds.isEmpty()) {
-            vectorStore.delete(chunkIds);
-            vectorDocumentRepository.deleteByVectorIdIn(chunkIds);
+    /** 清理只针对当前已提交版本之外的向量；调用时必须持有来源行锁。 */
+    private void removeUncommittedVectors(DocIndexEntry entry) {
+        FilterExpressionBuilder filters = new FilterExpressionBuilder();
+        vectorStore.delete(filters.and(filters.eq("source_id", entry.filePath()),
+                filters.ne("file_hash", entry.fileHash())).build());
+    }
+
+    private void cleanupAfterCommit(String sourceId) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    cleanupSourceVectors(sourceId);
+                }
+            });
+        } else {
+            cleanupSourceVectors(sourceId);
         }
-        docIndexRepository.deleteByFilePath(entry.filePath());
-        log.debug("Deleted indexed RAG source: sourceId={}, chunks={}", entry.filePath(), chunkIds.size());
-        return chunkIds;
+    }
+
+    private void cleanupSourceVectors(String sourceId) {
+        try {
+            Runnable cleanup = () -> docIndexRepository.lockByFilePath(sourceId)
+                    .ifPresent(this::removeUncommittedVectors);
+            if (cleanupTransaction == null) cleanup.run();
+            else cleanupTransaction.executeWithoutResult(status -> cleanup.run());
+        } catch (RuntimeException failure) {
+            // 来源及其当前版本已持久化，下次摄取或维护会重试同一清理，不能谎报提交失败。
+            log.warn("RAG vector cleanup pending for source={}; scheduled maintenance will retry", sourceId, failure);
+        }
+    }
+
+    /** 同时收敛失败写入和提交后尚未删除的旧版；不修改任何当前来源内容。 */
+    public void reconcileVectors() {
+        for (String sourceId : docIndexRepository.findSourceIds()) {
+            cleanupSourceVectors(sourceId);
+        }
     }
 
     /**
@@ -346,7 +395,7 @@ public class KnowledgeIngestionService {
      * @param text 候选切片正文
      * @return true 表示已有高于阈值的向量命中
      */
-    private boolean isSemanticDuplicate(String text) {
+    private boolean isSemanticDuplicate(String text, String sourceId) {
         if (dedupSimilarityThreshold <= 0) {
             return false;
         }
@@ -355,9 +404,11 @@ public class KnowledgeIngestionService {
                     .query(text)
                     .topK(1)
                     .similarityThreshold(dedupSimilarityThreshold)
+                    .filterExpression(new FilterExpressionBuilder().ne("source_id", sourceId).build())
                     .build();
             // 调用向量库 top-1 相似检索；失败时 fail-open 保留候选知识。
-            return !vectorStore.similaritySearch(request).isEmpty();
+            return vectorStore.similaritySearch(request).stream()
+                    .anyMatch(document -> vectorDocumentRepository.findByVectorId(document.getId()).isPresent());
         } catch (Exception e) {
             log.warn("Semantic dedup check failed; keeping candidate chunk. message={}", e.getMessage());
             return false;

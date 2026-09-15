@@ -10,6 +10,13 @@
 import fitz  # PyMuPDF
 from statistics import median
 
+MAX_PDF_PAGES = 1000
+MAX_TEXT_CHARACTERS = 5_000_000
+
+
+class PdfLimitError(ValueError):
+    """The document exceeds the supported parsing workload."""
+
 
 class PdfParser:
 
@@ -19,17 +26,23 @@ class PdfParser:
             target_chunk_size: 目标切片大小，按字符计，约 750 token。
             overlap: 相邻切片之间的重叠字符数。
         """
+        if not 256 <= target_chunk_size <= 12_000 or not 0 <= overlap <= target_chunk_size // 2:
+            raise ValueError("PDF chunk_size must be 256–12000 and overlap must be 0–half of chunk_size")
         self.target_chunk_size = target_chunk_size
         self.overlap = overlap
 
     def parse(self, pdf_bytes: bytes, filename: str = "") -> list[dict]:
-        doc = fitz.open(stream=pdf_bytes, filetype="pdf")
-        total_pages = len(doc)
-
-        # 步骤 1：提取带字体元数据的文本块
-        blocks = self._extract_blocks(doc)
+        try:
+            doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+        except fitz.FileDataError as error:
+            raise ValueError("Invalid PDF; upload a readable PDF document") from error
+        with doc:
+            if doc.needs_pass:
+                raise ValueError("Password-protected PDF; remove the password before uploading")
+            if len(doc) > MAX_PDF_PAGES:
+                raise PdfLimitError(f"PDF exceeds {MAX_PDF_PAGES} pages; split the document before uploading")
+            blocks = self._extract_blocks(doc)
         if not blocks:
-            doc.close()
             return [{"content": "", "section_title": "", "page_start": 0,
                      "page_end": 0, "chunk_index": 0,
                      "message": "No text extracted from PDF"}]
@@ -45,14 +58,15 @@ class PdfParser:
         # 步骤 4：带重叠切分大章节，并合并过小章节
         chunks = self._build_chunks(sections)
 
-        doc.close()
         return chunks
 
     def _extract_blocks(self, doc) -> list[dict]:
         blocks = []
+        total_text = 0
         for page_num in range(len(doc)):
             page = doc[page_num]
-            page_dict = page.get_text("dict")
+            # 仅需文本与字号；dict 默认携带图片字节，可能解压巨大的嵌入图片。
+            page_dict = page.get_text("dict", flags=fitz.TEXTFLAGS_DICT & ~fitz.TEXT_PRESERVE_IMAGES)
 
             for block in page_dict.get("blocks", []):
                 if block.get("type") != 0:  # 只处理文本块
@@ -65,6 +79,11 @@ class PdfParser:
                 for line in block.get("lines", []):
                     line_text = ""
                     for span in line.get("spans", []):
+                        total_text += len(span["text"])
+                        if total_text > MAX_TEXT_CHARACTERS:
+                            raise PdfLimitError(
+                                f"PDF exceeds {MAX_TEXT_CHARACTERS} text characters; split the document before uploading"
+                            )
                         line_text += span["text"]
                         max_size = max(max_size, span.get("size", 0))
                         font = span.get("font", "").lower()

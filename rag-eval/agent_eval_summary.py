@@ -453,7 +453,7 @@ def build_report(
         else "passed"
     )
     expected_policy_id = gates.get("harness_policy_id_expected", "deep-equity-v1")
-    expected_policy_version = gates.get("harness_policy_version_expected", 2)
+    expected_policy_version = gates.get("harness_policy_version_expected", 5)
     if harness_payload is not None:
         harness_engine = harness_payload.get("engine")
         harness_schema = harness_payload.get("schema_version")
@@ -689,8 +689,16 @@ def build_report(
                 ),
             ]
         )
+    rag_section = dict(rag_payload) if rag_payload else not_run("RAG evaluation was not supplied")
+    if rag_payload:
+        evaluation = rag_payload.get("gate_evaluation")
+        rag_section["status"] = (
+            {"pass": "passed", "fail": "failed"}.get(str(evaluation.get("status")), "incomplete")
+            if isinstance(evaluation, dict) and evaluation.get("schema_version") == "rag_gates_v1"
+            else "incomplete"
+        )
     sections = {
-        "rag": rag_payload or not_run("RAG evaluation was not supplied"),
+        "rag": rag_section,
         "trace": trace_payload or not_run(
             "Trace integrity evaluation was not supplied"
         ),
@@ -707,7 +715,7 @@ def build_report(
     missing_sections = [
         name
         for name, section in sections.items()
-        if section.get("status") == "not_run"
+        if section.get("status") in {"not_run", "incomplete", "missing"}
     ]
     failed_sections = [
         name

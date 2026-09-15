@@ -2,6 +2,7 @@ package com.stocksage.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.client.DataServicePayloads;
 import com.stocksage.harness.HarnessModels.EvidenceDimension;
 import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
 import com.stocksage.harness.HarnessModels.EvidenceStatus;
@@ -63,12 +64,11 @@ public class EvidenceEnvelopeMapper {
         String payloadHash = sha256(payload);
         String evidenceId = sha256(
                 dimension.name() + "|" + capabilityId + "|" + evidenceTarget + "|" + payloadHash);
-        EvidenceStatus structuredStatus = dimension == EvidenceDimension.NEWS
-                && status == EvidenceStatus.AVAILABLE
-                && isSuccessfulNoResults(payload)
-                ? EvidenceStatus.NO_RESULTS
-                : status;
-        EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
+        EvidenceStatus structuredStatus = status == EvidenceStatus.AVAILABLE ? inspectStatus(capabilityId, payload) : status;
+        if (structuredStatus == EvidenceStatus.NO_RESULTS && dimension != EvidenceDimension.NEWS) {
+            structuredStatus = EvidenceStatus.EMPTY;
+        }
+        EvidenceProvenance provenance = structuredStatus == EvidenceStatus.AVAILABLE || structuredStatus == EvidenceStatus.NO_RESULTS
                 ? extractProvenance(capabilityId, evidenceTarget, payload)
                 : EvidenceProvenance.empty();
         return new EvidenceEnvelope(
@@ -84,6 +84,87 @@ public class EvidenceEnvelopeMapper {
                 payloadHash,
                 approvedReadOnly
         );
+    }
+
+    /** 来源和业务数据分别验收；计数、日期、股票身份不能替代行情或财务数值。 */
+    EvidenceStatus inspectStatus(String capabilityId, String payload) {
+        if (payload == null || payload.isBlank()) return EvidenceStatus.EMPTY;
+        try {
+            JsonNode root = PROVENANCE_MAPPER.readTree(payload);
+            if (DataServicePayloads.hasTopLevelError(root)) return EvidenceStatus.FAILED;
+            if (root == null || root.isNull() || root.isEmpty()) return EvidenceStatus.EMPTY;
+            String name = capabilityId.substring(capabilityId.lastIndexOf('/') + 1).split("\\(", 2)[0];
+            if (KLinePayloadMapper.isKlineTool(name)) {
+                var chart = new KLinePayloadMapper(PROVENANCE_MAPPER).toChartPayload(name, root, new Object[0]);
+                if (chart.isEmpty()) return EvidenceStatus.EMPTY;
+                @SuppressWarnings("unchecked")
+                var rows = (List<java.util.Map<String, Object>>) chart.get().get("points");
+                return rows.stream().anyMatch(row -> List.of("open", "high", "low", "close").stream()
+                        .allMatch(key -> row.get(key) instanceof Number value && Double.isFinite(value.doubleValue())))
+                        ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
+            }
+            if (name.equals("getStructuredFinancials") || name.equals("getFinancialReports")) {
+                boolean financials = hasSecFinancialValue(root.path("metrics"))
+                        || hasBusinessNumber(root.path("reports")) || hasBusinessNumber(root.path("statements"))
+                        || hasBusinessNumber(root.path("indicators"));
+                return financials ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
+            }
+            if (name.equals("getFinancialMetrics")) {
+                return hasBusinessNumber(root.path("metrics")) || List.of("price", "pe", "pb", "marketCap", "roe")
+                        .stream().anyMatch(key -> hasBusinessNumber(root.path(key))) ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
+            }
+            if (name.equals("getTechnicalIndicators")) {
+                return hasBusinessNumber(root.path("indicators")) ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
+            }
+            for (String field : List.of("results", "news", "items", "data")) {
+                JsonNode rows = root.path(field);
+                if (rows.isArray()) return rows.isEmpty() ? EvidenceStatus.NO_RESULTS : EvidenceStatus.AVAILABLE;
+            }
+            // 未知能力不能凭提供方标签声明成功；仍保留有实质正文的既有结果。
+            return hasBusinessNumber(root) ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
+        } catch (Exception ignored) {
+            return EvidenceStatus.FAILED;
+        }
+    }
+
+    /** SEC 的公告财年、期间和计数只是元数据；财务事实只能来自每个 concept 的 value。 */
+    private boolean hasSecFinancialValue(JsonNode metrics) {
+        if (!metrics.isObject()) return false;
+        for (JsonNode metric : metrics) {
+            for (JsonNode point : metric.path("data")) {
+                if (isFiniteNumber(point.path("value"))) return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isFiniteNumber(JsonNode node) {
+        if (node == null) return false;
+        if (node.isNumber()) return Double.isFinite(node.asDouble());
+        if (node.isTextual()) {
+            try { return Double.isFinite(Double.parseDouble(node.asText().replace(",", "").trim())); }
+            catch (NumberFormatException ignored) { return false; }
+        }
+        return false;
+    }
+
+    private boolean hasBusinessNumber(JsonNode node) {
+        if (node == null || node.isNull() || node.isMissingNode() || node.isBoolean()) return false;
+        if (isFiniteNumber(node)) return true;
+        if (node.isArray()) {
+            for (JsonNode item : node) if (hasBusinessNumber(item)) return true;
+        } else if (node.isObject()) {
+            var fields = node.fields();
+            while (fields.hasNext()) {
+                var field = fields.next();
+                String key = field.getKey().toLowerCase(java.util.Locale.ROOT).replace("_", "").replace("-", "");
+                if (key.contains("date") || key.contains("日期") || key.contains("时间")
+                        || Set.of("year", "quarter", "fiscalyear", "fy", "fp", "cik", "code", "symbol", "ticker",
+                        "resolvedcode", "count", "metriccount", "statementcount", "asof", "timestamp", "t", "filed", "start", "end").contains(key)) continue;
+                if (hasBusinessNumber(field.getValue())) return true;
+            }
+        }
+        return false;
     }
 
     private String structuredEvidenceTarget(String requestedTicker, String payload) {
@@ -427,18 +508,6 @@ public class EvidenceEnvelopeMapper {
         } catch (DateTimeParseException ignored) {
             return null;
         }
-    }
-
-    private boolean isSuccessfulNoResults(String value) {
-        if (value == null || value.isBlank()) {
-            return false;
-        }
-        String compact = value.replaceAll("\\s+", "");
-        return compact.equals("[]")
-                || compact.contains("\"results\":[]")
-                || compact.contains("\"news\":[]")
-                || compact.contains("\"items\":[]")
-                || compact.contains("\"data\":[]");
     }
 
     private String sha256(String value) {

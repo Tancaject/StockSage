@@ -25,7 +25,7 @@
   "baseline_delta_max_drop": 0.02,
   "p95_latency_ratio_max": 1.2,
   "harness_policy_id_expected": "deep-equity-v1",
-  "harness_policy_version_expected": 4,
+  "harness_policy_version_expected": 5,
   "harness_case_count_min": 60,
   "harness_exact_accuracy_min": 1.0,
   "harness_decision_contract_exact_match_rate_min": 1.0,

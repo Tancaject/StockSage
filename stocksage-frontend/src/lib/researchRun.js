@@ -40,6 +40,7 @@ export function createInitialRun() {
  * 支持的 chunk 类型：
  * - 'meta' / 'model'  → 回填 conversationId / modelTier / modelName / traceId
  * - 'answer'          → 累加 answer
+ * - 'task-final'      → 用最终报告替换受理消息并结束运行
  * - 'observation' / 'action' / 'thought'  → 追加 timeline 条目
  * - 'error'           → 置 error 字段
  * - 其他类型          → 原样返回（无副作用）
@@ -68,6 +69,11 @@ export function applyChunk(run, chunk = {}) {
   // answer：累加内容
   if (type === 'answer') {
     return { ...run, answer: run.answer + (chunk.content || '') }
+  }
+
+  if (type === 'task-final') {
+    if (run.status === 'failed' || run.status === 'stopped') return run
+    return resolveStatus({ ...run, answer: String(chunk.content || '').trim() || run.answer }, 'done')
   }
 
   // observation / action / thought：追加 timeline 条目

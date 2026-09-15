@@ -85,16 +85,13 @@ class AgentGoldenSetTest(unittest.TestCase):
             self.assertEqual("INTENT_FUSION", case["expectedDecisionSource"])
             self.assertIs(case["requireNoFallback"], True)
 
-            history_tickers = set(
-                re.findall(r"\b[A-Z][A-Z.]{1,4}\b", " ".join(recent_turns))
-            )
             expected_resolution = case["expectedResolvedQueryContains"]
-            self.assertIn(expected_resolution, history_tickers)
-            for ticker in history_tickers:
-                self.assertIsNone(
-                    re.search(rf"\b{re.escape(ticker)}\b", case["query"]),
-                    f"{case['id']} repeats context ticker {ticker} in current query",
-                )
+            ticker_pattern = rf"\b{re.escape(expected_resolution)}\b"
+            self.assertRegex(" ".join(recent_turns), ticker_pattern)
+            self.assertIsNone(
+                re.search(ticker_pattern, case["query"]),
+                f"{case['id']} repeats context ticker {expected_resolution} in current query",
+            )
 
 
 if __name__ == "__main__":

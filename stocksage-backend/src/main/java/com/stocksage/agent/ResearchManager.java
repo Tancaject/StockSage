@@ -326,9 +326,9 @@ public class ResearchManager {
                 state == null ? "" : safe(state.getQuery()),
                 completedRound,
                 maxRounds,
-                truncate(state == null ? "" : safe(state.getFundamentalsReport()), 2400),
-                truncate(state == null ? "" : safe(state.getMarketReport()), 2400),
-                truncate(state == null ? "" : safe(state.getNewsReport()), 2400),
+                state == null ? "" : safe(state.getFundamentalsReport()),
+                state == null ? "" : safe(state.getMarketReport()),
+                state == null ? "" : safe(state.getNewsReport()),
                 renderDebate(state == null ? null : state.getDebateTurns(), 14_000)
         );
     }
@@ -434,9 +434,9 @@ public class ResearchManager {
                 沿 respondsToPointIds 链与该 THESIS 相关的真实 REBUTTAL。不要输出隐藏思维过程或任何额外字段。
                 """.formatted(
                 state == null ? "" : safe(state.getQuery()),
-                truncate(state == null ? "" : safe(state.getFundamentalsReport()), 3200),
-                truncate(state == null ? "" : safe(state.getMarketReport()), 3200),
-                truncate(state == null ? "" : safe(state.getNewsReport()), 3200),
+                state == null ? "" : safe(state.getFundamentalsReport()),
+                state == null ? "" : safe(state.getMarketReport()),
+                state == null ? "" : safe(state.getNewsReport()),
                 renderPosition(state, positionASide, 12_000),
                 renderPosition(state, positionBSide, 12_000)
         );
@@ -760,9 +760,9 @@ public class ResearchManager {
                 始终提醒：仅供参考，不构成投资建议。
                 """.formatted(
                 state.getQuery(),
-                truncate(safe(state.getFundamentalsReport()), 2500),
-                truncate(safe(state.getMarketReport()), 2500),
-                truncate(safe(state.getNewsReport()), 2500),
+                safe(state.getFundamentalsReport()),
+                safe(state.getMarketReport()),
+                safe(state.getNewsReport()),
                 renderVerdict(verdict),
                 renderDebate(state == null ? List.of() : state.getDebateTurns(), 6000),
                 evidenceLedgerSummary(state)
@@ -1189,12 +1189,18 @@ public class ResearchManager {
                         .formatted(
                                 item.evidenceId(),
                                 item.dimension().name(),
-                                item.capabilityId(),
-                                item.provider(),
-                                item.sourceRef(),
+                                evidenceMetadata(item.capabilityId(), 160),
+                                evidenceMetadata(item.provider(), 240),
+                                evidenceMetadata(item.sourceRef(), 500),
                                 item.asOf() == null ? "unknown" : item.asOf()))
                 .reduce((left, right) -> left + "\n" + right)
                 .orElse("(no usable structured evidence)");
+    }
+
+    /** 来源全文留在账本；提示词摘要不能用超长 URL 绕过快照预算。 */
+    private String evidenceMetadata(String value, int maxLength) {
+        String normalized = safe(value).replace('\r', ' ').replace('\n', ' ').strip();
+        return normalized.length() <= maxLength ? normalized : normalized.substring(0, maxLength - 3) + "...";
     }
 
     /**

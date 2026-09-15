@@ -6,6 +6,8 @@ MARKET、FUNDAMENTALS、NEWS 使用服务端拥有的工具计划，取证后调
 
 `ReadRequest` 将范围、K 线粒度、财报频率与数量带入 `ExecutionPlan`。当前消息的显式参数优先于模型改写；省略项来自消歧问题。模型只提供参数候选，工具名称仍由后端控制。
 
+原文明确的股票代码或公司别名绑定本轮标的；模型改写成其他股票时停止检索和取证并返回澄清。只改周期或粒度的追问继承只取 K 线的请求，明确增加分析或指标要求才恢复领域分析。
+
 | 请求 | 实际调用约束 |
 |---|---|
 | AAPL 最近一周小时线 | `getIbkrHistoricalBars(AAPL, 1w, 1h)` |
@@ -17,7 +19,9 @@ MARKET、FUNDAMENTALS、NEWS 使用服务端拥有的工具计划，取证后调
 
 ## 证据和业务状态
 
-`OrdinaryEvidence` 与 DEEP 共用 [`EvidenceEnvelopeMapper`](../../stocksage-backend/src/main/java/com/stocksage/service/EvidenceEnvelopeMapper.java) 的来源、标的和哈希解析，`OrdinaryCompletionPolicy` 复用 `ResearchHarness`。没有新增模型 Judge 或自动恢复循环。
+`OrdinaryEvidence` 与 DEEP 共用 [`EvidenceEnvelopeMapper`](../../stocksage-backend/src/main/java/com/stocksage/service/EvidenceEnvelopeMapper.java) 的业务数据、来源、标的和哈希解析，`OrdinaryCompletionPolicy` 复用 `ResearchHarness`。财务响应必须含有业务数值（零值有效）；日期、计数和证券身份不能代替业务数据。K 线至少有一条包含有限开高低收数值的记录才能作为行情证据。没有新增模型 Judge 或自动恢复循环。
+
+DEEP 的财务数据归入基本面快照，市场维度需要自己的行情或技术指标。旧策略 checkpoint 的证据必须在剩余恢复预算内重新取得，预算用尽则返回不评级；恢复次数和辩论授权继续沿用持久化记录。
 
 | 状态 | 确定性判定 |
 |---|---|
@@ -35,6 +39,8 @@ MARKET、FUNDAMENTALS、NEWS 使用服务端拥有的工具计划，取证后调
 每项工具证据按完整 JSON 字段/记录缩减，记录实际字符数、是否纳入、是否裁减与舍弃原因；裁减不能记为完整完成。领域 Agent 只接收有界证据，领域报告也有限长。最终提示词先为近期历史分配空间，并为已命中的 RAG 预留预算；普通工具区段若整体无法装入，明确返回预算错误，不截断证据后继续生成。
 
 Trace 的 `ordinary-evidence` 保存请求和逐项观察，`prompt-budget` 保存实际总字符数、历史字符数与动态上下文字符数。预算使用字符数，不把它当作精确 token 计费。
+
+DEEP 在采集时将每条正文限定为 2,000–4,500 字符，每个维度（包括证据 ID、来源和边界）最多 20,000 字符，三个维度合计最多 60,000 字符。最多追加一项聚焦新闻补证。Bull、Bear 和 Manager 使用同一份有界正文，不再按整段前缀二次截断；引用只能指向快照中实际可见的证据内容。
 
 ## 真实接口评估
 

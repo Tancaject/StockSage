@@ -100,6 +100,8 @@ export function useResearchRun() {
           // error chunk 还需要同步到终止状态
           if (chunk.type === CHUNK_TYPE_ERROR) {
             _finish('error')
+          } else if (chunk.type === 'task-final') {
+            _finish('done')
           }
         },
         onDone() {

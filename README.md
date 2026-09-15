@@ -7,7 +7,7 @@ StockSage 是一个本地可运行的 AI 股票研究工作台，采用“模型
 ## 核心能力
 
 - **上下文意图识别与多 Agent 研究**：结合最近 3 轮对话、LLM、Embedding 与高精度规则，直接选择受控的五类研究路由；MARKET、FUNDAMENTALS、NEWS 路线由后端先确定性取证，再交给无工具领域 Agent 归纳。DEEP 模式要求 Bull/Bear 提交绑定 Evidence ID 的结构化论点；每轮并行完成后，Research Manager 严格判断 `CONTINUE` 或 `STOP`，自适应决定是否继续，服务端只保留 5 轮硬上限，不设置默认轮数或非法输出 fallback。随后由 Manager 匿名逐论点评分、Java 策略锁定评级，再解释裁决并接受运行时 Harness 验收。
-- **可溯源 RAG**：SEC EDGAR 财报经过 Parent-Child 分块、Milvus 向量与 Lucene 标准 BM25 混合检索、RRF 融合和 rerank 后，为回答提供编号引用。
+- **可溯源 RAG**：SEC EDGAR 财报经过 Parent-Child 分块、Milvus 向量与 Lucene 标准 BM25 混合检索、RRF 融合和 rerank 后，为回答提供编号引用。SQL 镜像决定可引用的正文与版本；来源替换、失败清理和历史数据处理见[发布契约](docs/reviews/2026-09-14-code-audit.md#rag-来源发布与清理)。
 - **受控 Skill 与工具**：Skill 当前只接受 `INLINE_DETERMINISTIC` 的 `CAPABILITY` 步骤，按后端 allowlist、预算和 fallback 执行，不承载 Agent、最终回答或后台任务；模型不能调用写入知识库的工具。
 - **后台研究任务**：Redis Stream、MySQL checkpoint 与 SSE 回放支持后台执行、断线恢复和进度追踪；证据不足时返回 `NOT_RATED`。
 - **投研工作台**：提供自选股、K 线、单标的与事件研究、报告版本/审核，以及 IBKR 只读持仓诊断；多标的对比在真实执行器完成前明确标记为未开放。
@@ -68,6 +68,8 @@ Copy-Item stocksage-backend\src\main\resources\application-local.properties.exam
 ```
 
 在 `application-local.properties` 中填写 DashScope API Key 和 MySQL 密码。真实密钥只放在环境变量或本地配置中；使用管理、入库或评估接口时，还需设置 `STOCKSAGE_ADMIN_TOKEN`。
+
+启用 Phoenix 后默认只导出步骤类型、文本长度、计数、耗时与 traceId，不导出用户 ID、会话 ID 或正文。需要查看问题、工具结果和路由说明原文时，显式设置 `STOCKSAGE_PHOENIX_CAPTURE_CONTENT=true`；这些内容可能包含用户隐私，会写入所配置的观测服务。选项统一见[后端配置](stocksage-backend/src/main/resources/application.properties)。
 
 ### 2. 启动基础设施
 
