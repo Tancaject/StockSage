@@ -1,6 +1,8 @@
 package com.stocksage.model.dto;
 
-import com.stocksage.harness.EvidenceLedger;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.stocksage.agent.intent.TimeSensitivity;
+import com.stocksage.evidence.EvidenceLedger;
 import com.stocksage.harness.HarnessModels.HarnessSnapshot;
 import com.stocksage.model.dto.DebateModels.DebateTurn;
 import com.stocksage.model.dto.DebateModels.DebateVerdict;
@@ -26,8 +28,20 @@ import java.util.List;
 @AllArgsConstructor
 public class AnalysisState {
 
+    /** 当前执行权只在内存中传递；恢复时重新绑定，不能从 checkpoint 复用旧租约。 */
+    @JsonIgnore
+    private ModelInvocationContext modelInvocationContext;
+
     /** 用户原始研究问题，贯穿分析师、辩论和最终报告。 */
     private String query;
+
+    /** 提交时已识别的时间要求；旧 checkpoint 缺失时保持未知。 */
+    @Builder.Default
+    private TimeSensitivity timeSensitivity = TimeSensitivity.UNSPECIFIED;
+
+    public TimeSensitivity getTimeSensitivity() {
+        return timeSensitivity == null ? TimeSensitivity.UNSPECIFIED : timeSensitivity;
+    }
 
     /** 本轮研究的主证券代码；哈希、报告版本和工具预取都以它为标的。 */
     private String primaryTicker;

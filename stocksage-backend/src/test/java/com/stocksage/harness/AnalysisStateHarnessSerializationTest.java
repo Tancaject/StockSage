@@ -1,9 +1,11 @@
 package com.stocksage.harness;
 
+import com.stocksage.evidence.EvidenceLedger;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.harness.HarnessModels.EvidenceDimension;
-import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
-import com.stocksage.harness.HarnessModels.EvidenceStatus;
+import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
+import com.stocksage.evidence.EvidenceModels.EvidenceEnvelope;
+import com.stocksage.evidence.EvidenceModels.EvidenceStatus;
 import com.stocksage.harness.HarnessModels.HarnessDecision;
 import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.HarnessPhase;
@@ -11,9 +13,10 @@ import com.stocksage.harness.HarnessModels.HarnessSnapshot;
 import com.stocksage.harness.HarnessModels.RecoveryAction;
 import com.stocksage.harness.HarnessModels.RecoveryLifecycle;
 import com.stocksage.harness.HarnessModels.SuspendedRecovery;
-import com.stocksage.harness.HarnessModels.TargetIdentity;
+import com.stocksage.evidence.EvidenceModels.TargetIdentity;
 import com.stocksage.harness.HarnessModels.ViolationCode;
 import com.stocksage.model.dto.AnalysisState;
+import com.stocksage.model.dto.ModelInvocationContext;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -63,12 +66,14 @@ class AnalysisStateHarnessSerializationTest {
                 .evidenceLedger(ledger)
                 .build();
 
+        original.setModelInvocationContext(new ModelInvocationContext(42L, 2, "current-owner", "trace-42", "snapshot-test", System.currentTimeMillis() + 60_000));
         String json = objectMapper.writeValueAsString(original);
         AnalysisState restored = objectMapper.readValue(json, AnalysisState.class);
 
         assertThat(restored.getEvidenceLedger()).isEqualTo(ledger);
         assertThat(json).contains("\"payloadHash\":\"payload-hash\"");
-        assertThat(json).doesNotContain("rawPayload");
+        assertThat(json).doesNotContain("rawPayload", "modelInvocationContext", "current-owner");
+        assertThat(restored.getModelInvocationContext()).isNull();
     }
 
     @Test

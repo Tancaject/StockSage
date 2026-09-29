@@ -1,5 +1,8 @@
 package com.stocksage.agent;
 
+import com.stocksage.agent.intent.FineIntent;
+import com.stocksage.agent.intent.IntentSignalSource;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +31,7 @@ import java.util.Map;
  * @param sourceScores 各有限识别来源的融合分数
  * @param needsClarification 是否建议先向用户澄清
  * @param reasonCodes 有界、可审计的理由代码
+ * @param signalDiagnostics 各实际识别来源的最高置信候选，不包含自由文本或实体
  */
 public record RoutingDecisionMetadata(
         RoutingDecisionSource decisionSource,
@@ -47,7 +51,8 @@ public record RoutingDecisionMetadata(
         Map<String, String> entities,
         Map<String, Double> sourceScores,
         boolean needsClarification,
-        List<String> reasonCodes
+        List<String> reasonCodes,
+        List<SignalSnapshot> signalDiagnostics
 ) {
     public RoutingDecisionMetadata {
         decisionSource = decisionSource == null ? RoutingDecisionSource.DETERMINISTIC_FALLBACK : decisionSource;
@@ -69,6 +74,22 @@ public record RoutingDecisionMetadata(
         reasonCodes = reasonCodes == null
                 ? List.of()
                 : reasonCodes.stream().map(value -> bounded(value, 64)).filter(value -> !value.isBlank()).limit(12).toList();
+        signalDiagnostics = signalDiagnostics == null ? List.of() : List.copyOf(signalDiagnostics);
+    }
+
+    /** 保留十八字段构造方式；旧调用没有逐来源候选观测。 */
+    public RoutingDecisionMetadata(
+            RoutingDecisionSource decisionSource, String rawRoute, PlanRoute route,
+            String intentSummary, String rationale, double confidence, List<String> matchedSignals,
+            int ragHitCount, String fallbackReason, long durationMs,
+            String fineIntent, String intentGroup, String timeSensitivity, String analysisDepth,
+            Map<String, String> entities, Map<String, Double> sourceScores,
+            boolean needsClarification, List<String> reasonCodes
+    ) {
+        this(decisionSource, rawRoute, route, intentSummary, rationale, confidence,
+                matchedSignals, ragHitCount, fallbackReason, durationMs,
+                fineIntent, intentGroup, timeSensitivity, analysisDepth, entities, sourceScores,
+                needsClarification, reasonCodes, List.of());
     }
 
     /** 保留原有十字段构造方式，避免已有 Trace/测试调用在迁移期失效。 */
@@ -126,8 +147,17 @@ public record RoutingDecisionMetadata(
         attributes.put("sourceScores", sourceScores);
         attributes.put("needsClarification", needsClarification);
         attributes.put("reasonCodes", reasonCodes);
+        attributes.put("signalDiagnostics", signalDiagnostics.stream().map(signal -> Map.of(
+                "source", signal.source().name(),
+                "targetRoute", signal.targetRoute().name(),
+                "fineIntent", signal.fineIntent().name(),
+                "confidence", signal.confidence())).toList());
         return Map.copyOf(attributes);
     }
+
+    /** 诊断只允许有限枚举和分数，不能携带识别器的 prompt、实体、理由或消歧问题。 */
+    public record SignalSnapshot(IntentSignalSource source, PlanRoute targetRoute,
+                                 FineIntent fineIntent, double confidence) {}
 
     private static Map<String, String> boundedEntities(Map<String, String> values) {
         if (values == null || values.isEmpty()) {

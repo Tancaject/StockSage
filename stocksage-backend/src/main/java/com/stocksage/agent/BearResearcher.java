@@ -1,5 +1,7 @@
 package com.stocksage.agent;
 
+import com.stocksage.research.ResearchDebateService;
+
 import com.stocksage.model.dto.AnalysisState;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -45,7 +47,11 @@ public class BearResearcher {
         String prompt = round <= OPENING_ROUND
                 ? renderOpeningPrompt(state)
                 : renderRebuttalPrompt(state, round);
-        return chatClient.prompt().user(prompt).stream().content();
+        var request = chatClient.prompt().user(prompt);
+        if (state.getModelInvocationContext() != null) {
+            request.advisors(a -> a.param(ModelInvocationAdvisor.CONTEXT_KEY, state.getModelInvocationContext()));
+        }
+        return request.stream().content();
     }
 
     /**

@@ -144,7 +144,7 @@ public final class IntentFusionPolicy {
         return fuse(request, signals == null ? List.of() : java.util.Arrays.asList(signals));
     }
 
-    private EnumMap<IntentSignalSource, IntentSignal> bestBySource(List<IntentSignal> signals) {
+    static EnumMap<IntentSignalSource, IntentSignal> bestBySource(List<IntentSignal> signals) {
         EnumMap<IntentSignalSource, IntentSignal> result = new EnumMap<>(IntentSignalSource.class);
         for (IntentSignal signal : signals) {
             result.merge(signal.source(), signal,

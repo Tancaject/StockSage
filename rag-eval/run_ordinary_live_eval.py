@@ -1,6 +1,6 @@
 """Exercise ordinary /api/chat/stream requests and verify persisted execution traces.
 
-This is a labeled execution-contract diagnostic, not an LLM answer-quality judge.
+Execution checks and separately bound human answer reviews remain distinct.
 Credentials are read from the environment and are never included in the output.
 """
 from __future__ import annotations
@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from eval_http import StockSageClient, LiveEvalError
+from ordinary_answer_quality import capture_answer
 
 HERE = Path(__file__).resolve().parent
 
@@ -43,9 +44,15 @@ def assess(case: dict, events: list[dict], trace: dict) -> dict:
         checks["call:" + expected["tool"]] = expected["args"] in parsed
     if case.get("no_tools"):
         checks["no_tools"] = not calls and not any(item.get("stepKind") == "capability" for item in attrs)
-    if trace.get("taskOutcome") == "COMPLETED" and case.get("calls"):
+    if case.get("require_tool_success") or (trace.get("taskOutcome") == "COMPLETED" and case.get("calls")):
         checks["tool_success"] = bool(calls) and all(
             call.get("attributes", {}).get("outcome") == "SUCCESS" for call in calls)
+    for expected in case.get("freshness", []):
+        matches = [row for row in evidence.get("observations", []) if row.get("tool") == expected["tool"]]
+        checks["freshness:" + expected["tool"]] = bool(matches) and all(
+            row.get("status") == "AVAILABLE" and row.get("citable")
+            and row.get("freshnessStatus") == expected["status"]
+            and row.get("freshnessReason") == expected["reason"] for row in matches)
     answer = "".join(event.get("content", "") for event in events if event.get("type") == "answer")
     checks["answer"] = bool(answer.strip())
     if case.get("require_citations"):
@@ -56,7 +63,8 @@ def assess(case: dict, events: list[dict], trace: dict) -> dict:
             "raw_route": route.get("rawRoute"), "final_route": route.get("route"),
             "models": [{key: event.get(key) for key in ("modelName", "modelTier")}
                        for event in events if event.get("type") == "model"],
-            "actual_outcome": trace.get("taskOutcome"), "trace": trace, "events": events}
+            "actual_outcome": trace.get("taskOutcome"), "trace": trace, "events": events,
+            **capture_answer(case, answer)}
 
 
 def main() -> int:
@@ -73,7 +81,7 @@ def main() -> int:
         parser.error("cases must be nonempty with unique ids")
     canonical = json.dumps(cases, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     report = {"schema": "ordinary_execution_eval_v1", "evidence_kind": "GOLDEN_SET",
-              "evaluator": "ordinary-http-trace-v1", "generated_at": datetime.now(timezone.utc).isoformat(),
+              "evaluator": "ordinary-http-trace-v2", "generated_at": datetime.now(timezone.utc).isoformat(),
               "dataset_sha256": hashlib.sha256(canonical.encode()).hexdigest(), "sample_count": len(cases),
               "status": "NOT_RUN", "answer_quality": "NO_DATA", "cases": []}
     client = StockSageClient(args.base_url, args.timeout_seconds)

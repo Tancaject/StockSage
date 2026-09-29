@@ -1,5 +1,6 @@
 import json
 import unittest
+from pathlib import Path
 
 from run_ordinary_live_eval import assess
 
@@ -20,6 +21,26 @@ class OrdinaryLiveEvalTest(unittest.TestCase):
         self.assertFalse(assess(case, events, trace)["passed"])
         steps[1]["actionInput"] = '["AAPL","1w","1h"]'
         events[0]["content"] = "数据 [E9]"
+        self.assertFalse(assess(case, events, trace)["passed"])
+
+    def test_market_case_requires_qualified_time_gap_and_successful_citable_data(self):
+        case = json.loads((Path(__file__).parent / "ordinary_live_cases.jsonl").read_text(encoding="utf-8").splitlines()[0])
+        observation = {"id": "E1", "tool": "getIbkrHistoricalBars", "status": "AVAILABLE", "citable": True,
+                       "freshnessStatus": "UNKNOWN", "freshnessReason": "MARKET_SESSION_UNVERIFIED"}
+        call = {"action": "getIbkrHistoricalBars", "actionInput": json.dumps(case["calls"][0]["args"]),
+                "attributes": {"stepKind": "tool", "outcome": "SUCCESS"}}
+        trace = {"status": "success", "taskOutcome": "DEGRADED", "steps": [
+            {"attributes": {"kind": "routing-decision", "route": "MARKET"}}, call,
+            {"attributes": {"kind": "ordinary-evidence", "request": case["request"], "observations": [observation]}}]}
+        events = [{"type": "answer", "content": "已有行情 [E1]，最新交易周期尚未确认。"}]
+        self.assertTrue(assess(case, events, trace)["passed"])
+        for key, value in (("freshnessStatus", "FRESH"), ("freshnessReason", "TIME_CONTRACT_MISSING"),
+                           ("status", "FAILED"), ("citable", False)):
+            original = observation[key]
+            observation[key] = value
+            self.assertFalse(assess(case, events, trace)["passed"])
+            observation[key] = original
+        call["attributes"]["outcome"] = "FAILED"
         self.assertFalse(assess(case, events, trace)["passed"])
 
 

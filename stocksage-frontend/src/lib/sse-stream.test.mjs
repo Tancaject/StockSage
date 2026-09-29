@@ -53,8 +53,9 @@ test('chat and task streams preserve request options, event cursors and completi
       ': heartbeat\n\ndata: not-json\n\nid: 9-1\ndata: {"type":"task-final"}\n\ndata: [DONE]\n\n',
     ]) }
   })
+  const chatRequest = { message: 'query' }
   for (const start of [
-    callbacks => streamChat({ message: 'query' }, callbacks),
+    callbacks => streamChat(chatRequest, callbacks),
     callbacks => openTaskEvents('task/1', '8-0', callbacks.onChunk, callbacks.onDone, callbacks.onError),
   ]) {
     const chunks = []
@@ -62,11 +63,31 @@ test('chat and task streams preserve request options, event cursors and completi
     assert.deepEqual(chunks, [{ type: 'task-final', entryId: '9-1' }])
   }
   assert.equal(requests[0].options.method, 'POST')
-  assert.deepEqual(JSON.parse(requests[0].options.body), { message: 'query' })
+  assert.deepEqual(JSON.parse(requests[0].options.body), chatRequest)
   assert.equal(requests[0].options.headers.get('X-XSRF-TOKEN'), 'test-token')
   assert.equal(requests[1].options.method, 'GET')
   assert.equal(requests[1].url, '/api/research-tasks/task%2F1/events')
   assert.equal(requests[1].options.headers.get('Last-Event-ID'), '8-0')
+})
+
+test('chat submission ids persist for retries and change for new request objects', async t => {
+  globalThis.document = { cookie: 'XSRF-TOKEN=test-token' }
+  t.after(() => { delete globalThis.document })
+  const bodies = []
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    bodies.push(JSON.parse(options.body))
+    return { ok: true, body: responseBody([]) }
+  })
+  const request = { message: 'query' }
+  const newRun = { message: 'query' }
+  const explicit = { message: 'query', submissionId: 'existing-submission' }
+  for (const input of [request, request, newRun, explicit]) {
+    await new Promise((resolve, reject) => streamChat(input, { onDone: resolve, onError: reject }))
+  }
+  assert.match(request.submissionId, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
+  assert.notEqual(newRun.submissionId, request.submissionId)
+  assert.equal(explicit.submissionId, 'existing-submission')
+  assert.deepEqual(bodies, [request, request, newRun, explicit])
 })
 
 test('stream idle timeouts keep endpoint messages while explicit aborts remain silent', async t => {

@@ -26,6 +26,7 @@ import java.util.List;
  * @param expectedDecisionSource 可选的路由来源枚举名；为空时不参与单例通过判定
  * @param requireNoFallback 是否要求本例不得使用确定性回退
  * @param expectedResolvedQueryContains 可选的消歧结果片段；提供时要求执行计划的 resolvedQuery 包含它
+ * @param expectedClarification 可选的路由元数据澄清标签（含 Coordinator 安全覆盖），不含 ReadRequest 参数澄清
  */
 public record PlannerEvalCase(
         @NotBlank String id,
@@ -39,7 +40,8 @@ public record PlannerEvalCase(
         String expectedFineIntent,
         String expectedDecisionSource,
         boolean requireNoFallback,
-        String expectedResolvedQueryContains
+        String expectedResolvedQueryContains,
+        Boolean expectedClarification
 ) {
     /**
      * 将动作断言复制为不可变列表，防止评测期间被外部修改。
@@ -56,6 +58,7 @@ public record PlannerEvalCase(
      * @param expectedDecisionSource 期望路由来源
      * @param requireNoFallback 是否禁止回退
      * @param expectedResolvedQueryContains 期望消歧结果包含的片段
+     * @param expectedClarification 期望是否请求澄清
      */
     public PlannerEvalCase {
         requiredActions = requiredActions == null ? List.of() : List.copyOf(requiredActions);
@@ -66,6 +69,18 @@ public record PlannerEvalCase(
         expectedFineIntent = normalizeOptionalExpectation(expectedFineIntent);
         expectedDecisionSource = normalizeOptionalExpectation(expectedDecisionSource);
         expectedResolvedQueryContains = normalizeOptionalExpectation(expectedResolvedQueryContains);
+    }
+
+    /** 保留十二字段构造方式；旧样例没有澄清标签。 */
+    public PlannerEvalCase(
+            String id, String query, int ragHitCount, PlanRoute expectedRoute,
+            List<PlanAction> requiredActions, List<PlanAction> forbiddenActions, boolean critical,
+            List<String> recentTurns, String expectedFineIntent, String expectedDecisionSource,
+            boolean requireNoFallback, String expectedResolvedQueryContains
+    ) {
+        this(id, query, ragHitCount, expectedRoute, requiredActions, forbiddenActions, critical,
+                recentTurns, expectedFineIntent, expectedDecisionSource, requireNoFallback,
+                expectedResolvedQueryContains, null);
     }
 
     /** 保留最初 V2 十一字段构造方式，未声明消歧断言的调用保持原语义。 */
@@ -106,7 +121,8 @@ public record PlannerEvalCase(
                 || expectedFineIntent != null
                 || expectedDecisionSource != null
                 || requireNoFallback
-                || expectedResolvedQueryContains != null;
+                || expectedResolvedQueryContains != null
+                || expectedClarification != null;
     }
 
     private static String normalizeOptionalExpectation(String value) {

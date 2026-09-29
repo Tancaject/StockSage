@@ -1,0 +1,25 @@
+CONSOLIDATED STATEMENTS OF INCOME
+(In millions, except per share amounts)
+Quarter Ended December 31, Year Ended December 31,
+2024 2025 2024 2025
+(unaudited) (unaudited)
+Revenues $ 96,469 $ 113,828 $ 350,018 $ 402,836
+Costs and expenses:
+Cost of revenues 40,613 45,766 146,306 162,535
+Research and development 13,116 18,572 49,326 61,087
+Sales and marketing 7,363 8,215 27,808 28,693
+General and administrative 4,405 5,341 14,188 21,482
+Total costs and expenses 65,497 77,894 237,628 273,797
+Income from operations 30,972 35,934 112,390 129,039
+Other income (expense), net 1,271 3,183 7,425 29,787
+Income before income taxes 32,243 39,117 119,815 158,826
+Provision for income taxes 5,707 4,662 19,697 26,656
+Net income $ 26,536 $ 34,455 $ 100,118 $ 132,170
+Basic net income per share $ 2.17 $ 2.85 $ 8.13 $ 10.91
+Diluted net income per share $ 2.15 $ 2.82 $ 8.04 $ 10.81
+Number of shares used in basic net income per share
+calculation 12,228 12,073 12,319 12,116
+Number of shares used in diluted net income per share
+calculation 12,348 12,228 12,447 12,230
+5
+

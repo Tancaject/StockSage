@@ -18,13 +18,16 @@ import { openSseStream } from '../lib/sse-stream.js'
 /**
  * 发送对话消息，接收 SSE 流式回复。
  *
- * @param {Object} request       请求体：{ conversationId, message }
+ * 缺少 submissionId 时写回请求对象；重试复用同一对象，主动新运行使用新对象。
+ *
+ * @param {Object} request       可修改的请求体：{ conversationId, message, submissionId? }
  * @param {Function} onChunk     每收到一个 SSE 数据块时的回调：(chunk: { type, content, modelTier, modelName, traceId, entryId }) => void
  * @param {Function} onDone      流结束时的回调
  * @param {Function} onError     出错时的回调
  * @returns {AbortController}    返回控制器，调用 .abort() 可中断请求
  */
 export function streamChat(request, callbacks) {
+  request.submissionId ??= crypto.randomUUID()
   return openSseStream(`${BASE_URL}/chat/stream`, {
     method: 'POST',
     headers: { Accept: 'text/event-stream', 'Content-Type': 'application/json' },

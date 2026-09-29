@@ -36,4 +36,9 @@ public record IntentRecognitionResult(
     public boolean llmOnly() {
         return signals.size() == 1 && signals.get(0).source() == IntentSignalSource.LLM;
     }
+
+    /** 与融合策略共用候选选择；每个来源取最高置信信号，同分保留先到的信号。 */
+    public List<IntentSignal> bestSignals() {
+        return List.copyOf(IntentFusionPolicy.bestBySource(signals).values());
+    }
 }

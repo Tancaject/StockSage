@@ -12,11 +12,11 @@ import com.stocksage.repository.InvestmentReportVersionRepository;
 import com.stocksage.repository.MessageRepository;
 import com.stocksage.repository.ResearchTaskRepository;
 import com.stocksage.repository.UserAccountRepository;
-import com.stocksage.service.ConversationMessageService;
-import com.stocksage.service.InvestmentReportPersistedEvent;
-import com.stocksage.service.ResearchTaskLeaseService;
-import com.stocksage.service.ResearchTaskPublicationTransaction;
-import com.stocksage.service.ResearchTaskService;
+import com.stocksage.conversation.ConversationMessageService;
+import com.stocksage.research.InvestmentReportPersistedEvent;
+import com.stocksage.research.ResearchTaskLeaseService;
+import com.stocksage.research.ResearchTaskPublicationTransaction;
+import com.stocksage.research.ResearchTaskService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +61,7 @@ import static org.mockito.Mockito.mock;
         "spring.datasource.hikari.maximum-pool-size=4"
 })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@org.springframework.boot.context.properties.EnableConfigurationProperties(com.stocksage.config.ModelTokenBudgetProperties.class)
 @ContextConfiguration(classes = StockSageApplication.class)
 @Import({
         ResearchTaskPublicationTransaction.class,

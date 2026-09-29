@@ -1,11 +1,18 @@
 package com.stocksage.agent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.agent.intent.FineIntent;
+import com.stocksage.agent.intent.IntentDecision;
+import com.stocksage.agent.intent.IntentGroup;
+import com.stocksage.agent.intent.IntentRecognitionResult;
+import com.stocksage.agent.intent.IntentSignal;
+import com.stocksage.agent.intent.IntentSignalSource;
 import com.stocksage.service.TickerResolutionService;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -74,6 +81,7 @@ class CoordinatorPlanTest {
         assertThat(plan.routingDecision().decisionSource()).isEqualTo(RoutingDecisionSource.DETERMINISTIC_FALLBACK);
         assertThat(plan.routingDecision().matchedSignals()).contains("direct-rule", "rag-hit");
         assertThat(plan.routingDecision().fallbackReason()).isEqualTo("EXPLICIT_DETERMINISTIC");
+        assertThat(plan.routingDecision().signalDiagnostics()).isEmpty();
     }
 
     @Test
@@ -161,6 +169,13 @@ class CoordinatorPlanTest {
         assertThat(plan.routingDecision().rationale()).isEqualTo("用户询问最新事件");
         assertThat(plan.routingDecision().confidence()).isBetween(0.7, 1.0);
         assertThat(plan.routingDecision().sourceScores()).containsKeys("LLM", "PATTERN");
+        assertThat(plan.routingDecision().signalDiagnostics())
+                .anySatisfy(signal -> {
+                    assertThat(signal.source()).isEqualTo(IntentSignalSource.LLM);
+                    assertThat(signal.targetRoute()).isEqualTo(PlanRoute.NEWS);
+                    assertThat(signal.confidence()).isEqualTo(0.91);
+                })
+                .anySatisfy(signal -> assertThat(signal.source()).isEqualTo(IntentSignalSource.PATTERN));
         assertThat(plan.routingDecision().matchedSignals()).anyMatch(value -> value.startsWith("llm="));
         assertThat(plan.routingDecision().toAttributes())
                 .containsEntry("rawRoute", "NEWS")
@@ -168,6 +183,37 @@ class CoordinatorPlanTest {
                 .containsEntry("rationale", "用户询问最新事件")
                 .containsEntry("ragHitCount", 0);
         assertThat(plan.routingDecision().fallbackReason()).isEmpty();
+    }
+
+    @Test
+    void diagnosticCandidatesReuseHighestPerSourceAndFirstArrivalTieRule() throws Exception {
+        var decision = new IntentDecision(FineIntent.NEWS_EVENT, IntentGroup.NEWS, PlanRoute.NEWS,
+                0.9, null, null, Map.of(), "最新消息", Map.of(), false, List.of());
+        IntentSignal embedding = diagnosticSignal(IntentSignalSource.EMBEDDING, PlanRoute.NEWS, 0.92);
+        IntentSignal firstBest = diagnosticSignal(IntentSignalSource.LLM, PlanRoute.MARKET, 0.85);
+        var recognition = new IntentRecognitionResult(decision, "MARKET", true, "", List.of(
+                embedding,
+                diagnosticSignal(IntentSignalSource.LLM, PlanRoute.DIRECT, 0.4),
+                firstBest,
+                diagnosticSignal(IntentSignalSource.LLM, PlanRoute.NEWS, 0.85)), "", 1);
+
+        ExecutionPlan plan = coordinator.planRecognized(recognition, "最新消息", 0);
+
+        assertThat(recognition.bestSignals()).containsExactly(firstBest, embedding);
+        assertThat(plan.route()).isEqualTo(PlanRoute.NEWS);
+        assertThat(plan.routingDecision().signalDiagnostics()).containsExactly(
+                new RoutingDecisionMetadata.SignalSnapshot(IntentSignalSource.LLM, PlanRoute.MARKET,
+                        FineIntent.NEWS_EVENT, 0.85),
+                new RoutingDecisionMetadata.SignalSnapshot(IntentSignalSource.EMBEDDING, PlanRoute.NEWS,
+                        FineIntent.NEWS_EVENT, 0.92));
+        assertThat(new ObjectMapper().writeValueAsString(plan.routingDecision().signalDiagnostics()))
+                .doesNotContain("private-entity", "private-resolved-query", "private-rationale", "private-reason");
+    }
+
+    private IntentSignal diagnosticSignal(IntentSignalSource source, PlanRoute route, double confidence) {
+        return new IntentSignal(FineIntent.NEWS_EVENT, IntentGroup.NEWS, route.name(), route, source,
+                confidence, null, null, Map.of(), Map.of("ticker", "private-entity"),
+                "private-resolved-query", "private-rationale", List.of("private-reason"));
     }
 
     @Test

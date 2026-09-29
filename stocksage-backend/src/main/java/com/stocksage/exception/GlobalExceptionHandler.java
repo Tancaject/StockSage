@@ -149,12 +149,20 @@ public class GlobalExceptionHandler {
      * <p>详细堆栈只写入服务端日志，响应体避免把内部实现细节泄露给前端。</p>
      *
      * @param ex 未被更具体处理器捕获的异常
-     * @return HTTP 500 通用错误响应
+     * @return 包装的容量拒绝返回 HTTP 503；其余异常返回 HTTP 500 通用错误响应
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneral(Exception ex) {
+        ResearchCapacityExceededException capacity = ResearchCapacityExceededException.find(ex);
+        if (capacity != null) return handleCapacity(capacity);
         log.error("Unhandled exception", ex);
         return respond(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+    }
+
+    @ExceptionHandler(ResearchCapacityExceededException.class)
+    public ResponseEntity<ErrorResponse> handleCapacity(ResearchCapacityExceededException ex) {
+        log.warn("Request execution not admitted: {}", ex.getMessage());
+        return respond(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
     }
 
     /**

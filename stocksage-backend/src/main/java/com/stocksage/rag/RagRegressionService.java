@@ -1,7 +1,7 @@
 package com.stocksage.rag;
 
 import com.stocksage.repository.VectorDocumentRepository;
-import com.stocksage.service.KnowledgeService;
+import com.stocksage.knowledge.KnowledgeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
 import org.springframework.stereotype.Service;

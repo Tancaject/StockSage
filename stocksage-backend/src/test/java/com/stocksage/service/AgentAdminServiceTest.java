@@ -7,14 +7,15 @@ import com.stocksage.capability.CapabilityDescriptor;
 import com.stocksage.capability.CapabilityRegistry;
 import com.stocksage.mcp.McpCapabilityProvider;
 import com.stocksage.mcp.McpProperties;
-import com.stocksage.model.entity.AgentTrace;
+import com.stocksage.repository.AgentTraceRepository.LatencySample;
 import com.stocksage.repository.AgentTraceRepository;
 import com.stocksage.skill.SkillDefinition;
 import com.stocksage.skill.SkillRegistry;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
@@ -26,6 +27,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 class AgentAdminServiceTest {
 
@@ -68,10 +70,14 @@ class AgentAdminServiceTest {
         Counter.builder("stocksage.agent.tool.executions")
                 .tag("kind", "capability").tag("status", "FAILED")
                 .register(meterRegistry).increment();
-        AgentTrace fastTrace = successfulTrace("trace-fast", 400);
-        AgentTrace slowTrace = successfulTrace("trace-slow", 1200);
-        when(traceRepository.findAll(org.mockito.ArgumentMatchers.any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of(slowTrace, fastTrace)));
+        LatencySample fastTrace = sample("success", LocalDateTime.now(), 400L);
+        LatencySample slowTrace = sample("SUCCESS", LocalDateTime.now(), 1200L);
+        var samples = List.of(slowTrace, fastTrace,
+                sample("error", LocalDateTime.now(), 99999L),
+                sample("success", LocalDateTime.now().minusYears(1), 99999L),
+                sample("success", LocalDateTime.now(), null));
+        when(traceRepository.findLatencySamples(org.mockito.ArgumentMatchers.any(Pageable.class)))
+                .thenReturn(samples);
         AgentAdminService service = new AgentAdminService(
                 skills, capabilities, mcp, properties, meterRegistry, traceRepository, "latest-news-mcp"
         );
@@ -96,14 +102,21 @@ class AgentAdminServiceTest {
                 .extracting(AgentAdminService.CapabilityView::metricsStatus)
                 .isEqualTo("NO_DATA");
         assertThat(json).doesNotContain("secret.example", "provider-internal", "native-internal", "token=bad");
+        verify(traceRepository).findLatencySamples(PageRequest.of(0, 500,
+                Sort.by(Sort.Direction.DESC, "createdAt")));
+        when(traceRepository.findLatencySamples(org.mockito.ArgumentMatchers.any(Pageable.class)))
+                .thenReturn(List.of());
+        var empty = service.runtime().agentE2e();
+        assertThat(empty.status()).isEqualTo("NO_DATA");
+        assertThat(empty.sampleCount()).isZero();
+        assertThat(empty.p95DurationMs()).isNull();
     }
 
-    private static AgentTrace successfulTrace(String traceId, long durationMs) {
-        AgentTrace trace = new AgentTrace();
-        trace.setTraceId(traceId);
-        trace.setStatus("success");
-        trace.setDurationMs(durationMs);
-        trace.setCreatedAt(LocalDateTime.now().minusSeconds(1));
-        return trace;
+    private static LatencySample sample(String status, LocalDateTime createdAt, Long durationMs) {
+        LatencySample sample = mock(LatencySample.class);
+        when(sample.getStatus()).thenReturn(status);
+        when(sample.getCreatedAt()).thenReturn(createdAt);
+        when(sample.getDurationMs()).thenReturn(durationMs);
+        return sample;
     }
 }

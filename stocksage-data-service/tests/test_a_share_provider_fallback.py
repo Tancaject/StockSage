@@ -51,7 +51,12 @@ if importlib.util.find_spec("bs4") is None:
 
 fake_ddg = types.ModuleType("duckduckgo_search")
 fake_ddg.DDGS = object
-sys.modules.setdefault("duckduckgo_search", fake_ddg)
+if importlib.util.find_spec("duckduckgo_search") is None:
+    fake_ddg_errors = types.ModuleType("duckduckgo_search.exceptions")
+    fake_ddg_errors.RatelimitException = type("RatelimitException", (Exception,), {})
+    fake_ddg_errors.TimeoutException = type("TimeoutException", (Exception,), {})
+    sys.modules.setdefault("duckduckgo_search", fake_ddg)
+    sys.modules.setdefault("duckduckgo_search.exceptions", fake_ddg_errors)
 
 fake_dotenv = types.ModuleType("dotenv")
 fake_dotenv.load_dotenv = lambda *args, **kwargs: False
@@ -126,7 +131,7 @@ class AShareProviderFallbackTest(unittest.TestCase):
             "period": "daily",
             "count": 1,
             "provider": "akshare",
-            "data": [{"date": "2026-05-29", "close": 1510.0}],
+            "data": [{"date": "2026-05-29", "open": 1500.0, "high": 1520.0, "low": 1490.0, "close": 1510.0}],
         }
 
         with patch.object(stock.ak_svc, "get_a_share_kline", return_value=ak_payload, create=True) as ak_call:
@@ -137,6 +142,7 @@ class AShareProviderFallbackTest(unittest.TestCase):
         self.assertEqual(result["market"], "A_SHARE")
         self.assertEqual(result["resolvedCode"], "sh.600519")
         self.assertEqual(result["provider"], "akshare")
+        self.assertEqual(result["status"], "SUCCESS")
         self.assertNotIn("fallbackProvider", result)
 
     def test_a_share_kline_falls_back_to_baostock_when_akshare_fails(self):
@@ -144,7 +150,7 @@ class AShareProviderFallbackTest(unittest.TestCase):
             "code": "sh.600519",
             "period": "daily",
             "count": 1,
-            "data": [{"date": "2026-05-29", "close": "1510.0"}],
+            "data": [{"date": "2026-05-29", "open": "1500.0", "high": "1520.0", "low": "1490.0", "close": "1510.0"}],
         }
 
         with patch.object(stock.ak_svc, "get_a_share_kline", side_effect=RuntimeError("akshare timeout"), create=True):
@@ -153,6 +159,7 @@ class AShareProviderFallbackTest(unittest.TestCase):
 
         fallback_call.assert_called_once_with("sh.600519", "daily", 5)
         self.assertEqual(result["provider"], "baostock")
+        self.assertEqual(result["status"], "SUCCESS")
         self.assertEqual(result["primaryProvider"], "akshare")
         self.assertEqual(result["fallbackProvider"], "baostock")
         self.assertIn("akshare timeout", result["primaryProviderError"])

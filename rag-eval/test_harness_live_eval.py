@@ -45,7 +45,7 @@ def trace_with(*decisions):
             ),
             "recoveryLifecycle": lifecycle,
             "policyId": "deep-equity-v1",
-            "policyVersion": "5",
+            "policyVersion": "6",
             "phase": phase,
             "decision": outcome,
             "policyAllowsRecommendation": outcome == "PASS",
@@ -71,7 +71,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
             "case_count": 30,
             "dataset_sha256": dataset_hash,
             "policy_id": "deep-equity-v1",
-            "policy_version": "5",
+            "policy_version": "6",
         }
 
     def live_case(self, case_id="live-1", ticker="AAPL", timeout_seconds=30):
@@ -691,7 +691,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
                 "decisions": [
                     {
                         "policy_id": "deep-equity-v1",
-                        "policy_version": 5,
+                        "policy_version": 6,
                     }
                 ],
             }
@@ -766,11 +766,11 @@ class HarnessLiveEvalTest(unittest.TestCase):
                     "decisions": [
                         {
                             "policy_id": "deep-equity-v1",
-                            "policy_version": "5",
+                            "policy_version": "6",
                         },
                         {
                             "policy_id": "deep-equity-v1",
-                            "policy_version": 5,
+                            "policy_version": 6,
                         },
                     ]
                 },
@@ -778,7 +778,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
             ]
         )
         self.assertEqual(["deep-equity-v1"], result["policy_ids"])
-        self.assertEqual(["5"], result["policy_versions"])
+        self.assertEqual(["6"], result["policy_versions"])
 
     def test_tool_actions_only_include_explicit_tool_steps(self):
         steps = [
@@ -837,7 +837,7 @@ class HarnessLiveEvalTest(unittest.TestCase):
             self.release_manifest(),
             {
                 "policy_ids": ["deep-equity-v1"],
-                "policy_versions": ["1"],
+                "policy_versions": ["5"],
             },
         )
         self.assertEqual(["live_policy_version_mismatch"], violations)

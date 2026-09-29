@@ -1,0 +1,94 @@
+{
+  "schema": "fundamentals_iteration_record_v1",
+  "iterationId": "iteration-001",
+  "actor": "Codex",
+  "recordedAt": "2026-09-28T15:31:24.516475+00:00",
+  "status": "OPEN",
+  "engineeringResult": "OFFLINE_ORDINARY_CHAIN_VERIFIED",
+  "componentQuality": "UNVERIFIED",
+  "finalAnswerQuality": "UNVERIFIED",
+  "qualityScope": "FROZEN_COMPONENT_CHAIN",
+  "comparisonStatus": "UNVERIFIED",
+  "comparisonSplit": null,
+  "lineage": {
+    "offlineDrill": {
+      "kind": "OFFLINE_ORDINARY_DRILL_VERIFICATION",
+      "schemaVersion": 1,
+      "status": "VERIFIED_ORDINARY_RUN_CHAIN",
+      "realAcceptance": false,
+      "producerManifestSha256": "6ca16feb67f715043e08eda202c5e826b27255352cefaa18f853163bf9ace701",
+      "evaluatorSha256": "413c8bbd3bfb9e7f765750c1c91bdb99b75005da0afcee0d9ca69ce53898d8f5",
+      "runs": {
+        "candidate-before": {
+          "runId": "3ba80c6a-6a5c-48d8-ab36-4257075f8a46",
+          "traceSha256": "d0e581ab828af3fe6b4ed5be91eb709132c1ac34b03a3a629727380b82a1952c",
+          "caseSha256": "f642f4ba710ac7744c1fc04c1fd0c02fa1cbd3a61de06ba4fce6f15671a469b3"
+        },
+        "candidate-inflight": {
+          "runId": "9252a1cf-4173-48f2-bcda-238c2af32d6c",
+          "traceSha256": "d9ddee6240f10931ce066c7bf1615f36d7cccb39e724c943a3487f356c435632",
+          "caseSha256": "f642f4ba710ac7744c1fc04c1fd0c02fa1cbd3a61de06ba4fce6f15671a469b3"
+        },
+        "candidate-denied": {
+          "runId": "406679cc-2656-483f-a77a-e4ec44703165",
+          "traceSha256": "1e8401a354eee556c0af48e0fea2050882fde636d8088fc69218aab096e9883f",
+          "caseSha256": "f642f4ba710ac7744c1fc04c1fd0c02fa1cbd3a61de06ba4fce6f15671a469b3"
+        },
+        "baseline-after": {
+          "runId": "711f35f6-5d75-4128-a2ee-09f703838bcb",
+          "traceSha256": "798ed6694fefd8fea664873655d1e58483b6935d919fdec334d7e81185be7810",
+          "caseSha256": "f642f4ba710ac7744c1fc04c1fd0c02fa1cbd3a61de06ba4fce6f15671a469b3"
+        }
+      },
+      "withdrawnAt": "2026-09-28T15:30:33.667625200Z",
+      "independentReview": "NOT_PERFORMED",
+      "faultInjectionAcceptance": "NOT_PERFORMED",
+      "qualityEffect": "UNVERIFIED",
+      "activationAuthorized": false
+    }
+  },
+  "artifacts": {
+    "offlineDrill": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-13591932060945488604\\offline-drill.json",
+      "sha256": "f98f34080167e0ff8d8bf2153f1badd7a66b756840fe89ad539e8672d6218281"
+    },
+    "proof:c9a2fa11094998aa4d5df2f5a02307751fb0af9b665bede6ab6c43a0bb475ffc": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-13591932060945488604\\verification-evolution-iteration-python.log",
+      "sha256": "c9a2fa11094998aa4d5df2f5a02307751fb0af9b665bede6ab6c43a0bb475ffc"
+    },
+    "proof:be57115787fbecc0fdc0c6f1d8c0cbfcb1fa93d495d66ea113f866b899a10f0f": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-13591932060945488604\\TEST-com.stocksage.conversation.OrdinaryEvolutionDrillTest.xml",
+      "sha256": "be57115787fbecc0fdc0c6f1d8c0cbfcb1fa93d495d66ea113f866b899a10f0f"
+    }
+  },
+  "unresolved": [
+    {
+      "issueType": "MISSING_DATA",
+      "description": "真实验收所需的授权数据、独立标注和完整来源制品尚未登记；按用户决定后补。",
+      "evidenceRefs": [],
+      "queue": "DATA_QUEUE"
+    },
+    {
+      "issueType": "EVALUATION_FAILURE",
+      "description": "真实 E07、验证/保留集质量、预发布故障注入与独立回滚验收尚未执行；当前离线记录不能替代这些证据。",
+      "evidenceRefs": [],
+      "queue": "EVALUATION_QUEUE"
+    }
+  ],
+  "nextBatch": {
+    "trigger": "MANUAL",
+    "scope": "先逐项核验 E00—E17，补齐审计发现的离线实现缺口。真实验收环境就绪后，按固定预算、独立评估和人工发布约束运行真实批次；不得把本记录结案为已发布，也不得重复使用已消费的保留集冒充新样本。"
+  },
+  "missingEvidence": [
+    "baselineReport",
+    "candidate",
+    "gate",
+    "gold",
+    "holdout",
+    "registry",
+    "selection",
+    "sourceCases",
+    "validation"
+  ],
+  "activationAuthorized": false
+}

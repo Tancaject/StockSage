@@ -2,7 +2,8 @@ package com.stocksage.tool;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.client.DataServiceClient;
-import com.stocksage.service.EdgarIngestionService;
+import com.stocksage.knowledge.EdgarIngestionService;
+import com.stocksage.exception.ResearchBudgetExceededException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
@@ -35,10 +36,12 @@ public class FundamentalsTools {
      */
     public String ingestCompanyFilings(String ticker, String filingType, int count) {
         try {
-            // 受控研究流程以结构化文本记录摄取结果；异常不会中断后续证据降级。
+            // 普通摄取失败可降级；研究预算耗尽必须交回执行边界。
             Map<String, Object> result = edgarIngestionService.ingestFilings(ticker, filingType, count);
             return objectMapper.writeValueAsString(result);
         } catch (Exception e) {
+            ResearchBudgetExceededException.rethrowIfPresent(e);
+            ToolCallContext.checkRunDeadline();
             return "{\"error\":true,\"message\":\"Filing ingestion failed: " + e.getMessage() + "\"}";
         }
     }
@@ -46,10 +49,10 @@ public class FundamentalsTools {
     /**
      * 获取美股 SEC XBRL 结构化财务数据。
      */
-    @Tool(description = "获取美股公司的 SEC XBRL 结构化财务数据：营收、净利润、总资产、负债、EPS、经营现金流等。仅适用于美股 SEC EDGAR；港股/A 股请调用 getFinancialReports")
+    @Tool(description = "获取美股公司的 SEC XBRL 年度结构化财务数据：营收、净利润、总资产、负债、EPS、经营现金流等，每项保留实际期间与单位。仅适用于美股 SEC EDGAR；港股/A 股请调用 getFinancialReports")
     public String getStructuredFinancials(
             @ToolParam(description = "美股 ticker，如 AAPL、MSFT、NVDA") String ticker) {
-        return dataServiceClient.getEdgarXbrl(ticker);
+        return objectMapper.valueToTree(dataServiceClient.getEdgarXbrl(ticker)).toString();
     }
 
     /**
@@ -57,10 +60,10 @@ public class FundamentalsTools {
      *
      * <p>市场路由由 Python 数据服务解析，后端保持统一工具入口。</p>
      */
-    @Tool(description = "获取 A 股、港股、美股的结构化财报/财务报表数据。A 股走 baostock 财务表，港股走 AKShare 财务报表，美股走 SEC EDGAR XBRL；适合用户问年报、季报、营收、净利润、资产负债表、现金流时使用")
+    @Tool(description = "获取 A 股、港股、美股的结构化财务数据。A 股返回 BaoStock 盈利、营运、成长、偿债、现金流和杜邦六类财务摘要；港股返回 AKShare 三张财务表及指标，各表保留实际报告日期、原始数值与可用或失败状态；美股走 SEC EDGAR XBRL。港股 quarterly 返回披露报告期，不保证独立季度或单季口径；美股仅支持 annual，quarterly 返回 UNSUPPORTED。适合查询营收、净利润、资产负债和现金流")
     public String getFinancialReports(
             @ToolParam(description = "股票代码或名称，可传完整问题；如 贵州茅台、sh.600519、腾讯、0700.HK、00700、AAPL") String code,
-            @ToolParam(description = "annual 或 quarterly；用户问年报用 annual，问季报用 quarterly") String period,
+            @ToolParam(description = "annual 或 quarterly；港股 quarterly 对应披露报告期，不代表单季口径；美股 SEC 当前仅支持 annual") String period,
             @ToolParam(description = "返回最近几年，建议 3-5") int years) {
         // DataServiceClient 再按解析出的市场路由到 BaoStock、AKShare 或 SEC。
         return dataServiceClient.getFinancialReports(code, period, years);

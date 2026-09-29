@@ -103,12 +103,12 @@ StockSage 当前把单个改写 query 同时用于向量与 BM25。若改写丢�
 
 StockSage：
 
-- [请求与上下文](../../stocksage-backend/src/main/java/com/stocksage/service/ChatService.java)
+- [请求与上下文](../../stocksage-backend/src/main/java/com/stocksage/conversation/ChatService.java)
 - [固定执行计划](../../stocksage-backend/src/main/java/com/stocksage/agent/RoutePlanCatalog.java)、[执行参数边界](../../stocksage-backend/src/main/java/com/stocksage/agent/ExecutionPlan.java)
 - [普通路线执行与固定取数参数](../../stocksage-backend/src/main/java/com/stocksage/service/ToolPrefetchService.java)
 - [意图融合](../../stocksage-backend/src/main/java/com/stocksage/agent/intent/IntentFusionPolicy.java)
 - [RAG](../../stocksage-backend/src/main/java/com/stocksage/rag/RagService.java)
-- [完成契约](../../stocksage-backend/src/main/java/com/stocksage/harness/OrdinaryCompletionPolicy.java)、[有界补证](../../stocksage-backend/src/main/java/com/stocksage/service/DeepEvidenceReplanService.java)
+- [完成契约](../../stocksage-backend/src/main/java/com/stocksage/harness/OrdinaryCompletionPolicy.java)、[有界补证](../../stocksage-backend/src/main/java/com/stocksage/research/DeepEvidenceReplanService.java)
 - [MCP 适配器](../../stocksage-backend/src/main/java/com/stocksage/mcp/McpNewsSearchCapabilityAdapter.java)
 - [Planner runner](../../rag-eval/run_agent_eval.py)、[DEEP live evaluator](../../rag-eval/run_harness_live_eval.py)
 

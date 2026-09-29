@@ -1,10 +1,12 @@
 package com.stocksage.agent;
 
-import com.stocksage.harness.EvidenceLedger;
-import com.stocksage.harness.HarnessModels.EvidenceDimension;
-import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
-import com.stocksage.harness.HarnessModels.EvidenceStatus;
-import com.stocksage.harness.HarnessModels.TargetIdentity;
+import com.stocksage.evidence.EvidenceLedger;
+import com.stocksage.evidence.EvidenceTiming;
+import com.stocksage.agent.intent.TimeSensitivity;
+import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
+import com.stocksage.evidence.EvidenceModels.EvidenceEnvelope;
+import com.stocksage.evidence.EvidenceModels.EvidenceStatus;
+import com.stocksage.evidence.EvidenceModels.TargetIdentity;
 import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
@@ -20,9 +22,7 @@ import com.stocksage.model.dto.DebateModels.PointType;
 import com.stocksage.model.dto.DebateModels.Side;
 import org.junit.jupiter.api.Test;
 
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,18 +35,16 @@ class DebateDecisionPolicyTest {
 
     private static final Instant NOW = Instant.parse("2026-08-24T12:00:00Z");
 
-    private final DebateDecisionPolicy policy = new DebateDecisionPolicy(
-            Clock.fixed(NOW, ZoneOffset.UTC)
-    );
+    private final DebateDecisionPolicy policy = new DebateDecisionPolicy();
 
     @Test
     void computesStrongBullVerdictFromTopThreeAndTwoEvidenceDimensions() {
-        AnalysisState state = completeState(false);
+        AnalysisState state = freshBullState();
         ManagerAssessment assessment = assessment(
                 state,
                 List.of(
                         scored("B1", 4, "fundamentals-1"),
-                        scored("B2", 4, "market-1"),
+                        scored("B2", 4, "news-1"),
                         scored("B3", 4, "fundamentals-1"),
                         scored("S1", 1, "market-1"),
                         scored("S2", 1, "news-1"),
@@ -62,6 +60,58 @@ class DebateDecisionPolicyTest {
         assertThat(verdict.bearScore()).isLessThan(40.0);
         assertThat(verdict.decisivePointIds()).containsExactly("B1", "B2", "B3");
         assertThat(verdict.analysisHorizon()).isEqualTo(AnalysisHorizon.MEDIUM_TERM);
+
+        state.setTimeSensitivity(TimeSensitivity.RECENT);
+        DebateVerdict recentVerdict = policy.decide(state, assessment(state, assessment.assessments()));
+        assertThat(recentVerdict.recommendation()).isNotEqualTo("BUY");
+        assertThat(recentVerdict.unresolvedPointIds()).contains("B1", "B3");
+    }
+
+    @Test
+    void unknownOrStaleAcceptedCitationCapsTheWholeArgumentWithoutRemovingReferences() {
+        for (boolean stale : List.of(false, true)) {
+            AnalysisState state = freshBullState();
+            String constrainedId = stale ? "news-1" : "market-1";
+            List<DebatePoint> bull = new ArrayList<>(state.getDebateTurns().get(0).points());
+            DebatePoint point = bull.get(0);
+            bull.set(0, new DebatePoint(point.pointId(), point.type(), point.claim(), point.horizon(),
+                    List.of(new EvidenceRef("fundamentals-1", "fundamental facts"),
+                            new EvidenceRef(constrainedId, "additional facts")),
+                    point.reasoning(), point.assumption(), point.invalidationCondition(), point.respondsToPointIds()));
+            state.setDebateTurns(List.of(new DebateTurn(1, Side.BULL, bull), state.getDebateTurns().get(1)));
+            if (stale) {
+                var items = new ArrayList<>(state.getEvidenceLedger().evidence());
+                Instant oldPublication = NOW.minus(8, java.time.temporal.ChronoUnit.DAYS);
+                items.set(2, withTiming(items.get(2), new EvidenceTiming(1, NOW, null, null,
+                        new EvidenceTiming.Search("w", "w", 7, oldPublication, oldPublication, null, null, 1, 0, 0))));
+                state.setEvidenceLedger(new EvidenceLedger(TargetIdentity.resolved("NVDA"), items));
+            }
+            var b1 = new ArgumentAssessment("B1", 4, 4, 4, 4, 4, List.of("fundamentals-1", constrainedId),
+                    List.of(), List.of(AssessmentReasonCode.SUPPORTED), "Both facts support the claim");
+            var manager = assessment(state, List.of(b1, scored("B2", 4, "news-1"),
+                    scored("B3", 4, "fundamentals-1"), scored("S1", 1, "market-1"),
+                    scored("S2", 1, "news-1"), scored("S3", 1, "market-1")));
+
+            DebateVerdict verdict = policy.decide(state, manager);
+
+            assertThat(verdict.recommendation()).isNotEqualTo("BUY");
+            assertThat(verdict.unresolvedPointIds()).contains("B1");
+            assertThat(verdict.bullScore()).isEqualTo(stale ? 93.33 : 97.08);
+            assertThat(state.getEvidenceLedger().usableEvidenceIds()).contains(constrainedId);
+            assertThat(state.getEvidenceLedger().evidence()).allMatch(item -> item.status() == EvidenceStatus.AVAILABLE);
+        }
+    }
+
+    @Test
+    void recentLegacyAsOfDoesNotEstablishTypedFreshness() {
+        AnalysisState state = completeState(false);
+        var manager = assessment(state, List.of(scored("B1", 4, "fundamentals-1"), scored("B2", 4, "market-1"),
+                scored("B3", 4, "fundamentals-1"), scored("S1", 1, "market-1"),
+                scored("S2", 1, "news-1"), scored("S3", 1, "market-1")));
+        DebateVerdict verdict = policy.decide(state, manager);
+        assertThat(verdict.bullScore()).isEqualTo(91.25);
+        assertThat(verdict.recommendation()).isNotEqualTo("BUY");
+        assertThat(verdict.unresolvedPointIds()).contains("B1", "B2", "B3", "S1", "S2", "S3");
     }
 
     @Test
@@ -181,6 +231,22 @@ class DebateDecisionPolicyTest {
         DebateVerdict verdict = policy.decide(state);
 
         assertThat(policy.isCurrentVerdict(state, verdict)).isTrue();
+        state.setTimeSensitivity(TimeSensitivity.REAL_TIME);
+        assertThat(policy.isCurrentVerdict(state, verdict)).isFalse();
+        state.setTimeSensitivity(TimeSensitivity.UNSPECIFIED);
+        assertThat(policy.isCurrentVerdict(state, verdict)).isTrue();
+
+        EvidenceLedger originalLedger = state.getEvidenceLedger();
+        List<EvidenceEnvelope> changed = new ArrayList<>(originalLedger.evidence());
+        EvidenceEnvelope item = changed.get(1);
+        changed.set(1, new EvidenceEnvelope(item.evidenceId(), item.dimension(), item.capabilityId(), item.targetKey(),
+                item.status(), item.sourceRef(), item.provider(), item.observedAt(), item.asOf(), item.payloadHash(),
+                item.approvedReadOnly(), new EvidenceTiming(1, NOW,
+                new EvidenceTiming.Market("US", "1d", "INSTANT", null, item.asOf(), true), null, null)));
+        state.setEvidenceLedger(new EvidenceLedger(originalLedger.target(), changed));
+        assertThat(policy.isCurrentVerdict(state, verdict)).isFalse();
+        state.setEvidenceLedger(originalLedger);
+        assertThat(policy.isCurrentVerdict(state, verdict)).isTrue();
         DebateVerdict tampered = new DebateVerdict(
                 verdict.policyId(),
                 verdict.version(),
@@ -234,6 +300,30 @@ class DebateDecisionPolicyTest {
                 AssessmentParseStatus.VALID,
                 List.of()
         );
+    }
+
+    private AnalysisState freshBullState() {
+        AnalysisState state = completeState(false);
+        var items = new ArrayList<>(state.getEvidenceLedger().evidence());
+        items.set(0, withTiming(items.get(0), new EvidenceTiming(1, NOW, null,
+                new EvidenceTiming.Financial("annual", java.time.LocalDate.parse("2026-06-30"),
+                        java.time.LocalDate.parse("2026-07-25")), null)));
+        items.set(1, withTiming(items.get(1), new EvidenceTiming(1, NOW,
+                new EvidenceTiming.Market("US", "1d", "INSTANT", null, items.get(1).asOf(), false), null, null)));
+        Instant publication = items.get(2).asOf();
+        items.set(2, withTiming(items.get(2), new EvidenceTiming(1, NOW, null, null,
+                new EvidenceTiming.Search("w", "w", 7, publication, publication, null, null, 1, 0, 0))));
+        state.setEvidenceLedger(new EvidenceLedger(TargetIdentity.resolved("NVDA"), items));
+        var bull = new ArrayList<>(state.getDebateTurns().get(0).points());
+        bull.set(1, thesis("B2", "Dated news confirms execution", "news-1"));
+        state.setDebateTurns(List.of(new DebateTurn(1, Side.BULL, bull), state.getDebateTurns().get(1)));
+        return state;
+    }
+
+    private EvidenceEnvelope withTiming(EvidenceEnvelope item, EvidenceTiming timing) {
+        return new EvidenceEnvelope(item.evidenceId(), item.dimension(), item.capabilityId(), item.targetKey(),
+                item.status(), item.sourceRef(), item.provider(), item.observedAt(), item.asOf(), item.payloadHash(),
+                item.approvedReadOnly(), timing);
     }
 
     private ArgumentAssessment scored(String pointId, int score, String evidenceId) {

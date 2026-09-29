@@ -5,11 +5,11 @@ import com.stocksage.config.ResearchTaskMetricsConfig;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.repository.ResearchTaskRepository;
 import com.stocksage.repository.ResearchTaskCheckpointRepository;
-import com.stocksage.service.DeepResearchPipeline;
-import com.stocksage.service.ResearchTaskLeaseService;
-import com.stocksage.service.ResearchTaskQueue;
-import com.stocksage.service.ResearchTaskService;
-import com.stocksage.service.ResearchTaskWorker;
+import com.stocksage.research.DeepResearchPipeline;
+import com.stocksage.research.ResearchTaskLeaseService;
+import com.stocksage.research.ResearchTaskQueue;
+import com.stocksage.research.ResearchTaskService;
+import com.stocksage.research.ResearchTaskWorker;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -254,6 +254,7 @@ class ResearchTaskQueueIT {
             "org.springframework.ai.vectorstore.milvus.autoconfigure.MilvusVectorStoreAutoConfiguration"
     })
     @EnableScheduling
+    @org.springframework.boot.context.properties.EnableConfigurationProperties(com.stocksage.config.ModelTokenBudgetProperties.class)
     @EnableJpaRepositories(
             basePackageClasses = ResearchTaskQueueIT.class,
             considerNestedRepositories = true

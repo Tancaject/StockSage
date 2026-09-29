@@ -166,8 +166,92 @@ def normalize_planner(payload: dict[str, Any]) -> dict[str, Any]:
             [result.get("durationMs", 0) for result in results], 0.95
         ),
         "results": results,
+        "intent_calibration": intent_calibration(results),
     }
     return normalized
+
+
+def intent_calibration(results: list[dict], stratify: bool = True) -> dict:
+    """Describe observed candidates; neither source ablation nor calibrated probabilities."""
+    rows = [row for row in results if isinstance(row, dict)]
+    known = [row for row in rows if row.get("executable") is True
+             and type(row.get("actualClarification")) is bool]
+    labeled = [row for row in rows if type(row.get("expectedClarification")) is bool]
+    evaluated = [row for row in known if type(row.get("expectedClarification")) is bool]
+    accepted = [row for row in known if row["actualClarification"] is False]
+    comparable = [row for row in accepted if row.get("executionGuarded") is False
+                  and row.get("fallback") is False and row.get("expectedClarification") is not True
+                  and row.get("expectedRoute") in {"DIRECT", "FUNDAMENTALS", "MARKET", "NEWS", "DEEP"}]
+    comparable_rows = {id(row) for row in comparable}
+
+    def rate(numerator, denominator):
+        return numerator / denominator if denominator else None
+
+    sources = {}
+    invalid = 0
+    for row in known:
+        signals = row.get("signalDiagnostics") or []
+        if not isinstance(signals, list):
+            invalid += 1
+            continue
+        seen = set()
+        for signal in signals:
+            if (not isinstance(signal, dict)
+                    or signal.get("source") not in {"LLM", "EMBEDDING", "PATTERN", "NGRAM", "FALLBACK"}
+                    or signal.get("targetRoute") not in {"DIRECT", "FUNDAMENTALS", "MARKET", "NEWS", "DEEP"}
+                    or type(signal.get("confidence")) not in (int, float)
+                    or not math.isfinite(signal["confidence"]) or not 0 <= signal["confidence"] <= 1
+                    or signal["source"] in seen):
+                invalid += 1
+                continue
+            seen.add(signal["source"])
+            summary = sources.setdefault(signal["source"], {"observed_case_count": 0,
+                "route_comparable_case_count": 0, "signal_route_match_count": 0,
+                "fusion_corrects_signal_count": 0, "fusion_loses_signal_count": 0})
+            summary["observed_case_count"] += 1
+            if id(row) not in comparable_rows or signal["source"] == "FALLBACK":
+                continue
+            correct = signal["targetRoute"] == row["expectedRoute"]
+            fused_correct = row.get("actualRoute") == row["expectedRoute"]
+            summary["route_comparable_case_count"] += 1
+            summary["signal_route_match_count"] += int(correct)
+            summary["fusion_corrects_signal_count"] += int(fused_correct and not correct)
+            summary["fusion_loses_signal_count"] += int(correct and not fused_correct)
+    for summary in sources.values():
+        count = summary["route_comparable_case_count"]
+        summary["signal_route_agreement_rate"] = rate(summary["signal_route_match_count"], count)
+        summary["paired_fused_minus_signal_accuracy"] = rate(
+            summary["fusion_corrects_signal_count"] - summary["fusion_loses_signal_count"], count)
+    bins = []
+    for lower, upper in ((0, 0.25), (0.25, 0.5), (0.5, 0.75), (0.75, 1.0)):
+        scored = [row for row in comparable if type(row.get("confidence")) in (int, float)
+                  and math.isfinite(row["confidence"])
+                  and lower <= row["confidence"] and (row["confidence"] < upper
+                       or upper == 1.0 and row["confidence"] == 1.0)]
+        bins.append({"lower": lower, "upper": upper, "upper_inclusive": upper == 1.0,
+                     "case_count": len(scored), "route_accuracy": rate(
+                         sum(row.get("actualRoute") == row["expectedRoute"] for row in scored), len(scored))})
+    summary = {"status": "NO_DATA" if not known else "OBSERVED" if len(known) == len(rows) else "PARTIAL",
+               "scope": "PLANNER_DECISIONS_NOT_TOOL_EXECUTIONS",
+               "clarification_scope": "ROUTING_METADATA_ONLY",
+               "score_semantics": "HEURISTIC_NOT_CALIBRATED_PROBABILITY",
+               "case_count": len(rows), "decision_observed_count": len(known),
+               "decision_missing_count": len(rows) - len(known),
+               "clarification_labeled_count": len(labeled), "clarification_evaluated_count": len(evaluated),
+               "clarification_accuracy": rate(sum(row["expectedClarification"] == row["actualClarification"]
+                                                   for row in evaluated), len(evaluated)),
+               "clarification_rate": rate(len(known) - len(accepted), len(known)),
+               "nonclarified_route_comparable_count": len(comparable),
+               "nonclarified_route_error_rate": rate(sum(row.get("actualRoute") != row["expectedRoute"]
+                                                          for row in comparable), len(comparable)),
+               "invalid_signal_count": invalid,
+               "signal_observation_status": "NO_DATA" if not sources else "PARTIAL" if invalid else "OBSERVED",
+               "sources": sources, "score_bins": bins}
+    if stratify:
+        summary["expected_route_strata"] = {
+            route: intent_calibration([row for row in rows if (row.get("expectedRoute") or "UNKNOWN") == route], False)
+            for route in sorted({row.get("expectedRoute") or "UNKNOWN" for row in rows})}
+    return summary
 
 
 def metric_delta(current: dict[str, Any], baseline: dict[str, Any] | None) -> dict[str, Any]:
@@ -453,7 +537,7 @@ def build_report(
         else "passed"
     )
     expected_policy_id = gates.get("harness_policy_id_expected", "deep-equity-v1")
-    expected_policy_version = gates.get("harness_policy_version_expected", 5)
+    expected_policy_version = gates.get("harness_policy_version_expected", 6)
     if harness_payload is not None:
         harness_engine = harness_payload.get("engine")
         harness_schema = harness_payload.get("schema_version")

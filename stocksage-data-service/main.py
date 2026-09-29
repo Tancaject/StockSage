@@ -18,6 +18,7 @@ StockSage 金融数据服务。
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from app.research_budget import ResearchBudgetMiddleware
 
 from app.routers import stock, search, document, edgar
 from app.services.baostock_service import (
@@ -48,6 +49,8 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+app.add_middleware(ResearchBudgetMiddleware)
 
 # 注册路由
 app.include_router(stock.router, prefix="/api/stock", tags=["stock"])

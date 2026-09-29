@@ -1,6 +1,6 @@
 package com.stocksage.controller;
 
-import com.stocksage.config.RequestIdentity;
+import com.stocksage.identity.RequestIdentity;
 import com.stocksage.model.dto.WorkbenchCockpitResponse;
 import com.stocksage.model.dto.WorkbenchStockSuggestion;
 import com.stocksage.service.CompanyRelationService;

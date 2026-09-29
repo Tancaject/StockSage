@@ -1,12 +1,12 @@
 package com.stocksage.agent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.harness.EvidenceLedger;
-import com.stocksage.harness.HarnessModels.EvidenceDimension;
-import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
-import com.stocksage.harness.HarnessModels.EvidenceStatus;
+import com.stocksage.evidence.EvidenceLedger;
+import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
+import com.stocksage.evidence.EvidenceModels.EvidenceEnvelope;
+import com.stocksage.evidence.EvidenceModels.EvidenceStatus;
 import com.stocksage.harness.HarnessModels.ParseStatus;
-import com.stocksage.harness.HarnessModels.TargetIdentity;
+import com.stocksage.evidence.EvidenceModels.TargetIdentity;
 import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.DebateModels;
@@ -22,7 +22,7 @@ import com.stocksage.model.dto.DebateModels.ManagerAssessment;
 import com.stocksage.model.dto.DebateModels.PointType;
 import com.stocksage.model.dto.DebateModels.Side;
 import com.stocksage.model.dto.InvestmentReport;
-import com.stocksage.service.DeepResearchPipeline;
+import com.stocksage.research.DeepResearchPipeline;
 import com.stocksage.tool.ChatStreamEmitter;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;

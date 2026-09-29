@@ -2,7 +2,7 @@ package com.stocksage.config;
 
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.repository.ResearchTaskRepository;
-import com.stocksage.service.ResearchTaskQueue;
+import com.stocksage.research.ResearchTaskQueue;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 

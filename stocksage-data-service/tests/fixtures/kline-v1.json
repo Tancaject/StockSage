@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "status": "SUCCESS",
+  "input": "sh.600519",
+  "market": "A_SHARE",
+  "resolvedCode": "sh.600519",
+  "source": "baostock",
+  "routeReason": "explicit A-share prefix",
+  "provider": "baostock",
+  "period": "daily",
+  "count": 2,
+  "code": "sh.600519",
+  "symbol": null,
+  "error": false,
+  "message": null,
+  "fetchedAt": "2026-09-25T01:02:03Z",
+  "asOf": "2026-09-24",
+  "timeKind": "DATE",
+  "adjustment": "FORWARD_ADJUSTED",
+  "currency": null,
+  "volumeUnit": "UNKNOWN",
+  "retryable": null,
+  "errorCode": null,
+  "primaryProvider": "akshare",
+  "fallbackProvider": "baostock",
+  "primaryProviderError": "primary provider timed out",
+  "data": [
+    {
+      "date": "2026-09-23",
+      "open": 1500.0,
+      "high": 1510.0,
+      "low": 1490.0,
+      "close": 1505.0,
+      "volume": 0.0,
+      "amount": 0.0,
+      "turn": 0.0
+    },
+    {
+      "date": "2026-09-24",
+      "open": 1505.0,
+      "high": 1520.0,
+      "low": 1500.0,
+      "close": 1510.0,
+      "volume": 100.0,
+      "amount": 151000.0,
+      "turn": 0.5
+    }
+  ]
+}

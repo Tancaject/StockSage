@@ -1,13 +1,15 @@
 package com.stocksage.harness;
 
+import com.stocksage.evidence.EvidenceLedger;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.stocksage.agent.DebateDecisionPolicy;
-import com.stocksage.harness.HarnessModels.EvidenceDimension;
-import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
-import com.stocksage.harness.HarnessModels.EvidenceStatus;
+import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
+import com.stocksage.evidence.EvidenceModels.EvidenceEnvelope;
+import com.stocksage.evidence.EvidenceModels.EvidenceStatus;
 import com.stocksage.harness.HarnessModels.HarnessDecision;
 import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.HarnessPhase;
@@ -15,8 +17,8 @@ import com.stocksage.harness.HarnessModels.ParseStatus;
 import com.stocksage.harness.HarnessModels.RecoveryAction;
 import com.stocksage.harness.HarnessModels.RunContext;
 import com.stocksage.harness.HarnessModels.SynthesisResult;
-import com.stocksage.harness.HarnessModels.TargetIdentity;
-import com.stocksage.harness.HarnessModels.TargetResolutionStatus;
+import com.stocksage.evidence.EvidenceModels.TargetIdentity;
+import com.stocksage.evidence.EvidenceModels.TargetResolutionStatus;
 import com.stocksage.harness.HarnessModels.ViolationCode;
 import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
@@ -70,7 +72,9 @@ class HarnessGoldenSetTest {
             EnumSet.complementOf(EnumSet.of(
                     ViolationCode.RAG_MISSING,
                     ViolationCode.DEBATE_CONTRACT_INVALID,
-                    ViolationCode.DEBATE_ASSESSMENT_INVALID
+                    ViolationCode.DEBATE_ASSESSMENT_INVALID,
+                    // This fixture set exercises the DEEP policy; this code belongs to ordinary routes only.
+                    ViolationCode.EVIDENCE_TIME_REQUIREMENT_UNMET
             ));
     private static final Set<RecoveryAction> ACTIVE_RECOVERY_ACTIONS = EnumSet.of(
             RecoveryAction.RETRY_FUNDAMENTALS,

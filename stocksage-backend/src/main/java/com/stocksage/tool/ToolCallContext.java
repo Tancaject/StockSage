@@ -1,5 +1,6 @@
 package com.stocksage.tool;
 
+import com.stocksage.exception.ResearchBudgetExceededException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
@@ -13,12 +14,81 @@ import java.util.function.Supplier;
 public final class ToolCallContext {
 
     private static final ThreadLocal<Context> CURRENT = new ThreadLocal<>();
+    // Execution authority must never come from the single-active-trace observation fallback.
+    private static final ThreadLocal<RunDeadline> RUN_DEADLINE = new ThreadLocal<>();
+    private static final ThreadLocal<RunExecution> RUN_EXECUTION = new ThreadLocal<>();
     private static final ThreadLocal<Boolean> OBSERVATION_SUPPRESSED =
             ThreadLocal.withInitial(() -> false);
     private static final ConcurrentMap<String, Context> ACTIVE_CONTEXTS = new ConcurrentHashMap<>();
 
     /** 工具类不允许实例化。 */
     private ToolCallContext() {}
+
+    public record RunDeadline(Long runId, long deadlineEpochMs) {
+        public RunDeadline {
+            if (runId == null || runId <= 0 || deadlineEpochMs <= 0) {
+                throw new IllegalArgumentException("Research deadline requires a run ID and positive epoch milliseconds");
+            }
+        }
+
+        public long remainingMillis() {
+            return ResearchBudgetExceededException.remainingMillis(runId, deadlineEpochMs);
+        }
+    }
+
+    public static RunDeadline currentRunDeadline() {
+        return RUN_DEADLINE.get();
+    }
+
+    /** Worker-owned identity before any completed evidence snapshot exists. */
+    public record RunExecution(Long runId, int attempt, String leaseToken, String traceId, long deadlineEpochMs) {
+        public RunExecution {
+            if (runId == null || runId <= 0 || attempt <= 0 || leaseToken == null || leaseToken.isBlank()
+                    || deadlineEpochMs <= 0) throw new IllegalArgumentException("Research execution requires its run and owner");
+        }
+    }
+
+    public static RunExecution currentRunExecution() { return RUN_EXECUTION.get(); }
+
+    /** Explicitly capture at executor submission; never consult the active trace registry. */
+    public static <T> T withRunExecution(RunExecution execution, Supplier<T> action) {
+        RunExecution previous = RUN_EXECUTION.get();
+        if (execution == null) RUN_EXECUTION.remove();
+        else RUN_EXECUTION.set(execution);
+        try {
+            return execution == null ? action.get() : withRunDeadline(
+                    new RunDeadline(execution.runId(), execution.deadlineEpochMs()), action);
+        } finally {
+            if (previous == null) RUN_EXECUTION.remove();
+            else RUN_EXECUTION.set(previous);
+        }
+    }
+
+    public static void checkRunDeadline() {
+        RunDeadline deadline = RUN_DEADLINE.get();
+        if (deadline != null) deadline.remainingMillis();
+    }
+
+    public static long remainingMillis(long localLimitMs) {
+        RunDeadline deadline = RUN_DEADLINE.get();
+        return deadline == null ? localLimitMs : Math.min(localLimitMs, deadline.remainingMillis());
+    }
+
+    /** Executors must explicitly capture and pass this value; pooled threads never inherit it. */
+    public static <T> T withRunDeadline(RunDeadline deadline, Supplier<T> action) {
+        RunDeadline previous = RUN_DEADLINE.get();
+        if (deadline == null) RUN_DEADLINE.remove();
+        else RUN_DEADLINE.set(deadline);
+        try {
+            if (deadline != null) deadline.remainingMillis();
+            T result = action.get();
+            if (deadline != null) deadline.remainingMillis();
+            return result;
+        } finally {
+            if (previous == null) RUN_DEADLINE.remove();
+            else RUN_DEADLINE.set(previous);
+        }
+    }
 
     /**
      * 注册当前对话流的工具上下文。

@@ -2,6 +2,14 @@ package com.stocksage.rag;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.exception.ResearchBudgetExceededException;
+import com.stocksage.exception.ResearchCapacityExceededException;
+import com.stocksage.tool.ToolCallContext;
+import com.stocksage.agent.AgentRuntimeConfiguration;
+import com.stocksage.config.ModelTokenBudgetProperties;
+import com.stocksage.model.dto.ModelInvocationContext;
+import com.stocksage.research.ModelInvocationStore;
+import com.stocksage.knowledge.KnowledgeIngestionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.Embedding;
@@ -18,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.concurrent.Semaphore;
 
 /**
  * 通过 Ollama 生成本地向量；维度必须与向量库配置相符。
@@ -46,6 +55,22 @@ public class LocalEmbeddingModel implements EmbeddingModel {
 
     /** 与向量库配置一致的维度，响应不符时必须拒绝入库。 */
     private final int dimension;
+    private final int maxConcurrentCalls;
+    private final Semaphore permits;
+    private final ModelInvocationStore invocations;
+    private final ModelTokenBudgetProperties tokenBudget;
+    private final Map<String, Object> providerIdentity;
+
+    public Map<String, Object> runtimeConfiguration() {
+        Map<String, Object> configuration = new HashMap<>(Map.of("provider", "ollama", "model", model, "dimensions", dimension,
+                "timeoutMillis", timeout.toMillis(), "maxConcurrentCalls", maxConcurrentCalls,
+                "unknownProviderRevision", true, "providerIdentity", providerIdentity));
+        if (tokenBudget.maxTokens() != null && tokenBudget.embedding() != null) {
+            configuration.put("contextTokens", tokenBudget.embedding().maxInputTokensPerText());
+            configuration.put("operatorDeploymentRevision", tokenBudget.embedding().deploymentRevision());
+        }
+        return Map.copyOf(configuration);
+    }
 
     /**
      * 使用默认 1024 维初始化本地向量模型。
@@ -67,7 +92,25 @@ public class LocalEmbeddingModel implements EmbeddingModel {
      * @param dimension 与向量库一致的配置维度
      */
     public LocalEmbeddingModel(String baseUrl, String model, Duration timeout, int dimension) {
+        this(baseUrl, model, timeout, dimension, 2);
+    }
+
+    public LocalEmbeddingModel(String baseUrl, String model, Duration timeout, int dimension, int maxConcurrentCalls) {
+        this(baseUrl, model, timeout, dimension, maxConcurrentCalls, null, ModelTokenBudgetProperties.disabled());
+    }
+
+    public LocalEmbeddingModel(String baseUrl, String model, Duration timeout, int dimension, int maxConcurrentCalls,
+                               ModelInvocationStore invocations, ModelTokenBudgetProperties tokenBudget) {
+        if (maxConcurrentCalls <= 0) throw new IllegalArgumentException("Embedding concurrency must be positive");
+        this.maxConcurrentCalls = maxConcurrentCalls;
+        this.permits = new Semaphore(maxConcurrentCalls);
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
+        this.invocations = invocations;
+        this.tokenBudget = tokenBudget;
+        this.providerIdentity = Map.of("scope", "API_CONSTRUCTION", "protocol", "OLLAMA_EMBED",
+                "base", AgentRuntimeConfiguration.endpointIdentity(baseUrl),
+                "endpoint", AgentRuntimeConfiguration.endpointIdentity("/api/embed"),
+                "excluded", "USERINFO_QUERY_FRAGMENT_HEADERS_CREDENTIALS", "unknownProviderRevision", true);
         this.model = model;
         this.timeout = timeout;
         if (dimension <= 0) throw new IllegalArgumentException("Embedding dimension must be positive");
@@ -131,6 +174,8 @@ public class LocalEmbeddingModel implements EmbeddingModel {
                     sanitized.size(), e.getMessage());
             return embedOneByOne(sanitized);
         } catch (Exception e) {
+            ResearchBudgetExceededException.rethrowIfPresent(e);
+            ResearchCapacityExceededException.rethrowIfPresent(e);
             log.error("Ollama embedding call failed: {}", e.getMessage(), e);
             throw new RuntimeException("Embedding generation failed: " + e.getMessage(), e);
         }
@@ -183,17 +228,78 @@ public class LocalEmbeddingModel implements EmbeddingModel {
         body.put("input", texts);
         body.put("truncate", true);
 
+        var execution = ToolCallContext.currentRunExecution();
+        if (execution != null && tokenBudget.maxTokens() != null && tokenBudget.embedding() != null) {
+            body.put("options", Map.of("num_ctx", tokenBudget.embedding().maxInputTokensPerText()));
+        }
+
         // WebClient 发起同步等待的本地 HTTP 调用；timeout 限制 block 的最长时间。
-        String response = webClient.post()
+        var run = ToolCallContext.currentRunDeadline();
+        if (run != null) run.remainingMillis();
+        if (run != null && (execution == null || invocations == null)) {
+            throw new ResearchBudgetExceededException(run.runId(), ResearchBudgetExceededException.Reason.BUDGET_UNAVAILABLE);
+        }
+        if (!permits.tryAcquire()) throw new ResearchCapacityExceededException("ollama-embedding", null);
+        String invocationId = null;
+        boolean settled = false;
+        try {
+            if (execution != null) {
+                Map<String, Object> request = new HashMap<>();
+                request.put("requestedModel", model);
+                request.put("invocationKind", "EMBEDDING");
+                request.put("inputCount", texts.size());
+                request.put("provider", providerIdentity);
+                if (tokenBudget.maxTokens() != null && tokenBudget.embedding() != null) {
+                    request.put("contextTokens", tokenBudget.embedding().maxInputTokensPerText());
+                }
+                String input = objectMapper.writeValueAsString(texts);
+                invocationId = invocations.begin(new ModelInvocationContext(execution.runId(), execution.attempt(),
+                        execution.leaseToken(), execution.traceId(), null, execution.deadlineEpochMs(),
+                        KnowledgeIngestionService.sha256(input)), "ollama-embedding", request);
+            }
+            String response = webClient.post()
                 .uri("/api/embed")
                 .header("Content-Type", "application/json")
                 .bodyValue(body)
                 .retrieve()
                 .bodyToMono(String.class)
-                .timeout(timeout)
+                .timeout(Duration.ofMillis(ToolCallContext.remainingMillis(timeout.toMillis())))
                 .block();
-
-        return parseEmbeddingResponse(response);
+            JsonNode root = objectMapper.readTree(response);
+            if (invocationId != null) {
+                Map<String, Object> usage = new HashMap<>();
+                usage.put("usageSource", "NO_DATA");
+                usage.put("completionScope", "PROVIDER_HTTP_RESPONSE");
+                if (root.path("model").isTextual() && !root.path("model").textValue().isBlank()) {
+                    usage.put("actualModel", root.path("model").textValue());
+                }
+                JsonNode count = root.path("prompt_eval_count");
+                if (count.isIntegralNumber() && count.canConvertToLong() && count.longValue() >= 0) {
+                    usage.put("usageSource", "PROVIDER");
+                    usage.put("inputTokens", count.longValue());
+                    usage.put("outputTokens", 0L);
+                    usage.put("totalTokens", count.longValue());
+                }
+                // Transport usage is a fact even if vector validation triggers another HTTP request.
+                invocations.finish(invocationId, "SUCCEEDED", usage);
+                settled = true;
+            }
+            if (run != null) run.remainingMillis();
+            return parseEmbeddingResponse(root);
+        } catch (Exception failure) {
+            if (invocationId != null && !settled) invocations.finish(invocationId, "FAILED", Map.of("usageSource", "NO_DATA"));
+            if (run != null) run.remainingMillis();
+            if (failure instanceof ModelInvocationStore.InvocationRejectedException) {
+                var unavailable = new ResearchBudgetExceededException(run == null ? null : run.runId(),
+                        ResearchBudgetExceededException.Reason.BUDGET_UNAVAILABLE);
+                unavailable.initCause(failure);
+                throw unavailable;
+            }
+            if (failure instanceof RuntimeException runtime) throw runtime;
+            throw new IllegalStateException("Cannot record embedding input or parse provider response", failure);
+        } finally {
+            permits.release();
+        }
     }
 
     /** 批量失败后仅按原文本逐条重试；不可用向量必须中止摄取，不能伪造成功结果。 */
@@ -219,13 +325,12 @@ public class LocalEmbeddingModel implements EmbeddingModel {
      *
      * <p>任何 NaN 或 Inf 都会抛出 InvalidEmbeddingException，交由上层限次重试，仍无效则抛出失败。</p>
      *
-     * @param response Ollama JSON 响应
+     * @param root Ollama JSON 响应
      * @return 已解析的 embedding 列表
      * @throws InvalidEmbeddingException 任一维度不是有限浮点数时抛出
      */
-    private EmbeddingResponse parseEmbeddingResponse(String response) {
+    private EmbeddingResponse parseEmbeddingResponse(JsonNode root) {
         try {
-            JsonNode root = objectMapper.readTree(response);
             JsonNode embeddingsNode = root.path("embeddings");
 
             if (!embeddingsNode.isArray() || embeddingsNode.isEmpty()) {

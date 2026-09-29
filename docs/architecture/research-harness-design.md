@@ -1017,16 +1017,20 @@ stocksage-backend/src/main/java/com/stocksage/harness/
   ResearchCompletionPolicy.java
   ResearchHarness.java
   HarnessModels.java
-  EvidenceLedger.java
   DeepResearchCompletionPolicy.java
   HarnessObserver.java
+stocksage-backend/src/main/java/com/stocksage/evidence/
+  EvidenceModels.java
+  EvidenceLedger.java
+  EvidenceTiming.java
+  EvidenceFreshness.java
 ```
 
 修改：
 
 ```text
 stocksage-backend/src/main/java/com/stocksage/model/dto/AnalysisState.java
-stocksage-backend/src/main/java/com/stocksage/service/DeepEvidenceCollector.java
+stocksage-backend/src/main/java/com/stocksage/research/DeepEvidenceCollector.java
 ```
 
 任务：
@@ -1055,10 +1059,10 @@ G0 验证（2026-07-24）：
 修改：
 
 ```text
-stocksage-backend/src/main/java/com/stocksage/service/DeepResearchPipeline.java
+stocksage-backend/src/main/java/com/stocksage/research/DeepResearchPipeline.java
 stocksage-backend/src/main/java/com/stocksage/service/ToolPrefetchService.java
-stocksage-backend/src/main/java/com/stocksage/service/DeepEvidenceCollector.java
-stocksage-backend/src/main/java/com/stocksage/service/ReportMarkdownRenderer.java
+stocksage-backend/src/main/java/com/stocksage/research/DeepEvidenceCollector.java
+stocksage-backend/src/main/java/com/stocksage/research/ReportMarkdownRenderer.java
 ```
 
 任务：
@@ -1084,10 +1088,10 @@ stocksage-backend/src/main/java/com/stocksage/service/ReportMarkdownRenderer.jav
 
 ```text
 stocksage-backend/src/main/java/com/stocksage/agent/ResearchManager.java
-stocksage-backend/src/main/java/com/stocksage/agent/ResearchDebateService.java
+stocksage-backend/src/main/java/com/stocksage/research/ResearchDebateService.java
 stocksage-backend/src/main/java/com/stocksage/model/dto/InvestmentReport.java
-stocksage-backend/src/main/java/com/stocksage/service/DeepResearchPipeline.java
-stocksage-backend/src/main/java/com/stocksage/service/ReportMarkdownRenderer.java
+stocksage-backend/src/main/java/com/stocksage/research/DeepResearchPipeline.java
+stocksage-backend/src/main/java/com/stocksage/research/ReportMarkdownRenderer.java
 ```
 
 任务：
@@ -1117,9 +1121,9 @@ stocksage-backend/src/main/java/com/stocksage/service/ReportMarkdownRenderer.jav
 ```text
 stocksage-backend/src/main/resources/db/migration/V5__research_task_result_kind.sql
 stocksage-backend/src/main/java/com/stocksage/model/entity/ResearchTask.java
-stocksage-backend/src/main/java/com/stocksage/service/ResearchTaskCheckpointService.java
-stocksage-backend/src/main/java/com/stocksage/service/InvestmentReportVersionService.java
-stocksage-backend/src/main/java/com/stocksage/service/ResearchMemoryService.java
+stocksage-backend/src/main/java/com/stocksage/research/ResearchTaskCheckpointService.java
+stocksage-backend/src/main/java/com/stocksage/research/InvestmentReportVersionService.java
+stocksage-backend/src/main/java/com/stocksage/knowledge/ResearchMemoryService.java
 stocksage-backend/src/main/java/com/stocksage/service/OfflineDemoSampleService.java
 ```
 

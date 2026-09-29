@@ -1,6 +1,7 @@
 package com.stocksage.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.exception.ResearchCapacityExceededException;
 import com.stocksage.model.entity.CompanyRelation;
 import com.stocksage.model.entity.VectorDocument;
 import com.stocksage.repository.CompanyRelationRepository;
@@ -14,6 +15,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -65,6 +67,17 @@ class RelationExtractionServiceTest {
         ArgumentCaptor<List<CompanyRelation>> captor = ArgumentCaptor.forClass(List.class);
         verify(companyRelationRepository).saveAll(captor.capture());
         return captor.getValue();
+    }
+
+    @Test
+    void providerCapacityRejectionDoesNotPublishAnEmptyGraphOrDeleteExistingRelations() {
+        stubParent("NVIDIA's primary competitors include Advanced Micro Devices and Intel Corporation in the GPU market.");
+        var capacity = new ResearchCapacityExceededException("provider-admission", null);
+        when(chatClient.prompt().user(anyString()).call().content())
+                .thenThrow(new IllegalStateException("wrapped provider", capacity));
+        assertThatThrownBy(() -> service.extractForTicker("NVDA")).isSameAs(capacity);
+        verify(companyRelationRepository, never()).deleteBySourceTicker(anyString());
+        verify(companyRelationRepository, never()).saveAll(anyList());
     }
 
     @Test

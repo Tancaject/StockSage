@@ -7,6 +7,14 @@
 
 ## 1. 核心决策
 
+### 知识资格
+
+报告来源记忆属于 `HISTORICAL_GENERATED_CONCLUSION`，仅用于历史判断、变化与未解决问题。机器契约 `VERIFIED`、人工审核 `APPROVED` 和原始来源事实含义不同；审核通过也不把生成结论变成当前事实。用户画像仍是独立的用户背景。
+
+`ResearchMemoryService` 使用已有 `sourceType/sourceId`，按用户批量读取来源报告；Prompt、管理 API 的 `qualification` 和检索 Trace 共享类别、来源报告 ID、当前审核状态、报告生成时间与 `currentEvidence=false`。审核状态不重复存入记忆或向量。当前负向审核报告不参与检索注入；缺失来源或审核状态明确为 `UNKNOWN`，生成时间不补造，旧条目仍可作为带未知资格的历史背景。原有 `dataCutoffAt` 仅用于既有衰减参考，不能作为底层证据业务时点。
+
+普通完成策略只消费工具证据账本；`ChatPromptAssembler` 在加入研究记忆和画像前冻结 `evidenceContext`，DEEP 路线跳过研究记忆。`[M…]` 回指历史结论，不能代替当前工具/RAG 来源引用。检索 Trace 的命中资格描述准备的候选，最终实际送入模型的上下文以回答归因记录为准。真实收益仍需固定当前证据、模型及输入的注入/不注入成对评估；验证状态见 [progress.md](../../progress.md)。
+
 当前“向量候选数、最终记忆数、Prompt 容量”都被硬限制 `3 / 2400` 混在一起，无法在
 数据库过滤、冲突消解和时间衰减后保持足够召回。新链路拆成三个独立阶段：
 

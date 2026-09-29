@@ -2,6 +2,7 @@ package com.stocksage.ibkr;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.tool.ToolCallContext;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
 import reactor.netty.http.client.HttpClient;
+import reactor.core.publisher.Mono;
 
 import javax.net.ssl.SSLException;
 import java.net.URI;
@@ -60,7 +62,7 @@ public class IbkrWebApiClient {
      * @return 解析后的 JSON 节点
      */
     public JsonNode get(String path) {
-        return read(webClient.get().uri(path).retrieve().bodyToMono(String.class).timeout(timeout).block());
+        return exchange(webClient.get().uri(path).retrieve().bodyToMono(String.class));
     }
 
     /**
@@ -70,7 +72,7 @@ public class IbkrWebApiClient {
      * @return 解析后的 JSON 节点
      */
     public JsonNode get(Function<UriBuilder, URI> uriFunction) {
-        return read(webClient.get().uri(uriFunction).retrieve().bodyToMono(String.class).timeout(timeout).block());
+        return exchange(webClient.get().uri(uriFunction).retrieve().bodyToMono(String.class));
     }
 
     /**
@@ -82,14 +84,25 @@ public class IbkrWebApiClient {
      * @return 解析后的 JSON 节点
      */
     public JsonNode postEmpty(String path) {
-        return read(webClient.post()
+        return exchange(webClient.post()
                 .uri(path)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(Map.of())
                 .retrieve()
-                .bodyToMono(String.class)
-                .timeout(timeout)
-                .block());
+                .bodyToMono(String.class));
+    }
+
+    private JsonNode exchange(Mono<String> response) {
+        long remaining = ToolCallContext.remainingMillis(timeout.toMillis());
+        try {
+            String body = response.timeout(Duration.ofMillis(remaining)).block();
+            ToolCallContext.remainingMillis(timeout.toMillis());
+            return read(body);
+        } catch (RuntimeException error) {
+            // A run deadline is not a Gateway outage and must not become an error payload.
+            ToolCallContext.remainingMillis(timeout.toMillis());
+            throw error;
+        }
     }
 
     /**

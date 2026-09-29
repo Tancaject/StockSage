@@ -1,6 +1,6 @@
 package com.stocksage.integration;
 
-import com.stocksage.config.RequestIdentity;
+import com.stocksage.identity.RequestIdentity;
 import com.stocksage.model.entity.Conversation;
 import com.stocksage.model.entity.InvestmentReportVersion;
 import com.stocksage.repository.ConversationRepository;

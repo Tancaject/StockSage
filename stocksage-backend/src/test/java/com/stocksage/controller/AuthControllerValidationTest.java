@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.exception.GlobalExceptionHandler;
 import com.stocksage.model.entity.User;
 import com.stocksage.security.AuthenticatedUser;
-import com.stocksage.service.AuthService;
+import com.stocksage.identity.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;

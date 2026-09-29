@@ -4,7 +4,7 @@ import com.stocksage.capability.CapabilityDescriptor;
 import com.stocksage.capability.CapabilityRegistry;
 import com.stocksage.mcp.McpCapabilityProvider;
 import com.stocksage.mcp.McpProperties;
-import com.stocksage.model.entity.AgentTrace;
+import com.stocksage.repository.AgentTraceRepository.LatencySample;
 import com.stocksage.repository.AgentTraceRepository;
 import com.stocksage.skill.SkillDefinition;
 import com.stocksage.skill.SkillRegistry;
@@ -168,7 +168,7 @@ public class AgentAdminService {
     /** 从同一批持久化成功 Trace 计算样本数和端到端 P95。 */
     private AgentE2eView agentE2eView(Instant processStartedAt, Instant generatedAt) {
         LocalDateTime processStart = LocalDateTime.ofInstant(processStartedAt, ZoneId.systemDefault());
-        List<AgentTrace> traces = agentTraceRepository.findAll(PageRequest.of(
+        List<LatencySample> traces = agentTraceRepository.findLatencySamples(PageRequest.of(
                 0,
                 500,
                 Sort.by(Sort.Direction.DESC, "createdAt")
@@ -178,7 +178,7 @@ public class AgentAdminService {
                 .filter(trace -> trace.getDurationMs() != null)
                 .toList();
         List<Long> durations = traces.stream()
-                .map(AgentTrace::getDurationMs)
+                .map(LatencySample::getDurationMs)
                 .sorted()
                 .toList();
         int sampleCount = durations.size();
@@ -186,7 +186,7 @@ public class AgentAdminService {
                 ? null
                 : durations.get((int) Math.ceil(sampleCount * 0.95) - 1).doubleValue();
         Instant startedAt = traces.stream()
-                .map(AgentTrace::getCreatedAt)
+                .map(LatencySample::getCreatedAt)
                 .min(Comparator.naturalOrder())
                 .map(value -> value.atZone(ZoneId.systemDefault()).toInstant())
                 .orElse(processStartedAt);

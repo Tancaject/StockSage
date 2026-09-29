@@ -46,10 +46,20 @@ public class LocalNewsSearchCapabilityAdapter implements CapabilityAdapter {
     @Override
     public String invoke(Map<String, Object> arguments, CapabilityInvocationContext context) {
         // 调用现有 @Tool；Gateway 会抑制重复的 ToolCallAspect observation。
-        return newsTools.searchNews(requiredQuery(arguments), boundedLimit(arguments));
+        String query = requiredQuery(arguments);
+        int limit = boundedLimit(arguments, 10);
+        return advanced(arguments) ? newsTools.searchNews(query, limit, true) : newsTools.searchNews(query, limit);
     }
 
-    private String requiredQuery(Map<String, Object> arguments) {
+    /** 检索深度由后端编排传入，不从自然语言或字符串真假值推断。 */
+    static boolean advanced(Map<String, Object> arguments) {
+        Object value = arguments.getOrDefault("advanced", false);
+        if (value instanceof Boolean flag) return flag;
+        throw new CapabilityException(CapabilityException.Reason.DENIED,
+                "Search argument advanced must be a boolean");
+    }
+
+    static String requiredQuery(Map<String, Object> arguments) {
         String query = String.valueOf(arguments.getOrDefault("query", "")).trim();
         if (query.isBlank()) {
             throw new CapabilityException(CapabilityException.Reason.DENIED,
@@ -58,7 +68,7 @@ public class LocalNewsSearchCapabilityAdapter implements CapabilityAdapter {
         return query;
     }
 
-    private int boundedLimit(Map<String, Object> arguments) {
+    static int boundedLimit(Map<String, Object> arguments, int maximum) {
         Object raw = arguments.getOrDefault("maxResults", 5);
         int value;
         try {
@@ -66,6 +76,6 @@ public class LocalNewsSearchCapabilityAdapter implements CapabilityAdapter {
         } catch (NumberFormatException error) {
             value = 5;
         }
-        return Math.max(1, Math.min(10, value));
+        return Math.max(1, Math.min(maximum, value));
     }
 }

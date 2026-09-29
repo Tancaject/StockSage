@@ -8,6 +8,8 @@ SEC EDGAR 是美国证券交易委员会公开披露文件数据库。
 https://www.sec.gov/os/accessing-edgar-data
 """
 
+from app.research_budget import check_budget, bounded_timeout, budget_call
+
 import re
 import time
 import logging
@@ -46,7 +48,8 @@ class EdgarService:
         """遵守 SEC 限流要求。"""
         elapsed = time.time() - self._last_request_time
         if elapsed < _REQUEST_DELAY:
-            time.sleep(_REQUEST_DELAY - elapsed)
+            time.sleep(bounded_timeout(_REQUEST_DELAY - elapsed))
+        check_budget()
         self._last_request_time = time.time()
 
     def _get(self, url: str) -> httpx.Response:
@@ -54,7 +57,7 @@ class EdgarService:
         self._validate_sec_url(url)
         self._throttle()
         # 自动跟随会在目标校验前发出下一跳；SEC 端点变更时应明确更新调用地址。
-        resp = self._client.get(url, follow_redirects=False)
+        resp = budget_call(self._client.get, url, follow_redirects=False, timeout=bounded_timeout(30))
         resp.raise_for_status()
         return resp
 

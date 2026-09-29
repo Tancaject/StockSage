@@ -1,11 +1,24 @@
 package com.stocksage.config;
 
+import com.stocksage.agent.AgentRuntimeConfiguration;
+import com.stocksage.agent.ChatConcurrencyAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClientCustomizer;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.model.SimpleApiKey;
+import org.springframework.ai.model.openai.autoconfigure.OpenAIAutoConfigurationUtil;
+import org.springframework.ai.model.openai.autoconfigure.OpenAiConnectionProperties;
+import org.springframework.ai.model.openai.autoconfigure.OpenAiChatProperties;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
  * 各模型职责使用的 ChatClient 定义。
@@ -14,7 +27,52 @@ import org.springframework.context.annotation.Primary;
  * 工具与 Capability 的执行权留在后端计划执行层。</p>
  */
 @Configuration
+@EnableConfigurationProperties({ModelPricingProperties.class, ModelTokenBudgetProperties.class})
 public class AiConfig {
+
+    private final AgentRuntimeConfiguration runtimeConfiguration;
+
+    public AiConfig(AgentRuntimeConfiguration runtimeConfiguration) {
+        this.runtimeConfiguration = runtimeConfiguration;
+    }
+
+    @Bean
+    public ChatClientCustomizer chatConcurrencyCustomizer(
+            @Value("${stocksage.chat.max-concurrent-calls:8}") int maxConcurrentCalls) {
+        ChatConcurrencyAdvisor advisor = new ChatConcurrencyAdvisor(maxConcurrentCalls);
+        return builder -> builder.defaultAdvisors(advisor);
+    }
+
+    /** Record the same connection inputs used by the API; the default model retains its auto-configuration. */
+    @Bean
+    public OpenAiApi openAiApi(OpenAiConnectionProperties common, OpenAiChatProperties chat,
+                              ObjectProvider<RestClient.Builder> restBuilders,
+                              ObjectProvider<WebClient.Builder> webBuilders,
+                              ResponseErrorHandler errorHandler, ModelTokenBudgetProperties tokenBudget) {
+        var options = chat.getOptions();
+        if (tokenBudget.maxTokens() != null && ((options.getN() != null && options.getN() > 1)
+                || (options.getExtraBody() != null && !options.getExtraBody().isEmpty())
+                || (options.getToolNames() != null && !options.getToolNames().isEmpty())
+                || (options.getToolCallbacks() != null && !options.getToolCallbacks().isEmpty()))) {
+            throw new IllegalArgumentException("stocksage.research.token-budget requires single-response chat without extra-body or default tools");
+        }
+        var connection = OpenAIAutoConfigurationUtil.resolveConnectionProperties(common, chat, "chat");
+        String baseUrl = connection.baseUrl();
+        String completionsPath = chat.getCompletionsPath();
+        OpenAiApi api = OpenAiApi.builder()
+                .baseUrl(baseUrl)
+                .apiKey(new SimpleApiKey(connection.apiKey()))
+                .headers(connection.headers())
+                .completionsPath(completionsPath)
+                .embeddingsPath("/v1/embeddings")
+                .restClientBuilder(restBuilders.getIfAvailable(RestClient::builder))
+                .webClientBuilder(webBuilders.getIfAvailable(WebClient::builder).clone()
+                        .filter(ChatConcurrencyAdvisor.cancellationFilter()))
+                .responseErrorHandler(errorHandler)
+                .build();
+        runtimeConfiguration.recordChatProvider(baseUrl, completionsPath);
+        return api;
+    }
 
     /** 查询改写、路由和记忆摘要使用的快速模型。 */
     @Value("${stocksage.chat.model-routing.fast-model:qwen3.6-flash}")
@@ -72,9 +130,7 @@ public class AiConfig {
      */
     @Bean("queryRewriteChatClient")
     public ChatClient queryRewriteChatClient(ChatClient.Builder builder) {
-        return builder.clone()
-                .defaultOptions(chatOptions(fastModel))
-                .defaultSystem("""
+        return attributedClient(builder, "query-rewrite", chatOptions(fastModel), """
                         你是 StockSage 的 RAG 查询改写器。
                         任务：把用户的自然语言投研问题改写为适合向量检索的关键词组合。
 
@@ -83,8 +139,7 @@ public class AiConfig {
                         2. 保留股票 ticker、公司名、财报类型、年份/季度、核心财务或业务术语。
                         3. 删除寒暄、语气词和不影响检索的口语表达。
                         4. 中英混合即可，优先保留原问题中的专有名词。
-                """)
-                .build();
+                """);
     }
 
     /**
@@ -98,16 +153,20 @@ public class AiConfig {
      */
     @Bean("contextualGistChatClient")
     public ChatClient contextualGistChatClient(ChatClient.Builder builder) {
-        return builder.clone()
-                .defaultOptions(chatOptions(fastModel))
-                .defaultSystem("""
+        return attributedClient(builder, "contextual-gist", chatOptions(fastModel), """
                         你是 StockSage 的切片情境标注器，为 SEC 财报切片生成检索用的情境说明。
                         规则：
                         1. 只输出一句中文，不解释、不换行、不加引号或标号。
                         2. 说明这段文字在该财报中讨论什么主题、属于哪个论点或指标脉络。
                         3. 不得复述原文句子，不得编造数字或事实；上下文没有的信息不要写。
-                        """)
-                .build();
+                        """);
+    }
+
+    private ChatClient attributedClient(ChatClient.Builder builder, String role,
+                                        OpenAiChatOptions options, String systemPrompt) {
+        ChatClient client = builder.clone().defaultOptions(options).defaultSystem(systemPrompt).build();
+        runtimeConfiguration.recordClientDefaults(role, options, systemPrompt);
+        return client;
     }
 
     /**

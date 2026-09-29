@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import run_agent_eval
-from agent_eval_summary import build_report
+from agent_eval_summary import build_report, intent_calibration
 from eval_summary import DEFAULT_GATES, evaluate_gates, summarize_results
 
 
@@ -36,7 +36,7 @@ GATES = {
     "baseline_delta_max_drop": 0.02,
     "p95_latency_ratio_max": 1.2,
     "harness_policy_id_expected": "deep-equity-v1",
-    "harness_policy_version_expected": 5,
+    "harness_policy_version_expected": 6,
     "harness_case_count_min": 60,
     "harness_exact_accuracy_min": 1.0,
     "harness_decision_contract_exact_match_rate_min": 1.0,
@@ -155,7 +155,7 @@ def harness_result(**overrides):
         "case_schema_version": "harness_golden_case_v2",
         "engine": "java-production-policy",
         "policy_id": "deep-equity-v1",
-        "policy_version": 5,
+        "policy_version": 6,
         "status": "pass",
         "case_count": 60,
         "exact_accuracy": 1.0,
@@ -178,7 +178,7 @@ def live_harness_result(**overrides):
         "generated_at": "2026-09-03T12:00:00+00:00",
         "dataset_sha256": "b" * 64,
         "policy_ids": ["deep-equity-v1"],
-        "policy_versions": ["5"],
+        "policy_versions": ["6"],
         "run_mode": "release",
         "run_state": "complete",
         "planned_case_count": 30,
@@ -206,6 +206,46 @@ def complete_evidence():
 
 
 class AgentEvalSummaryTest(unittest.TestCase):
+    def test_intent_diagnostics_keep_missing_labels_and_guarded_cases_out_of_source_accuracy(self):
+        def row(expected, actual, clarify, label, signal_route, **extra):
+            return planner_result(expectedRoute=expected, actualRoute=actual, executable=True,
+                                  actualClarification=clarify, expectedClarification=label,
+                                  confidence=0.9 if expected == "MARKET" else 0.6,
+                                  signalDiagnostics=[{"source": "LLM", "targetRoute": signal_route,
+                                                      "fineIntent": "UNKNOWN", "confidence": 0.8}], **extra)
+        rows = [row("MARKET", "MARKET", False, False, "NEWS"),
+                row("NEWS", "MARKET", False, False, "NEWS"),
+                row("DIRECT", "DIRECT", True, True, "MARKET"),
+                row("DIRECT", "DIRECT", True, True, "NEWS", executionGuarded=True),
+                planner_result(expectedRoute="NEWS", executable=False, expectedClarification=False,
+                               sourceScores={"EMBEDDING": 0.99})]
+        result = intent_calibration(rows)
+        self.assertEqual(result["status"], "PARTIAL")
+        self.assertEqual(result["decision_missing_count"], 1)
+        self.assertEqual(result["clarification_labeled_count"], 5)
+        self.assertEqual(result["clarification_evaluated_count"], 4)
+        self.assertEqual(result["clarification_accuracy"], 1)
+        self.assertEqual(result["clarification_rate"], 0.5)
+        self.assertEqual(result["nonclarified_route_error_rate"], 0.5)
+        self.assertNotIn("EMBEDDING", result["sources"])
+        source = result["sources"]["LLM"]
+        self.assertEqual(source["observed_case_count"], 4)
+        self.assertEqual(source["route_comparable_case_count"], 2)
+        self.assertEqual(source["signal_route_agreement_rate"], 0.5)
+        self.assertEqual(source["paired_fused_minus_signal_accuracy"], 0)
+        self.assertEqual(result["expected_route_strata"]["MARKET"]["sources"]["LLM"]
+                         ["paired_fused_minus_signal_accuracy"], 1)
+        self.assertEqual(result["expected_route_strata"]["NEWS"]["sources"]["LLM"]
+                         ["paired_fused_minus_signal_accuracy"], -1)
+        self.assertEqual(result["score_bins"][3]["route_accuracy"], 1)
+        self.assertIsNone(result["score_bins"][0]["route_accuracy"])
+        legacy = intent_calibration([planner_result()])
+        self.assertEqual(legacy["status"], "NO_DATA")
+        self.assertEqual(legacy["signal_observation_status"], "NO_DATA")
+        self.assertIsNone(legacy["clarification_accuracy"])
+        rows[0]["signalDiagnostics"].append({"source": "NGRAM", "targetRoute": "MARKET", "confidence": float("nan")})
+        self.assertEqual(intent_calibration(rows)["invalid_signal_count"], 1)
+
     def test_missing_critical_sections_is_incomplete_and_preserves_not_run(self):
         report = build_report(planner(), GATES, baseline_payload=planner())
         self.assertEqual("agent_eval_v1", report["schema_version"])
@@ -430,7 +470,7 @@ class AgentEvalSummaryTest(unittest.TestCase):
 
     def test_completion_gate_contract_preserves_order_schema_and_thresholds(self):
         evidence = complete_evidence()
-        evidence["harness_payload"] = harness_result(policy_version="5")
+        evidence["harness_payload"] = harness_result(policy_version="6")
         report = build_report(
             planner(),
             GATES,
@@ -521,7 +561,7 @@ class AgentEvalSummaryTest(unittest.TestCase):
                     "deep-equity-v1",
                     "passed",
                 ),
-                ("harness_policy_version", "5", "==", 5, "passed"),
+                ("harness_policy_version", "6", "==", 6, "passed"),
                 ("harness_status", "pass", "==", "pass", "passed"),
                 ("harness_case_count", 60, ">=", 60, "passed"),
                 ("harness_exact_accuracy", 1.0, ">=", 1.0, "passed"),
@@ -578,9 +618,9 @@ class AgentEvalSummaryTest(unittest.TestCase):
                 ),
                 (
                     "harness_live_policy_versions",
-                    ["5"],
+                    ["6"],
                     "==",
-                    ["5"],
+                    ["6"],
                     "passed",
                 ),
                 (
@@ -609,7 +649,7 @@ class AgentEvalSummaryTest(unittest.TestCase):
         report = build_report(
             planner(),
             GATES,
-            harness_payload=harness_result(policy_version=1),
+            harness_payload=harness_result(policy_version=5),
         )
         self.assertEqual("failed", report["status"])
         failed = {
@@ -739,7 +779,7 @@ class AgentEvalSummaryTest(unittest.TestCase):
         report = build_report(
             planner(),
             GATES,
-            harness_live_payload=live_harness_result(policy_versions=["1"]),
+            harness_live_payload=live_harness_result(policy_versions=["5"]),
         )
         self.assertEqual("failed", report["status"])
         failed = {

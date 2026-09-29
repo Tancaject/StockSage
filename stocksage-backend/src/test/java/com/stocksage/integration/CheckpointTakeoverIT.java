@@ -1,12 +1,14 @@
 package com.stocksage.integration;
 
+import com.stocksage.research.ResearchTaskWorker;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.BearResearcher;
 import com.stocksage.agent.BullResearcher;
 import com.stocksage.agent.DebateContractParser;
 import com.stocksage.agent.DebateDecisionPolicy;
 import com.stocksage.agent.ModelTier;
-import com.stocksage.agent.ResearchDebateService;
+import com.stocksage.research.ResearchDebateService;
 import com.stocksage.agent.ResearchManager;
 import com.stocksage.harness.DeepResearchCompletionPolicy;
 import com.stocksage.harness.HarnessModels.HarnessDecision;
@@ -34,16 +36,16 @@ import com.stocksage.model.entity.ResearchTaskCheckpoint;
 import com.stocksage.model.entity.User;
 import com.stocksage.repository.ResearchTaskCheckpointRepository;
 import com.stocksage.repository.UserAccountRepository;
-import com.stocksage.service.ConversationMessageService;
-import com.stocksage.service.DeepEvidenceCollector;
-import com.stocksage.service.DeepResearchPipeline;
-import com.stocksage.service.InvestmentReportVersionService;
+import com.stocksage.conversation.ConversationMessageService;
+import com.stocksage.research.DeepEvidenceCollector;
+import com.stocksage.research.DeepResearchPipeline;
+import com.stocksage.research.InvestmentReportVersionService;
 import com.stocksage.service.OfflineDemoSampleService;
-import com.stocksage.service.ReportMarkdownRenderer;
-import com.stocksage.service.ResearchTaskCheckpointService;
-import com.stocksage.service.ResearchTaskLeaseService;
-import com.stocksage.service.ResearchTaskPublicationTransaction;
-import com.stocksage.service.ResearchTaskService;
+import com.stocksage.research.ReportMarkdownRenderer;
+import com.stocksage.research.ResearchTaskCheckpointService;
+import com.stocksage.research.ResearchTaskLeaseService;
+import com.stocksage.research.ResearchTaskPublicationTransaction;
+import com.stocksage.research.ResearchTaskService;
 import com.stocksage.tool.ChatStreamEmitter;
 import com.stocksage.trace.TraceService;
 import org.junit.jupiter.api.Test;
@@ -246,12 +248,14 @@ class CheckpointTakeoverIT {
                     mock(TaskScheduler.class),
                     checkpointService,
                     evidenceCollector,
-                    mock(com.stocksage.service.DeepEvidenceReplanService.class),
+                    mock(com.stocksage.research.DeepEvidenceReplanService.class),
                     reportRenderer,
                     conversationMessageService,
                     new ResearchTaskPublicationTransaction(userAccountRepository),
                     streamEmitter,
-                    mock(com.stocksage.trace.TraceService.class)
+                    mock(com.stocksage.trace.TraceService.class),
+                    mock(com.stocksage.research.ResearchRunManifestService.class),
+                    mock(com.stocksage.research.ResearchEvidenceSnapshotService.class, invocation -> "snapshot-test")
             );
 
             Future<?> takenOver = instanceB.submit(() -> {
@@ -265,7 +269,7 @@ class CheckpointTakeoverIT {
             assertThat(task.getStatus()).isEqualTo(ResearchTask.Status.SUCCEEDED);
             assertThat(task.getResultReportVersionId()).isEqualTo(99L);
             assertThat(persistedCheckpoint.get()).isNull();
-            verify(evidenceCollector, never()).collect(any(), any(), any(), any());
+            verify(evidenceCollector, never()).collect(any(), any(), any(), any(), any(), any());
             verify(debateService).runDebate(
                     eq("trace-42"), eq(20L), any(AnalysisState.class), eq(3), eq(3),
                     any(), any(Runnable.class), any());

@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -70,6 +71,19 @@ class SkillExecutionServiceTest {
                 PlanRoute.NEWS, "NEWS", "news",
                 List.of(PlanAction.SEARCH_NEWS), "", ModelTier.STANDARD);
         when(resolver.resolve(plan)).thenReturn(Optional.of(skill));
+    }
+
+    @Test
+    void localCapacityRejectionDoesNotRetryTheSamePoolThroughFallback() {
+        when(gateway.invoke(eq("mcp.news.search"), anyMap(), any(CapabilityInvocationContext.class)))
+                .thenThrow(new CapabilityException(CapabilityException.Reason.CAPACITY_EXCEEDED, "queue full"));
+        var result = execute();
+        assertThat(result.fallbackUsed()).isFalse();
+        assertThat(result.evidence()).isEmpty();
+        verify(gateway, never()).invoke(eq("local.news.searchNews"), anyMap(), any());
+        verify(emitter).emit("trace", 7L, "observation",
+                "执行容量不足，可选能力 mcp.news.search 未启动；请稍后重试。");
+        verify(observer).record(eq("latest-news-mcp"), eq(SkillExecutionObserver.Outcome.FAILED), anyLong());
     }
 
     @Test

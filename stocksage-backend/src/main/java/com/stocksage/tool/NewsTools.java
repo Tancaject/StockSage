@@ -33,10 +33,10 @@ public class NewsTools {
      *
      * <p>该方法适合围绕单一标的做新闻补充，具体数据源和去重逻辑由 Python 数据服务负责。</p>
      */
-    @Tool(description = "获取指定股票的近期新闻和公告摘要")
+    @Tool(description = "获取指定股票的近期新闻和公告摘要。days 映射为供应商的日、周或月搜索窗口，不保证逐条严格落在请求天数内；每条发布时间精度和实际供应商窗口随结果返回")
     public String getStockNews(
             @ToolParam(description = "股票代码或名称，如 AAPL、TSLA") String code,
-            @ToolParam(description = "获取最近多少天的新闻") int days) {
+            @ToolParam(description = "正整数天数；1 天对应日窗口，2-7 天对应周窗口，更长对应月窗口，不是严格日期过滤") int days) {
         return dataServiceClient.getStockNews(code, days);
     }
 
@@ -50,7 +50,7 @@ public class NewsTools {
     @Tool(description = "联网搜索金融相关信息。当知识库中没有相关内容、或需要获取最新市场新闻、政策变化、公司公告时使用")
     public String webSearch(
             @ToolParam(description = "搜索关键词，建议用中文+英文混合。若用户问最近、近期、最新、当前等问题，应使用当前年份或不带年份的查询词，不要擅自使用过去年份") String query,
-            @ToolParam(description = "返回结果数量，默认5条") int maxResults) {
+            @ToolParam(description = "返回结果数量，1-20 条，默认 5 条") int maxResults) {
         return webSearch(query, maxResults, false);
     }
 
@@ -85,7 +85,7 @@ public class NewsTools {
     @Tool(description = "搜索最新财经新闻。当用户询问某只股票的最新消息、市场热点、政策动态时使用")
     public String searchNews(
             @ToolParam(description = "搜索关键词。若用户问最近、近期、最新、当前等问题，应使用当前年份或不带年份的查询词，不要擅自使用过去年份") String query,
-            @ToolParam(description = "返回结果数量，默认5条") int maxResults) {
+            @ToolParam(description = "返回结果数量，1-20 条，默认 5 条") int maxResults) {
         return searchNews(query, maxResults, false);
     }
 
@@ -105,7 +105,7 @@ public class NewsTools {
     /**
      * 根据用户原始问题推断检索时间范围。
      *
-     * <p>返回 DuckDuckGo 的时间范围代码：d=24 小时、w=一周、m=一月；
+     * <p>返回供应商搜索时间范围代码：d=日、w=周、m=月；
      * 没有明确时效诉求时返回 null，表示不做时间过滤。粒度更细的关键词优先匹配。</p>
      */
     private String resolveTimeLimit(String userQuery) {

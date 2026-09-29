@@ -1,8 +1,9 @@
 package com.stocksage.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.client.DataServiceClient;
+import com.stocksage.client.SearchResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,15 +29,15 @@ public class StockNewsService {
 
     /** 复用 Python 新闻端点及其缓存、搜索降级策略。 */
     private final DataServiceClient dataServiceClient;
-    /** 将供应商 JSON 解析成统一前端结构。 */
+    /** 验证 data-service 契约后转为统一前端结构。 */
     private final ObjectMapper objectMapper;
 
     /**
-     * 读取某 ticker 近 {@code days} 天新闻并归一为前端条目列表。
+     * 按 {@code days} 请求新闻窗口，并保留供应商实际使用的检索窗口。
      *
      * @param ticker 股票代码
      * @param days 回溯天数；非正数默认 7 天
-     * @return 包含 provider、items、count、empty 和可选 error 的载荷
+     * @return 新闻条目、实际检索元数据、状态和可选的错误说明
      */
     public Map<String, Object> getNews(String ticker, int days) {
         String norm = ticker == null ? "" : ticker.trim().toUpperCase();
@@ -44,39 +45,50 @@ public class StockNewsService {
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("ticker", norm);
+        result.put("provider", "");
         List<Map<String, Object>> items = new ArrayList<>();
-        String provider = "";
 
         if (!norm.isEmpty()) {
             try {
                 // 调用 data-service 的既有新闻管线，不在 Java 侧直接访问第三方搜索供应商。
                 String raw = dataServiceClient.getStockNews(norm, window);
-                JsonNode root = objectMapper.readTree(raw == null || raw.isBlank() ? "{}" : raw);
-                provider = root.path("provider").asText("");
-                JsonNode results = root.path("results");
-                if (results.isArray()) {
-                    for (JsonNode r : results) {
-                        String title = r.path("title").asText("").trim();
+                SearchResponse response = SearchResponse.fromJson(objectMapper.readTree(raw));
+                Map<String, Object> metadata = objectMapper.convertValue(response, new TypeReference<LinkedHashMap<String, Object>>() {});
+                metadata.remove("results");
+                metadata.remove("error");
+                result.putAll(metadata);
+                if (response.error()) {
+                    result.put("error", "新闻读取失败（data-service /api/stock/news）："
+                            + firstNonBlank(response.message(), "上游服务未返回可用结果")
+                            + "。请稍后重试；若持续失败，请检查 data-service 日志和搜索服务配置。");
+                } else {
+                    for (var r : response.results()) {
+                        String title = r.title().trim();
                         if (title.isBlank()) {
                             continue;
                         }
-                        String url = firstNonBlank(r.path("link").asText(""), r.path("url").asText(""));
+                        String url = r.link();
                         Map<String, Object> item = new LinkedHashMap<>();
                         item.put("title", title);
                         item.put("url", url);
-                        item.put("source", firstNonBlank(r.path("source").asText(""), domainOf(url)));
-                        item.put("date", r.path("date").asText(""));
-                        item.put("snippet", r.path("snippet").asText(""));
+                        item.put("source", firstNonBlank(r.source(), domainOf(url)));
+                        item.put("date", r.date());
+                        item.put("snippet", r.snippet());
+                        item.put("publishedTimeKind", r.publishedTimeKind().name());
+                        item.put("publishedAt", r.publishedAt());
+                        item.put("publishedDate", r.publishedDate());
+                        item.put("publishedTimeBasis", r.publishedTimeBasis());
                         items.add(item);
                     }
                 }
             } catch (Exception e) {
                 log.warn("Failed to load stock news for {}: {}", norm, e.getMessage());
-                result.put("error", "新闻读取失败");
+                result.put("status", "ERROR");
+                result.put("error", "新闻读取失败（Java 新闻服务）：无法读取 data-service 的新闻响应。"
+                        + "请检查 data-service 日志及接口版本后重试。");
             }
         }
 
-        result.put("provider", provider);
         result.put("items", items);
         result.put("count", items.size());
         result.put("empty", items.isEmpty());

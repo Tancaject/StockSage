@@ -15,6 +15,11 @@ public class ChatRequest {
     /** 后端注入的会话用户 ID；保留字段兼容旧前端。 */
     private String userId;
 
+    /** 一次主动提交的客户端身份；网络重发沿用，重新生成使用新值。缺省保留旧幂等键语义。 */
+    @jakarta.validation.constraints.Pattern(regexp = "[A-Za-z0-9_-]{1,80}",
+            message = "submissionId 须为 1–80 位字母、数字、下划线或连字符")
+    private String submissionId;
+
     /** 会话 ID，首次对话可为 null（后端自动创建） */
     private Long conversationId;
 

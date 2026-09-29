@@ -1187,8 +1187,8 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 - `stocksage-backend/src/main/java/com/stocksage/rag/KeywordSearchService.java`
 - `stocksage-backend/src/main/java/com/stocksage/rag/DashScopeReranker.java`
 - `stocksage-backend/src/main/java/com/stocksage/rag/ContextualEnricher.java`
-- `stocksage-backend/src/main/java/com/stocksage/service/KnowledgeIngestionService.java`
-- `stocksage-backend/src/main/java/com/stocksage/service/EdgarIngestionService.java`
+- `stocksage-backend/src/main/java/com/stocksage/knowledge/KnowledgeIngestionService.java`
+- `stocksage-backend/src/main/java/com/stocksage/knowledge/EdgarIngestionService.java`
 - `stocksage-backend/src/main/java/com/stocksage/service/RagEvalService.java`
 - `RAG_EVALUATION.md`
 - `rag-eval/`
@@ -1199,12 +1199,12 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 - `stocksage-backend/src/main/java/com/stocksage/agent/ExecutionPlan.java`
 - `stocksage-backend/src/main/java/com/stocksage/config/AgentConfig.java`
 - `stocksage-backend/src/main/java/com/stocksage/service/ToolPrefetchService.java`
-- `stocksage-backend/src/main/java/com/stocksage/service/DeepEvidenceCollector.java`
-- `stocksage-backend/src/main/java/com/stocksage/agent/ResearchDebateService.java`
+- `stocksage-backend/src/main/java/com/stocksage/research/DeepEvidenceCollector.java`
+- `stocksage-backend/src/main/java/com/stocksage/research/ResearchDebateService.java`
 - `stocksage-backend/src/main/java/com/stocksage/agent/BullResearcher.java`
 - `stocksage-backend/src/main/java/com/stocksage/agent/BearResearcher.java`
 - `stocksage-backend/src/main/java/com/stocksage/agent/ResearchManager.java`
-- `stocksage-backend/src/main/java/com/stocksage/service/DeepResearchPipeline.java`
+- `stocksage-backend/src/main/java/com/stocksage/research/DeepResearchPipeline.java`
 
 ### Eval 与 Trace
 

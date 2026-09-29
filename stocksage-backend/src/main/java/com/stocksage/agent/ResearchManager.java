@@ -1,12 +1,14 @@
 package com.stocksage.agent;
 
+import com.stocksage.research.ResearchDebateService;
+
 import com.stocksage.util.JsonText;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.harness.EvidenceLedger;
-import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
+import com.stocksage.evidence.EvidenceLedger;
+import com.stocksage.evidence.EvidenceModels.EvidenceEnvelope;
 import com.stocksage.harness.HarnessModels.ParseStatus;
 import com.stocksage.harness.HarnessModels.SynthesisResult;
 import com.stocksage.model.dto.AnalysisHorizon;
@@ -148,9 +150,11 @@ public class ResearchManager {
     ) {
         Runnable guard = executionGuard == null ? NO_OP_EXECUTION_GUARD : executionGuard;
         StringBuilder buffer = new StringBuilder();
-        return continuationChatClient.prompt()
-                .user(buildContinuationPrompt(state, completedRound, maxRounds))
-                .stream()
+        var request = continuationChatClient.prompt().user(buildContinuationPrompt(state, completedRound, maxRounds));
+        if (state.getModelInvocationContext() != null) {
+            request.advisors(a -> a.param(ModelInvocationAdvisor.CONTEXT_KEY, state.getModelInvocationContext()));
+        }
+        return request.stream()
                 .content()
                 .doOnNext(token -> {
                     guard.run();
@@ -183,9 +187,11 @@ public class ResearchManager {
         Runnable guard = executionGuard == null ? NO_OP_EXECUTION_GUARD : executionGuard;
         boolean positionAIsBull = positionAIsBull(inputHash);
         StringBuilder buffer = new StringBuilder();
-        return scoringChatClient.prompt()
-                .user(buildScoringPrompt(state, positionAIsBull))
-                .stream()
+        var request = scoringChatClient.prompt().user(buildScoringPrompt(state, positionAIsBull));
+        if (state.getModelInvocationContext() != null) {
+            request.advisors(a -> a.param(ModelInvocationAdvisor.CONTEXT_KEY, state.getModelInvocationContext()));
+        }
+        return request.stream()
                 .content()
                 .doOnNext(token -> {
                     guard.run();
@@ -243,9 +249,11 @@ public class ResearchManager {
         StringBuilder buffer = new StringBuilder();
         AtomicBoolean jsonStarted = new AtomicBoolean(false);
 
-        Flux<String> tokens = reportChatClient.prompt()
-                .user(buildPrompt(state, verdict))
-                .stream()
+        var request = reportChatClient.prompt().user(buildPrompt(state, verdict));
+        if (state.getModelInvocationContext() != null) {
+            request.advisors(a -> a.param(ModelInvocationAdvisor.CONTEXT_KEY, state.getModelInvocationContext()));
+        }
+        Flux<String> tokens = request.stream()
                 .content();
 
         return tokens

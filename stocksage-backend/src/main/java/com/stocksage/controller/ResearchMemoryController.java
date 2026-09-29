@@ -1,7 +1,7 @@
 package com.stocksage.controller;
 
-import com.stocksage.config.RequestIdentity;
-import com.stocksage.service.ResearchMemoryService;
+import com.stocksage.identity.RequestIdentity;
+import com.stocksage.knowledge.ResearchMemoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

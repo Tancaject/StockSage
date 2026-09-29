@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "status": "PARTIAL",
+  "provider": "baostock",
+  "market": "A_SHARE",
+  "code": "sh.600519",
+  "input": "sh.600519",
+  "resolvedCode": "sh.600519",
+  "source": "baostock",
+  "routeReason": "explicit A-share prefix",
+  "period": "annual",
+  "requestedPeriod": "annual",
+  "requestedYears": 2,
+  "timeKind": "DATE",
+  "fetchedAt": "2026-09-25T01:02:03Z",
+  "asOf": "2025-12-31",
+  "currency": null,
+  "valueScale": "PROVIDER_RAW",
+  "valueEncoding": "DECIMAL_STRING",
+  "aggregationBasis": "UNKNOWN",
+  "count": 2,
+  "reports": [
+    {
+      "year": 2025,
+      "quarter": 4,
+      "status": "SUCCESS",
+      "asOf": "2025-12-31",
+      "statements": {
+        "profit": {
+          "status": "SUCCESS",
+          "data": {
+            "code": "sh.600519",
+            "pubDate": "2026-03-31",
+            "statDate": "2025-12-31",
+            "roeAvg": "0.074617",
+            "npMargin": "2.125",
+            "gpMargin": "3.125",
+            "netProfit": "9007199254740993.123456789",
+            "epsTTM": "5.125",
+            "MBRevenue": "10000000000.000001",
+            "totalShare": "7.125",
+            "liqaShare": null,
+            "netProfitUnit": "YUAN",
+            "MBRevenueUnit": "YUAN"
+          },
+          "errorCode": null,
+          "message": null,
+          "retryable": null
+        },
+        "operation": {
+          "status": "SUCCESS",
+          "data": {
+            "code": "sh.600519",
+            "pubDate": "2026-03-31",
+            "statDate": "2025-12-31",
+            "NRTurnRatio": "1.125",
+            "NRTurnDays": "2.125",
+            "INVTurnRatio": "3.125",
+            "INVTurnDays": "4.125",
+            "CATurnRatio": "5.125",
+            "AssetTurnRatio": "6.125",
+            "NRTurnDaysUnit": "DAY",
+            "INVTurnDaysUnit": "DAY"
+          },
+          "errorCode": null,
+          "message": null,
+          "retryable": null
+        },
+        "growth": {
+          "status": "SUCCESS",
+          "data": {
+            "code": "sh.600519",
+            "pubDate": "2026-03-31",
+            "statDate": "2025-12-31",
+            "YOYEquity": "1.125",
+            "YOYAsset": "2.125",
+            "YOYNI": "3.125",
+            "YOYEPSBasic": "4.125",
+            "YOYPNI": "5.125"
+          },
+          "errorCode": null,
+          "message": null,
+          "retryable": null
+        },
+        "balance": {
+          "status": "SUCCESS",
+          "data": {
+            "code": "sh.600519",
+            "pubDate": "2026-03-31",
+            "statDate": "2025-12-31",
+            "currentRatio": "1.125",
+            "quickRatio": "2.125",
+            "cashRatio": "3.125",
+            "YOYLiability": "4.125",
+            "liabilityToAsset": "5.125",
+            "assetToEquity": "6.125"
+          },
+          "errorCode": null,
+          "message": null,
+          "retryable": null
+        },
+        "cashFlow": {
+          "status": "SUCCESS",
+          "data": {
+            "code": "sh.600519",
+            "pubDate": "2026-03-31",
+            "statDate": "2025-12-31",
+            "CAToAsset": "1.125",
+            "NCAToAsset": "2.125",
+            "tangibleAssetToAsset": "3.125",
+            "ebitToInterest": "4.125",
+            "CFOToOR": "5.125",
+            "CFOToNP": "6.125",
+            "CFOToGr": "7.125"
+          },
+          "errorCode": null,
+          "message": null,
+          "retryable": null
+        },
+        "dupont": {
+          "status": "SUCCESS",
+          "data": {
+            "code": "sh.600519",
+            "pubDate": "2026-03-31",
+            "statDate": "2025-12-31",
+            "dupontROE": "1.125",
+            "dupontAssetStoEquity": "2.125",
+            "dupontAssetTurn": "3.125",
+            "dupontPnitoni": "4.125",
+            "dupontNitogr": "5.125",
+            "dupontTaxBurden": "6.125",
+            "dupontIntburden": "7.125",
+            "dupontEbittogr": "8.125"
+          },
+          "errorCode": null,
+          "message": null,
+          "retryable": null
+        }
+      }
+    },
+    {
+      "year": 2024,
+      "quarter": 4,
+      "status": "PARTIAL",
+      "asOf": "2024-12-31",
+      "statements": {
+        "profit": {
+          "status": "SUCCESS",
+          "data": {
+            "code": "sh.600519",
+            "pubDate": "2025-03-31",
+            "statDate": "2024-12-31",
+            "roeAvg": "0.074617",
+            "npMargin": "2.125",
+            "gpMargin": "3.125",
+            "netProfit": "0",
+            "epsTTM": "5.125",
+            "MBRevenue": "10000000000.000001",
+            "totalShare": "7.125",
+            "liqaShare": null,
+            "netProfitUnit": "YUAN",
+            "MBRevenueUnit": "YUAN"
+          },
+          "errorCode": null,
+          "message": null,
+          "retryable": null
+        },
+        "operation": {
+          "status": "EMPTY",
+          "data": null,
+          "errorCode": null,
+          "message": null,
+          "retryable": null
+        },
+        "growth": {
+          "status": "ERROR",
+          "data": null,
+          "errorCode": "UPSTREAM_ERROR",
+          "message": "Synthetic provider failure",
+          "retryable": null
+        },
+        "balance": {
+          "status": "EMPTY",
+          "data": null,
+          "errorCode": null,
+          "message": null,
+          "retryable": null
+        },
+        "cashFlow": {
+          "status": "EMPTY",
+          "data": null,
+          "errorCode": null,
+          "message": null,
+          "retryable": null
+        },
+        "dupont": {
+          "status": "EMPTY",
+          "data": null,
+          "errorCode": null,
+          "message": null,
+          "retryable": null
+        }
+      }
+    }
+  ],
+  "error": false,
+  "errorCode": null,
+  "message": "Some BaoStock financial tables are unavailable; use only successful statements.",
+  "retryable": null
+}

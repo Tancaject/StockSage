@@ -2,6 +2,8 @@ package com.stocksage.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.client.KLineResponse;
+import com.stocksage.ibkr.IbkrHistoricalResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.time.Instant;
 
 /**
  * 把不同行情工具的 K 线 JSON 归一成前端蜡烛图载荷。
@@ -43,6 +46,12 @@ public class KLinePayloadMapper {
             JsonNode root = result instanceof String text
                     ? objectMapper.readTree(text)
                     : objectMapper.valueToTree(result);
+            if ("getStockKLine".equals(sourceTool) && root.has("schemaVersion")) {
+                return toVersionedChart(sourceTool, KLineResponse.fromJson(root));
+            }
+            if ("getIbkrHistoricalBars".equals(sourceTool) && root.has("schemaVersion")) {
+                return toIbkrChart(sourceTool, IbkrHistoricalResponse.fromJson(root));
+            }
             if (root.path("error").asBoolean(false) || root.path("data").path("error").asBoolean(false)) {
                 return Optional.empty();
             }
@@ -85,7 +94,75 @@ public class KLinePayloadMapper {
                 || "getIbkrHistoricalBars".equals(sourceTool);
     }
 
-    /** 从任意兼容嵌套结构中提取并限制有效 OHLCV 点。 */
+    private Optional<Map<String, Object>> toVersionedChart(String sourceTool, KLineResponse response) {
+        if (response.status() != KLineResponse.Status.SUCCESS) return Optional.empty();
+        List<Map<String, Object>> points = new ArrayList<>();
+        int start = Math.max(0, response.data().size() - CHART_POINT_LIMIT);
+        for (KLineResponse.Bar bar : response.data().subList(start, response.data().size())) {
+            Map<String, Object> point = new LinkedHashMap<>();
+            point.put("date", bar.date());
+            point.put("open", bar.open());
+            point.put("high", bar.high());
+            point.put("low", bar.low());
+            point.put("close", bar.close());
+            if (bar.volume() != null) point.put("volume", bar.volume());
+            points.add(point);
+        }
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("chartType", "candlestick");
+        payload.put("sourceTool", sourceTool);
+        payload.put("title", response.resolvedCode() + " K线走势");
+        payload.put("symbol", response.resolvedCode());
+        payload.put("period", response.period());
+        payload.put("provider", response.provider());
+        payload.put("schemaVersion", response.schemaVersion());
+        payload.put("currency", response.currency());
+        payload.put("volumeUnit", response.volumeUnit().name());
+        payload.put("adjustment", response.adjustment());
+        payload.put("timeKind", response.timeKind());
+        payload.put("asOf", response.asOf());
+        payload.put("fetchedAt", response.fetchedAt());
+        payload.put("points", points);
+        return Optional.of(payload);
+    }
+
+    private Optional<Map<String, Object>> toIbkrChart(String sourceTool, IbkrHistoricalResponse response) {
+        if (response.status() != IbkrHistoricalResponse.Status.SUCCESS) return Optional.empty();
+        List<Map<String, Object>> points = new ArrayList<>();
+        int start = Math.max(0, response.data().size() - CHART_POINT_LIMIT);
+        for (IbkrHistoricalResponse.Bar bar : response.data().subList(start, response.data().size())) {
+            Map<String, Object> point = new LinkedHashMap<>();
+            point.put("date", Instant.ofEpochMilli(bar.t()).toString());
+            point.put("t", bar.t());
+            point.put("open", bar.o());
+            point.put("high", bar.h());
+            point.put("low", bar.l());
+            point.put("close", bar.c());
+            if (bar.v() != null) point.put("volume", bar.v());
+            points.add(point);
+        }
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("chartType", "candlestick");
+        payload.put("sourceTool", sourceTool);
+        payload.put("title", response.symbol() + " K线走势");
+        payload.put("symbol", response.symbol());
+        payload.put("period", response.bar());
+        payload.put("window", response.period());
+        payload.put("provider", response.provider());
+        payload.put("schemaVersion", response.schemaVersion());
+        payload.put("currency", response.currency());
+        payload.put("volumeUnit", response.volumeUnit());
+        payload.put("adjustment", response.adjustment());
+        payload.put("timeKind", response.timeKind());
+        payload.put("asOf", response.asOf());
+        payload.put("fetchedAt", response.fetchedAt());
+        payload.put("delayed", response.delayed());
+        payload.put("historyMetadata", response.historyMetadata());
+        payload.put("points", points);
+        return Optional.of(payload);
+    }
+
+    /** 从未版本化的兼容结构中提取并限制有效 OHLCV 点。 */
     private List<Map<String, Object>> extractChartPoints(JsonNode root) {
         JsonNode rows = findOhlcvArray(root, 0);
         if (rows == null || !rows.isArray()) {

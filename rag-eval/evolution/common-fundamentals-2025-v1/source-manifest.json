@@ -1,0 +1,833 @@
+{
+  "schema": "fundamentals_source_snapshot_import_v1",
+  "cases": [
+    {
+      "schemaVersion": 2,
+      "caseId": "msft-fy2025-growth",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "issuerId": "MSFT",
+      "reportFamilyId": "msft-fy2025",
+      "leakageGroup": "msft-fy2025",
+      "query": "微软（MSFT）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "resolvedQuery": "微软（MSFT）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "MSFT",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "MSFT",
+          "sourceRef": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K",
+          "sourceVersion": "MSFT-FY2025-official-financial-statements",
+          "publishedAt": "2025-07-31T00:00:00Z",
+          "availableAt": "2025-07-31T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:46:55.722742Z",
+          "periodStart": "2024-07-01",
+          "periodEnd": "2025-06-30",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/msft-growth.txt",
+          "visibleRange": [
+            0,
+            2445
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "msft-fy2025-cashflow",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "issuerId": "MSFT",
+      "reportFamilyId": "msft-fy2025",
+      "leakageGroup": "msft-fy2025",
+      "query": "微软（MSFT）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "resolvedQuery": "微软（MSFT）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "MSFT",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "MSFT",
+          "sourceRef": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K",
+          "sourceVersion": "MSFT-FY2025-official-financial-statements",
+          "publishedAt": "2025-07-31T00:00:00Z",
+          "availableAt": "2025-07-31T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:46:55.722742Z",
+          "periodStart": "2024-07-01",
+          "periodEnd": "2025-06-30",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/msft-cashflow.txt",
+          "visibleRange": [
+            0,
+            4294
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "msft-fy2025-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "issuerId": "MSFT",
+      "reportFamilyId": "msft-fy2025",
+      "leakageGroup": "msft-fy2025",
+      "query": "根据微软（MSFT）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "resolvedQuery": "根据微软（MSFT）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "MSFT",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "MSFT",
+          "sourceRef": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K",
+          "sourceVersion": "MSFT-FY2025-official-financial-statements",
+          "publishedAt": "2025-07-31T00:00:00Z",
+          "availableAt": "2025-07-31T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:46:55.722742Z",
+          "periodStart": "2024-07-01",
+          "periodEnd": "2025-06-30",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/msft-liquidity.txt",
+          "visibleRange": [
+            0,
+            3259
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "wmt-fy2025-growth",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "issuerId": "WMT",
+      "reportFamilyId": "wmt-fy2025",
+      "leakageGroup": "wmt-fy2025",
+      "query": "沃尔玛（WMT）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "resolvedQuery": "沃尔玛（WMT）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "WMT",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "WMT",
+          "sourceRef": "https://corporate.walmart.com/content/dam/corporate/documents/newsroom/2025/04/24/walmart-releases-2025-annual-report-and-proxy-statement/walmart-inc-2025-annual-report.pdf",
+          "sourceVersion": "WMT-FY2025-official-financial-statements",
+          "publishedAt": "2025-04-25T00:00:00Z",
+          "availableAt": "2025-04-25T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:48:19.317317Z",
+          "periodStart": "2024-02-01",
+          "periodEnd": "2025-01-31",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/wmt-growth.txt",
+          "visibleRange": [
+            0,
+            5418
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "wmt-fy2025-cashflow",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "issuerId": "WMT",
+      "reportFamilyId": "wmt-fy2025",
+      "leakageGroup": "wmt-fy2025",
+      "query": "沃尔玛（WMT）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "resolvedQuery": "沃尔玛（WMT）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "WMT",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "WMT",
+          "sourceRef": "https://corporate.walmart.com/content/dam/corporate/documents/newsroom/2025/04/24/walmart-releases-2025-annual-report-and-proxy-statement/walmart-inc-2025-annual-report.pdf",
+          "sourceVersion": "WMT-FY2025-official-financial-statements",
+          "publishedAt": "2025-04-25T00:00:00Z",
+          "availableAt": "2025-04-25T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:48:19.317317Z",
+          "periodStart": "2024-02-01",
+          "periodEnd": "2025-01-31",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/wmt-cashflow.txt",
+          "visibleRange": [
+            0,
+            2448
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "wmt-fy2025-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "issuerId": "WMT",
+      "reportFamilyId": "wmt-fy2025",
+      "leakageGroup": "wmt-fy2025",
+      "query": "根据沃尔玛（WMT）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "resolvedQuery": "根据沃尔玛（WMT）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "WMT",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "WMT",
+          "sourceRef": "https://corporate.walmart.com/content/dam/corporate/documents/newsroom/2025/04/24/walmart-releases-2025-annual-report-and-proxy-statement/walmart-inc-2025-annual-report.pdf",
+          "sourceVersion": "WMT-FY2025-official-financial-statements",
+          "publishedAt": "2025-04-25T00:00:00Z",
+          "availableAt": "2025-04-25T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:48:19.317317Z",
+          "periodStart": "2024-02-01",
+          "periodEnd": "2025-01-31",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/wmt-liquidity.txt",
+          "visibleRange": [
+            0,
+            8119
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "googl-fy2025-growth",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "VALIDATION",
+      "issuerId": "GOOGL",
+      "reportFamilyId": "googl-fy2025",
+      "leakageGroup": "googl-fy2025",
+      "query": "Alphabet（GOOGL）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "resolvedQuery": "Alphabet（GOOGL）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "GOOGL",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "GOOGL",
+          "sourceRef": "https://s206.q4cdn.com/479360582/files/doc_financials/2025/q4/2025q4-alphabet-earnings-release.pdf",
+          "sourceVersion": "GOOGL-FY2025-official-financial-statements",
+          "publishedAt": "2026-02-05T00:00:00Z",
+          "availableAt": "2026-02-05T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:43:53.673959+00:00",
+          "periodStart": "2025-01-01",
+          "periodEnd": "2025-12-31",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/googl-growth.txt",
+          "visibleRange": [
+            0,
+            1059
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "googl-fy2025-cashflow",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "VALIDATION",
+      "issuerId": "GOOGL",
+      "reportFamilyId": "googl-fy2025",
+      "leakageGroup": "googl-fy2025",
+      "query": "Alphabet（GOOGL）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "resolvedQuery": "Alphabet（GOOGL）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "GOOGL",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "GOOGL",
+          "sourceRef": "https://s206.q4cdn.com/479360582/files/doc_financials/2025/q4/2025q4-alphabet-earnings-release.pdf",
+          "sourceVersion": "GOOGL-FY2025-official-financial-statements",
+          "publishedAt": "2026-02-05T00:00:00Z",
+          "availableAt": "2026-02-05T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:43:53.673959+00:00",
+          "periodStart": "2025-01-01",
+          "periodEnd": "2025-12-31",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/googl-cashflow.txt",
+          "visibleRange": [
+            0,
+            2388
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "googl-fy2025-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "VALIDATION",
+      "issuerId": "GOOGL",
+      "reportFamilyId": "googl-fy2025",
+      "leakageGroup": "googl-fy2025",
+      "query": "根据Alphabet（GOOGL）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "resolvedQuery": "根据Alphabet（GOOGL）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "GOOGL",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "GOOGL",
+          "sourceRef": "https://s206.q4cdn.com/479360582/files/doc_financials/2025/q4/2025q4-alphabet-earnings-release.pdf",
+          "sourceVersion": "GOOGL-FY2025-official-financial-statements",
+          "publishedAt": "2026-02-05T00:00:00Z",
+          "availableAt": "2026-02-05T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:43:53.673959+00:00",
+          "periodStart": "2025-01-01",
+          "periodEnd": "2025-12-31",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/googl-liquidity.txt",
+          "visibleRange": [
+            0,
+            1846
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "cost-fy2025-growth",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "VALIDATION",
+      "issuerId": "COST",
+      "reportFamilyId": "cost-fy2025",
+      "leakageGroup": "cost-fy2025",
+      "query": "Costco（COST）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "resolvedQuery": "Costco（COST）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "COST",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "COST",
+          "sourceRef": "https://s201.q4cdn.com/287523651/files/doc_financials/2025/ar/COST-Annual-Report-2025.pdf",
+          "sourceVersion": "COST-FY2025-official-financial-statements",
+          "publishedAt": "2025-12-05T00:00:00Z",
+          "availableAt": "2025-12-05T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:45:34.478336Z",
+          "periodStart": "2024-09-02",
+          "periodEnd": "2025-08-31",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/cost-growth.txt",
+          "visibleRange": [
+            0,
+            3359
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "cost-fy2025-cashflow",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "VALIDATION",
+      "issuerId": "COST",
+      "reportFamilyId": "cost-fy2025",
+      "leakageGroup": "cost-fy2025",
+      "query": "Costco（COST）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "resolvedQuery": "Costco（COST）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "COST",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "COST",
+          "sourceRef": "https://s201.q4cdn.com/287523651/files/doc_financials/2025/ar/COST-Annual-Report-2025.pdf",
+          "sourceVersion": "COST-FY2025-official-financial-statements",
+          "publishedAt": "2025-12-05T00:00:00Z",
+          "availableAt": "2025-12-05T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:45:34.478336Z",
+          "periodStart": "2024-09-02",
+          "periodEnd": "2025-08-31",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/cost-cashflow.txt",
+          "visibleRange": [
+            0,
+            7137
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "cost-fy2025-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "VALIDATION",
+      "issuerId": "COST",
+      "reportFamilyId": "cost-fy2025",
+      "leakageGroup": "cost-fy2025",
+      "query": "根据Costco（COST）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "resolvedQuery": "根据Costco（COST）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "COST",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "COST",
+          "sourceRef": "https://s201.q4cdn.com/287523651/files/doc_financials/2025/ar/COST-Annual-Report-2025.pdf",
+          "sourceVersion": "COST-FY2025-official-financial-statements",
+          "publishedAt": "2025-12-05T00:00:00Z",
+          "availableAt": "2025-12-05T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:45:34.478336Z",
+          "periodStart": "2024-09-02",
+          "periodEnd": "2025-08-31",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/cost-liquidity.txt",
+          "visibleRange": [
+            0,
+            5283
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "aapl-fy2025-growth",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "HOLDOUT",
+      "issuerId": "AAPL",
+      "reportFamilyId": "aapl-fy2025",
+      "leakageGroup": "aapl-fy2025",
+      "query": "苹果（AAPL）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "resolvedQuery": "苹果（AAPL）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "AAPL",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "AAPL",
+          "sourceRef": "https://www.apple.com/newsroom/pdfs/fy2025-q4/FY25_Q4_Consolidated_Financial_Statements.pdf",
+          "sourceVersion": "AAPL-FY2025-official-financial-statements",
+          "publishedAt": "2025-10-31T00:00:00Z",
+          "availableAt": "2025-10-31T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:43:53.050242+00:00",
+          "periodStart": "2024-09-29",
+          "periodEnd": "2025-09-27",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/aapl-growth.txt",
+          "visibleRange": [
+            0,
+            1870
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "aapl-fy2025-cashflow",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "HOLDOUT",
+      "issuerId": "AAPL",
+      "reportFamilyId": "aapl-fy2025",
+      "leakageGroup": "aapl-fy2025",
+      "query": "苹果（AAPL）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "resolvedQuery": "苹果（AAPL）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "AAPL",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "AAPL",
+          "sourceRef": "https://www.apple.com/newsroom/pdfs/fy2025-q4/FY25_Q4_Consolidated_Financial_Statements.pdf",
+          "sourceVersion": "AAPL-FY2025-official-financial-statements",
+          "publishedAt": "2025-10-31T00:00:00Z",
+          "availableAt": "2025-10-31T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:43:53.050242+00:00",
+          "periodStart": "2024-09-29",
+          "periodEnd": "2025-09-27",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/aapl-cashflow.txt",
+          "visibleRange": [
+            0,
+            1900
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "aapl-fy2025-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "HOLDOUT",
+      "issuerId": "AAPL",
+      "reportFamilyId": "aapl-fy2025",
+      "leakageGroup": "aapl-fy2025",
+      "query": "根据苹果（AAPL）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "resolvedQuery": "根据苹果（AAPL）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "AAPL",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "AAPL",
+          "sourceRef": "https://www.apple.com/newsroom/pdfs/fy2025-q4/FY25_Q4_Consolidated_Financial_Statements.pdf",
+          "sourceVersion": "AAPL-FY2025-official-financial-statements",
+          "publishedAt": "2025-10-31T00:00:00Z",
+          "availableAt": "2025-10-31T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:43:53.050242+00:00",
+          "periodStart": "2024-09-29",
+          "periodEnd": "2025-09-27",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/aapl-liquidity.txt",
+          "visibleRange": [
+            0,
+            1534
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "amzn-fy2025-growth",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "HOLDOUT",
+      "issuerId": "AMZN",
+      "reportFamilyId": "amzn-fy2025",
+      "leakageGroup": "amzn-fy2025",
+      "query": "亚马逊（AMZN）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "resolvedQuery": "亚马逊（AMZN）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "AMZN",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "AMZN",
+          "sourceRef": "https://s2.q4cdn.com/299287126/files/doc_earnings/2025/q4/earnings-result/AMZN-Q4-2025-Earnings-Release.pdf",
+          "sourceVersion": "AMZN-FY2025-official-financial-statements",
+          "publishedAt": "2026-02-06T00:00:00Z",
+          "availableAt": "2026-02-06T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:43:53.730873+00:00",
+          "periodStart": "2025-01-01",
+          "periodEnd": "2025-12-31",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/amzn-growth.txt",
+          "visibleRange": [
+            0,
+            1416
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "amzn-fy2025-cashflow",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "HOLDOUT",
+      "issuerId": "AMZN",
+      "reportFamilyId": "amzn-fy2025",
+      "leakageGroup": "amzn-fy2025",
+      "query": "亚马逊（AMZN）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "resolvedQuery": "亚马逊（AMZN）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "AMZN",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "AMZN",
+          "sourceRef": "https://s2.q4cdn.com/299287126/files/doc_earnings/2025/q4/earnings-result/AMZN-Q4-2025-Earnings-Release.pdf",
+          "sourceVersion": "AMZN-FY2025-official-financial-statements",
+          "publishedAt": "2026-02-06T00:00:00Z",
+          "availableAt": "2026-02-06T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:43:53.730873+00:00",
+          "periodStart": "2025-01-01",
+          "periodEnd": "2025-12-31",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/amzn-cashflow.txt",
+          "visibleRange": [
+            0,
+            3051
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "caseId": "amzn-fy2025-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "HOLDOUT",
+      "issuerId": "AMZN",
+      "reportFamilyId": "amzn-fy2025",
+      "leakageGroup": "amzn-fy2025",
+      "query": "根据亚马逊（AMZN）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "resolvedQuery": "根据亚马逊（AMZN）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "history": [],
+      "asOf": "2026-09-29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "AMZN",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "evidence": [
+        {
+          "evidenceId": "E1",
+          "target": "AMZN",
+          "sourceRef": "https://s2.q4cdn.com/299287126/files/doc_earnings/2025/q4/earnings-result/AMZN-Q4-2025-Earnings-Release.pdf",
+          "sourceVersion": "AMZN-FY2025-official-financial-statements",
+          "publishedAt": "2026-02-06T00:00:00Z",
+          "availableAt": "2026-02-06T00:00:00Z",
+          "retrievedAt": "2026-09-29T02:43:53.730873+00:00",
+          "periodStart": "2025-01-01",
+          "periodEnd": "2025-12-31",
+          "unit": "million",
+          "currency": "USD",
+          "rawArtifact": "sources/amzn-liquidity.txt",
+          "visibleRange": [
+            0,
+            1375
+          ]
+        }
+      ],
+      "provenance": {
+        "authorizationRef": "user-request-2026-09-29-public-dataset-and-live-evaluation",
+        "authorizedBy": "workspace-user",
+        "capturedAt": "2026-09-29T02:50:28.497437+00:00",
+        "asOfInstant": "2026-09-29T02:50:28.497437+00:00",
+        "reviewedBy": "Codex-source-check-AI-not-human",
+        "reviewedAt": "2026-09-29T02:50:28.497437+00:00"
+      }
+    }
+  ]
+}

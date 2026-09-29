@@ -16,3 +16,12 @@ capabilities:
     timeoutMs: 8000
     maxResultBytes: 262144
     enabled: true
+
+  - id: local.news.webSearch
+    providerType: LOCAL
+    providerId: local
+    nativeName: webSearch
+    riskLevel: READ_ONLY
+    timeoutMs: 8000
+    maxResultBytes: 262144
+    enabled: true

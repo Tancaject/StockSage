@@ -1,7 +1,7 @@
 package com.stocksage.integration;
 
 import com.stocksage.config.AdminApiInterceptor;
-import com.stocksage.config.RequestIdentity;
+import com.stocksage.identity.RequestIdentity;
 import com.stocksage.config.SecurityConfig;
 import com.stocksage.config.WebConfig;
 import com.stocksage.controller.AuthController;
@@ -17,8 +17,8 @@ import com.stocksage.repository.InvestmentReportVersionRepository;
 import com.stocksage.repository.ResearchTaskRepository;
 import com.stocksage.repository.UserAccountRepository;
 import com.stocksage.repository.UserProfileRepository;
-import com.stocksage.service.AuthService;
-import com.stocksage.service.InvestmentReportVersionService;
+import com.stocksage.identity.AuthService;
+import com.stocksage.research.InvestmentReportVersionService;
 import com.stocksage.tool.ToolCallEventBus;
 import com.stocksage.trace.TraceEventRelay;
 import com.stocksage.trace.TraceEventStore;

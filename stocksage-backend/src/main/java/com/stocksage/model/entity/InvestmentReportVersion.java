@@ -55,6 +55,17 @@ public class InvestmentReportVersion {
     @Column(name = "conversation_id")
     private Long conversationId;
 
+    /** 首次创建报告的研究运行；复用和人工审核不得改写，历史来源未知时为空。 */
+    @Column(name = "producer_run_id", updatable = false)
+    private Long producerRunId;
+
+    @Column(name = "producer_attempt", updatable = false)
+    private Integer producerAttempt;
+
+    /** 创建时采用的证据输入；是否模型生成由运行结果类型及调用记录解释。 */
+    @Column(name = "producer_evidence_snapshot_id", length = 36, updatable = false)
+    private String producerEvidenceSnapshotId;
+
     /** 已归一化的研究标的代码。 */
     @Column(length = 32, nullable = false)
     private String ticker;

@@ -1,8 +1,9 @@
 package com.stocksage.agent;
 
-import com.stocksage.harness.EvidenceLedger;
-import com.stocksage.harness.HarnessModels.EvidenceDimension;
-import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
+import com.stocksage.evidence.EvidenceLedger;
+import com.stocksage.evidence.EvidenceFreshness;
+import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
+import com.stocksage.evidence.EvidenceModels.EvidenceEnvelope;
 import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -54,10 +54,10 @@ public class DebateDecisionPolicy {
     public static final String POLICY_ID = "debate-decision-v1";
 
     /** 算分权重、时效窗口或评级门槛变化时必须递增。 */
-    public static final int POLICY_VERSION = 1;
+    public static final int POLICY_VERSION = 2;
 
     /** 输入哈希契约；变化时即使业务策略版本不变也不会误复用旧 verdict。 */
-    private static final String INPUT_CONTRACT_ID = "debate-decision-input-v1";
+    private static final String INPUT_CONTRACT_ID = "debate-decision-input-v2-time-facts";
 
     private static final int REQUIRED_ARGUMENTS_PER_SIDE = 3;
     private static final double DIRECTIONAL_SCORE = 65.0;
@@ -71,18 +71,6 @@ public class DebateDecisionPolicy {
             AssessmentReasonCode.IRRELEVANT,
             AssessmentReasonCode.DUPLICATE
     );
-
-    private final Clock clock;
-
-    /** 生产默认使用 UTC 时钟；时效性只依赖明确注入的当前时点。 */
-    public DebateDecisionPolicy() {
-        this(Clock.systemUTC());
-    }
-
-    /** 测试和离线评估可注入固定时钟。 */
-    DebateDecisionPolicy(Clock clock) {
-        this.clock = clock == null ? Clock.systemUTC() : clock;
-    }
 
     /** @return 当前确定性裁决策略 ID */
     public String policyId() {
@@ -105,6 +93,8 @@ public class DebateDecisionPolicy {
         append(canonical, INPUT_CONTRACT_ID);
         append(canonical, state == null ? "" : state.getQuery());
         append(canonical, state == null ? "" : state.getPrimaryTicker());
+        append(canonical, state == null || state.getTimeSensitivity() == null
+                ? "UNSPECIFIED" : state.getTimeSensitivity().name());
         append(canonical, state == null ? "" : state.getDataSnapshotHash());
         append(canonical, state == null ? "" : state.getContextHash());
 
@@ -204,6 +194,9 @@ public class DebateDecisionPolicy {
         // 以本轮证据实际采集时点冻结时效性计算。checkpoint 重放同一输入时可复算出同一结果；
         // 新研究运行会产生新的 observedAt，并由报告快照的业务日桶使旧缓存失效。
         Instant evaluatedAt = freshnessEvaluationTime(ledger);
+        Map<String, EvidenceFreshness.Assessment> temporalAssessments = new HashMap<>();
+        evidenceById.forEach((id, evidence) -> temporalAssessments.put(id,
+                EvidenceFreshness.assess(evidence, state.getTimeSensitivity(), evaluatedAt)));
 
         List<ScoredArgument> eligible = new ArrayList<>();
         LinkedHashSet<String> unresolved = new LinkedHashSet<>(allRootIds);
@@ -224,12 +217,16 @@ public class DebateDecisionPolicy {
                     assessment.acceptedEvidenceIds(),
                     evidenceById,
                     point.horizon(),
-                    evaluatedAt
+                    evaluatedAt,
+                    temporalAssessments
             );
             double score = argumentScore(assessment, freshness);
             eligible.add(new ScoredArgument(root, assessment, score, freshness));
             unresolved.remove(point.pointId());
-            if (assessment.reasonCodes().contains(AssessmentReasonCode.CRITICAL_UNKNOWN)) {
+            if (assessment.reasonCodes().contains(AssessmentReasonCode.CRITICAL_UNKNOWN)
+                    || assessment.acceptedEvidenceIds().stream().anyMatch(id ->
+                    temporalAssessments.get(id).status() == EvidenceFreshness.Status.UNKNOWN
+                            || temporalAssessments.get(id).status() == EvidenceFreshness.Status.STALE)) {
                 unresolved.add(point.pointId());
             }
         }
@@ -393,42 +390,50 @@ public class DebateDecisionPolicy {
             List<String> acceptedEvidenceIds,
             Map<String, EvidenceEnvelope> evidenceById,
             AnalysisHorizon horizon,
-            Instant evaluatedAt
+            Instant evaluatedAt,
+            Map<String, EvidenceFreshness.Assessment> temporalAssessments
     ) {
         if (acceptedEvidenceIds.isEmpty()) {
             return 0.0;
         }
         double total = 0.0;
+        double temporalCap = 4.0;
         int count = 0;
         for (String evidenceId : acceptedEvidenceIds) {
             EvidenceEnvelope evidence = evidenceById.get(evidenceId);
             if (evidence == null) {
                 continue;
             }
+            temporalCap = Math.min(temporalCap, switch (temporalAssessments.get(evidenceId).status()) {
+                case STALE -> 0.0;
+                case UNKNOWN -> UNKNOWN_AS_OF_SCORE;
+                case FRESH, NOT_APPLICABLE -> 4.0;
+            });
             total += freshnessScore(evidence, horizon, evaluatedAt);
             count++;
         }
-        return count == 0 ? 0.0 : total / count;
+        // 同一论点依赖的未知或过期事实不能被其他新鲜引用平均掉。
+        return count == 0 ? 0.0 : Math.min(temporalCap, total / count);
     }
 
-    /** 使用账本中最新采集时点作为本轮固定评估时点；无采集时点时仅供不足分支安全兜底。 */
+    /** 使用账本中最新采集时点；旧证据缺失时点时保留未知，不用墙钟改变重放结果。 */
     private Instant freshnessEvaluationTime(EvidenceLedger ledger) {
         return ledger.evidence().stream()
                 .map(EvidenceEnvelope::observedAt)
                 .filter(java.util.Objects::nonNull)
                 .max(Comparator.naturalOrder())
-                .orElseGet(() -> Instant.now(clock));
+                .orElse(null);
     }
 
     /**
-     * POLICY_VERSION=1 的时效窗口。窗口内为 4 分，超过 staleDays 为 0 分，中间线性衰减。
+     * 业务年龄评分保持原窗口；能力时效判定另行限制未知或过期证据的分数。
      */
     private double freshnessScore(
             EvidenceEnvelope evidence,
             AnalysisHorizon horizon,
             Instant evaluatedAt
     ) {
-        if (evidence.asOf() == null) {
+        if (evidence.asOf() == null || evaluatedAt == null) {
             return UNKNOWN_AS_OF_SCORE;
         }
         if (evidence.asOf().isAfter(evaluatedAt.plus(Duration.ofDays(1)))) {
@@ -615,6 +620,7 @@ public class DebateDecisionPolicy {
         append(canonical, evidence.asOf());
         append(canonical, evidence.payloadHash());
         append(canonical, evidence.approvedReadOnly());
+        append(canonical, evidence.timing() == null ? "UNKNOWN" : evidence.timing().toString());
     }
 
     private void appendTurn(StringBuilder canonical, DebateTurn turn) {

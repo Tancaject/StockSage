@@ -1,7 +1,7 @@
 package com.stocksage.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.config.RequestIdentity;
+import com.stocksage.identity.RequestIdentity;
 import com.stocksage.exception.GlobalExceptionHandler;
 import com.stocksage.exception.ResourceNotFoundException;
 import com.stocksage.model.dto.InvestmentReport;
@@ -9,7 +9,7 @@ import com.stocksage.model.dto.InvestmentReportReviewRequest;
 import com.stocksage.model.dto.InvestmentReportReviewSummary;
 import com.stocksage.model.dto.InvestmentReportVersionSummary;
 import com.stocksage.model.entity.InvestmentReportVersion;
-import com.stocksage.service.InvestmentReportVersionService;
+import com.stocksage.research.InvestmentReportVersionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;

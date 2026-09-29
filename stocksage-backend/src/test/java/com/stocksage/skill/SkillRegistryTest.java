@@ -16,6 +16,7 @@ class SkillRegistryTest {
     void loadsAndValidatesTheRepositoryOwnedNewsSkills() {
         CapabilityRegistry capabilities = new CapabilityRegistry(List.of(
                 adapter("local.news.searchNews"),
+                adapter("local.news.webSearch"),
                 adapter("mcp.news.search")
         ));
         SkillRegistry registry = new SkillRegistry(new SkillValidator(capabilities));

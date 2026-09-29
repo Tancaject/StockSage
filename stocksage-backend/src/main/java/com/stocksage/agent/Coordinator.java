@@ -14,6 +14,8 @@ import com.stocksage.service.TickerResolutionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.metadata.EmptyUsage;
+import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,6 +28,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 /**
  * 将每次用户请求路由到合适的研究路径。
@@ -194,6 +198,31 @@ public class Coordinator {
      * 按能力层级和输入模态流式输出最终回答。
      */
     public Flux<String> streamAnswer(List<Message> promptMessages, boolean usePreparedContextOnly, ModelTier modelTier, boolean useVisionModel) {
+        return streamAnswer(promptMessages, usePreparedContextOnly, modelTier, useVisionModel, null);
+    }
+
+    /** 选择和实际调用共用同一配置描述，避免已批准条件与发送选项各自维护。 */
+    public Map<String, Object> finalAnswerInvocation(SelectedModel selected) {
+        Map<String, Object> invocation = new LinkedHashMap<>();
+        invocation.put("kind", "model-invocation");
+        invocation.put("schemaVersion", 1);
+        invocation.put("scope", "final-answer");
+        invocation.put("modelTier", selected.tier().name());
+        invocation.put("modelName", selected.modelName() == null ? "CLIENT_DEFAULT" : selected.modelName());
+        if (selected.modelName() != null) {
+            invocation.put("temperature", modelRoutingTemperature);
+            invocation.put("maxOutputTokens", modelRoutingMaxOutputTokens);
+            invocation.put("configurationSource", "REQUEST_OPTIONS");
+        } else {
+            invocation.put("configurationSource", "CLIENT_DEFAULT");
+        }
+        return Map.copyOf(invocation);
+    }
+
+    /** 观察单次最终回答的实际请求配置和供应商 usage；usage 是整次调用快照，不能按 chunk 累加。 */
+    public Flux<String> streamAnswer(List<Message> promptMessages, boolean usePreparedContextOnly,
+                                     ModelTier modelTier, boolean useVisionModel,
+                                     Consumer<Map<String, Object>> observer) {
         SelectedModel selectedModel = selectFinalAnswerModel(modelTier, usePreparedContextOnly, useVisionModel);
         ModelTier effectiveTier = selectedModel.tier();
         String modelName = selectedModel.modelName();
@@ -203,19 +232,58 @@ public class Coordinator {
         log.info("Coordinator selected final-answer model tier={}, model={}, preparedContextOnly={}",
                 effectiveTier, modelName, usePreparedContextOnly);
 
-        ChatClient.ChatClientRequestSpec requestSpec = responseChatClient.prompt()
-                .messages(promptMessages);
-        if (modelName != null && !modelName.isBlank()) {
-            String resolvedModel = modelName.trim();
-            requestSpec = requestSpec.options(OpenAiChatOptions.builder()
-                    .model(resolvedModel)
-                    .temperature(modelRoutingTemperature)
-                    .maxTokens(modelRoutingMaxOutputTokens)
-                    .build());
+        return Flux.defer(() -> {
+            var options = OpenAiChatOptions.builder().streamUsage(true);
+            Map<String, Object> invocation = finalAnswerInvocation(selectedModel);
+            if (modelName != null) {
+                options.model(modelName).temperature(((Number) invocation.get("temperature")).doubleValue())
+                        .maxTokens(((Number) invocation.get("maxOutputTokens")).intValue());
+            }
+            observeFinalAnswer(observer, invocation);
+            AtomicBoolean usageObserved = new AtomicBoolean();
+            Runnable reportMissingUsage = () -> {
+                if (usageObserved.compareAndSet(false, true)) {
+                    observeFinalAnswer(observer, Map.of("kind", "model-usage", "schemaVersion", 1,
+                            "scope", "final-answer", "usageSource", "NO_DATA",
+                            "usageSemantics", "INVOCATION_SNAPSHOT"));
+                }
+            };
+            return responseChatClient.prompt().messages(promptMessages).options(options.build())
+                    .stream().chatResponse()
+                    .doOnNext(response -> {
+                        Usage usage = response.getMetadata().getUsage();
+                        if (usage == null || usage instanceof EmptyUsage) return;
+                        usageObserved.set(true);
+                        Map<String, Object> event = new LinkedHashMap<>();
+                        event.put("kind", "model-usage");
+                        event.put("schemaVersion", 1);
+                        event.put("scope", "final-answer");
+                        event.put("usageSource", "PROVIDER");
+                        event.put("usageSemantics", "INVOCATION_SNAPSHOT");
+                        if (usage.getPromptTokens() != null) event.put("inputTokens", usage.getPromptTokens());
+                        if (usage.getCompletionTokens() != null) event.put("outputTokens", usage.getCompletionTokens());
+                        if (usage.getTotalTokens() != null) event.put("totalTokens", usage.getTotalTokens());
+                        String providerModel = response.getMetadata().getModel();
+                        if (providerModel != null && !providerModel.isBlank()) event.put("providerModelName", providerModel);
+                        observeFinalAnswer(observer, Map.copyOf(event));
+                    })
+                    .<String>mapNotNull(response -> response.getResult() == null
+                            || response.getResult().getOutput() == null
+                            ? null : response.getResult().getOutput().getText())
+                    .filter(text -> !text.isEmpty())
+                    .doOnTerminate(reportMissingUsage)
+                    .doOnCancel(reportMissingUsage);
+        });
+    }
+
+    private void observeFinalAnswer(Consumer<Map<String, Object>> observer, Map<String, Object> event) {
+        if (observer == null) return;
+        try {
+            observer.accept(event);
+        } catch (RuntimeException error) {
+            log.warn("Final-answer observation failed, kind={}, errorType={}",
+                    event.get("kind"), error.getClass().getSimpleName());
         }
-        return requestSpec
-                .stream()
-                .content();
     }
 
     /**
@@ -283,7 +351,9 @@ public class Coordinator {
                 decision.entities(),
                 sourceScores,
                 decision.needsClarification(),
-                decision.reasonCodes()
+                decision.reasonCodes(),
+                recognition.bestSignals().stream().map(signal -> new RoutingDecisionMetadata.SignalSnapshot(
+                        signal.source(), signal.targetRoute(), signal.fineIntent(), signal.confidence())).toList()
         );
         ReadRequest readRequest = ReadRequest.parse(route, resolvedQuery, decision.entities());
         // 当前消息的显式约束不能被模型改写覆盖；省略的约束仍从已消歧问题取得。

@@ -1,12 +1,13 @@
 package com.stocksage.harness;
 
+import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.stocksage.agent.intent.TimeSensitivity;
 import com.stocksage.model.dto.InvestmentReport;
 
-import java.time.Instant;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -19,31 +20,6 @@ import java.util.Map;
 public final class HarnessModels {
 
     private HarnessModels() {
-    }
-
-    /** 证据在研究结论中承担的业务维度。 */
-    public enum EvidenceDimension {
-        FUNDAMENTALS,
-        MARKET,
-        NEWS,
-        RAG
-    }
-
-    /** 一次证据收集的稳定终态；只有 AVAILABLE 被视为有可用数据。 */
-    public enum EvidenceStatus {
-        AVAILABLE,
-        EMPTY,
-        NO_RESULTS,
-        FAILED,
-        TIMED_OUT,
-        NOT_COLLECTED
-    }
-
-    /** 标的解析结果；模糊和未解析都不能生成确定评级。 */
-    public enum TargetResolutionStatus {
-        RESOLVED,
-        UNRESOLVED,
-        AMBIGUOUS
     }
 
     /** Harness 执行的两个阶段边界。 */
@@ -72,6 +48,7 @@ public final class HarnessModels {
         NEWS_MISSING,
         RAG_MISSING,
         PROVENANCE_MISSING,
+        EVIDENCE_TIME_REQUIREMENT_UNMET,
         UNAPPROVED_CAPABILITY,
         REPORT_PARSE_INVALID,
         REPORT_SCHEMA_INVALID,
@@ -122,112 +99,20 @@ public final class HarnessModels {
     }
 
     /**
-     * 规范化后的研究标的身份。
-     *
-     * @param canonicalKey 用于严格比较的标准大写键
-     * @param displaySymbol 面向界面的原始/展示代码
-     * @param status 解析状态
-     */
-    public record TargetIdentity(
-            String canonicalKey,
-            String displaySymbol,
-            TargetResolutionStatus status
-    ) {
-        public TargetIdentity {
-            canonicalKey = normalizeTarget(canonicalKey);
-            displaySymbol = displaySymbol == null ? "" : displaySymbol.strip();
-            status = status == null ? TargetResolutionStatus.UNRESOLVED : status;
-        }
-
-        /** 从 ticker 构造已解析身份；空值安全降级为 unresolved。 */
-        public static TargetIdentity resolved(String ticker) {
-            String normalized = normalizeTarget(ticker);
-            if (normalized.isBlank()) {
-                return unresolved();
-            }
-            return new TargetIdentity(normalized, ticker == null ? "" : ticker.strip(),
-                    TargetResolutionStatus.RESOLVED);
-        }
-
-        /** @return 标准的未解析身份 */
-        public static TargetIdentity unresolved() {
-            return new TargetIdentity("", "", TargetResolutionStatus.UNRESOLVED);
-        }
-
-        /** @return 状态为 RESOLVED 且标准键非空时为 {@code true} */
-        @JsonIgnore
-        public boolean isResolved() {
-            return status == TargetResolutionStatus.RESOLVED && !canonicalKey.isBlank();
-        }
-    }
-
-    /**
-     * 一次工具/RAG 证据的审计元数据。
-     *
-     * @param evidenceId 单轮研究内稳定证据 ID
-     * @param dimension 业务证据维度
-     * @param capabilityId 产生证据的能力 ID
-     * @param targetKey 证据所属标准标的
-     * @param status 收集终态
-     * @param sourceRef 可追溯来源引用
-     * @param provider 实际数据提供方
-     * @param observedAt 系统观察到结果的时间
-     * @param asOf 数据自身的业务时点，可为空
-     * @param payloadHash 原始结果摘要哈希，不保存正文
-     * @param approvedReadOnly 是否来自批准的只读能力
-     */
-    public record EvidenceEnvelope(
-            String evidenceId,
-            EvidenceDimension dimension,
-            String capabilityId,
-            String targetKey,
-            EvidenceStatus status,
-            String sourceRef,
-            String provider,
-            Instant observedAt,
-            Instant asOf,
-            String payloadHash,
-            boolean approvedReadOnly
-    ) {
-        public EvidenceEnvelope {
-            evidenceId = safe(evidenceId);
-            dimension = dimension == null ? EvidenceDimension.NEWS : dimension;
-            capabilityId = safe(capabilityId);
-            targetKey = normalizeTarget(targetKey);
-            status = status == null ? EvidenceStatus.NOT_COLLECTED : status;
-            sourceRef = safe(sourceRef);
-            provider = safe(provider);
-            payloadHash = safe(payloadHash);
-        }
-
-        /** @return 仅当状态为 AVAILABLE 时为 {@code true} */
-        public boolean hasUsableData() {
-            return status == EvidenceStatus.AVAILABLE;
-        }
-
-        /** @return 可用数据是否同时具有完整最小来源字段 */
-        public boolean hasProvenance() {
-            return hasUsableData()
-                    && !evidenceId.isBlank()
-                    && !sourceRef.isBlank()
-                    && !provider.isBlank()
-                    && observedAt != null
-                    && !payloadHash.isBlank();
-        }
-    }
-
-    /**
      * 一次策略评估的工作流与恢复预算上下文。
      *
      * @param workflow 路由/工作流名称
      * @param recoveryAttempts 各恢复动作已执行次数
+     * @param timeSensitivity 本次请求的时间要求；旧记录缺失时保持 UNSPECIFIED
      */
     public record RunContext(
             String workflow,
-            Map<RecoveryAction, Integer> recoveryAttempts
+            Map<RecoveryAction, Integer> recoveryAttempts,
+            TimeSensitivity timeSensitivity
     ) {
         public RunContext {
             workflow = safe(workflow);
+            timeSensitivity = timeSensitivity == null ? TimeSensitivity.UNSPECIFIED : timeSensitivity;
             EnumMap<RecoveryAction, Integer> bounded = new EnumMap<>(RecoveryAction.class);
             if (recoveryAttempts != null) {
                 recoveryAttempts.forEach((action, attempts) -> {
@@ -237,6 +122,10 @@ public final class HarnessModels {
                 });
             }
             recoveryAttempts = Map.copyOf(bounded);
+        }
+
+        public RunContext(String workflow, Map<RecoveryAction, Integer> recoveryAttempts) {
+            this(workflow, recoveryAttempts, TimeSensitivity.UNSPECIFIED);
         }
 
         /** @return 未使用任何恢复预算的 DEEP 上下文 */
@@ -495,7 +384,4 @@ public final class HarnessModels {
         return value == null ? "" : value.strip();
     }
 
-    private static String normalizeTarget(String value) {
-        return value == null ? "" : value.strip().toUpperCase(Locale.ROOT);
-    }
 }

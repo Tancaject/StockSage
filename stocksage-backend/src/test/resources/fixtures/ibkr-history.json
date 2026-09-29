@@ -1,0 +1,27 @@
+{
+  "symbol": "NVDA",
+  "text": "NVIDIA CORP",
+  "serverId": "history-test",
+  "priceFactor": "100",
+  "volumeFactor": 100,
+  "mdAvailability": "R",
+  "mktDataDelay": 17,
+  "outsideRth": false,
+  "barLength": 300,
+  "timePeriod": "24h",
+  "negativeCapable": false,
+  "priceDisplayRule": 1,
+  "priceDisplayValue": "2",
+  "startTime": "20250514-14:30:00",
+  "chartPanStartTime": "20250514-14:30:00",
+  "high": "10200/1747229700000/100",
+  "low": "9900/1747229400000/100",
+  "messageVersion": 2,
+  "direction": -1,
+  "points": 1,
+  "travelTime": 8,
+  "data": [
+    {"t": 1747229400000, "o": 100.0, "h": 101.0, "l": 99.0, "c": 100.5, "v": 0.0},
+    {"t": 1747229700000, "o": 100.5, "h": 102.0, "l": 100.0, "c": 101.0, "v": 5.0}
+  ]
+}

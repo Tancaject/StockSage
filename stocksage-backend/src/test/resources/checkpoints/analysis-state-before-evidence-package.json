@@ -1,0 +1,154 @@
+{
+  "query" : "Review AAPL using the collected evidence",
+  "timeSensitivity" : "RECENT",
+  "primaryTicker" : "AAPL",
+  "dataSnapshotHash" : "240cffa4131f675432a0952da3270ef64c54f2c82bb82ce97c1fe3ef0a77e0b9",
+  "contextHash" : "c6d18d9d2d09c6657ef6cad0d454021605b739a89d4e7c26a1ef2893a408b174",
+  "fundamentalsReport" : "Financial facts",
+  "marketReport" : "Market facts",
+  "newsReport" : "News facts",
+  "investmentReport" : null,
+  "debateTurns" : [ ],
+  "managerAssessment" : null,
+  "debateVerdict" : null,
+  "citations" : [ "https://www.sec.gov/Archives/fixture", "https://example.org/news/first" ],
+  "evidenceLedger" : {
+    "target" : {
+      "canonicalKey" : "AAPL",
+      "displaySymbol" : "AAPL",
+      "status" : "RESOLVED"
+    },
+    "evidence" : [ {
+      "evidenceId" : "market-instant",
+      "dimension" : "MARKET",
+      "capabilityId" : "getIbkrHistoricalBars",
+      "targetKey" : "AAPL",
+      "status" : "AVAILABLE",
+      "sourceRef" : "ibkr://history/AAPL",
+      "provider" : "IBKR_WEB_API",
+      "observedAt" : "2026-09-26T01:02:03.123456789Z",
+      "asOf" : "2026-09-25T20:00:00Z",
+      "payloadHash" : "market-instant-payload",
+      "approvedReadOnly" : true,
+      "timing" : {
+        "schemaVersion" : 1,
+        "fetchedAt" : "2026-09-26T01:02:03.123456789Z",
+        "market" : {
+          "market" : "US",
+          "bar" : "1h",
+          "timeKind" : "INSTANT",
+          "latestDate" : null,
+          "latestInstant" : "2026-09-25T20:00:00Z",
+          "delayed" : null
+        },
+        "financial" : null,
+        "search" : null
+      }
+    }, {
+      "evidenceId" : "market-date",
+      "dimension" : "MARKET",
+      "capabilityId" : "getStockKLine",
+      "targetKey" : "AAPL",
+      "status" : "AVAILABLE",
+      "sourceRef" : "fixture://daily/AAPL",
+      "provider" : "FIXTURE",
+      "observedAt" : "2026-09-26T01:02:03.123456789Z",
+      "asOf" : null,
+      "payloadHash" : "market-date-payload",
+      "approvedReadOnly" : true,
+      "timing" : {
+        "schemaVersion" : 1,
+        "fetchedAt" : "2026-09-26T01:02:03.123456789Z",
+        "market" : {
+          "market" : "US",
+          "bar" : "1d",
+          "timeKind" : "DATE",
+          "latestDate" : "2026-09-25",
+          "latestInstant" : null,
+          "delayed" : null
+        },
+        "financial" : null,
+        "search" : null
+      }
+    }, {
+      "evidenceId" : "fundamentals",
+      "dimension" : "FUNDAMENTALS",
+      "capabilityId" : "getFinancialReports",
+      "targetKey" : "AAPL",
+      "status" : "AVAILABLE",
+      "sourceRef" : "https://www.sec.gov/Archives/fixture",
+      "provider" : "SEC_EDGAR",
+      "observedAt" : "2026-09-26T01:02:03.123456789Z",
+      "asOf" : null,
+      "payloadHash" : "financial-payload",
+      "approvedReadOnly" : true,
+      "timing" : {
+        "schemaVersion" : 1,
+        "fetchedAt" : "2026-09-26T01:02:03.123456789Z",
+        "market" : null,
+        "financial" : {
+          "period" : "annual",
+          "latestPeriodEnd" : "2025-09-27",
+          "latestDisclosureDate" : "2025-10-31"
+        },
+        "search" : null
+      }
+    }, {
+      "evidenceId" : "news",
+      "dimension" : "NEWS",
+      "capabilityId" : "searchNews",
+      "targetKey" : "AAPL",
+      "status" : "AVAILABLE",
+      "sourceRef" : "https://example.org/news/first",
+      "provider" : "tavily",
+      "observedAt" : "2026-09-26T01:02:03.123456789Z",
+      "asOf" : "2026-09-25T10:30:00Z",
+      "payloadHash" : "news-payload",
+      "approvedReadOnly" : true,
+      "timing" : {
+        "schemaVersion" : 1,
+        "fetchedAt" : "2026-09-26T01:02:03.123456789Z",
+        "market" : null,
+        "financial" : null,
+        "search" : {
+          "requestedWindow" : "w",
+          "effectiveWindow" : "w",
+          "requestedDays" : 7,
+          "earliestPublishedAt" : "2026-09-24T09:00:00Z",
+          "latestPublishedAt" : "2026-09-25T10:30:00Z",
+          "earliestPublishedDate" : "2026-09-23",
+          "latestPublishedDate" : "2026-09-25",
+          "instantCount" : 2,
+          "dateCount" : 2,
+          "unknownCount" : 1
+        }
+      }
+    }, {
+      "evidenceId" : "rag-legacy",
+      "dimension" : "RAG",
+      "capabilityId" : "searchKnowledge",
+      "targetKey" : "AAPL",
+      "status" : "NO_RESULTS",
+      "sourceRef" : "fixture://knowledge/AAPL",
+      "provider" : "LOCAL_RAG",
+      "observedAt" : "2026-09-26T01:02:03.123456789Z",
+      "asOf" : null,
+      "payloadHash" : "empty-rag-payload",
+      "approvedReadOnly" : true,
+      "timing" : null
+    } ]
+  },
+  "harnessSnapshot" : {
+    "policyId" : "deep-equity-v1",
+    "policyVersion" : "1",
+    "phase" : "EVIDENCE",
+    "outcome" : "PASS",
+    "violations" : [ ],
+    "recoveryAttempts" : { },
+    "recoveryLifecycle" : "NONE",
+    "recoveryActions" : [ ],
+    "recoveryEffectKey" : "",
+    "suspendedRecovery" : null
+  },
+  "evidenceReplanState" : null
+}

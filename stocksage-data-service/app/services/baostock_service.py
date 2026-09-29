@@ -14,6 +14,9 @@ BaoStock 是一个免费、开源的 A 股数据接口，提供：
 - 返回的数据需要手动遍历 ResultSet，不像 SQL 那样直接拿 DataFrame
 """
 
+from app.research_budget import ResearchBudgetExceeded, check_budget, bounded_timeout, budget_call
+
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 import socket
 from threading import Event, RLock, Thread
@@ -73,7 +76,7 @@ SECTOR_SAMPLES = {
 def start_baostock_login_manager() -> None:
     """启动后台登录循环，避免阻塞 FastAPI 启动。"""
     global _BAOSTOCK_MANAGER_STARTED
-    with BAOSTOCK_LOCK:
+    with _request_lock():
         if _BAOSTOCK_MANAGER_STARTED:
             return
         _BAOSTOCK_MANAGER_STARTED = True
@@ -100,7 +103,7 @@ def stop_baostock_login_manager() -> None:
 
 def get_baostock_status() -> dict:
     """返回当前 BaoStock 登录管理器状态，供健康检查和错误响应复用。"""
-    with BAOSTOCK_LOCK:
+    with _request_lock():
         if _BAOSTOCK_LOGGED_IN:
             status = "ready"
         elif _BAOSTOCK_LOGIN_IN_PROGRESS:
@@ -179,10 +182,26 @@ def _baostock_login_worker() -> None:
         _BAOSTOCK_LOGIN_DONE.set()
 
 
+@contextmanager
+def _request_lock():
+    # Background login owns the same SDK lock; research requests must also bound this wait.
+    timeout = bounded_timeout(float("inf"))
+    if timeout == float("inf"):
+        BAOSTOCK_LOCK.acquire()
+    elif not BAOSTOCK_LOCK.acquire(timeout=timeout):
+        raise ResearchBudgetExceeded("Research request budget expired waiting for the BaoStock SDK lock; start a new research run.")
+    try:
+        check_budget()
+        yield
+    finally:
+        BAOSTOCK_LOCK.release()
+
+
 def _ensure_baostock_login(timeout_seconds: int = BAOSTOCK_LOGIN_TIMEOUT_SECONDS) -> dict | None:
     """确保 BaoStock 已登录；无法及时登录时返回可并入业务响应的错误对象。"""
+    check_budget()
     start_baostock_login_manager()
-    with BAOSTOCK_LOCK:
+    with _request_lock():
         if _BAOSTOCK_LOGGED_IN:
             return None
         if not _BAOSTOCK_LOGIN_IN_PROGRESS:
@@ -190,7 +209,7 @@ def _ensure_baostock_login(timeout_seconds: int = BAOSTOCK_LOGIN_TIMEOUT_SECONDS
             _BAOSTOCK_LOGIN_DONE.clear()
             _BAOSTOCK_RETRY_NOW.set()
 
-    if not _BAOSTOCK_LOGIN_DONE.wait(timeout_seconds):
+    if not budget_call(_BAOSTOCK_LOGIN_DONE.wait, bounded_timeout(timeout_seconds)):
         return {
             "error": True,
             "provider": "baostock",
@@ -201,7 +220,7 @@ def _ensure_baostock_login(timeout_seconds: int = BAOSTOCK_LOGIN_TIMEOUT_SECONDS
             ),
         }
 
-    with BAOSTOCK_LOCK:
+    with _request_lock():
         if _BAOSTOCK_LOGGED_IN:
             return None
         return {
@@ -238,9 +257,9 @@ class BaostockService:
         end_date = datetime.now().strftime("%Y-%m-%d")
         start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
 
-        with BAOSTOCK_LOCK:
+        with _request_lock():
             # adjustflag="2" 表示前复权（消除分红送股对价格的影响，方便做技术分析）
-            rs = bs.query_history_k_data_plus(
+            rs = budget_call(bs.query_history_k_data_plus,
                 code,
                 "date,open,high,low,close,volume,amount,turn",
                 start_date=start_date,
@@ -251,7 +270,7 @@ class BaostockService:
 
             # baostock 返回的是迭代器，需要逐行读取
             rows = []
-            while (rs.error_code == "0") and rs.next():
+            while (rs.error_code == "0") and budget_call(rs.next):
                 rows.append(rs.get_row_data())
             fields = rs.fields
 
@@ -278,10 +297,10 @@ class BaostockService:
             quarter = 4
             year -= 1
 
-        with BAOSTOCK_LOCK:
-            rs = bs.query_profit_data(code=code, year=year, quarter=quarter)
+        with _request_lock():
+            rs = budget_call(bs.query_profit_data, code=code, year=year, quarter=quarter)
             rows = []
-            while (rs.error_code == "0") and rs.next():
+            while (rs.error_code == "0") and budget_call(rs.next):
                 rows.append(rs.get_row_data())
             fields = rs.fields
 
@@ -317,7 +336,7 @@ class BaostockService:
 
         reports = []
         for year, quarter in periods:
-            with BAOSTOCK_LOCK:
+            with _request_lock():
                 statements = {
                     "profit": self._query_financial_table(bs.query_profit_data, code, year, quarter),
                     "operation": self._query_financial_table(bs.query_operation_data, code, year, quarter),
@@ -367,9 +386,9 @@ class BaostockService:
 
     def _query_financial_table(self, query_func, code: str, year: int, quarter: int) -> dict:
         """调用 BaoStock 财报表函数，并把 ResultSet 转成字典列表。"""
-        rs = query_func(code=code, year=year, quarter=quarter)
+        rs = budget_call(query_func, code=code, year=year, quarter=quarter)
         rows = []
-        while (rs.error_code == "0") and rs.next():
+        while (rs.error_code == "0") and budget_call(rs.next):
             rows.append(rs.get_row_data())
         if rs.error_code != "0":
             return {"error": rs.error_msg}
@@ -469,14 +488,14 @@ class BaostockService:
 
         for key, index in indices.items():
             code = index["code"]
-            with BAOSTOCK_LOCK:
-                rs = bs.query_history_k_data_plus(
+            with _request_lock():
+                rs = budget_call(bs.query_history_k_data_plus,
                     code, "date,close,volume,amount",
                     start_date=start_date, end_date=end_date,
                     frequency="d",
                 )
                 rows = []
-                while (rs.error_code == "0") and rs.next():
+                while (rs.error_code == "0") and budget_call(rs.next):
                     rows.append(rs.get_row_data())
             if rows:
                 latest = rows[-1]

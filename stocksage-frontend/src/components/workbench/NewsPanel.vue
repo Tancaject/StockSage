@@ -77,7 +77,10 @@ async function load() {
   if (!symbol) return
   try {
     const result = await fetchStockNews(symbol, 7)
-    if (isCurrent()) data.value = result
+    if (isCurrent()) {
+      data.value = result
+      error.value = result.error || ''
+    }
   } catch (err) {
     if (!isCurrent()) return
     error.value = err.message || '读取新闻失败'

@@ -1,14 +1,16 @@
 package com.stocksage.harness;
 
+import com.stocksage.evidence.EvidenceLedger;
+
 import com.stocksage.agent.DebateDecisionPolicy;
-import com.stocksage.harness.HarnessModels.EvidenceDimension;
-import com.stocksage.harness.HarnessModels.EvidenceEnvelope;
-import com.stocksage.harness.HarnessModels.EvidenceStatus;
+import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
+import com.stocksage.evidence.EvidenceModels.EvidenceEnvelope;
+import com.stocksage.evidence.EvidenceModels.EvidenceStatus;
 import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.ParseStatus;
 import com.stocksage.harness.HarnessModels.RecoveryAction;
 import com.stocksage.harness.HarnessModels.RunContext;
-import com.stocksage.harness.HarnessModels.TargetIdentity;
+import com.stocksage.evidence.EvidenceModels.TargetIdentity;
 import com.stocksage.harness.HarnessModels.ViolationCode;
 import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.DebateModels.ArgumentAssessment;

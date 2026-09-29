@@ -26,6 +26,7 @@ class SkillResolverTest {
     void setUp() {
         CapabilityRegistry capabilities = new CapabilityRegistry(List.of(
                 adapter("local.news.searchNews"),
+                adapter("local.news.webSearch"),
                 adapter("mcp.news.search")
         ));
         SkillRegistry registry = new SkillRegistry(new SkillValidator(capabilities));

@@ -1,0 +1,48 @@
+CONSOLIDATED STATEMENTS OF CASH FLOWS
+(In millions)
+Quarter Ended December 31, Year Ended December 31,
+2024 2025 2024 2025
+(unaudited) (unaudited)
+Operating activities
+Net income $ 26,536 $ 34,455 $ 100,118 $ 132,170
+Adjustments:
+Depreciation of property and equipment 4,205 6,040 15,311 21,136
+Stock-based compensation expense 5,810 7,071 22,785 24,953
+Deferred income taxes (1,448) 1,218 (5,257) 8,348
+Loss (gain) on debt and equity securities, net 67 (2,354) (2,671) (24,620)
+Other 827 1,265 3,419 2,108
+Changes in assets and liabilities, net of effects of
+acquisitions:
+Accounts receivable, net (4,570) (4,943) (5,891) (8,779)
+Income taxes, net 379 66 (2,418) (3,226)
+Other assets 937 (482) (1,397) (4,542)
+Accounts payable 401 227 359 907
+Accrued expenses and other liabilities 5,205 7,937 (1,161) 12,939
+Accrued revenue share 581 799 1,059 899
+Deferred revenue 183 1,103 1,043 2,420
+Net cash provided by operating activities 39,113 52,402 125,299 164,713
+Investing activities
+Purchases of property and equipment (14,276) (27,851) (52,535) (91,447)
+Purchases of marketable securities (21,645) (42,939) (86,679) (103,773)
+Maturities and sales of marketable securities 21,649 21,939 103,428 83,240
+Purchases of non-marketable securities (1,800) (2,404) (5,034) (5,716)
+Maturities and sales of non-marketable securities 150 171 882 1,367
+Acquisitions, net of cash acquired, and purchases of
+intangible assets (91) (167) (2,931) (1,592)
+Other investing activities (167) (525) (2,667) (2,370)
+Net cash used in investing activities (16,180) (51,776) (45,536) (120,291)
+Financing activities
+Net payments related to stock-based award activities (3,049) (5,166) (12,190) (14,167)
+Repurchases of stock (15,551) (5,499) (62,222) (45,709)
+Dividend payments (2,442) (2,536) (7,363) (10,049)
+Proceeds from issuance of debt, net of costs 4,895 26,562 13,589 64,564
+Repayments of debt (3,750) (6,333) (12,701) (32,427)
+Proceeds from sale of interest in consolidated entities, net 861 0 1,154 400
+Net cash provided by (used in) financing activities (19,036) 7,028 (79,733) (37,388)
+Effect of exchange rate changes on cash and cash
+equivalents (390) (36) (612) 208
+Net increase (decrease) in cash and cash equivalents 3,507 7,618 (582) 7,242
+Cash and cash equivalents at beginning of period 19,959 23,090 24,048 23,466
+Cash and cash equivalents at end of period $ 23,466 $ 30,708 $ 23,466 $ 30,708
+6
+

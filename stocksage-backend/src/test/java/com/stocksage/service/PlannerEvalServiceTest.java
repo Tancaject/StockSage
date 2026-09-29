@@ -7,6 +7,8 @@ import com.stocksage.agent.PlanAction;
 import com.stocksage.agent.PlanRoute;
 import com.stocksage.agent.RoutingDecisionMetadata;
 import com.stocksage.agent.RoutingDecisionSource;
+import com.stocksage.agent.intent.FineIntent;
+import com.stocksage.agent.intent.IntentSignalSource;
 import com.stocksage.model.dto.PlannerEvalCase;
 import com.stocksage.model.dto.PlannerEvalMode;
 import com.stocksage.model.dto.PlannerEvalRequest;
@@ -56,6 +58,10 @@ class PlannerEvalServiceTest {
         assertThat(response.forbiddenActionRate()).isZero();
         assertThat(response.executableRate()).isEqualTo(1.0);
         assertThat(response.results().get(0).passed()).isTrue();
+        assertThat(response.results().get(0).expectedClarification()).isNull();
+        assertThat(response.results().get(0).actualClarification()).isNull();
+        assertThat(response.results().get(0).clarificationMatched()).isNull();
+        assertThat(response.results().get(0).signalDiagnostics()).isEmpty();
         verify(coordinator).planDeterministically("NVDA price", 0);
     }
 
@@ -313,6 +319,84 @@ class PlannerEvalServiceTest {
         assertThat(response.routeAccuracy()).isEqualTo(1.0);
         assertThat(response.llmSignalCases()).isZero();
         assertThat(response.results().get(0).executionGuarded()).isTrue();
+    }
+
+    @Test
+    void clarificationLabelsAffectPassAndExposeObservedSignalsWithoutGuessingAnUnlabeledMatch() {
+        var signal = new RoutingDecisionMetadata.SignalSnapshot(
+                IntentSignalSource.LLM, PlanRoute.NEWS, FineIntent.NEWS_EVENT, 0.4);
+        var metadata = clarificationMetadata(List.of("FUSION_LOW_CONFIDENCE"), List.of(signal));
+        for (String query : List.of("labeled-match", "labeled-mismatch", "unlabeled")) {
+            when(coordinator.plan(query, 0, List.of())).thenReturn(new ExecutionPlan(
+                    PlanRoute.DIRECT, "clarify", "plan", List.of(PlanAction.FINAL_ANSWER),
+                    "done", ModelTier.FAST, metadata));
+        }
+
+        var response = service.evaluate(new PlannerEvalRequest(PlannerEvalMode.LIVE_COORDINATOR, List.of(
+                clarificationCase("labeled-match", true), clarificationCase("labeled-mismatch", false),
+                clarificationCase("unlabeled", null))));
+
+        var matched = response.results().get(0);
+        assertThat(matched.expectedClarification()).isTrue();
+        assertThat(matched.actualClarification()).isTrue();
+        assertThat(matched.clarificationMatched()).isTrue();
+        assertThat(matched.passed()).isTrue();
+        assertThat(matched.signalDiagnostics()).containsExactly(signal);
+        assertThat(matched.reasonCodes()).containsExactly("FUSION_LOW_CONFIDENCE");
+        assertThat(response.results().get(1).clarificationMatched()).isFalse();
+        assertThat(response.results().get(1).passed()).isFalse();
+        assertThat(response.results().get(2).actualClarification()).isTrue();
+        assertThat(response.results().get(2).clarificationMatched()).isNull();
+        assertThat(response.results().get(2).passed()).isTrue();
+    }
+
+    @Test
+    void missingRoutingAndPlannerFailureLeaveClarificationUnknownAndCannotPassALabel() {
+        when(coordinator.plan("missing-routing", 0, List.of())).thenReturn(new ExecutionPlan(
+                PlanRoute.DIRECT, "direct", "plan", List.of(PlanAction.FINAL_ANSWER), "done", ModelTier.FAST));
+        when(coordinator.plan("failed-planner", 0, List.of())).thenThrow(new IllegalStateException("failed"));
+
+        var response = service.evaluate(new PlannerEvalRequest(PlannerEvalMode.LIVE_COORDINATOR, List.of(
+                clarificationCase("missing-routing", false), clarificationCase("failed-planner", false))));
+
+        assertThat(response.results()).allSatisfy(result -> {
+            assertThat(result.expectedClarification()).isFalse();
+            assertThat(result.actualClarification()).isNull();
+            assertThat(result.clarificationMatched()).isNull();
+            assertThat(result.passed()).isFalse();
+            assertThat(result.signalDiagnostics()).isEmpty();
+            assertThat(result.reasonCodes()).isEmpty();
+        });
+        assertThat(response.results().get(1).errorCode()).isEqualTo("PLANNER_EXECUTION_FAILED");
+    }
+
+    @Test
+    void targetRewriteGuardAlsoExcludesTheRawSemanticRouteFromExecutionAccuracy() {
+        var metadata = clarificationMetadata(List.of(Coordinator.TARGET_REWRITE_MISMATCH), List.of());
+        when(coordinator.plan("rewrite-guard", 0, List.of())).thenReturn(new ExecutionPlan(
+                PlanRoute.DIRECT, "clarify", "plan", List.of(PlanAction.FINAL_ANSWER), "done", ModelTier.FAST,
+                metadata));
+
+        var response = service.evaluate(new PlannerEvalRequest(PlannerEvalMode.LIVE_COORDINATOR,
+                List.of(clarificationCase("rewrite-guard", true))));
+
+        assertThat(response.results().get(0).executionGuarded()).isTrue();
+        assertThat(response.results().get(0).reasonCodes()).containsExactly(Coordinator.TARGET_REWRITE_MISMATCH);
+        assertThat(response.results().get(0).passed()).isTrue();
+        assertThat(response.llmSignalCases()).isZero();
+    }
+
+    private PlannerEvalCase clarificationCase(String query, Boolean expectedClarification) {
+        return new PlannerEvalCase(query, query, 0, PlanRoute.DIRECT, List.of(PlanAction.FINAL_ANSWER), List.of(),
+                true, List.of(), null, null, false, null, expectedClarification);
+    }
+
+    private RoutingDecisionMetadata clarificationMetadata(List<String> reasons,
+                                                          List<RoutingDecisionMetadata.SignalSnapshot> signals) {
+        return new RoutingDecisionMetadata(RoutingDecisionSource.INTENT_FUSION, "NEWS", PlanRoute.DIRECT,
+                "clarify", "bounded", 0.4, List.of(), 0, "", 1,
+                "NEWS_EVENT", "NEWS", "RECENT", "STANDARD", java.util.Map.of(), java.util.Map.of(),
+                true, reasons, signals);
     }
 
     @Test

@@ -45,6 +45,7 @@ public class CapabilityException extends RuntimeException {
         DENIED,
         UNAVAILABLE,
         TIMEOUT,
+        CAPACITY_EXCEEDED,
         FAILED
     }
 }

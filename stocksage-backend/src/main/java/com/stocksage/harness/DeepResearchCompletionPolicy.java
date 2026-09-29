@@ -1,14 +1,16 @@
 package com.stocksage.harness;
 
+import com.stocksage.evidence.EvidenceLedger;
+
 import com.stocksage.agent.DebateDecisionPolicy;
-import com.stocksage.harness.HarnessModels.EvidenceDimension;
+import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
 import com.stocksage.harness.HarnessModels.HarnessDecision;
 import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.HarnessViolation;
 import com.stocksage.harness.HarnessModels.RecoveryAction;
 import com.stocksage.harness.HarnessModels.RunContext;
 import com.stocksage.harness.HarnessModels.SynthesisResult;
-import com.stocksage.harness.HarnessModels.TargetResolutionStatus;
+import com.stocksage.evidence.EvidenceModels.TargetResolutionStatus;
 import com.stocksage.harness.HarnessModels.ViolationCode;
 import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
@@ -37,7 +39,7 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
     /** 持久化到 Trace/checkpoint 的稳定策略 ID。 */
     public static final String POLICY_ID = "deep-equity-v1";
     /** 当前规则版本；规则语义变化时递增，用于拒绝陈旧报告权威。 */
-    public static final int POLICY_VERSION = 5;
+    public static final int POLICY_VERSION = 6;
 
     @Override
     public String policyId() {

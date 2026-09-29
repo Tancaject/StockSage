@@ -1,5 +1,7 @@
 package com.stocksage.agent;
 
+import com.stocksage.research.ResearchDebateService;
+
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.DebateModels.DebatePoint;
 import com.stocksage.model.dto.DebateModels.DebateTurn;
@@ -51,7 +53,11 @@ public class BullResearcher {
         String prompt = round <= OPENING_ROUND
                 ? renderOpeningPrompt(state)
                 : renderRebuttalPrompt(state, round);
-        return chatClient.prompt().user(prompt).stream().content();
+        var request = chatClient.prompt().user(prompt);
+        if (state.getModelInvocationContext() != null) {
+            request.advisors(a -> a.param(ModelInvocationAdvisor.CONTEXT_KEY, state.getModelInvocationContext()));
+        }
+        return request.stream().content();
     }
 
     /**

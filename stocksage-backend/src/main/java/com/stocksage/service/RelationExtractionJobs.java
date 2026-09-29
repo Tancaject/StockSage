@@ -1,5 +1,7 @@
 package com.stocksage.service;
 
+import com.stocksage.knowledge.EdgarIngestionService;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
