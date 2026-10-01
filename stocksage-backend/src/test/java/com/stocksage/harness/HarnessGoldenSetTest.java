@@ -204,15 +204,15 @@ class HarnessGoldenSetTest {
             return Path.of(configured).toAbsolutePath().normalize();
         }
         List<Path> candidates = List.of(
-                Path.of("..", "rag-eval", "harness_golden_set.jsonl"),
-                Path.of("rag-eval", "harness_golden_set.jsonl")
+                Path.of("..", "evals", "harness_golden_set.jsonl"),
+                Path.of("evals", "harness_golden_set.jsonl")
         );
         return candidates.stream()
                 .map(path -> path.toAbsolutePath().normalize())
                 .filter(Files::isRegularFile)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException(
-                        "Cannot find rag-eval/harness_golden_set.jsonl"
+                        "Cannot find evals/harness_golden_set.jsonl"
                 ));
     }
 

@@ -1,0 +1,123 @@
+{
+  "schema": "fundamentals_ai_diagnostic_identity_v1",
+  "experimentId": "common-fundamentals-ai-offline-001-20260930",
+  "status": "PASS",
+  "answer_quality": "NO_DATA",
+  "humanReviewed": false,
+  "publicationAuthorized": false,
+  "planSha256": "1b56e977510beb5709c65d73fb825284d5ba6dff2cb28a13f1eb112fe89fadbd",
+  "baselineReportSha256": "de9f73b0bdd2a3e5bcca0e334d5e35e6ba2a9d7d74491a823fe5b20f0bfa7419",
+  "runtimeBuildSha256": "9140e62727c843357b8f97b18b9ad3093e01ac4b8ceff381a0a5a88065e2f006",
+  "candidateCases": 12,
+  "candidateProviderSnapshots": 24,
+  "baselineReuse": "HISTORICAL_SAVED_RESPONSES",
+  "holdoutCalls": 0,
+  "splits": [
+    {
+      "split": "DEVELOPMENT",
+      "caseCount": 6,
+      "providerSnapshots": 12,
+      "driver": {
+        "status": "VERIFIED",
+        "driverCodeSource": "file:/D:/programming/StockSage/stocksage-backend/target/test-classes/",
+        "driverManifestSha256": "cfc5b6bbb6b2062a18bb6b6a027390e0facc93a4fab19131115a4d36f3d97508",
+        "productionArtifactSha256": "af9d6382ae73f11106eb7fef574b72e3a1de6ec2a359eb8c7b52504115532d2f",
+        "servingBundleId": "baseline-v1"
+      },
+      "executionSha256": "d48ae5ec291fbe77ab077f917db71f000df8fb33b6b3cffa1928fc10be6ce823",
+      "runtimeSha256": "4f45a11ba1ae660dd751e3f1a91a04895e8505d3bbd65725409e315dc5f54957",
+      "responsesSha256": "157043985d5262188acf70b67b4fe2d9e2252ac6a284ea27495f52f51526835e",
+      "pairs": [
+        {
+          "id": "msft-fy2025-growth@1",
+          "baselineRunId": "fd1978c7-2d8e-4c91-8b76-63106ff766f1",
+          "candidateRunId": "384b77a0-1506-4355-85b9-d383fb7e1efe",
+          "pairErrors": []
+        },
+        {
+          "id": "msft-fy2025-cashflow@1",
+          "baselineRunId": "5bde4cc0-ef5f-4bb5-8a37-5824ae3689c6",
+          "candidateRunId": "df126864-372e-4e35-819e-027367e027bd",
+          "pairErrors": []
+        },
+        {
+          "id": "msft-fy2025-liquidity@1",
+          "baselineRunId": "2af1ff4c-ef9a-4dd1-950a-9703fd6b741c",
+          "candidateRunId": "d0bd83ea-d145-47c2-9d53-ed06f959a041",
+          "pairErrors": []
+        },
+        {
+          "id": "wmt-fy2025-growth@1",
+          "baselineRunId": "6a394404-5572-41f6-b674-2affa35ba884",
+          "candidateRunId": "4b35bec3-9285-4be0-9532-844a78851e63",
+          "pairErrors": []
+        },
+        {
+          "id": "wmt-fy2025-cashflow@1",
+          "baselineRunId": "d2695e30-2a20-46b9-894d-a7a734763bbc",
+          "candidateRunId": "f6349610-b42d-41b7-861f-7f9ace91920e",
+          "pairErrors": []
+        },
+        {
+          "id": "wmt-fy2025-liquidity@1",
+          "baselineRunId": "228f5213-abe9-4a6e-a79e-2e63142ce92f",
+          "candidateRunId": "b5f78dee-0e02-4235-b40b-812135651fcc",
+          "pairErrors": []
+        }
+      ]
+    },
+    {
+      "split": "VALIDATION",
+      "caseCount": 6,
+      "providerSnapshots": 12,
+      "driver": {
+        "status": "VERIFIED",
+        "driverCodeSource": "file:/D:/programming/StockSage/stocksage-backend/target/test-classes/",
+        "driverManifestSha256": "cfc5b6bbb6b2062a18bb6b6a027390e0facc93a4fab19131115a4d36f3d97508",
+        "productionArtifactSha256": "af9d6382ae73f11106eb7fef574b72e3a1de6ec2a359eb8c7b52504115532d2f",
+        "servingBundleId": "baseline-v1"
+      },
+      "executionSha256": "6ab8320c56a16d45d9262cafcdcbe85d31e526be131c0db029289614a89d3001",
+      "runtimeSha256": "93afc75c5b0548b237692f7ee12f41385d25b3210b70c8d29643b745518c9b63",
+      "responsesSha256": "c4afa32072b215796e2100cddf9a8dd42566a7fdea00544763167bb198e7ce8c",
+      "pairs": [
+        {
+          "id": "googl-fy2025-growth@1",
+          "baselineRunId": "24a45c77-92fc-4d2f-8454-376d8dee65cf",
+          "candidateRunId": "9c18f4ad-25d4-4d8f-a2be-444799575c6b",
+          "pairErrors": []
+        },
+        {
+          "id": "googl-fy2025-cashflow@1",
+          "baselineRunId": "b9467293-aad0-46a1-b43a-a784a312f8c3",
+          "candidateRunId": "05325ea6-46f7-4263-b500-f7ce83b65abf",
+          "pairErrors": []
+        },
+        {
+          "id": "googl-fy2025-liquidity@1",
+          "baselineRunId": "980269b0-16db-43bf-ac48-def50054531a",
+          "candidateRunId": "292f603e-602a-43b6-bb36-595b1081d61a",
+          "pairErrors": []
+        },
+        {
+          "id": "cost-fy2025-growth@1",
+          "baselineRunId": "a8f312d6-35d7-48e5-9664-3bf38358ad46",
+          "candidateRunId": "2e41b61c-1af6-433a-906c-9bc1a1b3d738",
+          "pairErrors": []
+        },
+        {
+          "id": "cost-fy2025-cashflow@1",
+          "baselineRunId": "6bff53a2-f1a7-492d-ade4-8c9743fb4790",
+          "candidateRunId": "30c295b3-24e8-4aac-8f7d-f481b60c82b2",
+          "pairErrors": []
+        },
+        {
+          "id": "cost-fy2025-liquidity@1",
+          "baselineRunId": "73883a99-0c0f-4cf6-8ea9-55fdba24a0d4",
+          "candidateRunId": "24e80e22-9622-4fc7-b6a1-ede3ab812fac",
+          "pairErrors": []
+        }
+      ]
+    }
+  ]
+}

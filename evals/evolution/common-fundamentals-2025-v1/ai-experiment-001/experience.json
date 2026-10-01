@@ -1,0 +1,262 @@
+{
+  "applicabilityBoundary": "适用于已提供财报及必要比较期的历史基本面分析。报表片段、科目重分类、会计口径变化或期间不足时，只讨论能够对应和复核的部分；对资金可用性、具体业务驱动和持续经营能力的判断仍需相应披露。",
+  "counterexamples": [
+    "营业利润率上升可以伴随毛利率下降，费用率下降不等于业务组合优化。",
+    "经营现金流覆盖购建支出后仍可能面临到期债务和资金限制，正的简化自由现金流不保证全部支付安排得到覆盖。",
+    "流动资产账面上覆盖流动负债，但存货滞销、回款延迟或受限资金仍可能形成短期压力；反向的账面缺口也不能独自证明危机。",
+    "递延收入通常通过履约结清，但服务交付仍可能支出现金，不能把其余额视为可直接免除的偿付压力。",
+    "仅有总额时无法确定具体投资投向；仅有期末余额时无法确定周转速度和供应商议价能力。",
+    "金额与必答比例正确仍可能伴随额外合计漏项、单位错换或未经支持的因果断言。"
+  ],
+  "experienceId": "exp-0c70cf38b7334a218d87167c",
+  "forbiddenInferences": [
+    "营业利润率上升可以伴随毛利率下降，费用率下降不等于业务组合优化。",
+    "经营现金流覆盖购建支出后仍可能面临到期债务和资金限制，正的简化自由现金流不保证全部支付安排得到覆盖。",
+    "流动资产账面上覆盖流动负债，但存货滞销、回款延迟或受限资金仍可能形成短期压力；反向的账面缺口也不能独自证明危机。",
+    "递延收入通常通过履约结清，但服务交付仍可能支出现金，不能把其余额视为可直接免除的偿付压力。",
+    "仅有总额时无法确定具体投资投向；仅有期末余额时无法确定周转速度和供应商议价能力。",
+    "金额与必答比例正确仍可能伴随额外合计漏项、单位错换或未经支持的因果断言。"
+  ],
+  "kind": "RESEARCH_EXPERIENCE",
+  "method": "围绕收入与利润质量、现金流、资产负债、盈利能力、增长持续性、资本配置和关键风险分析，先完成问题明确要求的事项，再补充有证据且影响判断的内容。只给出事实、必要计算、结论及其边界。\n- 逐项对应问题要求的科目、期间、金额、增速、比率与说明，避免仅给最新期间的增速却遗漏所问比较期的增速。每个期间的同比均需其上年同期原值；缺少则明确无法计算。先核对财年截止日、全年或季度、期末余额或期间流量、币种、单位及合并范围，再作比较。\n- 依原表科目取值和命名，必要时附原文科目名。区分销售成本与包含期间费用的营业成本、现金与流动资产、非流动长期债务与到期债务及总负债。合计前列明纳入的互不重叠项目，核对是否遗漏类别或期限、重复加入小计；租赁义务须区分经营与融资、流动与非流动。资料不全时只称已知项目合计，不称全部负债。\n- 必答与额外数字使用相同核算标准：从原值计算，保留中间精度，最后统一四舍五入；复核差额、比例、正负号和数量级，不从已舍入的展示值推算。同比为当期与上年同期之差除以上年同期；营业利润率为营业利润除以收入；流动比率为流动资产除以流动负债。百分比的差用百分点，不能当成同比增幅。分母为零时不计算，负基数时说明通常增速的解释局限。优先保留原表金额单位，确需换算则反向换算核对，正文与表格保持一致。\n- 按问题限定定义自由现金流。采用现金购建支出毛额时，将原表现金流出按支出正额列示，以经营现金流减去该支出，并计算其占经营现金流的比例；不擅自抵减资产出售回款，不混入非现金新增资产，不等同净利润或全部可支配现金。覆盖结论只针对同期间指定支出，不能延伸为无需外部融资或足以承担未披露的偿债、分红和回购安排。\n- 先解释能由表内勾稽支持的变化，再判断经营含义。利润率改善可拆为毛利率与期间费用率的变化，同时保留相反方向的证据；未经分部收入、成本或原文说明，不把总额增长归因为特定业务需求、产品组合、提价、具体投资投向或管理层意图。行业常识只能说明可能机制，不能代替该企业的证据。会计结构变化不自动证明效率提升或增长可持续。\n- 流动性先陈述账面覆盖关系及资产负债结构，再明确尚需现金流、资金可动用性、变现速度、到期安排或授信资料。静态余额不能确认周转快、信用优、议价强，也不能单独断定偿债安全或危机。递延收入虽通常通过履约结清，履约仍可能发生现金成本，不能直接全额剔除并据此宣称风险降低。\n- 让限制直接约束对应结论：同一句中说明证据支持什么、尚不能判断什么；摘要和标题保留同样强度，不把正文中的可能性改写为确定事实。缺口章节不能抵消前文的无依据断言。风险写明触发条件与可能影响；证据不足时保留未知，不补写原因。检查所有新增金额、占比、合计及结论，删除无法追溯或与原表相悖的内容。",
+  "methodSha256": "194d89444058f62bc46ca878caa908538dcb27ec09fc00fbe9820260b66c7468",
+  "parentExperienceHashes": [],
+  "recordSha256": "0c70cf38b7334a218d87167c0ae7daf1ad0b1beff4cf8a406d33b83010e3b967",
+  "requiredCapabilities": [
+    "evidence-reading",
+    "period-comparison",
+    "unit-comparison",
+    "arithmetic"
+  ],
+  "requiredEvidence": [
+    "financial-statements"
+  ],
+  "reviewStatus": "UNREVIEWED",
+  "role": "FUNDAMENTALS",
+  "schemaVersion": 2,
+  "sourceRunIds": [
+    "fd1978c7-2d8e-4c91-8b76-63106ff766f1",
+    "5bde4cc0-ef5f-4bb5-8a37-5824ae3689c6",
+    "2af1ff4c-ef9a-4dd1-950a-9703fd6b741c",
+    "d2695e30-2a20-46b9-894d-a7a734763bbc",
+    "228f5213-abe9-4a6e-a79e-2e63142ce92f"
+  ],
+  "sources": [
+    {
+      "caseId": "msft-fy2025-growth",
+      "externalFeedbackSha256": "b8f748b8a2617f30364ddda922ae7fa5cb8b4a214be12d1fbc1199f68d4febe5",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "MSFT",
+      "issuerName": "微软",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "fa4dec7decd50b4dc97cadbbb9c22281e462c1ddef6123c3b2f4652a72e340ee"
+    },
+    {
+      "caseId": "msft-fy2025-growth",
+      "externalFeedbackSha256": "b064f5d332e37871209b942c1f1bd513bce4858ac692614540775378305acae1",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "MSFT",
+      "issuerName": "微软",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "1df1a557a0867212877bebb9d3a4c13882cbad40dc28e8ed035b52bbf0f61dc9"
+    },
+    {
+      "caseId": "msft-fy2025-growth",
+      "externalFeedbackSha256": "075c4f3825b8e919452b9d7290386beab3a91efbd1031ea4a6670a335c2a8d24",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "MSFT",
+      "issuerName": "微软",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "1df1a557a0867212877bebb9d3a4c13882cbad40dc28e8ed035b52bbf0f61dc9"
+    },
+    {
+      "caseId": "msft-fy2025-growth",
+      "externalFeedbackSha256": "9b90704f09999529a47d5fbbe74755218d521621658644d2460d5a3f6264d49b",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "MSFT",
+      "issuerName": "微软",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "1df1a557a0867212877bebb9d3a4c13882cbad40dc28e8ed035b52bbf0f61dc9"
+    },
+    {
+      "caseId": "msft-fy2025-growth",
+      "externalFeedbackSha256": "0ed0dfe76f33e3f4b8b3fbc82f17c88faa7050c3a2e562376bce974941799483",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "MSFT",
+      "issuerName": "微软",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "1df1a557a0867212877bebb9d3a4c13882cbad40dc28e8ed035b52bbf0f61dc9"
+    },
+    {
+      "caseId": "msft-fy2025-cashflow",
+      "externalFeedbackSha256": "a78e95e532985da523a54e974747112f177b3c6aa1a7c187544530ac02f834b1",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "MSFT",
+      "issuerName": "微软",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "7ccd84d1f3c7af8b9d679c3f28b5cc5b017c122055f75e00060b2bcd9351a682"
+    },
+    {
+      "caseId": "msft-fy2025-cashflow",
+      "externalFeedbackSha256": "c4275d5d14cac7022b884221540eaffe1800a1c46588a248fd1e5665f6830051",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "MSFT",
+      "issuerName": "微软",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "b0981ed5158df62ea0d7922f677096d9edefa7b7102044a32fb61059870e5285"
+    },
+    {
+      "caseId": "msft-fy2025-cashflow",
+      "externalFeedbackSha256": "bea9c1e0868309d9b43134816d56ec66fe5ac62d88c5580263f43353397c331e",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "MSFT",
+      "issuerName": "微软",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "b0981ed5158df62ea0d7922f677096d9edefa7b7102044a32fb61059870e5285"
+    },
+    {
+      "caseId": "msft-fy2025-liquidity",
+      "externalFeedbackSha256": "d2eb84aa7d256e06a46468423479424b7e09a44f98c03fab7a48f950ca7fbd41",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "MSFT",
+      "issuerName": "微软",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "e694d7e369d4ced7378bf1e85cf97af5dff93b8a7d82c30c236e27150603a7e1"
+    },
+    {
+      "caseId": "msft-fy2025-liquidity",
+      "externalFeedbackSha256": "85725fec3ba58929009b47bcf83384e569210f9d6a5c3f6963d2b4f6e66ee116",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "MSFT",
+      "issuerName": "微软",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "20bb88915aa2f05c79c3c1df3cdb4d16c50ba2b7f85b96ca8a1941cd8ca4db44"
+    },
+    {
+      "caseId": "msft-fy2025-liquidity",
+      "externalFeedbackSha256": "16c4386d471d1311730ab8cb2d64a04935ca41f57bd7c371d1d3aed07da41489",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "MSFT",
+      "issuerName": "微软",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "20bb88915aa2f05c79c3c1df3cdb4d16c50ba2b7f85b96ca8a1941cd8ca4db44"
+    },
+    {
+      "caseId": "msft-fy2025-liquidity",
+      "externalFeedbackSha256": "e34be5f0602548c8642d6884722b010be3f98204cc19435fab6122d63433f6dd",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "MSFT",
+      "issuerName": "微软",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "20bb88915aa2f05c79c3c1df3cdb4d16c50ba2b7f85b96ca8a1941cd8ca4db44"
+    },
+    {
+      "caseId": "wmt-fy2025-cashflow",
+      "externalFeedbackSha256": "e8cf5f3eaf832d286dea1b9a799956591e6870d27385333e9282ca40d67901fb",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "WMT",
+      "issuerName": "沃尔玛",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "3de1ec2e1da2b13fbe0230d3a1a86783aa968f17329d92ce94d8a021934d35f5"
+    },
+    {
+      "caseId": "wmt-fy2025-cashflow",
+      "externalFeedbackSha256": "0b40bb587e7a6019f26860e98c900375fec42cab9e59d391bc6e8985c7db3f22",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "WMT",
+      "issuerName": "沃尔玛",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "3de1ec2e1da2b13fbe0230d3a1a86783aa968f17329d92ce94d8a021934d35f5"
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "externalFeedbackSha256": "a63bb88f67b1969a6b12d73bb9a6683f8f2004338e7afa1985b04d6d2937b2b8",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "WMT",
+      "issuerName": "沃尔玛",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "35eafa62826bb9cd17a52ac32714cf251e4a7d32594f81a644bbe551eca1d9dd"
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "externalFeedbackSha256": "604d1be328523ec1e39082017a675072e706a8bf4fb142b365a2b7b6628bfff4",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "WMT",
+      "issuerName": "沃尔玛",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "35eafa62826bb9cd17a52ac32714cf251e4a7d32594f81a644bbe551eca1d9dd"
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "externalFeedbackSha256": "30d01e3bd816ed018b00667610487ed5903635ab89df03ca560d248ad48f20bf",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "WMT",
+      "issuerName": "沃尔玛",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "cb9b72fdd5b0a436f9a6c3b8275e885767284c418c219c498b90bb0f074c1da8"
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "externalFeedbackSha256": "223f205a5c062a7b7ede6c101370e4063ab80ff9e8105c3c41fa1818b5dbb167",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "WMT",
+      "issuerName": "沃尔玛",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "cb9b72fdd5b0a436f9a6c3b8275e885767284c418c219c498b90bb0f074c1da8"
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "externalFeedbackSha256": "2a9c9913b73094a18745e348adb1415e96029856caaa8a0fb4129054865b4d73",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR",
+      "issuerId": "WMT",
+      "issuerName": "沃尔玛",
+      "origin": "PUBLIC_AUTHORIZED",
+      "split": "DEVELOPMENT",
+      "traceSha256": "cb9b72fdd5b0a436f9a6c3b8275e885767284c418c219c498b90bb0f074c1da8"
+    }
+  ],
+  "status": "PROPOSED",
+  "taskType": "ORDINARY_FUNDAMENTALS",
+  "triggerTags": [
+    "historical-fundamentals"
+  ],
+  "validationStatus": "NOT_RUN",
+  "version": 1
+}

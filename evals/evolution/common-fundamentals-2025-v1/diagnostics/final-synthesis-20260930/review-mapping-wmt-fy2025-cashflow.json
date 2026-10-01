@@ -1,0 +1,38 @@
+{
+  "answer-14de18d9b2ad4146b1d6afe5880f5e22": {
+    "runId": "7db0b98e-34ad-4654-a034-e48a1e54f902",
+    "caseId": "wmt-fy2025-cashflow",
+    "variant": "original",
+    "repeatId": 2
+  },
+  "answer-f48a57e6c6cc44c7874aa27cb77f2222": {
+    "runId": "bf7646b6-fef3-43af-8b03-b52dbb9b5bc2",
+    "caseId": "wmt-fy2025-cashflow",
+    "variant": "bounded_judgment",
+    "repeatId": 2
+  },
+  "answer-8d837ff6e6bf409d9d1ba595aae9de00": {
+    "runId": "9da2fdd5-2f07-487e-a461-a60bca09fa91",
+    "caseId": "wmt-fy2025-cashflow",
+    "variant": "original",
+    "repeatId": 3
+  },
+  "answer-a70f7cfdc30049f79c0c28d9573a9d78": {
+    "runId": "1c161085-70f4-42f5-9d33-88abc32702d0",
+    "caseId": "wmt-fy2025-cashflow",
+    "variant": "bounded_judgment",
+    "repeatId": 3
+  },
+  "answer-94300a400455404a98f67de11ed56db5": {
+    "runId": "0b598d32-eb5b-4a05-8cf8-1013b87018af",
+    "caseId": "wmt-fy2025-cashflow",
+    "variant": "bounded_judgment",
+    "repeatId": 1
+  },
+  "answer-ce65372283bd476f88d867a2acc57f9d": {
+    "runId": "e35ec47b-42d2-4c49-a34b-5a4540f2c11f",
+    "caseId": "wmt-fy2025-cashflow",
+    "variant": "original",
+    "repeatId": 1
+  }
+}

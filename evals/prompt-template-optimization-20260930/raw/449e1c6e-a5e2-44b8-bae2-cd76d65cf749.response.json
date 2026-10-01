@@ -1,0 +1,16 @@
+{
+  "usageSource" : "PROVIDER",
+  "usageSemantics" : "INVOCATION_SNAPSHOT",
+  "actualModel" : "qwen3.8-flash",
+  "providerResponseId" : "chatcmpl-beebfbf5-1187-950f-9dca-3bde5402ba22",
+  "inputTokens" : 214,
+  "outputTokens" : 261,
+  "totalTokens" : 475,
+  "finishReason" : "STOP",
+  "text" : "MSFT Microsoft FY2025 FY2024 operating cash flow cash flow from operations annual report 10-K excluding stock price",
+  "callId" : "449e1c6e-a5e2-44b8-bae2-cd76d65cf749",
+  "caseId" : "rewrite-comparison-exclusion",
+  "arm" : "before",
+  "elapsedMs" : 5122,
+  "finishedAt" : "2026-09-30T14:09:18.167542100Z"
+}

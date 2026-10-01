@@ -158,7 +158,7 @@ function Invoke-PythonCheck {
 function Invoke-RagCheck {
     Write-Host "=== RAG retrieval eval ==="
     $python = Resolve-Python -PreferRagEval
-    Invoke-CheckedCommand -FilePath $python -CommandArgs @("$Root\rag-eval\run_retrieval_eval.py")
+    Invoke-CheckedCommand -FilePath $python -CommandArgs @("$Root\evals\run_retrieval_eval.py")
 }
 
 Write-Host "=== StockSage harness verification: $Mode ==="

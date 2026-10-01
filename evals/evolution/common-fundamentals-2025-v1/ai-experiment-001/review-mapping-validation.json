@@ -1,0 +1,146 @@
+{
+  "answer-1b6f3419e197437ca776822e4a3227b8": {
+    "caseId": "googl-fy2025-growth",
+    "arm": "baseline",
+    "stage": "analysis",
+    "runId": "24a45c77-92fc-4d2f-8454-376d8dee65cf"
+  },
+  "answer-3480c51ebfe349768b777627bb302bac": {
+    "caseId": "googl-fy2025-growth",
+    "arm": "baseline",
+    "stage": "finalAnswer",
+    "runId": "24a45c77-92fc-4d2f-8454-376d8dee65cf"
+  },
+  "answer-09fea6dab55847d786d447b45ce3e217": {
+    "caseId": "googl-fy2025-growth",
+    "arm": "candidate",
+    "stage": "analysis",
+    "runId": "9c18f4ad-25d4-4d8f-a2be-444799575c6b"
+  },
+  "answer-a8908e89dcf0484f884b294657ace32b": {
+    "caseId": "googl-fy2025-growth",
+    "arm": "candidate",
+    "stage": "finalAnswer",
+    "runId": "9c18f4ad-25d4-4d8f-a2be-444799575c6b"
+  },
+  "answer-d4d3ab46abde4fa6ac237ccef0169a8c": {
+    "caseId": "googl-fy2025-cashflow",
+    "arm": "baseline",
+    "stage": "analysis",
+    "runId": "b9467293-aad0-46a1-b43a-a784a312f8c3"
+  },
+  "answer-645eb02df8284f38a3094683653b4424": {
+    "caseId": "googl-fy2025-cashflow",
+    "arm": "baseline",
+    "stage": "finalAnswer",
+    "runId": "b9467293-aad0-46a1-b43a-a784a312f8c3"
+  },
+  "answer-bcef433ac59647df8a259d8d89bfb20a": {
+    "caseId": "googl-fy2025-cashflow",
+    "arm": "candidate",
+    "stage": "analysis",
+    "runId": "05325ea6-46f7-4263-b500-f7ce83b65abf"
+  },
+  "answer-34e0e407d5ee491896fac8da31b0a668": {
+    "caseId": "googl-fy2025-cashflow",
+    "arm": "candidate",
+    "stage": "finalAnswer",
+    "runId": "05325ea6-46f7-4263-b500-f7ce83b65abf"
+  },
+  "answer-1cb64f6f5b5e4eaf8e137735ba8897e7": {
+    "caseId": "googl-fy2025-liquidity",
+    "arm": "baseline",
+    "stage": "analysis",
+    "runId": "980269b0-16db-43bf-ac48-def50054531a"
+  },
+  "answer-6223f947f9524ba3afa48caf52a514c3": {
+    "caseId": "googl-fy2025-liquidity",
+    "arm": "baseline",
+    "stage": "finalAnswer",
+    "runId": "980269b0-16db-43bf-ac48-def50054531a"
+  },
+  "answer-1486a8d1aa2d4f868bf88019633bca20": {
+    "caseId": "googl-fy2025-liquidity",
+    "arm": "candidate",
+    "stage": "analysis",
+    "runId": "292f603e-602a-43b6-bb36-595b1081d61a"
+  },
+  "answer-186547eff6804242960ad84c5a4bb278": {
+    "caseId": "googl-fy2025-liquidity",
+    "arm": "candidate",
+    "stage": "finalAnswer",
+    "runId": "292f603e-602a-43b6-bb36-595b1081d61a"
+  },
+  "answer-5b1c8d725e4f40328c04dba35fc1e86a": {
+    "caseId": "cost-fy2025-growth",
+    "arm": "baseline",
+    "stage": "analysis",
+    "runId": "a8f312d6-35d7-48e5-9664-3bf38358ad46"
+  },
+  "answer-35c557d478b847a9941a6f02e7f8a5ba": {
+    "caseId": "cost-fy2025-growth",
+    "arm": "baseline",
+    "stage": "finalAnswer",
+    "runId": "a8f312d6-35d7-48e5-9664-3bf38358ad46"
+  },
+  "answer-71a318a4de6a4089b400dad1c085cd6a": {
+    "caseId": "cost-fy2025-growth",
+    "arm": "candidate",
+    "stage": "analysis",
+    "runId": "2e41b61c-1af6-433a-906c-9bc1a1b3d738"
+  },
+  "answer-766c39733b19410d931f9d38f49d0cf5": {
+    "caseId": "cost-fy2025-growth",
+    "arm": "candidate",
+    "stage": "finalAnswer",
+    "runId": "2e41b61c-1af6-433a-906c-9bc1a1b3d738"
+  },
+  "answer-037e9d91b0e348c2bf433b02d757667f": {
+    "caseId": "cost-fy2025-cashflow",
+    "arm": "baseline",
+    "stage": "analysis",
+    "runId": "6bff53a2-f1a7-492d-ade4-8c9743fb4790"
+  },
+  "answer-ad247c64b9b64a32962d18da725ac0ca": {
+    "caseId": "cost-fy2025-cashflow",
+    "arm": "baseline",
+    "stage": "finalAnswer",
+    "runId": "6bff53a2-f1a7-492d-ade4-8c9743fb4790"
+  },
+  "answer-44a0cdc2cc044d32bc1fdf00ce7e64e3": {
+    "caseId": "cost-fy2025-cashflow",
+    "arm": "candidate",
+    "stage": "analysis",
+    "runId": "30c295b3-24e8-4aac-8f7d-f481b60c82b2"
+  },
+  "answer-e3a03a4d127543e9970672ef2d18220f": {
+    "caseId": "cost-fy2025-cashflow",
+    "arm": "candidate",
+    "stage": "finalAnswer",
+    "runId": "30c295b3-24e8-4aac-8f7d-f481b60c82b2"
+  },
+  "answer-c1ef7d65d55b4c4887cdfe007a4c6a90": {
+    "caseId": "cost-fy2025-liquidity",
+    "arm": "baseline",
+    "stage": "analysis",
+    "runId": "73883a99-0c0f-4cf6-8ea9-55fdba24a0d4"
+  },
+  "answer-51ff48fbba81436aa54988d1c1ed3b1c": {
+    "caseId": "cost-fy2025-liquidity",
+    "arm": "baseline",
+    "stage": "finalAnswer",
+    "runId": "73883a99-0c0f-4cf6-8ea9-55fdba24a0d4"
+  },
+  "answer-61a90a360841411a8f6fac93e808335d": {
+    "caseId": "cost-fy2025-liquidity",
+    "arm": "candidate",
+    "stage": "analysis",
+    "runId": "24e80e22-9622-4fc7-b6a1-ede3ab812fac"
+  },
+  "answer-a031708bc8ee4bd4b6b23ecda996b22d": {
+    "caseId": "cost-fy2025-liquidity",
+    "arm": "candidate",
+    "stage": "finalAnswer",
+    "runId": "24e80e22-9622-4fc7-b6a1-ede3ab812fac"
+  }
+}

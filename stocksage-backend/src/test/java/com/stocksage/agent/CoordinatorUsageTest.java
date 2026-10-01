@@ -38,6 +38,9 @@ class CoordinatorUsageTest {
             if (withUsage) {
                 chunks.add(new ChatResponse(List.of(), ChatResponseMetadata.builder()
                         .model("provider-model-revision")
+                        .usage(new DefaultUsage(12, 1, 13)).build()));
+                chunks.add(new ChatResponse(List.of(), ChatResponseMetadata.builder()
+                        .model("provider-model-revision")
                         .usage(new DefaultUsage(12, 3, 15)).build()));
             }
             when(model.stream(any(Prompt.class))).thenReturn(Flux.fromIterable(chunks));

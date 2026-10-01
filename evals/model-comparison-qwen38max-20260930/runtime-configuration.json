@@ -1,0 +1,78 @@
+{
+  "clientOptions": {
+    "chatClient": {
+      "maxTokens": 4096,
+      "temperature": 0.7,
+      "model": "qwen3.8-max"
+    },
+    "fundamentals": {
+      "maxTokens": 4096,
+      "temperature": 0.7,
+      "model": "qwen3.8-max"
+    },
+    "market": {
+      "maxTokens": 4096,
+      "temperature": 0.7,
+      "model": "qwen3.8-max"
+    },
+    "news": {
+      "maxTokens": 4096,
+      "temperature": 0.7,
+      "model": "qwen3.8-max"
+    },
+    "relationExtraction": {
+      "maxTokens": 4096,
+      "temperature": 0.1,
+      "model": "qwen3.8-max"
+    }
+  },
+  "finalRoutes": {
+    "STANDARD": {
+      "configurationSource": "REQUEST_OPTIONS",
+      "maxOutputTokens": 4096,
+      "modelTier": "STANDARD",
+      "temperature": 0.7,
+      "schemaVersion": 1,
+      "modelName": "qwen3.8-max",
+      "scope": "final-answer",
+      "kind": "model-invocation"
+    },
+    "FAST": {
+      "configurationSource": "REQUEST_OPTIONS",
+      "maxOutputTokens": 4096,
+      "modelTier": "FAST",
+      "temperature": 0.7,
+      "schemaVersion": 1,
+      "modelName": "qwen3.8-flash",
+      "scope": "final-answer",
+      "kind": "model-invocation"
+    },
+    "STRONG": {
+      "configurationSource": "REQUEST_OPTIONS",
+      "maxOutputTokens": 4096,
+      "modelTier": "STRONG",
+      "temperature": 0.7,
+      "schemaVersion": 1,
+      "modelName": "qwen3.8-max",
+      "scope": "final-answer",
+      "kind": "model-invocation"
+    },
+    "VISION": {
+      "configurationSource": "REQUEST_OPTIONS",
+      "maxOutputTokens": 4096,
+      "modelTier": "STANDARD",
+      "temperature": 0.7,
+      "schemaVersion": 1,
+      "modelName": "qwen3-vl-plus",
+      "scope": "final-answer",
+      "kind": "model-invocation"
+    }
+  },
+  "schemaVersion": 1,
+  "scope": "MOCK_MODEL_CONSTRUCTED_OPTIONS_AND_ROUTING_ONLY",
+  "status": "PASS",
+  "providerCalls": 0,
+  "mockCalls": 5,
+  "applicationSourceSha256": "512097066508407be23ca1b6c1738c391556db97016cc2a55d1fa8b9a4972723",
+  "applicationResourceSha256": "512097066508407be23ca1b6c1738c391556db97016cc2a55d1fa8b9a4972723"
+}

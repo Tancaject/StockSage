@@ -28,7 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class FundamentalsPromptsTest {
-    private static final String LEGACY_SYSTEM = """
+    private static final String BASELINE_SYSTEM = """
             你是 StockSage Fundamentals Agent。你的唯一职责是基于可验证的财报、公告和结构化财务数据，分析公司的经营质量、财务趋势与基本面风险；你不负责实时行情、新闻归因、交易指令或最终投资评级。
 
             【证据与安全边界】
@@ -44,12 +44,12 @@ class FundamentalsPromptsTest {
             - 优先使用一手披露和结构化财务结果；搜索摘要只能作为线索，不能替代缺失的原始财报证据。
 
             【分析方法】
-            围绕收入与利润质量、现金流、资产负债、盈利能力、增长持续性、资本配置和关键风险展开。指标只在数据口径可比时比较，并解释变化来自业务、会计口径还是一次性因素。不要输出隐藏思维过程，只给出证据、结论及其边界。
+            围绕收入与利润质量、现金流、资产负债、盈利能力、增长持续性、资本配置和关键风险展开。指标只在数据口径可比时比较；仅在本轮证据支持时解释变化原因，否则说明原因尚无法确认。不要输出隐藏思维过程，只给出证据、结论及其边界。
 
             【输出结构】
             按“标的与数据范围 / 已验证事实 / 财务趋势与经营质量 / 风险与反向证据 / 数据缺口 / 来源”组织中文报告。每个重要结论尽量紧邻其报告期和来源；没有证据支撑的章节写明“暂无可靠数据”。
             """;
-    private static final String LEGACY_TASK = """
+    private static final String BASELINE_TASK = """
             用户问题：
             %s
 
@@ -65,7 +65,7 @@ class FundamentalsPromptsTest {
 
     @ParameterizedTest
     @MethodSource("inputs")
-    void actualClientSendsTheOriginalOrderedMessages(String query, String context) {
+    void actualClientSendsTheCurrentBaselineOrderedMessages(String query, String context) {
         ChatModel model = mock(ChatModel.class);
         when(model.call(any(Prompt.class))).thenReturn(
                 new ChatResponse(List.of(new Generation(new AssistantMessage("report")))));
@@ -80,8 +80,8 @@ class FundamentalsPromptsTest {
         assertEquals("report", agent.analyze(query, context));
         var observed = agent.analyzeObserved(query, context, "baseline-v1");
         assertEquals("report", observed.content());
-        assertEquals(LEGACY_SYSTEM, observed.systemPrompt());
-        assertEquals(LEGACY_TASK.formatted(query, context == null ? "" : context), observed.userPrompt());
+        assertEquals(BASELINE_SYSTEM, observed.systemPrompt());
+        assertEquals(BASELINE_TASK.formatted(query, context == null ? "" : context), observed.userPrompt());
         assertEquals("baseline-v1", observed.methodBundle().get("bundleId"));
         assertEquals("NO_DATA", observed.responseMetadata().get("usageSource"));
 
@@ -91,8 +91,8 @@ class FundamentalsPromptsTest {
             var messages = actual.getInstructions();
             assertEquals(List.of(MessageType.SYSTEM, MessageType.USER),
                     messages.stream().map(message -> message.getMessageType()).toList());
-            assertEquals(LEGACY_SYSTEM, messages.get(0).getText());
-            assertEquals(LEGACY_TASK.formatted(query, context == null ? "" : context), messages.get(1).getText());
+            assertEquals(BASELINE_SYSTEM, messages.get(0).getText());
+            assertEquals(BASELINE_TASK.formatted(query, context == null ? "" : context), messages.get(1).getText());
             assertEquals("test-standard", actual.getOptions().getModel());
             assertEquals(4096, actual.getOptions().getMaxTokens());
         }
@@ -112,10 +112,10 @@ class FundamentalsPromptsTest {
     @Test
     void onlyTheMethodSlotChangesAndCandidateTextIsNotReformatted() {
         String method = "  核对报告期与单位。\n保留 %s 和 {{fundamentals.method}} 原文。\n";
-        assertEquals(LEGACY_SYSTEM.replace(FundamentalsPrompts.baselineMethod(), method),
+        assertEquals(BASELINE_SYSTEM.replace(FundamentalsPrompts.baselineMethod(), method),
                 FundamentalsPrompts.system(method));
         assertThrows(IllegalArgumentException.class, () -> FundamentalsPrompts.system(null));
-        assertEquals(LEGACY_SYSTEM.replace(FundamentalsPrompts.baselineMethod(), ""),
+        assertEquals(BASELINE_SYSTEM.replace(FundamentalsPrompts.baselineMethod(), ""),
                 FundamentalsPrompts.system(""));
     }
 

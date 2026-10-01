@@ -1,0 +1,29 @@
+{
+  "callId" : "aa7cdafe-febf-4cd2-a0e2-a1907fcb8cda",
+  "caseId" : "profile-assistant-suggestion",
+  "arm" : "before",
+  "role" : "memory-profile",
+  "dataKind" : "SYNTHETIC",
+  "criteria" : [ "只输出原契约四字段 JSON", "holdings 与 revokedHoldings 为空数组；riskPreference 为 conservative", "profileSummary 不把助手建议写成用户已持有 MSFT 或债券" ],
+  "input" : {
+    "assistantResponse" : "可以考虑小仓位买入 MSFT，保守组合也可研究债券。",
+    "userMessage" : "我比较保守，想了解 MSFT，暂时没有买。"
+  },
+  "messages" : [ {
+    "role" : "system",
+    "text" : "你是 StockSage 的记忆摘要器，只负责压缩对话和提取用户画像。\n输出必须简洁、事实化，不要添加用户没有表达过的信息。\n"
+  }, {
+    "role" : "user",
+    "text" : "请从本轮对话中提取用户长期投资画像，输出严格 JSON：\n{\n  \"holdings\": [\"用户明确表示当前仍持有的 ticker\"],\n  \"revokedHoldings\": [\"用户明确表示已全部退出、不再持有的 ticker；部分卖出、期权交易或建议不要写入\"],\n  \"riskPreference\": \"conservative|moderate|aggressive|\",\n  \"profileSummary\": \"一句话画像摘要；无新增信息则空字符串\"\n}\n\n用户消息：\n我比较保守，想了解 MSFT，暂时没有买。\n\n助手回答：\n可以考虑小仓位买入 MSFT，保守组合也可研究债券。\n"
+  } ],
+  "options" : {
+    "model" : "qwen3.8-flash",
+    "temperature" : 0.7,
+    "maxTokens" : 4096,
+    "topP" : null,
+    "frequencyPenalty" : null,
+    "presencePenalty" : null,
+    "stopSequences" : null
+  },
+  "promptSha256" : "2f14950838f724f10fa0625e44d0f7b76333bd4681c07dd79edce3d6da76a0bb"
+}

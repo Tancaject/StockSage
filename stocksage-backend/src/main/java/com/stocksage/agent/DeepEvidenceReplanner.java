@@ -35,8 +35,10 @@ public class DeepEvidenceReplanner {
                         仅当缺少直接相关、近期且可通过新闻搜索补齐的证据时选择 ACT；财务或行情缺口不能用新闻搜索伪补。
                         query 只写搜索主题，不选择 ticker、provider 或工具，也不要加入另一个标的。
 
-                        严格输出四个字段：
-                        {"decision":"ACT|STOP","action":"FOCUSED_NEWS_SEARCH|null","query":"主题|null","reasonCode":"有限原因码"}
+                        严格输出四个字段；以下是两种有效格式，仅输出符合本轮判断的一种：
+                        {"decision":"ACT","action":"FOCUSED_NEWS_SEARCH","query":"与用户关注点直接相关的新闻主题","reasonCode":"USER_FOCUS_NOT_COVERED"}
+                        {"decision":"STOP","action":null,"query":null,"reasonCode":"SUFFICIENT"}
+                        STOP 的 action 和 query 必须是 JSON null，不能是字符串 "null"。
                         ACT reasonCode 只能是 USER_FOCUS_NOT_COVERED、CONFLICT_NEEDS_CURRENT_SOURCE、FRESHNESS_GAP；
                         STOP reasonCode 只能是 SUFFICIENT、NO_SAFE_ACTION。
                         """.formatted(

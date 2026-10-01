@@ -18,7 +18,7 @@ stocksage-data-service/.venv/
 **/__pycache__/
 **/*.py[cod]
 *$py.class
-rag-eval/results/
+evals/results/
 
 # === Node / Vue ===
 stocksage-frontend/node_modules/

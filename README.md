@@ -48,7 +48,7 @@ flowchart LR
 | `stocksage-backend` | Java 17、Spring Boot、Spring AI / Spring AI Alibaba；对话、Agent、RAG、任务和报告 |
 | `stocksage-data-service` | Python、FastAPI；行情、指标、新闻、EDGAR 与 XBRL 数据 |
 | `stocksage-frontend` | Vue 3、Vite、Element Plus；Chat 与 Workbench |
-| `rag-eval` | 检索、回答和 Agent/Harness 质量评估 |
+| [evals](evals/README.md) | 项目级评测；分别定义 RAG、Agent 与自进化的评测标准 |
 
 运行依赖 MySQL、Redis 和 Milvus；本地 embedding 默认使用 Ollama `bge-m3`。
 

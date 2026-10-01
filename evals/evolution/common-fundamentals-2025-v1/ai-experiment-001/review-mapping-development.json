@@ -1,0 +1,146 @@
+{
+  "answer-ea0c4271929244ccad6a2447c99c86f3": {
+    "caseId": "msft-fy2025-growth",
+    "arm": "baseline",
+    "stage": "analysis",
+    "runId": "fd1978c7-2d8e-4c91-8b76-63106ff766f1"
+  },
+  "answer-14d402d2dec445979af3865063254ddb": {
+    "caseId": "msft-fy2025-growth",
+    "arm": "baseline",
+    "stage": "finalAnswer",
+    "runId": "fd1978c7-2d8e-4c91-8b76-63106ff766f1"
+  },
+  "answer-db549521b16c42d68ad9e120a6191773": {
+    "caseId": "msft-fy2025-growth",
+    "arm": "candidate",
+    "stage": "analysis",
+    "runId": "384b77a0-1506-4355-85b9-d383fb7e1efe"
+  },
+  "answer-d6f9d1fa51fd4e15976a968c17f9b626": {
+    "caseId": "msft-fy2025-growth",
+    "arm": "candidate",
+    "stage": "finalAnswer",
+    "runId": "384b77a0-1506-4355-85b9-d383fb7e1efe"
+  },
+  "answer-8c9cda8d42ef4ebca7531dab3194631a": {
+    "caseId": "msft-fy2025-cashflow",
+    "arm": "baseline",
+    "stage": "analysis",
+    "runId": "5bde4cc0-ef5f-4bb5-8a37-5824ae3689c6"
+  },
+  "answer-a074b5e12c27474ebb4b0021c1e84f58": {
+    "caseId": "msft-fy2025-cashflow",
+    "arm": "baseline",
+    "stage": "finalAnswer",
+    "runId": "5bde4cc0-ef5f-4bb5-8a37-5824ae3689c6"
+  },
+  "answer-5e223e176d5942438cb0aaf56519f8b3": {
+    "caseId": "msft-fy2025-cashflow",
+    "arm": "candidate",
+    "stage": "analysis",
+    "runId": "df126864-372e-4e35-819e-027367e027bd"
+  },
+  "answer-75f4b05f1fd24d73bee14e13204700bd": {
+    "caseId": "msft-fy2025-cashflow",
+    "arm": "candidate",
+    "stage": "finalAnswer",
+    "runId": "df126864-372e-4e35-819e-027367e027bd"
+  },
+  "answer-0df12ab6bb3c4fd2ac363f0f4590bcd7": {
+    "caseId": "msft-fy2025-liquidity",
+    "arm": "baseline",
+    "stage": "analysis",
+    "runId": "2af1ff4c-ef9a-4dd1-950a-9703fd6b741c"
+  },
+  "answer-318ec5eab35a4d6d83fb380b197d86f5": {
+    "caseId": "msft-fy2025-liquidity",
+    "arm": "baseline",
+    "stage": "finalAnswer",
+    "runId": "2af1ff4c-ef9a-4dd1-950a-9703fd6b741c"
+  },
+  "answer-84cc7ea067034903bb65211074f3b767": {
+    "caseId": "msft-fy2025-liquidity",
+    "arm": "candidate",
+    "stage": "analysis",
+    "runId": "d0bd83ea-d145-47c2-9d53-ed06f959a041"
+  },
+  "answer-9113e732b63e4b5998804eb0d2e972c1": {
+    "caseId": "msft-fy2025-liquidity",
+    "arm": "candidate",
+    "stage": "finalAnswer",
+    "runId": "d0bd83ea-d145-47c2-9d53-ed06f959a041"
+  },
+  "answer-4ec9ce52291043ff8cd71eac2dfcdac0": {
+    "caseId": "wmt-fy2025-growth",
+    "arm": "baseline",
+    "stage": "analysis",
+    "runId": "6a394404-5572-41f6-b674-2affa35ba884"
+  },
+  "answer-b5ec788bc9a64748badb2c664cdefeba": {
+    "caseId": "wmt-fy2025-growth",
+    "arm": "baseline",
+    "stage": "finalAnswer",
+    "runId": "6a394404-5572-41f6-b674-2affa35ba884"
+  },
+  "answer-586b7aeafd90463cb2816ca70599cf59": {
+    "caseId": "wmt-fy2025-growth",
+    "arm": "candidate",
+    "stage": "analysis",
+    "runId": "4b35bec3-9285-4be0-9532-844a78851e63"
+  },
+  "answer-db5e5938030f418e87f552059b3e3ab9": {
+    "caseId": "wmt-fy2025-growth",
+    "arm": "candidate",
+    "stage": "finalAnswer",
+    "runId": "4b35bec3-9285-4be0-9532-844a78851e63"
+  },
+  "answer-207603d21d4f417393574b1a7fa6172a": {
+    "caseId": "wmt-fy2025-cashflow",
+    "arm": "baseline",
+    "stage": "analysis",
+    "runId": "d2695e30-2a20-46b9-894d-a7a734763bbc"
+  },
+  "answer-2318a0c1ec614881a72814b80bcd4888": {
+    "caseId": "wmt-fy2025-cashflow",
+    "arm": "baseline",
+    "stage": "finalAnswer",
+    "runId": "d2695e30-2a20-46b9-894d-a7a734763bbc"
+  },
+  "answer-c984c861bcc84d4fa5ead170532b985d": {
+    "caseId": "wmt-fy2025-cashflow",
+    "arm": "candidate",
+    "stage": "analysis",
+    "runId": "f6349610-b42d-41b7-861f-7f9ace91920e"
+  },
+  "answer-8676ba2acb78497a88b735fffc5b7f42": {
+    "caseId": "wmt-fy2025-cashflow",
+    "arm": "candidate",
+    "stage": "finalAnswer",
+    "runId": "f6349610-b42d-41b7-861f-7f9ace91920e"
+  },
+  "answer-1d3ba39b7b014006965e39a55f17c776": {
+    "caseId": "wmt-fy2025-liquidity",
+    "arm": "baseline",
+    "stage": "analysis",
+    "runId": "228f5213-abe9-4a6e-a79e-2e63142ce92f"
+  },
+  "answer-8455747598f6473ca1e4c7a4a1ddeee1": {
+    "caseId": "wmt-fy2025-liquidity",
+    "arm": "baseline",
+    "stage": "finalAnswer",
+    "runId": "228f5213-abe9-4a6e-a79e-2e63142ce92f"
+  },
+  "answer-52ef97a3204c4b1e8b3a20bbb2ac9f64": {
+    "caseId": "wmt-fy2025-liquidity",
+    "arm": "candidate",
+    "stage": "analysis",
+    "runId": "b5f78dee-0e02-4235-b40b-812135651fcc"
+  },
+  "answer-ba1ddf29ca5c4d91bfbf8524b1335f2a": {
+    "caseId": "wmt-fy2025-liquidity",
+    "arm": "candidate",
+    "stage": "finalAnswer",
+    "runId": "b5f78dee-0e02-4235-b40b-812135651fcc"
+  }
+}

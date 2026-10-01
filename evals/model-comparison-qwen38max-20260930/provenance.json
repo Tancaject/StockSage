@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "changedFactor": "Model selection only: qwen3.7-plus versus qwen3.8-max",
+  "ordinarySourceCaptureSha256": "a5ec0fb459fa3851be3bc8528e32ba2e7a02132510b418da1f8a697f2ffb87a2",
+  "finalSourceDiagnosisSha256": "6fedd66b8aa97e8d4489389431c30fc65cee652769bb82f94e225b671802739b",
+  "criteriaSha256": "f44d7c29ea26ae6778463716820685784be86bb36105b54904df1095cbc6af79",
+  "maxCalls": 16,
+  "independentCases": 4,
+  "repeatsPerModelPerCase": 2,
+  "newRequestsInBothArms": true,
+  "rolePromptsAndEvidenceUnchanged": true,
+  "providerVersionAndHiddenDefaults": "UNKNOWN",
+  "noValidationOrHoldout": true,
+  "modelsWereNotAssumedOrderedByQuality": true,
+  "evaluationScope": "Synchronous captured-message component calls; not full serving, retrieval or storage acceptance",
+  "requestedChange": "Application STANDARD default switched to qwen3.8-max; FAST/STRONG/VISION untouched"
+}

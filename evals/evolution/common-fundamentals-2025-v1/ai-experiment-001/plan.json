@@ -1,0 +1,212 @@
+{
+  "schema": "fundamentals_ai_diagnostic_plan_v1",
+  "experimentId": "common-fundamentals-ai-offline-001-20260930",
+  "recordedAt": "2026-09-30T02:49:43.095006+00:00",
+  "authorization": "User explicitly permitted AI cross-checked offline experimentation; no publication approval.",
+  "humanReviewed": false,
+  "publicationAuthorized": false,
+  "design": "One frozen external proposal; historical fixed-JAR baseline paired with new candidate runs, not randomized or alternating arms.",
+  "generation": {
+    "input": "development-input.json",
+    "inputSha256": "9ec11d47c88a03d1ece23fa6650d85b020ce5473a21d131283250f203e74670b",
+    "proposal": "proposal.json",
+    "proposalSha256": "c28160acf10ae0e8a1631f55da9ce4cb40f555d491a542e041ed72843c1889c6",
+    "scope": "Six development cases only; generator instructed not to inspect validation or holdout.",
+    "usage": "EXTERNAL_ASSISTANT_USAGE_NOT_MEASURED_BY_PROJECT_LEDGER"
+  },
+  "limits": {
+    "candidateCount": 1,
+    "candidateRevisionsAfterEvaluation": 0,
+    "newAnalystCalls": 12,
+    "newFinalAnswerCalls": 12,
+    "runRetries": 0,
+    "stageTimeoutSeconds": 120,
+    "holdoutCalls": 0
+  },
+  "metrics": [
+    "requiredFactsCorrect",
+    "derivedCorrect",
+    "coverageComplete",
+    "evidenceGrounded"
+  ],
+  "review": "AI source-grounded cross-check; opaque shuffled answer packets omit arm, method and old review labels. Reviewers may have prior conversation exposure, so anonymity is not guaranteed. Not human-independent or operating-system-isolated evaluation.",
+  "decision": "Report development and validation separately. A gain requires more complete issue-free answers on validation, no loss of required fact/calculation coverage, and disclosure of remaining errors. Descriptive only; no statistical or release acceptance.",
+  "money": {
+    "status": "UNPRICED",
+    "value": null
+  },
+  "pairing": {
+    "baselineBundleId": "baseline-v1",
+    "candidateBundleId": "candidate-daddd5d50c3c24878f63ba49",
+    "baselineBundleSha256": "cc71e5cce7b9b2bc3eef3b91ae20862840485ad18a5013b707b2fe296c05dbdd",
+    "candidateBundleSha256": "329aabf084905f58c5454f07648b550b30468e9a9010895df102bd887d7d44a9",
+    "fixedContractSha256": "03b588fd86fc9f75047578665fa5227d2e73ca1bca734463fb3feddebe8df193",
+    "expectedComparisonIdentity": {
+      "modelConfigSha256": "abec2abcf5913898e8def3c6d0e3ec4de88271dceec123bcd1acb6c932e30bb4",
+      "fixedFinalPromptSha256": "147b23141cd5fd6e7ec3e9b5cb4775d0df50dc7b771c962fdddc6729357ad9b9",
+      "memorySnapshotSha256": "ca3fcab9393440705a2788189d2d2aea967f798140bbeea22a485b4fb5cc055d"
+    },
+    "expectedRuntimeBuildSha256": "9140e62727c843357b8f97b18b9ad3093e01ac4b8ceff381a0a5a88065e2f006",
+    "minimumGroups": 2,
+    "bootstrapSamples": 1000,
+    "seed": 20260930,
+    "confidenceLevel": 0.95,
+    "cases": [
+      {
+        "caseId": "msft-fy2025-growth",
+        "issuerId": "MSFT",
+        "reportFamilyId": "msft-fy2025",
+        "split": "DEVELOPMENT",
+        "caseSha256": "267d495e65eb9769543589877d6b59692c4195f459f7b513955bfb82ad9d16e0",
+        "expectedEvidenceSnapshotSha256": "17c257ad298a9b022e6b730558570f4480fd221b59bd3b7834b170a0fe725996",
+        "expectedHistorySnapshotSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "repeatIds": [
+          1
+        ]
+      },
+      {
+        "caseId": "msft-fy2025-cashflow",
+        "issuerId": "MSFT",
+        "reportFamilyId": "msft-fy2025",
+        "split": "DEVELOPMENT",
+        "caseSha256": "985a716ff385a86bc2c8dfddc46e93f74bbfbc3461073293860978f3bb80d0d4",
+        "expectedEvidenceSnapshotSha256": "5e42d2bd98624c752b603536c8c9496d8fd2aaf529d00c294ce397c5aa088bdc",
+        "expectedHistorySnapshotSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "repeatIds": [
+          1
+        ]
+      },
+      {
+        "caseId": "msft-fy2025-liquidity",
+        "issuerId": "MSFT",
+        "reportFamilyId": "msft-fy2025",
+        "split": "DEVELOPMENT",
+        "caseSha256": "26dd425d5fd28ba56857bd63ee477e40230838566f93b96ae9bb8f00783644b5",
+        "expectedEvidenceSnapshotSha256": "b42c96675894a4ea64bfd3d3de4eb3271f6c1cf1544ad0d471e1a75b49763253",
+        "expectedHistorySnapshotSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "repeatIds": [
+          1
+        ]
+      },
+      {
+        "caseId": "wmt-fy2025-growth",
+        "issuerId": "WMT",
+        "reportFamilyId": "wmt-fy2025",
+        "split": "DEVELOPMENT",
+        "caseSha256": "795857cef9897ce1384561a40292439c3dee8978ad534d2d6fac6c7a1cdc15d6",
+        "expectedEvidenceSnapshotSha256": "fba67f0a196d6e1ed7962c46431f975540af2069f3001e4413473659d57c024d",
+        "expectedHistorySnapshotSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "repeatIds": [
+          1
+        ]
+      },
+      {
+        "caseId": "wmt-fy2025-cashflow",
+        "issuerId": "WMT",
+        "reportFamilyId": "wmt-fy2025",
+        "split": "DEVELOPMENT",
+        "caseSha256": "0ca50e3e9f734594a611af94001994677300a2b26aed833fdfa141cac34d06b6",
+        "expectedEvidenceSnapshotSha256": "f72abaac1120ab2b755c51f37a31282ec2dae8a87dd8a7a55d1954407d7c889d",
+        "expectedHistorySnapshotSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "repeatIds": [
+          1
+        ]
+      },
+      {
+        "caseId": "wmt-fy2025-liquidity",
+        "issuerId": "WMT",
+        "reportFamilyId": "wmt-fy2025",
+        "split": "DEVELOPMENT",
+        "caseSha256": "66041e5c3c76f57d66211872e9b34f449e70e90555e244134156460a62594536",
+        "expectedEvidenceSnapshotSha256": "fb402a9d6d0f4527770534414df2eec41c5d5994dcf909d3e5b9b24cada6bc4a",
+        "expectedHistorySnapshotSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "repeatIds": [
+          1
+        ]
+      },
+      {
+        "caseId": "googl-fy2025-growth",
+        "issuerId": "GOOGL",
+        "reportFamilyId": "googl-fy2025",
+        "split": "VALIDATION",
+        "caseSha256": "398d2e7d9f0a794a4eac03b56aa1cb838f550f0e515d3d376e6a906ee84d2f71",
+        "expectedEvidenceSnapshotSha256": "1fd4dfab92f661dd433a5aca3c7abfea97298a68138d8134f918adf195b40a7d",
+        "expectedHistorySnapshotSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "repeatIds": [
+          1
+        ]
+      },
+      {
+        "caseId": "googl-fy2025-cashflow",
+        "issuerId": "GOOGL",
+        "reportFamilyId": "googl-fy2025",
+        "split": "VALIDATION",
+        "caseSha256": "057e1cf1408bf7ec63765443bf75923ece122348fddb136fe5498e648d9e3797",
+        "expectedEvidenceSnapshotSha256": "5d3370627a3ea04bf22231fc733aa344aab0dde966fd0eb1740fff1b184b0478",
+        "expectedHistorySnapshotSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "repeatIds": [
+          1
+        ]
+      },
+      {
+        "caseId": "googl-fy2025-liquidity",
+        "issuerId": "GOOGL",
+        "reportFamilyId": "googl-fy2025",
+        "split": "VALIDATION",
+        "caseSha256": "fef9bdb61bb18101679dbea18eeea61158081a304b1d852448a700f7fc1f26e0",
+        "expectedEvidenceSnapshotSha256": "00626b524899a3f379d8d3b114fab3a5b711159f6095a995a1781d81b6374168",
+        "expectedHistorySnapshotSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "repeatIds": [
+          1
+        ]
+      },
+      {
+        "caseId": "cost-fy2025-growth",
+        "issuerId": "COST",
+        "reportFamilyId": "cost-fy2025",
+        "split": "VALIDATION",
+        "caseSha256": "84d7c676f82c68464e990498183cddba470925ca76afe7038dfb8cdfc14beae7",
+        "expectedEvidenceSnapshotSha256": "2e220f911e8b7ae8d619901cd3579257e90d239ae49815c6d3c8dcce80fe273f",
+        "expectedHistorySnapshotSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "repeatIds": [
+          1
+        ]
+      },
+      {
+        "caseId": "cost-fy2025-cashflow",
+        "issuerId": "COST",
+        "reportFamilyId": "cost-fy2025",
+        "split": "VALIDATION",
+        "caseSha256": "55fe920128d8625461a1a50e0c2cc9d029a8beca68b1903c89b8396a4f5d83b3",
+        "expectedEvidenceSnapshotSha256": "9d21f3608d4c824b707fecd323ab9626a0c7b6e316440e190f0cb69150ca1941",
+        "expectedHistorySnapshotSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "repeatIds": [
+          1
+        ]
+      },
+      {
+        "caseId": "cost-fy2025-liquidity",
+        "issuerId": "COST",
+        "reportFamilyId": "cost-fy2025",
+        "split": "VALIDATION",
+        "caseSha256": "f71074aa0bd32aab02568268414d0e2e46fc68c7cd94fdd07e2d8f71d72b5363",
+        "expectedEvidenceSnapshotSha256": "58460064f310df24392aefa72772354857fa60df43a52b0a7a76ce1be25a4efd",
+        "expectedHistorySnapshotSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "repeatIds": [
+          1
+        ]
+      }
+    ]
+  },
+  "frozenArtifacts": {
+    "proposal.json": "c28160acf10ae0e8a1631f55da9ce4cb40f555d491a542e041ed72843c1889c6",
+    "experience.json": "56e605ab74b87e43133077b9ef71c6c481ff2d49f642180639f8b5060f9c57bb",
+    "candidate.json": "2ad1934bd16c61b028f8b58c1de076611cc2d3c538e08bc61f314134a0f9ab69",
+    "bundle.json": "947a0892d2f5834f09c2750f94b4faa9fb33d91e6074bbae67d5d66cfee2aea0",
+    "execution-development.json": "d48ae5ec291fbe77ab077f917db71f000df8fb33b6b3cffa1928fc10be6ce823",
+    "execution-validation.json": "6ab8320c56a16d45d9262cafcdcbe85d31e526be131c0db029289614a89d3001"
+  },
+  "baselineReportSha256": "de9f73b0bdd2a3e5bcca0e334d5e35e6ba2a9d7d74491a823fe5b20f0bfa7419",
+  "datasetFileSha256": "667f334a5b63542c9f2e32605c7716f564fbd97e822e2c90704f3c0981c58078",
+  "answerKeyFileSha256": "07d8e42a275d90c25e7721314d8678122303347135cd1c9fb4b479694aa7ee91"
+}

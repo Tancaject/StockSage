@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
- * {@code rag-eval/run_rag_eval.py} 消费的稳定响应载荷。
+ * {@code evals/run_rag_eval.py} 消费的稳定响应载荷。
  *
  * <p>响应包含改写后的查询、最终上下文、生成回答、引用映射和可选的中间检索阶段，
  * 便于评估定位质量退化发生在哪个环节。</p>

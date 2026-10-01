@@ -226,6 +226,8 @@ public class LongTermMemory {
             String content = memoryChatClient.prompt()
                     .user("""
                             请从本轮对话中提取用户长期投资画像，输出严格 JSON：
+                            只依据用户明确自述更新画像；助手回答仅帮助理解指代，不能作为用户持仓或偏好的事实来源。
+                            提问、假设、建议和引用他人的情况不代表用户自身情况；无新增信息的字段输出空数组或空字符串。
                             {
                               "holdings": ["用户明确表示当前仍持有的 ticker"],
                               "revokedHoldings": ["用户明确表示已全部退出、不再持有的 ticker；部分卖出、期权交易或建议不要写入"],

@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "reviewType": "AI_SOURCE_GROUNDED",
+  "humanReviewed": false,
+  "modelLabelsHidden": true,
+  "reviewScope": "MODEL_LABELS_HIDDEN_AI_REVIEW_NOT_INDEPENDENT_FORMAL_ACCEPTANCE",
+  "reviewedAt": "2026-09-30T14:44:29.980651+00:00",
+  "sourcePacketSha256": "391645bd30fc55f6dcd04dc8f37dea5f7d9735668dafbe67c7cf8ce2812a1d9c",
+  "accessBoundary": "Only this current review packet was read; no current mapping, raw outputs or other current answer packets were inspected. Reviewer has prior project and rubric-design context, so this is not a claim of independent formal blind review.",
+  "coverageSemantics": "coverageComplete records whether the requested fields, ratio, conceptual distinctions and liquidity commentary were supplied. The truth and evidence limits of that commentary are assessed separately in evidenceGrounded; complete coverage does not make an unsafe conclusion acceptable.",
+  "reviews": [
+    {
+      "answerId": "answer-f2106924061f44e0bd08e5c4625ba8d5",
+      "caseId": "fundamentals-msft-fy2025-liquidity",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": true,
+      "verdict": "PASS",
+      "notes": [
+        "FY2025必答现金30,242、非流动长期债务40,152、流动资产191,131、流动负债141,218（百万美元）和1.353446≈1.35正确；两组概念明确区分，完成流动性简评。",
+        "全部主动补充的FY2024表内原值和差额匹配。增速65.1%、12.4%、25.2%、19.7%、12.7%、−5.9%、33.3%、13.1%复算正确；现金占流动资产15.8%、现金加短投占流动资产49.5%、债务占总负债14.6%、现金覆盖流动负债21.4%正确；流动资产净超过流动负债49,913及列明三项直接借款合计43,151正确。",
+        "「从资产负债表静态数据看，微软 FY2025 期末短期流动性较为稳健」限定为静态账面观察，紧接「它只说明流动资产对流动负债的账面覆盖情况」并列现金流、变现、授信和到期等限制，未当作真实偿债保证。",
+        "明确列出2,999到期长期债务，没有清零推断；递延收入等经营/履约义务被说明「仍可能对未来现金流出或经营资源消耗产生影响」，没有全额剔除后保证安全。45,186为原表Other long-term liabilities单项而非其他非流动负债合计，数字与命名匹配。"
+      ]
+    },
+    {
+      "answerId": "answer-7f9d402da9104e758312a3b8ea613dba",
+      "caseId": "fundamentals-msft-fy2025-liquidity",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "必答四项FY2025金额、1.35比率与概念区分完整；FY2024原值、1.27比率、15.8%、14.6%、65.1%及0+2,999+40,152=43,151算术正确；2,999到期债务未被遗漏或清零。45,186按Other long-term liabilities原表单项正确。",
+        "「未来通过交付服务而非现金来偿还，不构成实质性的刚性兑付压力。剔除这部分影响后，实际刚性流动负债规模较小」把递延收入视为无实质兑付影响并剔除后确认真实压力较低。本题没有履约现金成本、退款或到期安排，履约可能消耗现金，不能从64,555余额确认这种实际压力结论；它不是仅报告静态账面覆盖。",
+        "「可能进行了债务置换或偿还了部分长期本金」明确使用“可能”，按假设性原因处理，不单独当作已证实的管理行为扣分。",
+        "会计措辞边界：「未提供经营租赁（Operating lease）等表外承诺的详细资本化影响（尽管表中列示了 Operating lease liabilities 17,437，但缺乏完整的未来最低租赁付款额明细）」容易把已入表经营租赁负债称为表外。严格解读为分类混淆；宽松解读为缺少额外未来租赁承诺明细，则不单独扣分。无论此处采取哪种解释，前述递延收入推断仍使整篇为ISSUES。"
+      ]
+    },
+    {
+      "answerId": "answer-580914b451e648248c01a2e65b7dc51d",
+      "caseId": "fundamentals-msft-fy2025-liquidity",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": true,
+      "verdict": "PASS",
+      "notes": [
+        "必答FY2025现金30,242、非流动长期债务40,152、流动资产191,131、流动负债141,218与流动比率1.35正确；明确两组科目边界和流动性简评。",
+        "所有附加表内金额匹配原文，包括FY2024各值、股东权益343,479/268,477、短期投资64,323/57,228、2,999到期债务及各非流动负债单项。19.7%/12.7%增长、现金覆盖21.4%、现金加短投覆盖67.0%、非流动债务占比14.6%、49,913净流动资产及43,151列明借款合计均复算正确。",
+        "「该合计为基于表内项目的算术汇总，并非 [E1] 单独披露的“总债务”科目」正确保留额外合计范围，未将借款合计等同全部负债。",
+        "结论明确限定「短期流动性账面指标偏稳健」，不保证真实兑付；保留现金流、变现/授信和到期结构未知。对递延收入保留退款、履约周期和现金成本未知，没有全额剔除以确认安全。没有因未知现金流反而宣称其强劲，没有无证据的公司具体经营归因。"
+      ]
+    },
+    {
+      "answerId": "answer-fc6a5baaf258412594e9437725a54a7f",
+      "caseId": "fundamentals-msft-fy2025-liquidity",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "FY2025必答四项金额、流动比率1.35及两组概念区分完整；总负债275,524、短期债务0、到期长期债务2,999和其他新增原表金额正确。15.8%与14.6%正确，302.42/1,911.31/699.05/643.23/257.23/401.52/2,755.24/645.55/277.24/29.99亿美元换算均正确。",
+        "「其实际面临的刚性短期金融兑付压力极小，流动性处于安全区间」由静态比率及负债构成直接确认实际压力和安全，超出本轮资产负债表证据。虽然正确列出2,999一年内到期债务、也说不能断定危机，但没有现金流、资金可动用性、具体兑付和履约成本资料来支持实际安全结论。不是仅说明账面覆盖，故为实质推断问题。",
+        "「需关注供应链策略变化或备货调整对后续交付的潜在影响」以潜在风险形式提出，且数据缺口明确承认存货下降原因未知，不单独判作已确认业务原因；类似宏观环境恶化的条件性风险亦允许。",
+        "报告末尾仅列应收增长驱动和存货原因未知，未对前述实际兑付安全结论作实质限定。判错依据是明确保证本身，未额外要求用户必须获得某个固定缺口清单。"
+      ]
+    }
+  ]
+}

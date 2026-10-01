@@ -1,0 +1,38 @@
+{
+  "answer-82fa6526b3f14ec79acac75adcd0328f": {
+    "runId": "5207944f-1739-4e00-b067-83fd76b207cb",
+    "caseId": "msft-fy2025-liquidity",
+    "variant": "bounded_judgment",
+    "repeatId": 3
+  },
+  "answer-02b19f3ac09448968dbbe809cad89067": {
+    "runId": "afec1927-b541-42e5-adcc-10f48a88ed72",
+    "caseId": "msft-fy2025-liquidity",
+    "variant": "original",
+    "repeatId": 3
+  },
+  "answer-7406bd8c40b2478e93ea57a97f516a4d": {
+    "runId": "88d55810-fc78-46f2-a854-2140d8e8701c",
+    "caseId": "msft-fy2025-liquidity",
+    "variant": "bounded_judgment",
+    "repeatId": 1
+  },
+  "answer-37aa55d938d44fc585b1b4455914bfcb": {
+    "runId": "2500429d-b0e9-4db0-ad68-f622406056de",
+    "caseId": "msft-fy2025-liquidity",
+    "variant": "original",
+    "repeatId": 1
+  },
+  "answer-3a6ca947eafe4589828bf11f5353b076": {
+    "runId": "f5facd0a-507e-4400-8133-f9b8ffa05dc0",
+    "caseId": "msft-fy2025-liquidity",
+    "variant": "bounded_judgment",
+    "repeatId": 2
+  },
+  "answer-401af6738c754ac5b0e6e7b0ae4b18a7": {
+    "runId": "06b1e2c6-ec12-4158-8eea-fbd59b22fb21",
+    "caseId": "msft-fy2025-liquidity",
+    "variant": "original",
+    "repeatId": 2
+  }
+}

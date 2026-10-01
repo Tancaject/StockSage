@@ -1,0 +1,530 @@
+{
+  "schema": "max_baseline_execution_audit_v1",
+  "experimentId": "common-fundamentals-max-offline-001-20261001",
+  "auditedAt": "2026-10-01T01:19:31.655352+00:00",
+  "status": "PASS",
+  "answerQuality": "NOT_REVIEWED_BY_THIS_AUDIT",
+  "providerCallsByAuditor": 0,
+  "activationAuthorized": false,
+  "runtimeArtifactSha256": "f6d9e017c82a9bfd621dddd2b9e59c19037437fff7a79175ec827d742932b1f5",
+  "registeredCaseCount": 6,
+  "errors": [],
+  "shards": [
+    {
+      "shard": 1,
+      "executionStatus": "PASS",
+      "registeredRuns": 3,
+      "savedResponses": 3,
+      "missingResponses": [],
+      "failureRecords": [],
+      "providerErrors": []
+    },
+    {
+      "shard": 2,
+      "executionStatus": "PASS",
+      "registeredRuns": 3,
+      "savedResponses": 3,
+      "missingResponses": [],
+      "failureRecords": [],
+      "providerErrors": []
+    }
+  ],
+  "stages": {
+    "analysis": {
+      "completed": 6,
+      "knownUsageCalls": 6,
+      "usageComplete": true,
+      "knownProviderTokens": {
+        "inputTokens": 13479,
+        "outputTokens": 33340,
+        "totalTokens": 46819
+      },
+      "medianDurationMs": 129949.5,
+      "maxDurationMs": 158548,
+      "outputExceedsRequestedMaxCount": 4,
+      "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+    },
+    "finalAnswer": {
+      "completed": 6,
+      "knownUsageCalls": 6,
+      "usageComplete": true,
+      "knownProviderTokens": {
+        "inputTokens": 29007,
+        "outputTokens": 17822,
+        "totalTokens": 46829
+      },
+      "medianDurationMs": 62636.5,
+      "maxDurationMs": 70652,
+      "outputExceedsRequestedMaxCount": 0,
+      "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+    }
+  },
+  "cases": [
+    {
+      "runId": "8d1f4698-1f23-4576-8294-8657c065e560",
+      "caseId": "msft-fy2025-growth",
+      "status": "COMPLETED",
+      "errorCode": null,
+      "stages": {
+        "analysis": {
+          "status": "COMPLETED",
+          "errorCode": null,
+          "actualModel": "qwen3.8-max",
+          "modelIdentity": {
+            "request": {
+              "modelTier": "STANDARD",
+              "kind": "model-invocation",
+              "modelName": "qwen3.8-max",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "scope": "fundamentals-analysis",
+              "clientDefaults": {
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "temperature": 0.7,
+                "unknownProviderRevision": true
+              }
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "durationMs": 117530,
+          "answerCharacters": 3241,
+          "providerUsageStatus": "KNOWN",
+          "providerUsageRecords": 1,
+          "inputTokens": 2402,
+          "outputTokens": 5541,
+          "totalTokens": 7943,
+          "requestedMaxOutputTokens": 4096,
+          "outputExceedsRequestedMax": true,
+          "finishReason": null,
+          "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+        },
+        "finalAnswer": {
+          "status": "COMPLETED",
+          "errorCode": null,
+          "actualModel": "qwen3.8-max",
+          "modelIdentity": {
+            "request": {
+              "schemaVersion": 1,
+              "temperature": 0.7,
+              "modelTier": "STANDARD",
+              "maxOutputTokens": 4096,
+              "configurationSource": "REQUEST_OPTIONS",
+              "kind": "model-invocation",
+              "scope": "final-answer",
+              "modelName": "qwen3.8-max"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "durationMs": 69766,
+          "answerCharacters": 2984,
+          "providerUsageStatus": "KNOWN",
+          "providerUsageRecords": 1,
+          "inputTokens": 4869,
+          "outputTokens": 3404,
+          "totalTokens": 8273,
+          "requestedMaxOutputTokens": 4096,
+          "outputExceedsRequestedMax": false,
+          "finishReason": null,
+          "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+        }
+      }
+    },
+    {
+      "runId": "9ad05551-4aa1-414d-acc9-a53fe8ca557f",
+      "caseId": "msft-fy2025-cashflow",
+      "status": "COMPLETED",
+      "errorCode": null,
+      "stages": {
+        "analysis": {
+          "status": "COMPLETED",
+          "errorCode": null,
+          "actualModel": "qwen3.8-max",
+          "modelIdentity": {
+            "request": {
+              "modelTier": "STANDARD",
+              "kind": "model-invocation",
+              "modelName": "qwen3.8-max",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "scope": "fundamentals-analysis",
+              "clientDefaults": {
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "temperature": 0.7,
+                "unknownProviderRevision": true
+              }
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "durationMs": 82132,
+          "answerCharacters": 2727,
+          "providerUsageStatus": "KNOWN",
+          "providerUsageRecords": 1,
+          "inputTokens": 3218,
+          "outputTokens": 4036,
+          "totalTokens": 7254,
+          "requestedMaxOutputTokens": 4096,
+          "outputExceedsRequestedMax": false,
+          "finishReason": null,
+          "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+        },
+        "finalAnswer": {
+          "status": "COMPLETED",
+          "errorCode": null,
+          "actualModel": "qwen3.8-max",
+          "modelIdentity": {
+            "request": {
+              "schemaVersion": 1,
+              "temperature": 0.7,
+              "modelTier": "STANDARD",
+              "maxOutputTokens": 4096,
+              "configurationSource": "REQUEST_OPTIONS",
+              "kind": "model-invocation",
+              "scope": "final-answer",
+              "modelName": "qwen3.8-max"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "durationMs": 52713,
+          "answerCharacters": 2040,
+          "providerUsageStatus": "KNOWN",
+          "providerUsageRecords": 1,
+          "inputTokens": 5426,
+          "outputTokens": 2594,
+          "totalTokens": 8020,
+          "requestedMaxOutputTokens": 4096,
+          "outputExceedsRequestedMax": false,
+          "finishReason": null,
+          "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+        }
+      }
+    },
+    {
+      "runId": "edaac7a4-7fbf-42bb-a415-375903994b66",
+      "caseId": "msft-fy2025-liquidity",
+      "status": "COMPLETED",
+      "errorCode": null,
+      "stages": {
+        "analysis": {
+          "status": "COMPLETED",
+          "errorCode": null,
+          "actualModel": "qwen3.8-max",
+          "modelIdentity": {
+            "request": {
+              "modelTier": "STANDARD",
+              "kind": "model-invocation",
+              "modelName": "qwen3.8-max",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "scope": "fundamentals-analysis",
+              "clientDefaults": {
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "temperature": 0.7,
+                "unknownProviderRevision": true
+              }
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "durationMs": 149483,
+          "answerCharacters": 4955,
+          "providerUsageStatus": "KNOWN",
+          "providerUsageRecords": 1,
+          "inputTokens": 2639,
+          "outputTokens": 7324,
+          "totalTokens": 9963,
+          "requestedMaxOutputTokens": 4096,
+          "outputExceedsRequestedMax": true,
+          "finishReason": null,
+          "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+        },
+        "finalAnswer": {
+          "status": "COMPLETED",
+          "errorCode": null,
+          "actualModel": "qwen3.8-max",
+          "modelIdentity": {
+            "request": {
+              "schemaVersion": 1,
+              "temperature": 0.7,
+              "modelTier": "STANDARD",
+              "maxOutputTokens": 4096,
+              "configurationSource": "REQUEST_OPTIONS",
+              "kind": "model-invocation",
+              "scope": "final-answer",
+              "modelName": "qwen3.8-max"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "durationMs": 70652,
+          "answerCharacters": 3537,
+          "providerUsageStatus": "KNOWN",
+          "providerUsageRecords": 1,
+          "inputTokens": 6056,
+          "outputTokens": 3583,
+          "totalTokens": 9639,
+          "requestedMaxOutputTokens": 4096,
+          "outputExceedsRequestedMax": false,
+          "finishReason": null,
+          "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+        }
+      }
+    },
+    {
+      "runId": "44ef3403-6c2c-49e3-9069-e5884bb4422a",
+      "caseId": "wmt-fy2025-growth",
+      "status": "COMPLETED",
+      "errorCode": null,
+      "stages": {
+        "analysis": {
+          "status": "COMPLETED",
+          "errorCode": null,
+          "actualModel": "qwen3.8-max",
+          "modelIdentity": {
+            "request": {
+              "clientDefaults": {
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "temperature": 0.7,
+                "unknownProviderRevision": true
+              },
+              "scope": "fundamentals-analysis",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "modelName": "qwen3.8-max",
+              "kind": "model-invocation",
+              "modelTier": "STANDARD"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "durationMs": 158548,
+          "answerCharacters": 3539,
+          "providerUsageStatus": "KNOWN",
+          "providerUsageRecords": 1,
+          "inputTokens": 1814,
+          "outputTokens": 7712,
+          "totalTokens": 9526,
+          "requestedMaxOutputTokens": 4096,
+          "outputExceedsRequestedMax": true,
+          "finishReason": null,
+          "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+        },
+        "finalAnswer": {
+          "status": "COMPLETED",
+          "errorCode": null,
+          "actualModel": "qwen3.8-max",
+          "modelIdentity": {
+            "request": {
+              "configurationSource": "REQUEST_OPTIONS",
+              "maxOutputTokens": 4096,
+              "modelTier": "STANDARD",
+              "temperature": 0.7,
+              "schemaVersion": 1,
+              "modelName": "qwen3.8-max",
+              "scope": "final-answer",
+              "kind": "model-invocation"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "durationMs": 68996,
+          "answerCharacters": 2804,
+          "providerUsageStatus": "KNOWN",
+          "providerUsageRecords": 1,
+          "inputTokens": 4393,
+          "outputTokens": 3388,
+          "totalTokens": 7781,
+          "requestedMaxOutputTokens": 4096,
+          "outputExceedsRequestedMax": false,
+          "finishReason": null,
+          "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+        }
+      }
+    },
+    {
+      "runId": "78232810-3821-46c1-805e-59aa260e2089",
+      "caseId": "wmt-fy2025-cashflow",
+      "status": "COMPLETED",
+      "errorCode": null,
+      "stages": {
+        "analysis": {
+          "status": "COMPLETED",
+          "errorCode": null,
+          "actualModel": "qwen3.8-max",
+          "modelIdentity": {
+            "request": {
+              "clientDefaults": {
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "temperature": 0.7,
+                "unknownProviderRevision": true
+              },
+              "scope": "fundamentals-analysis",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "modelName": "qwen3.8-max",
+              "kind": "model-invocation",
+              "modelTier": "STANDARD"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "durationMs": 42242,
+          "answerCharacters": 2129,
+          "providerUsageStatus": "KNOWN",
+          "providerUsageRecords": 1,
+          "inputTokens": 1492,
+          "outputTokens": 2013,
+          "totalTokens": 3505,
+          "requestedMaxOutputTokens": 4096,
+          "outputExceedsRequestedMax": false,
+          "finishReason": null,
+          "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+        },
+        "finalAnswer": {
+          "status": "COMPLETED",
+          "errorCode": null,
+          "actualModel": "qwen3.8-max",
+          "modelIdentity": {
+            "request": {
+              "configurationSource": "REQUEST_OPTIONS",
+              "maxOutputTokens": 4096,
+              "modelTier": "STANDARD",
+              "temperature": 0.7,
+              "schemaVersion": 1,
+              "modelName": "qwen3.8-max",
+              "scope": "final-answer",
+              "kind": "model-invocation"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "durationMs": 43098,
+          "answerCharacters": 1797,
+          "providerUsageStatus": "KNOWN",
+          "providerUsageRecords": 1,
+          "inputTokens": 3371,
+          "outputTokens": 2093,
+          "totalTokens": 5464,
+          "requestedMaxOutputTokens": 4096,
+          "outputExceedsRequestedMax": false,
+          "finishReason": null,
+          "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+        }
+      }
+    },
+    {
+      "runId": "92817109-7a3d-4f10-8606-b4a5202d093d",
+      "caseId": "wmt-fy2025-liquidity",
+      "status": "COMPLETED",
+      "errorCode": null,
+      "stages": {
+        "analysis": {
+          "status": "COMPLETED",
+          "errorCode": null,
+          "actualModel": "qwen3.8-max",
+          "modelIdentity": {
+            "request": {
+              "clientDefaults": {
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "temperature": 0.7,
+                "unknownProviderRevision": true
+              },
+              "scope": "fundamentals-analysis",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "modelName": "qwen3.8-max",
+              "kind": "model-invocation",
+              "modelTier": "STANDARD"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "durationMs": 142369,
+          "answerCharacters": 4036,
+          "providerUsageStatus": "KNOWN",
+          "providerUsageRecords": 1,
+          "inputTokens": 1914,
+          "outputTokens": 6714,
+          "totalTokens": 8628,
+          "requestedMaxOutputTokens": 4096,
+          "outputExceedsRequestedMax": true,
+          "finishReason": null,
+          "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+        },
+        "finalAnswer": {
+          "status": "COMPLETED",
+          "errorCode": null,
+          "actualModel": "qwen3.8-max",
+          "modelIdentity": {
+            "request": {
+              "configurationSource": "REQUEST_OPTIONS",
+              "maxOutputTokens": 4096,
+              "modelTier": "STANDARD",
+              "temperature": 0.7,
+              "schemaVersion": 1,
+              "modelName": "qwen3.8-max",
+              "scope": "final-answer",
+              "kind": "model-invocation"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "durationMs": 56277,
+          "answerCharacters": 2808,
+          "providerUsageStatus": "KNOWN",
+          "providerUsageRecords": 1,
+          "inputTokens": 4892,
+          "outputTokens": 2760,
+          "totalTokens": 7652,
+          "requestedMaxOutputTokens": 4096,
+          "outputExceedsRequestedMax": false,
+          "finishReason": null,
+          "finishReasonStatus": "NOT_CAPTURED_BY_CURRENT_PRODUCER"
+        }
+      }
+    }
+  ],
+  "sourcePathBase": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\max-experiment-20261001",
+  "sourceSha256": {
+    "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-build-max-20261001\\build.json": "cbbad8845c6628ba72e7a63ea65c8bf7aabb009d260f7130583760520014d0e3",
+    "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-max-20261001-driver\\driver-dependencies.json": "741cdb3a33bec8ad30d9352d71c33b440abb03a723fe3604ec7e29a50c3bda5a",
+    "audit_baseline.py": "810699ad2b03c4f99bf3726858c7f6790ec0289b972e6a905fba7cf124ab6221",
+    "execution-development-baseline-1.json": "9c476dd586571d0e9cbf90c47fa72e05fd66f7c6e7bf375d8b867af6e7706d44",
+    "raw-baseline-1\\8d1f4698-1f23-4576-8294-8657c065e560.request.json": "08c1b7a1b98a1165b4f5e61c03791ff5b70af949655b44b4897410522f50cd71",
+    "raw-baseline-1\\8d1f4698-1f23-4576-8294-8657c065e560.response.json": "a9246928381d986452afccad84f667db84cd61d9266e0feff1b0ecc1be005b10",
+    "raw-baseline-1\\9ad05551-4aa1-414d-acc9-a53fe8ca557f.request.json": "dfcfa21e036cfe456fe01bfb40a0089fcd8d110af526a4c2ae5154bb89bfad81",
+    "raw-baseline-1\\9ad05551-4aa1-414d-acc9-a53fe8ca557f.response.json": "e7da31d810b69db5eea4cb7292ba6365b6b99663f9b6796232e39230804839d3",
+    "raw-baseline-1\\edaac7a4-7fbf-42bb-a415-375903994b66.request.json": "491045f4bb6692ef855938419015e3bd78dab7ef965dbdccfd007d47d2abac9a",
+    "raw-baseline-1\\edaac7a4-7fbf-42bb-a415-375903994b66.response.json": "6fc2ed7e56e4b8154be7e19bdab906d5e771fb1fadfb2f449af5fcf57b06c4bf",
+    "raw-baseline-1\\execution.json": "9c476dd586571d0e9cbf90c47fa72e05fd66f7c6e7bf375d8b867af6e7706d44",
+    "raw-baseline-1\\runtime.json": "76ddac1ee2a2b7186186acee1849ee8f36d421bbf0fbae85d2de1e4e6787bff4",
+    "raw-baseline-1\\responses.jsonl": "790202d2f5f37571d06f79e6bbd90962912e8f680e9a997418814aaa00dfe183",
+    "execution-development-baseline-2.json": "7f1689d7a57bf3a2a19c4d49bf4fe5b6184f39528d7600113f21cbec378093ca",
+    "raw-baseline-2\\44ef3403-6c2c-49e3-9069-e5884bb4422a.request.json": "9e055870af806e9f2af3019869a8811013420dda9429080f53ccb14c2eb3db6c",
+    "raw-baseline-2\\44ef3403-6c2c-49e3-9069-e5884bb4422a.response.json": "b86a669489a18e28bb9121d87d6cfd64586195c85ca275d47c532d97817187fc",
+    "raw-baseline-2\\78232810-3821-46c1-805e-59aa260e2089.request.json": "f31bee01247cb7eddac40919918e99b2d0d2c4382cc1aeecb035a84e50a22021",
+    "raw-baseline-2\\78232810-3821-46c1-805e-59aa260e2089.response.json": "50a613ad8875a282354db4a9244847a091f7b702ebd20d63550c4c3b604eb031",
+    "raw-baseline-2\\92817109-7a3d-4f10-8606-b4a5202d093d.request.json": "7b55c52ed447473f383ce68f64ad7caa6a04186001f518de41efce06f153b3e0",
+    "raw-baseline-2\\92817109-7a3d-4f10-8606-b4a5202d093d.response.json": "d82e51cff0abb91573f9d9a10f060612af0e62243be1c1a71752e8fa8a632517",
+    "raw-baseline-2\\execution.json": "7f1689d7a57bf3a2a19c4d49bf4fe5b6184f39528d7600113f21cbec378093ca",
+    "raw-baseline-2\\runtime.json": "7de93273840437ec0960a08db4cd4364a0e9b4dc2207c76d9d2f72f419da6bd5",
+    "raw-baseline-2\\responses.jsonl": "29835f7147f0790f57bdc7845a71b6cae39a03083cad3333a067320fa460dbaa"
+  },
+  "cost": {
+    "status": "UNPRICED",
+    "failedOrMissingUsage": "UNKNOWN_NOT_ZERO"
+  },
+  "limitations": [
+    "Finish reasons were not recorded; completion status and token counts cannot establish absence of truncation.",
+    "This audit verifies frozen component replay execution, not semantic quality or formal acceptance."
+  ]
+}

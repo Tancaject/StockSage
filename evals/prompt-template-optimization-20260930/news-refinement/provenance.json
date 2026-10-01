@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "maxModelCalls": 4,
+  "trigger": "Initial news template pair retained an unsupported short-term revenue assertion; one bounded revision with an additional ordinary full-evidence control",
+  "order": "Two cases, alternating first arm, one call per arm/case",
+  "scope": "Synthetic component smoke; development feedback, no independent efficacy or release claim",
+  "initialAfterCaptureSha256": "a5ec0fb459fa3851be3bc8528e32ba2e7a02132510b418da1f8a697f2ffb87a2",
+  "refinedFullCaptureSha256": "dc164e3268b8deb31f3ddc37789deba4efa9e95d400c8554165ced88127d0691",
+  "finalAgentConfigSha256": "4292347315af357a7efd91d89b65bacc114d8ce6b668779a04e047afdc739942",
+  "finalAgentConfigClassSha256": "4c2b8fb19e7b1c17be6f12d4382a03f5bdd79a9143238ddf752b884aa7a6ff20"
+}

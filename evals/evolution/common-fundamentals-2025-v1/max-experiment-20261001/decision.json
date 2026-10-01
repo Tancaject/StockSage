@@ -1,0 +1,42 @@
+{
+  "schema": "max_method_diagnostic_decision_v1",
+  "recordedAt": "2026-10-01T01:24:05.683875+00:00",
+  "decision": "NO_CONFIRMED_METHOD_DEFECT",
+  "action": "KEEP_BASELINE_NO_CANDIDATE_GENERATED",
+  "methodEvolutionBenefit": "UNTESTED_NO_CURRENT_CANDIDATE_COMPARISON",
+  "reviewType": "AI_SOURCE_GROUNDED_NONBLIND_WITH_AI_ADJUDICATION",
+  "humanReviewed": false,
+  "activationAuthorized": false,
+  "stageQuality": {
+    "ANALYSIS": {
+      "reviewed": 6,
+      "primaryPass": 6,
+      "strictOriginalReviewPass": 6,
+      "coreComplete": 6
+    },
+    "FINAL": {
+      "reviewed": 6,
+      "primaryPass": 6,
+      "strictOriginalReviewPass": 5,
+      "coreComplete": 6
+    }
+  },
+  "actualCalls": {
+    "evaluation": 12,
+    "generator": 0,
+    "transferRetest": 0,
+    "holdout": 0
+  },
+  "totalProviderTokens": 93648,
+  "pairedDurationMs": {
+    "median": 192971.0,
+    "maximum": 227544
+  },
+  "proofs": {
+    "plan.md": "64f589796fe269bfa8e248d9cd6735747f612d9c36170bf9c17963f006422e09",
+    "criteria.json": "04e9cf2e463509810672b92bef5f129407e6877e8f0179396c3e25de0526138a",
+    "baseline-execution-audit.json": "1343c84904c10acbacb91b4ecb57a57650f0662b40c34e510ee806fcd837af0d",
+    "review-baseline-msft.json": "c2e5443f127cad53651cba0ce5ccbeece31d612d20bb978dd07a6a58c9ef50ec",
+    "review-baseline-wmt.json": "4fead145427655f6cf49e5fdd0a20c9e89fbea3d053bcf3767224a9ffd0e43d9"
+  }
+}

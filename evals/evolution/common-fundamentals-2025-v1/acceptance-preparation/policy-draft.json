@@ -1,0 +1,118 @@
+{
+  "schema": "fundamentals_acceptance_policy_v1",
+  "experimentId": "common-fundamentals-2025-iteration-001-20260930",
+  "rationale": "未签署、未放行的搜索前审阅草稿。只覆盖现有常见基本面问题，不扩展罕见情形；采用既定18题、每个发行人/报告家族整体分组，不读取保留集答案进行候选优化。先前12题真实运行135197 tokens可用于规模估算，但每题仅一次且未完成独立标签/评审，不能据此估计模型波动或正式认定改善。主指标claim_support采用现有PASS/FAIL二值评分及发行人/报告家族分组平均；minMeaningfulDelta=0.25是待审的组平均通过率差25个百分点业务门槛，不是四档rubric中的一个档位，也不是由未测得方差推导的阈值。全部非退化幅度为零；每个split及每个任务分组只有两个发行人，1000次分组bootstrap和95%区间不增加独立样本数，样本或区间不支持结论时保持INCONCLUSIVE。预算覆盖新正式baseline的12次两阶段运行、开发集12次配对运行、验证集12次配对运行、保留集12次配对运行，各48次ANALYST和FINAL_ANSWER；另给GENERATOR两次，分别供E09模型反思和E10候选生成，JUDGE为零，由实际独立评审完成评分。最多一候选一轮，无自动重试；48题线性估算540788 tokens，700000是含两次生成及不确定用量余量的硬上限，不保证整轮一定足够，触及预算必须停止。原探索基线及此前失败费用另保留，不改写成新实验运行。maxCandidateP95LatencyMs=120000约束分析稿与最终回答耗时之和的候选组件P95，是待审实验界限，不是生产SLO，也不是单阶段超时配置。真实费用及计价尚未确认，maxExperimentCostUsd和maxMeanCandidateCostUsd保持null，不填写零；当前compare_resources会据此保留费用不可得，不能通过费用发布门禁。模型、固定最终回答组件、证据及单阶段执行条件须在正式E07中固定；本草稿不替代构建证明、人工gold/关键失败复核、权限隔离或签署的E07门禁。",
+  "primaryDimension": "claim_support",
+  "minMeaningfulDelta": 0.25,
+  "nonRegressionMargins": {
+    "claim_support": 0,
+    "numeric_period_correctness": 0,
+    "counterevidence": 0,
+    "unknowns": 0,
+    "numeric": 0,
+    "citation_support": 0,
+    "task_coverage": 0,
+    "appropriate_refusal": 0,
+    "appropriate_clarification": 0,
+    "answerable_response": 0
+  },
+  "minimumGroups": 2,
+  "bootstrapSamples": 1000,
+  "confidenceLevel": 0.95,
+  "seed": 20260930,
+  "repeats": {
+    "DEVELOPMENT": 1,
+    "VALIDATION": 1,
+    "HOLDOUT": 1
+  },
+  "cohorts": {
+    "DEVELOPMENT": {
+      "caseIds": [
+        "msft-fy2025-growth",
+        "msft-fy2025-cashflow",
+        "msft-fy2025-liquidity",
+        "wmt-fy2025-growth",
+        "wmt-fy2025-cashflow",
+        "wmt-fy2025-liquidity"
+      ],
+      "keyGroups": {
+        "growth": [
+          "msft-fy2025-growth",
+          "wmt-fy2025-growth"
+        ],
+        "cashflow": [
+          "msft-fy2025-cashflow",
+          "wmt-fy2025-cashflow"
+        ],
+        "liquidity": [
+          "msft-fy2025-liquidity",
+          "wmt-fy2025-liquidity"
+        ]
+      }
+    },
+    "VALIDATION": {
+      "caseIds": [
+        "googl-fy2025-growth",
+        "googl-fy2025-cashflow",
+        "googl-fy2025-liquidity",
+        "cost-fy2025-growth",
+        "cost-fy2025-cashflow",
+        "cost-fy2025-liquidity"
+      ],
+      "keyGroups": {
+        "growth": [
+          "googl-fy2025-growth",
+          "cost-fy2025-growth"
+        ],
+        "cashflow": [
+          "googl-fy2025-cashflow",
+          "cost-fy2025-cashflow"
+        ],
+        "liquidity": [
+          "googl-fy2025-liquidity",
+          "cost-fy2025-liquidity"
+        ]
+      }
+    },
+    "HOLDOUT": {
+      "caseIds": [
+        "aapl-fy2025-growth",
+        "aapl-fy2025-cashflow",
+        "aapl-fy2025-liquidity",
+        "amzn-fy2025-growth",
+        "amzn-fy2025-cashflow",
+        "amzn-fy2025-liquidity"
+      ],
+      "keyGroups": {
+        "growth": [
+          "aapl-fy2025-growth",
+          "amzn-fy2025-growth"
+        ],
+        "cashflow": [
+          "aapl-fy2025-cashflow",
+          "amzn-fy2025-cashflow"
+        ],
+        "liquidity": [
+          "aapl-fy2025-liquidity",
+          "amzn-fy2025-liquidity"
+        ]
+      }
+    }
+  },
+  "limits": {
+    "maxCandidates": 1,
+    "maxRounds": 1,
+    "maxModelCalls": {
+      "ANALYST": 48,
+      "FINAL_ANSWER": 48,
+      "GENERATOR": 2,
+      "JUDGE": 0
+    },
+    "maxTotalTokens": 700000,
+    "maxExperimentCostUsd": null,
+    "maxMeanCandidateCostUsd": null,
+    "maxCandidateP95LatencyMs": 120000
+  },
+  "runOrder": "ALTERNATING",
+  "retryPolicy": "NO_AUTOMATIC_RETRY"
+}

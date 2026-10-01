@@ -2,7 +2,7 @@
 
 本表按[原始计划](implementation-plan-v1.0.md)的条目定位实现、检查和仍需取得的证据，不代替验收结论。命令结果、审计覆盖进度和阻塞只维护在 [progress.md](../../progress.md)。代码或测试文件存在不等于该项已通过；测试数据不能证明真实收益、部署权限或隔离环境已经成立。
 
-后端路径以下述包根为起点：[实现](../../stocksage-backend/src/main/java/com/stocksage/)、[测试](../../stocksage-backend/src/test/java/com/stocksage/)。Python 文件位于 [rag-eval](../../rag-eval/)。未列出的计划条目仍须审计，不因本表覆盖了基础组件而视为完成。
+后端路径以下述包根为起点：[实现](../../stocksage-backend/src/main/java/com/stocksage/)、[测试](../../stocksage-backend/src/test/java/com/stocksage/)。Python 文件位于 [evals](../../evals/)。未列出的计划条目仍须审计，不因本表覆盖了基础组件而视为完成。
 
 ## E00：基线
 
@@ -21,7 +21,7 @@
 | E01.1 唯一可变字段 | [V1 契约](evolution-v1-contract.md)、`evolution_candidates.compile_candidate/validate_record`；`test_evolution_candidates` 的目标与未知字段拒绝检查 | 只接受完整 `fundamentals.method`，不接受整套系统配置。 |
 | E01.2 三类材料 | V1 契约；候选来源、方法经验独立制品；`evolution_reflection.py` 的独立开发反馈绑定 | 经验不是财务事实；用户反馈未经核验不能当作 gold。 |
 | E01.3 字段、范围、父版本、哈希 | `evolution_candidates.py`、`evolution.AgentPolicyBundle`；`test_evolution_candidates`、`AgentPolicyBundleTest` | 正则只拦截明确的越权语法，不能证明任意自然语言都安全；仍需独立评审。 |
-| E01.4 优化器/执行器/评测者/发布者 | [离线工作流](../../rag-eval/evolution/README.md)；`evolution_acceptance.require_gate`、发布者签名加载、profile 和管理令牌 | 进程/文件权限、保留集不挂载、凭据分离必须由实际部署证明，不能以不同角色字符串替代。 |
+| E01.4 优化器/执行器/评测者/发布者 | [离线工作流](../../evals/evolution/README.md)；`evolution_acceptance.require_gate`、发布者签名加载、profile 和管理令牌 | 进程/文件权限、保留集不挂载、凭据分离必须由实际部署证明，不能以不同角色字符串替代。 |
 | E01.5 状态和退出 | `evolution_experiment.py` / `run_evolution_experiment.py` 的持久状态及 CLI；`evolution_acceptance.py` 的比较结果 | 完成执行不等于 IMPROVED；全状态转换的审计字段还须随 E08—E17 逐项核对。 |
 | E01 验收、交付、回滚 | `test_evolution_candidates` 的模型/工具/路径/发布越权负例；`FundamentalsMethodRegistry` 默认基线与独立激活 | 恶意候选被静态拒绝的覆盖范围与真实模型注入防护分开。关闭实验不改变基线。 |
 
@@ -50,7 +50,7 @@
 
 | 计划条目 | 权威落点与检查 | 证据边界 |
 |---|---|---|
-| E04.1 smoke 与研究集 | [synthetic-smoke](../../rag-eval/evolution/synthetic-smoke/)、`test_evolution_dataset.test_fixture_coverage_does_not_claim_quality` | 12 个合成样本只验机制；计划中的 120 是建议，真实样本量必须由冻结采样计划和方差支持。 |
+| E04.1 smoke 与研究集 | [synthetic-smoke](../../evals/evolution/synthetic-smoke/)、`test_evolution_dataset.test_fixture_coverage_does_not_claim_quality` | 12 个合成样本只验机制；计划中的 120 是建议，真实样本量必须由冻结采样计划和方差支持。 |
 | E04.2 分组防泄漏与挑战集 | `evolution_dataset.validate_cases`、跨 split 冲突检查；E07 的独立 `samplingPlan` 证明 | 自动检查泄漏组、发行人/报告家族、源地址、原文及可见正文哈希；不能自动发现漏标的翻译/近重复。真实挑战集和人工分组仍需审查。 |
 | E04.3 正文、范围、时点与来源 | `import_evolution_snapshots.py`、`evolution_dataset.validate_case/execution_payload`；`test_evolution_real` 的实际临时文件读取及时间检查 | 原始 source manifest 保存 Unicode 范围并绑定哈希；原始及可见正文都保留。文件导入无网络访问。 |
 | E04.4 gold 分离 | `evolution_dataset.validate_gold/execution_payload`；`EvolutionReplayServiceTest.authorizedSourceContractPreservesMetadataButNeverImportsRawOrGold` | 输出字段白名单只能证明序列化隔离；进程无法读取 gold/holdout 需部署权限证据。 |
@@ -76,7 +76,7 @@
 | E06.1 执行契约与硬门禁 | `evolution_quality.input_errors`、两阶段实际上下文适配、`HARD_GATES`；`test_evolution_quality` / `test_evolution_real` 的篡改与失败检查 | 哈希和字段检查只能确认契约；权限、租户、证券身份等语义/环境门禁还需独立事实证据，不能只签一个 PASS。 |
 | E06.2 数值、口径、公式 | `evolution_dataset.validate_facts/derived_value/validate_real_expectations`；`test_evolution_dataset` 与 `test_evolution_real` | gold 冻结单位、币种、期间、舍入与容差；零值、负值、缺值分开；不能用隐藏原文要求回答。 |
 | E06.3 主张支持 | `evolution_quality` 的源/gold/回答绑定、独立主张提取和 `claim_checks`；`test_evolution_real` 的支持、摘录、错值检查 | 引用 ID 合法不是支持率；人工评审必须核对实际可见证据，程序不自称能判定任意金融语义。 |
-| E06.4 rubric 与人工裁决 | `ordinary_answer_quality.DIMENSIONS`、源绑定 requiredPoints/response_kind；`evolution_review.py` 的盲评和争议裁决 | 固定四维评分与事实/覆盖/拒答指标分开；模型自评、偏好票或点赞不能独自授予发布资格。 |
+| E06.4 rubric 与人工裁决 | `evolution_rubric.DIMENSIONS`、源绑定 requiredPoints/response_kind；`evolution_review.py` 的盲评和争议裁决 | 固定四维评分与事实/覆盖/拒答指标分开；模型自评、偏好票或点赞不能独自授予发布资格。 |
 | E06.5 负向控制 | `test_evolution_real` 的错币种/期间/公式、缺事实、空答案、非法引用、不当拒答、评分指令负例；E07 `negativeControls` 原始制品绑定 | 本地标签检查与真实模型在恶意文档下的输出验收分开。 |
 | E06.6 失败归因 | `evolution_candidates.ATTRIBUTIONS`、`evolution_reflection.TARGETS`；`test_evolution_reflection` 的非方法缺陷分流 | 供应商、执行器、能力、数据与评估故障不能改名为方法经验；失败记录仍保留成本。 |
 | E06 交付、验收、回滚 | 评估器、独立标签契约与测试；`evolution_acceptance.evaluator_hash/require_gate` | 没有标签保持 NO_DATA；评估相关代码变化使旧门禁失效，需重新独立验收，不能补填新哈希沿用旧批准。 |
@@ -161,7 +161,7 @@
 | E13.3 人工检查及构建权限 | 固定 scope/negativeCases/cost/privacy/dependencies/rollback 六项原始证明；发布者独立密钥 | 审批检查原始证明而非只收一个 PASS。真实构建权限、独立性和受保护流程需部署证据。 |
 | E13.4 启动固定加载 | `ApprovedMethodArtifact.load`、`RuntimeArtifactIdentity`、`FundamentalsMethodRegistry`；签名/构建/篡改/撤回检查 | 只信任发布者签名、固定制品哈希及实际 JAR 身份；新包/新授权需重启加载，普通 HTTP 不能登记候选。 |
 | E13.5 待验证状态与非适用回退 | 批准包 `APPROVED_PENDING_VALIDATION`，`MethodActivation` 单独授权；`MethodActivationTest` | 批准不等于 ACTIVE；范围外请求用 baseline，进入 SERVING 必须已通过影子与回滚验收。 |
-| E13 交付、验收、回滚 | 包、审批、构建、scope、rollback 字段及[发布说明](../../rag-eval/evolution/README.md) | 真实包审批、构建和部署尚须独立证明；拒绝部署或撤回不能原地修改旧包。 |
+| E13 交付、验收、回滚 | 包、审批、构建、scope、rollback 字段及[发布说明](../../evals/evolution/README.md) | 真实包审批、构建和部署尚须独立证明；拒绝部署或撤回不能原地修改旧包。 |
 
 ## E14：受控影子批次
 
@@ -184,7 +184,7 @@
 | E15.4 独立开关 | 生成 `--stop-file`、STOP_SHADOW/CANCEL_SHADOW、PROHIBIT_ACTIVATION、STABLE_ONLY/REVOKE；回滚说明和独立测试 | 停生成、停影子、禁激活、回基线有不同作用域；不能用一个开关名代替实测。 |
 | E15.5 保留版本与历史 | 不可变包、账本、原始 Trace/proofs；withdraw 只写标记 | 不删表、不擦历史、不改旧报告；撤回后不能因重试恢复候选。 |
 | E15.6 完整切换/撤回序列 | DRILL 授权、四阶段原始 runId/Trace、固定案例与撤回跨越时间检查；独立 `accept_drill` | 离线导出只标机制已验证；正式验收还要求不同评审者及所有故障/操作证明。 |
-| E15 交付、验收、回滚 | [回滚手册](../../rag-eval/evolution/README.md#rollback-controls-and-recorded-drill)、演练导出、独立签名恢复验收 | 演练最终回到 baseline；没有接受的回滚证明不能签 SERVING。离线检查器不签发发布许可。 |
+| E15 交付、验收、回滚 | [回滚手册](../../evals/evolution/README.md#rollback-controls-and-recorded-drill)、演练导出、独立签名恢复验收 | 演练最终回到 baseline；没有接受的回滚证明不能签 SERVING。离线检查器不签发发布许可。 |
 
 ## E16：受限激活与观测
 
@@ -241,5 +241,5 @@
 | §16.4 证据等级 | 迭代 engineering/component/final/comparison 分离；演练 checker 明确 `realAcceptance:false` 与 `activationAuthorized:false` | 静态/受控测试/固定快照真实模型/真实组件链/授权现场各自陈述。串联真实 Java 组件但替换模型/存储的演练不能升级为真实环境验收。 |
 | §17.1 文件组织 | 各 E 行中的现有 Java evolution 包、rag-eval Python CLI/契约、docs/evolution 文档 | 路径属于建议，复用现有模块；不提交私有快照、密钥和保留集，不为离线 V1 新建平台。 |
 | §17.2 测试矩阵 | prompts/bundle/replay/dataset/quality/experiment/release/ordinary drill 对应测试及本表 E02—E16 | 真实 MVC 过滤器、临时文件/SQLite、真实线程同步覆盖机制；本地模型/存储替身不能证明其他普通路线或 DEEP 的真实语义无退化，完整现场测试另验。 |
-| §18.1—18.2 命令/退出码 | [离线工作流](../../rag-eval/evolution/README.md)、实际 `run_evolution_experiment.py`、`run_ordinary_live_eval.py` 与测试 | compile 不等于 tests，运行完整不等于质量通过；实现采用现有 rag-eval 路径。缺专用环境/凭据不填真实通过。 |
+| §18.1—18.2 命令/退出码 | [离线工作流](../../evals/evolution/README.md)、实际 `run_evolution_experiment.py`、`run_ordinary_live_eval.py` 与测试 | compile 不等于 tests，运行完整不等于质量通过；实现采用现有 rag-eval 路径。缺专用环境/凭据不填真实通过。 |
 | §18.3—18.4 执行与交接 | 一名开发 Agent 可顺序完成；进度记录保存基线 SHA/改动/测试/未跑/下一步/回滚 | 开发子 Agent 不能替代独立评审者。共享目录不等于权限隔离，用户批准实施不等于批准候选上线。 |

@@ -1,0 +1,34 @@
+[
+  {
+    "answerId": "answer-6b15e292c39a431d9ca34f4c8d74fd5f",
+    "callId": "2b65f618-1a6e-4e95-aac6-deb1a366f37c",
+    "model": "qwen3.7-plus",
+    "arm": "before",
+    "repeatId": 1,
+    "responseSha256": "995f41f09d5ae06777379b1db0ed566bc8574653e6010159cf49784480fc2819"
+  },
+  {
+    "answerId": "answer-af5c86dff75e47f78dbc1425433fd561",
+    "callId": "81b088f8-2ff3-4a9d-9ecb-b7711e503a0f",
+    "model": "qwen3.8-max",
+    "arm": "after",
+    "repeatId": 1,
+    "responseSha256": "876f59cfe8b82a5756e99c376f299628a67a2251f0372a001a7746da6da84820"
+  },
+  {
+    "answerId": "answer-a4a5596451ae406ea59b6c9eb90790ee",
+    "callId": "44bfd243-7ab0-42ad-89fa-8e3c8088adf6",
+    "model": "qwen3.8-max",
+    "arm": "after",
+    "repeatId": 2,
+    "responseSha256": "9736b054c7ca10ddc43d0eda6ba5e39ff743d8a3f8f32d8217973a544579fc5e"
+  },
+  {
+    "answerId": "answer-01412b7e6b6848369e2b3c7992dea928",
+    "callId": "c16941eb-030b-4c8e-a2c8-415f23e7ef27",
+    "model": "qwen3.7-plus",
+    "arm": "before",
+    "repeatId": 2,
+    "responseSha256": "4e1f3fb35b291fd41c1436f85631ca0f19b2b9121440bc80c4ce97908adbff83"
+  }
+]

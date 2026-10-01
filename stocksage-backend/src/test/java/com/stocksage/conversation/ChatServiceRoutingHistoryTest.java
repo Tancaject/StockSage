@@ -125,7 +125,7 @@ class ChatServiceRoutingHistoryTest {
                     new ToolPrefetchService.PreparedToolContext(prefix + draft,
                             "", null, "trace-answer", "COMPLETED", List.of("E1"), source,
                             new ToolPrefetchService.AnalystSection(prefix.length(), prefix.length() + draft.length())),
-                    List.of(), "历史研究结论", List.of(), false, "trace-answer");
+                    List.of(), "历史研究结论", "", List.of(), false, "trace-answer");
         }
         ArgumentCaptor<AgentStep> steps = ArgumentCaptor.forClass(AgentStep.class);
         verify(traceService, times(4)).addStep(eq("trace-answer"), steps.capture());
@@ -160,7 +160,7 @@ class ChatServiceRoutingHistoryTest {
                 service, "buildPromptMessages", "u_A", CONVERSATION_ID,
                 new ToolPrefetchService.PreparedToolContext("本轮标的：AAPL\n" + source + "\n第二种解读",
                         "", null, "trace-answer", "COMPLETED", List.of("E1"), source),
-                List.of(), "历史研究结论", List.of(), false, "trace-answer");
+                List.of(), "历史研究结论", "", List.of(), false, "trace-answer");
         assertThat(withoutObservation.stream().map(org.springframework.ai.chat.messages.Message::getText).toList())
                 .containsExactlyElementsOf(actual.stream().map(org.springframework.ai.chat.messages.Message::getText).toList());
     }

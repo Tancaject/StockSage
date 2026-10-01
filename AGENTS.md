@@ -5,7 +5,7 @@
 - stocksage-backend (Java, Spring AI Alibaba) → :8080
 - stocksage-data-service (Python, FastAPI) → :8001，后端通过 REST 调用
 - stocksage-frontend (Vue 3, Vite) → :5173
-- rag-eval：RAG 检索与回答质量评估脚本
+- evals：项目级 RAG、Agent 与自进化评测，入口见 [evals/README.md](evals/README.md)
 
 README 和后端配置使用 data-service 端口 `8001`。除非用户明确改变本地 setup，否则旧的 `8000` 引用视为过时。
 
@@ -66,15 +66,15 @@ npm run build
 ```powershell
 python -m compileall stocksage-data-service\main.py stocksage-data-service\app
 python -m unittest discover stocksage-data-service\tests
-python -m unittest discover rag-eval
+python -m unittest discover evals
 ```
 
 RAG evaluation 需要 backend、data-service、MySQL、Redis、Milvus 和 Ollama 运行：
 
 ```powershell
 .\.venv-rag-eval\Scripts\Activate.ps1
-python .\rag-eval\run_retrieval_eval.py
-python .\rag-eval\run_rag_eval.py
+python .\evals\run_retrieval_eval.py
+python .\evals\run_rag_eval.py
 ```
 
 ## 完成标准

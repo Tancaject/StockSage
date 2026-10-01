@@ -1,0 +1,84 @@
+{
+  "timeoutSeconds": {
+    "sharedProperty": 180,
+    "ordinaryPrefetchField": 180,
+    "deepReplanPlannerField": 180,
+    "answerReplayField": 180
+  },
+  "clientOptions": {
+    "chatClient": {
+      "model": "qwen3.8-max",
+      "maxTokens": 4096,
+      "temperature": 0.7
+    },
+    "fundamentals": {
+      "model": "qwen3.8-max",
+      "maxTokens": 4096,
+      "temperature": 0.7
+    },
+    "market": {
+      "model": "qwen3.8-max",
+      "maxTokens": 4096,
+      "temperature": 0.7
+    },
+    "news": {
+      "model": "qwen3.8-max",
+      "maxTokens": 4096,
+      "temperature": 0.7
+    },
+    "relationExtraction": {
+      "model": "qwen3.8-max",
+      "maxTokens": 4096,
+      "temperature": 0.1
+    }
+  },
+  "finalRoutes": {
+    "STANDARD": {
+      "temperature": 0.7,
+      "schemaVersion": 1,
+      "modelName": "qwen3.8-max",
+      "scope": "final-answer",
+      "kind": "model-invocation",
+      "configurationSource": "REQUEST_OPTIONS",
+      "maxOutputTokens": 4096,
+      "modelTier": "STANDARD"
+    },
+    "FAST": {
+      "temperature": 0.7,
+      "schemaVersion": 1,
+      "modelName": "qwen3.8-flash",
+      "scope": "final-answer",
+      "kind": "model-invocation",
+      "configurationSource": "REQUEST_OPTIONS",
+      "maxOutputTokens": 4096,
+      "modelTier": "FAST"
+    },
+    "STRONG": {
+      "temperature": 0.7,
+      "schemaVersion": 1,
+      "modelName": "qwen3.8-max",
+      "scope": "final-answer",
+      "kind": "model-invocation",
+      "configurationSource": "REQUEST_OPTIONS",
+      "maxOutputTokens": 4096,
+      "modelTier": "STRONG"
+    },
+    "VISION": {
+      "temperature": 0.7,
+      "schemaVersion": 1,
+      "modelName": "qwen3-vl-plus",
+      "scope": "final-answer",
+      "kind": "model-invocation",
+      "configurationSource": "REQUEST_OPTIONS",
+      "maxOutputTokens": 4096,
+      "modelTier": "STANDARD"
+    }
+  },
+  "schemaVersion": 1,
+  "scope": "LOCAL_BEAN_TIMEOUT_INJECTION_AND_MOCK_CLIENT_OPTIONS_NO_SERVICE_RUN",
+  "status": "PASS",
+  "providerCalls": 0,
+  "mockCalls": 5,
+  "applicationSourceSha256": "4f6ecc4aa559d1e435c7068002a25796d4a0f048a58a2f976659be0f896cafcd",
+  "applicationResourceSha256": "4f6ecc4aa559d1e435c7068002a25796d4a0f048a58a2f976659be0f896cafcd"
+}

@@ -1,0 +1,670 @@
+{
+  "schemaVersion": 1,
+  "reviewType": "AI_SOURCE_GROUNDED_NONBLIND",
+  "humanReviewed": false,
+  "independentHumanAcceptance": false,
+  "reviewedAt": "2026-10-01T01:22:12.834816+00:00",
+  "criteriaPath": "rag-eval/evolution/common-fundamentals-2025-v1/max-experiment-20261001/criteria.json",
+  "criteriaSha256": "04e9cf2e463509810672b92bef5f129407e6877e8f0179396c3e25de0526138a",
+  "scope": "Only the three MSFT DEVELOPMENT baseline runs and their ANALYSIS / FINAL answers. No transfer-retest, HOLDOUT, or candidate outputs reviewed.",
+  "reviewBlinding": "非盲：评审者知道这些是当前 qwen3.8-max 基线；非人工验收。",
+  "summary": {
+    "cases": 3,
+    "answerStages": 6,
+    "finalPass": 3,
+    "analysisPass": 3,
+    "substantiveIssueAnswerStages": 0,
+    "coreIncompleteAnswerStages": 0,
+    "inconclusiveAnswerStages": 0,
+    "ambiguityNoteCount": 2,
+    "minorNumericNoteCount": 0,
+    "interpretation": "本轮微软开发基线没有识别到明确实质方法错误；两处措辞歧义只记 NOTE，不构造失败或预设候选收益。"
+  },
+  "numericCrosschecks": {
+    "growth": {
+      "revenueGrowthPct": "14.93215623240671991906071260",
+      "operatingIncomeGrowthPct": "17.44903274149479590251569450",
+      "operatingMargin2024Pct": "44.64429957327371676144940071",
+      "operatingMargin2025Pct": "45.62195624085984864619272763",
+      "marginChangePp": "0.97765666758613188474332692",
+      "productGrowthPct": "-1.276766553965386812406403900",
+      "serviceGrowthPct": "20.75364986775640563573959380",
+      "opex2024": "61575",
+      "opex2025": "65365",
+      "opexGrowthPct": "6.155095412099066179455948000",
+      "grossMargin2024Pct": "69.76444382797137751813382724",
+      "grossMargin2025Pct": "68.82374238616518294501000980",
+      "grossMarginChangePp": "-0.94070144180619457312381744",
+      "pretaxGrowthPct": "14.69564975368087060591722560",
+      "netIncomeGrowthPct": "15.53962058636652446219478990"
+    },
+    "cashflow": {
+      "fcf2025": "71611",
+      "fcf2024": "74071",
+      "fcf2023": "59475",
+      "capexToCfoPct2025": "47.40749988983710580044358925",
+      "capexToCfoPct2024": "37.51813611364173161925970915",
+      "capexToCfoPct2023": "32.09221072823182845790230869",
+      "coverage2025": "2.109370885036637697324596056",
+      "cfoGrowthPct": "14.85811654350980193676822890",
+      "capexGrowthPct": "45.13343975537918474717269600",
+      "fcfGrowthPct": "-3.321137827219829622929351570",
+      "cfoHundredMillionUsd": "1361.62",
+      "capexHundredMillionUsd": "645.51",
+      "fcfHundredMillionUsd": "716.11"
+    },
+    "liquidity": {
+      "currentRatio2025": "1.353446444504241668909062584",
+      "currentRatio2024": "1.274954903181520680682598215",
+      "cashGrowthPct": "65.12148512148512148512148510",
+      "shortInvestmentGrowthPct": "12.39777731180540993919060600",
+      "cashInvestmentsGrowthPct": "25.18036085408310498656394370",
+      "currentAssetsGrowthPct": "19.65580277210863059836978980",
+      "currentLiabilitiesGrowthPct": "12.71650463738965247513688680",
+      "noncurrentDebtGrowthPct": "-5.940779610194902548725637180",
+      "currentDebtGrowthPct": "33.34815473543797243219208540",
+      "totalLiabilitiesGrowthPct": "13.06517403543904861173805640",
+      "cashShareOfCurrentAssetsPct": "15.82265566548597558742433200",
+      "cashAndShortInvestmentSharePct": "49.47653703480858678079432431",
+      "noncurrentDebtSharePct": "14.57295916145235986701702937",
+      "shortUnearnedSharePct": "45.71301108923791584642184424",
+      "cashCoverage": "0.2141511705306688949000835588",
+      "cashAndShortInvestmentCoverage": "0.6696384313614411760540441020",
+      "borrowings2025": "43151",
+      "borrowings2024": "51630",
+      "borrowingsGrowthPct": "-16.42262250629478985086190199",
+      "currentLiabilitiesSum": "141218",
+      "cashAndInvestmentsHundredMillionUsd": "945.65"
+    }
+  },
+  "reviews": [
+    {
+      "caseId": "msft-fy2025-growth",
+      "answerId": "8d1f4698-1f23-4576-8294-8657c065e560:ANALYSIS",
+      "runId": "8d1f4698-1f23-4576-8294-8657c065e560",
+      "stage": "ANALYSIS",
+      "arm": "BASELINE",
+      "reviewType": "AI_SOURCE_GROUNDED_NONBLIND",
+      "humanReviewed": false,
+      "runComplete": true,
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coreCoverageComplete": true,
+      "coverageComplete": true,
+      "coreCoverageChecks": [
+        {
+          "id": "core-1",
+          "criterion": "列出 FY2025/FY2024 总收入与营业利润，金额单位及全年口径可识别",
+          "covered": true,
+          "exactQuotes": [
+            "| 总收入 | 245,122 百万美元 | 281,724 百万美元 | **+14.9%** |",
+            "| 营业利润 | 109,433 百万美元 | 128,528 百万美元 | **+17.4%** |"
+          ]
+        },
+        {
+          "id": "core-2",
+          "criterion": "分别给出 FY2025 收入、营业利润相对 FY2024 的同比增速",
+          "covered": true,
+          "exactQuotes": [
+            "- 总收入同比增速 = `(281,724 - 245,122) / 245,122` ≈ **14.9%** [E1]。  ",
+            "- 营业利润同比增速 = `(128,528 - 109,433) / 109,433` ≈ **17.4%** [E1]。  "
+          ]
+        },
+        {
+          "id": "core-3",
+          "criterion": "给出两个年度营业利润率，并比较方向",
+          "covered": true,
+          "exactQuotes": [
+            "| 营业利润率 | **44.64%** | **45.62%** | **+0.98 个百分点** |"
+          ]
+        },
+        {
+          "id": "core-4",
+          "criterion": "给出与上述收入、营业利润、利润率方向一致的简短增长质量评价",
+          "covered": true,
+          "exactQuotes": [
+            "从利润表看，**微软 FY2025 的增长质量总体偏正面**：总收入同比增长 **14.9%**，营业利润同比增长 **17.4%**，营业利润率由 **44.64%** 提升至 **45.62%**，显示收入增长伴随经营杠杆释放和盈利能力改善 [E1]。"
+          ]
+        }
+      ],
+      "evidenceGrounded": true,
+      "substantiveIssue": false,
+      "substantiveIssues": [],
+      "ambiguityNotes": [],
+      "numericNotes": [],
+      "verdict": "PASS",
+      "issueCauses": [],
+      "notes": [
+        {
+          "category": "PASS_EVIDENCE",
+          "exactQuote": "但需要注意两点反向信号：一是 **Product 收入同比下降**，增长主要依赖 Service and other；二是 **毛利率下降、非经营损失扩大**，说明利润质量改善主要体现在经营利润层面，并未完全传导至税前利润和净利润 [E1]。在缺少现金流和资本开支数据的情况下，暂不能对现金转化质量作出完整判断。",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-growth/context/E1 (Income Statements)",
+          "reason": "源输入只有利润表；回答将积极判断限定在经营盈利层面，明确现金转化和资本开支不能由本题证据完整判断。"
+        },
+        {
+          "category": "ACCEPTABLE_MECHANISM",
+          "exactQuote": "- 营业费用同比增速约 **6.2%**，低于总收入 **14.9%** 的增速 [E1]。",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-growth/context/E1 (Gross margin; Research and development; Sales and marketing; General and administrative)",
+          "reason": "费用率下降抵消毛利率下降、导致营业利润率提高可由源表复算；没有断言未给出的具体管理动作。"
+        }
+      ],
+      "numericAudit": {
+        "checkedScope": "所有必答金额/比率；额外 Product 与 Service and other 两年金额/同比；研发、销售及管理费用分项及合计/增速；毛利额、毛利率与百分点变化；其他收支、税前利润、净利润及增速；财年/单位/来源日期。所列值均匹配输入或正常舍入的 Decimal 结果。",
+        "calculationReference": "numericCrosschecks.growth",
+        "minorRoundingPresent": false,
+        "normalRoundedValuesAccepted": true
+      },
+      "sourceBinding": {
+        "responsePath": "rag-eval/evolution/common-fundamentals-2025-v1/max-experiment-20261001/raw-baseline-1/8d1f4698-1f23-4576-8294-8657c065e560.response.json",
+        "responseSha256": "a9246928381d986452afccad84f667db84cd61d9266e0feff1b0ecc1be005b10",
+        "answerSha256": "f33e3f4078e8d54a04c81f16bfb8e4aeffeb61a8080c33c2377c232feedeb4f2",
+        "criteriaSha256": "04e9cf2e463509810672b92bef5f129407e6877e8f0179396c3e25de0526138a",
+        "inputCaseSha256": "267d495e65eb9769543589877d6b59692c4195f459f7b513955bfb82ad9d16e0",
+        "evidenceContextSha256": "17c257ad298a9b022e6b730558570f4480fd221b59bd3b7834b170a0fe725996",
+        "sourceRef": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K"
+      },
+      "runtimeObservation": {
+        "durationMs": 117530,
+        "timeoutSeconds": 180,
+        "stageStatus": "COMPLETED"
+      }
+    },
+    {
+      "caseId": "msft-fy2025-growth",
+      "answerId": "8d1f4698-1f23-4576-8294-8657c065e560:FINAL",
+      "runId": "8d1f4698-1f23-4576-8294-8657c065e560",
+      "stage": "FINAL",
+      "arm": "BASELINE",
+      "reviewType": "AI_SOURCE_GROUNDED_NONBLIND",
+      "humanReviewed": false,
+      "runComplete": true,
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coreCoverageComplete": true,
+      "coverageComplete": true,
+      "coreCoverageChecks": [
+        {
+          "id": "core-1",
+          "criterion": "列出 FY2025/FY2024 总收入与营业利润，金额单位及全年口径可识别",
+          "covered": true,
+          "exactQuotes": [
+            "| 总收入 | 245,122 百万美元 | 281,724 百万美元 | **+14.9%** | 收入保持双位数增长 [E1] |",
+            "| 营业利润 | 109,433 百万美元 | 128,528 百万美元 | **+17.4%** | 营业利润增速高于收入增速 [E1] |"
+          ]
+        },
+        {
+          "id": "core-2",
+          "criterion": "分别给出 FY2025 收入、营业利润相对 FY2024 的同比增速",
+          "covered": true,
+          "exactQuotes": [
+            "- 总收入同比增速 = `(281,724 - 245,122) / 245,122 ≈ 14.9%` [E1]  ",
+            "- 营业利润同比增速 = `(128,528 - 109,433) / 109,433 ≈ 17.4%` [E1]  "
+          ]
+        },
+        {
+          "id": "core-3",
+          "criterion": "给出两个年度营业利润率，并比较方向",
+          "covered": true,
+          "exactQuotes": [
+            "| 营业利润率 | **44.64%** | **45.62%** | **+0.98 个百分点** | 经营盈利能力小幅提升 [E1] |"
+          ]
+        },
+        {
+          "id": "core-4",
+          "criterion": "给出与上述收入、营业利润、利润率方向一致的简短增长质量评价",
+          "covered": true,
+          "exactQuotes": [
+            "从本轮提供的微软 **FY2025 全年利润表**看，微软（MSFT）FY2025 的增长质量**总体偏正面**：总收入增长约 **14.9%**，营业利润增长约 **17.4%**，营业利润率从 **44.64%** 提升至 **45.62%**，显示收入扩张同时经营盈利能力有所改善。不过，增长主要靠 **Service and other** 拉动，**Product 收入略降**，且毛利率小幅下降、非经营损失扩大，因此利润质量改善主要体现在经营利润层面。[E1]"
+          ]
+        }
+      ],
+      "evidenceGrounded": true,
+      "substantiveIssue": false,
+      "substantiveIssues": [],
+      "ambiguityNotes": [
+        {
+          "exactQuote": "### 3. 营业利润率提升并非来自毛利率改善，而是费用端控制",
+          "supportedReading": "标题以“费用端控制”概括费用增速低于收入增速、费用率下降；正文给出 61,575/65,365 和 6.2%，并另列管理原因未知。",
+          "strongerReading": "若孤立读成管理层实施某个节流方案的事实，则源表不证明该管理动作。",
+          "mainVerdictEffect": "NOTE_ONLY; PASS unchanged",
+          "strictSensitivity": "严格把标题解释为管理行为因果会有问题，但完整语境有充分合理的会计分解解释，不计主分析失败。"
+        }
+      ],
+      "numericNotes": [],
+      "verdict": "PASS",
+      "issueCauses": [],
+      "notes": [
+        {
+          "category": "PASS_EVIDENCE",
+          "exactQuote": "但需要保留两个反向信号：一是 **Product 收入同比下降**，增长主要依赖 **Service and other**；二是 **毛利率下降、非经营损失扩大**，使净利润增速低于营业利润增速。因此，本轮证据支持“经营层面增长质量较好”的判断，但不足以完整判断现金转化质量和长期资本开支压力。[E1]",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-growth/context/E1 (Income Statements)",
+          "reason": "源输入只有利润表；回答将积极判断限定在经营盈利层面，明确现金转化和资本开支不能由本题证据完整判断。"
+        },
+        {
+          "category": "ACCEPTABLE_MECHANISM",
+          "exactQuote": "也就是说，微软 FY2025 营业利润率提升，并不是因为毛利率改善，而更可能来自费用增速低于收入增速带来的经营杠杆。根据利润表，研发、销售及管理费用合计从 FY2024 的 **61,575 百万美元**增至 FY2025 的 **65,365 百万美元**，增速约 **6.2%**，明显低于总收入 **14.9%** 的增速。[E1]",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-growth/context/E1 (Gross margin; Research and development; Sales and marketing; General and administrative)",
+          "reason": "费用率下降抵消毛利率下降、导致营业利润率提高可由源表复算；没有断言未给出的具体管理动作。"
+        }
+      ],
+      "numericAudit": {
+        "checkedScope": "所有必答金额/比率；额外 Product 与 Service and other 两年金额/同比；研发、销售及管理费用分项及合计/增速；毛利额、毛利率与百分点变化；其他收支、税前利润、净利润及增速；财年/单位/来源日期。所列值均匹配输入或正常舍入的 Decimal 结果。",
+        "calculationReference": "numericCrosschecks.growth",
+        "minorRoundingPresent": false,
+        "normalRoundedValuesAccepted": true
+      },
+      "sourceBinding": {
+        "responsePath": "rag-eval/evolution/common-fundamentals-2025-v1/max-experiment-20261001/raw-baseline-1/8d1f4698-1f23-4576-8294-8657c065e560.response.json",
+        "responseSha256": "a9246928381d986452afccad84f667db84cd61d9266e0feff1b0ecc1be005b10",
+        "answerSha256": "84ccba243f5ac4cabca1f3b73ad0b3b9720dd1bc851e45fc8110643fac79a861",
+        "criteriaSha256": "04e9cf2e463509810672b92bef5f129407e6877e8f0179396c3e25de0526138a",
+        "inputCaseSha256": "267d495e65eb9769543589877d6b59692c4195f459f7b513955bfb82ad9d16e0",
+        "evidenceContextSha256": "17c257ad298a9b022e6b730558570f4480fd221b59bd3b7834b170a0fe725996",
+        "sourceRef": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K"
+      },
+      "runtimeObservation": {
+        "durationMs": 69766,
+        "timeoutSeconds": 180,
+        "stageStatus": "COMPLETED"
+      }
+    },
+    {
+      "caseId": "msft-fy2025-cashflow",
+      "answerId": "9ad05551-4aa1-414d-acc9-a53fe8ca557f:ANALYSIS",
+      "runId": "9ad05551-4aa1-414d-acc9-a53fe8ca557f",
+      "stage": "ANALYSIS",
+      "arm": "BASELINE",
+      "reviewType": "AI_SOURCE_GROUNDED_NONBLIND",
+      "humanReviewed": false,
+      "runComplete": true,
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coreCoverageComplete": true,
+      "coverageComplete": true,
+      "coreCoverageChecks": [
+        {
+          "id": "core-1",
+          "criterion": "列出 FY2025 经营现金流与现金购建固定资产毛额，单位及年度可识别",
+          "covered": true,
+          "exactQuotes": [
+            "| 经营活动现金流净额，Net cash from operations | **136,162** | 百万美元 | [E1] |",
+            "| 购建固定资产/设备现金支出，Additions to property and equipment | **(64,551)** | 百万美元 | [E1] |"
+          ]
+        },
+        {
+          "id": "core-2",
+          "criterion": "按经营现金流减现金购建毛额计算简化自由现金流",
+          "covered": true,
+          "exactQuotes": [
+            "= 136,162 - 64,551 = \\mathbf{71,611}"
+          ]
+        },
+        {
+          "id": "core-3",
+          "criterion": "给出现金购建毛额占经营现金流比例",
+          "covered": true,
+          "exactQuotes": [
+            "\\frac{64,551}{136,162} \\approx 47.4\\%"
+          ]
+        },
+        {
+          "id": "core-4",
+          "criterion": "解释当年经营现金流覆盖该项资本开支情况和比例含义，保留题定简化口径且不混同净利润",
+          "covered": true,
+          "exactQuotes": [
+            "- 该剩余现金可用于股息、回购、偿债、收购、投资其他资产或留存现金，但需注意这只是简化口径，并非最终可自由支配现金。"
+          ]
+        }
+      ],
+      "evidenceGrounded": true,
+      "substantiveIssue": false,
+      "substantiveIssues": [],
+      "ambiguityNotes": [],
+      "numericNotes": [],
+      "verdict": "PASS",
+      "issueCauses": [],
+      "notes": [
+        {
+          "category": "PASS_EVIDENCE",
+          "exactQuote": "- 该剩余现金可用于股息、回购、偿债、收购、投资其他资产或留存现金，但需注意这只是简化口径，并非最终可自由支配现金。",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-cashflow/context/E1 (Cash Flows Statements)",
+          "reason": "只断言当年经营现金流覆盖现金购建毛额；扣除资本开支后的金额明确不是可用于所有义务的最终自由现金。"
+        },
+        {
+          "category": "ACCEPTABLE_MECHANISM",
+          "exactQuote": "   FY2025 资本开支为 64,551 百万美元，高于 FY2024 的 44,477 百万美元和 FY2023 的 28,107 百万美元。若未来资本开支继续高速增长，而经营现金流增速放缓，覆盖倍数可能下降。 [E1]",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-cashflow/query and context/E1",
+          "reason": "明确条件推断且数学机制正确，不是对未来资本开支或现金流的事实预测。"
+        },
+        {
+          "category": "PASS_EVIDENCE",
+          "exactQuote": "   本轮证据仅提供现金流量表总额，未提供资本开支构成、分部投资、数据中心建设承诺、租赁安排或管理层解释。因此，资本开支上升的具体原因和持续性尚无法确认。",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-cashflow/context/E1 (Additions to property and equipment)",
+          "reason": "未把数据中心等举例当成当年已经确证的支出投向或增长原因。"
+        }
+      ],
+      "numericAudit": {
+        "checkedScope": "所有必答金额/FCF/比例；额外三年经营现金流、现金购建毛额、FCF及比率；FY2025同比及覆盖倍数；百万美元与亿美元换算；分析稿额外 5,978 收购及相关净支出、18,420 回购、24,082 股息与源表一致。",
+        "calculationReference": "numericCrosschecks.cashflow",
+        "minorRoundingPresent": false,
+        "normalRoundedValuesAccepted": true
+      },
+      "sourceBinding": {
+        "responsePath": "rag-eval/evolution/common-fundamentals-2025-v1/max-experiment-20261001/raw-baseline-1/9ad05551-4aa1-414d-acc9-a53fe8ca557f.response.json",
+        "responseSha256": "e7da31d810b69db5eea4cb7292ba6365b6b99663f9b6796232e39230804839d3",
+        "answerSha256": "730fdbd06e6b2ed7f0cc1ef93e9722f4306cefdd9f29c1ab1af2df52dd79244d",
+        "criteriaSha256": "04e9cf2e463509810672b92bef5f129407e6877e8f0179396c3e25de0526138a",
+        "inputCaseSha256": "985a716ff385a86bc2c8dfddc46e93f74bbfbc3461073293860978f3bb80d0d4",
+        "evidenceContextSha256": "5e42d2bd98624c752b603536c8c9496d8fd2aaf529d00c294ce397c5aa088bdc",
+        "sourceRef": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K"
+      },
+      "runtimeObservation": {
+        "durationMs": 82132,
+        "timeoutSeconds": 180,
+        "stageStatus": "COMPLETED"
+      }
+    },
+    {
+      "caseId": "msft-fy2025-cashflow",
+      "answerId": "9ad05551-4aa1-414d-acc9-a53fe8ca557f:FINAL",
+      "runId": "9ad05551-4aa1-414d-acc9-a53fe8ca557f",
+      "stage": "FINAL",
+      "arm": "BASELINE",
+      "reviewType": "AI_SOURCE_GROUNDED_NONBLIND",
+      "humanReviewed": false,
+      "runComplete": true,
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coreCoverageComplete": true,
+      "coverageComplete": true,
+      "coreCoverageChecks": [
+        {
+          "id": "core-1",
+          "criterion": "列出 FY2025 经营现金流与现金购建固定资产毛额，单位及年度可识别",
+          "covered": true,
+          "exactQuotes": [
+            "| 经营活动现金流净额 | **136,162 百万美元** | 微软主业经营产生的现金流入净额，是覆盖资本开支的主要来源。[E1] |",
+            "| 购建固定资产/设备现金支出 | **64,551 百万美元** | 现金流量表中的资本开支现金流出毛额。[E1] |"
+          ]
+        },
+        {
+          "id": "core-2",
+          "criterion": "按经营现金流减现金购建毛额计算简化自由现金流",
+          "covered": true,
+          "exactQuotes": [
+            "简化自由现金流 = 136,162 - 64,551 = 71,611 \\text{ 百万美元}"
+          ]
+        },
+        {
+          "id": "core-3",
+          "criterion": "给出现金购建毛额占经营现金流比例",
+          "covered": true,
+          "exactQuotes": [
+            "资本开支 / 经营现金流 = \\frac{64,551}{136,162} \\approx 47.4\\%"
+          ]
+        },
+        {
+          "id": "core-4",
+          "criterion": "解释当年经营现金流覆盖该项资本开支情况和比例含义，保留题定简化口径且不混同净利润",
+          "covered": true,
+          "exactQuotes": [
+            "- **简化自由现金流不是最终可自由分配现金。** 该口径只扣除购建固定资产/设备支出，未扣除收购、投资购买、偿债、股息和回购等现金支出。[E1]"
+          ]
+        }
+      ],
+      "evidenceGrounded": true,
+      "substantiveIssue": false,
+      "substantiveIssues": [],
+      "ambiguityNotes": [],
+      "numericNotes": [],
+      "verdict": "PASS",
+      "issueCauses": [],
+      "notes": [
+        {
+          "category": "PASS_EVIDENCE",
+          "exactQuote": "- **简化自由现金流不是最终可自由分配现金。** 该口径只扣除购建固定资产/设备支出，未扣除收购、投资购买、偿债、股息和回购等现金支出。[E1]",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-cashflow/context/E1 (Cash Flows Statements)",
+          "reason": "只断言当年经营现金流覆盖现金购建毛额；扣除资本开支后的金额明确不是可用于所有义务的最终自由现金。"
+        },
+        {
+          "category": "ACCEPTABLE_MECHANISM",
+          "exactQuote": "- **若未来资本开支继续高增长，而经营现金流增速放缓，覆盖倍数可能下降。** 这是后续需要跟踪的关键点。[E1]",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-cashflow/query and context/E1",
+          "reason": "明确条件推断且数学机制正确，不是对未来资本开支或现金流的事实预测。"
+        },
+        {
+          "category": "PASS_EVIDENCE",
+          "exactQuote": "- **资本开支上升的具体原因无法仅凭本证据确认。** 本轮证据只给出现金流量表总额，没有提供资本开支构成、数据中心建设细节、管理层指引或产能利用率等信息，因此不能确认资本开支高增长是否会持续。[E1]",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-cashflow/context/E1 (Additions to property and equipment)",
+          "reason": "未把数据中心等举例当成当年已经确证的支出投向或增长原因。"
+        }
+      ],
+      "numericAudit": {
+        "checkedScope": "所有必答金额/FCF/比例；额外三年经营现金流、现金购建毛额、FCF及比率；FY2025同比及覆盖倍数；百万美元与亿美元换算；分析稿额外 5,978 收购及相关净支出、18,420 回购、24,082 股息与源表一致。",
+        "calculationReference": "numericCrosschecks.cashflow",
+        "minorRoundingPresent": false,
+        "normalRoundedValuesAccepted": true
+      },
+      "sourceBinding": {
+        "responsePath": "rag-eval/evolution/common-fundamentals-2025-v1/max-experiment-20261001/raw-baseline-1/9ad05551-4aa1-414d-acc9-a53fe8ca557f.response.json",
+        "responseSha256": "e7da31d810b69db5eea4cb7292ba6365b6b99663f9b6796232e39230804839d3",
+        "answerSha256": "d7cbbed957683047b3b8a1107ca50362a5c95d38731a31152f8c1c4cb38ec670",
+        "criteriaSha256": "04e9cf2e463509810672b92bef5f129407e6877e8f0179396c3e25de0526138a",
+        "inputCaseSha256": "985a716ff385a86bc2c8dfddc46e93f74bbfbc3461073293860978f3bb80d0d4",
+        "evidenceContextSha256": "5e42d2bd98624c752b603536c8c9496d8fd2aaf529d00c294ce397c5aa088bdc",
+        "sourceRef": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K"
+      },
+      "runtimeObservation": {
+        "durationMs": 52713,
+        "timeoutSeconds": 180,
+        "stageStatus": "COMPLETED"
+      }
+    },
+    {
+      "caseId": "msft-fy2025-liquidity",
+      "answerId": "edaac7a4-7fbf-42bb-a415-375903994b66:ANALYSIS",
+      "runId": "edaac7a4-7fbf-42bb-a415-375903994b66",
+      "stage": "ANALYSIS",
+      "arm": "BASELINE",
+      "reviewType": "AI_SOURCE_GROUNDED_NONBLIND",
+      "humanReviewed": false,
+      "runComplete": true,
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coreCoverageComplete": true,
+      "coverageComplete": true,
+      "coreCoverageChecks": [
+        {
+          "id": "core-1",
+          "criterion": "列出 FY2025 期末现金及现金等价物、非流动长期债务、流动资产和流动负债，单位及时点可识别",
+          "covered": true,
+          "exactQuotes": [
+            "| 现金及现金等价物 | **30,242 百万美元** | 资产负债表“Cash and cash equivalents” [E1] |",
+            "| 非流动长期债务 | **40,152 百万美元** | 资产负债表“Long-term debt”，不含一年内到期部分 [E1] |",
+            "| 流动资产 | **191,131 百万美元** | “Total current assets” [E1] |",
+            "| 流动负债 | **141,218 百万美元** | “Total current liabilities” [E1] |"
+          ]
+        },
+        {
+          "id": "core-2",
+          "criterion": "给出流动资产除以流动负债的流动比率",
+          "covered": true,
+          "exactQuotes": [
+            "流动比率 = \\frac{流动资产}{流动负债} = \\frac{191,131}{141,218} \\approx 1.35"
+          ]
+        },
+        {
+          "id": "core-3",
+          "criterion": "通过科目标签或解释区分现金与流动资产、非流动长期债务与总负债",
+          "covered": true,
+          "exactQuotes": [
+            "因此，不能把“流动资产 191,131 百万美元”直接理解为“现金 191,131 百万美元”。",
+            "因此，不能把“总负债 275,524 百万美元”直接理解为“长期借款压力 275,524 百万美元”。总负债中还包括："
+          ]
+        },
+        {
+          "id": "core-4",
+          "criterion": "给出有边界的流动性简评，表明单一时点比率不足以证明实际偿债安全或危机",
+          "covered": true,
+          "exactQuotes": [
+            "因此，本报告只能基于资产负债表静态数据作出有限流动性判断，不能给出最终偿债安全或投资评级结论。"
+          ]
+        }
+      ],
+      "evidenceGrounded": true,
+      "substantiveIssue": false,
+      "substantiveIssues": [],
+      "ambiguityNotes": [],
+      "numericNotes": [],
+      "verdict": "PASS",
+      "issueCauses": [],
+      "notes": [
+        {
+          "category": "PASS_EVIDENCE",
+          "exactQuote": "短期未赚收入通常与未来履约或服务交付相关，不完全等同于需要立即偿还的金融性借款。但本轮证据未提供收入确认节奏、合同负债明细及现金流影响，因此只能作为结构性事实，不能直接推断其实际现金压力 [E1]。",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-liquidity/context/E1 (Short-term unearned revenue)",
+          "reason": "将短期未赚收入解释为一般履约相关义务，同时保留未提供现金影响的限制；没有从真实现金需求中直接剔除该余额。"
+        },
+        {
+          "category": "PASS_EVIDENCE",
+          "exactQuote": "因此，本报告只能基于资产负债表静态数据作出有限流动性判断，不能给出最终偿债安全或投资评级结论。",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-liquidity/context/E1 (Balance Sheets)",
+          "reason": "静态覆盖支持较稳健的有限判断，但结论明确缺少现金流、到期与融资安排，并未保证实际偿债安全。"
+        },
+        {
+          "category": "PASS_EVIDENCE",
+          "exactQuote": "0 + 2,999 + 40,152 = 43,151 \\text{ 百万美元}",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-liquidity/context/E1 (Short-term debt; Current portion of long-term debt; Long-term debt)",
+          "reason": "一年内到期借款未被漏作零；两年合计分别 43,151/51,630，文字明确这是三个借款科目的合并口径，不是总负债。"
+        }
+      ],
+      "numericAudit": {
+        "checkedScope": "所有必答金额/流动比率；额外上年金额、短期投资及现金合计、短期借款/到期长期借款/非流动长期债务、总负债、各同比；两年借款合计/降幅；现金及投资占比/覆盖率；流动负债分项及合计/预收占比；长期税项 25,986、租赁负债 17,437、Other long-term liabilities 单项 45,186 等额外科目。均按对应标题范围核对。",
+        "calculationReference": "numericCrosschecks.liquidity",
+        "minorRoundingPresent": false,
+        "normalRoundedValuesAccepted": true
+      },
+      "sourceBinding": {
+        "responsePath": "rag-eval/evolution/common-fundamentals-2025-v1/max-experiment-20261001/raw-baseline-1/edaac7a4-7fbf-42bb-a415-375903994b66.response.json",
+        "responseSha256": "6fc2ed7e56e4b8154be7e19bdab906d5e771fb1fadfb2f449af5fcf57b06c4bf",
+        "answerSha256": "ef90de2b3fd1b0bd1dc3e14ef8b763e2adba1cf342e9f65490fd71ab27a9e5c1",
+        "criteriaSha256": "04e9cf2e463509810672b92bef5f129407e6877e8f0179396c3e25de0526138a",
+        "inputCaseSha256": "26dd425d5fd28ba56857bd63ee477e40230838566f93b96ae9bb8f00783644b5",
+        "evidenceContextSha256": "b42c96675894a4ea64bfd3d3de4eb3271f6c1cf1544ad0d471e1a75b49763253",
+        "sourceRef": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K"
+      },
+      "runtimeObservation": {
+        "durationMs": 149483,
+        "timeoutSeconds": 180,
+        "stageStatus": "COMPLETED"
+      }
+    },
+    {
+      "caseId": "msft-fy2025-liquidity",
+      "answerId": "edaac7a4-7fbf-42bb-a415-375903994b66:FINAL",
+      "runId": "edaac7a4-7fbf-42bb-a415-375903994b66",
+      "stage": "FINAL",
+      "arm": "BASELINE",
+      "reviewType": "AI_SOURCE_GROUNDED_NONBLIND",
+      "humanReviewed": false,
+      "runComplete": true,
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coreCoverageComplete": true,
+      "coverageComplete": true,
+      "coreCoverageChecks": [
+        {
+          "id": "core-1",
+          "criterion": "列出 FY2025 期末现金及现金等价物、非流动长期债务、流动资产和流动负债，单位及时点可识别",
+          "covered": true,
+          "exactQuotes": [
+            "| 现金及现金等价物 | **30,242** | 18,315 | +65.1% | 现金明显增加，但只是流动资产的一部分 [E1] |",
+            "| 非流动长期债务 | **40,152** | 42,688 | -5.9% | 长期金融性债务有所下降 [E1] |",
+            "| 流动资产合计 | **191,131** | 159,734 | +19.7% | 包括现金、短期投资、应收账款、其他流动资产等 [E1] |",
+            "| 流动负债合计 | **141,218** | 125,286 | +12.7% | 包括应付账款、短期未赚收入、应计薪酬等 [E1] |"
+          ]
+        },
+        {
+          "id": "core-2",
+          "criterion": "给出流动资产除以流动负债的流动比率",
+          "covered": true,
+          "exactQuotes": [
+            "=\\frac{191,131}{141,218}"
+          ]
+        },
+        {
+          "id": "core-3",
+          "criterion": "通过科目标签或解释区分现金与流动资产、非流动长期债务与总负债",
+          "covered": true,
+          "exactQuotes": [
+            "## 三、需要区分：现金不等于流动资产",
+            "## 四、需要区分：非流动长期债务不等于总负债"
+          ]
+        },
+        {
+          "id": "core-4",
+          "criterion": "给出有边界的流动性简评，表明单一时点比率不足以证明实际偿债安全或危机",
+          "covered": true,
+          "exactQuotes": [
+            "但这不是“无风险”结论：现金对流动负债的直接覆盖不足，总负债仍在上升，且缺少现金流、债务到期和融资安排等证据。更稳妥的判断是：**微软短期流动性有支撑，但仍需结合经营现金流和债务结构进一步验证** [E1]。"
+          ]
+        }
+      ],
+      "evidenceGrounded": true,
+      "substantiveIssue": false,
+      "substantiveIssues": [],
+      "ambiguityNotes": [
+        {
+          "exactQuote": "该口径下总债务同比下降约 **16.4%**，说明金融性债务压力有所减轻。但需要注意，一年内到期的长期债务从 **2,249 百万美元** 增至 **2,999 百万美元**，绝对金额不大，但代表部分长期债务将在一年内到期 [E1]。",
+          "supportedReading": "按已明确的三个借款科目合计，名义借款余额下降 16.4%，下文同时指出流动部分增加以及未来现金影响未知。",
+          "strongerReading": "若“压力有所减轻”被理解为实际利息/到期兑付负担已经改善，余额下降本身不能证明该点。",
+          "mainVerdictEffect": "NOTE_ONLY; PASS unchanged",
+          "strictSensitivity": "孤立的实际兑付压力解读会增加一个实质边界问题；依完整上下文和冻结歧义规则，主判保持 PASS。"
+        }
+      ],
+      "numericNotes": [],
+      "verdict": "PASS",
+      "issueCauses": [],
+      "notes": [
+        {
+          "category": "PASS_EVIDENCE",
+          "exactQuote": "短期未赚收入通常与未来履约、服务交付或合同义务相关，不一定等同于需要立即偿还的金融性借款。不过，本轮证据没有提供收入确认节奏、合同负债明细和现金流影响，因此只能作为结构性事实，不能直接推断其实际现金压力 [E1]。",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-liquidity/context/E1 (Short-term unearned revenue)",
+          "reason": "将短期未赚收入解释为一般履约相关义务，同时保留未提供现金影响的限制；没有从真实现金需求中直接剔除该余额。"
+        },
+        {
+          "category": "PASS_EVIDENCE",
+          "exactQuote": "但这不是“无风险”结论：现金对流动负债的直接覆盖不足，总负债仍在上升，且缺少现金流、债务到期和融资安排等证据。更稳妥的判断是：**微软短期流动性有支撑，但仍需结合经营现金流和债务结构进一步验证** [E1]。",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-liquidity/context/E1 (Balance Sheets)",
+          "reason": "静态覆盖支持较稳健的有限判断，但结论明确缺少现金流、到期与融资安排，并未保证实际偿债安全。"
+        },
+        {
+          "category": "PASS_EVIDENCE",
+          "exactQuote": "| 合计 | **43,151** | **51,630** |",
+          "sourceReference": "raw-baseline-1/execution.json#msft-fy2025-liquidity/context/E1 (Short-term debt; Current portion of long-term debt; Long-term debt)",
+          "reason": "一年内到期借款未被漏作零；两年合计分别 43,151/51,630，文字明确这是三个借款科目的合并口径，不是总负债。"
+        }
+      ],
+      "numericAudit": {
+        "checkedScope": "所有必答金额/流动比率；额外上年金额、短期投资及现金合计、短期借款/到期长期借款/非流动长期债务、总负债、各同比；两年借款合计/降幅；现金及投资占比/覆盖率；流动负债分项及合计/预收占比；长期税项 25,986、租赁负债 17,437、Other long-term liabilities 单项 45,186 等额外科目。均按对应标题范围核对。",
+        "calculationReference": "numericCrosschecks.liquidity",
+        "minorRoundingPresent": false,
+        "normalRoundedValuesAccepted": true
+      },
+      "sourceBinding": {
+        "responsePath": "rag-eval/evolution/common-fundamentals-2025-v1/max-experiment-20261001/raw-baseline-1/edaac7a4-7fbf-42bb-a415-375903994b66.response.json",
+        "responseSha256": "6fc2ed7e56e4b8154be7e19bdab906d5e771fb1fadfb2f449af5fcf57b06c4bf",
+        "answerSha256": "32563ab5ba9901d79a603cba2b02a3660ec924930daa44e2f78a7e8420ed55a4",
+        "criteriaSha256": "04e9cf2e463509810672b92bef5f129407e6877e8f0179396c3e25de0526138a",
+        "inputCaseSha256": "26dd425d5fd28ba56857bd63ee477e40230838566f93b96ae9bb8f00783644b5",
+        "evidenceContextSha256": "b42c96675894a4ea64bfd3d3de4eb3271f6c1cf1544ad0d471e1a75b49763253",
+        "sourceRef": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K"
+      },
+      "runtimeObservation": {
+        "durationMs": 70652,
+        "timeoutSeconds": 180,
+        "stageStatus": "COMPLETED"
+      }
+    }
+  ]
+}

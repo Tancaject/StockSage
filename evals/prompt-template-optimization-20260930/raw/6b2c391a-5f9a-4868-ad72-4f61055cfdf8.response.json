@@ -1,0 +1,16 @@
+{
+  "usageSource" : "PROVIDER",
+  "usageSemantics" : "INVOCATION_SNAPSHOT",
+  "actualModel" : "qwen3.8-flash",
+  "providerResponseId" : "chatcmpl-4dc029ce-bd5c-90de-a017-8abf97e74d7b",
+  "inputTokens" : 253,
+  "outputTokens" : 284,
+  "totalTokens" : 537,
+  "finishReason" : "STOP",
+  "text" : "MSFT 2025 2024 财年 经营现金流 比较 不讨论股价",
+  "callId" : "6b2c391a-5f9a-4868-ad72-4f61055cfdf8",
+  "caseId" : "rewrite-comparison-exclusion",
+  "arm" : "after",
+  "elapsedMs" : 6083,
+  "finishedAt" : "2026-09-30T14:09:24.252730300Z"
+}

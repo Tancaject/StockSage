@@ -363,7 +363,7 @@ H0 的代码、确定性门禁和 Docker/Testcontainers/PIT 已于 2026-07-31 �
   当前完整 Java/Testcontainers 门禁和 56 个 Python eval 回归覆盖；遵循用户的
   5-case 时间边界，没有追加新的 live case，故 live 修复仍缺一次运行态复验。
 - 脱敏结果保存在忽略目录
-  `rag-eval/results/harness_live_eval_20260731_h0_smoke5_disconnect.json`；
+  `evals/results/harness_live_eval_20260731_h0_smoke5_disconnect.json`；
   先前中断的 30-case 仍只作为事故证据，两者均不计入发布通过率。
 - 中断运行观察到 DashScope FAST `403 AllocationQuota.FreeTierOnly`；这是外部配额
   access issue，必须与产品缺陷分开记录，但不会放宽 live gate。
@@ -1155,10 +1155,11 @@ stocksage-backend/src/main/java/com/stocksage/service/OfflineDemoSampleService.j
 新增/修改：
 
 ```text
-rag-eval/harness_golden_set.jsonl
-rag-eval/run_harness_eval.py
-rag-eval/agent_eval_summary.py
-rag-eval/agent_eval_gates.json
+evals/harness_golden_set.jsonl
+evals/run_harness_eval.py
+evals/harness_eval_summary.py
+evals/harness_eval_gates.json
+evals/agent_eval_summary.py
 stocksage-frontend/src/
 ```
 
@@ -1304,13 +1305,13 @@ cd stocksage-backend
 涉及 Eval：
 
 ```powershell
-python -m unittest discover rag-eval
-python rag-eval\run_harness_eval.py --fail-on-gate
-python rag-eval\run_harness_live_eval.py --fail-on-gate
+python -m unittest discover evals
+python evals\run_harness_eval.py --fail-on-gate
+python evals\run_harness_live_eval.py --fail-on-gate
 ```
 
 `run_harness_eval.py` 只是跨平台编排器：默认通过 Maven Wrapper 执行
-`HarnessGoldenSetTest`，结果写入忽略目录 `rag-eval/results/`。Agent Eval 只接受
+`HarnessGoldenSetTest`，结果写入忽略目录 `evals/results/`。Agent Eval 只接受
 `engine=java-production-policy`、`schema_version=harness_eval_v1` 且
 `case_schema_version=harness_golden_case_v2` 的 completion 结果。结果还必须满足
 case count 至少 60、coverage status 为 `pass`、数据集 hash 非空、完整决策/违规码/

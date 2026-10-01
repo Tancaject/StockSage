@@ -224,7 +224,7 @@ class EvolutionReplayServiceTest {
 
     @Test
     void acceptsTheCheckedInSyntheticExecutionContractWithoutRunningModels() {
-        Path checkedIn = Path.of(System.getProperty("basedir", "."), "..", "rag-eval", "evolution", "synthetic-smoke", "execution.json");
+        Path checkedIn = Path.of(System.getProperty("basedir", "."), "..", "evals", "evolution", "synthetic-smoke", "execution.json");
         assertThat(service(checkedIn, 120)).isNotNull();
         verify(model, never()).call(any(Prompt.class));
         verifyNoInteractions(coordinator);

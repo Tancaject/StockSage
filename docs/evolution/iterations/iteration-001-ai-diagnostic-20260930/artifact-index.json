@@ -1,0 +1,269 @@
+{
+  "schema": "fundamentals_iteration_record_v1",
+  "iterationId": "iteration-001",
+  "actor": "Codex",
+  "recordedAt": "2026-09-30T03:26:43.762235+00:00",
+  "status": "OPEN",
+  "engineeringResult": "OFFLINE_ORDINARY_CHAIN_VERIFIED",
+  "componentQuality": "UNVERIFIED",
+  "finalAnswerQuality": "UNVERIFIED",
+  "qualityScope": "FROZEN_COMPONENT_CHAIN",
+  "comparisonStatus": "UNVERIFIED",
+  "comparisonSplit": null,
+  "lineage": {
+    "offlineDrill": {
+      "kind": "OFFLINE_ORDINARY_DRILL_VERIFICATION",
+      "schemaVersion": 1,
+      "status": "VERIFIED_ORDINARY_RUN_CHAIN",
+      "realAcceptance": false,
+      "producerManifestSha256": "a1c761e52b5adc65f35568cd2413c65f424beb59b12a80a28ee270b5d7e2eb14",
+      "evaluatorSha256": "9ba4b2301bd91b9a7f6b0f1cb4372662b4334adf22cd1e90982c575c2fd6c316",
+      "runs": {
+        "candidate-before": {
+          "runId": "75e6c735-b143-4eed-a1cd-b74174290c8d",
+          "traceSha256": "aa317c1034bf0aad5a6674f0e15d6e3ad554694e83ca0635e60691392019bf02",
+          "caseSha256": "f642f4ba710ac7744c1fc04c1fd0c02fa1cbd3a61de06ba4fce6f15671a469b3"
+        },
+        "candidate-inflight": {
+          "runId": "2f8991d3-a2ea-4803-81d6-428b7aeaba92",
+          "traceSha256": "77af0521d9910ee191948cc43fc8ab4c091be9bc8d5d94b769bd68365be59e63",
+          "caseSha256": "f642f4ba710ac7744c1fc04c1fd0c02fa1cbd3a61de06ba4fce6f15671a469b3"
+        },
+        "candidate-denied": {
+          "runId": "0974c3ad-2a69-4e36-b49f-3557797c0b68",
+          "traceSha256": "8c50c1f325ba1bc1e568083949e4f7a4ff6d119053de144e80d5bd46e3a782c6",
+          "caseSha256": "f642f4ba710ac7744c1fc04c1fd0c02fa1cbd3a61de06ba4fce6f15671a469b3"
+        },
+        "baseline-after": {
+          "runId": "497a402c-b0aa-448d-b60f-74d08d0a9b2e",
+          "traceSha256": "4592ef5863a13b4a3ce96d5a064ff560b09c7e1ba208d25a4a4a2ba8cd7aad2f",
+          "caseSha256": "f642f4ba710ac7744c1fc04c1fd0c02fa1cbd3a61de06ba4fce6f15671a469b3"
+        }
+      },
+      "withdrawnAt": "2026-09-29T02:23:29.272386300Z",
+      "independentReview": "NOT_PERFORMED",
+      "faultInjectionAcceptance": "NOT_PERFORMED",
+      "qualityEffect": "UNVERIFIED",
+      "activationAuthorized": false
+    },
+    "candidate": {
+      "recordSha256": "daddd5d50c3c24878f63ba49d0ba06b34b9f560644e083536bdf0dd926cb4e9b",
+      "parentBundleId": "baseline-v1",
+      "parentMethodSha256": "d4a1c4fe892bb71d5f8f500f4cbb36d03396e5cf57491600ecad51c6e8c4d876",
+      "methodSha256": "194d89444058f62bc46ca878caa908538dcb27ec09fc00fbe9820260b66c7468",
+      "experienceRecordSha256": "0c70cf38b7334a218d87167c0ae7daf1ad0b1beff4cf8a406d33b83010e3b967",
+      "generationMode": "EXTERNAL_PROPOSAL",
+      "sourceExplanation": "依据所给财报片段、历史回答及人工智能生成的来源核查反馈，提炼出逐项覆盖、统一数值复核、科目边界、会计解释与经营归因分离、结论就近保留不确定性的方法。核查反馈仅作为发现问题的线索，不视为人工确认；表现较好的个别回答仅提供可借鉴做法，不构成普遍有效的证明。"
+    }
+  },
+  "artifacts": {
+    "baselineReport": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\results\\20260930-packaged-qwen37-baseline\\baseline-report.json",
+      "sha256": "de9f73b0bdd2a3e5bcca0e334d5e35e6ba2a9d7d74491a823fe5b20f0bfa7419"
+    },
+    "candidate": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\candidate.json",
+      "sha256": "2ad1934bd16c61b028f8b58c1de076611cc2d3c538e08bc61f314134a0f9ab69"
+    },
+    "offlineDrill": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\offline-drill.json",
+      "sha256": "7f8ff4b10f01ff79d68f45da0282ee0067742009b7e24d560c603762113023fe"
+    },
+    "sourceCases": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\cases.jsonl",
+      "sha256": "667f334a5b63542c9f2e32605c7716f564fbd97e822e2c90704f3c0981c58078"
+    },
+    "proof:01d1b70f29f91470b5e304a853aec64e5c7ed21dbb91dcf90b33f79c5ae728de": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\review-mapping-development.json",
+      "sha256": "01d1b70f29f91470b5e304a853aec64e5c7ed21dbb91dcf90b33f79c5ae728de"
+    },
+    "proof:126007b2f78cb6ec36acba64beca8692bfc4652c46e18beaa3bb20c85ab3c054": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\verification-evolution-final-java.log",
+      "sha256": "126007b2f78cb6ec36acba64beca8692bfc4652c46e18beaa3bb20c85ab3c054"
+    },
+    "proof:157043985d5262188acf70b67b4fe2d9e2252ac6a284ea27495f52f51526835e": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\raw-development\\responses.jsonl",
+      "sha256": "157043985d5262188acf70b67b4fe2d9e2252ac6a284ea27495f52f51526835e"
+    },
+    "proof:1b56e977510beb5709c65d73fb825284d5ba6dff2cb28a13f1eb112fe89fadbd": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\plan.json",
+      "sha256": "1b56e977510beb5709c65d73fb825284d5ba6dff2cb28a13f1eb112fe89fadbd"
+    },
+    "proof:1ee082075f72a7a30f82abe14350b25e9a859a59c2cdaf0cad05575af7a2f043": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\TEST-com.stocksage.agent.FundamentalsPromptsTest.xml",
+      "sha256": "1ee082075f72a7a30f82abe14350b25e9a859a59c2cdaf0cad05575af7a2f043"
+    },
+    "proof:1f9546d0ae933c2cb4f6dcaeaa8bfc0e81e13f6098c6634950166e2a1637fb5e": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\verification.json",
+      "sha256": "1f9546d0ae933c2cb4f6dcaeaa8bfc0e81e13f6098c6634950166e2a1637fb5e"
+    },
+    "proof:211cb68cc63cd22258bda701cbee0982fa478453647648b99383a6be3f1a3430": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\source-artifacts.json",
+      "sha256": "211cb68cc63cd22258bda701cbee0982fa478453647648b99383a6be3f1a3430"
+    },
+    "proof:31ba77c4eba46841c5c4819066b4a563286cf9e1371d3fd7b41dcdc13cae37a1": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\TEST-com.stocksage.evolution.ApprovedMethodArtifactTest.xml",
+      "sha256": "31ba77c4eba46841c5c4819066b4a563286cf9e1371d3fd7b41dcdc13cae37a1"
+    },
+    "proof:4f45a11ba1ae660dd751e3f1a91a04895e8505d3bbd65725409e315dc5f54957": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\raw-development\\runtime.json",
+      "sha256": "4f45a11ba1ae660dd751e3f1a91a04895e8505d3bbd65725409e315dc5f54957"
+    },
+    "proof:54690147e96da75cb8f7b944e63a6b9b53ec1a0b4444e12933245708e60664bb": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\TEST-com.stocksage.evolution.MethodActivationTest.xml",
+      "sha256": "54690147e96da75cb8f7b944e63a6b9b53ec1a0b4444e12933245708e60664bb"
+    },
+    "proof:54b951f908190c25dc11ab62bf5832a14a9e18795ea86e36295b81781e3b4c91": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\TEST-com.stocksage.agent.CoordinatorUsageTest.xml",
+      "sha256": "54b951f908190c25dc11ab62bf5832a14a9e18795ea86e36295b81781e3b4c91"
+    },
+    "proof:56e605ab74b87e43133077b9ef71c6c481ff2d49f642180639f8b5060f9c57bb": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\experience.json",
+      "sha256": "56e605ab74b87e43133077b9ef71c6c481ff2d49f642180639f8b5060f9c57bb"
+    },
+    "proof:5950b0f69cd143b5c94738ee8b5dae15cf8097828315952620bd2ca3bbc5a1f0": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\TEST-com.stocksage.service.ToolPrefetchServiceSubmitTest.xml",
+      "sha256": "5950b0f69cd143b5c94738ee8b5dae15cf8097828315952620bd2ca3bbc5a1f0"
+    },
+    "proof:6ab8320c56a16d45d9262cafcdcbe85d31e526be131c0db029289614a89d3001": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\raw-validation\\execution.json",
+      "sha256": "6ab8320c56a16d45d9262cafcdcbe85d31e526be131c0db029289614a89d3001"
+    },
+    "proof:7411da36289a759087315969728aefaa00376c5ce966245a8bd56206fd467b3f": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\identity-verification.json",
+      "sha256": "7411da36289a759087315969728aefaa00376c5ce966245a8bd56206fd467b3f"
+    },
+    "proof:76c1ffbde8874e9cf3f6de824ff21fb99973c1c4f1b49e9f3d0c6b0fa609dd9f": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\TEST-com.stocksage.evolution.EvolutionReplayServiceTest.xml",
+      "sha256": "76c1ffbde8874e9cf3f6de824ff21fb99973c1c4f1b49e9f3d0c6b0fa609dd9f"
+    },
+    "proof:7f8ff4b10f01ff79d68f45da0282ee0067742009b7e24d560c603762113023fe": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\offline-drill.json",
+      "sha256": "7f8ff4b10f01ff79d68f45da0282ee0067742009b7e24d560c603762113023fe"
+    },
+    "proof:8460077d1cdd92334f3b4edb6cea5c9c294a6099e6272aeb2147fb57664d61f8": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\review-mapping-validation.json",
+      "sha256": "8460077d1cdd92334f3b4edb6cea5c9c294a6099e6272aeb2147fb57664d61f8"
+    },
+    "proof:8fd265ac3ecc67914b542d1cf9cd7ce0d41157da72daba52ad65eaf7666914ea": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\verification-summary.json",
+      "sha256": "8fd265ac3ecc67914b542d1cf9cd7ce0d41157da72daba52ad65eaf7666914ea"
+    },
+    "proof:93afc75c5b0548b237692f7ee12f41385d25b3210b70c8d29643b745518c9b63": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\raw-validation\\runtime.json",
+      "sha256": "93afc75c5b0548b237692f7ee12f41385d25b3210b70c8d29643b745518c9b63"
+    },
+    "proof:947a0892d2f5834f09c2750f94b4faa9fb33d91e6074bbae67d5d66cfee2aea0": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\bundle.json",
+      "sha256": "947a0892d2f5834f09c2750f94b4faa9fb33d91e6074bbae67d5d66cfee2aea0"
+    },
+    "proof:9508f0fa60e75008a0eaf67d5901a4ea478cb0ea560bc375d56e7b01a944d604": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\TEST-com.stocksage.evolution.AgentPolicyBundleTest.xml",
+      "sha256": "9508f0fa60e75008a0eaf67d5901a4ea478cb0ea560bc375d56e7b01a944d604"
+    },
+    "proof:9c39fae6432849dd54da38167957f256b7bffa2ce76291036b9a9755730567a4": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\TEST-com.stocksage.conversation.ChatServiceStreamLifecycleTest.xml",
+      "sha256": "9c39fae6432849dd54da38167957f256b7bffa2ce76291036b9a9755730567a4"
+    },
+    "proof:9e14b3b2e6fabf72b21a8e97669754b9ebbc5d4b0ef4f466621120a6688d3e65": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\TEST-com.stocksage.service.EvidenceEnvelopeMapperTest.xml",
+      "sha256": "9e14b3b2e6fabf72b21a8e97669754b9ebbc5d4b0ef4f466621120a6688d3e65"
+    },
+    "proof:a5184d77862513d0c238afc701e31d022f596111205da61a188125974b138979": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\candidate-report-development.json",
+      "sha256": "a5184d77862513d0c238afc701e31d022f596111205da61a188125974b138979"
+    },
+    "proof:a676f2c187daec7021137a69b274686d08399e51bd9a6fe6f0e315311a1cce2a": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\acceptance-preparation\\gold-draft.jsonl",
+      "sha256": "a676f2c187daec7021137a69b274686d08399e51bd9a6fe6f0e315311a1cce2a"
+    },
+    "proof:af6788c08871712872843b7b01675acd9c382ea9bcb32f7487682696c61f1407": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\requirement-evidence-map.md",
+      "sha256": "af6788c08871712872843b7b01675acd9c382ea9bcb32f7487682696c61f1407"
+    },
+    "proof:b72be202796090d1e230b2ccf8d57129b2cd506456bc908ac2c402f364c385e1": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\review-development.json",
+      "sha256": "b72be202796090d1e230b2ccf8d57129b2cd506456bc908ac2c402f364c385e1"
+    },
+    "proof:b8a9045ceef47c25b2887ffadd8e426acd2e800610b1977e68ba18185aa2e370": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\diagnostic-assessment.json",
+      "sha256": "b8a9045ceef47c25b2887ffadd8e426acd2e800610b1977e68ba18185aa2e370"
+    },
+    "proof:c05ead25b9edcf7bc2d60036f58fd99c48c01f67586f5910fdd96d9a5d500971": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\candidate-report-validation.json",
+      "sha256": "c05ead25b9edcf7bc2d60036f58fd99c48c01f67586f5910fdd96d9a5d500971"
+    },
+    "proof:c28160acf10ae0e8a1631f55da9ce4cb40f555d491a542e041ed72843c1889c6": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\proposal.json",
+      "sha256": "c28160acf10ae0e8a1631f55da9ce4cb40f555d491a542e041ed72843c1889c6"
+    },
+    "proof:c4afa32072b215796e2100cddf9a8dd42566a7fdea00544763167bb198e7ce8c": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\raw-validation\\responses.jsonl",
+      "sha256": "c4afa32072b215796e2100cddf9a8dd42566a7fdea00544763167bb198e7ce8c"
+    },
+    "proof:c6fd722cb6114a2519226b79da40357fd8503a287643d77701562fe350a31e08": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\verification-evolution-final-python.log",
+      "sha256": "c6fd722cb6114a2519226b79da40357fd8503a287643d77701562fe350a31e08"
+    },
+    "proof:cc3be2780b48b081080d3ec9544bc768240f524eedaf7a4539fcfa7520240906": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\TEST-com.stocksage.controller.EvolutionReplayControllerTest.xml",
+      "sha256": "cc3be2780b48b081080d3ec9544bc768240f524eedaf7a4539fcfa7520240906"
+    },
+    "proof:cd118eee9ee8128a801ea7c78392fee763553589bdd9d515f524990e987752e4": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\review-validation.json",
+      "sha256": "cd118eee9ee8128a801ea7c78392fee763553589bdd9d515f524990e987752e4"
+    },
+    "proof:cfc5b6bbb6b2062a18bb6b6a027390e0facc93a4fab19131115a4d36f3d97508": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\driver-dependencies.json",
+      "sha256": "cfc5b6bbb6b2062a18bb6b6a027390e0facc93a4fab19131115a4d36f3d97508"
+    },
+    "proof:d48ae5ec291fbe77ab077f917db71f000df8fb33b6b3cffa1928fc10be6ce823": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\raw-development\\execution.json",
+      "sha256": "d48ae5ec291fbe77ab077f917db71f000df8fb33b6b3cffa1928fc10be6ce823"
+    },
+    "proof:e23ec595de8758bd5ea8dcb56058c7d0c4c748ed7107518fad31250b1c2fe178": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\review-instructions.md",
+      "sha256": "e23ec595de8758bd5ea8dcb56058c7d0c4c748ed7107518fad31250b1c2fe178"
+    },
+    "proof:ec26c93c8771e018221a5a678de87de3bc49f6040cfcf301521cafeac831c39e": {
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\review-adjudications.json",
+      "sha256": "ec26c93c8771e018221a5a678de87de3bc49f6040cfcf301521cafeac831c39e"
+    },
+    "proof:f5fc5ff6b330e4653cdfe60bd0e560c7b02662192cab4c43fe7c65501ca815ee": {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-drills\\ordinary-2281939637392614900\\TEST-com.stocksage.conversation.OrdinaryEvolutionDrillTest.xml",
+      "sha256": "f5fc5ff6b330e4653cdfe60bd0e560c7b02662192cab4c43fe7c65501ca815ee"
+    }
+  },
+  "unresolved": [
+    {
+      "description": "已绑定公开授权源数据和 gold 草稿；gold 尚未独立确认，正式验收证据仍不完整。",
+      "evidenceRefs": [
+        "a676f2c187daec7021137a69b274686d08399e51bd9a6fe6f0e315311a1cce2a"
+      ],
+      "issueType": "MISSING_DATA",
+      "queue": "DATA_QUEUE"
+    },
+    {
+      "description": "候选报告与人工智能诊断仅作研究证据，不能替代正式 E07、独立比较及后续验收；本批次不授权激活。",
+      "evidenceRefs": [
+        "7411da36289a759087315969728aefaa00376c5ce966245a8bd56206fd467b3f",
+        "b8a9045ceef47c25b2887ffadd8e426acd2e800610b1977e68ba18185aa2e370"
+      ],
+      "issueType": "EVALUATION_FAILURE",
+      "queue": "EVALUATION_QUEUE"
+    }
+  ],
+  "nextBatch": {
+    "scope": "当前候选保持冻结；是否开展新的固定批次由用户决定。先补齐独立 gold 与正式验收证据，不因本轮诊断改写候选，不自动继续或激活。",
+    "trigger": "MANUAL"
+  },
+  "missingEvidence": [
+    "gate",
+    "gold",
+    "holdout",
+    "registry",
+    "selection",
+    "validation"
+  ],
+  "activationAuthorized": false
+}

@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -240,10 +241,12 @@ public class Coordinator {
                         .maxTokens(((Number) invocation.get("maxOutputTokens")).intValue());
             }
             observeFinalAnswer(observer, invocation);
-            AtomicBoolean usageObserved = new AtomicBoolean();
-            Runnable reportMissingUsage = () -> {
-                if (usageObserved.compareAndSet(false, true)) {
-                    observeFinalAnswer(observer, Map.of("kind", "model-usage", "schemaVersion", 1,
+            AtomicBoolean usageReported = new AtomicBoolean();
+            AtomicReference<Map<String, Object>> latestUsage = new AtomicReference<>();
+            Runnable reportUsage = () -> {
+                if (usageReported.compareAndSet(false, true)) {
+                    Map<String, Object> usage = latestUsage.get();
+                    observeFinalAnswer(observer, usage != null ? usage : Map.of("kind", "model-usage", "schemaVersion", 1,
                             "scope", "final-answer", "usageSource", "NO_DATA",
                             "usageSemantics", "INVOCATION_SNAPSHOT"));
                 }
@@ -253,7 +256,6 @@ public class Coordinator {
                     .doOnNext(response -> {
                         Usage usage = response.getMetadata().getUsage();
                         if (usage == null || usage instanceof EmptyUsage) return;
-                        usageObserved.set(true);
                         Map<String, Object> event = new LinkedHashMap<>();
                         event.put("kind", "model-usage");
                         event.put("schemaVersion", 1);
@@ -265,14 +267,15 @@ public class Coordinator {
                         if (usage.getTotalTokens() != null) event.put("totalTokens", usage.getTotalTokens());
                         String providerModel = response.getMetadata().getModel();
                         if (providerModel != null && !providerModel.isBlank()) event.put("providerModelName", providerModel);
-                        observeFinalAnswer(observer, Map.copyOf(event));
+                        // Streaming usage is cumulative; publish the last snapshot once at termination.
+                        latestUsage.set(Map.copyOf(event));
                     })
                     .<String>mapNotNull(response -> response.getResult() == null
                             || response.getResult().getOutput() == null
                             ? null : response.getResult().getOutput().getText())
                     .filter(text -> !text.isEmpty())
-                    .doOnTerminate(reportMissingUsage)
-                    .doOnCancel(reportMissingUsage);
+                    .doOnTerminate(reportUsage)
+                    .doOnCancel(reportUsage);
         });
     }
 

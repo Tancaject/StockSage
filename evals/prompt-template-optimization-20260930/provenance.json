@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "scope": "COMPILED_COMPONENT_PROMPT_SMOKE_NOT_PACKAGED_OR_END_TO_END_ACCEPTANCE",
+  "sources": [
+    {
+      "sourcePath": "stocksage-backend/src/main/java/com/stocksage/agent/DeepEvidenceReplanner.java",
+      "beforeSha256": "96d58bc29c2f5c71e361156c21618d8a2ed26f6502d18ed3542080727ec03149",
+      "afterSha256": "e7ea254537b88a273ce543d4e01d826c88bb683286e06a30a331014aa77cdb89"
+    },
+    {
+      "sourcePath": "stocksage-backend/src/main/java/com/stocksage/agent/NewsAgent.java",
+      "beforeSha256": "8e92891f37617ef7069defbf98322de2634d873a34487969c2582a0c36a79378",
+      "afterSha256": "87f9a169853d41516a9094118dfb2014859bf00e4b65b9cbe946f8f49dab3400"
+    },
+    {
+      "sourcePath": "stocksage-backend/src/main/java/com/stocksage/config/AgentConfig.java",
+      "beforeSha256": "8806f409a1a410e631104687189177ec83c1353fed6d40362c1bc50ce04e7dd4",
+      "afterSha256": "f328cd1fb77de1cec79bcba8a30faf25400f861e6d732b29c9493c9d9720a70a"
+    },
+    {
+      "sourcePath": "stocksage-backend/src/main/java/com/stocksage/config/AiConfig.java",
+      "beforeSha256": "ff3be23f7c23cc6c6e5e14abc9ba540f3459139f3e8f4f5d866546612be04e58",
+      "afterSha256": "a8322391b60fde79c16c912d74dd49ea04b43c1ad3dfb1749e21aa33d6af7133"
+    },
+    {
+      "sourcePath": "stocksage-backend/src/main/java/com/stocksage/conversation/ChatPromptAssembler.java",
+      "beforeSha256": "c113bcc15e5192853052f480377093eca14979276390173d47b6656c3d6ea1fa",
+      "afterSha256": "6613a29de36d2cfa604f7f903374627e0bbe226a1ec0c7ee47d81fab04bcafed"
+    },
+    {
+      "sourcePath": "stocksage-backend/src/main/java/com/stocksage/memory/LongTermMemory.java",
+      "beforeSha256": "11e7b7e345954795cddc26b0afbdbfc6abb05c360b0cadfc79b2c036ccf00d49",
+      "afterSha256": "a70272052af45ed6453785a55d657fc57ba439634e6a7b73d2ca662e87eafb1e"
+    },
+    {
+      "sourcePath": "stocksage-backend/src/main/java/com/stocksage/memory/ShortTermMemory.java",
+      "beforeSha256": "8b4a0064b07489be1acbaf1d1e7358f47a2bd4def6b225d3736466e9d84d0b5f",
+      "afterSha256": "00a86f7c9079b09ec3fc24db2f4a473bf4e63f44a6bc4f5ce419329a593e109d"
+    },
+    {
+      "sourcePath": "stocksage-backend/src/main/resources/prompts/fundamentals-method.txt",
+      "beforeSha256": "d03474356226b7a9bec0ea14f943c81341f5fa12400e3101c98eb9e8c675e5dc",
+      "afterSha256": "a8e5e21940f5e332ecead6e75bb78f4d17b01b11ff16ed6dfe20c3bf9e11ab92"
+    }
+  ],
+  "classResources": [
+    {
+      "resource": "com/stocksage/agent/DeepEvidenceReplanner.class",
+      "beforeSha256": "3cda689ccd3026c9859a80a516d5c9b5745a0de96c2c132360982e03d7d85b0f",
+      "afterSha256": "6eb93af14e7b1a26e62f5304b560d801d878092fe99c4f6e868c52f4edc3f3d1"
+    },
+    {
+      "resource": "com/stocksage/agent/NewsAgent.class",
+      "beforeSha256": "bd6b5614839b189203b6183454d919dc4e42e09bdfdb1c99405bc746ca2b69af",
+      "afterSha256": "504d0ddf043819a51197a1eabaf642cf3257c9268eefaf119f4bad92196f0ab2"
+    },
+    {
+      "resource": "com/stocksage/config/AgentConfig.class",
+      "beforeSha256": "4aa2a6d2878829ff0e1dc983a02c41deebc3522c07f6860496fc32e6d493b6c7",
+      "afterSha256": "1bd01f69b77c9004c161defe517b2b352d6939e9c9b820b44b8d71a29edbb130"
+    },
+    {
+      "resource": "com/stocksage/config/AiConfig.class",
+      "beforeSha256": "4759ef7734e70762ec34801128b549f54408dcde39dda89388d5869e5ba27658",
+      "afterSha256": "f965cd2c4eeb3576635dcc997430d3474492c1398f05b563d325f62b2ec11674"
+    },
+    {
+      "resource": "com/stocksage/conversation/ChatPromptAssembler$AnalystSpan.class",
+      "beforeSha256": "57185095482799def89e9026f9876736fff6df1cf70ac39944e763c2c5db0c57",
+      "afterSha256": "57185095482799def89e9026f9876736fff6df1cf70ac39944e763c2c5db0c57"
+    },
+    {
+      "resource": "com/stocksage/conversation/ChatPromptAssembler$Assembly.class",
+      "beforeSha256": "9d2e27d6a698732817fcdc400de38efc0a0fe1ff8060c81a81ee4febd25b9d21",
+      "afterSha256": "9d2e27d6a698732817fcdc400de38efc0a0fe1ff8060c81a81ee4febd25b9d21"
+    },
+    {
+      "resource": "com/stocksage/conversation/ChatPromptAssembler.class",
+      "beforeSha256": "4c66ae829920e066e814bcaa1aa893c78bb4d4d5c358779f0470a51ef7fa54d9",
+      "afterSha256": "e1c471a6b430a5146a589f5ca02e97d2f1fb99f5696c3805c4c0a82887781643"
+    },
+    {
+      "resource": "com/stocksage/memory/LongTermMemory.class",
+      "beforeSha256": "746a56b159e621ac900d6997e4b1524c13d5c2e0e005238e077bec839869c496",
+      "afterSha256": "80d46bb3d25a386eb6a711448ea40a5fedc71a4dcc2340c81f9096b42742f86b"
+    },
+    {
+      "resource": "com/stocksage/memory/LongTermMemoryProperties$1.class",
+      "beforeSha256": "12c075c5b731ab6b8d499306902803544d849f5bfbec22682c210e5a7ad491b9",
+      "afterSha256": "12c075c5b731ab6b8d499306902803544d849f5bfbec22682c210e5a7ad491b9"
+    },
+    {
+      "resource": "com/stocksage/memory/LongTermMemoryProperties.class",
+      "beforeSha256": "cc3f8737f9720842ea4cb5c859d3e2633f5555a76e5ec2d84d4afe1658b4b4dd",
+      "afterSha256": "cc3f8737f9720842ea4cb5c859d3e2633f5555a76e5ec2d84d4afe1658b4b4dd"
+    },
+    {
+      "resource": "com/stocksage/memory/ShortTermMemory.class",
+      "beforeSha256": "0e8b7a20c5f3bf20cc077fa6ddac495e2a9467c204ab2b739aacde065257002d",
+      "afterSha256": "a4fe29f1d7c019b152a1191a2755c6b1e0d4022df618d5fc53d090df6d21a4d0"
+    },
+    {
+      "resource": "prompts/fundamentals-method.txt",
+      "beforeSha256": "d03474356226b7a9bec0ea14f943c81341f5fa12400e3101c98eb9e8c675e5dc",
+      "afterSha256": "a8e5e21940f5e332ecead6e75bb78f4d17b01b11ff16ed6dfe20c3bf9e11ab92"
+    },
+    {
+      "resource": "prompts/fundamentals-system.txt",
+      "beforeSha256": "1b0296aee5183084a5ec0a99368afe8c9379dd477b47c8b81e44b19209ea2a80",
+      "afterSha256": "1b0296aee5183084a5ec0a99368afe8c9379dd477b47c8b81e44b19209ea2a80"
+    },
+    {
+      "resource": "prompts/fundamentals-task.txt",
+      "beforeSha256": "21928583bb4819f8be94aeb8659e6409073f4573c588c6a9ae9c35c3fb7cd6f8",
+      "afterSha256": "21928583bb4819f8be94aeb8659e6409073f4573c588c6a9ae9c35c3fb7cd6f8"
+    }
+  ],
+  "captureBeforeSha256": "0139d40761903cc1b0b8d87c7ec713bf503588bd986e3131e0d97d40cf041fc2",
+  "captureAfterSha256": "a5ec0fb459fa3851be3bc8528e32ba2e7a02132510b418da1f8a697f2ffb87a2",
+  "historicalFinalDiagnosticPlanSha256": "75f881663471965da88471d7e65806dcacbe2bb6b7cc25a6edf2ea7ea64248d6",
+  "finalRuleVerification": "Compiled current ordinary rules equal the prior frozen five-rule intervention; untrusted/temporal rules unchanged",
+  "historicalJarUnchanged": true,
+  "limits": [
+    "AI-reviewed smoke with one call per arm and case; no statistical efficacy claim",
+    "Six synthetic auxiliary cases and two previously seen DEVELOPMENT financial cases",
+    "No production serving, storage, RAG retrieval/ingestion or holdout execution"
+  ]
+}

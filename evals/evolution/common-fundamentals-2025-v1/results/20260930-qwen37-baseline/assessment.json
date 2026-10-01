@@ -1,0 +1,446 @@
+{
+  "schema": "common_fundamentals_baseline_assessment_v1",
+  "reviewType": "AI_SOURCE_GROUNDED",
+  "humanReviewed": false,
+  "activationAuthorized": false,
+  "scope": "LIVE_MODEL_FROZEN_COMPONENT_CHAIN",
+  "executionStatus": "PASS",
+  "caseCount": 12,
+  "issuerCount": 4,
+  "holdoutInvocations": 0,
+  "runStartedAt": "2026-09-30T01:22:05.124683800Z",
+  "model": "qwen3.7-plus",
+  "stageTimeoutSeconds": 120,
+  "httpTransport": {
+    "configuration": "BOOT_AUTO_CONFIGURATION",
+    "connectTimeout": "UNSET",
+    "readTimeout": "PT2M"
+  },
+  "datasetFileSha256": "667f334a5b63542c9f2e32605c7716f564fbd97e822e2c90704f3c0981c58078",
+  "answerKeyFileSha256": "07d8e42a275d90c25e7721314d8678122303347135cd1c9fb4b479694aa7ee91",
+  "stages": {
+    "analysis": {
+      "completedCount": 12,
+      "requiredFactsCorrectCases": 12,
+      "derivedCorrectCases": 12,
+      "coverageCompleteCases": 10,
+      "evidenceGroundedCases": 2,
+      "passCases": 2,
+      "medianDurationMs": 43788.0,
+      "maxDurationMs": 56482,
+      "exceededConfigured30SecondThreshold": 12,
+      "inputTokens": 26848,
+      "outputTokens": 31445,
+      "totalTokens": 58293,
+      "actualModels": [
+        "qwen3.7-plus"
+      ]
+    },
+    "finalAnswer": {
+      "completedCount": 12,
+      "requiredFactsCorrectCases": 12,
+      "derivedCorrectCases": 12,
+      "coverageCompleteCases": 10,
+      "evidenceGroundedCases": 0,
+      "passCases": 0,
+      "medianDurationMs": 45477.0,
+      "maxDurationMs": 58559,
+      "exceededConfigured30SecondThreshold": 12,
+      "inputTokens": 45838,
+      "outputTokens": 31066,
+      "totalTokens": 76904,
+      "actualModels": [
+        "qwen3.7-plus"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "caseId": "msft-fy2025-growth",
+      "analysis": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答四项全年金额及同比 14.9%/17.4%、利润率 45.6%/44.6% 均与 E1 和固定答案一致；币种、单位、财年正确。",
+          "原句：销售及管理费用（25,654 百万美元，同比 +4.9%）。E1 的 25,654 是 Sales and marketing（销售与营销）；General and administrative 另列 7,223。把前者当作销售及管理合计改变了科目口径。"
+        ]
+      },
+      "finalAnswer": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答金额、同比、利润率正确，覆盖核心问题；[E1] 对应所给微软 FY2025 利润表。",
+          "原句：利润率的提升说明高毛利业务（如云服务、AI相关商业化）的占比提升或成本管控极其有效。E1 仅是合并利润表，没有云/AI 毛利、业务组合或成本控制措施证据，不能把这些具体原因当成得到确认的解释。",
+          "原句：销管费用（同比+4.9%）。该增速对应 Sales and marketing，遗漏另列的 General and administrative；延续分析稿的科目误标。"
+        ]
+      },
+      "runId": "0111b1c6-6753-4f78-ab37-8dd9cd1b276d",
+      "analysisDurationMs": 40750,
+      "finalAnswerDurationMs": 38995
+    },
+    {
+      "caseId": "msft-fy2025-cashflow",
+      "analysis": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "136,162/64,551 百万美元、简化 FCF 71,611、占比 47.4% 均正确；毛额、不含出售回款且不等于净利润的口径明确。额外历史数据及回购/分红也见 E1。",
+          "原句：主要指向 AI 基础设施与云数据中心建设；该比例的持续走高反映了管理层对未来 AI 和云计算需求的长期看好。E1 只披露购建固定资产总额，没有投资投向或管理层动机；属于无来源归因。",
+          "次要术语问题：资本开支回报率（ROIC）。ROIC 是投入资本回报率，不能直接等同某批资本开支的回报率。"
+        ]
+      },
+      "finalAnswer": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答 CFO、购建支出、简化 FCF、47.4% 及单位、全年期间均正确，覆盖问题；[E1] 指向所给现金流量表。",
+          "原句：公司正处于 AI 基础设施与云数据中心的高强度资本投入期；以押注未来 AI 和云计算的长期需求。表内总额及增速无法确认具体投向和动机，最终回答继承了分析稿的无来源归因。",
+          "次要术语问题：资本开支回报率（ROIC）存在不确定性。ROIC 是投入资本回报率，不是资本开支回报率。"
+        ]
+      },
+      "runId": "8ca7c277-3562-4ff1-82ab-f51d02d96636",
+      "analysisDurationMs": 46435,
+      "finalAnswerDurationMs": 30532
+    },
+    {
+      "caseId": "msft-fy2025-liquidity",
+      "analysis": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": false,
+        "evidenceGrounded": false,
+        "notes": [
+          "现金 30,242、非流动长期债务 40,152、流动资产 191,131、流动负债 141,218 百万美元及流动比率 1.35 均正确；短期投资、递延收入等附加余额也见 E1。",
+          "原句：这部分负债的清偿方式是向客户交付产品或服务……而非消耗现金。剔除……后，公司实际的刚性短期现金偿付压力极低。递延收入不是按账面余额偿债，但履约可能需要现金成本；仅凭余额不能将其视作完全没有现金需求并确认压力极低。",
+          "原句：长期债务的偿还具有极高的安全垫；长期债务本金……十分安全。文中同时承认没有现金流量表、利息保障倍数，亦无详细到期/资金可动用性资料；主结论强于证据，未满足题目要求的有限度流动性判断。"
+        ]
+      },
+      "finalAnswer": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": false,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答四项金额和流动比率 1.35 正确；金额单位、资产负债表日正确，[E1] 对应原表。",
+          "原句：财务状况极度稳健……长期债务在巨额现金储备面前毫无压力；总负债的大头是无需消耗现金的经营性负债。经营性负债并不等于无需现金，履约成本及应付款等可能消耗现金。缺少现金流/期限/可动用性证据时，不能得出毫无压力的确定性结论。",
+          "原句：这部分负债的清偿方式是交付产品，而不是消耗现金。将递延收入履约与现金成本对立，继承并强化了分析稿的问题；末尾数据缺口未收回前述确定性结论。",
+          "原句：非流动长期债务……仅占总负债……14.6%。该比例并非全部带息负债占比；且短期投资被概括为随时可动用的真金白银，原表未提供投资构成、变现损失或资金限制信息。"
+        ]
+      },
+      "runId": "26c6c317-1e5c-4d24-a4db-f84484a0b8a4",
+      "analysisDurationMs": 43684,
+      "finalAnswerDurationMs": 51860
+    },
+    {
+      "caseId": "wmt-fy2025-growth",
+      "analysis": {
+        "verdict": "PASS",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": true,
+        "notes": [
+          "680,985/648,125、29,348/27,012 百万美元，5.1%/8.6% 同比及 4.31%/4.17% 利润率均正确；财年截至 1 月 31 日和全年口径正确，E1 对应原利润表。",
+          "原句：基于数据推断，高毛利业务的快速增长是潜在驱动因素。该段明确标记推断/潜在，并用表内会员及其他收入增长作线索，末尾承认缺分部资料；按允许有限假设的口径，不将其等同确定因果而扣分。"
+        ]
+      },
+      "finalAnswer": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答金额、同比和利润率正确，覆盖核心问题；单位、全年期间和 E1 对应关系正确。",
+          "原句：营业利润率的扩张主要得益于高毛利业务的快速增长。分析稿的潜在假设被升级为主要原因；合并利润表虽有会员及其他收入增长，没有该类业务成本、利润率或贡献分解，无法确认其是利润率提升的主要驱动。"
+        ]
+      },
+      "runId": "55c8db40-f2a4-4a1c-b2d1-f9a6c6b83f1e",
+      "analysisDurationMs": 43196,
+      "finalAnswerDurationMs": 35465
+    },
+    {
+      "caseId": "wmt-fy2025-cashflow",
+      "analysis": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "CFO 36,443、购建支出 23,783、简化 FCF 12,660 百万美元和 65.3% 均正确；毛额、非净利润口径清楚，E1 确含 FCF 调节表，FY2024 比较数也吻合。",
+          "原句：这反映出公司作为重资产零售巨头，在供应链基础设施、门店网络或自动化等领域的资本投入强度依然较高。所给 FCF 调节表没有这些投向；这是未得到来源支持的投向判断。后文承认缺细分投向，宜将此处改成仅说明总资本投入强度，或明确列为假设。"
+        ]
+      },
+      "finalAnswer": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答 CFO、购建支出、简化 FCF 和 65.3% 以及美元单位、FY2025 年度口径均正确；额外同比在固定舍入容差内。",
+          "原句：这一高比例印证了沃尔玛……在电商履约中心、供应链自动化及门店网络改造等领域的战略投入强度依然极高；长期是维持其全渠道零售成本优势和竞争护城河的必经之路。FCF 调节表不能确认具体投向、战略动机或长期竞争效果，属于确定性的无来源扩写。",
+          "原句：足以支撑其股东回报与债务偿还。正的 FCF 说明当期 CFO 超过题定 CapEx，但原摘录没有具体回购、分红和偿债需求，不能据此断言足以覆盖全部这些用途。"
+        ]
+      },
+      "runId": "9aaaf87e-fa41-494c-8f81-2b5327e4b236",
+      "analysisDurationMs": 36710,
+      "finalAnswerDurationMs": 40824
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "analysis": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": false,
+        "evidenceGrounded": false,
+        "notes": [
+          "现金 9,037、非流动长期债务 33,401、流动资产 79,458、流动负债 96,584 百万美元及流动比率 0.82 均正确；财年/币种和 E1 对应关系正确。附加总负债求和 163,131 正确。",
+          "原句：凭借极高的存货周转率和日常经营中持续产生的强劲经营性现金流入，沃尔玛具备实际的短期债务偿付能力。E1 仅为期末资产负债表，没有销售成本/平均存货或 CFO，无法核实周转率及强劲现金流。文末也明确承认缺 CFO 和债务到期分布，实际偿付能力的确定性结论没有证据支撑。",
+          "原句：应付账款……反映了……极强的议价能力；长期债务下降……说明公司在主动优化长期资本结构。余额变化只能作相关线索，不能确认供应商条款或管理层主动优化动机。"
+        ]
+      },
+      "finalAnswer": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": false,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答四项金额、0.82 流动比率和单位/财年正确，长期债务与总负债数值有区分；各项额外同比和总负债估算吻合原表。",
+          "原句：实际短期偿债能力依然强劲；凭借极高的存货周转率和……强劲现金流，能够迅速将存货转化为现金来偿付债务；相对于其庞大的经营现金流而言规模完全可控。当前证据没有 CFO 或周转率，不能用未提供的指标确认偿债能力。",
+          "原句：公司主动优化长期资本结构，降低长期利息负担。非流动债务余额下降不能单独确认动机或利息负担下降，需还款/重分类/新债和利率证据。",
+          "末尾虽披露现金流与到期分布缺口，但未限制开头及正文的强劲、迅速偿付、完全可控等断言，未满足题目要求的有限度流动性判断。"
+        ]
+      },
+      "runId": "40fae74a-3d03-4d2d-9005-b7f7f0b9b844",
+      "analysisDurationMs": 37274,
+      "finalAnswerDurationMs": 48544
+    },
+    {
+      "caseId": "googl-fy2025-growth",
+      "analysis": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答数字与单位/全年口径正确：收入350,018→402,836百万美元、营业利润112,390→129,039；同比15.1%/14.8%，营业利润率32.1%→32.0%，均符合冻结答案及容差。",
+          "原句“正在大幅增加对研发（可能涉及 AI 等前沿技术）和组织管理的战略性投入”把研发/行政费用增长解释为公司战略意图。E1仅有费用金额49,326→61,087及14,188→21,482，未披露费用用途或管理层战略。本项针对无条件的“战略性投入”归因，不因“可能涉及AI”这一假设本身扣分。"
+        ]
+      },
+      "finalAnswer": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答金额、同比、利润率和年度区分均正确，回答完整，E1对应本题唯一利润表。",
+          "原句“这并非业务基本面恶化，而是公司正处于 AI 等前沿技术的‘战略性投入期’”“主动选择了‘用短期利润率换取长期技术壁垒’的战略路径”未由E1支持，并把分析稿的“可能涉及AI”升级为确定事实。",
+          "原句“核心业务（如搜索广告、YouTube 等）依然具备较强的增长动能和护城河”无分部收入、竞争或护城河证据；答案后段亦承认缺分部拆解。"
+        ]
+      },
+      "runId": "3680f602-d83b-425b-83cc-1c218bb1a527",
+      "analysisDurationMs": 42034,
+      "finalAnswerDurationMs": 43060
+    },
+    {
+      "caseId": "googl-fy2025-cashflow",
+      "analysis": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答金额/计算正确：OCF164,713、现金PP&E支出91,447、简化FCF73,266百万美元、Capex/OCF55.52%；毛额口径、覆盖结论及未来风险均有涉及。",
+          "原句“购建固定资产、无形资产和其他长期资产支付的现金……91,447”扩大了科目范围。E1的91,447仅为Purchases of property and equipment；Acquisitions, net of cash acquired, and purchases of intangible assets另列1,592。requiredFactsCorrect标记必答金额正确，此科目表述问题单独计入来源问题。"
+        ]
+      },
+      "finalAnswer": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答金额、简化FCF与55.52%均正确；FY2024补充数字及对应同比也与E1相符，不因额外年度对比扣分。",
+          "原句“正在向重资产的 AI 算力与基础设施领域深度转型”未由E1的PP&E现金支出总额证明；该答案末尾同时承认未披露投向明细。",
+          "原句“营运资金管理出色”“高投入未侵蚀财务灵活性”“证明其激进的扩张并未对整体财务灵活性造成实质性挤压”超出单张现金流量表能支持的结论。FCF同比微增0.69%及仍有分红/回购，只能支持历史现金覆盖，不能证明管理质量或其他资金约束均未受影响。"
+        ]
+      },
+      "runId": "6dd9cfbb-35a3-4afe-8ed2-ef0e672e6d72",
+      "analysisDurationMs": 56482,
+      "finalAnswerDurationMs": 46665
+    },
+    {
+      "caseId": "googl-fy2025-liquidity",
+      "analysis": {
+        "verdict": "PASS",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": true,
+        "notes": [
+          "必答数字正确：现金30,708、非流动长期债务46,547、流动资产206,038、流动负债102,745百万美元；流动比率2.01与冻结值2.0053一致。",
+          "明确区分现金、流动资产、长期债务和总负债；同时核对现金及有价证券126,843、应收款62,886等组成，未只凭2.01推断绝对安全。",
+          "原句“流动比率2.01仅反映账面资产的静态覆盖能力，不能直接等同于绝对的偿债安全”，并列出缺现金流、债务期限/利率和表外承诺资料。将债务大幅增加带来的利息压力作为一般风险推断可接受；未给出无依据的利息金额。"
+        ]
+      },
+      "finalAnswer": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答数字、单位、报告期和流动比率均正确，科目区分和资料缺口完整。",
+          "原句“短期偿债毫无压力”及“这并非经营恶化，而是公司主动调整资本结构”分别作出绝对偿债判断和管理层意图归因；单张资产负债表与静态覆盖比率不足以支持。",
+          "原句“未来每年将新增数十亿美元的刚性利息支出”没有期限、利率或利息支出计算依据；文中同时承认缺长期债务平均利率。相较分析稿的一般风险推断，这是新增的无证据定量预测。"
+        ]
+      },
+      "runId": "93472200-3c3f-4b84-ae48-77749c6a6266",
+      "analysisDurationMs": 52495,
+      "finalAnswerDurationMs": 54060
+    },
+    {
+      "caseId": "cost-fy2025-growth",
+      "analysis": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答数字与52周年度口径正确：收入254,453→275,235、营业利润9,285→10,383百万美元；同比8.17%/11.83%，营业利润率3.65%→3.77%。derivedCorrect针对这些冻结必答指标；下述额外比率方向错误另列。",
+          "原句“SG&A 增速9.45%略高于收入增速但占收比下降”方向错误。E1的SG&A为22,810→24,966，总收入为254,453→275,235，占比实际从8.9643%升至9.0708%，增加0.1065个百分点。",
+          "原句“利润率的提升更多依赖于费用管控……及高毛利会员费收入的拉动”缺费用/利润归因证据，且费用管控归因与其自身SG&A占比上升的事实不符。会员费收入增长及占比增加可由表中数据验证，“高毛利”及贡献大小未单独披露。"
+        ]
+      },
+      "finalAnswer": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答数字、计算、财年/52周口径正确；未沿用分析稿“SG&A占比下降”的方向错误。",
+          "原句“会员费收入几乎全额转化为毛利……是整体营业利润率扩张的最核心引擎”未由合并利润表证明。会员费占总收入仅由1.8974%升至1.9340%（+0.0366个百分点）；表内未拆会员费成本及其利润贡献，不能据此确定“几乎全额”或“最核心”。",
+          "原句“没有单纯依靠‘烧钱’或降价换规模”“难以出现爆发式的利润增长，未来仍需依赖会员续费率和高毛利业务的渗透”超出该表披露；收入和营业利润率改善不能单独证明定价策略或未来增长上限。"
+        ]
+      },
+      "runId": "771c83a4-cd74-4a20-a018-8210852103d3",
+      "analysisDurationMs": 43892,
+      "finalAnswerDurationMs": 46884
+    },
+    {
+      "caseId": "cost-fy2025-cashflow",
+      "analysis": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答数据与毛额口径正确：OCF13,335、现金PP&E支出5,498、简化FCF7,837百万美元；Capex/OCF41.2%符合41.2298%，明确不等于净利润。",
+          "原句“需将约0.41美元用于新店建设、现有门店翻新、物流中心及IT基础设施投入”将E1未拆分的PP&E总支出具体归于若干用途；来源未列投向明细。",
+          "原句“39%-42%的合理区间……资本配置纪律严明”缺行业比较、项目回报或管理纪律证据。历史现金覆盖及比例平稳可成立，不能单独证明配置质量。",
+          "额外计算原句“三年复合增速约12.6%”不准确：FY2023的4,323到FY2025的5,498跨两个年度间隔，CAGR=(5498/4323)^(1/2)-1≈12.77%，约12.8%；此为额外推导，必答FCF和比例仍正确。"
+        ]
+      },
+      "finalAnswer": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答金额、FCF、41.2%比例、单位和FY2025全年口径正确；解释了现金覆盖及与净利润的区别。",
+          "原句“反映公司正处于积极的新店建设与物流/IT基础设施扩张期”超出E1未拆分的PP&E支出总额。",
+          "原句“非常健康的‘进取且克制’的水平”“没有为了盲目扩张而透支现金流，也没有因为过度保守而停止增长”没有项目回报、扩张安排或比较基准支持；历史现金覆盖不等于资本配置纪律已获证明。",
+          "沿用了额外“三年复合增速约12.6%”；按FY2023至FY2025两年间隔应约12.77%。必答FCF与Capex/OCF不受该额外错误影响。"
+        ]
+      },
+      "runId": "6ec760ec-2c44-45a7-bf77-13776394b6e5",
+      "analysisDurationMs": 54770,
+      "finalAnswerDurationMs": 44289
+    },
+    {
+      "caseId": "cost-fy2025-liquidity",
+      "analysis": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答金额和流动比率正确：现金14,161、非流动长期债务5,713、流动资产38,380、流动负债37,108百万美元，流动比率1.03；明确区分现金、资产与债务/总负债。",
+          "原句“净现金头寸充裕。因此，公司的核心信用风险不在于长期资本结构，而在于短期营运资本的周转效率”结论过强。比较现金与非流动长期债务并不等于核实全部有息债务、受限现金及其他承诺；该答案自身也列出短期借款明细和受限资金情况未知。可支持账面流动性改善，不能凭此排定公司的全部信用风险。"
+        ]
+      },
+      "finalAnswer": {
+        "verdict": "ISSUES",
+        "requiredFactsCorrect": true,
+        "derivedCorrect": true,
+        "coverageComplete": true,
+        "evidenceGrounded": false,
+        "notes": [
+          "必答金额、单位、财年和1.03流动比率正确；也列出了现金流、账龄和受限资金等资料缺口。",
+          "原句“公司整体信用风险极低”“无长期偿债危机”“Costco 根本不存在长期债务违约风险”属于无证据的绝对信用判断，与缺现金流、债务细节、受限资金资料的边界冲突。",
+          "原句“依赖强势供应链地位形成的‘无息流动负债’”“利用对上游供应商的强势议价能力占用资金”将资产负债科目规模直接归因于议价能力，E1未披露合同条款或议价证据。一般关于存货变现、账期和现金流的条件风险分析不计为问题。"
+        ]
+      },
+      "runId": "efb422c3-963e-4614-9e86-895aaea01c92",
+      "analysisDurationMs": 45194,
+      "finalAnswerDurationMs": 58559
+    }
+  ],
+  "priorAttempts": [
+    {
+      "directory": "stocksage-backend/target/evolution-live-common-baseline-v1",
+      "outcome": "ANALYST_INVOCATION_FAILED_NO_ANSWER"
+    },
+    {
+      "directory": "stocksage-backend/target/evolution-live-common-diagnostic-v1",
+      "outcome": "AllocationQuota.FreeTierOnly_NO_ANSWER"
+    },
+    {
+      "directory": "stocksage-backend/target/evolution-live-common-qwen36-v1",
+      "outcome": "INPUT_VALIDATION_REJECTED_NOT_CALLED"
+    },
+    {
+      "directory": "stocksage-backend/target/evolution-live-common-20260930-v1",
+      "outcome": "HTTP_READ_TIMEOUT_NO_ANSWER_PROVIDER_USAGE_UNKNOWN"
+    }
+  ],
+  "cost": {
+    "status": "UNPRICED",
+    "note": "Provider token counts, not a billing statement; failed prior calls may have unknown usage."
+  },
+  "runner": {
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "1096.24"
+  },
+  "reportTimeSemantics": "baseline-report timestamps describe verification of saved responses, not additional live invocations."
+}

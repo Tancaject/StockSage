@@ -1,0 +1,35 @@
+{
+  "scope": "EXTERNAL_TEST_DRIVER_NOT_PART_OF_PRODUCTION_JAR_HASH",
+  "dependencies": [
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\junit\\jupiter\\junit-jupiter-api\\5.11.4\\junit-jupiter-api-5.11.4.jar",
+      "sha256": "ab83ef9e51ac4597d59d26b4b58812129550e2f579a404c8af7d09f5ce5b4293"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\opentest4j\\opentest4j\\1.3.0\\opentest4j-1.3.0.jar",
+      "sha256": "48e2df636cab6563ced64dcdff8abb2355627cb236ef0bf37598682ddf742f1b"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\junit\\platform\\junit-platform-commons\\1.11.4\\junit-platform-commons-1.11.4.jar",
+      "sha256": "9edd969b0d0670c54105bc91ae79bd1c6f503e12115faba82073b84c86bbc334"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\apiguardian\\apiguardian-api\\1.1.2\\apiguardian-api-1.1.2.jar",
+      "sha256": "b509448ac506d607319f182537f0b35d71007582ec741832a1f111e5b5b70b38"
+    }
+  ],
+  "driverClasses": [
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\test-classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$1.class",
+      "sha256": "61ea9c0ea49e68a7f34b5df70768f24e69d6e5f19d8f9fc11858aa90c3367137"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\test-classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$HttpTransportConfiguration.class",
+      "sha256": "9d122d0655c047083fb41b6ee3004d81c39e58eaef75655949bbe90bb664cf29"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\test-classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest.class",
+      "sha256": "22df963e9765ad6138edabcd34445d23cfb99c8483e0b565edd489fe8b2f2ea0"
+    }
+  ]
+}

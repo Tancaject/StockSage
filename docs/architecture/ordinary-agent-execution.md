@@ -89,10 +89,10 @@ DEEP 在采集时将每条正文限定为 2,000–4,500 字符，每个维度（
 先启动 README 中的服务与所需数据源，设置专用账号环境变量 `STOCKSAGE_EVAL_EMAIL`、`STOCKSAGE_EVAL_PASSWORD`，再运行：
 
 ```powershell
-python rag-eval/run_ordinary_live_eval.py --output rag-eval/results/ordinary-live.json
+python evals/run_ordinary_live_eval.py --output evals/results/ordinary-live.json
 ```
 
-固定用例位于 `rag-eval/ordinary_live_cases.jsonl`，覆盖显式周期、多轮改参、季度频率、不支持的粒度、历史区间和多标的边界。脚本真实调用 `/api/chat/stream` 与 `/api/trace/{id}`，检查实际工具参数、工具状态、引用和业务结果；保留数据集哈希、时间、实际最终模型、原始事件与 Trace。没有账号或服务不可用时输出 `BLOCKED`，不使用离线结果代替真实执行。
+固定用例位于 `evals/ordinary_live_cases.jsonl`，覆盖显式周期、多轮改参、季度频率、不支持的粒度、历史区间和多标的边界。脚本真实调用 `/api/chat/stream` 与 `/api/trace/{id}`，检查实际工具参数、工具状态、引用和业务结果；保留数据集哈希、时间、实际最终模型、原始事件与 Trace。没有账号或服务不可用时输出 `BLOCKED`，不使用离线结果代替真实执行。
 
 行情用例要求成功取得可引用数据，同时明确 `MARKET_SESSION_UNVERIFIED` 并返回 `DEGRADED`；失败取证、缺少时间契约或伪称 `FRESH` 均不能通过该用例。它验收的是执行和如实报告边界，不能据此宣称最新行情覆盖已完成。用例和评估器身份随该契约更新，旧评审不能直接用于新结果。
 
@@ -103,7 +103,7 @@ python rag-eval/run_ordinary_live_eval.py --output rag-eval/results/ordinary-liv
 运行结果逐条保留用例定义、实际 SSE 答案及其哈希。后端 Trace 的 `answer-context` 提供实际消息序列、动态上下文和实际纳入的原始工具/RAG 证据；模型调用参数来自 `model-invocation`。先从同一份真实结果导出评审模板：
 
 ```powershell
-python rag-eval/ordinary_answer_quality.py --input rag-eval/results/ordinary-live.json --review-template rag-eval/results/ordinary-reviews.json
+python evals/ordinary_answer_quality.py --input evals/results/ordinary-live.json --review-template evals/results/ordinary-reviews.json
 ```
 
 模板包含实际问题、答案、上下文和版本绑定。填写 `reviewer`、带时区的 ISO 格式 `reviewed_at`，再为以下四项填写 `status` 与具体 `reason`：
@@ -118,7 +118,7 @@ python rag-eval/ordinary_answer_quality.py --input rag-eval/results/ordinary-liv
 状态使用 `PASS`、`FAIL`、`NOT_APPLICABLE` 或 `NO_DATA`；非 `NO_DATA` 必须说明理由。不适用不是通过，全部不适用仍为 `NO_DATA`。脚本不自动充当语义 Judge：
 
 ```powershell
-python rag-eval/ordinary_answer_quality.py --input rag-eval/results/ordinary-live.json --reviews rag-eval/results/ordinary-reviews.json --output rag-eval/results/ordinary-reviewed.json
+python evals/ordinary_answer_quality.py --input evals/results/ordinary-live.json --reviews evals/results/ordinary-reviews.json --output evals/results/ordinary-reviewed.json
 ```
 
 评审绑定用例、答案、完整文字 prompt、上下文、源证据和模型调用参数的哈希。答案或上下文变化后必须重新评审；缺失绑定、证据捕获不完整、仅有文字指纹的图片请求、无模型上下文的规则直答均不能获得质量通过。缺项为 `NO_DATA`，任一明确失败优先记为 `FAIL`。结果保留四维分数、有效样本数与评审覆盖率；`answer_quality` 表达人工语义结果，`quality_evaluation.status` 同时要求完整执行与完整评审，原执行 `status` 不被改写。
@@ -128,7 +128,7 @@ python rag-eval/ordinary_answer_quality.py --input rag-eval/results/ordinary-liv
 对候选结果应用其自己的评审，并传入已评审基线：
 
 ```powershell
-python rag-eval/ordinary_answer_quality.py --input rag-eval/results/candidate-live.json --reviews rag-eval/results/candidate-reviews.json --baseline rag-eval/results/ordinary-reviewed.json --output rag-eval/results/candidate-reviewed.json
+python evals/ordinary_answer_quality.py --input evals/results/candidate-live.json --reviews evals/results/candidate-reviews.json --baseline evals/results/ordinary-reviewed.json --output evals/results/candidate-reviewed.json
 ```
 
 仅用例定义和实际可见源证据哈希相同的样本进入成对比较；不匹配样本列入 `unpaired` 并注明原因，不计入差值。保留双方 prompt、模型及参数身份，报告每个维度的有效配对数和通过率差；这不是自动判定方案更优的统计检验。原始证据变化需要重新冻结或重采样，不能把不同数据的结果解释为纯 prompt 收益。
@@ -142,7 +142,7 @@ python rag-eval/ordinary_answer_quality.py --input rag-eval/results/candidate-li
 普通预取在写入完整成功的分析师草稿时记录其范围；组装器将范围映射到实际发送消息，经上下文标记清理后，以 Unicode code point 半开区间写入 `answer-context.analystSpan`，同时记录片段哈希。旧 Trace、失败或截断的分析、图片及 DEEP 路径不提供此标记。实际回答 prompt 与执行方式保持不变。
 
 ```powershell
-python rag-eval/ordinary_answer_quality.py --input rag-eval/results/ordinary-live.json --analyst-inputs rag-eval/results/analyst-inputs.json
+python evals/ordinary_answer_quality.py --input evals/results/ordinary-live.json --analyst-inputs evals/results/analyst-inputs.json
 ```
 
 该命令校验原始执行与输入绑定，再导出 `ordinary_analyst_inputs_v1`：基线为实际发送的消息，候选只删除显式范围内的草稿（含标题和尾部换行）。剩余消息、顺序、当前问题、日期、历史、RAG、研究记忆和画像均保持原样；不会重新组装提示词，也不会利用释放的空间补入更多资料。输出重算候选 prompt/context 哈希，源证据哈希保持不变。缺少完整标记或校验不通过的用例进入 `unavailable`。
@@ -156,7 +156,7 @@ python rag-eval/ordinary_answer_quality.py --input rag-eval/results/ordinary-liv
 在本机环境变量配置 `STOCKSAGE_ADMIN_TOKEN`（自定义管理头时同时配置 `STOCKSAGE_ADMIN_HEADER_NAME`），然后运行：
 
 ```powershell
-python rag-eval/run_ordinary_answer_replay.py --input rag-eval/results/analyst-inputs.json --output-dir rag-eval/results/analyst-replay
+python evals/run_ordinary_answer_replay.py --input evals/results/analyst-inputs.json --output-dir evals/results/analyst-replay
 ```
 
 运行前校验整份输入的源绑定，以及候选是否只删除指定草稿。基线与候选均调用当前部署重新生成，分别写入 `baseline.json` 与 `without_analyst.json`；相邻用例交替执行两支的先后顺序。请求配置不一致、输入指纹不符或生成失败时不进入有效配对；HTTP 响应丢失时停止且不重试，因为服务端可能已经调用模型。
@@ -166,9 +166,9 @@ python rag-eval/run_ordinary_answer_replay.py --input rag-eval/results/analyst-i
 对两个结果分别按上文导出并填写人工评审模板，再生成本次基线评审结果；候选比较使用本次 `baseline-reviewed.json`，不要使用原聊天答案的评审。回放结果也由 `ordinary_answer_quality.py` 处理，例如：
 
 ```powershell
-python rag-eval/ordinary_answer_quality.py --input rag-eval/results/analyst-replay/without_analyst.json --reviews rag-eval/results/analyst-replay/candidate-reviews.json --baseline rag-eval/results/analyst-replay/baseline-reviewed.json --output rag-eval/results/analyst-replay/candidate-reviewed.json
+python evals/ordinary_answer_quality.py --input evals/results/analyst-replay/without_analyst.json --reviews evals/results/analyst-replay/candidate-reviews.json --baseline evals/results/analyst-replay/baseline-reviewed.json --output evals/results/analyst-replay/candidate-reviewed.json
 ```
 
 真实供应商结果、答案评审与多次运行稳定性仍须单独取得；离线检查不构成删除分析师阶段的依据。
 
-`model-usage` 使用供应商返回的调用快照，不能逐 chunk 累加；缺失为 `NO_DATA`。此产物的质量范围为 `ordinary-final-answer`，用量范围仅为 `final-answer`，不代表意图、领域 Agent、记忆和整次 DEEP 的总成本。评审文件包含当前账号的实际上下文，按真实结果文件管理；本流程不调用外部 Judge 或上传评审内容。
+`model-usage` 在流完成、失败或取消时记录最后一份供应商调用快照，整次调用只记录一次，不能逐 chunk 累加；缺失为 `NO_DATA`，失败或取消时保留的快照不代表供应商最终账单。此产物的质量范围为 `ordinary-final-answer`，用量范围仅为 `final-answer`，不代表意图、领域 Agent、记忆和整次 DEEP 的总成本。评审文件包含当前账号的实际上下文，按真实结果文件管理；本流程不调用外部 Judge 或上传评审内容。

@@ -45,7 +45,7 @@
 
 ### A01 · P1：把真实答案质量作为发布依据，并证明额外模型阶段的价值
 
-**事实。** [RagEvalService:62](../../stocksage-backend/src/main/java/com/stocksage/service/RagEvalService.java#L62) 使用独立检索与回答链，[AiConfig:160](../../stocksage-backend/src/main/java/com/stocksage/config/AiConfig.java#L160) 配置专用回答模型。生产回答还经过路由、工具、记忆和不同上下文预算，[ChatService:801](../../stocksage-backend/src/main/java/com/stocksage/conversation/ChatService.java#L801) 是实际组装入口。已有 ordinary 与 DEEP live runner，不能说项目没有端到端评估；但 [ordinary runner:78](../../rag-eval/run_ordinary_live_eval.py#L78) 明确将 `answer_quality` 记为 `NO_DATA`。
+**事实。** [RagEvalService:62](../../stocksage-backend/src/main/java/com/stocksage/service/RagEvalService.java#L62) 使用独立检索与回答链，[AiConfig:160](../../stocksage-backend/src/main/java/com/stocksage/config/AiConfig.java#L160) 配置专用回答模型。生产回答还经过路由、工具、记忆和不同上下文预算，[ChatService:801](../../stocksage-backend/src/main/java/com/stocksage/conversation/ChatService.java#L801) 是实际组装入口。已有 ordinary 与 DEEP live runner，不能说项目没有端到端评估；但 [ordinary runner:78](../../evals/run_ordinary_live_eval.py#L78) 明确将 `answer_quality` 记为 `NO_DATA`。
 
 **评价。** 独立组件评估有助于定位检索问题，执行契约评估有助于验证走了正确路径；二者都不能替代真实答案的主张支持率、数字正确性、反证覆盖和有用性。大厂级设计的要求是能证明一次 prompt、模型或编排调整对实际产品的影响。
 
