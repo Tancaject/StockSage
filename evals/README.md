@@ -60,7 +60,40 @@ python evals/ordinary_answer_quality.py --input evals/results/ordinary-live.json
 python evals/ordinary_answer_quality.py --input evals/results/ordinary-live.json --reviews evals/results/ordinary-reviews.json --output evals/results/ordinary-reviewed.json
 ```
 
-普通回答使用自己的四维标准：论断支持、数字与期间正确、反证处理、不确定性表达。标签、理由、回答及证据绑定共同决定复核是否有效；程序检查绑定和汇总，不能凭引用编号自动确定语义正确。固定输入的分析稿消融由 [run_ordinary_answer_replay.py](run_ordinary_answer_replay.py) 执行，仅覆盖最终回答生成。完整步骤和解释边界见[普通路线执行说明](../docs/architecture/ordinary-agent-execution.md)。
+普通回答使用自己的五维标准：论断支持、数字与期间正确、反证处理、不确定性表达、任务完成度。具体判据、适用状态和错误归属统一由 [ordinary_rubric()](ordinary_answer_quality.py) 定义，标注、判官输入和评分器引用同一份标准并绑定哈希。标准变化后必须重新复核标签，旧评审不能沿用。标签、理由、回答及证据绑定共同决定复核是否有效；程序检查绑定和汇总，不能凭引用编号自动确定语义正确。固定输入的分析稿消融由 [run_ordinary_answer_replay.py](run_ordinary_answer_replay.py) 执行，仅覆盖最终回答生成。完整步骤和解释边界见[普通路线执行说明](../docs/architecture/ordinary-agent-execution.md)。
+
+### 评测 Agent 与判官校准
+
+[run_evaluation_agent.py](run_evaluation_agent.py) 根据已登记的 Ordinary 结果 schema 读取实际答案、Trace 和证据，沿用上述标准。完整冻结证据直接提供给判官，需要核算派生数值时可调用 `calculate`；每轮启用 JSON 输出模式，最后一轮不再提供工具。绑定核查、摘录校验和状态汇总固定执行；工具不访问网络来源或执行任意脚本。本入口目前只支持普通最终答案，其他领域仍使用各自入口。
+
+```powershell
+python evals/run_evaluation_agent.py --input evals/results/ordinary-live.json --output evals/results/ordinary-ai-review.json
+python evals/run_evaluation_agent.py --dataset evals/judge-pilot/v2/cases.jsonl --split DEV --output evals/results/judge-dev.json
+python evals/judge_calibration.py --dataset evals/judge-pilot/v2/cases.jsonl --report evals/results/judge-dev.json --output evals/results/judge-dev-calibration.json
+python evals/propose_judge_prompt.py --dataset evals/judge-pilot/v2/cases.jsonl --baseline evals/results/judge-dev.json --output evals/results/judge-candidate
+python evals/run_evaluation_agent.py --dataset evals/judge-pilot/v2/cases.jsonl --split DEV --prompt evals/results/judge-candidate/candidate-prompt.txt --output evals/results/judge-candidate-dev.json
+python evals/judge_calibration.py --dataset evals/judge-pilot/v2/cases.jsonl --baseline evals/results/judge-dev.json --report evals/results/judge-candidate-dev.json --output evals/results/judge-comparison.json
+```
+
+凭据复用现有 `DASHSCOPE_API_KEY` / 本地忽略配置读取方式；`--model`、`--endpoint`、调用上限及超时可通过 `--help` 查看。报告记录实际返回的模型、提示词和标准身份、每次响应、工具调用及供应商用量；缺用量时不虚构费用。`--dry-run` 只检查输入，不调用模型。输出文件已存在会拒绝覆盖。
+
+判官默认关闭思考；`--enable-thinking` 可开启，`--thinking-budget` 可选指定供应商思考预算。报告保存请求实际使用的配置，工具续轮保留供应商返回的 `reasoning_content`。这些开关用于显式实验，不自动改变业务模型或启用候选提示词；[提示词提案入口](propose_judge_prompt.py)仍只接受其已有固定配置契约。
+
+### 普通回答辅助试用
+
+当前接受的试用配置使用原提示词、`qwen3.8-max`、开启思考和 4096 思考预算。下面的显式命令覆盖兼容性 CLI 默认值，读取真实保存的 Ordinary 回答及证据：
+
+```powershell
+python evals/run_evaluation_agent.py --input evals/results/ordinary-live.json --output evals/results/ordinary-ai-trial.json --model qwen3.8-max --prompt evals/prompts/ordinary_judge.txt --enable-thinking --thinking-budget 4096 --timeout-seconds 180 --max-tokens 2400 --max-calls 4
+```
+
+用户接受最终通过／失败判定正确率超过 80% 即进入辅助试用，并在实际使用中完善。统计时以全部登记样本为分母，技术无效不算判对；逐维标签一致与五维全部一致另外报告，不能混称准确率。[控制变量实验](judge-pilot/controlled-20261002/RESULTS.md)提供这套配置的样例证据与适用边界；详细归因继续用于分析，不直接授权业务候选发布。业务 Agent 自进化的流程与当前迭代记录见[自进化评测入口](evolution/README.md)。
+
+AI 诊断采用独立 `ordinary_judge_diagnostic_v2` schema，始终标记 `diagnostic_only: true`、`release_eligible: false` 和人工复核未完成，不直接回填人工评审或发布门禁。摘录要求来自冻结标准：提供的片段必须能在原文中找到。单项摘录或格式错误只使该项技术无效；输入绑定损坏、接口失败和不可解析的整份输出影响全部维度。`technical_status`、全局 `errors` 与逐维 `errors` 明确区分这些情况，原始判断保存在 `reported_status`，无效项不计作语义判断。合理的材料不足属于有效 `NO_DATA`；有出处的摘录只能证明定位，不能单独证明语义判断正确。
+
+[判官校准集](judge-pilot/v2/README.md) 包含有官方来源的编写答案与 AI 交叉核查标签，不冒充业务 Agent 的真实输出。运行前校验标签复核状态、两个不同复核角色及标准哈希；争议或未复核标签阻止模型调用。开发和验证按公司/报告分组隔离。校准器分别报告技术有效率、已知判断覆盖率、有效已知判断上的语义一致率、合理弃权及全项目一致率，并给出各自分母。误放与误杀需结合覆盖率阅读；`--baseline` 只在共同有效且已知的项目上计算纠正/退化，覆盖增减单列，比较条件由 [COMPARISON_POLICY](judge_calibration.py) 定义。v1 历史数据和运行不重写，也不与 v2 跨标准比较。
+
+[propose_judge_prompt.py](propose_judge_prompt.py) 收集完整 DEV 运行中已核实的分歧和无效评审，一次调用提出一个通用流程候选；没有开发集错误时不生成。生成输入只包含 DEV，标准、协议、模型和工具保持固定，原始响应及父版本身份随候选保存。使用 `--prompt` 显式评估候选；先在 DEV 选择并冻结版本，再以 `--split VALIDATION` 验证，验证结果不能回流本轮优化。生成和比较不会自动安装候选，不改变业务 Agent 的模板或发布资格。
 
 ## Harness / DEEP
 

@@ -1,0 +1,12 @@
+{
+  "schema": "judge_pilot_selection_v1",
+  "selected": "baseline",
+  "selected_prompt_sha256": "eef030d26320426b8e0cf054e639e93bc9fc80d3ffea882dff4acf8f34d20d69",
+  "rejected_candidate_prompt_sha256": "3891ee51ec695e83ed8c120b3ba6013bcb0fb22366173c912be17930b44315f9",
+  "decision_basis": "PRE_VALIDATION_PROCEDURE_REVIEW",
+  "reason": "Candidate demands nonempty source excerpts even for NO_DATA; missing captured evidence cannot satisfy that rule. The unchanged protocol permits an explained abstention. Candidate will be measured on DEV only, never installed.",
+  "decision_independent_of_candidate_dev_metrics": true,
+  "validation_split": "VALIDATION",
+  "validation_repeats": 2,
+  "release_eligible": false
+}

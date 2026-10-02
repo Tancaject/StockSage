@@ -15,21 +15,37 @@ from pathlib import Path
 from eval_common import assess_review_format, capture_answer, json_hash, sha256, summarize_status
 from eval_common import context_errors as captured_context_errors
 
-DIMENSIONS = ("claim_support", "numeric_period_correctness", "counterevidence", "unknowns")
+DIMENSIONS = ("claim_support", "numeric_period_correctness", "counterevidence", "unknowns", "task_completion")
 REVIEW_REQUIREMENTS = {
-    "claim_support": "围绕用户的实际问题，核查最终回答的事实与推断是否由本轮可见证据支持；引用存在本身不代表内容成立，明确标为假设的一般解释不等同于已证实事实。",
-    "numeric_period_correctness": "核查最终回答中使用的数值、单位、期间和比较基准，以及自行计算的比例或变化；没有数值主张时可说明原因后标为不适用。",
-    "counterevidence": "核查回答是否遗漏本轮证据中与用户问题和结论有关的重要反向信息；不要求凭空增加负面观点或问题范围外的比较。",
-    "unknowns": "核查回答是否清楚区分已知、推断和仍缺少的信息，结论强度是否符合证据；不将缺失信息补成确定答案，也不要求无关免责声明。",
+    "claim_support": "只检查回答已经陈述的事实及推断是否成立于本轮证据。来源矛盾、无依据事实、错误因果、错误派生结论为FAIL；均有支持为PASS。漏答本身由task_completion评价，不因漏答就认定已写事实错误。明确标为假设的一般解释不当作已证实事实；不使用模型记忆补证。",
+    "numeric_period_correctness": "核查回答实际使用的数值、指标名称、单位、期间、比较基准和计算。错误值、GAAP口径或收入/费用错配为FAIL；正确为PASS。没有需要核查的数值/期间主张才为NOT_APPLICABLE；只有公司名、章节编号或题目中的年份不构成数值主张。",
+    "counterevidence": "先按问题与回答结论检查证据是否有相关的重要反向经营事实或可比性因素（如增长同时利润率下降、影响比较的非经常损益）。有且回答已呈现/回应相关指标及比较因素为PASS，有而未涉及为FAIL；证据充分且确实没有这类信息才为NOT_APPLICABLE。已处理反证不是不适用。已讨论相应指标但数值或方向说错归入事实/数值，不能再当成未涉及；遗漏另一个独立的反向指标仍FAIL。缺少披露、因果未识别、预测本身不确定性归入unknowns，不能仅凭这些再次判反证失败。不要求添加范围外的负面观点。",
+    "unknowns": "检查回答是否将证据缺口、因果未识别、预测不确定性明确保留。将明确未披露的指标补成确定事实、把相关性说成因果或将预测说成保证为FAIL；没有这种越界且适当说明相关缺口为PASS。用了‘预计/指引’不能豁免虚构披露。单纯算错、已有指标数值错配或漏答不自动使本维失败；必须指出具体的信息缺口或确定性越界。不要求无关免责声明。",
+    "task_completion": "只检查用户要求的核心子问题、比较对象/期间、输出约束是否得到回应。给出回应或针对该子问明确说明信息缺口为PASS；忽略核心子问、答非所问为FAIL。覆盖不等于内容正确：全部子问已回答但数字错误，本维可PASS，事实/数值维度仍FAIL；声称无法回答也属于回应，其缺口声称是否真实由claim_support/unknowns评价。根据问题和回答判定，不要求额外来源支持覆盖判断；不使用NOT_APPLICABLE。",
 }
-SCHEMA = "ordinary_answer_quality_v1"
+STATUS_DEFINITIONS = {
+    "PASS": "该维度适用，有足够材料判断且满足要求。",
+    "FAIL": "有足够材料，能指出该维度的具体实质违反。",
+    "NOT_APPLICABLE": "仅numeric_period_correctness无数值主张或counterevidence无相关反向信息时允许；说明检查范围和理由，不强制提供不存在的引文。",
+    "NO_DATA": "该维度所需材料不足，无法判断；不是错误答案、接口失败或格式错误的同义词。",
+}
+EVIDENCE_RULES = {
+    "scope": "AI诊断的摘录校验协议；普通人工评审使用相同语义标准、输入绑定和逐维理由，不凭reviewer文本认定人工身份。",
+    "quotes": "提供的每条摘录须为输入原文连续子串，禁止改写、拼接或省略号替代。摘录仅证明定位。",
+    "known": "PASS/FAIL应提供回答摘录；除task_completion外还需来源摘录。空回答的task_completion=FAIL允许无回答摘录。",
+    "inapplicable_or_unknown": "NOT_APPLICABLE/NO_DATA需具体理由，摘录可为空；完整输入仍由哈希绑定。",
+    "missing_source": "来源未捕获时，依赖来源的四维为NO_DATA；task_completion仍可根据完整问题/回答判断覆盖，不能凭URL或模型记忆补证。",
+}
+SCHEMA = "ordinary_answer_quality_v2"
 SCOPE = "ordinary-final-answer"
 RESULT_SCHEMAS = {"ordinary_execution_eval_v1", "ordinary_answer_replay_eval_v1"}
 
 
 def ordinary_rubric() -> dict:
-    rubric = {"schema": "ordinary_answer_rubric_v1", "scope": SCOPE,
-              "dimensions": dict(REVIEW_REQUIREMENTS)}
+    rubric = {"schema": "ordinary_answer_rubric_v2", "scope": SCOPE,
+              "dimensions": dict(REVIEW_REQUIREMENTS), "statuses": dict(STATUS_DEFINITIONS),
+              "evidence_rules": dict(EVIDENCE_RULES),
+              "attribution": "各维独立按其定义判断。同一缺陷确实同时违反多个定义时可跨维失败，但每项须独立说明依据；不能自动复制失败，也不能规定所有错误只归一维。只汇总各维状态，不将重复原因累加为惩罚总分。"}
     return {**rubric, "sha256": json_hash({**rubric, "dimensionKeys": DIMENSIONS})}
 
 
@@ -60,7 +76,7 @@ def material(case: dict) -> dict:
     errors = []
     if not definition or definition.get("id") != case.get("id") or case.get("case_sha256") != json_hash(definition):
         errors.append("CASE_BINDING_MISSING_OR_CHANGED")
-    if not answer.strip() or answer != case.get("answer") or sha256(answer) != case.get("answer_sha256"):
+    if answer != case.get("answer") or sha256(answer) != case.get("answer_sha256"):
         errors.append("ANSWER_BINDING_MISSING_OR_CHANGED")
     errors.extend(context_errors(context))
     if not invocation.get("modelName") or not invocation.get("modelTier"):
@@ -89,7 +105,54 @@ def review_template(report: dict) -> dict:
 
 
 def assess_review(case: dict, review: dict | None) -> dict:
-    return assess_review_format(material(case), review, DIMENSIONS)
+    checked = assess_review_format(material(case), review, DIMENSIONS)
+    if checked["errors"]:
+        return checked
+    for name, row in checked["dimensions"].items():
+        if row["status"] == "NOT_APPLICABLE" and name not in {"numeric_period_correctness", "counterevidence"}:
+            checked["errors"].append("NOT_APPLICABLE_FORBIDDEN:" + name)
+            row["status"] = "NO_DATA"
+    checked["status"] = summarize_status([row["status"] for row in checked["dimensions"].values()])
+    return checked
+
+
+def assess_diagnostic_dimensions(item: dict, ratings: dict, global_errors: list[str]) -> dict:
+    """Validate each dimension independently; only capture/transport errors affect all."""
+    dimensions = {}
+    for name in DIMENSIONS:
+        row = ratings.get(name) if isinstance(ratings, dict) else None
+        errors = list(global_errors)
+        raw = row if isinstance(row, dict) else {}
+        status = raw.get("reported_status", raw.get("status"))
+        reason = raw.get("reason", "")
+        if not isinstance(status, str) or status not in STATUS_DEFINITIONS:
+            errors.append("STATUS_INVALID")
+            status = None
+        if not isinstance(reason, str) or not reason.strip():
+            errors.append("REASON_MISSING")
+        if status == "NOT_APPLICABLE" and name not in {"numeric_period_correctness", "counterevidence"}:
+            errors.append("NOT_APPLICABLE_FORBIDDEN")
+        if not item.get("evidence", "").strip() and name != "task_completion" and status != "NO_DATA":
+            errors.append("SOURCE_UNAVAILABLE")
+        if not item.get("question", "").strip():
+            errors.append("QUESTION_UNAVAILABLE")
+        quotes = {}
+        for field, text in (("answer_quotes", item.get("answer", "")), ("evidence_quotes", item.get("evidence", ""))):
+            values = raw.get(field, [])
+            required = status in {"PASS", "FAIL"} and (field == "answer_quotes" or name != "task_completion")
+            if field == "answer_quotes" and name == "task_completion" and status == "FAIL" and not text.strip():
+                required = False
+            if not isinstance(values, list) or any(not isinstance(q, str) or not q.strip() or q not in text for q in values):
+                errors.append("EXCERPT_INVALID:" + field)
+            elif required and not values:
+                errors.append("EXCERPT_MISSING:" + field)
+            quotes[field] = values
+        dimensions[name] = {"status": "NO_DATA" if errors else status, "reported_status": status,
+                            "reason": reason, **quotes, "errors": errors}
+    valid_count = sum(not row["errors"] for row in dimensions.values())
+    return {"status": summarize_status([row["status"] for row in dimensions.values()]),
+            "technical_status": "VALID" if valid_count == len(DIMENSIONS) else "PARTIAL" if valid_count else "INVALID",
+            "errors": list(global_errors), "dimensions": dimensions}
 
 
 def unique_cases(report: dict) -> dict[str, dict]:
@@ -191,7 +254,7 @@ def compare_reports(baseline: dict, candidate: dict) -> dict:
     for route in sorted(set(routes.values())):
         strata[route] = pair_summary([row for row in paired if routes[row["id"]] == route],
                                     [row for row in unpaired if routes[row["id"]] == route])
-    return {"schema": "ordinary_answer_comparison_v1", "scope": SCOPE, "usage_scope": "final-answer",
+    return {"schema": "ordinary_answer_comparison_v2", "scope": SCOPE, "usage_scope": "final-answer", "rubric": ordinary_rubric(),
             **pair_summary(paired, unpaired), "stratification": "baseline_expected_route_else_candidate",
             "coverage_scope": "exported_case_union",
             "route_strata": strata, "pairs": paired, "unpaired": unpaired}

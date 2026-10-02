@@ -142,7 +142,8 @@ class OrdinaryAnswerQualityTest(unittest.TestCase):
         report = sample_report()
         reviews = completed_reviews(report, "NOT_APPLICABLE")
         self.assertEqual(apply_reviews(report, reviews)["answer_quality"], "NO_DATA")
-        reviews["reviews"][0]["dimensions"]["claim_support"]["status"] = "PASS"
+        for name in ("claim_support", "unknowns", "task_completion"):
+            reviews["reviews"][0]["dimensions"][name]["status"] = "PASS"
         self.assertEqual(apply_reviews(report, reviews)["answer_quality"], "PASS")
         reviews["reviews"][0]["dimensions"]["unknowns"]["reason"] = ""
         self.assertEqual(apply_reviews(report, reviews)["answer_quality"], "NO_DATA")

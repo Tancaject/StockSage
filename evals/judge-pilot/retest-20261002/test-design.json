@@ -1,0 +1,68 @@
+{
+  "schema": "ordinary_judge_independent_retest_design_v1",
+  "created_at": "2026-10-02T03:56:29.967473+00:00",
+  "purpose": "Retest the unchanged evaluator on new controlled everyday answer variants; quantify error detection and correct-answer preservation as well as rubric agreement.",
+  "diagnostic_only": true,
+  "release_eligible": false,
+  "comparison_scope": "Same evaluator on independent new examples; not an A/B improvement claim. Authored controlled variants do not measure live business Agent task success.",
+  "source_group_count": 4,
+  "case_count": 20,
+  "repeats": 2,
+  "workers": 4,
+  "variants": [
+    "CORRECT_FACTUAL",
+    "CORRECT_BOUNDED",
+    "NUMERIC_ERROR",
+    "OMISSION",
+    "UNSUPPORTED_CERTAINTY"
+  ],
+  "paired_material": "Within each group, question and evidence identical across all variants. Correct variants contain no expected FAIL. Corrupt variant must have FAIL in its predefined target dimension.",
+  "target_dimensions": {
+    "NUMERIC_ERROR": "numeric_period_correctness",
+    "OMISSION": "task_completion",
+    "UNSUPPORTED_CERTAINTY": "unknowns"
+  },
+  "metric_definitions": {
+    "correct_answer_retention": "Complete technically valid review, all five statuses PASS or NOT_APPLICABLE; denominator all correct-control attempts. Invalid or NO_DATA is not retained.",
+    "targeted_error_detection": "Predeclared target dimension technically valid and FAIL; denominator all corrupt-variant attempts. Other unrelated FAIL does not count.",
+    "paired_separation": "Same group/repeat CORRECT_FACTUAL retained AND corrupt-variant targeted error detected; denominator all corrupt-variant attempts.",
+    "technical_or_unknown": "Report separately; neither detection nor retention gets credit for missing or technically invalid judgments.",
+    "rubric_agreement": "Use unchanged judge_calibration_v2 metric definitions and denominators; report all five dimensions, confusion matrices, false pass/fail and repeatability."
+  },
+  "diagnostic_targets": {
+    "dimension_technical_valid_rate_min": 0.98,
+    "known_judgment_coverage_min": 0.95,
+    "semantic_agreement_rate_min": 0.9,
+    "each_dimension_semantic_agreement_rate_min": 0.8,
+    "false_pass_count_max": 0,
+    "expected_no_data_correct_rate_min": 1.0,
+    "repeat_consistency_rate_min": 0.9
+  },
+  "practical_targets": {
+    "correct_answer_retention_min": 0.9,
+    "targeted_error_detection_min": 0.9,
+    "paired_separation_min": 0.9
+  },
+  "acceptance_rule": "All prior diagnostic targets and practical targets must pass; practical detection cannot override a failed rubric calibration. Targets are preregistered working criteria for this small pilot, not production guarantees.",
+  "config": {
+    "model": "qwen3.8-max",
+    "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+    "temperature": 0,
+    "enable_thinking": false,
+    "timeout_seconds": 180,
+    "max_tokens": 2400,
+    "max_calls": 4
+  },
+  "rubric_sha256": "3396bd8f16f563fd04079836ed8280f58b2e37f39a508a2189fb82321068f870",
+  "prompt_sha256": "7f3f12300b022238e7e8d609a08ac40141811606b5b77a6cb45a47df0a7db615",
+  "tools_sha256": "bad50e8ef62ce289aca2768d859094ab0140eb3f607d6fe6b42766f7edb3f207",
+  "source_sha256": {
+    "evals\\run_evaluation_agent.py": "a400bf529fd6fe3416878b57a59ef2fa0ded13051c519975bfa92b9e07413151",
+    "evals\\ordinary_answer_quality.py": "c548836d902170f2cb895158917d96e55ff84bac0e04036f1f7ed4ea0d0b0e14",
+    "evals\\judge_calibration.py": "ff4d983f3ced91a2cbb70a8843a3ec2e9722b44ad7760c0698008741f7a7c41e",
+    "evals\\propose_judge_prompt.py": "e27f4e1e95453a3f1cc549f1d7dd79bc6ce0b12a4ddecfe8ba291a42c7b2948a",
+    "evals\\prompts\\ordinary_judge.txt": "5c62ba3e36bdcef71ce68df2c3b88337a24b7fbd2067f4734ebce25c37324376"
+  },
+  "label_rule": "Official-source verification plus independent AI semantic review before calls; unresolved disputes block run. Record AI identities, no human gold claim. Freeze final cases/label-review identities in run-plan after authoring.",
+  "history_rule": "No edits to old artifacts, business HOLDOUT, current scorer, prompt, or rubric; no tuning on this retest. New result goes to its own files."
+}

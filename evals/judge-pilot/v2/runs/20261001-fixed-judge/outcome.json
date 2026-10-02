@@ -1,0 +1,6 @@
+{
+  "status": "DEV_TECHNICAL_TARGET_FAILED",
+  "validation_run": false,
+  "reason": "3 non-JSON responses and 24 partially invalid reviews; preserve this fixed runtime and repair output protocol before consuming fresh validation.",
+  "superseding_run": "../20261001-json-contract/run-plan.json"
+}

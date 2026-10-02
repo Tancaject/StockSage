@@ -106,22 +106,13 @@ python evals/run_ordinary_live_eval.py --output evals/results/ordinary-live.json
 python evals/ordinary_answer_quality.py --input evals/results/ordinary-live.json --review-template evals/results/ordinary-reviews.json
 ```
 
-模板包含实际问题、答案、上下文和版本绑定。填写 `reviewer`、带时区的 ISO 格式 `reviewed_at`，再为以下四项填写 `status` 与具体 `reason`：
-
-| 维度 | 人工判断依据 |
-|---|---|
-| `claim_support` | 关键主张是否得到实际可见证据支持；存在引用编号不等于获得支持 |
-| `numeric_period_correctness` | 数字、单位、币种、期间、比较口径是否准确一致 |
-| `counterevidence` | 是否保留会改变结论的重要反证与相反解释 |
-| `unknowns` | 是否如实表达信息缺口、时效限制与不确定性 |
-
-状态使用 `PASS`、`FAIL`、`NOT_APPLICABLE` 或 `NO_DATA`；非 `NO_DATA` 必须说明理由。不适用不是通过，全部不适用仍为 `NO_DATA`。脚本不自动充当语义 Judge：
+模板包含实际问题、答案、上下文和版本绑定。填写 `reviewer`、带时区的 ISO 格式 `reviewed_at`，再按模板内冻结的五维标准填写 `status` 与具体 `reason`。维度、状态适用范围和错误归属以 [ordinary_rubric()](../../evals/ordinary_answer_quality.py) 为唯一来源；标准变化后需要重新导出模板并复核，不能复用旧标签。脚本检查格式和绑定，不凭 `reviewer` 字符串验证人工身份，也不自动充当语义 Judge：
 
 ```powershell
 python evals/ordinary_answer_quality.py --input evals/results/ordinary-live.json --reviews evals/results/ordinary-reviews.json --output evals/results/ordinary-reviewed.json
 ```
 
-评审绑定用例、答案、完整文字 prompt、上下文、源证据和模型调用参数的哈希。答案或上下文变化后必须重新评审；缺失绑定、证据捕获不完整、仅有文字指纹的图片请求、无模型上下文的规则直答均不能获得质量通过。缺项为 `NO_DATA`，任一明确失败优先记为 `FAIL`。结果保留四维分数、有效样本数与评审覆盖率；`answer_quality` 表达人工语义结果，`quality_evaluation.status` 同时要求完整执行与完整评审，原执行 `status` 不被改写。
+评审绑定用例、答案、完整文字 prompt、上下文、源证据和模型调用参数的哈希。答案或上下文变化后必须重新评审；缺失绑定、证据捕获不完整、仅有文字指纹的图片请求、无模型上下文的规则直答均不能获得质量通过。缺项为 `NO_DATA`，任一明确失败优先记为 `FAIL`。结果保留各维状态、有效样本数与评审覆盖率；`answer_quality` 表达复核的语义结果，`quality_evaluation.status` 同时要求完整执行与完整评审，原执行 `status` 不被改写。
 
 ### 成对比较与归因
 
@@ -133,7 +124,7 @@ python evals/ordinary_answer_quality.py --input evals/results/candidate-live.jso
 
 仅用例定义和实际可见源证据哈希相同的样本进入成对比较；不匹配样本列入 `unpaired` 并注明原因，不计入差值。保留双方 prompt、模型及参数身份，报告每个维度的有效配对数和通过率差；这不是自动判定方案更优的统计检验。原始证据变化需要重新冻结或重采样，不能把不同数据的结果解释为纯 prompt 收益。
 
-`route_strata` 按用例预声明的路线分层，不按模型实际选中的路线分组。每层分别列出有效配对数、未配对原因、配对覆盖率和四维差值，避免一条路线的改善抵消另一条路线的退化。用例定义发生变化时计入基线的预声明路线；仅候选存在的用例使用候选路线。`coverage_scope=exported_case_union` 表示覆盖率分母只是两份产物中已导出的用例并集，两边都未导出的计划用例无法由此统计，不代表完整数据集覆盖率。没有有效维度评分的层保持 `NO_DATA`；`PAIRED` 仅表示存在可比较评审，不表示质量非劣或可以删除某一 Agent 阶段。
+`route_strata` 按用例预声明的路线分层，不按模型实际选中的路线分组。每层分别列出有效配对数、未配对原因、配对覆盖率和逐维差值，避免一条路线的改善抵消另一条路线的退化。用例定义发生变化时计入基线的预声明路线；仅候选存在的用例使用候选路线。`coverage_scope=exported_case_union` 表示覆盖率分母只是两份产物中已导出的用例并集，两边都未导出的计划用例无法由此统计，不代表完整数据集覆盖率。没有有效维度评分的层保持 `NO_DATA`；`PAIRED` 仅表示存在可比较评审，不表示质量非劣或可以删除某一 Agent 阶段。
 
 普通 live 脚本会重新调用工具取证，不能直接用于同证据消融。下方冻结输入回放只改变已经生成的分析草稿是否进入最终回答；它不重跑规划、取证或分析师阶段。两个结果即使能够配对，也需要检查双方模型、prompt、历史与记忆差异；这份比较本身不能证明整个 Agent 链路的收益。
 

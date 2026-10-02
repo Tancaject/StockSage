@@ -1,0 +1,595 @@
+{
+  "schema": "ordinary_judge_factorial_quality_audit_v1",
+  "audited_at": "2026-10-02T05:37:46.348936+00:00",
+  "reviewer": "AI_INDEPENDENT_REVIEWER:/root/retest_label_review",
+  "diagnostic_only": true,
+  "release_eligible": false,
+  "status": "RECOMPUTATION_MATCHED",
+  "plan_sha256": "aeb171ac99389d302b70d838e06565ac0fbe1bb3396277ccd96266109cbf1fe2",
+  "dataset_sha256": "1fbd3baa823297e3ea71d6e5c7685187e2a44a7f53d10372db68793334bd2049",
+  "verification": {
+    "raw_final_verdicts_reassessed": 160,
+    "dimension_items": 800,
+    "all_recorded_assessments_match_raw": true,
+    "frozen_files_unchanged": true,
+    "keyed_pairing_matches_summary": true,
+    "all_main_metrics_match_summary": true,
+    "model_calls_made_during_audit": 0,
+    "labels_or_rubric_modified": false
+  },
+  "arms": {
+    "A_base_off": {
+      "total": 200,
+      "valid": 191,
+      "known": 191,
+      "agreement": 170,
+      "false_pass": 3,
+      "false_fail": 12,
+      "disagreement_by_dimension": {
+        "counterevidence": 10,
+        "claim_support": 9,
+        "numeric_period_correctness": 1,
+        "unknowns": 1
+      },
+      "correct_retained": 12,
+      "correct_total": 16,
+      "target_detected": 21,
+      "corrupt_total": 24,
+      "paired_separation": 16
+    },
+    "B_prompt_off": {
+      "total": 200,
+      "valid": 195,
+      "known": 195,
+      "agreement": 174,
+      "false_pass": 1,
+      "false_fail": 12,
+      "disagreement_by_dimension": {
+        "counterevidence": 10,
+        "claim_support": 8,
+        "unknowns": 3
+      },
+      "correct_retained": 12,
+      "correct_total": 16,
+      "target_detected": 23,
+      "corrupt_total": 24,
+      "paired_separation": 17
+    },
+    "C_base_on": {
+      "total": 200,
+      "valid": 198,
+      "known": 198,
+      "agreement": 181,
+      "false_pass": 0,
+      "false_fail": 7,
+      "disagreement_by_dimension": {
+        "counterevidence": 17
+      },
+      "correct_retained": 15,
+      "correct_total": 16,
+      "target_detected": 24,
+      "corrupt_total": 24,
+      "paired_separation": 24
+    },
+    "D_prompt_on": {
+      "total": 200,
+      "valid": 200,
+      "known": 200,
+      "agreement": 182,
+      "false_pass": 1,
+      "false_fail": 5,
+      "disagreement_by_dimension": {
+        "counterevidence": 17,
+        "claim_support": 1
+      },
+      "correct_retained": 16,
+      "correct_total": 16,
+      "target_detected": 24,
+      "corrupt_total": 24,
+      "paired_separation": 24
+    }
+  },
+  "pairwise_contrasts": {
+    "prompt_off": {
+      "left": "A_base_off",
+      "right": "B_prompt_off",
+      "common_count": 190,
+      "corrected": 4,
+      "regressed": 3,
+      "new_false_pass": 1,
+      "technical_coverage_gained": 5,
+      "technical_coverage_lost": 1,
+      "new_false_pass_items": [
+        {
+          "id": "hd-fy2025-q1-05",
+          "repeat": 1,
+          "dimension": "unknowns",
+          "right_reason": "回答未将未披露信息补为确定事实，也未把相关性说成因果或将预测说成保证；除‘装修需求回暖’这一无依据归因（已在claim_support评价）外，其余陈述均在证据范围内，未出现确定性越界。"
+        }
+      ]
+    },
+    "prompt_on": {
+      "left": "C_base_on",
+      "right": "D_prompt_on",
+      "common_count": 198,
+      "corrected": 3,
+      "regressed": 4,
+      "new_false_pass": 1,
+      "technical_coverage_gained": 2,
+      "technical_coverage_lost": 0,
+      "new_false_pass_items": [
+        {
+          "id": "nike-fy2025-q4-03",
+          "repeat": 1,
+          "dimension": "claim_support",
+          "right_reason": "回答陈述的营收111亿美元、报告口径同比-12%、不变汇率-11%、毛利率40.3%、下滑归因于更高折扣和渠道组合变化、以及公告未给出下季度毛利率指引，均与来源一致；毛利率同比幅度属单位换算错误，归入数值维度，其余事实主张无来源矛盾或无依据推断。"
+        }
+      ]
+    },
+    "thinking_base": {
+      "left": "A_base_off",
+      "right": "C_base_on",
+      "common_count": 189,
+      "corrected": 18,
+      "regressed": 14,
+      "new_false_pass": 0,
+      "technical_coverage_gained": 9,
+      "technical_coverage_lost": 2,
+      "new_false_pass_items": []
+    },
+    "thinking_prompt": {
+      "left": "B_prompt_off",
+      "right": "D_prompt_on",
+      "common_count": 195,
+      "corrected": 19,
+      "regressed": 16,
+      "new_false_pass": 1,
+      "technical_coverage_gained": 5,
+      "technical_coverage_lost": 0,
+      "new_false_pass_items": [
+        {
+          "id": "nike-fy2025-q4-03",
+          "repeat": 1,
+          "dimension": "claim_support",
+          "right_reason": "回答陈述的营收111亿美元、报告口径同比-12%、不变汇率-11%、毛利率40.3%、下滑归因于更高折扣和渠道组合变化、以及公告未给出下季度毛利率指引，均与来源一致；毛利率同比幅度属单位换算错误，归入数值维度，其余事实主张无来源矛盾或无依据推断。"
+        }
+      ]
+    }
+  },
+  "common_four_arm": {
+    "count": 188,
+    "agreement_counts": {
+      "A_base_off": 167,
+      "B_prompt_off": 168,
+      "C_base_on": 171,
+      "D_prompt_on": 170
+    },
+    "agreement_rates": {
+      "A_base_off": 0.8882978723404256,
+      "B_prompt_off": 0.8936170212765957,
+      "C_base_on": 0.9095744680851063,
+      "D_prompt_on": 0.9042553191489362
+    },
+    "effects_on_same_188_items": {
+      "prompt_off_agreement_count_delta": 1,
+      "prompt_on_agreement_count_delta": -1,
+      "thinking_base_agreement_count_delta": 4,
+      "thinking_candidate_agreement_count_delta": 2
+    },
+    "interaction_agreement_count": -2,
+    "excluded_items": [
+      {
+        "id": "fedex-fy2025-q4-01",
+        "repeat": 1,
+        "dimension": "claim_support",
+        "invalid_arms": [
+          "A_base_off",
+          "B_prompt_off"
+        ]
+      },
+      {
+        "id": "fedex-fy2025-q4-01",
+        "repeat": 1,
+        "dimension": "counterevidence",
+        "invalid_arms": [
+          "A_base_off"
+        ]
+      },
+      {
+        "id": "fedex-fy2025-q4-01",
+        "repeat": 1,
+        "dimension": "unknowns",
+        "invalid_arms": [
+          "B_prompt_off"
+        ]
+      },
+      {
+        "id": "fedex-fy2025-q4-01",
+        "repeat": 2,
+        "dimension": "claim_support",
+        "invalid_arms": [
+          "A_base_off",
+          "B_prompt_off"
+        ]
+      },
+      {
+        "id": "fedex-fy2025-q4-01",
+        "repeat": 2,
+        "dimension": "unknowns",
+        "invalid_arms": [
+          "A_base_off"
+        ]
+      },
+      {
+        "id": "fedex-fy2025-q4-02",
+        "repeat": 1,
+        "dimension": "claim_support",
+        "invalid_arms": [
+          "A_base_off",
+          "B_prompt_off"
+        ]
+      },
+      {
+        "id": "fedex-fy2025-q4-02",
+        "repeat": 2,
+        "dimension": "claim_support",
+        "invalid_arms": [
+          "A_base_off",
+          "B_prompt_off"
+        ]
+      },
+      {
+        "id": "fedex-fy2025-q4-02",
+        "repeat": 2,
+        "dimension": "unknowns",
+        "invalid_arms": [
+          "A_base_off"
+        ]
+      },
+      {
+        "id": "fedex-fy2025-q4-04",
+        "repeat": 1,
+        "dimension": "task_completion",
+        "invalid_arms": [
+          "A_base_off"
+        ]
+      },
+      {
+        "id": "hd-fy2025-q1-04",
+        "repeat": 1,
+        "dimension": "task_completion",
+        "invalid_arms": [
+          "A_base_off"
+        ]
+      },
+      {
+        "id": "nike-fy2025-q4-02",
+        "repeat": 1,
+        "dimension": "task_completion",
+        "invalid_arms": [
+          "C_base_on"
+        ]
+      },
+      {
+        "id": "nike-fy2025-q4-05",
+        "repeat": 2,
+        "dimension": "task_completion",
+        "invalid_arms": [
+          "C_base_on"
+        ]
+      }
+    ]
+  },
+  "paired_examples": [
+    {
+      "id": "nike-fy2025-q4-03",
+      "repeat": 1,
+      "dimensions": [
+        "claim_support",
+        "numeric_period_correctness"
+      ],
+      "arms": {
+        "A_base_off": {
+          "claim_support": {
+            "expected": "FAIL",
+            "actual": "PASS",
+            "valid": true,
+            "reason": "回答中关于营收、毛利率数值及同比变化、下滑原因、无法保证下季回升等主张均与来源一致，未发现无依据事实或错误推断。",
+            "errors": []
+          },
+          "numeric_period_correctness": {
+            "expected": "FAIL",
+            "actual": "PASS",
+            "valid": true,
+            "reason": "营收111亿美元、报告口径-12%、不变汇率-11%、毛利率40.3%及同比-0.44个百分点（即-440bps）均与来源完全一致，期间为FY2025 Q4，单位与口径正确。",
+            "errors": []
+          }
+        },
+        "B_prompt_off": {
+          "claim_support": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "回答称毛利率同比下降0.44个百分点，但证据显示上年同季44.7%、本季40.3%，同比下降440个基点即4.4个百分点，回答数值与来源矛盾。其余营收、同比变化、原因及不能保证回升的陈述均有证据支持。",
+            "errors": []
+          },
+          "numeric_period_correctness": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "回答将毛利率同比变化表述为0.44个百分点，实际应为4.4个百分点（440个基点），数值错误；其他数值、期间和口径正确。",
+            "errors": []
+          }
+        },
+        "C_base_on": {
+          "claim_support": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "营收111亿美元、报告口径同比-12%、不变汇率-11%、毛利率40.3%及下滑归因（更高折扣与渠道组合变化）均与证据一致；但“同比下降0.44个百分点”与证据披露的“同比下降440个基点”（44.7%-40.3%=4.4个百分点）矛盾，属错误派生结论。",
+            "errors": []
+          },
+          "numeric_period_correctness": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "毛利率同比变化数值错误：证据为上年同季44.7%、本季40.3%，即下降4.4个百分点/440个基点，回答写成0.44个百分点，缩小十倍；其余数值与期间（FY2025第四季度、截至2025-05-31、与上年同季比较）正确。",
+            "errors": []
+          }
+        },
+        "D_prompt_on": {
+          "claim_support": {
+            "expected": "FAIL",
+            "actual": "PASS",
+            "valid": true,
+            "reason": "回答陈述的营收111亿美元、报告口径同比-12%、不变汇率-11%、毛利率40.3%、下滑归因于更高折扣和渠道组合变化、以及公告未给出下季度毛利率指引，均与来源一致；毛利率同比幅度属单位换算错误，归入数值维度，其余事实主张无来源矛盾或无依据推断。",
+            "errors": []
+          },
+          "numeric_period_correctness": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "基点与百分点换算错误：来源为同比下降440个基点（44.7%-40.3%=4.4个百分点），回答写成下降0.44个百分点，缩小10倍；其余数值、期间（FY2025第四季度、与上年同季比较）和口径标注正确。",
+            "errors": []
+          }
+        }
+      },
+      "interpretation": "A falsely accepts the conversion. B and C reject both the factual and numeric defect. D rejects numeric correctness but excuses claim support solely because the same error was assigned to the numeric dimension, contrary to independent cross-dimension attribution."
+    },
+    {
+      "id": "fedex-fy2025-q4-04",
+      "repeat": 1,
+      "dimensions": [
+        "claim_support",
+        "counterevidence",
+        "task_completion"
+      ],
+      "arms": {
+        "A_base_off": {
+          "claim_support": {
+            "expected": "PASS",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "回答称“Federal Express经营表现改善”，但未提及证据中明确披露的“FedEx Freight分部经营表现下降”这一重要事实，导致对两个分部经营表现的概括不完整且产生误导，属于漏答关键已陈述事实范围外的反向信息，但就claim_support而言，回答已写内容（Federal Express改善、营收、利润率、指引及非保证）均有证据支持；然而问题要求概括“两个分部的经营表现各有什么变化”，回答只写了一个分部的变化，遗漏另一个分部的下降事实，这属于对已存在证据事实的选择性呈现，构成无依据的片面陈述。",
+            "errors": []
+          },
+          "counterevidence": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "证据明确显示FedEx Freight分部经营表现下降，这是与Federal Express改善并存的重要反向经营事实，且问题明确要求说明“两个分部的经营表现各有什么变化”，回答完全未涉及FedEx Freight的下降情况，属于有相关反向事实而未呈现。",
+            "errors": []
+          },
+          "task_completion": {
+            "expected": "FAIL",
+            "actual": "NO_DATA",
+            "valid": false,
+            "reason": "问题明确要求说明“Federal Express和FedEx Freight两个分部的经营表现各有什么变化”，回答仅描述了Federal Express的改善，完全未回应FedEx Freight的变化，遗漏核心子问题。",
+            "errors": [
+              "EXCERPT_INVALID:evidence_quotes"
+            ]
+          }
+        },
+        "B_prompt_off": {
+          "claim_support": {
+            "expected": "PASS",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "回答称“Federal Express经营表现改善”，但未提及证据中明确存在的FedEx Freight分部经营表现下降的事实，且将两个分部的表现混为一谈或遗漏负面分部信息，导致已陈述的关于分部表现的概括不完整且具有误导性。虽然回答未直接说错Federal Express的数据，但作为对“两个分部经营表现”的概括，遗漏关键反向事实使得已写内容在语境上构成错误推断。",
+            "errors": []
+          },
+          "counterevidence": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "证据中明确存在FedEx Freight分部经营表现下降的重要反向经营事实（燃油附加费降低、成本提高等），这是评估整体经营表现的关键可比性因素。回答仅提及Federal Express的改善，完全未涉及FedEx Freight的下降表现，属于有重要反向信息而未呈现。",
+            "errors": []
+          },
+          "task_completion": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "用户明确要求说明“Federal Express和FedEx Freight两个分部的经营表现各有什么变化”。回答仅回应了Federal Express的表现，完全忽略了FedEx Freight分部的经营表现变化，核心子问题未得到回应。",
+            "errors": []
+          }
+        },
+        "C_base_on": {
+          "claim_support": {
+            "expected": "PASS",
+            "actual": "PASS",
+            "valid": true,
+            "reason": "回答中已陈述的事实均与证据一致：营收222亿美元、GAAP营业利润率8.1%、调整后9.1%且两项均高于上年同期（7.0%、8.5%）；Federal Express经营表现改善及降本、业务量、基础收益率原因；FY2026第一季度营收同比持平至增长2%指引；预测含经济与燃油假设、不能视为保证。未发现无依据事实或错误因果。",
+            "errors": []
+          },
+          "counterevidence": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "证据中存在明确的重要反向经营事实：FedEx Freight分部经营表现下降，原因包括燃油附加费降低、每票重量减少、医疗和工资成本提高及少一个营业日。问题直接要求说明两个分部变化，回答仅提及Federal Express改善，完全未涉及Freight的下滑这一独立反向指标，属于有而未涉及。",
+            "errors": []
+          },
+          "task_completion": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "问题要求分别说明Federal Express和FedEx Freight两个分部的经营表现变化，回答仅回应了Federal Express，对FedEx Freight分部这一核心子问既未作答也未说明信息缺口，属于忽略核心子问；其余子问（营收、两项利润率、FY2026第一季度指引及是否为保证）已回应。",
+            "errors": []
+          }
+        },
+        "D_prompt_on": {
+          "claim_support": {
+            "expected": "PASS",
+            "actual": "PASS",
+            "valid": true,
+            "reason": "回答所述营收、两项利润率、均高于上年同期、Federal Express改善原因及FY2026第一季度指引与假设、不构成保证，均与来源一致，无虚构或错误因果。",
+            "errors": []
+          },
+          "counterevidence": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "来源明确披露FedEx Freight分部经营表现下降及具体原因，属与“两个分部经营表现变化”直接相关的重要反向经营事实，回答完全未涉及。",
+            "errors": []
+          },
+          "task_completion": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "问题要求分别说明Federal Express与FedEx Freight两个分部经营表现变化，回答仅覆盖Federal Express，对FedEx Freight既未回应也未说明信息缺口，核心子问被忽略。",
+            "errors": []
+          }
+        }
+      },
+      "interpretation": "A and B spread the Freight omission into claim support; C and D preserve support for written facts while retaining the relevant counterevidence and task failures."
+    },
+    {
+      "id": "hd-fy2025-q1-05",
+      "repeat": 1,
+      "dimensions": [
+        "claim_support",
+        "unknowns"
+      ],
+      "arms": {
+        "A_base_off": {
+          "claim_support": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "回答声称“总销售增长的主要原因就是消费者装修需求回暖”，但来源仅提及“客户继续参与小型项目和春季活动，第一季度结果符合预期”，并未将“消费者装修需求回暖”确认为总销售增长的主要原因，属于无依据因果推断。其余数值及同比表述与来源一致。",
+            "errors": []
+          },
+          "unknowns": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "回答将“消费者装修需求回暖”作为总销售增长的确定原因陈述，但来源未披露该因果关系，属于将未识别因果当作确定事实，构成确定性越界。",
+            "errors": []
+          }
+        },
+        "B_prompt_off": {
+          "claim_support": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "回答称“总销售增长的主要原因就是消费者装修需求回暖”，但证据仅显示“客户继续参与小型项目和春季活动，第一季度结果符合预期”，并未将销售增长归因于装修需求回暖，也未提及该因素为‘主要原因’，属无依据因果推断。其余数值及同步改善判断均有证据支持。",
+            "errors": []
+          },
+          "unknowns": {
+            "expected": "FAIL",
+            "actual": "PASS",
+            "valid": true,
+            "reason": "回答未将未披露信息补为确定事实，也未把相关性说成因果或将预测说成保证；除‘装修需求回暖’这一无依据归因（已在claim_support评价）外，其余陈述均在证据范围内，未出现确定性越界。",
+            "errors": []
+          }
+        },
+        "C_base_on": {
+          "claim_support": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "销售额、可比销售、汇率影响、净利润等事实均与来源一致，但结尾把增长归因于“消费者装修需求回暖”并称其为“主要原因”，来源仅提到客户参与小型项目和春季活动、结果符合预期，未披露该因果结论，属无依据的因果主张。",
+            "errors": []
+          },
+          "unknowns": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "来源未披露销售增长的驱动因素，回答却以确定语气断言“主要原因就是消费者装修需求回暖”，把未披露的因果关系补成确定事实，属确定性越界。",
+            "errors": []
+          }
+        },
+        "D_prompt_on": {
+          "claim_support": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "销售额、可比销售、汇率影响、净利润等数值与来源一致，但“总销售增长的主要原因就是消费者装修需求回暖”属无依据的因果结论；来源仅称客户继续参与小型项目和春季活动、结果符合预期，并未认定这是总销售增长的主要原因。",
+            "errors": []
+          },
+          "unknowns": {
+            "expected": "FAIL",
+            "actual": "FAIL",
+            "valid": true,
+            "reason": "回答把总销售增长的驱动因素写成确定的“主要原因”，而来源未披露增长归因（也未区分门店扩张、并购等因素），属将相关性表述为因果的确定性越界；回答未保留该信息缺口。",
+            "errors": []
+          }
+        }
+      },
+      "interpretation": "Only B accepts unknowns, expressly exempting the unsupported causal attribution because claim support already penalized it. This is a new false pass in the prompt-off contrast, without loss of the claim-support failure."
+    }
+  ],
+  "attribution_summary": {
+    "omission_claim_support_false_fail_count": {
+      "A_base_off": 8,
+      "B_prompt_off": 8,
+      "C_base_on": 0,
+      "D_prompt_on": 0
+    },
+    "counterevidence_disagreement_count": {
+      "A_base_off": 10,
+      "B_prompt_off": 10,
+      "C_base_on": 17,
+      "D_prompt_on": 17
+    },
+    "interpretation": "Thinking-on corrected the observed omission-to-support contamination, but increased disagreement over counterevidence applicability. Many on-arm counterevidence differences treat negative performance itself or forecast uncertainty as counterevidence; UPS revenue-versus-average-daily-volume comparability remains a semantic scope boundary in the AI reference labels."
+  },
+  "conclusions": [
+    "With the same 188 valid-known items, the prompt treatment changes agreement by +1 with thinking off and -1 with thinking on. No consistent semantic improvement from this prompt package is established.",
+    "On that same set, thinking changes agreement by +4 with baseline guidance and +2 with candidate guidance. These are small descriptive gains accompanied by repairs and regressions, not broad capability proof.",
+    "Coverage and practical correctness improve substantially in thinking-on arms, but D has a new claim-support false pass despite 24/24 target detection.",
+    "Conditional agreement denominators differ (191,195,198,200); those rates alone must not be used to attribute semantic gains.",
+    "The fixed AI reference labels remain unchanged. Counterevidence scope has interpretive uncertainty; observed mismatches are not human-ground-truth certification.",
+    "The experiment identifies outcomes of the complete prompt package and bounded thinking setting on consumed cases; it does not identify the effect of each prompt clause, internal reasoning mechanisms or fresh held-out generalization.",
+    "A higher counterevidence mismatch count with thinking enabled is not by itself evidence of worse counterevidence ability: the unresolved adverse-fact-versus-counterargument interpretation affects the measurement. Preserve scores and discuss this uncertainty separately."
+  ],
+  "source_file_sha256": {
+    "plan.json": "bf2f8246e674cd558ade112c1423e3a5be205beb8c454831282abad923c78bc6",
+    "summary.json": "50e1a566da219c64018f7f70e3c154940515655cda2ea786737689d7b8f881c0",
+    "A_base_off.json": "cd73925cc9735334c4f89e66960f6e12c26b2be8a151118c214357c48668977c",
+    "B_prompt_off.json": "dc29a015725eb04a0849300fad994f16a3f0e6c1c6259abd08e0040e99123e11",
+    "C_base_on.json": "19cd46d1725c5019acfeb1654d3e23a308dce3e2f993b52a4ee5f8e1cefee923",
+    "D_prompt_on.json": "620fbd2e8d5bd222c9184d4668be5c7f361635e1945ba543ec014b5fddc50a37",
+    "A_base_off-calibration.json": "40f8a9c2101ab010c2b92eb421a614edf10769203095c1d90c34915a09b607e8",
+    "B_prompt_off-calibration.json": "e6278e59e5533a56095902b7aaf7fcb2c931c92fbfe721dbf2de95ae86073ff9",
+    "C_base_on-calibration.json": "061a305929aaf7304e20d7a2ee984045801c25660e902bbc7f8445a4fe42d9a2",
+    "D_prompt_on-calibration.json": "048d72fb7b0e268ef9f70dc037be52105c254af585aab8284cc8e309d886eced"
+  },
+  "counterevidence_interpretation_note": {
+    "case_id": "nike-fy2025-q4-01",
+    "repeat": 1,
+    "arm": "C_base_on",
+    "frozen_expected": "NOT_APPLICABLE",
+    "observed": "PASS",
+    "observed_reason": "证据中的反向经营事实为营收同比下降12%（不变汇率-11%）及毛利率同比大幅下滑440个基点，回答已同时呈现营收下滑与毛利率下滑及原因，未只报喜不报忧。",
+    "rule_reading": "The rubric requires interpreting relevant adverse facts with respect to the question and answer conclusion, but does not operationally specify the proposition that an adverse fact must oppose, nor explicitly distinguish negative operating facts from evidence contradicting a conclusion.",
+    "reference_reading": "The frozen AI reference interprets simultaneous revenue and margin declines as supporting the limited historical conclusion, so no opposing operating fact applies.",
+    "alternative_reading": "The judge treats negative operating performance itself as adverse evidence and judges whether it was presented. That interpretation is broader than the reference, but current wording does not make the boundary fully mechanical.",
+    "conclusion": "This PASS-versus-NOT_APPLICABLE difference cannot alone establish a model capability error. The 17 counterevidence disagreements in each thinking-on arm must not all be called model errors or deterioration. Reasons relying only on forecast or macro uncertainty have a clearer conflict with the explicit unknowns exclusion.",
+    "score_policy": "All frozen labels and original statistics remain unchanged; this is post-run measurement interpretation, not relabeling or score correction."
+  },
+  "cross_dimension_exemption_note": {
+    "B_prompt_off_hd_fy2025_q1_05_repeat1": "The raw unknowns reason explicitly exempts the unsupported causal attribution because claim_support already evaluated it. This conflicts with independently assessing whether the same claim also crosses the causal-certainty boundary.",
+    "D_prompt_on_nike_fy2025_q4_03_repeat1": "The raw claim_support reason explicitly assigns the false converted magnitude to the numeric dimension and accepts the remaining facts. The false magnitude is itself a source-contradicting factual claim, so assigning it to numeric correctness does not exempt claim support.",
+    "causal_limit": "The output documents the mutually-exclusive-dimension interpretation. It does not prove which prompt clause caused it or identify an internal reasoning mechanism."
+  }
+}

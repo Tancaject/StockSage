@@ -1,0 +1,19 @@
+{
+  "evals\\judge-pilot\\cases.jsonl": "9566bdf4067ac4670a430838bab5e52088057c78a11a593bb6aa68d83e914739",
+  "evals\\judge-pilot\\runs\\20261001\\baseline-dev-calibration.json": "0f95f7f3622bf7ce1f98cfce84b29167d8a8d4296b28a4dd56a6ef01cfefc227",
+  "evals\\judge-pilot\\runs\\20261001\\baseline-dev.json": "8680dab46638a7dce259e15c86df05e5b36c93351541f764730343421beb6fcb",
+  "evals\\judge-pilot\\runs\\20261001\\baseline-prompt.txt": "da3e010f8c876d65b9a5b861add8b0f60b6dd023e89bfba165d0c1438d105a27",
+  "evals\\judge-pilot\\runs\\20261001\\baseline-validation.json": "04f869ab48785815321315f288ac61765313e9709193bf13b8680d14bc939404",
+  "evals\\judge-pilot\\runs\\20261001\\candidate-dev.json": "ab3e1d07b61b3c0bb274db00bec9b8c03e2786a601251f8593dbf521dedc9da1",
+  "evals\\judge-pilot\\runs\\20261001\\candidate-procedure-review.json": "c090c0391b012bd3d316fbf4b13e5a121eda4ed18739398079eed32222a009de",
+  "evals\\judge-pilot\\runs\\20261001\\dev-comparison.json": "9961d532da587ea121234e998a04e23ce2b90c2e578c82f7ef082350ee048540",
+  "evals\\judge-pilot\\runs\\20261001\\measurement-audit.json": "feea61b89bdfd64fc284a8594e52b55a32b7e5f1ab8d1bd4ed2cb21ff22a3af6",
+  "evals\\judge-pilot\\runs\\20261001\\measurement-audit.md": "fdf2a874e4d265b0c8452c6d85631b24f45d74e933968f9b2ba9fe481a0564a2",
+  "evals\\judge-pilot\\runs\\20261001\\outcome.json": "07d8cbc6c2f0e750965843c67f735717a8c673cc0bf538a2ac952292546e4b71",
+  "evals\\judge-pilot\\runs\\20261001\\plan.json": "95c13f2b3a0fe224e0641de974ded43dcd3b94d5eb8389e8b72677cbcbe34f66",
+  "evals\\judge-pilot\\runs\\20261001\\README.md": "46786cae496c976c2db773476458ca8f6c816e0d6b307d249c5043672e53fe63",
+  "evals\\judge-pilot\\runs\\20261001\\selection.json": "aaf3223aa4fafe34455e616e102460b3b7fd9628e3f5a9672038d5cf6455793b",
+  "evals\\judge-pilot\\runs\\20261001\\validation-calibration.json": "82daf53762a644f6caa6e3e67ce076078fb3ade660624b066e7408c47bd490f3",
+  "evals\\judge-pilot\\runs\\20261001\\candidate-001\\candidate-prompt.txt": "36a8cb57fadd653d40e3686fe38e410b155db25662893271b3c4261b51fc2c7f",
+  "evals\\judge-pilot\\runs\\20261001\\candidate-001\\proposal.json": "ae7664751e52da49690be50eb593a0fe611229084d129d93c9b1e90052517a3b"
+}

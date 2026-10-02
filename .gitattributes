@@ -1,0 +1,10 @@
+# Keep checksummed experiment artifacts byte-identical across checkouts.
+/evals/judge-pilot/** -text whitespace=cr-at-eol,-blank-at-eof
+/evals/run_evaluation_agent.py text eol=lf
+/evals/ordinary_answer_quality.py text eol=lf
+/evals/judge_calibration.py text eol=lf
+/evals/propose_judge_prompt.py text eol=lf
+/evals/eval_common.py text eol=lf
+/evals/run_ragas_eval.py text eol=lf
+/evals/evolution_generator.py text eol=lf
+/evals/prompts/ordinary_judge.txt text eol=lf

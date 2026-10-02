@@ -1,0 +1,1215 @@
+{
+  "schema": "judge_calibration_v1",
+  "diagnostic_only": true,
+  "release_eligible": false,
+  "dataset_sha256": "aa968faee63dbb59748ba8df48e373312977d4fc7acb7343d7dc6f4b6ec3d9de",
+  "rubric": {
+    "schema": "ordinary_answer_rubric_v1",
+    "scope": "ordinary-final-answer",
+    "dimensions": {
+      "claim_support": "围绕用户的实际问题，核查最终回答的事实与推断是否由本轮可见证据支持；引用存在本身不代表内容成立，明确标为假设的一般解释不等同于已证实事实。",
+      "numeric_period_correctness": "核查最终回答中使用的数值、单位、期间和比较基准，以及自行计算的比例或变化；没有数值主张时可说明原因后标为不适用。",
+      "counterevidence": "核查回答是否遗漏本轮证据中与用户问题和结论有关的重要反向信息；不要求凭空增加负面观点或问题范围外的比较。",
+      "unknowns": "核查回答是否清楚区分已知、推断和仍缺少的信息，结论强度是否符合证据；不将缺失信息补成确定答案，也不要求无关免责声明。"
+    },
+    "sha256": "ee61a60cc802888cc1a9d051525891a4f88fc33a066bf655656e4b95d0b5384c"
+  },
+  "judge": {
+    "config": {
+      "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+      "model": "qwen3.8-max",
+      "temperature": 0,
+      "enable_thinking": false,
+      "timeout_seconds": 180,
+      "max_tokens": 2400,
+      "max_calls": 4
+    },
+    "prompt_sha256": "eef030d26320426b8e0cf054e639e93bc9fc80d3ffea882dff4acf8f34d20d69",
+    "guidance": "逐项核对用户问题、回答和实际可见证据。先读取证据；数值推导可调用 calculate，明确单位、期间和比较基准。\n只评价本轮可见材料，不用模型记忆补充事实。来源没有支持的确定性断言应判 FAIL；捕获材料本身缺失到无法核查时才用 NO_DATA。\n不要求问题范围外的分析，不惩罚有依据的简洁回答或合理的不确定性。重要反向信息必须与问题和结论有关。\nPASS 表示满足该维度；FAIL 表示实质性违反；NOT_APPLICABLE 表示该维度确实不涉及，例如没有数值主张或没有相关反证；NO_DATA 表示材料不足以判断。\n每项给出简短中文理由，逐字摘录回答及证据。遗漏类问题摘录被判断的结论和遭遗漏的证据。摘录只能证明定位，仍须核查语义。\n",
+    "tools_sha256": "f6117eb717929916160ff642369f4f5679c9ac2094a3ac297e5ba6c3eef3ef90",
+    "runner_sha256": "e6f2ca4effcf1d0844ecf7a3e5aa5ed2b68a388da3e99b1613459ba2fefe2693"
+  },
+  "split": "VALIDATION",
+  "repeats": 2,
+  "sample_count": 12,
+  "attempt_count": 24,
+  "recorded_attempt_count": 24,
+  "label_origins": [
+    "AI_SOURCE_CHECKED"
+  ],
+  "overall": {
+    "count": 24,
+    "known_label_count": 24,
+    "expected_unknown_count": 0,
+    "rated_count": 10,
+    "unknown_count": 14,
+    "coverage": 0.4166666666666667,
+    "exact_agreement_count": 10,
+    "exact_agreement_rate": 0.4166666666666667,
+    "misclassification_count": 0,
+    "false_pass_count": 0,
+    "expected_fail_count": 14,
+    "false_pass_rate": 0.0,
+    "false_fail_count": 0,
+    "expected_pass_like_count": 10,
+    "false_fail_rate": 0.0,
+    "unsupported_certainty_count": 0,
+    "invalid_count": 14,
+    "confusion": {
+      "FAIL": {
+        "FAIL": 7,
+        "NOT_APPLICABLE": 0,
+        "NO_DATA": 7,
+        "PASS": 0
+      },
+      "NOT_APPLICABLE": {
+        "FAIL": 0,
+        "NOT_APPLICABLE": 0,
+        "NO_DATA": 0,
+        "PASS": 0
+      },
+      "NO_DATA": {
+        "FAIL": 0,
+        "NOT_APPLICABLE": 0,
+        "NO_DATA": 0,
+        "PASS": 0
+      },
+      "PASS": {
+        "FAIL": 0,
+        "NOT_APPLICABLE": 0,
+        "NO_DATA": 7,
+        "PASS": 3
+      }
+    }
+  },
+  "dimensions": {
+    "claim_support": {
+      "count": 24,
+      "known_label_count": 24,
+      "expected_unknown_count": 0,
+      "rated_count": 10,
+      "unknown_count": 14,
+      "coverage": 0.4166666666666667,
+      "exact_agreement_count": 10,
+      "exact_agreement_rate": 0.4166666666666667,
+      "misclassification_count": 0,
+      "false_pass_count": 0,
+      "expected_fail_count": 10,
+      "false_pass_rate": 0.0,
+      "false_fail_count": 0,
+      "expected_pass_like_count": 14,
+      "false_fail_rate": 0.0,
+      "unsupported_certainty_count": 0,
+      "invalid_count": 14,
+      "confusion": {
+        "FAIL": {
+          "FAIL": 5,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 5,
+          "PASS": 0
+        },
+        "NOT_APPLICABLE": {
+          "FAIL": 0,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 0,
+          "PASS": 0
+        },
+        "NO_DATA": {
+          "FAIL": 0,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 0,
+          "PASS": 0
+        },
+        "PASS": {
+          "FAIL": 0,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 9,
+          "PASS": 5
+        }
+      }
+    },
+    "numeric_period_correctness": {
+      "count": 24,
+      "known_label_count": 24,
+      "expected_unknown_count": 0,
+      "rated_count": 10,
+      "unknown_count": 14,
+      "coverage": 0.4166666666666667,
+      "exact_agreement_count": 10,
+      "exact_agreement_rate": 0.4166666666666667,
+      "misclassification_count": 0,
+      "false_pass_count": 0,
+      "expected_fail_count": 8,
+      "false_pass_rate": 0.0,
+      "false_fail_count": 0,
+      "expected_pass_like_count": 16,
+      "false_fail_rate": 0.0,
+      "unsupported_certainty_count": 0,
+      "invalid_count": 14,
+      "confusion": {
+        "FAIL": {
+          "FAIL": 4,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 4,
+          "PASS": 0
+        },
+        "NOT_APPLICABLE": {
+          "FAIL": 0,
+          "NOT_APPLICABLE": 2,
+          "NO_DATA": 0,
+          "PASS": 0
+        },
+        "NO_DATA": {
+          "FAIL": 0,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 0,
+          "PASS": 0
+        },
+        "PASS": {
+          "FAIL": 0,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 10,
+          "PASS": 4
+        }
+      }
+    },
+    "counterevidence": {
+      "count": 24,
+      "known_label_count": 24,
+      "expected_unknown_count": 0,
+      "rated_count": 10,
+      "unknown_count": 14,
+      "coverage": 0.4166666666666667,
+      "exact_agreement_count": 6,
+      "exact_agreement_rate": 0.25,
+      "misclassification_count": 4,
+      "false_pass_count": 0,
+      "expected_fail_count": 4,
+      "false_pass_rate": 0.0,
+      "false_fail_count": 1,
+      "expected_pass_like_count": 20,
+      "false_fail_rate": 0.05,
+      "unsupported_certainty_count": 0,
+      "invalid_count": 14,
+      "confusion": {
+        "FAIL": {
+          "FAIL": 2,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 2,
+          "PASS": 0
+        },
+        "NOT_APPLICABLE": {
+          "FAIL": 1,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 8,
+          "PASS": 3
+        },
+        "NO_DATA": {
+          "FAIL": 0,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 0,
+          "PASS": 0
+        },
+        "PASS": {
+          "FAIL": 0,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 4,
+          "PASS": 4
+        }
+      }
+    },
+    "unknowns": {
+      "count": 24,
+      "known_label_count": 24,
+      "expected_unknown_count": 0,
+      "rated_count": 10,
+      "unknown_count": 14,
+      "coverage": 0.4166666666666667,
+      "exact_agreement_count": 10,
+      "exact_agreement_rate": 0.4166666666666667,
+      "misclassification_count": 0,
+      "false_pass_count": 0,
+      "expected_fail_count": 2,
+      "false_pass_rate": 0.0,
+      "false_fail_count": 0,
+      "expected_pass_like_count": 22,
+      "false_fail_rate": 0.0,
+      "unsupported_certainty_count": 0,
+      "invalid_count": 14,
+      "confusion": {
+        "FAIL": {
+          "FAIL": 1,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 1,
+          "PASS": 0
+        },
+        "NOT_APPLICABLE": {
+          "FAIL": 0,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 0,
+          "PASS": 0
+        },
+        "NO_DATA": {
+          "FAIL": 0,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 0,
+          "PASS": 0
+        },
+        "PASS": {
+          "FAIL": 0,
+          "NOT_APPLICABLE": 0,
+          "NO_DATA": 13,
+          "PASS": 9
+        }
+      }
+    }
+  },
+  "dimension_total": {
+    "count": 96,
+    "known_label_count": 96,
+    "expected_unknown_count": 0,
+    "rated_count": 40,
+    "unknown_count": 56,
+    "coverage": 0.4166666666666667,
+    "exact_agreement_count": 36,
+    "exact_agreement_rate": 0.375,
+    "misclassification_count": 4,
+    "false_pass_count": 0,
+    "expected_fail_count": 24,
+    "false_pass_rate": 0.0,
+    "false_fail_count": 1,
+    "expected_pass_like_count": 72,
+    "false_fail_rate": 0.013888888888888888,
+    "unsupported_certainty_count": 0,
+    "invalid_count": 56,
+    "confusion": {
+      "FAIL": {
+        "FAIL": 12,
+        "NOT_APPLICABLE": 0,
+        "NO_DATA": 12,
+        "PASS": 0
+      },
+      "NOT_APPLICABLE": {
+        "FAIL": 1,
+        "NOT_APPLICABLE": 2,
+        "NO_DATA": 8,
+        "PASS": 3
+      },
+      "NO_DATA": {
+        "FAIL": 0,
+        "NOT_APPLICABLE": 0,
+        "NO_DATA": 0,
+        "PASS": 0
+      },
+      "PASS": {
+        "FAIL": 0,
+        "NOT_APPLICABLE": 0,
+        "NO_DATA": 36,
+        "PASS": 22
+      }
+    }
+  },
+  "repeatability": {
+    "eligible_case_count": 3,
+    "consistent_case_count": 3,
+    "excluded_case_count": 9,
+    "consistency_rate": 1.0,
+    "requires": "at least two repeats with all dimensions known and valid"
+  },
+  "cost": {
+    "prompt_tokens": 97485,
+    "known_prompt_tokens": 97485,
+    "prompt_tokens_reported_attempts": 24,
+    "completion_tokens": 13904,
+    "known_completion_tokens": 13904,
+    "completion_tokens_reported_attempts": 24,
+    "total_tokens": 111389,
+    "known_total_tokens": 111389,
+    "total_tokens_reported_attempts": 24,
+    "usage_complete": true,
+    "usage_scope": "recorded_attempts",
+    "call_count": 79,
+    "call_count_reported_attempts": 24,
+    "summed_attempt_latency_ms": 285452,
+    "latency_reported_attempts": 24,
+    "monetary_cost": null,
+    "pricing_status": "UNCONFIGURED"
+  },
+  "observations": [
+    {
+      "id": "crm-fy2025-q4-01",
+      "repeat": 1,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS",
+            "INVALID_EVIDENCE_QUOTES"
+          ]
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS",
+            "INVALID_ANSWER_QUOTES",
+            "INVALID_EVIDENCE_QUOTES"
+          ]
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        }
+      },
+      "expected": "PASS",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    },
+    {
+      "id": "crm-fy2025-q4-01",
+      "repeat": 2,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS",
+            "INVALID_EVIDENCE_QUOTES"
+          ]
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS",
+            "INVALID_ANSWER_QUOTES",
+            "INVALID_EVIDENCE_QUOTES"
+          ]
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        }
+      },
+      "expected": "PASS",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    },
+    {
+      "id": "crm-fy2025-q4-02",
+      "repeat": 1,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS",
+            "INVALID_EVIDENCE_QUOTES"
+          ]
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        }
+      },
+      "expected": "FAIL",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    },
+    {
+      "id": "crm-fy2025-q4-02",
+      "repeat": 2,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "errors": []
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "PASS",
+          "errors": []
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        }
+      },
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "errors": [],
+      "valid": true
+    },
+    {
+      "id": "crm-fy2025-q4-03",
+      "repeat": 1,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "FAIL",
+          "errors": []
+        },
+        "unknowns": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "errors": []
+        }
+      },
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "errors": [],
+      "valid": true
+    },
+    {
+      "id": "crm-fy2025-q4-03",
+      "repeat": 2,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS",
+            "INVALID_ANSWER_QUOTES",
+            "INVALID_EVIDENCE_QUOTES"
+          ]
+        },
+        "unknowns": {
+          "expected": "FAIL",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        }
+      },
+      "expected": "FAIL",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    },
+    {
+      "id": "orcl-fy2025-q3-01",
+      "repeat": 1,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        }
+      },
+      "expected": "PASS",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    },
+    {
+      "id": "orcl-fy2025-q3-01",
+      "repeat": 2,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        }
+      },
+      "expected": "PASS",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    },
+    {
+      "id": "orcl-fy2025-q3-02",
+      "repeat": 1,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "errors": []
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        }
+      },
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "errors": [],
+      "valid": true
+    },
+    {
+      "id": "orcl-fy2025-q3-02",
+      "repeat": 2,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "errors": []
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        }
+      },
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "errors": [],
+      "valid": true
+    },
+    {
+      "id": "orcl-fy2025-q3-03",
+      "repeat": 1,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        },
+        "counterevidence": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "errors": []
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        }
+      },
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "errors": [],
+      "valid": true
+    },
+    {
+      "id": "orcl-fy2025-q3-03",
+      "repeat": 2,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        },
+        "counterevidence": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "errors": []
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        }
+      },
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "errors": [],
+      "valid": true
+    },
+    {
+      "id": "adbe-fy2025-q1-01",
+      "repeat": 1,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        }
+      },
+      "expected": "PASS",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    },
+    {
+      "id": "adbe-fy2025-q1-01",
+      "repeat": 2,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        }
+      },
+      "expected": "PASS",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    },
+    {
+      "id": "adbe-fy2025-q1-02",
+      "repeat": 1,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        }
+      },
+      "expected": "FAIL",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    },
+    {
+      "id": "adbe-fy2025-q1-02",
+      "repeat": 2,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        }
+      },
+      "expected": "FAIL",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    },
+    {
+      "id": "adbe-fy2025-q1-03",
+      "repeat": 1,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "errors": []
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "PASS",
+          "errors": []
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        }
+      },
+      "expected": "PASS",
+      "actual": "PASS",
+      "errors": [],
+      "valid": true
+    },
+    {
+      "id": "adbe-fy2025-q1-03",
+      "repeat": 2,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "errors": []
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "PASS",
+          "errors": []
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        }
+      },
+      "expected": "PASS",
+      "actual": "PASS",
+      "errors": [],
+      "valid": true
+    },
+    {
+      "id": "dis-fy2025-q1-01",
+      "repeat": 1,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        }
+      },
+      "expected": "PASS",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    },
+    {
+      "id": "dis-fy2025-q1-01",
+      "repeat": 2,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        }
+      },
+      "expected": "PASS",
+      "actual": "PASS",
+      "errors": [],
+      "valid": true
+    },
+    {
+      "id": "dis-fy2025-q1-02",
+      "repeat": 1,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "errors": []
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "errors": []
+        }
+      },
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "errors": [],
+      "valid": true
+    },
+    {
+      "id": "dis-fy2025-q1-02",
+      "repeat": 2,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS",
+            "INVALID_EVIDENCE_QUOTES"
+          ]
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS",
+            "INVALID_EVIDENCE_QUOTES"
+          ]
+        }
+      },
+      "expected": "FAIL",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    },
+    {
+      "id": "dis-fy2025-q1-03",
+      "repeat": 1,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "counterevidence": {
+          "expected": "FAIL",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS",
+            "INVALID_ANSWER_QUOTES",
+            "INVALID_EVIDENCE_QUOTES"
+          ]
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        }
+      },
+      "expected": "FAIL",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    },
+    {
+      "id": "dis-fy2025-q1-03",
+      "repeat": 2,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        },
+        "counterevidence": {
+          "expected": "FAIL",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS",
+            "INVALID_ANSWER_QUOTES",
+            "INVALID_EVIDENCE_QUOTES"
+          ]
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "errors": [
+            "REVIEW_REPORTED_ERRORS"
+          ]
+        }
+      },
+      "expected": "FAIL",
+      "actual": "NO_DATA",
+      "errors": [
+        "REVIEW_REPORTED_ERRORS"
+      ],
+      "valid": false
+    }
+  ]
+}

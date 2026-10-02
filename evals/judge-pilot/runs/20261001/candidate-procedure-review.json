@@ -1,0 +1,23 @@
+{
+  "schema": "judge_candidate_procedure_review_v1",
+  "reviewer_origin": "AI_CROSS_CHECK",
+  "candidate": "candidate-001/candidate-prompt.txt",
+  "status": "PROCEDURE_CONFLICT",
+  "selection_eligible": false,
+  "release_eligible": false,
+  "findings": [
+    {
+      "severity": "BLOCKING",
+      "location": "candidate-prompt.txt:16,19",
+      "finding": "Candidate requires nonempty evidence quotes for NO_DATA, including when captured evidence is empty. Fixed protocol only requires nonempty excerpts for known judgments.",
+      "reason": "Missing evidence cannot produce a real source excerpt; this risks fabrication or invalid diagnostics."
+    },
+    {
+      "severity": "DIAGNOSTIC",
+      "location": "candidate-prompt.txt:26-27",
+      "finding": "Counterevidence PASS versus NOT_APPLICABLE remains ambiguous; unknowns wording may duplicate factual misattribution penalties."
+    }
+  ],
+  "data_leakage_review": "No company-specific answer, date or financial figure copied into candidate guidance.",
+  "scope": "DEV only; not human review; no validation-based revision"
+}

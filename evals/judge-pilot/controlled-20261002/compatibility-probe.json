@@ -1,0 +1,411 @@
+{
+  "scope": "compatibility only, not scored or used for prompt selection",
+  "created_at": "2026-10-02T05:20:58.020415+00:00",
+  "item": {
+    "id": "compatibility-only",
+    "question": "材料中本年收入及相对上年的增长率是多少？",
+    "answer": "本年收入110百万元，相比上年增长10%。",
+    "evidence": "同一公司同口径年度收入：上年100百万元，本年110百万元。",
+    "errors": [],
+    "binding": null
+  },
+  "guidance": "先核对问题要求，再将回答实际陈述的主张与输入中的完整证据逐项对照，按 rubric 独立判定各维度。\n每个维度先按 rubric 判断适用性，再检查该维要求是否满足。事实真伪、问题覆盖和不确定性边界分别判断，不把某一维度的失败自动复制给其他维度。判断反证时，先检查证据中是否存在相关的重要反向经营事实或可比性因素，再检查回答是否呈现或回应；不能用“没有遗漏”代替适用性判断。\n核查回答中的派生数值时，先对齐指标、单位、期间和比较基准，再调用 calculate 检查相应算式；单位换算、基点与百分点换算、变化幅度计算也属于派生数值核查。来源已明确披露且回答直接照用的数值无需虚构基数反算。独立计算可在一轮内发起。\n每项写出具体、简短的中文理由，按 rubric 的摘录规则复制原文。摘录必须是输入原文的连续片段，不改写、不拼接、不用省略号替代中间文本；需要不连续的信息时分为多条原文摘录，每条提交前逐字核对。检查遗漏时定位被判断的回答及相应来源。\n提交前对每个维度单独执行 rubric.evidence_rules 校验：先按 missing_source 判断材料是否足够，再按 known 检查 PASS/FAIL 的摘录是否齐全。即使理由是“未发现越界”，也应摘录已检查的主张及界定其信息范围的来源，不能因此省略所需摘录。不存在适用事实与来源根本缺失须按 rubric 区分。\n完成后直接输出最终 JSON，不加 Markdown；无需为了使用工具而调用工具。\n",
+  "common_config": {
+    "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+    "model": "qwen3.8-max",
+    "temperature": 0,
+    "timeout_seconds": 180,
+    "max_tokens": 2400,
+    "max_calls": 4,
+    "thinking_budget": 4096
+  },
+  "runner_file_sha256": "4c7843a9269262fe6398be1f3c95fbf916dfc0c0eb83019626c7f7c15471abdf",
+  "reviews": {
+    "False": {
+      "id": "compatibility-only",
+      "repeat": 1,
+      "input_sha256": "8147f9014f6dddc3325c5b609348290a635823c062a5dc76bee1b8c3b1df1a5d",
+      "binding": null,
+      "status": "PASS",
+      "technical_status": "VALID",
+      "dimensions": {
+        "claim_support": {
+          "status": "PASS",
+          "reported_status": "PASS",
+          "reason": "回答称本年收入110百万元、同比增长10%，与证据中本年110百万元、上年100百万元一致，计算验证增长率确为10%。",
+          "answer_quotes": [
+            "本年收入110百万元，相比上年增长10%。"
+          ],
+          "evidence_quotes": [
+            "同一公司同口径年度收入：上年100百万元，本年110百万元。"
+          ],
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "reported_status": "PASS",
+          "reason": "回答使用的本年收入110百万元及同比增长10%与证据期间（本年vs上年）和数值一致，工具复核percent_change(110,100)=10.0%，无错配。",
+          "answer_quotes": [
+            "本年收入110百万元，相比上年增长10%。"
+          ],
+          "evidence_quotes": [
+            "同一公司同口径年度收入：上年100百万元，本年110百万元。"
+          ],
+          "errors": []
+        },
+        "counterevidence": {
+          "status": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "reason": "问题仅询问本年收入及同比增长率，证据仅提供同口径年度收入数据，未涉及利润率、非经常损益等可能构成反向经营事实或可比性因素的信息，且回答已准确覆盖所问指标。",
+          "answer_quotes": [
+            "本年收入110百万元，相比上年增长10%。"
+          ],
+          "evidence_quotes": [
+            "同一公司同口径年度收入：上年100百万元，本年110百万元。"
+          ],
+          "errors": []
+        },
+        "unknowns": {
+          "status": "PASS",
+          "reported_status": "PASS",
+          "reason": "回答仅陈述证据中明确披露的本年收入及同比变化，未将未披露信息补为确定事实，也未对预测或因果作越界断言。",
+          "answer_quotes": [
+            "本年收入110百万元，相比上年增长10%。"
+          ],
+          "evidence_quotes": [
+            "同一公司同口径年度收入：上年100百万元，本年110百万元。"
+          ],
+          "errors": []
+        },
+        "task_completion": {
+          "status": "PASS",
+          "reported_status": "PASS",
+          "reason": "用户要求给出本年收入及相对上年的增长率，回答明确提供‘本年收入110百万元’和‘相比上年增长10%’，完整回应核心子问题。",
+          "answer_quotes": [
+            "本年收入110百万元，相比上年增长10%。"
+          ],
+          "evidence_quotes": [],
+          "errors": []
+        }
+      },
+      "origin": "AI",
+      "errors": [],
+      "calls": [
+        {
+          "request_sha256": "163ae850e63bbe2c0a4faeb0731326e8d6d6f114a33d891207df03e331e23ee2",
+          "requested_model": "qwen3.8-max",
+          "status": "RECEIVED",
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "tool_calls",
+                "index": 0,
+                "message": {
+                  "content": "",
+                  "role": "assistant",
+                  "tool_calls": [
+                    {
+                      "function": {
+                        "arguments": "{\"operation\": \"percent_change\", \"left\": \"110\", \"right\": \"100\"}",
+                        "name": "calculate"
+                      },
+                      "id": "call_85fe24320367487cac03dcb4",
+                      "index": 0,
+                      "type": "function"
+                    }
+                  ]
+                }
+              }
+            ],
+            "created": 1790918457,
+            "id": "chatcmpl-2418a63e-9c4b-94b5-b006-5da16ed794b0",
+            "model": "qwen3.8-max",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 54,
+              "prompt_tokens": 1863,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "text_tokens": 1863
+              },
+              "total_tokens": 1917
+            }
+          },
+          "observed_model": "qwen3.8-max",
+          "usage": {
+            "completion_tokens": 54,
+            "prompt_tokens": 1863,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "text_tokens": 1863
+            },
+            "total_tokens": 1917
+          }
+        },
+        {
+          "request_sha256": "00bfab20484fd84ac6a76f999d562726ab263570b0bb40b717732f856ae2b4b5",
+          "requested_model": "qwen3.8-max",
+          "status": "RECEIVED",
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "content": "{\"dimensions\": {\"claim_support\": {\"status\": \"PASS\", \"reason\": \"回答称本年收入110百万元、同比增长10%，与证据中本年110百万元、上年100百万元一致，计算验证增长率确为10%。\", \"answer_quotes\": [\"本年收入110百万元，相比上年增长10%。\"], \"evidence_quotes\": [\"同一公司同口径年度收入：上年100百万元，本年110百万元。\"]}, \"numeric_period_correctness\": {\"status\": \"PASS\", \"reason\": \"回答使用的本年收入110百万元及同比增长10%与证据期间（本年vs上年）和数值一致，工具复核percent_change(110,100)=10.0%，无错配。\", \"answer_quotes\": [\"本年收入110百万元，相比上年增长10%。\"], \"evidence_quotes\": [\"同一公司同口径年度收入：上年100百万元，本年110百万元。\"]}, \"counterevidence\": {\"status\": \"NOT_APPLICABLE\", \"reason\": \"问题仅询问本年收入及同比增长率，证据仅提供同口径年度收入数据，未涉及利润率、非经常损益等可能构成反向经营事实或可比性因素的信息，且回答已准确覆盖所问指标。\", \"answer_quotes\": [\"本年收入110百万元，相比上年增长10%。\"], \"evidence_quotes\": [\"同一公司同口径年度收入：上年100百万元，本年110百万元。\"]}, \"unknowns\": {\"status\": \"PASS\", \"reason\": \"回答仅陈述证据中明确披露的本年收入及同比变化，未将未披露信息补为确定事实，也未对预测或因果作越界断言。\", \"answer_quotes\": [\"本年收入110百万元，相比上年增长10%。\"], \"evidence_quotes\": [\"同一公司同口径年度收入：上年100百万元，本年110百万元。\"]}, \"task_completion\": {\"status\": \"PASS\", \"reason\": \"用户要求给出本年收入及相对上年的增长率，回答明确提供‘本年收入110百万元’和‘相比上年增长10%’，完整回应核心子问题。\", \"answer_quotes\": [\"本年收入110百万元，相比上年增长10%。\"], \"evidence_quotes\": []}}}",
+                  "role": "assistant"
+                }
+              }
+            ],
+            "created": 1790918458,
+            "id": "chatcmpl-bf985539-6916-9003-8993-887783b0bc5a",
+            "model": "qwen3.8-max",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 519,
+              "prompt_tokens": 1967,
+              "prompt_tokens_details": {
+                "cached_tokens": 1152,
+                "text_tokens": 1967
+              },
+              "total_tokens": 2486
+            }
+          },
+          "observed_model": "qwen3.8-max",
+          "usage": {
+            "completion_tokens": 519,
+            "prompt_tokens": 1967,
+            "prompt_tokens_details": {
+              "cached_tokens": 1152,
+              "text_tokens": 1967
+            },
+            "total_tokens": 2486
+          }
+        }
+      ],
+      "tool_trace": [
+        {
+          "name": "calculate",
+          "arguments": {
+            "operation": "percent_change",
+            "left": "110",
+            "right": "100"
+          },
+          "output": {
+            "result": "10.0",
+            "operation": "percent_change",
+            "left": "110",
+            "right": "100"
+          }
+        }
+      ],
+      "reviewed_at": "2026-10-02T05:21:04.834062+00:00",
+      "latency_ms": 6812,
+      "usage": {
+        "prompt_tokens": 3830,
+        "completion_tokens": 573,
+        "total_tokens": 4403
+      }
+    },
+    "True": {
+      "id": "compatibility-only",
+      "repeat": 1,
+      "input_sha256": "8147f9014f6dddc3325c5b609348290a635823c062a5dc76bee1b8c3b1df1a5d",
+      "binding": null,
+      "status": "PASS",
+      "technical_status": "VALID",
+      "dimensions": {
+        "claim_support": {
+          "status": "PASS",
+          "reported_status": "PASS",
+          "reason": "回答称本年收入110百万元、同比增长10%，与来源披露的本年110百万元、上年100百万元一致，计算(110-100)/100=10%成立，无无依据或矛盾主张。",
+          "answer_quotes": [
+            "本年收入110百万元，相比上年增长10%。"
+          ],
+          "evidence_quotes": [
+            "同一公司同口径年度收入：上年100百万元，本年110百万元。"
+          ],
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "reported_status": "PASS",
+          "reason": "数值110百万元与来源一致，单位为百万元，期间为本年对上年，增长率10%经calculate核算为10.0%，指标口径与比较基准均正确。",
+          "answer_quotes": [
+            "本年收入110百万元，相比上年增长10%。"
+          ],
+          "evidence_quotes": [
+            "同一公司同口径年度收入：上年100百万元，本年110百万元。"
+          ],
+          "errors": []
+        },
+        "counterevidence": {
+          "status": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "reason": "来源仅披露同公司同口径两年收入，未包含利润率、非经常损益或其他可比性因素等重要反向经营事实，证据范围内确无相关反证信息。",
+          "answer_quotes": [],
+          "evidence_quotes": [],
+          "errors": []
+        },
+        "unknowns": {
+          "status": "PASS",
+          "reported_status": "PASS",
+          "reason": "回答仅陈述来源已明确披露的收入与可直接计算的增长率，未将未披露指标补成事实，未把相关性说成因果，也未作预测性保证，不存在确定性越界。",
+          "answer_quotes": [
+            "本年收入110百万元，相比上年增长10%。"
+          ],
+          "evidence_quotes": [
+            "同一公司同口径年度收入：上年100百万元，本年110百万元。"
+          ],
+          "errors": []
+        },
+        "task_completion": {
+          "status": "PASS",
+          "reported_status": "PASS",
+          "reason": "问题要求本年收入及相对上年的增长率两项，回答同时给出本年收入110百万元与增长10%，核心子问题均已回应。",
+          "answer_quotes": [
+            "本年收入110百万元，相比上年增长10%。"
+          ],
+          "evidence_quotes": [],
+          "errors": []
+        }
+      },
+      "origin": "AI",
+      "errors": [],
+      "calls": [
+        {
+          "request_sha256": "941822ac51b5b2cb1b3bfb343feab41d0e84d17a719d2f76c71c48c17e411794",
+          "requested_model": "qwen3.8-max",
+          "status": "RECEIVED",
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "tool_calls",
+                "index": 0,
+                "message": {
+                  "content": "",
+                  "reasoning_content": "Check 10% growth: (110-100)/100 = 10%. Correct.",
+                  "role": "assistant",
+                  "tool_calls": [
+                    {
+                      "function": {
+                        "arguments": "{\"operation\": \"percent_change\", \"left\": \"110\", \"right\": \"100\"}",
+                        "name": "calculate"
+                      },
+                      "id": "call_f6d1a7ee29b04456bff3feef",
+                      "index": 0,
+                      "type": "function"
+                    }
+                  ]
+                }
+              }
+            ],
+            "created": 1790918457,
+            "id": "chatcmpl-3dd67cdc-d1e8-9529-9467-4aad04d274c6",
+            "model": "qwen3.8-max",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 83,
+              "completion_tokens_details": {
+                "reasoning_tokens": 26,
+                "text_tokens": 83
+              },
+              "prompt_tokens": 1887,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "text_tokens": 1887
+              },
+              "total_tokens": 1970
+            }
+          },
+          "observed_model": "qwen3.8-max",
+          "usage": {
+            "completion_tokens": 83,
+            "completion_tokens_details": {
+              "reasoning_tokens": 26,
+              "text_tokens": 83
+            },
+            "prompt_tokens": 1887,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "text_tokens": 1887
+            },
+            "total_tokens": 1970
+          }
+        },
+        {
+          "request_sha256": "ffa8ee2dc3ee414e20a78b1238d401cfcbf59d8dc5bec8d8a0cf1c3e6ecd2579",
+          "requested_model": "qwen3.8-max",
+          "status": "RECEIVED",
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "content": "{\"dimensions\": {\"claim_support\": {\"status\": \"PASS\", \"reason\": \"回答称本年收入110百万元、同比增长10%，与来源披露的本年110百万元、上年100百万元一致，计算(110-100)/100=10%成立，无无依据或矛盾主张。\", \"answer_quotes\": [\"本年收入110百万元，相比上年增长10%。\"], \"evidence_quotes\": [\"同一公司同口径年度收入：上年100百万元，本年110百万元。\"]}, \"numeric_period_correctness\": {\"status\": \"PASS\", \"reason\": \"数值110百万元与来源一致，单位为百万元，期间为本年对上年，增长率10%经calculate核算为10.0%，指标口径与比较基准均正确。\", \"answer_quotes\": [\"本年收入110百万元，相比上年增长10%。\"], \"evidence_quotes\": [\"同一公司同口径年度收入：上年100百万元，本年110百万元。\"]}, \"counterevidence\": {\"status\": \"NOT_APPLICABLE\", \"reason\": \"来源仅披露同公司同口径两年收入，未包含利润率、非经常损益或其他可比性因素等重要反向经营事实，证据范围内确无相关反证信息。\", \"answer_quotes\": [], \"evidence_quotes\": []}, \"unknowns\": {\"status\": \"PASS\", \"reason\": \"回答仅陈述来源已明确披露的收入与可直接计算的增长率，未将未披露指标补成事实，未把相关性说成因果，也未作预测性保证，不存在确定性越界。\", \"answer_quotes\": [\"本年收入110百万元，相比上年增长10%。\"], \"evidence_quotes\": [\"同一公司同口径年度收入：上年100百万元，本年110百万元。\"]}, \"task_completion\": {\"status\": \"PASS\", \"reason\": \"问题要求本年收入及相对上年的增长率两项，回答同时给出本年收入110百万元与增长10%，核心子问题均已回应。\", \"answer_quotes\": [\"本年收入110百万元，相比上年增长10%。\"], \"evidence_quotes\": []}}}",
+                  "reasoning_content": "All dimensions: claim_support PASS, numeric PASS, counterevidence — evidence is minimal, no relevant counterevidence → NOT_APPLICABLE. unknowns PASS. task_completion PASS.",
+                  "role": "assistant"
+                }
+              }
+            ],
+            "created": 1790918460,
+            "id": "chatcmpl-3cf8a6db-8efb-970a-aacf-fabb27625922",
+            "model": "qwen3.8-max",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 522,
+              "completion_tokens_details": {
+                "reasoning_tokens": 37,
+                "text_tokens": 522
+              },
+              "prompt_tokens": 2018,
+              "prompt_tokens_details": {
+                "cached_tokens": 1024,
+                "text_tokens": 2018
+              },
+              "total_tokens": 2540
+            }
+          },
+          "observed_model": "qwen3.8-max",
+          "usage": {
+            "completion_tokens": 522,
+            "completion_tokens_details": {
+              "reasoning_tokens": 37,
+              "text_tokens": 522
+            },
+            "prompt_tokens": 2018,
+            "prompt_tokens_details": {
+              "cached_tokens": 1024,
+              "text_tokens": 2018
+            },
+            "total_tokens": 2540
+          }
+        }
+      ],
+      "tool_trace": [
+        {
+          "name": "calculate",
+          "arguments": {
+            "operation": "percent_change",
+            "left": "110",
+            "right": "100"
+          },
+          "output": {
+            "result": "10.0",
+            "operation": "percent_change",
+            "left": "110",
+            "right": "100"
+          }
+        }
+      ],
+      "reviewed_at": "2026-10-02T05:21:10.353213+00:00",
+      "latency_ms": 12328,
+      "usage": {
+        "prompt_tokens": 3905,
+        "completion_tokens": 605,
+        "total_tokens": 4510
+      }
+    }
+  }
+}

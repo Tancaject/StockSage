@@ -1,0 +1,429 @@
+{
+  "schema": "ordinary_judge_transport_smoke_v1",
+  "diagnostic_only": true,
+  "release_eligible": false,
+  "plan": "run-plan.json",
+  "reviews": [
+    {
+      "id": "msft-fy2025-q4-02",
+      "repeat": 1,
+      "input_sha256": "8c5c8b1d685651a34f62edcdab8227088f9baa480760ce028b257a966272b8a7",
+      "binding": null,
+      "status": "FAIL",
+      "technical_status": "VALID",
+      "dimensions": {
+        "claim_support": {
+          "status": "FAIL",
+          "reported_status": "FAIL",
+          "reason": "回答称Q4同比增长15%、全年同比增长18%，与来源披露的Q4同比18%、全年同比15%相反，属于事实错误。",
+          "answer_quotes": [
+            "第四季度营收764亿美元，同比增长15%",
+            "全年营收2817亿美元，同比增长18%"
+          ],
+          "evidence_quotes": [
+            "截至2025-06-30的季度，营收764亿美元，同比增长18%",
+            "截至同日的2025财年全年，营收2817亿美元，同比增长15%"
+          ],
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "status": "FAIL",
+          "reported_status": "FAIL",
+          "reason": "回答使用的同比增长率数值与来源不一致：Q4应为18%却写15%，全年应为15%却写18%，期间与金额正确但增长率错配。",
+          "answer_quotes": [
+            "同比增长15%",
+            "同比增长18%"
+          ],
+          "evidence_quotes": [
+            "截至2025-06-30的季度，营收764亿美元，同比增长18%",
+            "截至同日的2025财年全年，营收2817亿美元，同比增长15%"
+          ],
+          "errors": []
+        },
+        "counterevidence": {
+          "status": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "reason": "问题仅询问营收增长，证据未提供需对比的反向经营事实或可比性因素，且回答未涉及其他指标，无需检查反证。",
+          "answer_quotes": [],
+          "evidence_quotes": [],
+          "errors": []
+        },
+        "unknowns": {
+          "status": "PASS",
+          "reported_status": "PASS",
+          "reason": "回答未将未披露信息补为确定事实，也未把预测当作保证；虽数值错误但属事实维度问题，不构成确定性越界。",
+          "answer_quotes": [
+            "第四季度营收764亿美元，同比增长15%；全年营收2817亿美元，同比增长18%"
+          ],
+          "evidence_quotes": [
+            "截至2025-06-30的季度，营收764亿美元，同比增长18%",
+            "截至同日的2025财年全年，营收2817亿美元，同比增长15%"
+          ],
+          "errors": []
+        },
+        "task_completion": {
+          "status": "PASS",
+          "reported_status": "PASS",
+          "reason": "回答区分了单季和全年并给出营收及同比增长，覆盖了用户核心子问题；尽管数值错误，但覆盖度满足要求。",
+          "answer_quotes": [
+            "第四季度营收764亿美元，同比增长15%；全年营收2817亿美元，同比增长18%"
+          ],
+          "evidence_quotes": [],
+          "errors": []
+        }
+      },
+      "origin": "AI",
+      "errors": [],
+      "calls": [
+        {
+          "request_sha256": "44d57940bde904f40ceae015e59c32650b788651e09ce39a0ac2fe56c75abc6f",
+          "requested_model": "qwen3.8-max",
+          "status": "RECEIVED",
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "content": "{\"dimensions\": {\"claim_support\": {\"status\": \"FAIL\", \"reason\": \"回答称Q4同比增长15%、全年同比增长18%，与来源披露的Q4同比18%、全年同比15%相反，属于事实错误。\", \"answer_quotes\": [\"第四季度营收764亿美元，同比增长15%\", \"全年营收2817亿美元，同比增长18%\"], \"evidence_quotes\": [\"截至2025-06-30的季度，营收764亿美元，同比增长18%\", \"截至同日的2025财年全年，营收2817亿美元，同比增长15%\"]}, \"numeric_period_correctness\": {\"status\": \"FAIL\", \"reason\": \"回答使用的同比增长率数值与来源不一致：Q4应为18%却写15%，全年应为15%却写18%，期间与金额正确但增长率错配。\", \"answer_quotes\": [\"同比增长15%\", \"同比增长18%\"], \"evidence_quotes\": [\"截至2025-06-30的季度，营收764亿美元，同比增长18%\", \"截至同日的2025财年全年，营收2817亿美元，同比增长15%\"]}, \"counterevidence\": {\"status\": \"NOT_APPLICABLE\", \"reason\": \"问题仅询问营收增长，证据未提供需对比的反向经营事实或可比性因素，且回答未涉及其他指标，无需检查反证。\", \"answer_quotes\": [], \"evidence_quotes\": []}, \"unknowns\": {\"status\": \"PASS\", \"reason\": \"回答未将未披露信息补为确定事实，也未把预测当作保证；虽数值错误但属事实维度问题，不构成确定性越界。\", \"answer_quotes\": [\"第四季度营收764亿美元，同比增长15%；全年营收2817亿美元，同比增长18%\"], \"evidence_quotes\": [\"截至2025-06-30的季度，营收764亿美元，同比增长18%\", \"截至同日的2025财年全年，营收2817亿美元，同比增长15%\"]}, \"task_completion\": {\"status\": \"PASS\", \"reason\": \"回答区分了单季和全年并给出营收及同比增长，覆盖了用户核心子问题；尽管数值错误，但覆盖度满足要求。\", \"answer_quotes\": [\"第四季度营收764亿美元，同比增长15%；全年营收2817亿美元，同比增长18%\"], \"evidence_quotes\": []}}}",
+                  "role": "assistant"
+                }
+              }
+            ],
+            "created": 1790867234,
+            "id": "chatcmpl-f753b743-5b3b-9997-aee2-c5053896673a",
+            "model": "qwen3.8-max",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 537,
+              "prompt_tokens": 1771,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "text_tokens": 1771
+              },
+              "total_tokens": 2308
+            }
+          },
+          "observed_model": "qwen3.8-max",
+          "usage": {
+            "completion_tokens": 537,
+            "prompt_tokens": 1771,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "text_tokens": 1771
+            },
+            "total_tokens": 2308
+          }
+        }
+      ],
+      "tool_trace": [],
+      "reviewed_at": "2026-10-01T15:07:25.633979+00:00",
+      "latency_ms": 11437,
+      "usage": {
+        "prompt_tokens": 1771,
+        "completion_tokens": 537,
+        "total_tokens": 2308
+      }
+    },
+    {
+      "id": "msft-fy2025-q4-03",
+      "repeat": 1,
+      "input_sha256": "86e5dab9a8296c6e63ada5e6486bfa560ecddaab3f8f41dd4008efd54fa95272",
+      "binding": null,
+      "status": "NO_DATA",
+      "technical_status": "PARTIAL",
+      "dimensions": {
+        "claim_support": {
+          "status": "NO_DATA",
+          "reported_status": "NO_DATA",
+          "reason": "证据为空，无法验证回答中关于微软FY2025第四季度及全年营收数值和同比增长率的事实主张。",
+          "answer_quotes": [
+            "第四季度营收764亿美元，同比增长18%",
+            "全年营收2817亿美元，同比增长15%"
+          ],
+          "evidence_quotes": [],
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "status": "NO_DATA",
+          "reported_status": "NO_DATA",
+          "reason": "证据为空，无法核查回答中使用的营收数值、期间（FY2025 Q4及全年）及同比基准是否正确。",
+          "answer_quotes": [
+            "第四季度营收764亿美元，同比增长18%",
+            "全年营收2817亿美元，同比增长15%"
+          ],
+          "evidence_quotes": [],
+          "errors": []
+        },
+        "counterevidence": {
+          "status": "NO_DATA",
+          "reported_status": "NOT_APPLICABLE",
+          "reason": "证据为空，无法判断是否存在与营收增长相关的重要反向经营事实或可比性因素。",
+          "answer_quotes": [],
+          "evidence_quotes": [],
+          "errors": [
+            "SOURCE_UNAVAILABLE"
+          ]
+        },
+        "unknowns": {
+          "status": "NO_DATA",
+          "reported_status": "NO_DATA",
+          "reason": "证据为空，无法判断回答是否将证据缺口或预测不确定性明确保留，也无法确认是否存在将未披露指标补成确定事实的越界行为。",
+          "answer_quotes": [],
+          "evidence_quotes": [],
+          "errors": []
+        },
+        "task_completion": {
+          "status": "PASS",
+          "reported_status": "PASS",
+          "reason": "用户要求区分单季和全年营收增长，回答分别给出了第四季度和全年的营收及同比增长率，覆盖了核心子问题。",
+          "answer_quotes": [
+            "第四季度营收764亿美元，同比增长18%",
+            "全年营收2817亿美元，同比增长15%"
+          ],
+          "evidence_quotes": [],
+          "errors": []
+        }
+      },
+      "origin": "AI",
+      "errors": [],
+      "calls": [
+        {
+          "request_sha256": "5bb82d5eb9b028c7165cad5faf9a8a4ff4a664480e1785daa3163c4dff653544",
+          "requested_model": "qwen3.8-max",
+          "status": "RECEIVED",
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "content": "{\"dimensions\": {\"claim_support\": {\"status\": \"NO_DATA\", \"reason\": \"证据为空，无法验证回答中关于微软FY2025第四季度及全年营收数值和同比增长率的事实主张。\", \"answer_quotes\": [\"第四季度营收764亿美元，同比增长18%\", \"全年营收2817亿美元，同比增长15%\"], \"evidence_quotes\": []}, \"numeric_period_correctness\": {\"status\": \"NO_DATA\", \"reason\": \"证据为空，无法核查回答中使用的营收数值、期间（FY2025 Q4及全年）及同比基准是否正确。\", \"answer_quotes\": [\"第四季度营收764亿美元，同比增长18%\", \"全年营收2817亿美元，同比增长15%\"], \"evidence_quotes\": []}, \"counterevidence\": {\"status\": \"NOT_APPLICABLE\", \"reason\": \"证据为空，无法判断是否存在与营收增长相关的重要反向经营事实或可比性因素。\", \"answer_quotes\": [], \"evidence_quotes\": []}, \"unknowns\": {\"status\": \"NO_DATA\", \"reason\": \"证据为空，无法判断回答是否将证据缺口或预测不确定性明确保留，也无法确认是否存在将未披露指标补成确定事实的越界行为。\", \"answer_quotes\": [], \"evidence_quotes\": []}, \"task_completion\": {\"status\": \"PASS\", \"reason\": \"用户要求区分单季和全年营收增长，回答分别给出了第四季度和全年的营收及同比增长率，覆盖了核心子问题。\", \"answer_quotes\": [\"第四季度营收764亿美元，同比增长18%\", \"全年营收2817亿美元，同比增长15%\"], \"evidence_quotes\": []}}}",
+                  "role": "assistant"
+                }
+              }
+            ],
+            "created": 1790867234,
+            "id": "chatcmpl-da2bbf50-99f9-921d-b2d5-cd2f32a8f32a",
+            "model": "qwen3.8-max",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 353,
+              "prompt_tokens": 1700,
+              "prompt_tokens_details": {
+                "cached_tokens": 1024,
+                "text_tokens": 1700
+              },
+              "total_tokens": 2053
+            }
+          },
+          "observed_model": "qwen3.8-max",
+          "usage": {
+            "completion_tokens": 353,
+            "prompt_tokens": 1700,
+            "prompt_tokens_details": {
+              "cached_tokens": 1024,
+              "text_tokens": 1700
+            },
+            "total_tokens": 2053
+          }
+        }
+      ],
+      "tool_trace": [],
+      "reviewed_at": "2026-10-01T15:07:22.045145+00:00",
+      "latency_ms": 7843,
+      "usage": {
+        "prompt_tokens": 1700,
+        "completion_tokens": 353,
+        "total_tokens": 2053
+      }
+    },
+    {
+      "id": "wmt-fy2025-02",
+      "repeat": 1,
+      "input_sha256": "e6a7c700efcd93bf74e676d5685faa698f85df7f2cce3236c1a0cb7130377eb6",
+      "binding": null,
+      "status": "FAIL",
+      "technical_status": "PARTIAL",
+      "dimensions": {
+        "claim_support": {
+          "status": "PASS",
+          "reported_status": "PASS",
+          "reason": "回答称经营现金流36443百万美元、同比增长约2.0%，与证据中2025财年36,443及2024财年35,726一致，计算同比约2.01%支持该表述。",
+          "answer_quotes": [
+            "经营现金流达到36443百万美元，同比增长约2.0%"
+          ],
+          "evidence_quotes": [
+            "经营现金流36,443/35,726"
+          ],
+          "errors": []
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "reported_status": "PASS",
+          "reason": "使用的经营现金流数值36,443百万美元及期间FY2025与证据匹配；同比基数35,726正确，计算结果约2.0%无误。",
+          "answer_quotes": [
+            "经营现金流达到36443百万美元，同比增长约2.0%"
+          ],
+          "evidence_quotes": [
+            "经营现金流36,443/35,726"
+          ],
+          "errors": []
+        },
+        "counterevidence": {
+          "status": "FAIL",
+          "reported_status": "FAIL",
+          "reason": "问题要求同时考虑资本投入后的现金余量，证据提供自由现金流12,660（FY2025）较上年15,120下降，属重要反向经营事实；回答仅呈现经营现金流增长，未涉及资本开支或自由现金流下降。",
+          "answer_quotes": [
+            "经营现金流达到36443百万美元，同比增长约2.0%，经营端现金流有所增加。"
+          ],
+          "evidence_quotes": [
+            "自由现金流12,660/15,120",
+            "购置物业及设备付款23,783/20,606"
+          ],
+          "errors": []
+        },
+        "unknowns": {
+          "status": "NO_DATA",
+          "reported_status": "PASS",
+          "reason": "回答未将未披露指标补为确定事实，也未把预测说成保证；虽遗漏自由现金流，但属于漏答而非确定性越界。",
+          "answer_quotes": [
+            "经营现金流达到36443百万美元，同比增长约2.0%，经营端现金流有所增加。"
+          ],
+          "evidence_quotes": [],
+          "errors": [
+            "EXCERPT_MISSING:evidence_quotes"
+          ]
+        },
+        "task_completion": {
+          "status": "FAIL",
+          "reported_status": "FAIL",
+          "reason": "用户明确要求同时考虑经营现金流和资本投入后的现金余量；回答仅覆盖经营现金流，未回应资本投入或自由现金流部分，核心子问缺失。",
+          "answer_quotes": [
+            "经营现金流达到36443百万美元，同比增长约2.0%，经营端现金流有所增加。"
+          ],
+          "evidence_quotes": [],
+          "errors": []
+        }
+      },
+      "origin": "AI",
+      "errors": [],
+      "calls": [
+        {
+          "request_sha256": "914df7dcb153141b6a83bcb3337812d04e6b6a9ab9eab0627632485c623aeda4",
+          "requested_model": "qwen3.8-max",
+          "status": "RECEIVED",
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "tool_calls",
+                "index": 0,
+                "message": {
+                  "content": "",
+                  "role": "assistant",
+                  "tool_calls": [
+                    {
+                      "function": {
+                        "arguments": "{\"operation\": \"percent_change\", \"left\": \"36443\", \"right\": \"35726\"}",
+                        "name": "calculate"
+                      },
+                      "id": "call_a7e5bac6ec724c5b9dd186f9",
+                      "index": 0,
+                      "type": "function"
+                    }
+                  ]
+                }
+              }
+            ],
+            "created": 1790867234,
+            "id": "chatcmpl-6169a84e-5254-9299-a655-b07116e3cdc3",
+            "model": "qwen3.8-max",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 58,
+              "prompt_tokens": 1789,
+              "prompt_tokens_details": {
+                "cached_tokens": 1024,
+                "text_tokens": 1789
+              },
+              "total_tokens": 1847
+            }
+          },
+          "observed_model": "qwen3.8-max",
+          "usage": {
+            "completion_tokens": 58,
+            "prompt_tokens": 1789,
+            "prompt_tokens_details": {
+              "cached_tokens": 1024,
+              "text_tokens": 1789
+            },
+            "total_tokens": 1847
+          }
+        },
+        {
+          "request_sha256": "e236420559d0edc3c7e95f27d78070ce4516bc54bd8103d6a598aa1d650d8b36",
+          "requested_model": "qwen3.8-max",
+          "status": "RECEIVED",
+          "response": {
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "content": "{\"dimensions\": {\"claim_support\": {\"status\": \"PASS\", \"reason\": \"回答称经营现金流36443百万美元、同比增长约2.0%，与证据中2025财年36,443及2024财年35,726一致，计算同比约2.01%支持该表述。\", \"answer_quotes\": [\"经营现金流达到36443百万美元，同比增长约2.0%\"], \"evidence_quotes\": [\"经营现金流36,443/35,726\"]}, \"numeric_period_correctness\": {\"status\": \"PASS\", \"reason\": \"使用的经营现金流数值36,443百万美元及期间FY2025与证据匹配；同比基数35,726正确，计算结果约2.0%无误。\", \"answer_quotes\": [\"经营现金流达到36443百万美元，同比增长约2.0%\"], \"evidence_quotes\": [\"经营现金流36,443/35,726\"]}, \"counterevidence\": {\"status\": \"FAIL\", \"reason\": \"问题要求同时考虑资本投入后的现金余量，证据提供自由现金流12,660（FY2025）较上年15,120下降，属重要反向经营事实；回答仅呈现经营现金流增长，未涉及资本开支或自由现金流下降。\", \"answer_quotes\": [\"经营现金流达到36443百万美元，同比增长约2.0%，经营端现金流有所增加。\"], \"evidence_quotes\": [\"自由现金流12,660/15,120\", \"购置物业及设备付款23,783/20,606\"]}, \"unknowns\": {\"status\": \"PASS\", \"reason\": \"回答未将未披露指标补为确定事实，也未把预测说成保证；虽遗漏自由现金流，但属于漏答而非确定性越界。\", \"answer_quotes\": [\"经营现金流达到36443百万美元，同比增长约2.0%，经营端现金流有所增加。\"], \"evidence_quotes\": []}, \"task_completion\": {\"status\": \"FAIL\", \"reason\": \"用户明确要求同时考虑经营现金流和资本投入后的现金余量；回答仅覆盖经营现金流，未回应资本投入或自由现金流部分，核心子问缺失。\", \"answer_quotes\": [\"经营现金流达到36443百万美元，同比增长约2.0%，经营端现金流有所增加。\"], \"evidence_quotes\": []}}}",
+                  "role": "assistant"
+                }
+              }
+            ],
+            "created": 1790867237,
+            "id": "chatcmpl-0d1d21cb-2ffc-9d97-a2f0-4ae12945969b",
+            "model": "qwen3.8-max",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 542,
+              "prompt_tokens": 1926,
+              "prompt_tokens_details": {
+                "cached_tokens": 1152,
+                "text_tokens": 1926
+              },
+              "total_tokens": 2468
+            }
+          },
+          "observed_model": "qwen3.8-max",
+          "usage": {
+            "completion_tokens": 542,
+            "prompt_tokens": 1926,
+            "prompt_tokens_details": {
+              "cached_tokens": 1152,
+              "text_tokens": 1926
+            },
+            "total_tokens": 2468
+          }
+        }
+      ],
+      "tool_trace": [
+        {
+          "name": "calculate",
+          "arguments": {
+            "operation": "percent_change",
+            "left": "36443",
+            "right": "35726"
+          },
+          "output": {
+            "result": "2.006941723114818339584616246",
+            "operation": "percent_change",
+            "left": "36443",
+            "right": "35726"
+          }
+        }
+      ],
+      "reviewed_at": "2026-10-01T15:07:29.061874+00:00",
+      "latency_ms": 14859,
+      "usage": {
+        "prompt_tokens": 3715,
+        "completion_tokens": 600,
+        "total_tokens": 4315
+      }
+    }
+  ]
+}
