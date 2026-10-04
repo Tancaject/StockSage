@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "origin": "OFFLINE_STUB_ONLY_NO_MODEL_CALLS",
+  "checkedStageInvocations": 16,
+  "checks": [
+    "all four cases and both arms use registered original input",
+    "only analysis method changes by arm",
+    "final stage receives exactly the newly generated draft",
+    "original draft fully replaced once; system/evidence/question preserved",
+    "UTF-16 final prompt length matches provenance",
+    "eight chain summaries written"
+  ],
+  "realQualityAssessed": false,
+  "incompleteAnalysisCheck": {
+    "status": "PASS",
+    "fixtureInvocations": 3,
+    "rule": "Nonempty length-terminated analysis is not submitted for final synthesis; other arm continues",
+    "realModelCalls": 0
+  }
+}

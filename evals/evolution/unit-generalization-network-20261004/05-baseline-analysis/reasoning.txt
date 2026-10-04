@@ -1,0 +1,76 @@
+我们需要回答中文。任务：基于给定证据计算 TGT FY2025 第三季度单季的经营现金流、购建固定资产现金支出和简化自由现金流。用户说明：根据给出的年内累计现金流表还原，简化自由现金流按经营现金流减上述支出毛额计算，不抵扣资产出售回款。说明本季经营现金流是否覆盖该支出，并注明所还原的财报期间。金额注明单位，比率和百分比保留两位小数。
+
+证据：E1 Nine Months Ended Nov 1, 2025 (FY2025 Q3 YTD): Cash provided by operating activities 3,485; Expenditures for property and equipment (2,842). E2 Six Months Ended Aug 2, 2025 (FY2025 Q2 YTD): operating 2,358; capex (1,864). 单季 Q3 = Nine months - Six months. Operating cash flow Q3 = 3,485 - 2,358 = 1,127 million USD. Capex Q3 = 2,842 - 1,864 = 978 million USD (注意表中为负支出，毛额取正数 978). Simplified FCF = 1,127 - 978 = 149 million USD. Coverage: OCF covers capex? 1,127 / 978 = 1.15235 => 1.15x, coverage excess 149, coverage percentage? 用户要求比率和百分比保留两位小数。可写经营现金流/购建固定资产支出=1.15，覆盖率115.24%? 百分比保留两位小数：115.24%。或者覆盖支出：是，覆盖倍数1.15倍，超出149百万美元。
+
+需要注意：Target fiscal year: FY2025 Q3 ended November 1, 2025? The nine months ended November 1, 2025. Six months ended August 2, 2025. Therefore single quarter is roughly Aug 3, 2025 to Nov 1, 2025. They ask “FY2025第三季度单季”。还原的财报期间：FY2025 Q3 单季，约2025-08-03至2025-11-01；由截至2025-11-01九个月累计减去截至2025-08-02六个月累计还原。注意财年季度可能 13周，但日期来自证据。要注明单位 USD millions. 
+
+输出结构固定：标的与数据范围 / 已验证事实 / 财务趋势与经营质量 / 风险与反向证据 / 数据缺口 / 来源。重点回答。不要扩写太多。但需要包括推断和事实区分。可以说明“单季数值为基于累计报表相减的推导，不是公司直接披露的单季现金流表”。
+
+检查是否有细节：E1 periodStart 2025-02-02 periodEnd 2025-11-01. E2 periodStart 2025-02-02 periodEnd 2025-08-02. So Q3 period start should be 2025-08-03? Since E2 periodEnd Aug 2, next day Aug 3. Yes.
+
+Potential issue: FY2025 third quarter ended Nov 1, 2025. Nine months ended Nov 1, 2025. Six months ended Aug 2, 2025. Single quarter is Aug 3-Nov 1. Good.
+
+Need maybe mention “购建固定资产现金支出毛额” as positive 978; in cash flow statement it's negative (2,842) and (1,864). We take absolute amounts. Simplified FCF = operating cash flow minus gross capex, not deducting asset sale proceeds; E1 has investing Other 52 and E2 Other 11 but we ignore per user. Could mention not using “Other” investing cash flow.
+
+Need ratios: coverage ratio 1.15; percentage 115.24%. If they want “比率和百分比保留两位小数” maybe ratio 1.15, percentage 115.24%. Also maybe capex/OCF 86.78%? Not necessary but can include. Let's calculate precisely: 978 / 1127 = 0.86779 = 86.78%. OCF/capex = 1.15235 = 1.15, 115.24%. FCF margin? Not asked. Could avoid.
+
+Need ensure no hidden chain-of-thought. Final concise.
+
+Let's draft in Chinese:
+
+标的与数据范围：
+- 标的：Target Corporation (TGT)，美股。
+- 期间：FY2025 Q3 单季（根据累计还原：2025-08-03至2025-11-01；对应截至2025-11-01九个月减去截至2025-08-02六个月）。
+- 币种：美元；单位：百万美元。
+- 口径：经营现金流=Cash provided by operating activities；购建固定资产现金支出=Expenditures for property and equipment 的毛额；简化自由现金流=经营现金流-资本支出毛额，不扣/不含资产出售回款或 investing “Other”。
+
+已验证事实：
+- 九个月累计：经营现金流 3,485；物业及设备支出 (2,842) [E1]
+- 六个月累计：经营现金流 2,358；物业及设备支出 (1,864) [E2]
+
+计算：
+- Q3 OCF = 3,485 - 2,358 = 1,127 百万美元。
+- Q3 capex = 2,842 - 1,864 = 978 百万美元。
+- Q3 simplified FCF = 1,127 - 978 = 149 百万美元。
+- 覆盖：1,127 > 978，覆盖倍数=1.15倍；覆盖率=115.24%；超出=149 百万美元。
+
+财务趋势与经营质量：
+- 本季经营现金流足以覆盖资本支出，形成正向简化自由现金流 149 million. 这基于推导。与上年同期累计比较? Could mention not directly because need Q3 prior year single quarter not provided; only prior year cumulative nine/six. We have E1 prior year nine months OCF 4,078 capex 1,968; E2 prior year six months OCF 3,339 capex 1,313. Could compute prior year Q3 if wanted? User didn't ask but maybe financial trend. We can compute: prior year Q3 OCF = 4,078 - 3,339 = 739; capex = 1,968 - 1,313 = 655; simplified FCF = 84. This could be a trend: YoY Q3 OCF +52.50%? 1127/739 -1 = 52.50%; capex +49.31%; FCF +77.38%. But user didn't ask; however financial trend section could include but careful. Is it allowed? Evidence includes prior year columns. We can use if relevant. But question only asks current quarter. We can mention optional: 上年同期还原数可由同一证据计算，但用户没要求；若用于趋势：FY2024 Q3 OCF 739, capex 655, simplified FCF 84. Need ensure not overexpand? System says focus on user, don't expand irrelevant. Maybe keep minimal: only say positive simplified FCF; no need YoY. But “财务趋势与经营质量” expects some context. We can say based only on current quarter derived data, OCF covers capex; no additional trend because not asked. But maybe include YoY as supplementary? It might be useful but not necessary. The fixed section can be short.
+
+风险与反向证据：
+- 单季不是直接披露，是由两个累计现金流量表相减还原；若累计口径调整、重述或期间边界不一致会影响结果。
+- 简化自由现金流未考虑资产出售/处置回款、投资“Other”、租赁、债务、股息等；不是公司定义自由现金流。
+- E1/E2均为未经审计新闻稿现金流表。
+
+数据缺口：
+- 没有公司直接披露的 FY2025 Q3 单季现金流量表；没有 10-Q 原文；没有资产出售回款明细（虽然用户要求不抵扣）；没有管理层对资本支出原因解释。若需要原因，尚缺。
+
+来源：
+- E1 Target Q3 2025 earnings press release consolidated cash flows nine months ended Nov 1, 2025.
+- E2 Target Q2 2025 earnings press release consolidated cash flows six months ended Aug 2, 2025.
+
+Need ensure “金额注明单位，比率和百分比保留两位小数”。 We'll write 1,127百万美元, 978百万美元, 149百万美元. Ratio 1.15倍, 115.24%. Maybe also “经营现金流覆盖资本支出：是”。
+
+Double-check calculations:
+3,485 - 2,358 = 1,127.
+2,842 - 1,864 = 978.
+1,127 - 978 = 149.
+1127/978 =? 978*1.15 = 1124.7; exact 1.152351738. percentage 115.24%. FCF/capex? not needed.
+
+Could include table:
+项目 | FY2025 Q3单季还原值
+经营现金流 | 1,127百万美元
+购建固定资产现金支出（毛额） | 978百万美元
+简化自由现金流 | 149百万美元
+覆盖倍数 | 1.15倍
+覆盖率 | 115.24%
+
+Need mention “财报期间：FY2025第三季度，约2025年8月3日至2025年11月1日；由截至2025年11月1日止九个月累计与截至2025年8月2日止六个月累计差额还原。”
+
+Need be careful with Target fiscal periods: E1 periodStart 2025-02-02, periodEnd 2025-11-01; E2 periodStart 2025-02-02, periodEnd 2025-08-02. Q3 start is Aug 3. Good.
+
+Potential nuance: “FY2025第三季度” could be quarter ended Nov 1, 2025. The evidence source says third-quarter earnings. Good.
+
+Need not mention “标的待确认” because ticker and company clear.
+
+Let's produce final with sections. Ensure no chain-of-thought. Use Chinese. Keep factual.

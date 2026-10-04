@@ -1,0 +1,22 @@
+{
+  "schema": "fundamentals_batch_fixed_controls_v1",
+  "status": "FROZEN_BEFORE_GENERATION",
+  "planSha256": "fa948d7e1ffc12ec4e3509990f214d25a4cf005fabba9289bf62273be1b12663",
+  "reviewPolicySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+  "selectionRule": "First two fully passing, distinct-issuer cases in preregistered priority, excluding all confirmed method failures.",
+  "caseIds": [
+    "ibm-fy2025q3-quarter-control",
+    "tgt-fy2025q3-liquidity"
+  ],
+  "reviews": [
+    {
+      "path": "secondary-review-original-first.json",
+      "sha256": "7cc5af17e13c2324049526de49dbecbd71b7bee0c8782cd6f68f1ac7c1002ff9"
+    },
+    {
+      "path": "secondary-review-original-later.json",
+      "sha256": "24889076ade20305d16d3d608dbf75a5275bb8cf71395f3386998fdf4ec49cbd"
+    }
+  ],
+  "releaseEligible": false
+}

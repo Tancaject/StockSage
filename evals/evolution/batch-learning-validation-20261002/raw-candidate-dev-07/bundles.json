@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "bundles": [
+    {
+      "bundleId": "candidate-a7a92cfaac38c01535486362",
+      "parentBundleId": "baseline-v1",
+      "method": "围绕收入与利润质量、现金流、资产负债、盈利能力、增长持续性、资本配置和关键风险展开。指标只在数据口径可比时比较；仅在本轮证据支持时解释变化原因，否则说明原因尚无法确认。不要输出隐藏思维过程，只给出证据、结论及其边界。\n\n以下补充步骤仅在各自适用条件满足时采用；条件不满足时保留原有分析方法。\n\n任务条件：cumulative-to-single-quarter-reconstruction、working-capital-sub-item-derivation\n证据条件：two-cumulative-periods-same-start-date、cash-flow-statement-line-items\n所需能力：evidence-reading、period-comparison、arithmetic\n适用边界：仅适用于同一公司、同一财年、期初日期相同的两期累计现金流量表之间的单季还原场景；两期期初不同或存在重述、合并范围变化时不适用。\n操作：当用两期同起点累计现金流量表还原单季数据时，除用户指定的汇总行外，还应对同一张表内所有可还原的明细行（如存货变动、应付账款变动、应计负债变动等）逐一做差值计算。还原完成后，在数据缺口部分声明某类数据缺失前，必须先检查该明细是否已通过上述差值还原得出；若已得出，不得将其列入缺口，而应报告还原值并注明商业原因尚无法确认。\n反例：两期累计报表期初日期不同；公司发生重述或合并范围变更导致累计数不可直接相减；仅有一期累计报表无法做差\n禁止推断：不得将还原出的会计变动直接推断为商业原因；不得将明细还原值等同于管理层披露的单季数据；不得因明细可还原就声称已掌握经营驱动因素",
+      "fixedContractSha256": "03b588fd86fc9f75047578665fa5227d2e73ca1bca734463fb3feddebe8df193",
+      "contentSha256": "959c7d820bd43eb29bfe0494fb480f53830ba316bfa5e8dbb2c42c12d764644d"
+    }
+  ]
+}

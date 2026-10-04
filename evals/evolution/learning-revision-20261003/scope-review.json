@@ -1,0 +1,16 @@
+{
+  "schema": "learning_revision_scope_review_v1",
+  "origin": "AI_ENGINEERING_REVIEW_NOT_HUMAN",
+  "group1ApprovedForDiagnostic": true,
+  "releaseEligible": false,
+  "checks": {
+    "lineage": "Version 2 resolves exact version 1 record hash",
+    "scope": "Explicitly limits checking to requested items or specific missing-data claims; no full-table calculation requirement",
+    "boundaries": "Same-start fiscal periods and accounting-versus-commercial-cause limits preserved"
+  },
+  "caveats": [
+    "Whether already derived is weaker than whether derivable; must verify actual false-missing behavior",
+    "Generated false-missing-data-claim tag is not shown to be produced by runtime matching; diagnostic conditional injection only",
+    "Group 2 generation is not permission to compose an untested bundle"
+  ]
+}

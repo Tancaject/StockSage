@@ -1,0 +1,46 @@
+{
+  "schema": "reasoning_cause_controlled_plan_v1",
+  "status": "FROZEN_BEFORE_CALLS",
+  "maxProviderCalls": 3,
+  "automaticRetries": 0,
+  "maxConcurrency": 1,
+  "model": "qwen3.8-max",
+  "temperature": 0.7,
+  "maxTokens": 4096,
+  "enableThinking": true,
+  "stream": true,
+  "deadlineSeconds": 600,
+  "sleepControl": "THREAD_SCOPED_ES_SYSTEM_REQUIRED_RESTORED_ON_EXIT",
+  "arms": [
+    {
+      "id": "B-candidate-medium",
+      "source": "evals\\evolution\\batch-learning-validation-20261002\\raw-candidate-dev-09\\candidate-dev-09-1-1.response.json",
+      "thinkingBudget": 8192
+    },
+    {
+      "id": "A-candidate-xhigh",
+      "source": "evals\\evolution\\batch-learning-validation-20261002\\raw-candidate-dev-09\\candidate-dev-09-1-1.response.json",
+      "thinkingBudget": 32768
+    },
+    {
+      "id": "C-baseline-xhigh",
+      "source": "evals\\evolution\\batch-learning-validation-20261002\\raw-development-09\\development-09-1-1.response.json",
+      "thinkingBudget": 32768
+    }
+  ],
+  "frozenInputs": {
+    "evals\\evolution\\batch-learning-validation-20261002\\raw-candidate-dev-09\\candidate-dev-09-1-1.response.json": "58c0c02856534630a6ab088f2112d64c17a9f2ab33b12b7029ecb289e335ea1d",
+    "evals\\evolution\\batch-learning-validation-20261002\\raw-development-09\\development-09-1-1.response.json": "160ad47ae9007c0e2f375d0577170c4101f3bb19dc6f3d17ca2f4e727fa2b303",
+    "evals\\evolution\\batch-learning-validation-20261002\\gold.jsonl": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+    "evals\\evolution\\batch-learning-validation-20261002\\review-policy.json": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+    "evals\\diagnostics\\model-root-cause-20261002\\probe.py": "ccf4be4c439fa8dbe302a6d5bb488f5ee075b03920b04a097c6af9291ce6e23f"
+  },
+  "controls": "A/B differ only thinking_budget, which also maps to effort. A/C differ only registered method prompt. New samples/time are not exact reproduction or stable-effect proof. Production settings are unchanged.",
+  "predeclaredReadout": {
+    "lateCompletion": "A first answer after 300s, complete DONE/stop: naturally completing reasoning exceeds interactive deadline.",
+    "budgetContribution": "B earlier first answer and fewer reasoning tokens than A; any final-quality changes reported against frozen source/gold, not hidden.",
+    "experienceContribution": "Compare A/C extra computations, reasoning tokens and time; one sample is directional, not a stable causal-effect estimate.",
+    "degeneration": "Require observable repeated long passages/calculation cycles, not mere length or compression."
+  },
+  "qualityScope": "AI source checking under original rubric; no release acceptance or automatic selection."
+}

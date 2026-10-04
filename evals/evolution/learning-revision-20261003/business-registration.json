@@ -1,0 +1,12 @@
+{
+  "oldMethodSha256": "665c13fe964c829c11769b819b75b62bd51a562399da3f3345f518b878ac621a",
+  "newBundleSha256": "898a4ec6489d28d8fc593eaca61f6ebdbe020813af58c89c0d7ab1955aecf28d",
+  "inputs": {
+    "input-05-old.json": "e5f9fa703d3949f26946635b7d18d553d943ad69f6507432e989572e40ab235e",
+    "input-05-revised.json": "807c77667fa2fcc7145eeb83dc68f84fef67ef46fdd7bc3a7237d6255d9755f4",
+    "input-09-old.json": "15bd28f1e35adcf075ffbb5fb3aeba4928a6d685356397e0492c05b0bc430fd1",
+    "input-09-revised.json": "44ab977f39edaacfacfbbed26826edd5e2e26d819f63a4ecfd1f1d19f8dd3f1f",
+    "input-06-old.json": "cdd80252e56c3090f058c61d853100cb1cfde13a6deea251c3d4dc80c0baa578",
+    "input-06-revised.json": "f4dccdc74d86aeb05e0650221e0a10f89071fddb3411b0db4821dfc2127a8635"
+  }
+}

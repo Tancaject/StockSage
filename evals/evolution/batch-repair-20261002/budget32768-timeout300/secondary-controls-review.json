@@ -1,0 +1,312 @@
+{
+  "schema": "batch_secondary_answer_review_v1",
+  "reviewType": "AI_INDEPENDENT_TEXT_REVIEW_NOT_HUMAN",
+  "humanReviewStatus": "AI_ONLY",
+  "reviewer": "batch_dataset_design",
+  "scope": "Two real high-budget baseline controls first; all assigned cases reviewed regardless of prior outcomes",
+  "standard": "Same frozen batch-learning-20261002 gold/source-only standard. Bounded general mechanisms allowed; specific company facts/causes need source support. Automatic evaluator results not inspected.",
+  "goldFile": "evals/evolution/batch-learning-20261002/gold.jsonl",
+  "goldFileSha256": "1b31f7cf00852cb0a4696385faac1954b344a0d50563cd5033ef71b5c106cbc1",
+  "status": "COMPLETED",
+  "reviewedStages": 4,
+  "cases": [
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "executionPath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/repair-b32768-pep-control.execution.json",
+      "executionSha256": "e3aed8f07cf2e32f9d94ad0969877db09abb476921fa0df3f739b35e8c895659",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-pep-control/repair-b32768-pep-control-1-1.response.json",
+      "goldLineSha256": "1b7ba36debac76f43f38375fdcd04b73287e6a6cf470f48bcbe0e7b2ed5d0579",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "450186a1640f538d9e02753b702e26f4751f61d758d30c0975fb9ae40871510e",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": "PASS: 5468 - 996 = 4472 USD million",
+          "quarterCapitalSpendingOutflowAmount": "PASS: 2499 - 1507 = 992 USD million, gross outflow",
+          "quarterSimpleFreeCashFlow": "PASS: 4472 - 992 = 3480 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: FY2025 fiscal Q3 2025-06-15 through 2025-09-06, 12 weeks",
+          "p2": "PASS: all three required amounts correct with units",
+          "p3": "PASS: consistent36-week minus24-week same-year cumulative data, correct gross-capex sign",
+          "p4": "PASS: OCF covers capex and leaves3480"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Capital spending (2,499) (2,850)\nSales of property, plant and equipment 272 177"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "24 Weeks Ended\n6/14/2025 6/15/2024"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "Net Cash Provided by Operating Activities 996 1,315"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "Capital spending (1,507) (1,701)\nSales of property, plant and equipment 169 127"
+          }
+        ],
+        "additionalNumericChecks": [
+          "4472/992=4.51times or450.81%;992/4472=22.18%: correct.",
+          "Asset-sale receipts272-169=103million, explicitly excluded from simpleFCF: correct."
+        ],
+        "issues": [],
+        "notes": [
+          "No Q3-versus-H1 quarter-on-quarter interpretation, definite seasonal explanation or acquisition-integration spending intent.",
+          "Statement that single-quarter cash flow may be affected by working capital, taxes and restructuring/acquisition cash is a bounded general mechanism supported by visible row categories, not an asserted company-specific cause.",
+          "Full answer read under the same standard as4096/8192, without automatic evaluator results."
+        ],
+        "attribution": "NONE"
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "87fa123e911a7bbb47f6b16c20889a0c9e26a68b0316ac02df5d90341a54a514",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": "PASS: 5468 - 996 = 4472 USD million",
+          "quarterCapitalSpendingOutflowAmount": "PASS: 2499 - 1507 = 992 USD million, gross outflow",
+          "quarterSimpleFreeCashFlow": "PASS: 4472 - 992 = 3480 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: FY2025 fiscal Q3 2025-06-15 through 2025-09-06, 12 weeks",
+          "p2": "PASS: all three required amounts correct with units",
+          "p3": "PASS: consistent36-week minus24-week same-year cumulative data, correct gross-capex sign",
+          "p4": "PASS: OCF covers capex and leaves3480"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Capital spending (2,499) (2,850)\nSales of property, plant and equipment 272 177"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "24 Weeks Ended\n6/14/2025 6/15/2024"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "Net Cash Provided by Operating Activities 996 1,315"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "Capital spending (1,507) (1,701)\nSales of property, plant and equipment 169 127"
+          }
+        ],
+        "additionalNumericChecks": [
+          "4472/992=4.51times or450.81%;992/4472=22.18%: correct.",
+          "Asset-sale receipts272-169=103million, explicitly excluded from simpleFCF: correct."
+        ],
+        "issues": [],
+        "notes": [
+          "No Q3-versus-H1 quarter-on-quarter interpretation, definite seasonal explanation or acquisition-integration spending intent.",
+          "Statement that single-quarter cash flow may be affected by working capital, taxes and restructuring/acquisition cash is a bounded general mechanism supported by visible row categories, not an asserted company-specific cause.",
+          "Full answer read under the same standard as4096/8192, without automatic evaluator results."
+        ],
+        "attribution": "NONE"
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-pep-control/repair-b32768-pep-control-1-1.response.json",
+      "responseSha256": "97b722dad9cf7ba344616434689c7b31a50fc1320aadd498ce53f3f6c70f3bb2",
+      "caseSha256": "f5f94dcbbdf6d11c805cfb35f2e0a73fd779898d77beafbfd9b1c19c2b36a0b0",
+      "executionStatus": "COMPLETED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "visibleSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928"
+        },
+        {
+          "evidenceId": "E2",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf",
+          "visibleSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38"
+        }
+      ]
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "executionPath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/repair-b32768-tgt-control.execution.json",
+      "executionSha256": "65d96873f76ba3810c95a8030325875320bff408e22adf970346fd7a7b215679",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-tgt-control/repair-b32768-tgt-control-1-1.response.json",
+      "goldLineSha256": "f1926e39ecc4a4f20c9b2d6a3475d9c989f7b03500cf9481e9e1b5a36c3337f6",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "d74c39e8d9af4676c9f6af5e26b63d2c282f4b2ee1a1612d1d8ed91285fb9510",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "PASS: 3485 USD million",
+          "ytdConsolidatedNetIncome": "PASS: 2660 USD million",
+          "priorOperatingCashFlow": "PASS: 4078 USD million",
+          "priorConsolidatedNetIncome": "PASS: 2988 USD million",
+          "ytdCashIncomeGap": "PASS: 825 = 3485 - 2660",
+          "priorCashIncomeGap": "PASS: 1090 = 4078 - 2988",
+          "ytdCashConversion": "PASS: 1.31, expected 1.3102",
+          "priorCashConversion": "PASS: 1.36, expected 1.3648"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: correct comparable fiscal nine-month OCF/NI amounts and dates",
+          "p2": "PASS: OCF minus NI gaps825/1090 and ratios1.31/1.36 or131.02%/136.48% correct",
+          "p3": "PASS: D&A added back; inventory cash use and AP positive contribution correctly interpreted",
+          "p4": "PASS: OCF and NI both decline, OCF declines more; positive conversion yet weaker versus prior period is explicitly reflected"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "(millions) (unaudited) |  | November 1, 2025 |  | November 2,2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net earnings |  | $ 2,660 |  | $ 2,988"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Depreciation and amortization |  | 2,331 |  | 2,215\nShare-based compensation expense |  | 197 |  | 229\nDeferred income taxes |  | (21) |  | (58)\nNoncash (gains) / losses and other, net |  | 8 |  | (1)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Inventory |  | (2,156) |  | (3,279)\nOther assets |  | (294) |  | (265)\nAccounts payable |  | 658 |  | 2,362\nAccrued and other liabilities |  | 102 |  | (113)\nCash provided by operating activities |  | 3,485 |  | 4,078"
+          }
+        ],
+        "additionalNumericChecks": [
+          "NI -328/-10.98%; OCF -593/-14.54%; gap -265/-24.31%; ratio decline5.46percentagepoints or approximately0.05: correct.",
+          "Noncash current2331+197-21+8=2515; prior2215+229-58-1=2385; increase130.",
+          "Operating-account current-2156-294+658+102=-1690; prior-3279-265+2362-113=-1295; additional cash use395.",
+          "Bridge2660+2515-1690=3485; change in OCF-NI gap130-395=-265.",
+          "AP cash contribution decreases1704; inventory cash use decreases1123; D&A increases116: correct."
+        ],
+        "issues": [],
+        "notes": [
+          "Specific supplier, procurement, inventory and seasonal drivers explicitly unconfirmed. No retail industry benchmark or categorical normalisation conclusion.",
+          "Judgement “still healthy/较好 but weaker” is tied to observed cash coverage and opposing evidence; unlike earlier claims, it does not establish absence of every earnings-quality problem.",
+          "Generic indirect cash-flow mechanisms are valid and allowed. Full answer reviewed under unchanged frozen standards; automatic evaluator results not read."
+        ],
+        "attribution": "NONE"
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "d65365df2d07021f8834980b0692d8d3582bb8ca140a32d4b6c27d0bd8aa700c",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "PASS: 3485 USD million",
+          "ytdConsolidatedNetIncome": "PASS: 2660 USD million",
+          "priorOperatingCashFlow": "PASS: 4078 USD million",
+          "priorConsolidatedNetIncome": "PASS: 2988 USD million",
+          "ytdCashIncomeGap": "PASS: 825 = 3485 - 2660",
+          "priorCashIncomeGap": "PASS: 1090 = 4078 - 2988",
+          "ytdCashConversion": "PASS: 1.31, expected 1.3102",
+          "priorCashConversion": "PASS: 1.36, expected 1.3648"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: correct comparable fiscal nine-month OCF/NI amounts and dates",
+          "p2": "PASS: OCF minus NI gaps825/1090 and ratios1.31/1.36 or131.02%/136.48% correct",
+          "p3": "PASS: D&A added back; inventory cash use and AP positive contribution correctly interpreted",
+          "p4": "PASS: OCF and NI both decline, OCF declines more; positive conversion yet weaker versus prior period is explicitly reflected"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "(millions) (unaudited) |  | November 1, 2025 |  | November 2,2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net earnings |  | $ 2,660 |  | $ 2,988"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Depreciation and amortization |  | 2,331 |  | 2,215\nShare-based compensation expense |  | 197 |  | 229\nDeferred income taxes |  | (21) |  | (58)\nNoncash (gains) / losses and other, net |  | 8 |  | (1)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Inventory |  | (2,156) |  | (3,279)\nOther assets |  | (294) |  | (265)\nAccounts payable |  | 658 |  | 2,362\nAccrued and other liabilities |  | 102 |  | (113)\nCash provided by operating activities |  | 3,485 |  | 4,078"
+          }
+        ],
+        "additionalNumericChecks": [
+          "NI -328/-10.98%; OCF -593/-14.54%; gap -265/-24.31%; ratio decline5.46percentagepoints or approximately0.05: correct.",
+          "Noncash current2331+197-21+8=2515; prior2215+229-58-1=2385; increase130.",
+          "Operating-account current-2156-294+658+102=-1690; prior-3279-265+2362-113=-1295; additional cash use395.",
+          "Bridge2660+2515-1690=3485; change in OCF-NI gap130-395=-265.",
+          "AP cash contribution decreases1704; inventory cash use decreases1123; D&A increases116: correct."
+        ],
+        "issues": [],
+        "notes": [
+          "Specific supplier, procurement, inventory and seasonal drivers explicitly unconfirmed. No retail industry benchmark or categorical normalisation conclusion.",
+          "Judgement “still healthy/较好 but weaker” is tied to observed cash coverage and opposing evidence; unlike earlier claims, it does not establish absence of every earnings-quality problem.",
+          "Generic indirect cash-flow mechanisms are valid and allowed. Full answer reviewed under unchanged frozen standards; automatic evaluator results not read."
+        ],
+        "attribution": "NONE"
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-tgt-control/repair-b32768-tgt-control-1-1.response.json",
+      "responseSha256": "d6237cd1b20c044004a224d982b4cecd8053858d25d22313222226cf6d438e36",
+      "caseSha256": "db32f8596e00dd925957e1ec49fd61e8e7869a0b5b6722b7c5b032495fd7ca7d",
+      "executionStatus": "COMPLETED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://corporate.target.com/press/release/2025/11/target-corporation-reports-third-quarter-earnings",
+          "visibleSha256": "ec5b45fedd4b52e997f108a88a9a1f612604754571b694b43ec3c3ed201de2d3"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-10-02T10:16:01.661055+00:00",
+  "summary": {
+    "caseCount": 2,
+    "executionCompletedCases": 2,
+    "perStageRequiredNumericFacts": {
+      "analysis": {
+        "correct": 11,
+        "total": 11,
+        "allRequiredFactsCorrectCases": 2,
+        "caseCount": 2
+      },
+      "finalAnswer": {
+        "correct": 11,
+        "total": 11,
+        "allRequiredFactsCorrectCases": 2,
+        "caseCount": 2
+      }
+    },
+    "perStageFullSemanticCases": {
+      "analysis": {
+        "PASS": 2,
+        "FAIL": 0,
+        "NO_DATA": 0
+      },
+      "finalAnswer": {
+        "PASS": 2,
+        "FAIL": 0,
+        "NO_DATA": 0
+      }
+    },
+    "primaryEvaluatorAgreement": "NOT_ASSESSED: automatic judgments not read",
+    "boundary": "Two real paired controls only, AI source-grounded review. Does not certify other four cases or establish population accuracy / causal effect of budget."
+  }
+}

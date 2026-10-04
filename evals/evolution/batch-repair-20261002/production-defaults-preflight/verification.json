@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "modelCalls": 0,
+  "productionConfiguration": {
+    "model": "qwen3.8-max",
+    "thinkingBudget": 32768,
+    "enableThinking": true,
+    "stageTimeoutSeconds": 300,
+    "httpReadTimeout": "PT5M",
+    "retryAttempts": 1
+  },
+  "build": {
+    "schema": "fundamentals_evolution_build_v1",
+    "gitSha": "1abd3c197ee8543a3ab5c3f796d3beb656b70f4c",
+    "sourceState": "WORKTREE_SNAPSHOT",
+    "sourceTreeSha256": "1b715a6000c2e37bcd8c5dbc73ed636faeaae957215518de6b0cce9fb9a2a0ce",
+    "artifactSha256": "91097907edef9c32d1ecb5af93f7b98b8ba7bc4cf8df96a8c57abeafa8b8da91",
+    "artifactFormat": "SPRING_BOOT_JAR",
+    "builtAt": "2026-10-02T10:32:29.383056+00:00"
+  },
+  "runtimeSha256": "13a2983e6bd050600e346524e4912afd0bead8061c89e6867a9bc370f7670023",
+  "commandSha256": "b59174a5779be0c2601c515e0faf6cb735c6ccb4eb4c91d8654bde95ca5af5cc",
+  "httpContractTestSha256": "e0e52885bef8f72e930050a0a13166a4f1e6b68a948402351b515bddd99d8364",
+  "experimentalOverrides": [],
+  "preservedExperimentalJarSha256": "0e27ea2adf37db3a3f24eb9b31512dfe6d1fa36f81b53f43122472e657eceb5f",
+  "streamingBoundary": "Ordinary replay has the stage deadline; normal ChatService SSE has no corresponding whole-generation timeout.",
+  "releaseEligible": false
+}

@@ -1,0 +1,297 @@
+我们需要回答用户中文问题。需要严格使用提供的证据 E1，JNJ FY2025 Q3 10-Q cash flow，累计九个月截至 2025-09-28 和上年同期截至 2024-09-29，单位百万美元。需要比较本期和上年同期经营现金流；再用本期经营、投资、筹资净现金流及汇率影响核对期初到期末现金变化，列出各部分和两个余额。结合投资和筹资表内主要项目说明资金去向，并区分可以确认的现金用途与还无法确认的经营原因或持续性。需要比率和百分比保留两位小数。需要应用补充步骤：cumulative-to-single-quarter-reconstruction? 任务条件说适用：当用两期同起点累计现金流量表还原单季数据时，应对所有可还原明细逐一差值计算。用户问题没有明确要求单季还原，主要是累计期间比较。但任务条件可能要求？它说补充步骤仅在各自适用条件满足时采用；条件：two-cumulative-periods-same-start-date, cash-flow-statement-line-items。这里有两期累计期间同起点？都是 Fiscal Nine Months Ended Sep 28 2025 和 Sep 29 2024，期初应该均为各自财年开始（2024-12-30? E1 periodStart 2024-12-30 for 2025 Q3; 2024 nine months start likely 2023-12-31? Not given but fiscal nine months same start of fiscal year). 但任务要求“使用财报累计期间”，用户没有要求单季还原。补充步骤说仅适用于同一公司、同一财年、期初日期相同的两期累计现金流量表之间的单季还原场景；两期期初不同... 这里是不同财年（FY2025九个月和FY2024九个月），期初日期不同（2024-12-30 vs 2023-12-31?），不是同一财年，因此不适用单季还原。也可能“cumulative-to-single-quarter-reconstruction”条件指如果用户要求单季？但用户要求累计期间，不需要。故不做单季还原，但可能需说明不适用。不过系统说任务条件：cumulative-to-single-quarter-reconstruction、working-capital-sub-item-derivation；证据条件：two-cumulative-periods-same-start-date、cash-flow-statement-line-items。这个上下文有两期累计但不是同一财年/期初相同？ two-cumulative-periods-same-start-date 可能指两个累计期间有相同起始日？不，2025九个月期初 2024-12-30，2024九个月期初 2023-12-31，不同。证据 metadata only periodStart for E1 is 2024-12-30 (maybe for current period). It doesn't provide prior period start. But table says fiscal nine months ended; likely different start dates. So not applicable. Need not reconstruct single quarter. But maybe they expect using two cumulative periods same start date? Wait: request parameters reportPeriod=quarterly, reportCount=2. But evidence only one cash flow statement with current and prior year nine months. Could reconstruct FY2025 Q3 single quarter if had Q2 cumulative and Q3 cumulative same fiscal year. Not provided. So no single-quarter reconstruction. Need mention data gap for单季还原? User didn't ask, but task says if condition? We can note no two same-start cumulative periods for single-quarter reconstruction; only current and prior-year nine-month cumulative.
+
+Need compute:
+Current nine months ended 2025-09-28:
+Net earnings 21,688 vs 10,635 prior.
+Operating CF 17,221 vs 17,283. Difference -62. Percentage change = -62 / 17,283 = -0.3587% -> -0.36%.
+Investing CF -19,103 vs -17,279, outflow increased by 1,824; percentage? Net used increased 10.56%? (-19,103 - (-17,279)) / abs(-17,279) = -1,824/17,279 = -10.56% (more negative). Could state outflow up 10.56%.
+Financing CF -4,170 vs -1,792, outflow increased by 2,378; percent 132.70%? 2,378/1,792=1.3270 -> 132.70% more outflow.
+FX effect 178 vs -91.
+Decrease in cash -5,874 vs -1,879. Beginning cash 24,105 vs 21,859. Ending 18,231 vs 19,980.
+Check reconciliation: 17,221 + (-19,103) + (-4,170) + 178 = 17,221 - 19,103 = -1,882; -1,882 - 4,170 = -6,052; +178 = -5,874. Beginning 24,105 + (-5,874)=18,231. Good.
+Prior: 17,283 -17,279 -1,792 -91 = 4 -1,792 = -1,788; -91=-1,879. Beginning 21,859 -1,879=19,980. Good.
+
+Need answer: profit growth but ending cash below beginning, does it indicate operating cash creation明显恶化? Evidence: OCF essentially flat YoY (17,221 vs 17,283, -0.36%), not明显恶化. Net income up 103.93%? (21,688-10,635)/10,635=1.0393 -> 103.93%, but OCF flat due to noncash and working capital/other items. Need discuss net earnings vs OCF: OCF/net income? Current 17,221/21,688=0.7940 -> 79.40%; prior 17,283/10,635=1.6252 -> 162.52%. But caution net earnings include deferred tax provision 5,215 noncash? Actually deferred tax provision increases net income? Let's parse: reconciliation starts net earnings, adds/subtracts adjustments. Deferred tax provision 5,215 is added? It says Deferred tax provision 5,215 (current) vs (2,167) prior. If it's provision (expense) added back? Usually deferred taxes add back if expense; here positive 5,215. Net earnings likely after tax includes deferred tax expense? But we can just state adjustments. Major drags: Increase in other current and non-current assets -7,653 vs +949; decrease in other current and non-current liabilities -6,196 vs -326; deferred tax provision +5,215 vs -2,167; accounts receivable increase -2,172 vs -1,259; inventories increase -1,404 vs -1,038; AP & accrued +1,111 vs +2,713. Need maybe derive working capital subitems? We have line items already cumulative. Need not reconstruct.
+
+Need “结合投资和筹资表内的主要项目说明资金去向”:
+Investing major current:
+Acquisitions, net of cash acquired -14,459 (prior -15,145)
+Additions to PP&E -2,995 (prior -2,812)
+Acquired IPR&D / milestones -385 (prior -1,250)
+Purchases investments -677, sales +1,442 net +765? Actually purchases -677, sales +1,442 -> net +765 inflow.
+Proceeds disposal +408.
+Credit support agreements activity, net -2,338 (prior +699). This is significant outflow. Other -99.
+Net investing -19,103.
+Financing major:
+Dividends -9,250 (prior -8,839)
+Repurchase common stock -4,029 (prior -2,150)
+Proceeds short-term debt +10,673, repayment -10,524 net +149.
+Proceeds long-term debt +9,138, repayment -1,755 net +7,383.
+Proceeds exercise stock options/etc +1,831.
+Credit support agreements activity, net -246.
+Other -8. Settlement convertible debt Shockwave prior -970, current 0.
+Net financing -4,170. Despite debt issuance inflows, dividends and buybacks larger? Let's sum: dividends+repurchase = -13,279. Debt net: ST +149, LT +7,383 = +7,532. Options +1,831. CSA -246, other -8 => -4,170. Yes.
+
+Can confirm cash uses: acquisitions -14,459; capex -2,995; IPR&D -385; dividends -9,250; buybacks -4,029; net debt repayment? Actually long-term net issuance positive, short-term net positive; so financing not net debt repayment overall. But there were repayments long-term -1,755 and short-term -10,524 offset by proceeds. Credit support agreements activity in investing -2,338 and financing -246 are confirmed line-item uses/outflows but commercial reason maybe not explained by evidence. Need distinguish confirmed cash use vs cannot confirm operating reason or sustainability.
+
+Need explain ending cash lower than beginning primarily due to investing outflows (acquisitions, capex, credit support agreements) and financing outflows (dividends, buybacks) exceeding operating cash flow, plus small FX positive. Not due to operating cash collapse. However OCF flat while net income increased; quality of earnings/cash conversion lower due to deferred tax and other asset/liability changes. But cannot confirm whether other assets/liabilities changes are one-time, litigation/tax, working capital timing, acquisitions/divestitures effects? Note line says changes net of effects from acquisitions and divestitures. But still reasons not provided in excerpt. Need avoid inferring. Need mention “可以确认的现金用途” from investing/financing line items; “无法确认的经营原因或持续性” for working capital changes, deferred tax, credit support agreements commercial nature, acquisitions specifics? Actually acquisition cash outflow confirmed use, but target/strategic reason not in evidence (Note 10 not provided). Could confirm cash paid for acquisitions net of cash acquired 14,459 million; cannot confirm which acquisitions or whether recurring. Also IPR&D milestones cash outflow confirmed but underlying projects not known. Credit support agreements activity: cash outflow confirmed but nature not explained; not classify as operating/investing? It appears in both investing and financing. Need state cannot confirm driver or persistence.
+
+Need ratios and percentages two decimals. Which ratios? Maybe OCF / net earnings. Also cash change components as % of beginning cash? Could provide. User asks “比率和百分比保留两位小数.” We can include:
+- OCF margin? No revenue not provided, cannot.
+- OCF / net earnings: FY2025 9M 79.40%, FY2024 9M 162.52%.
+- cash decrease as % beginning cash: -5,874 / 24,105 = -24.37%; prior -1,879/21,859=-8.60%.
+- ending cash vs beginning: 18,231/24,105=75.63% (i.e. down 24.37%).
+- OCF change -0.36%; net earnings change +103.93%; investing outflow change +10.56%; financing outflow change +132.70%.
+- component contribution to cash decrease? As percentage of beginning cash: operating +71.44% (17,221/24,105=71.44%), investing -79.25%, financing -17.30%, FX +0.74%, net -24.37%. Prior: operating +79.06%, investing -79.05%, financing -8.20%, FX -0.42%, net -8.60%. Might be useful. Need ensure percentages two decimals.
+
+Need check all arithmetic:
+OCF current 17,221; prior 17,283; change -62. % = -0.3587 -> -0.36%.
+Net earnings change: 11,053/10,635=1.0393 -> +103.93%.
+Investing outflow change: current -19,103 vs prior -17,279; difference -1,824. If “净流出扩大” = 1,824/17,279=10.56%.
+Financing: -4,170 vs -1,792; difference -2,378; /1,792=132.70%.
+FX: 178 vs -91; swing +269.
+Cash decrease: -5,874 vs -1,879; difference -3,995; as %? Could state cash reduction expanded by 212.61%? 3,995/1,879=212.61%. But not necessary.
+Beginning cash 24,105; end 18,231; decrease 5,874; % beginning = 24.37%.
+Prior beginning 21,859; end 19,980; decrease 1,879; % beginning = 8.60%.
+OCF/net earnings: 17,221/21,688=0.79404 -> 79.40%. Prior 17,283/10,635=1.6251 -> 162.52%.
+Operating CF to cash decrease? OCF covers? OCF 17,221 less than dividends+buybacks 13,279? Remaining 3,942, but investing -19,103, so cash down.
+Acquisitions + capex + IPR&D = 14,459+2,995+385=17,839. OCF 17,221; shortfall 618. Plus credit support investing -2,338 etc. Dividends+buybacks 13,279, debt net +7,532 and options +1,831 reduce financing outflow.
+Need maybe compute “资金去向” as shares of total cash outflows? Could but not necessary. Could present major uses.
+
+Need be careful about “期末现金低于年初，是否说明经营现金创造已经明显恶化？” Answer: Based on nine-month cumulative, not明显恶化; OCF basically flat YoY and still positive large. But cash conversion relative to net income lower; working capital/other balance sheet items consumed cash; cannot confirm sustainability. Ending cash decline mainly due to investment and financing decisions, not operating cash generation collapse.
+
+Need structure:
+标的与数据范围
+- 标的：JNJ，美股。证据为 10-Q 合并现金流量表，FY2025前九个月（2024-12-30至2025-09-28）与FY2024前九个月（截至2024-09-29；具体期初未在证据中列示，但为同表上年同期）。货币美元，单位百万。来源 E1。
+- 说明：仅有累计现金流量表；没有单季报表或两期同起点累计表用于单季还原；因此不进行单季还原。若需要单季经营现金流，缺 Q2 cumulative etc.
+
+已验证事实
+- Table maybe list OCF, investing, financing, FX, decrease, beginning, ending.
+- Reconciliation arithmetic.
+- Compare OCF.
+
+财务趋势与经营质量
+- OCF flat, not deterioration; net income up but not converted proportionally.
+- Key adjustments/working capital items: deferred tax +5,215, other assets -7,653, other liabilities -6,196, AR -2,172, inventory -1,404, AP/accrued +1,111. Compare prior. Need maybe say “这些是已披露的累计变动；商业原因未在本证据中说明”。
+- Cash balance reconciliation.
+- Funds use: investing acquisitions, capex, credit support; financing dividends, buybacks, debt activity.
+
+风险与反向证据
+- Risk: OCF flat despite earnings growth; cash conversion ratio lower; large outflows for acquisitions and shareholder returns; if acquisition/CSA outflows continue, cash balance may continue down; but not necessarily operating deterioration.
+- Reverse evidence: OCF stable; proceeds from debt and option exercises offset; divestment/investment sales provide inflows.
+
+数据缺口
+- No revenue, net margin, segment info; no Note 10 details for acquisitions/disposals/credit support agreements; no management discussion for drivers of other assets/liabilities, deferred tax, litigation/tax; no single-quarter data; no balance sheet to tie working capital; no debt maturity/interest. Need mention cannot confirm sustainability.
+
+来源
+- E1 source.
+
+Need ensure no hidden chain-of-thought in final. Use concise but detailed. Need include units and periods. Need maybe include tables.
+
+Need consider if “期末现金低于年初” in current FY: 18,231 vs 24,105. Yes.
+
+Need check if “FY2025前九个月利润增长” net earnings 21,688 vs 10,635, yes. But note there may be one-time gains/losses? Evidence doesn't provide income statement; only cash flow adjustments. We can say profit growth per net earnings line in cash flow statement; cannot attribute drivers.
+
+Potential issue: “Deferred tax provision 5,215” as adjustment. If it is a provision added back? We can avoid saying direction relative to net income beyond reconciliation. It is positive adjustment to OCF. But if deferred tax provision increased OCF by 5,215? In reconciliation, positive means added to net earnings. Prior negative -2,167 reduced OCF. So current OCF benefited by 5,215 from deferred tax provision relative to prior? Need be careful: If net earnings already includes deferred tax expense, adding it back returns noncash expense. If deferred tax provision is benefit? But line says provision; positive adjustment. We can state “该项在调节中为正，增加经营现金流；上年同期为负，减少经营现金流；具体税项/原因未披露。”
+
+Need maybe compute net effect of changes in assets and liabilities? Let's compute: Current changes in assets/liabilities sum: AR -2,172 + inventories -1,404 + AP/accrued +1,111 + other assets -7,653 + other liabilities -6,196 = -16,314? -2,172-1,404=-3,576; +1,111=-2,465; -7,653=-10,118; -6,196=-16,314. Prior: -1,259-1,038+2,713+949-326 = 1,039? -1,259-1,038=-2,297; +2,713=416; +949=1,365; -326=1,039. So working capital/other asset-liability changes consumed 16,314 current vs provided 1,039 prior. But note “net of effects from acquisitions and divestitures.” Could mention. This is a big reason OCF didn't rise. However also adjustments include deferred tax +5,215, IPR&D charges 109 vs 1,252, asset write-downs etc. Let's compute total nonoperating/noncash adjustments? Net earnings to OCF: current net earnings 21,688 + adjustments total = 17,221, so total adjustments = -4,467. Prior total adjustments = 6,648. Major current negative adjustments are other assets/liabilities -16,314 offset by depreciation 5,492, deferred tax 5,215, SBC 1,045, etc. We can mention “资产/负债变动合计消耗现金 16,314百万美元，上年同期为提供 1,039百万美元；这是经营现金流未随利润增长的主要已披露原因，但具体经营原因未披露。” This is useful. Need ensure “Changes in assets and liabilities” includes all five lines. Yes.
+
+Need maybe compute “经营现金流与净利润差” = OCF - net earnings = -4,467 current vs +6,648 prior. Ratio above. Could state.
+
+Need maybe include “汇率影响” current +178 vs prior -91. It is not operating/investing/financing.
+
+Need “列出各部分和两个余额” means list components and two balances (beginning/end). We'll include table with current and prior, and maybe current reconciliation. Need show arithmetic.
+
+Need “先比较本期和上年同期经营现金流” so start with OCF comparison.
+
+Need “结合投资和筹资表内的主要项目说明资金去向” include table of major investing/financing items.
+
+Need “区分可以确认的现金用途与还无法确认的经营原因或持续性。” We can create subsections: 可确认现金用途（基于现金流表项目）: acquisitions, capex, IPR&D, dividends, buybacks, debt repayments? Also purchases of investments, credit support agreements. But “cash use” confirmed as line items. Can't confirm: drivers of other assets/liabilities, deferred tax, credit support agreements commercial purpose, acquisition targets/strategic rationale, whether working capital changes recurring. Need be precise: For debt proceeds/repayments, confirmed financing activities but purpose not disclosed; for short-term debt net small, long-term net issuance positive. For acquisitions, confirmed cash paid but not which acquisitions (Note 10 not provided). For credit support agreements, confirmed net outflows in investing -2,338 and financing -246, but nature not explained.
+
+Need maybe mention “投资表内主要项目” includes “Credit support agreements activity, net” -2,338; it's unusual. Need not overinterpret.
+
+Need maybe include “本期现金减少 5,874百万美元，其中经营现金流入 17,221百万美元被投资净流出 19,103百万美元和筹资净流出 4,170百万美元抵消，汇率增加 178百万美元。” Good.
+
+Need ensure no external knowledge. We know JNJ is US-listed, but can state from target JNJ. Market maybe US? Evidence source q4cdn, 10-Q; can say US listed? Not explicitly but JNJ ticker; okay maybe “标的：JNJ（强生，美股；本证据为10-Q）”。 If market not explicit? 10-Q SEC implies US. Fine.
+
+Need check if periodStart E1 2024-12-30 for current period. Prior period start not given; table says fiscal nine months ended September 29, 2024. We can state current period start from metadata; prior period start not explicitly shown but “FY2024前九个月” (截至2024-09-29). Avoid exact prior start if not given. But maybe fiscal year starts around Dec 31 2023; not in evidence. Don't state exact prior start unless from table? It only says Fiscal Nine Months Ended September 29, 2024. We can say “上年同期为截至2024-09-29的九个月；证据未单列其期初日期”。 Good.
+
+Need mention “累计期间，非单季”。
+
+Potential issue: The evidence has “Net cash flows from operating activities 17,221 17,283” and “Decrease in cash and cash equivalents (5,874) (1,879)” but “Cash and cash equivalents, beginning of period 24,105 21,859”. The current period beginning 24,105 is as of 2024-12-29? Not necessary.
+
+Need maybe include “现金及现金等价物” only, not total liquidity. Mention ending cash lower does not equal liquidity crisis; no debt maturity evidence.
+
+Need maybe include “比率和百分比保留两位小数” all percentages with two decimals. If we include “79.40%” etc. Good.
+
+Need maybe include “单位：百万美元”。
+
+Need maybe include “已验证事实” table:
+指标 | FY2025前9个月 | FY2024前9个月 | 变动 | 变动%
+Net earnings 21,688 10,635 +11,053 +103.93%
+OCF 17,221 17,283 -62 -0.36%
+Investing -19,103 -17,279 -1,824 +10.56% outflow expansion
+Financing -4,170 -1,792 -2,378 +132.70% outflow expansion
+FX 178 -91 +269 not meaningful? Could not percent due base negative; can state +269.
+Cash decrease -5,874 -1,879 -3,995 +212.61%? If include, percent of decrease expansion. Need be careful: “现金减少扩大 212.61%” computed. It is okay.
+Beginning cash 24,105 21,859 +2,246 +10.27%? Could include. Ending 18,231 19,980 -1,749 -8.75%. Percent ending vs prior ending = -8.75%. Good.
+
+Need “核对期初到期末现金变化” table for current:
+期初 24,105
+经营 +17,221 (占期初 71.44%)
+投资 -19,103 (-79.25%)
+筹资 -4,170 (-17.30%)
+汇率 +178 (+0.74%)
+净减少 -5,874 (-24.37%)
+期末 18,231
+Maybe include arithmetic: 24,105+17,221-19,103-4,170+178=18,231.
+For prior maybe optional but user asks two balances and compare? Could include prior reconciliation too:
+期初 21,859
+经营 +17,283 (+79.06%)
+投资 -17,279 (-79.05%)
+筹资 -1,792 (-8.20%)
+汇率 -91 (-0.42%)
+净减少 -1,879 (-8.60%)
+期末 19,980
+Arithmetic: 21,859+17,283-17,279-1,792-91=19,980.
+This satisfies.
+
+Need “资金去向” table:
+投资活动主要：
+Acquisitions, net of cash acquired -14,459 (prior -15,145) confirmed use:并购现金支出; target/nature not confirmed.
+Additions to PP&E -2,995 (prior -2,812) capex.
+Credit support agreements activity, net -2,338 (prior +699) confirmed outflow; commercial reason not confirmed.
+Purchases investments -677, sales +1,442, net +765 inflow; disposal +408. IPR&D -385.
+Financing:
+Dividends -9,250, buybacks -4,029 confirmed shareholder returns.
+Short-term debt proceeds +10,673, repayments -10,524 net +149; long-term proceeds +9,138, repayments -1,755 net +7,383; overall debt financing provided +7,532? Check ST net 149 + LT net 7,383 = 7,532. Yes.
+Exercise stock options etc +1,831.
+CSA financing -246. Other -8.
+Net financing -4,170 because dividends+buybacks exceed debt/option inflows.
+Need maybe say “可以确认的现金用途” include: 并购、资本开支、IPR&D里程碑、股利、回购、债务偿还（但被新发行部分抵消）、投资购买、CSA。 But if we list all, too much. Need focus major.
+
+Need “经营原因或持续性无法确认”：
+- OCF flat due to working capital/other items: other current/noncurrent assets -7,653 vs +949; other liabilities -6,196 vs -326; AR/inventory increases; AP/accrued less inflow. These are accounting line changes; no business reason in evidence.
+- Deferred tax provision +5,215 vs -2,167; tax driver not confirmed.
+- Acquisitions and IPR&D may be strategic/investment, but target and recurrence not confirmed.
+- Credit support agreements outflow nature not confirmed.
+- Dividends/buybacks are board decisions; sustainability depends on policy and liquidity, not confirmed.
+
+Need maybe mention “反向证据”：OCF not declined; OCF covers dividends? OCF 17,221 > dividends 9,250; OCF covers dividends+buybacks? 17,221 > 13,279. But investing acquisitions etc caused cash decline. This weakens “经营现金创造明显恶化” claim. However OCF/net income low. Need include.
+
+Need maybe mention “风险”：cash balance down 24.37%; if large acquisition payments and shareholder returns continue without debt issuance or asset sales, liquidity could pressure; but current evidence only cash and equivalents, no debt covenants.
+
+Need maybe mention “数据缺口”：no Q2 cumulative for single-quarter reconstruction; no same-start two cumulative periods for reconstruction; no Note 10; no MD&A; no balance sheet; no revenue/segment; no details of credit support agreements; no details of deferred tax; no details of other assets/liabilities; no debt schedule. Also “本期期末现金低于年初” could be affected by classification of cash equivalents? No evidence.
+
+Need ensure final in Chinese, with sections exactly: 标的与数据范围 / 已验证事实 / 财务趋势与经营质量 / 风险与反向证据 / 数据缺口 / 来源. Use [E1].
+
+Need maybe not say “隐藏思维”. Good.
+
+Let's draft final with tables. Need ensure all numbers with commas? Fine. Use million USD. Percent two decimals.
+
+Potential nuance: “FY2025前九个月利润增长，但期末现金低于年初，是否说明经营现金创造已经明显恶化？” We can answer in first paragraph: 不能仅凭此得出明显恶化。经营现金流同比基本持平（-0.36%），现金下降主要由投资和筹资流出造成。但经营现金流/净利润降至79.40%，现金转化变弱，且资产/负债变动消耗现金，原因未披露。
+
+Need include “本期经营现金流与上年同期比较” first. Maybe in 已验证事实 start.
+
+Let's compute some extra ratios if needed:
+- Current OCF covers dividends: 17,221/9,250=1.86? 17,221/9,250=1.8617 -> 1.86 times. Covers dividends+buybacks: 17,221/13,279=1.297 -> 1.30 times. Could include as ratios; two decimals. Useful. Prior OCF/dividends 17,283/8,839=1.955 -> 1.96; OCF/(div+buyback) 17,283/10,989=1.5728 -> 1.57. But user didn't ask; maybe helpful for cash creation. Include maybe in quality section. Ensure ratios two decimals.
+- Acquisition+capex+IPR&D / OCF = 17,839/17,221=1.0359 -> 1.04 times. Prior (15,145+2,812+1,250=19,207)/17,283=1.1113 -> 1.11. So OCF not enough to cover these investment outlays current (by 618). But note other investing inflows/outflows. Could mention.
+- Cash decrease as % beginning 24.37. Good.
+
+Need be careful: “Acquisitions, net of cash acquired” -14,459; “Acquired IPR&D / related milestones” -385; “Additions to PP&E” -2,995. Sum = 17,839. Yes.
+
+Need maybe compute “投资活动主要流出合计” including credit support? If include acquisitions+capex+IPR&D+CSA+purchase investments+other = 14,459+2,995+385+2,338+677+99=20,953; inflows 408+1,442=1,850; net -19,103. But major uses: acquisitions and capex and CSA. Good.
+
+Need maybe compute “筹资活动主要流出” dividends+buybacks+debt repayments+CSA+other = 9,250+4,029+10,524+1,755+246+8=25,812; inflows = 10,673+9,138+1,831=21,642; net -4,170. But if we say debt repayments are offset by proceeds. Good.
+
+Need maybe mention “short-term debt net proceeds 149; long-term net proceeds 7,383; total debt net inflow 7,532” as confirmed. This shows financing wasn't purely outflow; net financing outflow due to shareholder returns. Good.
+
+Need maybe mention “汇率影响 +178 vs -91; not operating.”
+
+Need maybe mention “本期期末现金 18,231 低于期初 24,105，下降 24.37%；上年同期期末 19,980 较期初 21,859 下降 8.60%。”
+
+Need maybe mention “已披露事实：现金流量表勾稽关系成立。” Good.
+
+Need ensure “数据缺口” includes “未提供资产负债表，无法验证应收/存货/应付变动的余额基础；未提供利润表/收入，无法计算经营现金流率或收入增长；未提供管理层讨论，无法解释 other assets/liabilities.” Good.
+
+Potential issue: The system says “任务条件：cumulative-to-single-quarter-reconstruction、working-capital-sub-item-derivation... 操作：当用两期同起点累计现金流量表还原单季数据时，除用户指定的汇总行外，还应对同一张表内所有可还原的明细行逐一做差值计算。还原完成后，在数据缺口部分声明某类数据缺失前，必须先检查该明细是否已通过上述差值还原得出；若已得出，不得将其列入缺口，而应报告还原值并注明商业原因尚无法确认。” We are not doing reconstruction because not applicable. But maybe they expect working-capital-sub-item-derivation from current vs prior cumulative? No, that's year-over-year difference, not single-quarter. We can still derive YoY changes in working capital line items (we did). Need maybe not list as gap. Good.
+
+Need maybe include “本期与上年同期均为财年年初至9月末的累计数，不能混同单季；本报告未做单季还原，因为证据未提供同一财年内两期同起点累计数。” This addresses condition.
+
+Need maybe mention “标的待确认” not needed because ticker clear.
+
+Need maybe include “来源 [E1]” after each table? We can cite [E1] globally.
+
+Let's draft final. Need be detailed but not too verbose. Ensure all percentages two decimals. Use negative parentheses? Fine.
+
+Double-check arithmetic for component % of beginning cash current:
+Operating 17,221/24,105 = 0.7144 -> 71.44%
+Investing -19,103/24,105 = -0.7925 -> -79.25%
+Financing -4,170/24,105 = -0.1730 -> -17.30%
+FX 178/24,105 = 0.007384 -> 0.74%
+Net -5,874/24,105=-0.24368 -> -24.37%
+Sum 71.44-79.25-17.30+0.74 = -24.37. Good.
+Prior:
+17,283/21,859=0.79066 -> 79.07? Let's compute precisely: 21,859*0.79=17,268.61; remainder 14.39; /21,859=0.000658; total 0.790658 -> 79.07% (not 79.06). Let's calculate: 17283 / 21859. Use rough: 21859*0.7907 = 17284? 21859*0.7907 = 21859*(0.79 +0.0007)=17268.61+15.3013=17283.9113, slightly high. 0.79066 gives 17283.037? 21859*0.00066=14.4269; +17268.61=17283.0369. So 79.07% if rounded two decimals? 0.79066 -> 79.07% (since third decimal? 79.066% -> 79.07). Earlier I said 79.06; correct 79.07. Investing -17,279/21,859 = -0.79047 -> -79.05%? 0.79047*100=79.047 -> 79.05. Financing -1,792/21,859 = -0.08198 -> -8.20%. FX -91/21,859=-0.004163 -> -0.42%. Sum 79.07-79.05-8.20-0.42=-8.60. Good. Use 79.07.
+Current OCF/net earnings: 17221/21688. 21688*0.794=17220.272; ratio 0.79403 -> 79.40%. Prior 17283/10635=1.6251 -> 162.51? Compute 10635*1.625 = 17281.875; ratio 1.625105? 17283-17281.875=1.125; /10635=0.0001058; so 1.625106 -> 162.51% if two decimals? 162.5106 -> 162.51. Earlier 162.52. Need exact: 17283 / 10635. Let's do long: 10635*1.6251 = 10635 + 0.6251*10635. 0.625*10635=6646.875; 0.0001*10635=1.0635; sum = 17282.9385. Difference 0.0615. Add 0.0000058*10635=0.0617. So 1.6251058 -> 162.51058%, rounds 162.51%. Use 162.51%. Current 17221/21688: 0.7940? 21688*0.794 = 17220.272; diff .728; /21688=.0000336; 0.7940336 -> 79.40336%, rounds 79.40%. Good.
+OCF covers dividends: 17221/9250 = 1.86173 -> 1.86. Prior 17283/8839 = 1.9553 -> 1.96.
+OCF covers dividends+buybacks: current 17221/(9250+4029=13279) = 1.297? 13279*1.30=17262.7; slightly lower. 17221/13279=1.29686 -> 1.30. Prior 17283/(8839+2150=10989) = 1.57275 -> 1.57.
+Acq+capex+IPR&D / OCF current 17839/17221=1.03588 -> 1.04; prior 19207/17283=1.11133 -> 1.11.
+Cash decrease expansion: (5874-1879)/1879 = 3995/1879=2.1261 -> 212.61%. Good.
+Ending vs prior ending: 18231/19980 -1 = -0.08754 -> -8.75%.
+Beginning current vs prior: 24105/21859 -1 = 0.10275 -> 10.28%? 21859*1.1028=24105? 21859*0.1028=2247? 21859*0.10275=2245.9; +21859=24104.9. So 10.28%. If include, use 10.28.
+Net earnings change: 21688-10635=11053; /10635=1.03930 -> 103.93.
+Investing outflow change: 1824/17279=0.10556 -> 10.56.
+Financing outflow change: 2378/1792=1.3270 -> 132.70.
+FX swing: 178 - (-91)=269.
+Cash and equivalents current end vs beginning: 18231/24105=0.7563 -> ending is 75.63% of beginning. Could state decreased by 24.37.
+
+Need maybe include “净利润增长但经营现金流未增长” with OCF/net income. Good.
+
+Potential issue with “Net gain on sale of assets/businesses (131)” etc. We don't need.
+
+Need maybe mention “Asset write-downs 123 vs 379; charges for acquired IPR&D 109 vs 1,252; net gain sale -131 vs -225” as adjustments? Maybe not central. But could mention if explaining OCF vs net income. The biggest differences are deferred tax and asset/liability changes. We can mention “非现金/非经营调节项中，递延税项和其他资产/负债变动影响最大。”
+
+Need maybe include “已验证事实” include line-item detail for working capital? Yes.
+
+Let's outline final:
+
+标题: StockSage Fundamentals Agent report.
+
+1. 标的与数据范围
+- JNJ, US, cash flow statement, nine months ended 2025-09-28 and 2024-09-29, USD millions, source E1. Current period start 2024-12-30 from metadata; prior start not shown. Cumulative only; no single-quarter reconstruction due no same-start cumulative within same fiscal year.
+
+2. 已验证事实
+2.1 经营现金流比较
+Table: Net earnings, OCF, OCF/net earnings. Maybe also changes.
+- OCF 17,221 vs 17,283, -62, -0.36. Net earnings +103.93. OCF/NI 79.40 vs 162.51.
+- Working capital lines: current sum -16,314 vs prior +1,039. List major lines maybe table.
+2.2 现金余额勾稽
+Table current and prior reconciliation with components and % of beginning. Show arithmetic.
+
+3. 财务趋势与经营质量
+- Answer question: no obvious operating cash deterioration; OCF flat, still covers dividends etc. But cash conversion weakened.
+- Explain OCF vs profit: asset/liability changes consumed cash; deferred tax positive; cannot confirm reasons.
+- Funds uses: investing and financing major items table. Distinguish confirmed uses vs unconfirmed.
+Maybe separate “资金去向：可确认与不可确认”.
+
+4. 风险与反向证据
+- Risks: cash down, acquisition/CSA outflows, shareholder returns, working capital drag. Reverse: OCF stable, debt issuance and option proceeds, OCF covers shareholder returns, not evidence of operating cash collapse.
+
+5. 数据缺口
+- no single-quarter reconstruction; no note 10; no MD&A; no balance sheet/income statement/revenue; no details for other assets/liabilities, deferred tax, CSA; no debt terms.
+
+6. 来源
+[E1] details.
+
+Need ensure “已验证事实” not include inference. In “财务趋势” can include inference labeled. Need maybe say “基于数据的推断” for conclusion. Good.
+
+Let's write in Chinese. Need maybe use “百万美元” every table. Ratios two decimals. Use parentheses for negatives? Fine.
+
+Potential issue: “本期经营、投资、筹资净现金流及汇率影响，核对期初到期末的现金变化，列出各部分和两个余额。” We should explicitly show formula. Good.
+
+Need maybe include “两个余额” could mean current and prior ending? Or beginning and ending? It says 期初到期末 and 两个余额, likely beginning and ending balances. We include both periods beginning/ending.
+
+Need maybe include “本期和上年同期经营现金流” first. Good.
+
+Let's produce final. Ensure no analysis hidden. final only.

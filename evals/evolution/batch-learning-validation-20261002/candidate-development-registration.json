@@ -1,0 +1,26 @@
+{
+  "schema": "fundamentals_development_candidate_selection_v1",
+  "registeredAt": "2026-10-02T13:38:36.236606+00:00",
+  "planSha256": "fa948d7e1ffc12ec4e3509990f214d25a4cf005fabba9289bf62273be1b12663",
+  "candidateBundleId": "candidate-a7a92cfaac38c01535486362",
+  "bundlePath": "generated/group-1/bundle.json",
+  "bundleSha256": "f6f1729a9360af217e4e435a5fd6a457bb3390e27cfdb47b92f81cebb770793c",
+  "memberExperienceIds": [
+    "exp-af3ac31b4ade4be35e439c18"
+  ],
+  "memberOrder": [
+    "group-1"
+  ],
+  "memberCount": 1,
+  "multipleExperienceInteractionTested": false,
+  "screeningDecision": "PASS",
+  "evidence": {
+    "screen-g1-source-review.json": "582dcced86e70bd4b79309a18bd30fc63ce3a933ce15103ac91110e8fa70e75d",
+    "screen-g1-execution-audit.json": "1bf6a344d2f2ba662a7cbdebf94bc322180018f9ff91fb8e068629e268ae61e6",
+    "generation-source-audit.json": "2ce6e4c998ece0a85033d939e0aaba366f6bd8eb9f0d67801c60bb43eaf0d92d",
+    "screen-g1.phase.json": "5053b6f15efa64191def16cb49955fabb1ef059933afa2eb671d364be9089adb"
+  },
+  "reuseRule": "One screened member only; candidate method/bundle, JAR, case inputs, options and rubric remain byte-identical. Reuse all three registered screening runs in DEVELOPMENT; no rerun or claim of independent replication.",
+  "fullDevelopmentGate": "All ten candidate cases must be executed and source-reviewable; preserve own-group analysis correction, do not regress previously passing analysis/final answers, introduce no new material numeric/factual errors, and do not reduce final-answer pass count. Otherwise do not consume transfer.",
+  "releaseEligible": false
+}

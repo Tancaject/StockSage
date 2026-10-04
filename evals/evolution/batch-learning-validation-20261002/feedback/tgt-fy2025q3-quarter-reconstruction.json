@@ -1,0 +1,51 @@
+{
+  "caseId": "tgt-fy2025q3-quarter-reconstruction",
+  "runId": "development-05-1-1",
+  "stage": "analysis",
+  "technicalStatus": "VALID",
+  "attribution": "METHOD_ERROR",
+  "origin": "AI",
+  "reviewer": "AI-independent-confirmed",
+  "binding": {
+    "caseSha256": "d6bdda90b5b42ffd9ab84e2505e9304dbdcee7b89bdd2dd5be14e8e185f78d36",
+    "answerSha256": "2b088dff376616b1d801f8a583bb292f6619d0aca06d0f6227a6b3b68caadfbe",
+    "evidenceSha256": "354fff44e94ed74b947c2194a8bb87e7e79a3252ad36eb86d18e66942362ae6f"
+  },
+  "findings": [
+    {
+      "answerQuote": "- 缺少本季经营现金流的具体驱动因素拆分，例如存货、应付账款、应计负债等营运资本项目的单季变化。",
+      "sourceQuote": "Inventory |  | (2,156) |  | (3,279)",
+      "reason": "Two compatible FY2025 cumulative cash-flow tables share the same start date; their signed differences give quarter inventory -2015, payables +1783 and accrued/other liabilities +404 million USD. The statement that these accounting movements are missing is false. Commercial causes remain unknown. This does not require optional details to be volunteered; it corrects the false missing-data claim."
+    },
+    {
+      "answerQuote": "- 缺少本季经营现金流的具体驱动因素拆分，例如存货、应付账款、应计负债等营运资本项目的单季变化。",
+      "sourceQuote": "Inventory |  | (141) |  | (718)",
+      "reason": "Two compatible FY2025 cumulative cash-flow tables share the same start date; their signed differences give quarter inventory -2015, payables +1783 and accrued/other liabilities +404 million USD. The statement that these accounting movements are missing is false. Commercial causes remain unknown. This does not require optional details to be volunteered; it corrects the false missing-data claim."
+    },
+    {
+      "answerQuote": "- 缺少本季经营现金流的具体驱动因素拆分，例如存货、应付账款、应计负债等营运资本项目的单季变化。",
+      "sourceQuote": "Accounts payable |  | 658 |  | 2,362",
+      "reason": "Two compatible FY2025 cumulative cash-flow tables share the same start date; their signed differences give quarter inventory -2015, payables +1783 and accrued/other liabilities +404 million USD. The statement that these accounting movements are missing is false. Commercial causes remain unknown. This does not require optional details to be volunteered; it corrects the false missing-data claim."
+    },
+    {
+      "answerQuote": "- 缺少本季经营现金流的具体驱动因素拆分，例如存货、应付账款、应计负债等营运资本项目的单季变化。",
+      "sourceQuote": "Accounts payable |  | (1,125) |  | 522",
+      "reason": "Two compatible FY2025 cumulative cash-flow tables share the same start date; their signed differences give quarter inventory -2015, payables +1783 and accrued/other liabilities +404 million USD. The statement that these accounting movements are missing is false. Commercial causes remain unknown. This does not require optional details to be volunteered; it corrects the false missing-data claim."
+    },
+    {
+      "answerQuote": "- 缺少本季经营现金流的具体驱动因素拆分，例如存货、应付账款、应计负债等营运资本项目的单季变化。",
+      "sourceQuote": "Accrued and other liabilities |  | 102 |  | (113)",
+      "reason": "Two compatible FY2025 cumulative cash-flow tables share the same start date; their signed differences give quarter inventory -2015, payables +1783 and accrued/other liabilities +404 million USD. The statement that these accounting movements are missing is false. Commercial causes remain unknown. This does not require optional details to be volunteered; it corrects the false missing-data claim."
+    },
+    {
+      "answerQuote": "- 缺少本季经营现金流的具体驱动因素拆分，例如存货、应付账款、应计负债等营运资本项目的单季变化。",
+      "sourceQuote": "Accrued and other liabilities |  | (302) |  | (194)",
+      "reason": "Two compatible FY2025 cumulative cash-flow tables share the same start date; their signed differences give quarter inventory -2015, payables +1783 and accrued/other liabilities +404 million USD. The statement that these accounting movements are missing is false. Commercial causes remain unknown. This does not require optional details to be volunteered; it corrects the false missing-data claim."
+    }
+  ],
+  "secondReview": {
+    "path": "second-review-development-05.json",
+    "sha256": "e0772a06846a920718327f981f4f7637d9d0b986d687aeb97cb48a34796944d7"
+  },
+  "releaseEligible": false
+}

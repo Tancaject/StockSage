@@ -1,0 +1,99 @@
+{
+  "schema": "fundamentals_registered_subset_phase_v1",
+  "phaseId": "candidate-full-development",
+  "planSha256": "fa948d7e1ffc12ec4e3509990f214d25a4cf005fabba9289bf62273be1b12663",
+  "auditPhaseSha256": "60132f732ce0706771dcf1cea189ac262a70c6e8841a5f2d6758782e1d9bda15",
+  "split": "DEVELOPMENT",
+  "prefix": "[cs]",
+  "bundleId": "candidate-a7a92cfaac38c01535486362",
+  "bundleFile": "generated/group-1/bundle.json",
+  "bundleFileSha256": "f6f1729a9360af217e4e435a5fd6a457bb3390e27cfdb47b92f81cebb770793c",
+  "expectedRuns": [
+    {
+      "caseId": "tgt-fy2025q3-quarter-reconstruction",
+      "runId": "screen-g1-01-1-1"
+    },
+    {
+      "caseId": "ibm-fy2025q3-quarter-control",
+      "runId": "screen-g1-02-1-1"
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity",
+      "runId": "screen-g1-03-1-1"
+    },
+    {
+      "caseId": "jnj-fy2025q3-quarter-reconstruction",
+      "runId": "candidate-dev-02-1-1"
+    },
+    {
+      "caseId": "pep-fy2025q3-cash-quality",
+      "runId": "candidate-dev-03-1-1"
+    },
+    {
+      "caseId": "pep-fy2025q3-liquidity",
+      "runId": "candidate-dev-04-1-1"
+    },
+    {
+      "caseId": "ibm-fy2025q3-oneoff-cash-comparability",
+      "runId": "candidate-dev-07-1-1"
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-deployment-bridge",
+      "runId": "candidate-dev-08-1-1"
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-cash-comparison",
+      "runId": "candidate-dev-09-1-1"
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity-cash-synthesis",
+      "runId": "candidate-dev-10-1-1"
+    }
+  ],
+  "executions": [
+    {
+      "path": "evals/evolution/batch-learning-validation-20261002/screen-g1-01.execution.json",
+      "sha256": "73c7af993d02679dce6519f16bb39d5abe976e925d20408c441579a68ae480a0"
+    },
+    {
+      "path": "evals/evolution/batch-learning-validation-20261002/screen-g1-02.execution.json",
+      "sha256": "46c74bf1b2c5b7302944442c30fceb319133532bddb99a7f3423c98180b38b75"
+    },
+    {
+      "path": "evals/evolution/batch-learning-validation-20261002/screen-g1-03.execution.json",
+      "sha256": "315402865530750c1165844b4abfbf67e1de181d2e3bf2aedc92e6220a870334"
+    },
+    {
+      "path": "evals/evolution/batch-learning-validation-20261002/candidate-dev-02.execution.json",
+      "sha256": "6e4d95eadd31d9db5ad27f388b5f98aa9b2c3903ea28400baf4ee49e4b7d8f34"
+    },
+    {
+      "path": "evals/evolution/batch-learning-validation-20261002/candidate-dev-03.execution.json",
+      "sha256": "28e1df57404aad79501f0460ea33cf511c52f88521a0c52baba7588956a00e09"
+    },
+    {
+      "path": "evals/evolution/batch-learning-validation-20261002/candidate-dev-04.execution.json",
+      "sha256": "59948de2c3ab2280073918e95512b0937cd319b602f0d87a8570692eacb4165f"
+    },
+    {
+      "path": "evals/evolution/batch-learning-validation-20261002/candidate-dev-07.execution.json",
+      "sha256": "3e1dba36305b7d5a1261a911c9c463a8bf20806026549590200e7ad9e2e0189b"
+    },
+    {
+      "path": "evals/evolution/batch-learning-validation-20261002/candidate-dev-08.execution.json",
+      "sha256": "f518815da731c8b433b9fdb7c46c700d977561d0d8236863ec7ee4332feb83a0"
+    },
+    {
+      "path": "evals/evolution/batch-learning-validation-20261002/candidate-dev-09.execution.json",
+      "sha256": "1b6a2583fa456c8cb4d137fdceea86519b6435d5944b9110be3cf1e0ae96fdad"
+    },
+    {
+      "path": "evals/evolution/batch-learning-validation-20261002/candidate-dev-10.execution.json",
+      "sha256": "c98da4e9c7cfdb72b879fb5f91ba95d1cd0b6222223fc85713864ddd4d09a303"
+    }
+  ],
+  "selectionRegistrationSha256": "f1a08cfc461fde11ae158fed48107577a6ac1a20f4280a42707570a6f7e537b8",
+  "freshExecutionCount": 7,
+  "reusedExecutionCount": 3,
+  "releaseEligible": false
+}

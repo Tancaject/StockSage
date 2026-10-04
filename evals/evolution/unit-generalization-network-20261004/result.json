@@ -1,0 +1,271 @@
+{
+  "schema": "combined_two_stage_diagnostic_result_v1",
+  "status": "COMPLETED_NO_NET_QUALITY_GAIN",
+  "releaseEligible": false,
+  "selectedCandidate": null,
+  "reviewOrigin": "CODEX_NONBLIND_AI_SOURCE_REVIEW_NOT_CALIBRATED_JUDGE",
+  "realGeneratorCalls": 1,
+  "realBusinessCalls": 16,
+  "automaticRetries": 0,
+  "technicalCompleted": 16,
+  "historical300SecondStageCompletions": 16,
+  "reservedTransferCasesConsumed": 0,
+  "knownTotalTokens": 145954,
+  "generatorTokens": 7311,
+  "arms": {
+    "baseline": {
+      "stages": {
+        "analysis": {
+          "PASS": 3,
+          "FAIL": 1
+        },
+        "finalAnswer": {
+          "PASS": 3,
+          "FAIL": 1
+        }
+      },
+      "denominatorPerStage": 4,
+      "meanChainSeconds": 214.797,
+      "medianChainSeconds": 197.102,
+      "chainSecondsByCase": {
+        "7": 326.625,
+        "5": 138.375,
+        "1": 138.359,
+        "6": 255.829
+      },
+      "providerTokens": 63486
+    },
+    "combined": {
+      "stages": {
+        "analysis": {
+          "PASS": 3,
+          "FAIL": 1
+        },
+        "finalAnswer": {
+          "PASS": 3,
+          "FAIL": 1
+        }
+      },
+      "denominatorPerStage": 4,
+      "meanChainSeconds": 277.242,
+      "medianChainSeconds": 259.61,
+      "chainSecondsByCase": {
+        "7": 412.764,
+        "5": 260.422,
+        "1": 176.984,
+        "6": 258.798
+      },
+      "providerTokens": 75157
+    }
+  },
+  "finalPairs": [
+    {
+      "case": 7,
+      "baseline": "PASS",
+      "combined": "PASS",
+      "outcome": "UNCHANGED"
+    },
+    {
+      "case": 5,
+      "baseline": "FAIL",
+      "combined": "PASS",
+      "outcome": "GAIN"
+    },
+    {
+      "case": 1,
+      "baseline": "PASS",
+      "combined": "PASS",
+      "outcome": "UNCHANGED"
+    },
+    {
+      "case": 6,
+      "baseline": "PASS",
+      "combined": "FAIL",
+      "outcome": "REGRESSION"
+    }
+  ],
+  "calls": [
+    {
+      "case": 7,
+      "arm": "baseline",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "durationSeconds": 209.453,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 11190,
+      "review": "reviews/07-baseline-analysis.json"
+    },
+    {
+      "case": 7,
+      "arm": "baseline",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "durationSeconds": 117.172,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 10575,
+      "review": "reviews/07-baseline-finalAnswer.json"
+    },
+    {
+      "case": 7,
+      "arm": "combined",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "durationSeconds": 275.421,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 13981,
+      "review": "reviews/07-combined-analysis.json"
+    },
+    {
+      "case": 7,
+      "arm": "combined",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "durationSeconds": 137.343,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 10997,
+      "review": "reviews/07-combined-finalAnswer.json"
+    },
+    {
+      "case": 5,
+      "arm": "baseline",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "FAIL",
+      "durationSeconds": 89.172,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 6279,
+      "review": "reviews/05-baseline-analysis.json"
+    },
+    {
+      "case": 5,
+      "arm": "baseline",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "FAIL",
+      "durationSeconds": 49.203,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 6370,
+      "review": "reviews/05-baseline-finalAnswer.json"
+    },
+    {
+      "case": 5,
+      "arm": "combined",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "durationSeconds": 211.906,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 11547,
+      "review": "reviews/05-combined-analysis.json"
+    },
+    {
+      "case": 5,
+      "arm": "combined",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "durationSeconds": 48.516,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 6758,
+      "review": "reviews/05-combined-finalAnswer.json"
+    },
+    {
+      "case": 1,
+      "arm": "baseline",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "durationSeconds": 79.156,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 5219,
+      "review": "reviews/01-baseline-analysis.json"
+    },
+    {
+      "case": 1,
+      "arm": "baseline",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "durationSeconds": 59.203,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 6137,
+      "review": "reviews/01-baseline-finalAnswer.json"
+    },
+    {
+      "case": 1,
+      "arm": "combined",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "durationSeconds": 145.625,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 8260,
+      "review": "reviews/01-combined-analysis.json"
+    },
+    {
+      "case": 1,
+      "arm": "combined",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "durationSeconds": 31.359,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 4762,
+      "review": "reviews/01-combined-finalAnswer.json"
+    },
+    {
+      "case": 6,
+      "arm": "baseline",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "durationSeconds": 137.625,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 7722,
+      "review": "reviews/06-baseline-analysis.json"
+    },
+    {
+      "case": 6,
+      "arm": "baseline",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "durationSeconds": 118.204,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 9994,
+      "review": "reviews/06-baseline-finalAnswer.json"
+    },
+    {
+      "case": 6,
+      "arm": "combined",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "FAIL",
+      "durationSeconds": 147.907,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 8808,
+      "review": "reviews/06-combined-analysis.json"
+    },
+    {
+      "case": 6,
+      "arm": "combined",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "FAIL",
+      "durationSeconds": 110.891,
+      "withinHistorical300Seconds": true,
+      "totalTokens": 10044,
+      "review": "reviews/06-combined-finalAnswer.json"
+    }
+  ],
+  "limits": [
+    "Four development cases, one sample per arm; no causal per-lesson or statistical improvement claim.",
+    "Fixed-message direct-provider replay; not current Java assembler or live RAG acceptance.",
+    "Source-based AI judgments are not human labels or measured evaluator accuracy.",
+    "Latency totals sum model-stage elapsed times, excluding orchestration overhead; not concurrent campaign wall time."
+  ]
+}

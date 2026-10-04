@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "kind": "DIAGNOSTIC_METHOD_BUNDLE",
+  "status": "DIAGNOSTIC",
+  "diagnosticOnly": true,
+  "releaseEligible": false,
+  "parentBundleId": "baseline-v1",
+  "parentMethodSha256": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8",
+  "fixedContractSha256": "03b588fd86fc9f75047578665fa5227d2e73ca1bca734463fb3feddebe8df193",
+  "members": [
+    {
+      "experienceId": "exp-da9c860244a29c0cfb451540",
+      "version": 2,
+      "recordSha256": "da9c860244a29c0cfb451540b0aeef58c7fd9238ccac9c62838825fd2b448912",
+      "methodSha256": "a87c03e0d028c7c57a7f9441fbe5aa07710cfdded2ccafee9423ae00773b78ac"
+    },
+    {
+      "experienceId": "exp-9d07d57b5ae81e1ab10723bd",
+      "version": 1,
+      "recordSha256": "9d07d57b5ae81e1ab10723bd92e7be8a7f090fa87fe14af19541c599ded43b6c",
+      "methodSha256": "1f58413f8286f8ca1cc9cab6b7fbfa40fcc19becd9e2dd28abfb416ca408679d"
+    }
+  ],
+  "method": "围绕收入与利润质量、现金流、资产负债、盈利能力、增长持续性、资本配置和关键风险展开。指标只在数据口径可比时比较；仅在本轮证据支持时解释变化原因，否则说明原因尚无法确认。不要输出隐藏思维过程，只给出证据、结论及其边界。\n\n以下补充步骤仅在各自适用条件满足时采用；条件不满足时保留原有分析方法。\n\n任务条件：cumulative-to-single-quarter-reconstruction、false-missing-data-claim\n证据条件：two-cumulative-periods-same-start-date、cash-flow-statement-line-items\n所需能力：evidence-reading、period-comparison、arithmetic\n适用边界：仅适用于同一公司、同一财年、期初日期相同的两期累计现金流量表之间的单季还原场景；两期期初不同或存在重述、合并范围变化时不适用。\n操作：当用两期同起点累计现金流量表还原单季数据时，在声明某类数据缺失前，必须先检查该明细是否已通过两期累计数差值还原得出；若已得出，不得将其列入缺口，而应报告还原值并注明商业原因尚无法确认。仅对用户要求的项目，或准备断言其缺失的具体项目，执行必要核查；不要求遍历、计算或展示整张表。\n反例：两期累计报表期初日期不同；公司发生重述或合并范围变更导致累计数不可直接相减；仅有一期累计报表无法做差\n禁止推断：不得将还原出的会计变动直接推断为商业原因；不得将明细还原值等同于管理层披露的单季数据；不得因明细可还原就声称已掌握经营驱动因素\n\n任务条件：unit-conversion-billion-to-million、derived-ratio-percentage-rounding\n证据条件：source-footnote-unit、source-table-unit\n所需能力：unit-comparison、arithmetic\n适用边界：源文件金额单位与输出单位不同，或需从除法结果推导百分比表示时适用。\n操作：当源文件以billion为单位披露金额而输出需以百万或中文亿为单位时，先写出换算等式（符号金额×倍率＝目标单位数值），确认等式两侧数值一致后再引用；禁止在中文表述中将billion误写为亿。计算派生比率时，先完成除法得到完整小数，再按题目要求的精度四舍五入，不得在中间步骤提前截断。\n反例：源文件与输出单位相同无需换算；题目未要求特定小数位数\n禁止推断：不得将billion直接等同于亿；不得在除法结果上叠加未说明的中间舍入",
+  "methodSha256": "2f68ad0b7873777207191c956d59a1ee630e902beb1b05cc69256770bedae49d",
+  "bundleId": "diagnostic-f46c271fb4de21f009196e68",
+  "recordSha256": "f46c271fb4de21f009196e68b2f8545c0ce904bfd01fbd156a3e70869c573df1",
+  "contentSha256": "fa3b1042c980f71f698c2acb1ed5a3607ec131eca7d23efaa782d071d60bbdb7"
+}

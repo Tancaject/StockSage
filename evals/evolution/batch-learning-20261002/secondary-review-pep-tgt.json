@@ -1,0 +1,699 @@
+{
+  "schema": "batch_secondary_answer_review_v1",
+  "reviewType": "AI_INDEPENDENT_TEXT_REVIEW_NOT_HUMAN",
+  "reviewer": "batch_dataset_design",
+  "scope": "All six PEP/TGT development cases, both analysis and finalAnswer, regardless of primary judgement",
+  "standard": "Frozen gold required facts/points plus all material added claims and numbers; accept clear negative capex-flow expressions per frozen notes. No frozen standards or source edits.",
+  "goldFileSha256": "1b31f7cf00852cb0a4696385faac1954b344a0d50563cd5033ef71b5c106cbc1",
+  "status": "COMPLETED",
+  "cases": [
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "goldLineSha256": "1b7ba36debac76f43f38375fdcd04b73287e6a6cf470f48bcbe0e7b2ed5d0579",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "7288131cc8e7575a2103b2962c16fce0629740d26a22cdb4b7fdf11cfd44458b",
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": "4472 USD million, correct",
+          "quarterCapitalSpendingOutflowAmount": "992 USD million outflow magnitude, correct",
+          "quarterSimpleFreeCashFlow": "3480 USD million, correct"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: 2025-06-15 to 2025-09-06, twelve fiscal weeks",
+          "p2": "PASS: all three required amounts present",
+          "p3": "PASS: same-start 36-week less 24-week cumulative values; gross capital spending, no sales proceeds offset",
+          "p4": "PASS: operating cash flow exceeds spending"
+        },
+        "answerEvidence": [
+          "4,472 - 992 = 3,480 百万美元",
+          "4.51 倍",
+          "450.81%",
+          "22.18%"
+        ],
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "Net Cash Provided by Operating Activities 5,468 6,220\n\nInvesting Activities\nCapital spending (2,499) (2,850)"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "Net Cash Provided by Operating Activities 996 1,315\n\nInvesting Activities\nCapital spending (1,507) (1,701)"
+          }
+        ],
+        "additionalNumericChecks": [
+          "4472 / 992 = 4.5080645 => 4.51x and 450.81%",
+          "992 / 4472 * 100 = 22.1824687 => 22.18%",
+          "Asset-sale proceeds 272 - 169 = 103, correctly identified and excluded from gross-capex FCF."
+        ],
+        "issues": [],
+        "attribution": "NONE",
+        "notes": [
+          "No unnecessary refusal. Conditional limits do not erase a correct calculation. Source periods, currencies, units and source identities align."
+        ]
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "dacc34d5bcd9ea4ad864129065ea496f390d9495d7810bc9bf9c1d01d3931b89",
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": "4472 USD million, correct",
+          "quarterCapitalSpendingOutflowAmount": "992 USD million outflow magnitude, correct",
+          "quarterSimpleFreeCashFlow": "3480 USD million, correct"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: 2025-06-15 to 2025-09-06, twelve fiscal weeks",
+          "p2": "PASS: all three required amounts present",
+          "p3": "PASS: same-start 36-week less 24-week cumulative values; gross capital spending, no sales proceeds offset",
+          "p4": "PASS: operating cash flow exceeds spending"
+        },
+        "answerEvidence": [
+          "4,472 - 992 = 3,480 百万美元",
+          "4.51 倍",
+          "450.81%",
+          "22.18%"
+        ],
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "Net Cash Provided by Operating Activities 5,468 6,220\n\nInvesting Activities\nCapital spending (2,499) (2,850)"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "Net Cash Provided by Operating Activities 996 1,315\n\nInvesting Activities\nCapital spending (1,507) (1,701)"
+          }
+        ],
+        "additionalNumericChecks": [
+          "4472 / 992 = 4.5080645 => 4.51x and 450.81%",
+          "992 / 4472 * 100 = 22.1824687 => 22.18%"
+        ],
+        "issues": [],
+        "attribution": "NONE",
+        "notes": [
+          "No unnecessary refusal. Conditional limits do not erase a correct calculation. Source periods, currencies, units and source identities align."
+        ]
+      },
+      "responsePath": "raw-development-pep/development-pep-1-1.response.json",
+      "responseSha256": "122c9ab6e5947dc997e45629169e36afc199dfdb88bf39966bac144b728ebb72",
+      "executionStatus": "COMPLETED",
+      "caseSha256": "f5f94dcbbdf6d11c805cfb35f2e0a73fd779898d77beafbfd9b1c19c2b36a0b0"
+    },
+    {
+      "caseId": "pep-fy2025q3-cash-quality",
+      "goldLineSha256": "672410fac98e6c08d0600db3615741d446148d1a86fbe4530acefc952259a841",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "47f59856b3dcc135172bda83fe65e20504dfbbbc5c2b98600bc3762ec55ee663",
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "5468 USD million, correct",
+          "ytdConsolidatedNetIncome": "5740 USD million, consolidated cash-flow starting income, correct",
+          "priorOperatingCashFlow": "6220 USD million, correct",
+          "priorConsolidatedNetIncome": "8092 USD million, correct",
+          "ytdCashIncomeGap": "-272 USD million, correct",
+          "priorCashIncomeGap": "-1872 USD million, correct",
+          "ytdCashConversion": "0.95x / 95.26%, correct to requested rounding",
+          "priorCashConversion": "0.77x / 76.87%, correct to requested rounding"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: two comparable 36-week periods, consolidated NI not parent NI",
+          "p2": "PASS: amounts, signed gaps and ratios correct",
+          "p3": "PASS: D&A addback and receivables/payables cash-use directions explained",
+          "p4": "PASS: explicitly distinguishes ratio improvement from lower absolute operating cash flow and denominator effect"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "Net income $ 5,740 $ 8,092"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Depreciation and amortization 2,315 2,118"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Accounts and notes receivable (1,747) (1,521)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+          }
+        ],
+        "additionalNumericChecks": [
+          "NI change -2352 / 8092 = -29.0657%, reported -29.07%",
+          "OCF change -752 / 6220 = -12.0900%, reported -12.09%",
+          "Gap narrows 1600; D&A increases 197; impairment and other charges increase 1950",
+          "Receivables use 226 more cash; payables and other current liabilities use 665 less cash",
+          "Reported ratio rise 18.39pp equals difference of displayed 95.26%-76.87%; unrounded change about 18.3953pp and deviation remains within frozen 0.01 tolerance",
+          "Inventory -449 and Other, net -441 are present in source with matching direction."
+        ],
+        "issues": [],
+        "attribution": "NONE",
+        "notes": [
+          "Impairment explanation is explicitly conditional on composition not supplied; it is not an invented cash/noncash breakdown.",
+          "No unsupported claim that improved ratio proves stronger absolute operating cash generation."
+        ]
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "5581f23f594352d844a70f07a50139ed73704fc1db5f4d5372f6867603d23c1b",
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "5468 USD million, correct",
+          "ytdConsolidatedNetIncome": "5740 USD million, consolidated cash-flow starting income, correct",
+          "priorOperatingCashFlow": "6220 USD million, correct",
+          "priorConsolidatedNetIncome": "8092 USD million, correct",
+          "ytdCashIncomeGap": "-272 USD million, correct",
+          "priorCashIncomeGap": "-1872 USD million, correct",
+          "ytdCashConversion": "0.95x / 95.26%, correct to requested rounding",
+          "priorCashConversion": "0.77x / 76.87%, correct to requested rounding"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: two comparable 36-week periods, consolidated NI not parent NI",
+          "p2": "PASS: amounts, signed gaps and ratios correct",
+          "p3": "PASS: D&A addback and receivables/payables cash-use directions explained",
+          "p4": "PASS: explicitly distinguishes ratio improvement from lower absolute operating cash flow and denominator effect"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "Net income $ 5,740 $ 8,092"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Depreciation and amortization 2,315 2,118"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Accounts and notes receivable (1,747) (1,521)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+          }
+        ],
+        "additionalNumericChecks": [
+          "NI change -2352 / 8092 = -29.0657%, reported -29.07%",
+          "OCF change -752 / 6220 = -12.0900%, reported -12.09%",
+          "Gap narrows 1600; D&A increases 197; impairment and other charges increase 1950",
+          "Receivables use 226 more cash; payables and other current liabilities use 665 less cash",
+          "Reported ratio rise 18.39pp equals difference of displayed 95.26%-76.87%; unrounded change about 18.3953pp and deviation remains within frozen 0.01 tolerance"
+        ],
+        "issues": [],
+        "attribution": "NONE",
+        "notes": [
+          "Impairment explanation is explicitly conditional on composition not supplied; it is not an invented cash/noncash breakdown.",
+          "No unsupported claim that improved ratio proves stronger absolute operating cash generation."
+        ],
+        "observations": [
+          {
+            "category": "WORDING_AMBIGUITY",
+            "severity": "NON_MATERIAL",
+            "answerQuote": "说明现金转化质量虽有改善，但尚未达到完全健康状态。",
+            "reason": "“完全健康”没有预先定义阈值，表述泛化；同段已明确相对转化比率改善、绝对现金流下降和营运项目占款。未据此提出新事实或改变任务结论，不升级为方法错误。"
+          }
+        ]
+      },
+      "responsePath": "raw-development-pep/development-pep-2-1.response.json",
+      "responseSha256": "055e2bff4c49f1a07336ecd0c929aad3699fc996424abe8fb428df6c720ca3dc",
+      "executionStatus": "COMPLETED",
+      "caseSha256": "fdb5771080e0ca118de4888cd0ab83aa23e41ea77ab82a03855f009191ada19d"
+    },
+    {
+      "caseId": "pep-fy2025q3-liquidity",
+      "goldLineSha256": "c093c10c6c9922fc7dd486b6cc08e032140ba17e8189a221759cc08bc0b4d551",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "4c36379c7d963443be8547f9411febd2a536cd92c91fa341f756966d0f1881fe",
+        "requiredFactChecks": {
+          "currentRatioCurrent": "0.91 = 28722 / 31499; expected 0.9118, within 0.01",
+          "currentRatioPrior": "0.82 = 25826 / 31536; expected 0.8189, within 0.01",
+          "totalDebtCurrent": "50849 = 6736 + 44113 USD million",
+          "totalDebtPrior": "44306 = 7082 + 37224 USD million",
+          "netDebtCurrent": "42188 = 50849 - 8126 - 535 USD million",
+          "netDebtPrior": "35040 = 44306 - 8505 - 761 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: 2025-09-06 and 2024-12-28 balances and both current ratios correct",
+          "p2": "PASS: short-term plus long-term debt, no double count or total-liability substitution",
+          "p3": "PASS: subtracts cash and short-term investments only as requested",
+          "p4": "PASS: acknowledges improved current ratio alongside falling cash buffer and rising debt; discloses cash-flow, maturities and restrictions unavailable"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "9/6/2025 12/28/2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Cash and cash equivalents $ 8,126 $ 8,505\nShort-term investments 535 761"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Total Current Assets 28,722 25,826"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Short-term debt obligations $ 6,736 $ 7,082\nAccounts payable and other current liabilities 24,763 24,454\nTotal Current Liabilities 31,499 31,536\nLong-Term Debt Obligations 44,113 37,224"
+          }
+        ],
+        "additionalNumericChecks": [
+          "Cash delta -379; short-term investments -226; cash plus investments 8661 versus 9266, delta -605 and -6.53%: correct.",
+          "Current assets +2896 and +11.21%; current liabilities -37 and -0.12%; short debt -346 and -4.89%; long debt +6889 and +18.51%: correct.",
+          "Current-ratio relative change 11.34414165%, reported 11.34%; absolute change 0.09290138, reported 0.09: correct.",
+          "Debt delta 6543 and 14.77%; net debt delta 7148 and 20.40%: correct.",
+          "Cash plus short-term investment / short debt 1.285778 = 1.29 versus 1.308387 = 1.31: correct; rounded difference -0.02."
+        ],
+        "issues": [],
+        "attribution": "NONE",
+        "notes": [
+          "Overall mixed liquidity judgement is supported by both improving and weakening metrics; a generic qualitative label is not scored as a method error. Source is static balances and answer explicitly states cash-flow, refinancing and cash-restriction limits."
+        ],
+        "observations": [
+          {
+            "category": "WORDING_AMBIGUITY",
+            "severity": "NON_MATERIAL",
+            "answerQuote": "这说明公司仍有能力覆盖短期债务义务，但流动性缓冲较上年末略有收窄。",
+            "reason": "Could state static book-value coverage more precisely, but surrounding answer limits its conclusion to balance-sheet data and explicitly says cash restrictions, cash flows, maturities and refinancing are unknown; it does not assert guaranteed repayment."
+          }
+        ]
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "b98c848f22d89a2b093c49b741e4b779324ea5a942cb3a74f6635bc6b7b11f01",
+        "requiredFactChecks": {
+          "currentRatioCurrent": "0.91 = 28722 / 31499; expected 0.9118, within 0.01",
+          "currentRatioPrior": "0.82 = 25826 / 31536; expected 0.8189, within 0.01",
+          "totalDebtCurrent": "50849 = 6736 + 44113 USD million",
+          "totalDebtPrior": "44306 = 7082 + 37224 USD million",
+          "netDebtCurrent": "42188 = 50849 - 8126 - 535 USD million",
+          "netDebtPrior": "35040 = 44306 - 8505 - 761 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: 2025-09-06 and 2024-12-28 balances and both current ratios correct",
+          "p2": "PASS: short-term plus long-term debt, no double count or total-liability substitution",
+          "p3": "PASS: subtracts cash and short-term investments only as requested",
+          "p4": "PASS: acknowledges improved current ratio alongside falling cash buffer and rising debt; discloses cash-flow, maturities and restrictions unavailable"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "9/6/2025 12/28/2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Cash and cash equivalents $ 8,126 $ 8,505\nShort-term investments 535 761"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Total Current Assets 28,722 25,826"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Short-term debt obligations $ 6,736 $ 7,082\nAccounts payable and other current liabilities 24,763 24,454\nTotal Current Liabilities 31,499 31,536\nLong-Term Debt Obligations 44,113 37,224"
+          }
+        ],
+        "additionalNumericChecks": [
+          "Cash delta -379; short-term investments -226; cash plus investments 8661 versus 9266, delta -605 and -6.53%: correct.",
+          "Current assets +2896 and +11.21%; current liabilities -37 and -0.12%; short debt -346 and -4.89%; long debt +6889 and +18.51%: correct.",
+          "Current-ratio relative change 11.34414165%, reported 11.34%; absolute change 0.09290138, reported 0.09: correct.",
+          "Debt delta 6543 and 14.77%; net debt delta 7148 and 20.40%: correct.",
+          "Cash plus short-term investment / short debt 1.285778 = 1.29 versus 1.308387 = 1.31: correct; rounded difference -0.02.",
+          "Relative change using displayed 0.91 and 0.82 is 10.97560976%, reported 10.98%; clearly separated from unrounded 11.34%."
+        ],
+        "issues": [],
+        "attribution": "NONE",
+        "notes": [
+          "Overall mixed liquidity judgement is supported by both improving and weakening metrics; a generic qualitative label is not scored as a method error. Source is static balances and answer explicitly states cash-flow, refinancing and cash-restriction limits."
+        ],
+        "observations": [
+          {
+            "category": "WORDING_AMBIGUITY",
+            "severity": "NON_MATERIAL",
+            "answerQuote": "这说明公司现金类资产仍能覆盖短期债务义务，短期偿付能力没有失守；但覆盖倍数从 **1.31** 降至 **1.29**，流动性缓冲边际收窄 [E1]。",
+            "reason": "Could state static book-value coverage more precisely, but surrounding answer limits its conclusion to balance-sheet data and explicitly says cash restrictions, cash flows, maturities and refinancing are unknown; it does not assert guaranteed repayment."
+          }
+        ]
+      },
+      "responsePath": "raw-development-pep/development-pep-3-1.response.json",
+      "responseSha256": "44f5b4f095317bb4c76b71c1dc0d044b3e29414b8e498fc53b6dd68b6c5ef0ce",
+      "executionStatus": "COMPLETED",
+      "caseSha256": "d02da0efa75bf1dfaec3c1fad540d08f342d02c5bb65c2d58ef2b7b2506754bd"
+    },
+    {
+      "caseId": "tgt-fy2025q3-quarter-reconstruction",
+      "goldLineSha256": "f81ace0031c0aedd20129982935061f272ab463773385710c3381c130425c437",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "f25c8bfbdc282e99949d9a61c1affc2ed5ec54214ce9bdfebe028f186ff4819f",
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": "1127 = 3485 - 2358 USD million",
+          "quarterCapitalSpendingOutflowAmount": "978 = 2842 - 1864 USD million; explicitly distinguishes positive outflow magnitude from cash-flow sign -978",
+          "quarterSimpleFreeCashFlow": "149 = 1127 - 978 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: reconstructed fiscal quarter 2025-08-03 through 2025-11-01, not calendar Q3 or nine-month cumulative amount",
+          "p2": "PASS: all three output amounts correct and in USD million",
+          "p3": "PASS: subtracts same FY2025 six-month cumulative from nine-month cumulative for same line items; gross capex excludes Other",
+          "p4": "PASS: 1127 > 978, covered by 149 and 1.15 times"
+        },
+        "answerEvidence": [
+          "**2025-08-03 至 2025-11-01**",
+          "1,127 - 978 = 149"
+        ],
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "(millions) (unaudited) |  | November 1, 2025 |  | November 2,2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078\nInvesting activities |  |  |  | \nExpenditures for property and equipment |  | (2,842) |  | (1,968)\nOther |  | 52 |  | 26"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "(millions) (unaudited) |  | August 2, 2025 |  | August 3, 2024"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339\nInvesting activities |  |  |  | \nExpenditures for property and equipment |  | (1,864) |  | (1,313)\nOther |  | 11 |  | 8"
+          }
+        ],
+        "additionalNumericChecks": [
+          "Coverage 1127 / 978 = 1.152351738241308793456032720, reported 1.15 times; percentage 115.2351738241308793456032720, reported 115.24%: correct.",
+          "Investing Other 52 minus 11 = 41 USD million, explicitly excluded; no unsupported identification of all Other as asset-sale proceeds."
+        ],
+        "issues": [],
+        "attribution": "NONE",
+        "notes": [
+          "Optional gross and signed capex forms are both explained and economically equivalent. Conditional source limitations do not add an unsupported factual cause."
+        ]
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "10fa486aef1f82ffe0550a9d49b0fbb2ed80380fa4b6dcb9a142d2d644a2ed1d",
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": "1127 = 3485 - 2358 USD million",
+          "quarterCapitalSpendingOutflowAmount": "978 = 2842 - 1864 USD million; explicitly distinguishes positive outflow magnitude from cash-flow sign -978",
+          "quarterSimpleFreeCashFlow": "149 = 1127 - 978 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: reconstructed fiscal quarter 2025-08-03 through 2025-11-01, not calendar Q3 or nine-month cumulative amount",
+          "p2": "PASS: all three output amounts correct and in USD million",
+          "p3": "PASS: subtracts same FY2025 six-month cumulative from nine-month cumulative for same line items; gross capex excludes Other",
+          "p4": "PASS: 1127 > 978, covered by 149 and 1.15 times"
+        },
+        "answerEvidence": [
+          "**2025-08-03 至 2025-11-01**",
+          "1,127 - 978 = 149"
+        ],
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "(millions) (unaudited) |  | November 1, 2025 |  | November 2,2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078\nInvesting activities |  |  |  | \nExpenditures for property and equipment |  | (2,842) |  | (1,968)\nOther |  | 52 |  | 26"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "(millions) (unaudited) |  | August 2, 2025 |  | August 3, 2024"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339\nInvesting activities |  |  |  | \nExpenditures for property and equipment |  | (1,864) |  | (1,313)\nOther |  | 11 |  | 8"
+          }
+        ],
+        "additionalNumericChecks": [
+          "Coverage 1127 / 978 = 1.152351738241308793456032720, reported 1.15 times; percentage 115.2351738241308793456032720, reported 115.24%: correct."
+        ],
+        "issues": [],
+        "attribution": "NONE",
+        "notes": [
+          "Optional gross and signed capex forms are both explained and economically equivalent. Conditional source limitations do not add an unsupported factual cause."
+        ]
+      },
+      "responsePath": "raw-development-tgt/development-tgt-1-1.response.json",
+      "responseSha256": "8398e9729b40feebf11969c612ef63ea8ad525f62e4301a5e213eed3a1d767cb",
+      "executionStatus": "COMPLETED",
+      "caseSha256": "d6bdda90b5b42ffd9ab84e2505e9304dbdcee7b89bdd2dd5be14e8e185f78d36"
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "goldLineSha256": "f1926e39ecc4a4f20c9b2d6a3475d9c989f7b03500cf9481e9e1b5a36c3337f6",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "734b6d7925bb16d66c0db128fa38b553700ede3949bf12a614c5f247a7e91218",
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "3485 USD million for FY2025 nine months ending 2025-11-01",
+          "ytdConsolidatedNetIncome": "2660 USD million, cash-flow Net earnings starting line",
+          "priorOperatingCashFlow": "4078 USD million for prior FY same nine months ending 2024-11-02",
+          "priorConsolidatedNetIncome": "2988 USD million, prior cash-flow Net earnings starting line",
+          "ytdCashIncomeGap": "825 = 3485 - 2660 USD million",
+          "priorCashIncomeGap": "1090 = 4078 - 2988 USD million",
+          "ytdCashConversion": "1.31 times / 131.02% = 3485 / 2660, gold 1.3102",
+          "priorCashConversion": "1.36 times / 136.48% = 4078 / 2988, gold 1.3648"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: nine-month cumulative fiscal periods and both OCF / consolidated Net earnings pairs correct; no single-quarter claim",
+          "p2": "PASS: differences and division correct for both periods",
+          "p3": "PASS: D&A 2331 added back; inventory -2156 cash use and accounts payable +658 cash contribution correctly explained",
+          "p4": "PASS: OCF falls 14.54% versus net income 10.98%, ratio remains above 1 but weakens; explains supported account bridge and labels underlying operating causes unknown"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "(millions) (unaudited) |  | November 1, 2025 |  | November 2,2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net earnings |  | $ 2,660 |  | $ 2,988"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Depreciation and amortization |  | 2,331 |  | 2,215\nShare-based compensation expense |  | 197 |  | 229\nDeferred income taxes |  | (21) |  | (58)\nNoncash (gains) / losses and other, net |  | 8 |  | (1)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Inventory |  | (2,156) |  | (3,279)\nOther assets |  | (294) |  | (265)\nAccounts payable |  | 658 |  | 2,362\nAccrued and other liabilities |  | 102 |  | (113)\nCash provided by operating activities |  | 3,485 |  | 4,078"
+          }
+        ],
+        "additionalNumericChecks": [
+          "OCF delta -593 and -14.54%; net earnings delta -328 and -10.98%; OCF less earnings delta -265 and -24.31%: correct.",
+          "Cash conversion percentages 131.02% / 136.48%, decline 5.46421274 percentage points reported 5.46, or 0.05 times: correct.",
+          "Noncash aggregate: 2331 + 197 - 21 + 8 = 2515 current; 2215 + 229 - 58 - 1 = 2385 prior; delta +130.",
+          "Operating-account aggregate: -2156 - 294 + 658 + 102 = -1690; -3279 - 265 + 2362 - 113 = -1295; cash drag increases 395.",
+          "Bridge OCF minus net income: 2515 - 1690 = 825 current; 2385 - 1295 = 1090 prior; change 130 - 395 = -265.",
+          "D&A delta +116; inventory cash use falls 1123; accounts payable cash contribution falls 1704: all consistent with disclosed rows."
+        ],
+        "issues": [],
+        "attribution": "NONE",
+        "notes": [
+          "Prior period described as same fiscal nine-month period ending 2024-11-02, which unambiguously matches gold; do not require the unrequested starting date string. No unsupported concrete supplier / procurement / seasonality cause is asserted; such possibilities are explicitly unconfirmed."
+        ],
+        "observations": [
+          {
+            "category": "WORDING_AMBIGUITY",
+            "severity": "NON_MATERIAL",
+            "answerQuote": "但与上财年同期相比，现金转化效率小幅下降，主要体现为应付账款对现金流的贡献明显降低，以及净利润本身同比下降。",
+            "reason": "This closing sentence places lower profit beside lower conversion efficiency; lower profit alone is not proof or a standalone cause of a weaker ratio. The preceding exact OCF/NI comparison and complete noncash/operating-account bridge correctly establish the decline, so no material calculation or method failure is assigned."
+          }
+        ]
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "9e021c55db4e774af5f85d8fb76bb033cc5e1188218ac430ec2f9c8a49705a64",
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "3485 USD million for FY2025 nine months ending 2025-11-01",
+          "ytdConsolidatedNetIncome": "2660 USD million, cash-flow Net earnings starting line",
+          "priorOperatingCashFlow": "4078 USD million for prior FY same nine months ending 2024-11-02",
+          "priorConsolidatedNetIncome": "2988 USD million, prior cash-flow Net earnings starting line",
+          "ytdCashIncomeGap": "825 = 3485 - 2660 USD million",
+          "priorCashIncomeGap": "1090 = 4078 - 2988 USD million",
+          "ytdCashConversion": "1.31 times / 131.02% = 3485 / 2660, gold 1.3102",
+          "priorCashConversion": "1.36 times / 136.48% = 4078 / 2988, gold 1.3648"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: nine-month cumulative fiscal periods and both OCF / consolidated Net earnings pairs correct; no single-quarter claim",
+          "p2": "PASS: differences and division correct for both periods",
+          "p3": "PASS: D&A 2331 added back; inventory -2156 cash use and accounts payable +658 cash contribution correctly explained",
+          "p4": "PASS: OCF falls 14.54% versus net income 10.98%, ratio remains above 1 but weakens; explains supported account bridge and labels underlying operating causes unknown"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "(millions) (unaudited) |  | November 1, 2025 |  | November 2,2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net earnings |  | $ 2,660 |  | $ 2,988"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Depreciation and amortization |  | 2,331 |  | 2,215\nShare-based compensation expense |  | 197 |  | 229\nDeferred income taxes |  | (21) |  | (58)\nNoncash (gains) / losses and other, net |  | 8 |  | (1)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Inventory |  | (2,156) |  | (3,279)\nOther assets |  | (294) |  | (265)\nAccounts payable |  | 658 |  | 2,362\nAccrued and other liabilities |  | 102 |  | (113)\nCash provided by operating activities |  | 3,485 |  | 4,078"
+          }
+        ],
+        "additionalNumericChecks": [
+          "OCF delta -593 and -14.54%; net earnings delta -328 and -10.98%; OCF less earnings delta -265 and -24.31%: correct.",
+          "Cash conversion percentages 131.02% / 136.48%, decline 5.46421274 percentage points reported 5.46, or 0.05 times: correct.",
+          "Noncash aggregate: 2331 + 197 - 21 + 8 = 2515 current; 2215 + 229 - 58 - 1 = 2385 prior; delta +130.",
+          "Operating-account aggregate: -2156 - 294 + 658 + 102 = -1690; -3279 - 265 + 2362 - 113 = -1295; cash drag increases 395.",
+          "Bridge OCF minus net income: 2515 - 1690 = 825 current; 2385 - 1295 = 1090 prior; change 130 - 395 = -265.",
+          "D&A delta +116; inventory cash use falls 1123; accounts payable cash contribution falls 1704; other-assets use rises 29; accrued/other liabilities contribution improves 215: all consistent with disclosed rows."
+        ],
+        "issues": [],
+        "attribution": "NONE",
+        "notes": [
+          "Prior period described as same fiscal nine-month period ending 2024-11-02, which unambiguously matches gold; do not require the unrequested starting date string. No unsupported concrete supplier / procurement / seasonality cause is asserted; such possibilities are explicitly unconfirmed."
+        ]
+      },
+      "responsePath": "raw-development-tgt/development-tgt-2-1.response.json",
+      "responseSha256": "453e344871b626552cf5343b788c9d1266c623b877a1f08e1dc5c478372423d5",
+      "executionStatus": "COMPLETED",
+      "caseSha256": "db32f8596e00dd925957e1ec49fd61e8e7869a0b5b6722b7c5b032495fd7ca7d"
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity",
+      "goldLineSha256": "9dfba81396bb34a4e6333322e1ad8ac896c8abe93d6be63132b21da9696b544c",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "bfda67765788f0f449b469adbd4c4a903f52bc0c9ea0dde429ee736f085a79d5",
+        "requiredFactChecks": {
+          "currentRatioCurrent": "0.97 = 20702 / 21242; expected 0.9746, within 0.01",
+          "currentRatioPrior": "0.94 = 19454 / 20799; expected 0.9353, within 0.01",
+          "totalDebtCurrent": "16499 = 1133 + 15366 USD million",
+          "totalDebtPrior": "15940 = 1636 + 14304 USD million",
+          "netDebtCurrent": "12677 = 16499 - 3822 USD million",
+          "netDebtPrior": "11178 = 15940 - 4762 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: correct 2025-11-01 and 2025-02-01 balance columns and current ratios; does not use third comparison column 2024-11-02",
+          "p2": "PASS: current and noncurrent debt combined exactly once; excludes other liabilities as requested",
+          "p3": "PASS: net debt deducts only cash and equivalents as requested",
+          "p4": "PASS: acknowledges improving current ratio and falling near-term debt alongside lower cash and higher net debt; limits judgement to static evidence and no definite solvency claim"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "(millions, except footnotes) (unaudited) |  | November 1, 2025 |  | February 1, 2025 |  | November 2, 2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Cash and cash equivalents |  | $ 3,822 |  | $ 4,762 |  | $ 3,433\nInventory |  | 14,896 |  | 12,740 |  | 15,165\nOther current assets |  | 1,984 |  | 1,952 |  | 1,956\nTotal current assets |  | 20,702 |  | 19,454 |  | 20,554"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Accounts payable |  | $ 13,792 |  | $ 13,053 |  | $ 14,419\nAccrued and other current liabilities |  | 6,317 |  | 6,110 |  | 5,738\nCurrent portion of long-term debt and other borrowings |  | 1,133 |  | 1,636 |  | 1,635\nTotal current liabilities |  | 21,242 |  | 20,799 |  | 21,792\nLong-term debt and other borrowings |  | 15,366 |  | 14,304 |  | 14,346"
+          }
+        ],
+        "additionalNumericChecks": [
+          "Unrounded current-ratio delta 0.03924524 is 0.04; relative increase 4.19585510% is 4.20%. Displayed 0.97 minus 0.94 being 0.03 is rounding, not a calculation failure.",
+          "Debt delta 559 / prior 15940 = 3.51%; net debt delta 1499 / prior 11178 = 13.41%: correct.",
+          "Current debt decrease 503 and 30.75%; noncurrent debt increase 1062 and 7.42%; 1062 - 503 = 559: correct.",
+          "Cash decline 940 and 19.74%; debt increase 559 plus lost cash 940 equals net debt increase 1499: correct.",
+          "Current accounts payable 13792 is disclosed and a majority of 21242 total current liabilities; general retail working-capital explanation is conditional, not an asserted company-specific operating cause.",
+          "Inventory 14896 versus 12740, increase 2156, is disclosed correctly; specific underlying stocking/turnover reasons marked unknown."
+        ],
+        "issues": [],
+        "attribution": "NONE",
+        "notes": [
+          "Both improvement and weakening evidence appear explicitly. Generic overall liquidity wording does not override correct dimension-specific evidence. No unsupported solvency certainty."
+        ],
+        "observations": [
+          {
+            "category": "WORDING_AMBIGUITY",
+            "severity": "NON_MATERIAL",
+            "answerQuote": "**TGT 短期流动性缓冲有限，且较 2025-02-01 有所削弱。**",
+            "reason": "This summary emphasizes lower cash / higher net debt, while another summary says short-term liquidity improved through current ratio / near-term debt. Those are different metrics, all disclosed correctly, but the overall label could distinguish them more explicitly. Frozen p4 requires reflecting mixed evidence, which this answer does."
+          },
+          {
+            "category": "METRIC_AMBIGUITY",
+            "severity": "NON_MATERIAL",
+            "answerQuote": "长期债务增加使整体杠杆水平较 2025-02-01 上升。[E1]",
+            "reason": "No leverage ratio is defined. Debt amount and net debt rise, supporting debt-burden wording, but gross debt/equity would decrease because equity also rises. Treat as imprecise metric language, not an established wrong computed ratio; the required total-debt and net-debt figures are correct."
+          }
+        ]
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "fbe871f931c2a4beb00e1ca0d2f52f7d72dbe5097f252a13aae7e705419ca1e2",
+        "requiredFactChecks": {
+          "currentRatioCurrent": "0.97 = 20702 / 21242; expected 0.9746, within 0.01",
+          "currentRatioPrior": "0.94 = 19454 / 20799; expected 0.9353, within 0.01",
+          "totalDebtCurrent": "16499 = 1133 + 15366 USD million",
+          "totalDebtPrior": "15940 = 1636 + 14304 USD million",
+          "netDebtCurrent": "12677 = 16499 - 3822 USD million",
+          "netDebtPrior": "11178 = 15940 - 4762 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: correct 2025-11-01 and 2025-02-01 balance columns and current ratios; does not use third comparison column 2024-11-02",
+          "p2": "PASS: current and noncurrent debt combined exactly once; excludes other liabilities as requested",
+          "p3": "PASS: net debt deducts only cash and equivalents as requested",
+          "p4": "PASS: acknowledges improving current ratio and falling near-term debt alongside lower cash and higher net debt; limits judgement to static evidence and no definite solvency claim"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "(millions, except footnotes) (unaudited) |  | November 1, 2025 |  | February 1, 2025 |  | November 2, 2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Cash and cash equivalents |  | $ 3,822 |  | $ 4,762 |  | $ 3,433\nInventory |  | 14,896 |  | 12,740 |  | 15,165\nOther current assets |  | 1,984 |  | 1,952 |  | 1,956\nTotal current assets |  | 20,702 |  | 19,454 |  | 20,554"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Accounts payable |  | $ 13,792 |  | $ 13,053 |  | $ 14,419\nAccrued and other current liabilities |  | 6,317 |  | 6,110 |  | 5,738\nCurrent portion of long-term debt and other borrowings |  | 1,133 |  | 1,636 |  | 1,635\nTotal current liabilities |  | 21,242 |  | 20,799 |  | 21,792\nLong-term debt and other borrowings |  | 15,366 |  | 14,304 |  | 14,346"
+          }
+        ],
+        "additionalNumericChecks": [
+          "Unrounded current-ratio delta 0.03924524 is 0.04; relative increase 4.19585510% is 4.20%. Displayed 0.97 minus 0.94 being 0.03 is rounding, not a calculation failure.",
+          "Debt delta 559 / prior 15940 = 3.51%; net debt delta 1499 / prior 11178 = 13.41%: correct.",
+          "Current debt decrease 503 and 30.75%; noncurrent debt increase 1062 and 7.42%; 1062 - 503 = 559: correct.",
+          "Cash decline 940 and 19.74%; debt increase 559 plus lost cash 940 equals net debt increase 1499: correct.",
+          "Current accounts payable 13792 is disclosed and a majority of 21242 total current liabilities; general retail working-capital explanation is conditional, not an asserted company-specific operating cause."
+        ],
+        "issues": [],
+        "attribution": "NONE",
+        "notes": [
+          "Both improvement and weakening evidence appear explicitly. Generic overall liquidity wording does not override correct dimension-specific evidence. No unsupported solvency certainty."
+        ],
+        "observations": [
+          {
+            "category": "WORDING_AMBIGUITY",
+            "severity": "NON_MATERIAL",
+            "answerQuote": "**TGT 的短期流动性缓冲有限，且较 2025-02-01 有所削弱。**",
+            "reason": "This summary emphasizes lower cash / higher net debt, while another summary says short-term liquidity improved through current ratio / near-term debt. Those are different metrics, all disclosed correctly, but the overall label could distinguish them more explicitly. Frozen p4 requires reflecting mixed evidence, which this answer does."
+          }
+        ]
+      },
+      "responsePath": "raw-development-tgt/development-tgt-3-1.response.json",
+      "responseSha256": "8897301a0814a4854a8cc1581d79cf7491b852e0886bb230663657eb99791599",
+      "executionStatus": "COMPLETED",
+      "caseSha256": "8a36261f0e5d4e3e7c08518cfb59eaf6958c2c30f0db4ed622a8431dd6ab0114"
+    }
+  ],
+  "reviewedStages": 12,
+  "updatedAt": "2026-10-02T08:50:14.847823+00:00",
+  "summary": {
+    "caseCount": 6,
+    "stages": {
+      "PASS": 12,
+      "FAIL": 0,
+      "NO_DATA": 0
+    },
+    "materialMethodErrors": 0,
+    "materialFinalIntegrationErrors": 0,
+    "nonMaterialObservationsPresent": true,
+    "primaryEvaluatorAgreement": "NOT_ASSESSED: no primary judgments were inspected",
+    "boundary": "AI independent source-grounded text review, not human acceptance and not a production-quality estimate. All assigned cases were reviewed regardless of outcomes."
+  }
+}

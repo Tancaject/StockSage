@@ -1,0 +1,55 @@
+我们需要回答中文用户问题。任务：从两份累计现金流量表还原 TGT FY2025 第三季度单季经营现金流、购建固定资产现金支出、简化自由现金流（经营现金流 - 购建固定资产现金支出毛额，不抵扣资产出售回款）。需要说明本季经营现金流是否覆盖该支出，注明财报期间，金额单位，比率百分比两位小数。
+
+证据：
+E1：Nine Months Ended Nov 1, 2025 和 Nov 2, 2024。periodStart 2025-02-02, periodEnd 2025-11-01。Cash provided by operating activities 3,485 (million USD). Expenditures for property and equipment (2,842). 注意支出列为负数，毛额 2,842。
+E2：Six Months Ended Aug 2, 2025 和 Aug 3, 2024。periodStart 2025-02-02, periodEnd 2025-08-02。Cash provided by operating activities 2,358. Expenditures for property and equipment (1,864).
+
+两期累计同起点 2025-02-02，适合相减得到 Q3 单季（大概 2025-08-03 至 2025-11-01；Target财年季度可能 13周，期间以披露为准。我们可以说单季为 FY2025 第三季度，即截至 2025-11-01 的三个月/13周，具体起讫未直接列出但可由两期差推断；不要编具体开始日期？E1 Q3 periodEnd 2025-11-01，E2 periodEnd 2025-08-02，故第三季度为 2025-08-03 至 2025-11-01。这个可以从日期推断，但证据没有明说季度起始。可以谨慎写“按两期累计期末日推断为2025-08-03至2025-11-01”。
+
+计算：
+Q3 OCF = 3,485 - 2,358 = 1,127 million USD.
+Q3 CapEx = 2,842 - 1,864 = 978 million USD (毛额；报表负号表示现金流出)。
+Simplified FCF = 1,127 - 978 = 149 million USD.
+Coverage ratio OCF / CapEx = 1,127 / 978 = 1.152351... = 1.15 times. 覆盖比例百分比? 用户要求比率和百分比保留两位小数。可以说覆盖率 115.24%? 1,127/978*100=115.235... 115.24%。或倍数 1.15倍。是否覆盖：是，经营现金流覆盖该支出，超出 149 million。
+
+需要按固定章节：标的与数据范围 / 已验证事实 / 财务趋势与经营质量 / 风险与反向证据 / 数据缺口 / 来源。重点回答问题。不要扩写太多，但需要固定章节。可以简洁。
+
+注意系统补充：当用两期同起点累计现金流量表还原单季数据时，在声明某类数据缺失前，必须先检查该明细是否已通过两期累计数差值还原得出；若已得出，不得列入缺口。我们只针对用户要求项目，已有。数据缺口：无关于所问三项；但若需要管理层解释单季驱动因素，缺少单季直接披露或 MD&A；但可以说商业原因未确认。也可提同比数据可计算？用户没要求同比。我们可用上年同期累计还原 Q3 FY2024? E1有九个月截至2024-11-02，E2有六个月截至2024-08-03，同起点? 2024财年起点? E1 periodStart 2025-02-02? Wait E1 metadata periodStart for evidence maybe 2025-02-02 for current? It says periodStart 2025-02-02, periodEnd 2025-11-01, but table includes Nov 2, 2024. E2 metadata periodStart 2025-02-02, periodEnd 2025-08-02, table includes Aug 3, 2024. For prior year comparatives, nine months ended Nov 2, 2024 and six months ended Aug 3, 2024 likely same fiscal-year start date? Target FY2024 began around Feb 4, 2024? But metadata not giving prior periodStart. We don't need prior. Could compute prior Q3 if wanted: OCF 4,078-3,339=739, CapEx 1,968-1,313=655, FCF=84. But user didn't ask. Might mention as context? Could be useful but risk: prior-year comparatives have different fiscal start? Nine months ended Nov 2 2024 and six months ended Aug 3 2024 likely same start (fiscal year beginning Feb 4, 2024). But evidence metadata not specify. Better avoid unless clearly labeled optional. Since user asks only FY2025 Q3. Keep focused.
+
+Need ensure no hidden chain of thought. Final Chinese.
+
+Potential nuance: Target FY2025 Q3 ended November 1, 2025. The nine months ended and six months ended. We need “财报期间”：还原所依据的累计期间：FY2025 前九个月（2025-02-02 至 2025-11-01）与前六个月（2025-02-02 至 2025-08-02）；还原出的单季期间为第三季度（约 2025-08-03 至 2025-11-01）。注明来自 E1/E2。
+
+Need include arithmetic table maybe.
+
+Check numbers:
+E1 OCF 3,485; E2 OCF 2,358; diff 1,127.
+E1 capex (2,842); E2 (1,864); diff (978) as outflow; gross 978.
+FCF = 1,127 - 978 = 149.
+Coverage: 1,127 / 978 = let's calculate precisely: 978*1.15=1124.7, remainder 2.3; 2.3/978=0.00235, so 1.15235. Percentage 115.24%. If ratio to two decimals: 1.15. Percentage to two decimals: 115.24%. User says 比率和百分比保留两位小数. Provide both maybe.
+
+Need mention “购建固定资产现金支出毛额”：报表项为 Expenditures for property and equipment，累计九个月 2,842，前六个月 1,864，差 978。由于报表以负号列示现金流出，单季现金流出为 978 百万美元。
+
+Risk/rebuttal: This is reconstructed, not direct single-quarter disclosure. It assumes no restatement/change in consolidation and same fiscal start. Evidence shows same periodStart current periods; okay. Also simplified FCF ignores asset sale proceeds (“Other” investing line), working capital timing, etc. The “Other” investing line in cumulative: E1 52, E2 11, diff 41 positive, but user says not deduct/don't include asset sale proceeds. We can mention not included. Could mention if one used net investing cash flow, different. But simplified FCF as requested.
+
+Data gap: No direct single-quarter cash flow statement provided; but reconstruction available so not gap for requested items. If need reasons for Q3 changes, no MD&A/management explanation provided. Could mention “单季经营现金流和资本开支变动的商业原因尚无法确认”。 Also note Q3 direct disclosure may exist but not in evidence.
+
+Need ensure source section lists E1/E2 with links.
+
+Let's craft with headings.
+
+Potential issue: The evidence metadata E1 periodStart 2025-02-02 and E2 periodStart 2025-02-02. Good. The table says Nine Months Ended November 1, 2025, Six Months Ended August 2, 2025. We can state “同一财年起始日（2025-02-02）”。
+
+Need maybe include “单位：百万美元”。
+
+Could include “本季经营现金流是否覆盖该支出：覆盖，覆盖额 149 百万美元，覆盖率 115.24% / 1.15倍”。
+
+Let's think if Target's fiscal quarter Q3 might be 13 weeks ending Nov 1, 2025. If we say “约 2025-08-03 至 2025-11-01” based on cumulative period end dates. Is August 3 correct? Six months ended Aug 2, so next day Aug 3. Yes. But if there are 13 weeks, Aug 3 to Nov 1 is 13 weeks? Aug 3-30 4 weeks, Sep 4, Oct 4, Nov 1? 13 weeks maybe. Fine.
+
+Need avoid overclaim: “按两期期末日推断” not direct stated. Good.
+
+Now final. Ensure no mention analysis. Use Chinese.
+
+One more nuance: “简化自由现金流按经营现金流减上述支出毛额计算，不抵扣资产出售回款。” The “Other” investing line might include asset sale proceeds; we ignore. Could mention “未使用 Investing Other 52/11 等项”。
+
+Let's produce.

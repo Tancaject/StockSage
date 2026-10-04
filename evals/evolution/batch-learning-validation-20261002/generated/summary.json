@@ -1,0 +1,46 @@
+{
+  "groups": [
+    {
+      "group": "FALSE_MISSING_DERIVABLE_PERIOD_DETAIL",
+      "status": "PROPOSED",
+      "releaseEligible": false,
+      "observedModel": "qwen3.8-max",
+      "usage": {
+        "completion_tokens": 862,
+        "completion_tokens_details": {
+          "reasoning_tokens": 578,
+          "text_tokens": 862
+        },
+        "prompt_tokens": 25932,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 25932
+        },
+        "total_tokens": 26794
+      },
+      "candidateId": "candidate-a7a92cfaac38c01535486362",
+      "experienceId": "exp-af3ac31b4ade4be35e439c18"
+    },
+    {
+      "group": "INCONSISTENT_UNIT_AND_DERIVED_NUMERIC_REPRESENTATIONS",
+      "status": "NOT_GENERATED",
+      "releaseEligible": false,
+      "observedModel": "qwen3.8-max",
+      "usage": {
+        "completion_tokens": 3250,
+        "completion_tokens_details": {
+          "reasoning_tokens": 847,
+          "text_tokens": 3250
+        },
+        "prompt_tokens": 25398,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 25398
+        },
+        "total_tokens": 28648
+      },
+      "error": "Generation incomplete or actual model differs"
+    }
+  ],
+  "releaseEligible": false
+}

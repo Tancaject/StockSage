@@ -1,0 +1,322 @@
+{
+  "schema": "native_judge_new_answers_audit_v1",
+  "createdAt": "2026-10-02T10:12:17.092877+00:00",
+  "scope": "TWELVE_NEW_REAL_BUSINESS_ANSWER_STAGES",
+  "releaseEligible": false,
+  "humanReviewed": false,
+  "reviewOrigin": "AI_INDEPENDENT_COMPARISON_NOT_HUMAN",
+  "plan": {
+    "path": "evals\\evolution\\batch-repair-20261002\\judge-new-answers-plan.json",
+    "sha256": "bfa0a114b95f8aa8190b7a22ea2904da5515dbbb4a4f320888a3e3a5953eab24"
+  },
+  "independentReference": {
+    "path": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+    "sha256": "2fb1e21fd7323d38bb80fda064e4e152ff3cf9333d7ed5e68f02e5dc57b8009b",
+    "reviewer": "batch_dataset_design",
+    "type": "AI_INDEPENDENT_TEXT_REVIEW_NOT_HUMAN",
+    "suppliedToJudge": false,
+    "comparisonReadAfterAllJudgeCallsCompleted": true
+  },
+  "adapterSha256": "28b754f495003bc8267ce3515769836f1dc4f4d7ecbf138f0a230cdc1956bb74",
+  "frozenInputsUnchanged": true,
+  "sourceReports": [
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\judge-new-ibm-cash.json",
+      "sha256": "2197e6a2aeeabe1dc6dfbe40574dc3787759b57330c23d347ef7cba14a22e19a",
+      "status": "COMPLETED"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\judge-new-ibm-liquidity.json",
+      "sha256": "6186c243e77263385983f5a8685e3a77c00902142d0b5889620da4e1eab5a0a9",
+      "status": "INCOMPLETE"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\judge-new-jnj-cash.json",
+      "sha256": "5140536636d9f3806cd5ea20e869ac4a7c13b7a6a7a449914205b4e985323e40",
+      "status": "COMPLETED"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\judge-new-jnj-liquidity.json",
+      "sha256": "36d42a1509cad90586d435db00432187e2114daa5275b4afce34732bd8f0a385",
+      "status": "COMPLETED"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\judge-new-pep-control.json",
+      "sha256": "6ed0296e21cc179a1868651634fe3fcde7836a2703aafaf52d3e6f4130d19f91",
+      "status": "INCOMPLETE"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\judge-new-tgt-control.json",
+      "sha256": "d002f08120a4fdf9c96c67270054c31d8733d16b67438cddd4252dd6da5c2b06",
+      "status": "INCOMPLETE"
+    }
+  ],
+  "summary": {
+    "stages": 12,
+    "providerCalls": 24,
+    "providerCallLimit": 48,
+    "actualModels": {
+      "qwen3.8-max": 24
+    },
+    "technicalValid": 9,
+    "technicalInvalid": 3,
+    "decisive": 8,
+    "correctDecisions": 5,
+    "falsePasses": 3,
+    "falseFails": 0,
+    "noDecision": 4,
+    "allAttemptAgreement": {
+      "numerator": 5,
+      "denominator": 12,
+      "percent": 41.67
+    },
+    "technicalCoverage": {
+      "numerator": 9,
+      "denominator": 12,
+      "percent": 75.0
+    },
+    "independentExpectedStatuses": {
+      "FAIL": 12
+    }
+  },
+  "rows": [
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "stage": "analysis",
+      "answerSha256": "ad5cbf6c66b39ecc95fc8668a8dee5b1c03792ef290c045b6760872b20d0e734",
+      "responseSha256": "4b02031f907cae9bbc6bf725f85be593d15f2e45b9dc38b74ec444af9a7cf8dd",
+      "judgeOutput": "evals\\evolution\\batch-repair-20261002\\judge-new-ibm-cash.json",
+      "judgeStatus": "FAIL",
+      "technicalStatus": "VALID",
+      "independentStatus": "FAIL",
+      "comparison": "AGREEMENT",
+      "providerCalls": 2,
+      "errors": [],
+      "independentIssueIds": [
+        "IBM_RATIO_2024",
+        "IBM_AR_CAUSE_UNSUPPORTED"
+      ]
+    },
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "stage": "finalAnswer",
+      "answerSha256": "47ad4e19608f536b040914b12c06acf055bf8b4fe48db3a93983598c6fa73784",
+      "responseSha256": "4b02031f907cae9bbc6bf725f85be593d15f2e45b9dc38b74ec444af9a7cf8dd",
+      "judgeOutput": "evals\\evolution\\batch-repair-20261002\\judge-new-ibm-cash.json",
+      "judgeStatus": "FAIL",
+      "technicalStatus": "VALID",
+      "independentStatus": "FAIL",
+      "comparison": "AGREEMENT",
+      "providerCalls": 2,
+      "errors": [],
+      "independentIssueIds": [
+        "IBM_RATIO_2024",
+        "IBM_AR_CAUSE_UNSUPPORTED"
+      ]
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "stage": "analysis",
+      "answerSha256": "a232efd38758c4d48a014605e21fa2075c645927a4a3772861c776ba2e48e536",
+      "responseSha256": "0a502dfa83dcdbcee15595d9d11ac0e1c6c2372c4dcfd2b662a0ba1b83f9fc5d",
+      "judgeOutput": "evals\\evolution\\batch-repair-20261002\\judge-new-ibm-liquidity.json",
+      "judgeStatus": "FAIL",
+      "technicalStatus": "VALID",
+      "independentStatus": "FAIL",
+      "comparison": "AGREEMENT",
+      "providerCalls": 2,
+      "errors": [],
+      "independentIssueIds": [
+        "IBM_HISTORICAL_LIQUIDITY_UNSUPPORTED"
+      ]
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "stage": "finalAnswer",
+      "answerSha256": "4f91aa6f5882adbada797990dcc353011506ed0aaf6ad4671761f1ea45812e4f",
+      "responseSha256": "0a502dfa83dcdbcee15595d9d11ac0e1c6c2372c4dcfd2b662a0ba1b83f9fc5d",
+      "judgeOutput": "evals\\evolution\\batch-repair-20261002\\judge-new-ibm-liquidity.json",
+      "judgeStatus": "NO_DATA",
+      "technicalStatus": "INVALID",
+      "independentStatus": "FAIL",
+      "comparison": "NO_DECISION",
+      "providerCalls": 2,
+      "errors": [
+        "JUDGE_FAILED: Unknown registered quote line: "
+      ],
+      "independentIssueIds": [
+        "IBM_HISTORICAL_LIQUIDITY_UNSUPPORTED"
+      ]
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "stage": "analysis",
+      "answerSha256": "3130c16b8e8042b7851bd2c755f8e0619c0f9d135405ecb416de89d7c10e926f",
+      "responseSha256": "9318b1ac2b43a14a785bc0e091aea9a4ef0a1e1c3b36c064ed79378d615c0dd9",
+      "judgeOutput": "evals\\evolution\\batch-repair-20261002\\judge-new-jnj-cash.json",
+      "judgeStatus": "NO_DATA",
+      "technicalStatus": "VALID",
+      "independentStatus": "FAIL",
+      "comparison": "NO_DECISION",
+      "providerCalls": 2,
+      "errors": [],
+      "independentIssueIds": [
+        "JNJ_DEFERRED_TAX_DIRECTION"
+      ]
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "stage": "finalAnswer",
+      "answerSha256": "1ae567fd7f924fd44e9fdabc9f5a2291cfe5766a26d75ec17b1f8d37459031b8",
+      "responseSha256": "9318b1ac2b43a14a785bc0e091aea9a4ef0a1e1c3b36c064ed79378d615c0dd9",
+      "judgeOutput": "evals\\evolution\\batch-repair-20261002\\judge-new-jnj-cash.json",
+      "judgeStatus": "PASS",
+      "technicalStatus": "VALID",
+      "independentStatus": "FAIL",
+      "comparison": "FALSE_PASS",
+      "providerCalls": 2,
+      "errors": [],
+      "independentIssueIds": [
+        "JNJ_DEFERRED_TAX_DIRECTION"
+      ]
+    },
+    {
+      "caseId": "jnj-fy2025q3-liquidity",
+      "stage": "analysis",
+      "answerSha256": "5effcd0b0f55e43c92634a3242d48b7b7c0b595230c6878d4035a648b1555681",
+      "responseSha256": "7db48c180c98589ca44259b18159f4a8bc2f37a2b1b324f959da4473de1bff0f",
+      "judgeOutput": "evals\\evolution\\batch-repair-20261002\\judge-new-jnj-liquidity.json",
+      "judgeStatus": "FAIL",
+      "technicalStatus": "VALID",
+      "independentStatus": "FAIL",
+      "comparison": "AGREEMENT",
+      "providerCalls": 2,
+      "errors": [],
+      "independentIssueIds": [
+        "JNJ_CREDIT_RATING_UNSUPPORTED",
+        "JNJ_RATIO_PREMATURE_ROUNDING"
+      ]
+    },
+    {
+      "caseId": "jnj-fy2025q3-liquidity",
+      "stage": "finalAnswer",
+      "answerSha256": "054e5c2c660b43cf80db8ee7ccc4f87ba1f048cd031752de4459a10c88f85c7d",
+      "responseSha256": "7db48c180c98589ca44259b18159f4a8bc2f37a2b1b324f959da4473de1bff0f",
+      "judgeOutput": "evals\\evolution\\batch-repair-20261002\\judge-new-jnj-liquidity.json",
+      "judgeStatus": "FAIL",
+      "technicalStatus": "VALID",
+      "independentStatus": "FAIL",
+      "comparison": "AGREEMENT",
+      "providerCalls": 2,
+      "errors": [],
+      "independentIssueIds": [
+        "JNJ_CREDIT_RATING_UNSUPPORTED",
+        "JNJ_RATIO_PREMATURE_ROUNDING"
+      ]
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "stage": "analysis",
+      "answerSha256": "9e41217fbd82b433977b06e910c2572dda218ecbaa8dafe0b11bffc6910605e3",
+      "responseSha256": "a98735edc2a80c559dd84b450ef834bf04dc4d55cc54fac87e979adc623e5e34",
+      "judgeOutput": "evals\\evolution\\batch-repair-20261002\\judge-new-pep-control.json",
+      "judgeStatus": "PASS",
+      "technicalStatus": "VALID",
+      "independentStatus": "FAIL",
+      "comparison": "FALSE_PASS",
+      "providerCalls": 2,
+      "errors": [],
+      "independentIssueIds": [
+        "PEP_QOQ_PERIOD_MISMATCH",
+        "PEP_CAPEX_INTENT_UNSUPPORTED"
+      ]
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "stage": "finalAnswer",
+      "answerSha256": "6f3b2e2e52e1b8d9cb01944d47d4e9d37feed4c5a60eee34f10b79fd38c35fe8",
+      "responseSha256": "a98735edc2a80c559dd84b450ef834bf04dc4d55cc54fac87e979adc623e5e34",
+      "judgeOutput": "evals\\evolution\\batch-repair-20261002\\judge-new-pep-control.json",
+      "judgeStatus": "NO_DATA",
+      "technicalStatus": "INVALID",
+      "independentStatus": "FAIL",
+      "comparison": "NO_DECISION",
+      "providerCalls": 2,
+      "errors": [
+        "JUDGE_FAILED: fact.unit: expected nonempty text"
+      ],
+      "independentIssueIds": [
+        "PEP_QOQ_PERIOD_MISMATCH",
+        "PEP_CAPEX_INTENT_UNSUPPORTED",
+        "PEP_SEASONAL_CAUSE_UPGRADED"
+      ]
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "stage": "analysis",
+      "answerSha256": "014eb632036d5ecdce77c170861b561be8c100a67f729f1ee281b75e23f6103a",
+      "responseSha256": "7c410209a3ac7f8b139cf14ab50de978e3fefacd1a0ef473696e68391d0ba918",
+      "judgeOutput": "evals\\evolution\\batch-repair-20261002\\judge-new-tgt-control.json",
+      "judgeStatus": "NO_DATA",
+      "technicalStatus": "INVALID",
+      "independentStatus": "FAIL",
+      "comparison": "NO_DECISION",
+      "providerCalls": 2,
+      "errors": [
+        "DUPLICATE_EXTRACTED_CLAIM"
+      ],
+      "independentIssueIds": [
+        "TGT_QUALITY_CERTAINTY",
+        "TGT_INDUSTRY_BENCHMARK_UNSUPPORTED",
+        "TGT_CAPEX_PURPOSE_UNSUPPORTED",
+        "TGT_INVENTORY_CAUSE_UNSUPPORTED"
+      ]
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "stage": "finalAnswer",
+      "answerSha256": "f986175cbdcdca67e325e9e25af3e516ee94de96114965c99d672bfec915de5b",
+      "responseSha256": "7c410209a3ac7f8b139cf14ab50de978e3fefacd1a0ef473696e68391d0ba918",
+      "judgeOutput": "evals\\evolution\\batch-repair-20261002\\judge-new-tgt-control.json",
+      "judgeStatus": "PASS",
+      "technicalStatus": "VALID",
+      "independentStatus": "FAIL",
+      "comparison": "FALSE_PASS",
+      "providerCalls": 2,
+      "errors": [],
+      "independentIssueIds": [
+        "TGT_QUALITY_CERTAINTY",
+        "TGT_INDUSTRY_BENCHMARK_UNSUPPORTED",
+        "TGT_CAPEX_PURPOSE_UNSUPPORTED",
+        "TGT_INVENTORY_CAUSE_UNSUPPORTED"
+      ]
+    }
+  ],
+  "observedAdapterIssues": [
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "stage": "finalAnswer",
+      "kind": "UNSUPPORTED_CLAIM_EMPTY_SOURCE_NOT_EXPRESSIBLE",
+      "detail": "support FAIL with valid answer A5 and empty evidence_line for unsupported historical ratio range is rejected by the current mandatory-source wire contract."
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "stage": "finalAnswer",
+      "kind": "NONNUMERIC_CAUSAL_CLAIMS_IN_NUMERIC_FACT_SCHEMA",
+      "detail": "Two unsupported causal claims have value=null and unit=null; validate_facts rejects the empty unit. Do not silently discard or relabel these claims."
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "stage": "analysis",
+      "kind": "RAW_LEVEL_AND_CHANGE_SHARE_FIELD",
+      "detail": "Six duplicate groups conflate original amounts with percent changes or amount changes under the same field. They are not equivalent ratio displays and must not be deduplicated."
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "stage": "analysis",
+      "kind": "SEMANTIC_REVIEW_INCOMPLETE",
+      "detail": "unknowns returned NO_DATA with reason 占位; syntax VALID does not establish a complete judgment."
+    }
+  ],
+  "boundary": "This is source-bound AI agreement on six known failing business answers (12 stages), not a balanced unseen accuracy benchmark, not ordinary-evaluator calibration, and not release authorization. No original reports or prior cached recheck were overwritten."
+}

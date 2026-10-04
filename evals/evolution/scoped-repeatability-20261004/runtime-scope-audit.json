@@ -1,0 +1,88 @@
+{
+  "scope": "STATIC_SOURCE_INSPECTION_NOT_LIVE_RUNTIME_TRACE",
+  "files": {
+    "stocksage-backend/src/main/java/com/stocksage/service/OrdinaryEvidence.java": "e8af9fbc39efad2e1186bf82a786b7d28e74fa5d772766c89bc29d90f7c5efc1",
+    "stocksage-backend/src/main/java/com/stocksage/evolution/FundamentalsMethodRegistry.java": "915c19ab428eb875a045401c2152087b5d452ac7ab153130fc5edc16c7ff5cca",
+    "stocksage-backend/src/main/java/com/stocksage/agent/FundamentalsAgent.java": "24e231e50eb021c3c9446abb54eb62afab79fafd7c77a3369c9e36892bb9e0af",
+    "evals/evolution_candidates.py": "3b90d673cbfbd79aa000160943fddedbdad2aa8730d72d4b61617ba747f2e975",
+    "evals/evolution_batch.py": "e8d9f7c359486f0243a4643c3fafe05143712f548ebebd3d460737fa53b86533",
+    "evals/run_evaluation_agent.py": "4c7843a9269262fe6398be1f3c95fbf916dfc0c0eb83019626c7f7c15471abdf"
+  },
+  "findings": [
+    {
+      "source": "stocksage-backend/src/main/java/com/stocksage/service/OrdinaryEvidence.java",
+      "lines": [
+        151,
+        161,
+        299,
+        303
+      ],
+      "fact": "Trusted online tags are financial-evidence/dated-values/structured-financials and fundamentals/reportPeriod/period-comparison; no current producer for the generated detailed lesson conditions."
+    },
+    {
+      "source": "stocksage-backend/src/main/java/com/stocksage/evolution/FundamentalsMethodRegistry.java",
+      "lines": [
+        145,
+        149
+      ],
+      "fact": "Online scope requires containsAll for task/evidence/capabilities; it does not parse applicability prose."
+    },
+    {
+      "source": "stocksage-backend/src/main/java/com/stocksage/agent/FundamentalsAgent.java",
+      "lines": [
+        62,
+        73,
+        95,
+        99
+      ],
+      "fact": "arithmetic is supplied as a constant capability label; analyst uses a no-tool ChatClient and the direct invocation performs no calculator calls."
+    },
+    {
+      "source": "evals/evolution_batch.py",
+      "lines": [
+        35,
+        44
+      ],
+      "fact": "Diagnostic composition prints conditions into the method for the model; it does not execute condition matching."
+    },
+    {
+      "source": "evals/run_evaluation_agent.py",
+      "lines": [
+        80,
+        99
+      ],
+      "fact": "Decimal calculator exists in evaluator tool execution only; this does not give business FundamentalsAgent the same capability."
+    }
+  ],
+  "implication": "Offline selection must have explicit trusted pre-answer annotations. Production use requires a real observation producer and independently qualified activation; never map all detailed conditions to broad fundamentals tags.",
+  "maximumCurrentRuntimeTagCheck": [
+    {
+      "recordSha256": "da9c860244a29c0cfb451540b0aeef58c7fd9238ccac9c62838825fd2b448912",
+      "matches": false,
+      "unsupportedConditions": {
+        "triggerTags": [
+          "cumulative-to-single-quarter-reconstruction",
+          "false-missing-data-claim"
+        ],
+        "requiredEvidence": [
+          "cash-flow-statement-line-items",
+          "two-cumulative-periods-same-start-date"
+        ]
+      }
+    },
+    {
+      "recordSha256": "9d07d57b5ae81e1ab10723bd92e7be8a7f090fa87fe14af19541c599ded43b6c",
+      "matches": false,
+      "unsupportedConditions": {
+        "triggerTags": [
+          "derived-ratio-percentage-rounding",
+          "unit-conversion-billion-to-million"
+        ],
+        "requiredEvidence": [
+          "source-footnote-unit",
+          "source-table-unit"
+        ]
+      }
+    }
+  ]
+}

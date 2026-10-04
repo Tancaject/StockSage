@@ -1,0 +1,31 @@
+TARGET CORPORATION Consolidated Statements of Cash Flows
+
+ |  | Six Months Ended
+(millions) (unaudited) |  | August 2, 2025 |  | August 3, 2024
+Operating activities |  |  |  | 
+Net earnings |  | $ 1,971 |  | $ 2,134
+Adjustments to reconcile net earnings to cash provided by operating activities: |  |  |  | 
+Depreciation and amortization |  | 1,558 |  | 1,461
+Share-based compensation expense |  | 133 |  | 149
+Deferred income taxes |  | 112 |  | 16
+Noncash (gains) / losses and other, net |  | 1 |  | 22
+Changes in operating accounts: |  |  |  | 
+Inventory |  | (141) |  | (718)
+Other assets |  | 151 |  | (53)
+Accounts payable |  | (1,125) |  | 522
+Accrued and other liabilities |  | (302) |  | (194)
+Cash provided by operating activities |  | 2,358 |  | 3,339
+Investing activities |  |  |  | 
+Expenditures for property and equipment |  | (1,864) |  | (1,313)
+Other |  | 11 |  | 8
+Cash required for investing activities |  | (1,853) |  | (1,305)
+Financing activities |  |  |  | 
+Additions to long-term debt |  | 1,984 |  | —
+Reductions of long-term debt |  | (1,571) |  | (1,076)
+Dividends paid |  | (1,019) |  | (1,017)
+Repurchase of stock |  | (258) |  | (155)
+Shares withheld for taxes on share-based compensation |  | (62) |  | (94)
+Cash required for financing activities |  | (926) |  | (2,342)
+Net decrease in cash and cash equivalents |  | (421) |  | (308)
+Cash and cash equivalents at beginning of period |  | 4,762 |  | 3,805
+Cash and cash equivalents at end of period |  | $ 4,341 |  | $ 3,497

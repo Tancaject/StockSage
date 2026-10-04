@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 2,
+  "cases": [
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "f5f94dcbbdf6d11c805cfb35f2e0a73fd779898d77beafbfd9b1c19c2b36a0b0",
+      "query": "百事（PEP）FY2025第三季度单季的经营现金流、购建固定资产现金支出和简化自由现金流各是多少？根据给出的年内累计现金流表还原，简化自由现金流按经营现金流减上述支出毛额计算，不抵扣资产出售回款。说明本季经营现金流是否覆盖该支出，并注明所还原的财报期间。金额注明单位，比率和百分比保留两位小数。",
+      "resolvedQuery": "百事（PEP）FY2025第三季度单季的经营现金流、购建固定资产现金支出和简化自由现金流各是多少？根据给出的年内累计现金流表还原，简化自由现金流按经营现金流减上述支出毛额计算，不抵扣资产出售回款。说明本季经营现金流是否覆盖该支出，并注明所还原的财报期间。金额注明单位，比率和百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-02",
+      "context": "[E1] {\"availableAt\":\"2025-10-09T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-06\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2025-10-09T00:00:00Z\",\"rawSha256\":\"1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf\",\"sourceVersion\":\"PEP-FY2025-Q3-cashflow\",\"target\":\"PEP\",\"unit\":\"million\",\"visibleSha256\":\"1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928\"}\nPepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Statement of Cash Flows\n(in millions, un audited)\n\n36 Weeks Ended\n9/6/2025 9/7/2024\nOperating Activities\nNet income $ 5,740 $ 8,092\nDepreciation and amortization 2,315 2,118\nImpairment and other charges 1,960 10\nProduct recall-related impact — 184\nCash payments for product recall-related impact (5) (138)\nOperating lease right-of-use asset amortization 489 438\nShare-based compensation expense 207 260\nRestructuring and impairment charges 567 415\nCash payments for restructuring charges (554) (284)\nAcquisition and divestiture-related charges 308 7\nCash payments for acquisition and divestiture-related charges (80) (4)\nPension and retiree medical plan expenses 164 114\nPension and retiree medical plan contributions (400) (300)\nDeferred income taxes and other tax charges and credits 30 124\nTax payments related to the Tax Cuts and Jobs Act (772) (579)\nChange in assets and liabilities:\nAccounts and notes receivable (1,747) (1,521)\nInventories (449) (492)\nPrepaid expenses and other current assets (223) (200)\nAccounts payable and other current liabilities (1,647) (2,312)\nIncome taxes payable 6 426\nOther, net (441) (138)\nNet Cash Provided by Operating Activities 5,468 6,220\n\nInvesting Activities\nCapital spending (2,499) (2,850)\nSales of property, plant and equipment 272 177\nAcquisitions, net of cash acquired, investments in noncontrolled affiliates and (3,176) (31)\npurchases of intangible and other assets\nDivestitures, sales of investments in noncontrolled affiliates and other assets 5 145\nShort-term investments, by original maturity:\nMore than three months - purchases (190) (425)\nMore than three months - maturities 425 —\nThree months or less, net 43 4\nOther investing, net (117) 15\nNet Cash Used for Investing Activities (5,237) (2,965)\n\n(Continued on following page)\n\n\n\n\n\n\n\n\nA - 2\n\n\n[E2] {\"availableAt\":\"2025-07-17T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E2\",\"periodEnd\":\"2025-06-14\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2025-07-17T00:00:00Z\",\"rawSha256\":\"b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf\",\"sourceVersion\":\"PEP-FY2025-Q2-cashflow\",\"target\":\"PEP\",\"unit\":\"million\",\"visibleSha256\":\"b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38\"}\nPepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Statement of Cash Flows\n(in millions, unaudited)\n\n24 Weeks Ended\n6/14/2025 6/15/2024\nOperating Activities\nNet income $ 3,122 $ 5,147\nDepreciation and amortization 1,491 1,379\nImpairment and other charges 1,860 —\nProduct recall-related impact — 182\nCash payments for product recall-related impact (2) (135)\nOperating lease right-of-use asset amortization 315 278\nShare-based compensation expense 131 183\nRestructuring and impairment charges 426 170\nCash payments for restructuring charges (387) (173)\nPension and retiree medical plan expense 99 67\nPension and retiree medical plan contributions (354) (263)\nDeferred income taxes and other tax charges and credits (260) 142\nTax payments related to the Tax Cuts and Jobs Act (772) (579)\nChange in assets and liabilities:\nAccounts and notes receivable (1,582) (1,138)\nInventories (800) (696)\nPrepaid expenses and other current assets (354) (365)\nAccounts payable and other current liabilities (2,083) (2,968)\nIncome taxes payable 415 287\nOther, net (269) (203)\nNet Cash Provided by Operating Activities 996 1,315\n\nInvesting Activities\nCapital spending (1,507) (1,701)\nSales of property, plant and equipment 169 127\nAcquisitions, net of cash acquired, investments in noncontrolled affiliates and\npurchases of intangible and other assets (3,130) (30)\nDivestitures, sales of investments in noncontrolled affiliates and other assets 5 135\nShort-term investments, by original maturity:\nMore than three months - maturities 425 —\nThree months or less, net 22 1\nOther investing, net (111) 14\nNet Cash Used for Investing Activities (4,127) (1,454)\n\n(Continued on following page)\n\n\n\n\n\n\n\n\n\n\n\n\nA - 2\n",
+      "contextSha256": "381f5c785120f9b5022daa9745a75d3a9eb648ba6da9913942cbb5995faea14d",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "PEP",
+      "requestAttributes": {
+        "reportPeriod": "quarterly",
+        "reportCount": 2
+      },
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1",
+        "E2"
+      ],
+      "preAnalystContext": "本轮标的：PEP\n请求参数：{reportPeriod=quarterly, reportCount=2}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2025-10-09T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-06\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2025-10-09T00:00:00Z\",\"rawSha256\":\"1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf\",\"sourceVersion\":\"PEP-FY2025-Q3-cashflow\",\"target\":\"PEP\",\"unit\":\"million\",\"visibleSha256\":\"1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928\"}\nPepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Statement of Cash Flows\n(in millions, un audited)\n\n36 Weeks Ended\n9/6/2025 9/7/2024\nOperating Activities\nNet income $ 5,740 $ 8,092\nDepreciation and amortization 2,315 2,118\nImpairment and other charges 1,960 10\nProduct recall-related impact — 184\nCash payments for product recall-related impact (5) (138)\nOperating lease right-of-use asset amortization 489 438\nShare-based compensation expense 207 260\nRestructuring and impairment charges 567 415\nCash payments for restructuring charges (554) (284)\nAcquisition and divestiture-related charges 308 7\nCash payments for acquisition and divestiture-related charges (80) (4)\nPension and retiree medical plan expenses 164 114\nPension and retiree medical plan contributions (400) (300)\nDeferred income taxes and other tax charges and credits 30 124\nTax payments related to the Tax Cuts and Jobs Act (772) (579)\nChange in assets and liabilities:\nAccounts and notes receivable (1,747) (1,521)\nInventories (449) (492)\nPrepaid expenses and other current assets (223) (200)\nAccounts payable and other current liabilities (1,647) (2,312)\nIncome taxes payable 6 426\nOther, net (441) (138)\nNet Cash Provided by Operating Activities 5,468 6,220\n\nInvesting Activities\nCapital spending (2,499) (2,850)\nSales of property, plant and equipment 272 177\nAcquisitions, net of cash acquired, investments in noncontrolled affiliates and (3,176) (31)\npurchases of intangible and other assets\nDivestitures, sales of investments in noncontrolled affiliates and other assets 5 145\nShort-term investments, by original maturity:\nMore than three months - purchases (190) (425)\nMore than three months - maturities 425 —\nThree months or less, net 43 4\nOther investing, net (117) 15\nNet Cash Used for Investing Activities (5,237) (2,965)\n\n(Continued on following page)\n\n\n\n\n\n\n\n\nA - 2\n\n\n[E2] {\"availableAt\":\"2025-07-17T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E2\",\"periodEnd\":\"2025-06-14\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2025-07-17T00:00:00Z\",\"rawSha256\":\"b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf\",\"sourceVersion\":\"PEP-FY2025-Q2-cashflow\",\"target\":\"PEP\",\"unit\":\"million\",\"visibleSha256\":\"b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38\"}\nPepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Statement of Cash Flows\n(in millions, unaudited)\n\n24 Weeks Ended\n6/14/2025 6/15/2024\nOperating Activities\nNet income $ 3,122 $ 5,147\nDepreciation and amortization 1,491 1,379\nImpairment and other charges 1,860 —\nProduct recall-related impact — 182\nCash payments for product recall-related impact (2) (135)\nOperating lease right-of-use asset amortization 315 278\nShare-based compensation expense 131 183\nRestructuring and impairment charges 426 170\nCash payments for restructuring charges (387) (173)\nPension and retiree medical plan expense 99 67\nPension and retiree medical plan contributions (354) (263)\nDeferred income taxes and other tax charges and credits (260) 142\nTax payments related to the Tax Cuts and Jobs Act (772) (579)\nChange in assets and liabilities:\nAccounts and notes receivable (1,582) (1,138)\nInventories (800) (696)\nPrepaid expenses and other current assets (354) (365)\nAccounts payable and other current liabilities (2,083) (2,968)\nIncome taxes payable 415 287\nOther, net (269) (203)\nNet Cash Provided by Operating Activities 996 1,315\n\nInvesting Activities\nCapital spending (1,507) (1,701)\nSales of property, plant and equipment 169 127\nAcquisitions, net of cash acquired, investments in noncontrolled affiliates and\npurchases of intangible and other assets (3,130) (30)\nDivestitures, sales of investments in noncontrolled affiliates and other assets 5 135\nShort-term investments, by original maturity:\nMore than three months - maturities 425 —\nThree months or less, net 22 1\nOther investing, net (111) 14\nNet Cash Used for Investing Activities (4,127) (1,454)\n\n(Continued on following page)\n\n\n\n\n\n\n\n\n\n\n\n\nA - 2\n",
+      "preAnalystContextSha256": "5605fe3200778b14bdab8526fb92dffa3fc9ded3ed9139448c544b8e11803b94",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261002-batch-learning",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-02T08:23:03.229467+00:00",
+        "asOfInstant": "2026-10-02T08:23:03.229467+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-02T08:23:03.229467+00:00",
+        "sourceManifestSha256": "0dacb5cabf217e2d0687141eaafc28c814e99ac3a54e14962f243650cc58c418"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2025-10-09T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-09-06",
+          "periodStart": "2024-12-29",
+          "publishedAt": "2025-10-09T00:00:00Z",
+          "rawSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928",
+          "retrievedAt": "2026-10-02T08:17:08.907227+00:00",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "sourceVersion": "PEP-FY2025-Q3-cashflow",
+          "target": "PEP",
+          "unit": "million",
+          "visibleSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928",
+          "visibleText": "PepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Statement of Cash Flows\n(in millions, un audited)\n\n36 Weeks Ended\n9/6/2025 9/7/2024\nOperating Activities\nNet income $ 5,740 $ 8,092\nDepreciation and amortization 2,315 2,118\nImpairment and other charges 1,960 10\nProduct recall-related impact — 184\nCash payments for product recall-related impact (5) (138)\nOperating lease right-of-use asset amortization 489 438\nShare-based compensation expense 207 260\nRestructuring and impairment charges 567 415\nCash payments for restructuring charges (554) (284)\nAcquisition and divestiture-related charges 308 7\nCash payments for acquisition and divestiture-related charges (80) (4)\nPension and retiree medical plan expenses 164 114\nPension and retiree medical plan contributions (400) (300)\nDeferred income taxes and other tax charges and credits 30 124\nTax payments related to the Tax Cuts and Jobs Act (772) (579)\nChange in assets and liabilities:\nAccounts and notes receivable (1,747) (1,521)\nInventories (449) (492)\nPrepaid expenses and other current assets (223) (200)\nAccounts payable and other current liabilities (1,647) (2,312)\nIncome taxes payable 6 426\nOther, net (441) (138)\nNet Cash Provided by Operating Activities 5,468 6,220\n\nInvesting Activities\nCapital spending (2,499) (2,850)\nSales of property, plant and equipment 272 177\nAcquisitions, net of cash acquired, investments in noncontrolled affiliates and (3,176) (31)\npurchases of intangible and other assets\nDivestitures, sales of investments in noncontrolled affiliates and other assets 5 145\nShort-term investments, by original maturity:\nMore than three months - purchases (190) (425)\nMore than three months - maturities 425 —\nThree months or less, net 43 4\nOther investing, net (117) 15\nNet Cash Used for Investing Activities (5,237) (2,965)\n\n(Continued on following page)\n\n\n\n\n\n\n\n\nA - 2\n"
+        },
+        {
+          "availableAt": "2025-07-17T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E2",
+          "periodEnd": "2025-06-14",
+          "periodStart": "2024-12-29",
+          "publishedAt": "2025-07-17T00:00:00Z",
+          "rawSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38",
+          "retrievedAt": "2026-10-02T08:17:08.907227+00:00",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf",
+          "sourceVersion": "PEP-FY2025-Q2-cashflow",
+          "target": "PEP",
+          "unit": "million",
+          "visibleSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38",
+          "visibleText": "PepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Statement of Cash Flows\n(in millions, unaudited)\n\n24 Weeks Ended\n6/14/2025 6/15/2024\nOperating Activities\nNet income $ 3,122 $ 5,147\nDepreciation and amortization 1,491 1,379\nImpairment and other charges 1,860 —\nProduct recall-related impact — 182\nCash payments for product recall-related impact (2) (135)\nOperating lease right-of-use asset amortization 315 278\nShare-based compensation expense 131 183\nRestructuring and impairment charges 426 170\nCash payments for restructuring charges (387) (173)\nPension and retiree medical plan expense 99 67\nPension and retiree medical plan contributions (354) (263)\nDeferred income taxes and other tax charges and credits (260) 142\nTax payments related to the Tax Cuts and Jobs Act (772) (579)\nChange in assets and liabilities:\nAccounts and notes receivable (1,582) (1,138)\nInventories (800) (696)\nPrepaid expenses and other current assets (354) (365)\nAccounts payable and other current liabilities (2,083) (2,968)\nIncome taxes payable 415 287\nOther, net (269) (203)\nNet Cash Provided by Operating Activities 996 1,315\n\nInvesting Activities\nCapital spending (1,507) (1,701)\nSales of property, plant and equipment 169 127\nAcquisitions, net of cash acquired, investments in noncontrolled affiliates and\npurchases of intangible and other assets (3,130) (30)\nDivestitures, sales of investments in noncontrolled affiliates and other assets 5 135\nShort-term investments, by original maturity:\nMore than three months - maturities 425 —\nThree months or less, net 22 1\nOther investing, net (111) 14\nNet Cash Used for Investing Activities (4,127) (1,454)\n\n(Continued on following page)\n\n\n\n\n\n\n\n\n\n\n\n\nA - 2\n"
+        }
+      ]
+    },
+    {
+      "caseId": "pep-fy2025q3-cash-quality",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "fdb5771080e0ca118de4888cd0ab83aa23e41ea77ab82a03855f009191ada19d",
+      "query": "百事（PEP）截至2025-09-06的FY2025年内累计利润现金转化情况怎么样？与上财年相同累计期间比较经营现金流、现金流表起点的合并净利润、两者差额以及经营现金流/净利润。结合表内至少一项非现金调整及一项经营资产负债变动解释差异，给出与数据相称的判断。金额注明单位，比率和百分比保留两位小数。",
+      "resolvedQuery": "百事（PEP）截至2025-09-06的FY2025年内累计利润现金转化情况怎么样？与上财年相同累计期间比较经营现金流、现金流表起点的合并净利润、两者差额以及经营现金流/净利润。结合表内至少一项非现金调整及一项经营资产负债变动解释差异，给出与数据相称的判断。金额注明单位，比率和百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-02",
+      "context": "[E1] {\"availableAt\":\"2025-10-09T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-06\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2025-10-09T00:00:00Z\",\"rawSha256\":\"1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf\",\"sourceVersion\":\"PEP-FY2025-Q3-cashflow\",\"target\":\"PEP\",\"unit\":\"million\",\"visibleSha256\":\"1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928\"}\nPepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Statement of Cash Flows\n(in millions, un audited)\n\n36 Weeks Ended\n9/6/2025 9/7/2024\nOperating Activities\nNet income $ 5,740 $ 8,092\nDepreciation and amortization 2,315 2,118\nImpairment and other charges 1,960 10\nProduct recall-related impact — 184\nCash payments for product recall-related impact (5) (138)\nOperating lease right-of-use asset amortization 489 438\nShare-based compensation expense 207 260\nRestructuring and impairment charges 567 415\nCash payments for restructuring charges (554) (284)\nAcquisition and divestiture-related charges 308 7\nCash payments for acquisition and divestiture-related charges (80) (4)\nPension and retiree medical plan expenses 164 114\nPension and retiree medical plan contributions (400) (300)\nDeferred income taxes and other tax charges and credits 30 124\nTax payments related to the Tax Cuts and Jobs Act (772) (579)\nChange in assets and liabilities:\nAccounts and notes receivable (1,747) (1,521)\nInventories (449) (492)\nPrepaid expenses and other current assets (223) (200)\nAccounts payable and other current liabilities (1,647) (2,312)\nIncome taxes payable 6 426\nOther, net (441) (138)\nNet Cash Provided by Operating Activities 5,468 6,220\n\nInvesting Activities\nCapital spending (2,499) (2,850)\nSales of property, plant and equipment 272 177\nAcquisitions, net of cash acquired, investments in noncontrolled affiliates and (3,176) (31)\npurchases of intangible and other assets\nDivestitures, sales of investments in noncontrolled affiliates and other assets 5 145\nShort-term investments, by original maturity:\nMore than three months - purchases (190) (425)\nMore than three months - maturities 425 —\nThree months or less, net 43 4\nOther investing, net (117) 15\nNet Cash Used for Investing Activities (5,237) (2,965)\n\n(Continued on following page)\n\n\n\n\n\n\n\n\nA - 2\n",
+      "contextSha256": "947984abece49c9caabf3fa195a4c11ca34eafe334a7f8b34df12f29e752fcf5",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "PEP",
+      "requestAttributes": {
+        "reportPeriod": "quarterly",
+        "reportCount": 2
+      },
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：PEP\n请求参数：{reportPeriod=quarterly, reportCount=2}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2025-10-09T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-06\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2025-10-09T00:00:00Z\",\"rawSha256\":\"1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf\",\"sourceVersion\":\"PEP-FY2025-Q3-cashflow\",\"target\":\"PEP\",\"unit\":\"million\",\"visibleSha256\":\"1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928\"}\nPepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Statement of Cash Flows\n(in millions, un audited)\n\n36 Weeks Ended\n9/6/2025 9/7/2024\nOperating Activities\nNet income $ 5,740 $ 8,092\nDepreciation and amortization 2,315 2,118\nImpairment and other charges 1,960 10\nProduct recall-related impact — 184\nCash payments for product recall-related impact (5) (138)\nOperating lease right-of-use asset amortization 489 438\nShare-based compensation expense 207 260\nRestructuring and impairment charges 567 415\nCash payments for restructuring charges (554) (284)\nAcquisition and divestiture-related charges 308 7\nCash payments for acquisition and divestiture-related charges (80) (4)\nPension and retiree medical plan expenses 164 114\nPension and retiree medical plan contributions (400) (300)\nDeferred income taxes and other tax charges and credits 30 124\nTax payments related to the Tax Cuts and Jobs Act (772) (579)\nChange in assets and liabilities:\nAccounts and notes receivable (1,747) (1,521)\nInventories (449) (492)\nPrepaid expenses and other current assets (223) (200)\nAccounts payable and other current liabilities (1,647) (2,312)\nIncome taxes payable 6 426\nOther, net (441) (138)\nNet Cash Provided by Operating Activities 5,468 6,220\n\nInvesting Activities\nCapital spending (2,499) (2,850)\nSales of property, plant and equipment 272 177\nAcquisitions, net of cash acquired, investments in noncontrolled affiliates and (3,176) (31)\npurchases of intangible and other assets\nDivestitures, sales of investments in noncontrolled affiliates and other assets 5 145\nShort-term investments, by original maturity:\nMore than three months - purchases (190) (425)\nMore than three months - maturities 425 —\nThree months or less, net 43 4\nOther investing, net (117) 15\nNet Cash Used for Investing Activities (5,237) (2,965)\n\n(Continued on following page)\n\n\n\n\n\n\n\n\nA - 2\n",
+      "preAnalystContextSha256": "6250b3a99eecac10ccd97d9a21699275d3e2af95f8fd69c5da3deb08a1c21c24",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261002-batch-learning",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-02T08:23:03.229467+00:00",
+        "asOfInstant": "2026-10-02T08:23:03.229467+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-02T08:23:03.229467+00:00",
+        "sourceManifestSha256": "0dacb5cabf217e2d0687141eaafc28c814e99ac3a54e14962f243650cc58c418"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2025-10-09T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-09-06",
+          "periodStart": "2024-12-29",
+          "publishedAt": "2025-10-09T00:00:00Z",
+          "rawSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928",
+          "retrievedAt": "2026-10-02T08:17:08.907227+00:00",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "sourceVersion": "PEP-FY2025-Q3-cashflow",
+          "target": "PEP",
+          "unit": "million",
+          "visibleSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928",
+          "visibleText": "PepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Statement of Cash Flows\n(in millions, un audited)\n\n36 Weeks Ended\n9/6/2025 9/7/2024\nOperating Activities\nNet income $ 5,740 $ 8,092\nDepreciation and amortization 2,315 2,118\nImpairment and other charges 1,960 10\nProduct recall-related impact — 184\nCash payments for product recall-related impact (5) (138)\nOperating lease right-of-use asset amortization 489 438\nShare-based compensation expense 207 260\nRestructuring and impairment charges 567 415\nCash payments for restructuring charges (554) (284)\nAcquisition and divestiture-related charges 308 7\nCash payments for acquisition and divestiture-related charges (80) (4)\nPension and retiree medical plan expenses 164 114\nPension and retiree medical plan contributions (400) (300)\nDeferred income taxes and other tax charges and credits 30 124\nTax payments related to the Tax Cuts and Jobs Act (772) (579)\nChange in assets and liabilities:\nAccounts and notes receivable (1,747) (1,521)\nInventories (449) (492)\nPrepaid expenses and other current assets (223) (200)\nAccounts payable and other current liabilities (1,647) (2,312)\nIncome taxes payable 6 426\nOther, net (441) (138)\nNet Cash Provided by Operating Activities 5,468 6,220\n\nInvesting Activities\nCapital spending (2,499) (2,850)\nSales of property, plant and equipment 272 177\nAcquisitions, net of cash acquired, investments in noncontrolled affiliates and (3,176) (31)\npurchases of intangible and other assets\nDivestitures, sales of investments in noncontrolled affiliates and other assets 5 145\nShort-term investments, by original maturity:\nMore than three months - purchases (190) (425)\nMore than three months - maturities 425 —\nThree months or less, net 43 4\nOther investing, net (117) 15\nNet Cash Used for Investing Activities (5,237) (2,965)\n\n(Continued on following page)\n\n\n\n\n\n\n\n\nA - 2\n"
+        }
+      ]
+    },
+    {
+      "caseId": "pep-fy2025q3-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "d02da0efa75bf1dfaec3c1fad540d08f342d02c5bb65c2d58ef2b7b2506754bd",
+      "query": "按百事（PEP）截至2025-09-06及2024-12-28的资产负债表，计算两个时点的流动比率、有息债务总额和净债务，比较变化后判断短期流动性缓冲。有息债务按短期债务义务加长期债务义务；净债务减去现金和现金等价物加短期投资。不加入其他负债或扣除其他投资。金额注明单位，比率和百分比保留两位小数。",
+      "resolvedQuery": "按百事（PEP）截至2025-09-06及2024-12-28的资产负债表，计算两个时点的流动比率、有息债务总额和净债务，比较变化后判断短期流动性缓冲。有息债务按短期债务义务加长期债务义务；净债务减去现金和现金等价物加短期投资。不加入其他负债或扣除其他投资。金额注明单位，比率和百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-02",
+      "context": "[E1] {\"availableAt\":\"2025-10-09T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-06\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2025-10-09T00:00:00Z\",\"rawSha256\":\"858ed03d62c2de4b927fa63c7f255879927b843dbfe0e9f633931bed3c5ae376\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf\",\"sourceVersion\":\"PEP-FY2025-Q3-balance\",\"target\":\"PEP\",\"unit\":\"million\",\"visibleSha256\":\"858ed03d62c2de4b927fa63c7f255879927b843dbfe0e9f633931bed3c5ae376\"}\nPepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Balance Sheet\n(in millions, except per share amounts)\n(unaudited)\n9/6/2025 12/28/2024\nASSETS\nCurrent Assets\nCash and cash equivalents $ 8,126 $ 8,505\nShort-term investments 535 761\nAccounts and notes receivable, net 12,634 10,333\nInventories:\nRaw materials and packaging 2,805 2,440\nWork-in-process 154 104\nFinished goods 3,134 2,762\n6,093 5,306\nPrepaid expenses and other current assets 1,334 921\nTotal Current Assets 28,722 25,826\nProperty, Plant and Equipment, net 29,053 28,008\nAmortizable Intangible Assets, net 1,241 1,102\nGoodwill 18,845 17,534\nOther Indefinite-Lived Intangible Assets 13,611 13,699\nInvestments in Noncontrolled Affiliates 2,084 1,985\nDeferred Income Taxes 4,341 4,362\nOther Assets 8,661 6,951\nTotal Assets $ 106,558 $ 99,467\n\nLIABILITIES AND EQUITY\nCurrent Liabilities\nShort-term debt obligations $ 6,736 $ 7,082\nAccounts payable and other current liabilities 24,763 24,454\nTotal Current Liabilities 31,499 31,536\nLong-Term Debt Obligations 44,113 37,224\nDeferred Income Taxes 3,474 3,484\nOther Liabilities 7,929 9,052\nTotal Liabilities 87,015 81,296\nCommitments and contingencies\nPepsiCo Common Shareholders’ Equity\nCommon stock, par value 1 2/3¢ per share (authorized 3,600 shares; issued, net of repurchased common\nstock at par value: 1,369 and 1,372 shares, respectively) 23 23\nCapital in excess of par value 4,374 4,385\nRetained earnings 72,197 72,266\nAccumulated other comprehensive loss (15,597) (17,612)\nRepurchased common stock, in excess of par value ( 498 and 495 shares, respectively) (41,609) (41,021)\nTotal PepsiCo Common Shareholders’ Equity 19,388 18,041\nNoncontrolling interests 155 130\nTotal Equity 19,543 18,171\nTotal Liabilities and Equity $ 106,558 $ 99,467\n\n\n\n\n\n\n\n\n\n\n\nA - 4\n",
+      "contextSha256": "363c51234fbd2c5f505280dd3a61145a204042fba22bec8cc66eecc0c92d16d8",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "PEP",
+      "requestAttributes": {
+        "reportPeriod": "quarterly",
+        "reportCount": 2
+      },
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：PEP\n请求参数：{reportPeriod=quarterly, reportCount=2}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2025-10-09T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-06\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2025-10-09T00:00:00Z\",\"rawSha256\":\"858ed03d62c2de4b927fa63c7f255879927b843dbfe0e9f633931bed3c5ae376\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf\",\"sourceVersion\":\"PEP-FY2025-Q3-balance\",\"target\":\"PEP\",\"unit\":\"million\",\"visibleSha256\":\"858ed03d62c2de4b927fa63c7f255879927b843dbfe0e9f633931bed3c5ae376\"}\nPepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Balance Sheet\n(in millions, except per share amounts)\n(unaudited)\n9/6/2025 12/28/2024\nASSETS\nCurrent Assets\nCash and cash equivalents $ 8,126 $ 8,505\nShort-term investments 535 761\nAccounts and notes receivable, net 12,634 10,333\nInventories:\nRaw materials and packaging 2,805 2,440\nWork-in-process 154 104\nFinished goods 3,134 2,762\n6,093 5,306\nPrepaid expenses and other current assets 1,334 921\nTotal Current Assets 28,722 25,826\nProperty, Plant and Equipment, net 29,053 28,008\nAmortizable Intangible Assets, net 1,241 1,102\nGoodwill 18,845 17,534\nOther Indefinite-Lived Intangible Assets 13,611 13,699\nInvestments in Noncontrolled Affiliates 2,084 1,985\nDeferred Income Taxes 4,341 4,362\nOther Assets 8,661 6,951\nTotal Assets $ 106,558 $ 99,467\n\nLIABILITIES AND EQUITY\nCurrent Liabilities\nShort-term debt obligations $ 6,736 $ 7,082\nAccounts payable and other current liabilities 24,763 24,454\nTotal Current Liabilities 31,499 31,536\nLong-Term Debt Obligations 44,113 37,224\nDeferred Income Taxes 3,474 3,484\nOther Liabilities 7,929 9,052\nTotal Liabilities 87,015 81,296\nCommitments and contingencies\nPepsiCo Common Shareholders’ Equity\nCommon stock, par value 1 2/3¢ per share (authorized 3,600 shares; issued, net of repurchased common\nstock at par value: 1,369 and 1,372 shares, respectively) 23 23\nCapital in excess of par value 4,374 4,385\nRetained earnings 72,197 72,266\nAccumulated other comprehensive loss (15,597) (17,612)\nRepurchased common stock, in excess of par value ( 498 and 495 shares, respectively) (41,609) (41,021)\nTotal PepsiCo Common Shareholders’ Equity 19,388 18,041\nNoncontrolling interests 155 130\nTotal Equity 19,543 18,171\nTotal Liabilities and Equity $ 106,558 $ 99,467\n\n\n\n\n\n\n\n\n\n\n\nA - 4\n",
+      "preAnalystContextSha256": "e5611f49a45139b8aa90ba41d6be341a650152634e1afa7cc6933c18b1b36e61",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261002-batch-learning",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-02T08:23:03.229467+00:00",
+        "asOfInstant": "2026-10-02T08:23:03.229467+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-02T08:23:03.229467+00:00",
+        "sourceManifestSha256": "0dacb5cabf217e2d0687141eaafc28c814e99ac3a54e14962f243650cc58c418"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2025-10-09T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-09-06",
+          "periodStart": "2024-12-29",
+          "publishedAt": "2025-10-09T00:00:00Z",
+          "rawSha256": "858ed03d62c2de4b927fa63c7f255879927b843dbfe0e9f633931bed3c5ae376",
+          "retrievedAt": "2026-10-02T08:17:08.907227+00:00",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "sourceVersion": "PEP-FY2025-Q3-balance",
+          "target": "PEP",
+          "unit": "million",
+          "visibleSha256": "858ed03d62c2de4b927fa63c7f255879927b843dbfe0e9f633931bed3c5ae376",
+          "visibleText": "PepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Balance Sheet\n(in millions, except per share amounts)\n(unaudited)\n9/6/2025 12/28/2024\nASSETS\nCurrent Assets\nCash and cash equivalents $ 8,126 $ 8,505\nShort-term investments 535 761\nAccounts and notes receivable, net 12,634 10,333\nInventories:\nRaw materials and packaging 2,805 2,440\nWork-in-process 154 104\nFinished goods 3,134 2,762\n6,093 5,306\nPrepaid expenses and other current assets 1,334 921\nTotal Current Assets 28,722 25,826\nProperty, Plant and Equipment, net 29,053 28,008\nAmortizable Intangible Assets, net 1,241 1,102\nGoodwill 18,845 17,534\nOther Indefinite-Lived Intangible Assets 13,611 13,699\nInvestments in Noncontrolled Affiliates 2,084 1,985\nDeferred Income Taxes 4,341 4,362\nOther Assets 8,661 6,951\nTotal Assets $ 106,558 $ 99,467\n\nLIABILITIES AND EQUITY\nCurrent Liabilities\nShort-term debt obligations $ 6,736 $ 7,082\nAccounts payable and other current liabilities 24,763 24,454\nTotal Current Liabilities 31,499 31,536\nLong-Term Debt Obligations 44,113 37,224\nDeferred Income Taxes 3,474 3,484\nOther Liabilities 7,929 9,052\nTotal Liabilities 87,015 81,296\nCommitments and contingencies\nPepsiCo Common Shareholders’ Equity\nCommon stock, par value 1 2/3¢ per share (authorized 3,600 shares; issued, net of repurchased common\nstock at par value: 1,369 and 1,372 shares, respectively) 23 23\nCapital in excess of par value 4,374 4,385\nRetained earnings 72,197 72,266\nAccumulated other comprehensive loss (15,597) (17,612)\nRepurchased common stock, in excess of par value ( 498 and 495 shares, respectively) (41,609) (41,021)\nTotal PepsiCo Common Shareholders’ Equity 19,388 18,041\nNoncontrolling interests 155 130\nTotal Equity 19,543 18,171\nTotal Liabilities and Equity $ 106,558 $ 99,467\n\n\n\n\n\n\n\n\n\n\n\nA - 4\n"
+        }
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "runId": "development-pep-1-1",
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "development-pep-2-1",
+      "caseId": "pep-fy2025q3-cash-quality",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "development-pep-3-1",
+      "caseId": "pep-fy2025q3-liquidity",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    }
+  ],
+  "context": {
+    "experimentId": "fundamentals-batch-learning-20261002",
+    "evaluatorVersion": "2c08f66dc96e9061e3dd753cf5c041c78c3e8e036e8c969ba0eccaa32fb132ed",
+    "runMode": "DEVELOPMENT"
+  }
+}

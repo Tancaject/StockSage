@@ -1,0 +1,25 @@
+{
+  "scope": "STATIC_INPUT_SIZE_DIAGNOSTIC_ONLY",
+  "implemented": false,
+  "modelCalls": 0,
+  "claimedQualityBenefit": "UNPROVEN",
+  "interpretation": "The generated method learns only from a confirmed analysis-stage fault, while the actual request includes the full two-stage trace and repeated prompts/evidence. Separating retained audit artifacts from the model-facing analysis packet reduces measured characters; no claim this would prevent whitespace degeneration without a fresh registered trial.",
+  "groups": [
+    {
+      "group": 1,
+      "requestSha256": "cde4bacbd737b5b3f8b34e2c99cc03edfdb1c6d3b75ccf7c39d5919878f26e7a",
+      "actualUserPayloadCharacters": 54664,
+      "finalAnswerSubtreeCharacters": 25980,
+      "illustrativeAnalysisOnlyPacketCharacters": 11931,
+      "characterReductionPercent": 78.17
+    },
+    {
+      "group": 2,
+      "requestSha256": "032ef0609b7d19d11469e547e2b728aee2ef9b1e961444db6fa6bcd307c5fdc2",
+      "actualUserPayloadCharacters": 48190,
+      "finalAnswerSubtreeCharacters": 24293,
+      "illustrativeAnalysisOnlyPacketCharacters": 9934,
+      "characterReductionPercent": 79.39
+    }
+  ]
+}

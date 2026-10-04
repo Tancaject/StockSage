@@ -1,0 +1,35 @@
+**结论：Target（TGT）FY2025 第三财季单季经营现金流足以覆盖购建固定资产现金支出，简化自由现金流为正。**
+
+按同一财年初（2025-02-02）起的累计现金流量表相减还原：
+
+| 项目 | FY2025 Q3 单季还原值 | 说明 |
+|---|---:|---|
+| 经营现金流 | **1,127 百万美元** | 九个月累计 3,485 百万美元 − 六个月累计 2,358 百万美元 [E1][E2] |
+| 购建固定资产现金支出 | **978 百万美元** | 九个月累计 2,842 百万美元 − 六个月累计 1,864 百万美元；按现金流出毛额列示 [E1][E2] |
+| 简化自由现金流 | **149 百万美元** | 经营现金流 1,127 − 购建固定资产支出 978；未抵扣资产出售回款 |
+
+**覆盖情况：**
+
+- 覆盖金额：**149 百万美元**
+- 覆盖倍数：**1.15**
+- 覆盖率：**115.24%**
+
+因此，本季经营现金流可以覆盖购建固定资产现金支出，覆盖后仍剩余简化自由现金流 **149 百万美元**。这表明在现金流金额层面，Target 第三财季的经营现金创造能力足以支持当期资本性支出；但该结论仅反映现金流覆盖关系，本轮证据未提供管理层对经营现金流或资本支出变化原因的解释。
+
+**还原财报期间：**
+
+- 本次还原的是 **Target FY2025 第三财季单季**，即截至 **2025-11-01** 的季度；按两期累计数推算，单季期间约为 **2025-08-03 至 2025-11-01**。
+- 九个月累计期间为 **2025-02-02 至 2025-11-01** [E1]；六个月累计期间为 **2025-02-02 至 2025-08-02** [E2]。
+
+**风险与数据限制：**
+
+- Target 未在本轮证据中直接披露 FY2025 Q3 单季现金流量表，单季数据为累计数相减后的还原值。
+- 该简化自由现金流口径不包含投资活动中的 “Other” 项目，也不抵扣资产出售回款，可能不同于公司或管理层使用的自由现金流口径。
+- 两份现金流量表均为业绩新闻稿中的未经审计数据 [E1][E2]。
+
+仅供参考，不构成投资建议。
+
+**数据来源与时间说明**
+
+- [E1] Target Corporation Reports Third Quarter Earnings，Consolidated Statements of Cash Flows，Nine Months Ended November 1, 2025；availableAt：2025-11-19。来源：https://corporate.target.com/press/release/2025/11/target-corporation-reports-third-quarter-earnings  
+- [E2] Target Corporation Reports Second Quarter Earnings，Consolidated Statements of Cash Flows，Six Months Ended August 2, 2025；availableAt：2025-08-20。来源：https://corporate.target.com/press/release/2025/08/target-corporation-reports-second-quarter-earnings

@@ -290,7 +290,7 @@ const hasReasoning = computed(() => {
 const researchTimeline = computed(() => buildResearchTimeline({
   reasoning: displayReasoning.value,
   charts: messageCharts.value,
-  hasAnswer: Boolean(String(props.message.content || '').trim()),
+  hasAnswer: !props.message.streamError && Boolean(String(props.message.content || '').trim()),
 }))
 
 // 流式推理（含多空辩论）首次到达时自动展开一次。后台任务可能先返回受理文本，

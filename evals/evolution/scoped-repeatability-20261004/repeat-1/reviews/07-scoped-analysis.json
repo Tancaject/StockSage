@@ -1,0 +1,193 @@
+{
+  "schema": "fundamentals_two_stage_ai_source_review_v1",
+  "origin": "CODEX_NONBLIND_AI_SOURCE_REVIEW_NOT_HUMAN_OR_CALIBRATED_JUDGE",
+  "case": 7,
+  "caseId": "ibm-fy2025q3-oneoff-cash-comparability",
+  "arm": "scoped",
+  "stage": "analysis",
+  "releaseEligible": false,
+  "rubric": {
+    "schema": "fundamentals_evolution_rubric_v1",
+    "sha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+    "scope": "FUNDAMENTALS_ANALYSIS",
+    "invocationScope": "fundamentals-analysis",
+    "dimensions": {
+      "claim_support": "核查基本面分析稿的事实、额外主张及推断是否由该阶段实际可见证据支持；可接受有边界的一般机制，不将其当作公司已证实事实。",
+      "numeric_period_correctness": "核查分析稿所用科目、金额、单位、期间、比较基数及派生计算，包括自行增加的合计；按本题 gold 的数值口径和用户问题范围判定。",
+      "counterevidence": "核查分析稿是否保留实际证据中影响结论的相反信号及方法不适用条件；没有相关反向证据时不强造风险，也不要求未问的同行比较。",
+      "unknowns": "核查分析方法是否把证据缺口与相应结论的强度对应起来；缺数据不能补成原因或保证，可计算且证据充分的内容也不应被误称未知。"
+    }
+  },
+  "binding": {
+    "answerSha256": "56a4bc99e866ebc01ee9017d9abf992f0992c9ffe4bfc7cf70812f13dc8ed81e",
+    "resultSha256": "507ab448dfa333593ffffd39536d84b4eb3e1f2808112b46cb269a5a14644489",
+    "requestSha256": "da3b92d0505e02ac4d5274dbd377386c18458738f142d9417d9b04ba62a97efc",
+    "sourceTraceSha256": "74949e92611d42b76ef426b4207daaccbe73e08ae022aae5f464574a63fe3567",
+    "goldSha256": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+    "policySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad"
+  },
+  "requiredFacts": [
+    {
+      "field": "illustrativeAdjustedNetIncome2025",
+      "period": "2025-01-01/2025-09-30",
+      "unit": "million",
+      "observed": "5293",
+      "expected": "5293.0000",
+      "answerQuote": "> 4,993 + 300 = **5,293 百万美元**",
+      "status": "PASS"
+    },
+    {
+      "field": "illustrativeAdjustedNetIncome2024",
+      "period": "2024-01-01/2024-09-30",
+      "unit": "million",
+      "observed": "5134",
+      "expected": "5134.0000",
+      "answerQuote": "> 3,109 + 2,725 − 700 = **5,134 百万美元**",
+      "status": "PASS"
+    },
+    {
+      "field": "illustrativeAdjustedCashConversion2025",
+      "period": "2025-01-01/2025-09-30",
+      "unit": "ratio",
+      "observed": "1.73",
+      "expected": "1.7293",
+      "answerQuote": "| 2025年前三季度 | 9,153 | 5,293 | **1.73** | **172.93%** |",
+      "status": "PASS"
+    },
+    {
+      "field": "illustrativeAdjustedCashConversion2024",
+      "period": "2024-01-01/2024-09-30",
+      "unit": "ratio",
+      "observed": "1.78",
+      "expected": "1.7754",
+      "answerQuote": "| 2024年前三季度 | 9,115 | 5,134 | **1.78** | **177.54%** |",
+      "status": "PASS"
+    },
+    {
+      "field": "reportedCashConversion2025",
+      "period": "2025-01-01/2025-09-30",
+      "unit": "ratio",
+      "observed": "1.83",
+      "expected": "1.8332",
+      "answerQuote": "| 2025年前三季度 | 9,153 | 4,993 | **1.83** | **183.32%** |",
+      "status": "PASS"
+    },
+    {
+      "field": "reportedCashConversion2024",
+      "period": "2024-01-01/2024-09-30",
+      "unit": "ratio",
+      "observed": "2.93",
+      "expected": "2.9318",
+      "answerQuote": "| 2024年前三季度 | 9,115 | 3,109 | **2.93** | **293.18%** |",
+      "status": "PASS"
+    }
+  ],
+  "additionalNumericChecks": [
+    {
+      "observed": "183.32",
+      "expected": "183.3166433006208692169036651",
+      "formula": "9153/4993*100",
+      "answerQuote": "| 2025年前三季度 | 9,153 | 4,993 | **1.83** | **183.32%** |",
+      "status": "PASS"
+    },
+    {
+      "observed": "293.18",
+      "expected": "293.1810871662914120295915085",
+      "formula": "9115/3109*100",
+      "answerQuote": "| 2024年前三季度 | 9,115 | 3,109 | **2.93** | **293.18%** |",
+      "status": "PASS"
+    },
+    {
+      "observed": "172.93",
+      "expected": "172.9265067069714717551483091",
+      "formula": "9153/5293*100",
+      "answerQuote": "| 2025年前三季度 | 9,153 | 5,293 | **1.73** | **172.93%** |",
+      "status": "PASS"
+    },
+    {
+      "observed": "177.54",
+      "expected": "177.5418776782236073237241917",
+      "formula": "9115/5134*100",
+      "answerQuote": "| 2024年前三季度 | 9,115 | 5,134 | **1.78** | **177.54%** |",
+      "status": "PASS"
+    },
+    {
+      "observed": "37.47",
+      "expected": "37.47323707936036397198535438",
+      "formula": "(1-(9153/4993)/(9115/3109))*100",
+      "answerQuote": "2025年前三季度经营现金流/净利润比率 **1.83**，低于2024年同期的 **2.93**。按未四舍五入数值计算，下降约 **37.47%**。仅看原表，确实会给出“利润现金转化明显变差”的直观印象。",
+      "status": "PASS"
+    },
+    {
+      "observed": "2.60",
+      "expected": "2.599595673769442019645483410",
+      "formula": "(1-(9153/5293)/(9115/5134))*100",
+      "answerQuote": "两年比率已经明显接近。按未四舍五入数值计算，2025年较2024年仅下降约 **2.60%**，不再是原表所示的大幅下降。",
+      "status": "PASS"
+    },
+    {
+      "observed": "0.42",
+      "expected": "0.4168952276467361492046077894",
+      "formula": "38/9115*100",
+      "answerQuote": "   2025年前三季度经营现金流为 **9,153百万美元**，2024年同期为 **9,115百万美元**，仅增加 **38百万美元**，增幅约 **0.42%**。  ",
+      "status": "PASS"
+    }
+  ],
+  "dimensions": {
+    "claim_support": {
+      "status": "PASS",
+      "answerQuote": "不能仅凭原表经营现金流/净利润比率从 **2.93** 降至 **1.83**，就判断 IBM 利润现金转化“明显变差”。",
+      "reason": "Read against original evidence, not the analyst draft as independent authority."
+    },
+    "counterevidence": {
+      "status": "PASS",
+      "answerQuote": "2. **调整后2025年比率仍略低于2024年**  ",
+      "reason": "Relevant opposing signals and comparison boundaries retained."
+    },
+    "unknowns": {
+      "status": "PASS",
+      "answerQuote": "2. **缺少现金税支付明细**  ",
+      "reason": "Unavailable commercial causes or disclosure details remain bounded."
+    },
+    "numeric_period_correctness": {
+      "status": "PASS",
+      "answerQuote": "> 4,993 + 300 = **5,293 百万美元**",
+      "reason": "Required facts, source units and fiscal periods reviewed; additional calculations use the frozen absolute tolerance 0.01."
+    }
+  },
+  "requiredPoints": [
+    {
+      "id": "p1",
+      "requirement": "同为九个月期间，原表经营现金流/净利润为2025年约1.83和2024年约2.93，不把单季度列混入。",
+      "status": "PASS"
+    },
+    {
+      "id": "p2",
+      "requirement": "按题目约定，2025示意净利润=4993+300=5293；2024=3109+2725-700=5134百万美元。养老金相关税收利益不能与税前费用同向加回，也不能漏掉2025税费。",
+      "status": "PASS"
+    },
+    {
+      "id": "p3",
+      "requirement": "保持披露经营现金流9153/9115不变，示意比率约1.73/1.78；解释原表大幅变化受到一次性项目影响，不能把非现金费用加回说成企业额外创造了现金。",
+      "status": "PASS"
+    },
+    {
+      "id": "p4",
+      "requirement": "比较结论与方向相称：示意调整后仍略降但差距远小于原表；这是仅针对列示项目的示意口径，不能据此宣布所有一次性因素已消除或未来现金质量有保证。",
+      "status": "PASS"
+    }
+  ],
+  "sourceQuotes": [
+    "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109",
+    "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115",
+    "Pension Settlement Charge |  | - |  | 2,725 |  | - |  | 2,725",
+    "(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter."
+  ],
+  "notes": [
+    "0.3/0.7 billion =300/700 million=3/7 Chinese hundred-million, all consistent.",
+    "The caveat about detailed tax adjustment presentation is unnecessary for the stipulated exercise, but the required net-income adjustments are executed correctly and no requested calculation is withheld. Exact cash-tax movements remain absent."
+  ],
+  "semanticStatus": "PASS",
+  "historicalSourceErrorObserved": false,
+  "repetition": 1
+}

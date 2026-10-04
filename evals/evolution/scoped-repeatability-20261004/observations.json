@@ -1,0 +1,92 @@
+[
+  {
+    "case": 1,
+    "caseId": "ibm-fy2025q3-quarter-control",
+    "query": "IBM 2025第三季度单季经营现金流和GAAP净利润分别是多少？算出两者差额及经营现金流/净利润，用简短结论说明本季度现金转化情况。使用报表已披露的单季数据，金额注明单位。比率和百分比保留两位小数。",
+    "sourceTraceSha256": "d00a600a708b3db361114f264b1bd9f9323f923f2e538d9d32e4d767d5504636",
+    "observations": {
+      "triggerTags": [],
+      "requiredEvidence": [],
+      "requiredCapabilities": [
+        "evidence-reading",
+        "period-comparison",
+        "unit-comparison",
+        "arithmetic"
+      ]
+    },
+    "selectedMemberHashes": [],
+    "sameAsBaseline": true,
+    "basis": "Required answer uses already disclosed quarter values or balance sheet million values; no cumulative reconstruction or required footnote-unit conversion."
+  },
+  {
+    "case": 5,
+    "caseId": "tgt-fy2025q3-quarter-reconstruction",
+    "query": "塔吉特（TGT）FY2025第三季度单季的经营现金流、购建固定资产现金支出和简化自由现金流各是多少？根据给出的年内累计现金流表还原，简化自由现金流按经营现金流减上述支出毛额计算，不抵扣资产出售回款。说明本季经营现金流是否覆盖该支出，并注明所还原的财报期间。金额注明单位，比率和百分比保留两位小数。",
+    "sourceTraceSha256": "1c560e86597ba69e46457760117e21af7b314d2f43d468da38845fc770ebfaf3",
+    "observations": {
+      "triggerTags": [
+        "cumulative-to-single-quarter-reconstruction"
+      ],
+      "requiredEvidence": [
+        "two-cumulative-periods-same-start-date",
+        "cash-flow-statement-line-items"
+      ],
+      "requiredCapabilities": [
+        "evidence-reading",
+        "period-comparison",
+        "unit-comparison",
+        "arithmetic"
+      ]
+    },
+    "selectedMemberHashes": [
+      "786fed34c2df7495eb58f5468804e01f8647cfca05f8a2bef3a07f562ac29f1c"
+    ],
+    "sameAsBaseline": false,
+    "basis": "Same fiscal start and distinct cumulative ends; question explicitly requests reconstruction."
+  },
+  {
+    "case": 6,
+    "caseId": "tgt-fy2025q3-liquidity",
+    "query": "按塔吉特（TGT）截至2025-11-01及2025-02-01的资产负债表，计算两个时点的流动比率、有息债务总额和净债务，比较变化后判断短期流动性缓冲。有息债务按一年内到期的长期债务及其他借款加非流动长期债务及其他借款；净债务减去现金和现金等价物。不加入其他负债或扣除其他投资。金额注明单位，比率和百分比保留两位小数。",
+    "sourceTraceSha256": "95cf79c58dbce796a298aba8c386a612343dbbf951f0d6f5213257502d92e48e",
+    "observations": {
+      "triggerTags": [],
+      "requiredEvidence": [],
+      "requiredCapabilities": [
+        "evidence-reading",
+        "period-comparison",
+        "unit-comparison",
+        "arithmetic"
+      ]
+    },
+    "selectedMemberHashes": [],
+    "sameAsBaseline": true,
+    "basis": "Required answer uses already disclosed quarter values or balance sheet million values; no cumulative reconstruction or required footnote-unit conversion."
+  },
+  {
+    "case": 7,
+    "caseId": "ibm-fy2025q3-oneoff-cash-comparability",
+    "query": "IBM 2025年前三季度经营现金流/净利润比率低于2024年同期，能否据此判断利润现金转化明显变差？请给出两年的原表比率，再做一个仅剔除已列示一次性项的示意比较：剔除2024年养老金结算费用及其相关税收利益，以及2025年H.R.1相关非现金税费；其余项目不调，经营现金流保持披露值。列出两年示意调整后的净利润及经营现金流/该净利润，解释与原表判断有什么不同、还不能确认什么。这是本题可比性练习，不是公司公布的调整后指标；税项按脚注已披露的约数计算。金额注明单位，比率和百分比保留两位小数。",
+    "sourceTraceSha256": "74949e92611d42b76ef426b4207daaccbe73e08ae022aae5f464574a63fe3567",
+    "observations": {
+      "triggerTags": [
+        "unit-conversion-billion-to-million"
+      ],
+      "requiredEvidence": [
+        "source-footnote-unit",
+        "source-table-unit"
+      ],
+      "requiredCapabilities": [
+        "evidence-reading",
+        "period-comparison",
+        "unit-comparison",
+        "arithmetic"
+      ]
+    },
+    "selectedMemberHashes": [
+      "73b5476610dfcdd63821398f96d29d9bf4048eed332e9921d352a3504b51ca71"
+    ],
+    "sameAsBaseline": false,
+    "basis": "Question requires tax footnotes in billion combined with a table in million."
+  }
+]

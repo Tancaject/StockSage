@@ -1,0 +1,934 @@
+{
+  "schema": "fundamentals_batch_execution_audit_v1",
+  "scope": "EXECUTION_AND_USAGE_ONLY",
+  "generatedAt": "2026-10-02T09:59:42.029828+00:00",
+  "releaseEligible": false,
+  "businessQuality": "NOT_ASSESSED",
+  "planSha256": "5a4dbe365bff911834e242f241a45ded3a6f39602a1d2f56e507e77ccdfa5b64",
+  "auditScriptSha256": "552243363e923e0322b58356c4761dc5c9b17af5b1d8f3c658ef371bf6cde1d5",
+  "split": "DEVELOPMENT",
+  "bundleId": "baseline-v1",
+  "lineage": {
+    "replacements": []
+  },
+  "lineageSha256": null,
+  "status": "INCOMPLETE",
+  "errors": [],
+  "plannedCaseCount": 6,
+  "registeredAttemptCount": 6,
+  "primaryCaseCount": 6,
+  "supersededUnsubmittedReservationCount": 0,
+  "submittedRunCount": 3,
+  "receivedCaseCount": 0,
+  "passedExecutionCount": 0,
+  "failedExecutionCount": 0,
+  "missingResponseCount": 6,
+  "notStartedCaseCount": 3,
+  "plannedStageCount": 12,
+  "observedInvocationCount": 0,
+  "providerUsageStageCount": 0,
+  "unreportedPlannedStageCount": 12,
+  "unknownUsageInvocationCount": 0,
+  "providerTokens": {
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "totalTokens": 0
+  },
+  "sumRecordedStageDurationMs": 0,
+  "frozenFileChecks": [
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\business_replay.py",
+      "expectedSha256": "c283a3ce96bbc344d0e261c565c7928b58ed34905f463ba6ed4cde94c79e1955",
+      "actualSha256": "c283a3ce96bbc344d0e261c565c7928b58ed34905f463ba6ed4cde94c79e1955"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "expectedSha256": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a",
+      "actualSha256": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "expectedSha256": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336",
+      "actualSha256": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\build.json",
+      "expectedSha256": "9ba5b190b4a07aa41711877df6bc5b083c373d195a8774cdc707bee8c1301180",
+      "actualSha256": "9ba5b190b4a07aa41711877df6bc5b083c373d195a8774cdc707bee8c1301180"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\runtime-dependencies.json",
+      "expectedSha256": "cb944fcbf75fe9e4b73b62671d9ef27be66c8847446b19e9df9bc71d0f081fff",
+      "actualSha256": "cb944fcbf75fe9e4b73b62671d9ef27be66c8847446b19e9df9bc71d0f081fff"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\baseline-method.txt",
+      "expectedSha256": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8",
+      "actualSha256": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\experiment.py",
+      "expectedSha256": "e31ea5664bf73403e6a3fae00fc8f46672a188bc8393c64b56595278b0329a72",
+      "actualSha256": "e31ea5664bf73403e6a3fae00fc8f46672a188bc8393c64b56595278b0329a72"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\result.json",
+      "expectedSha256": "408f25cc1f2b20d22155bb898785b1eec0b624ffe99a2b89147003da542ff4a4",
+      "actualSha256": "408f25cc1f2b20d22155bb898785b1eec0b624ffe99a2b89147003da542ff4a4"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\campaign\\baseline-execution-audit.json",
+      "expectedSha256": "b74d2df69c976867b805febb51c2f8dc46c15c5c5579ee574856c14eccc91ea9",
+      "actualSha256": "b74d2df69c976867b805febb51c2f8dc46c15c5c5579ee574856c14eccc91ea9"
+    },
+    {
+      "path": "evals\\evolution_ai_review.py",
+      "expectedSha256": "28b754f495003bc8267ce3515769836f1dc4f4d7ecbf138f0a230cdc1956bb74",
+      "actualSha256": "28b754f495003bc8267ce3515769836f1dc4f4d7ecbf138f0a230cdc1956bb74"
+    },
+    {
+      "path": "evals\\evolution_rubric.py",
+      "expectedSha256": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea",
+      "actualSha256": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea"
+    },
+    {
+      "path": "evals\\evolution_quality.py",
+      "expectedSha256": "d01b12f5fd0b0ba020ed33301b95e4780a86c527462badd462a82d50647f754e",
+      "actualSha256": "d01b12f5fd0b0ba020ed33301b95e4780a86c527462badd462a82d50647f754e"
+    },
+    {
+      "path": "evals\\evolution_dataset.py",
+      "expectedSha256": "12df23500bf7ee45a2ee0ab955924bf7368e30c1a7e2bb2e20a5f993fa24ee65",
+      "actualSha256": "12df23500bf7ee45a2ee0ab955924bf7368e30c1a7e2bb2e20a5f993fa24ee65"
+    },
+    {
+      "path": "evals\\eval_common.py",
+      "expectedSha256": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c",
+      "actualSha256": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c"
+    },
+    {
+      "path": "evals\\run_evolution_replay.py",
+      "expectedSha256": "90777b3f0eb6e6932a9da762591bb5bceb2acc16994949d964d5012d156a786d",
+      "actualSha256": "90777b3f0eb6e6932a9da762591bb5bceb2acc16994949d964d5012d156a786d"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\cases.jsonl",
+      "expectedSha256": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a",
+      "actualSha256": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\gold.jsonl",
+      "expectedSha256": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336",
+      "actualSha256": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\build.json",
+      "expectedSha256": "9ba5b190b4a07aa41711877df6bc5b083c373d195a8774cdc707bee8c1301180",
+      "actualSha256": "9ba5b190b4a07aa41711877df6bc5b083c373d195a8774cdc707bee8c1301180"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\runtime-dependencies.json",
+      "expectedSha256": "cb944fcbf75fe9e4b73b62671d9ef27be66c8847446b19e9df9bc71d0f081fff",
+      "actualSha256": "cb944fcbf75fe9e4b73b62671d9ef27be66c8847446b19e9df9bc71d0f081fff"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\baseline-method.txt",
+      "expectedSha256": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8",
+      "actualSha256": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\business_replay.py",
+      "expectedSha256": "81aa11f80c985baea349e4c7c55b770de982ad57854d2c38d1d1cb509d8c29b5",
+      "actualSha256": "81aa11f80c985baea349e4c7c55b770de982ad57854d2c38d1d1cb509d8c29b5"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\audit_execution.py",
+      "expectedSha256": "aa4591f6aad6dde14e76ba2faa9dffd66c4c19aad8771d95dc027752f0cbcc4a",
+      "actualSha256": "aa4591f6aad6dde14e76ba2faa9dffd66c4c19aad8771d95dc027752f0cbcc4a"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\plan.json",
+      "expectedSha256": "a48760e67360d6510dff4a21a4e68df698381784ef3d18d7d976a1aa8ba6eebb",
+      "actualSha256": "a48760e67360d6510dff4a21a4e68df698381784ef3d18d7d976a1aa8ba6eebb"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\audit_execution.py",
+      "expectedSha256": "dc61ec266161e2c322482881fe3c72a597a12dc2e62a505c47ff1e56305106bb",
+      "actualSha256": "dc61ec266161e2c322482881fe3c72a597a12dc2e62a505c47ff1e56305106bb"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\execution-audit.json",
+      "expectedSha256": "0dbf5c2705a17fd018241af4267fe2a52778090a53fa2a327090e1b5dcd17710",
+      "actualSha256": "0dbf5c2705a17fd018241af4267fe2a52778090a53fa2a327090e1b5dcd17710"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\campaign\\audit_execution.py",
+      "expectedSha256": "552243363e923e0322b58356c4761dc5c9b17af5b1d8f3c658ef371bf6cde1d5",
+      "actualSha256": "552243363e923e0322b58356c4761dc5c9b17af5b1d8f3c658ef371bf6cde1d5"
+    }
+  ],
+  "runtimeFileChecks": [
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-build-batch-repair-20261002\\stocksage-backend.jar",
+      "sha256": "0e27ea2adf37db3a3f24eb9b31512dfe6d1fa36f81b53f43122472e657eceb5f",
+      "actualSha256": "0e27ea2adf37db3a3f24eb9b31512dfe6d1fa36f81b53f43122472e657eceb5f"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\EvolutionLiveBaselineTest.java",
+      "sha256": "dcc6e660141aa2f7f1d325e62291b6a4a9db4d8c4ca2a90243dc561c63de8b68",
+      "actualSha256": "dcc6e660141aa2f7f1d325e62291b6a4a9db4d8c4ca2a90243dc561c63de8b68"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$1.class",
+      "sha256": "2f287337b290b1f7c41b1e65a3206b35979844fb41a9c2dcc24d724e24309ee5",
+      "actualSha256": "2f287337b290b1f7c41b1e65a3206b35979844fb41a9c2dcc24d724e24309ee5"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$DiagnosisFile.class",
+      "sha256": "96c58aad7e94217dbdde210afda92b1a4f6f47b3e0fb4498c387870f77c748e7",
+      "actualSha256": "96c58aad7e94217dbdde210afda92b1a4f6f47b3e0fb4498c387870f77c748e7"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$DiagnosisRun.class",
+      "sha256": "4484d693ab535452d6a28d1da6032bb7f1bcb7cfb0622eac8186e4e0a77276b0",
+      "actualSha256": "4484d693ab535452d6a28d1da6032bb7f1bcb7cfb0622eac8186e4e0a77276b0"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$HttpTransportConfiguration.class",
+      "sha256": "e552d6707ce5e2efbb5b38614fa31e7a4b2c3da9de5a1b02fcffed380afea3ed",
+      "actualSha256": "e552d6707ce5e2efbb5b38614fa31e7a4b2c3da9de5a1b02fcffed380afea3ed"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest.class",
+      "sha256": "8944862a1dafbf341849d20923ba595087299aab1b677b3c1903c8149c9c6a2e",
+      "actualSha256": "8944862a1dafbf341849d20923ba595087299aab1b677b3c1903c8149c9c6a2e"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\junit\\jupiter\\junit-jupiter-api\\5.11.4\\junit-jupiter-api-5.11.4.jar",
+      "sha256": "ab83ef9e51ac4597d59d26b4b58812129550e2f579a404c8af7d09f5ce5b4293",
+      "actualSha256": "ab83ef9e51ac4597d59d26b4b58812129550e2f579a404c8af7d09f5ce5b4293"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\opentest4j\\opentest4j\\1.3.0\\opentest4j-1.3.0.jar",
+      "sha256": "48e2df636cab6563ced64dcdff8abb2355627cb236ef0bf37598682ddf742f1b",
+      "actualSha256": "48e2df636cab6563ced64dcdff8abb2355627cb236ef0bf37598682ddf742f1b"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\junit\\platform\\junit-platform-commons\\1.11.4\\junit-platform-commons-1.11.4.jar",
+      "sha256": "9edd969b0d0670c54105bc91ae79bd1c6f503e12115faba82073b84c86bbc334",
+      "actualSha256": "9edd969b0d0670c54105bc91ae79bd1c6f503e12115faba82073b84c86bbc334"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\apiguardian\\apiguardian-api\\1.1.2\\apiguardian-api-1.1.2.jar",
+      "sha256": "b509448ac506d607319f182537f0b35d71007582ec741832a1f111e5b5b70b38",
+      "actualSha256": "b509448ac506d607319f182537f0b35d71007582ec741832a1f111e5b5b70b38"
+    }
+  ],
+  "captureArtifacts": [
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-ibm-cash\\runtime.json",
+      "sha256": "bd5f5a4f6bb622a02f09e86942714290ad4f879e1cf329cef080e8fc12d652c9"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-jnj-cash\\runtime.json",
+      "sha256": "fa48d3cd216fcf2c53e358afcb95691f8d7ad9f4c6f652cb3c2020ae72e68703"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-pep-control\\runtime.json",
+      "sha256": "05649385faabf58126b69ebc337f05fb382bc0fe4ba524891d67390d5ddb5ae6"
+    }
+  ],
+  "cases": [
+    {
+      "runId": "repair-b8192-ibm-cash-1-1",
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "bundleId": "baseline-v1",
+      "repeatId": 1,
+      "shard": "repair-b8192-ibm-cash",
+      "status": "NO_DATA",
+      "errors": [],
+      "responsePresent": false,
+      "stages": {},
+      "requestPresent": true,
+      "failurePresent": false,
+      "runtimeThinkingOptions": {
+        "enableThinking": true,
+        "thinkingBudget": 8192
+      }
+    },
+    {
+      "runId": "repair-b8192-ibm-liquidity-1-1",
+      "caseId": "ibm-fy2025q3-liquidity",
+      "bundleId": "baseline-v1",
+      "repeatId": 1,
+      "shard": "repair-b8192-ibm-liquidity",
+      "status": "NO_DATA",
+      "errors": [],
+      "responsePresent": false,
+      "stages": {},
+      "requestPresent": false,
+      "failurePresent": false
+    },
+    {
+      "runId": "repair-b8192-jnj-cash-1-1",
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "bundleId": "baseline-v1",
+      "repeatId": 1,
+      "shard": "repair-b8192-jnj-cash",
+      "status": "NO_DATA",
+      "errors": [],
+      "responsePresent": false,
+      "stages": {},
+      "requestPresent": true,
+      "failurePresent": false,
+      "runtimeThinkingOptions": {
+        "enableThinking": true,
+        "thinkingBudget": 8192
+      }
+    },
+    {
+      "runId": "repair-b8192-jnj-liquidity-1-1",
+      "caseId": "jnj-fy2025q3-liquidity",
+      "bundleId": "baseline-v1",
+      "repeatId": 1,
+      "shard": "repair-b8192-jnj-liquidity",
+      "status": "NO_DATA",
+      "errors": [],
+      "responsePresent": false,
+      "stages": {},
+      "requestPresent": false,
+      "failurePresent": false
+    },
+    {
+      "runId": "repair-b8192-pep-control-1-1",
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "bundleId": "baseline-v1",
+      "repeatId": 1,
+      "shard": "repair-b8192-pep-control",
+      "status": "NO_DATA",
+      "errors": [],
+      "responsePresent": false,
+      "stages": {},
+      "requestPresent": true,
+      "failurePresent": false,
+      "runtimeThinkingOptions": {
+        "enableThinking": true,
+        "thinkingBudget": 8192
+      }
+    },
+    {
+      "runId": "repair-b8192-tgt-control-1-1",
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "bundleId": "baseline-v1",
+      "repeatId": 1,
+      "shard": "repair-b8192-tgt-control",
+      "status": "NO_DATA",
+      "errors": [],
+      "responsePresent": false,
+      "stages": {},
+      "requestPresent": false,
+      "failurePresent": false
+    }
+  ],
+  "auditAdapterSha256": "dc61ec266161e2c322482881fe3c72a597a12dc2e62a505c47ff1e56305106bb",
+  "baselineAuditSha256": "b74d2df69c976867b805febb51c2f8dc46c15c5c5579ee574856c14eccc91ea9",
+  "requestObservationScope": "NATIVE_CLIENT_DEFAULTS_AND_FINAL_REQUEST_OPTIONS; HTTP serialization is covered by StandardThinkingBudgetHttpTest",
+  "reasoningTokenBreakdown": "NO_DATA: native business response records retain aggregate provider usage only",
+  "comparisonScope": "HISTORICAL_DIAGNOSTIC_NOT_RANDOMIZED; failed baseline durations are censored and missing usage remains unknown",
+  "comparisons": [
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "baselineRunId": "development-ibm-2-1",
+      "repairRunId": "repair-b8192-ibm-cash-1-1",
+      "baselineResponseSha256": "b20f9e023d08233bf8d17eac8344a862e3f21e262d3f1a433578ebf2e0ac775f",
+      "repairResponseSha256": null,
+      "sourceCaseMatchesBaseline": true,
+      "group": "FORMER_TIMEOUT",
+      "baselineExecutionStatus": "FAIL",
+      "repairExecutionStatus": "NO_DATA",
+      "stages": {
+        "analysis": {
+          "baselineExecutionStatus": "FAILED",
+          "repairExecutionStatus": "NOT_EXECUTED",
+          "baselineDurationMs": 180008,
+          "repairDurationMs": null,
+          "baselineDurationCensoredByTimeout": true,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [
+            {
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "usageSource": "NO_DATA",
+              "providerCompletionUnknown": true
+            }
+          ],
+          "repairProviderUsage": []
+        },
+        "finalAnswer": {
+          "baselineExecutionStatus": "NOT_EXECUTED",
+          "repairExecutionStatus": "NOT_EXECUTED",
+          "baselineDurationMs": null,
+          "repairDurationMs": null,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [],
+          "repairProviderUsage": []
+        }
+      }
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "baselineRunId": "development-unsubmitted-ibm-1-1",
+      "repairRunId": "repair-b8192-ibm-liquidity-1-1",
+      "baselineResponseSha256": "af0fb0021a53133ba01740f85f0f0e504c92e2ff7eb5713c63a8096093e80c9f",
+      "repairResponseSha256": null,
+      "sourceCaseMatchesBaseline": true,
+      "group": "FORMER_TIMEOUT",
+      "baselineExecutionStatus": "FAIL",
+      "repairExecutionStatus": "NO_DATA",
+      "stages": {
+        "analysis": {
+          "baselineExecutionStatus": "FAILED",
+          "repairExecutionStatus": "NOT_EXECUTED",
+          "baselineDurationMs": 180007,
+          "repairDurationMs": null,
+          "baselineDurationCensoredByTimeout": true,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [
+            {
+              "usageSource": "NO_DATA",
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage",
+              "providerCompletionUnknown": true
+            }
+          ],
+          "repairProviderUsage": []
+        },
+        "finalAnswer": {
+          "baselineExecutionStatus": "NOT_EXECUTED",
+          "repairExecutionStatus": "NOT_EXECUTED",
+          "baselineDurationMs": null,
+          "repairDurationMs": null,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [],
+          "repairProviderUsage": []
+        }
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "baselineRunId": "development-jnj-2-1",
+      "repairRunId": "repair-b8192-jnj-cash-1-1",
+      "baselineResponseSha256": "97ad35deecbf9aa3bd03fe6e82407db2e386218d47d8dd79ea8fba8709c727d7",
+      "repairResponseSha256": null,
+      "sourceCaseMatchesBaseline": true,
+      "group": "FORMER_TIMEOUT",
+      "baselineExecutionStatus": "FAIL",
+      "repairExecutionStatus": "NO_DATA",
+      "stages": {
+        "analysis": {
+          "baselineExecutionStatus": "FAILED",
+          "repairExecutionStatus": "NOT_EXECUTED",
+          "baselineDurationMs": 180005,
+          "repairDurationMs": null,
+          "baselineDurationCensoredByTimeout": true,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [
+            {
+              "providerCompletionUnknown": true,
+              "usageSource": "NO_DATA",
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage"
+            }
+          ],
+          "repairProviderUsage": []
+        },
+        "finalAnswer": {
+          "baselineExecutionStatus": "NOT_EXECUTED",
+          "repairExecutionStatus": "NOT_EXECUTED",
+          "baselineDurationMs": null,
+          "repairDurationMs": null,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [],
+          "repairProviderUsage": []
+        }
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-liquidity",
+      "baselineRunId": "development-unsubmitted-jnj-1-1",
+      "repairRunId": "repair-b8192-jnj-liquidity-1-1",
+      "baselineResponseSha256": "0ada9d17f95d7727e4d68d49a0ffd21eab6cc61b8592481f22be8e01b099c6ed",
+      "repairResponseSha256": null,
+      "sourceCaseMatchesBaseline": true,
+      "group": "FORMER_TIMEOUT",
+      "baselineExecutionStatus": "FAIL",
+      "repairExecutionStatus": "NO_DATA",
+      "stages": {
+        "analysis": {
+          "baselineExecutionStatus": "FAILED",
+          "repairExecutionStatus": "NOT_EXECUTED",
+          "baselineDurationMs": 180006,
+          "repairDurationMs": null,
+          "baselineDurationCensoredByTimeout": true,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [
+            {
+              "kind": "model-usage",
+              "providerCompletionUnknown": true,
+              "usageSource": "NO_DATA",
+              "scope": "fundamentals-analysis"
+            }
+          ],
+          "repairProviderUsage": []
+        },
+        "finalAnswer": {
+          "baselineExecutionStatus": "NOT_EXECUTED",
+          "repairExecutionStatus": "NOT_EXECUTED",
+          "baselineDurationMs": null,
+          "repairDurationMs": null,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [],
+          "repairProviderUsage": []
+        }
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "baselineRunId": "development-pep-1-1",
+      "repairRunId": "repair-b8192-pep-control-1-1",
+      "baselineResponseSha256": "122c9ab6e5947dc997e45629169e36afc199dfdb88bf39966bac144b728ebb72",
+      "repairResponseSha256": null,
+      "sourceCaseMatchesBaseline": true,
+      "group": "SUCCESSFUL_CONTROL",
+      "baselineExecutionStatus": "PASS",
+      "repairExecutionStatus": "NO_DATA",
+      "stages": {
+        "analysis": {
+          "baselineExecutionStatus": "COMPLETED",
+          "repairExecutionStatus": "NOT_EXECUTED",
+          "baselineDurationMs": 93895,
+          "repairDurationMs": null,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [
+            {
+              "usageSource": "PROVIDER",
+              "totalTokens": 7234,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "actualModel": "qwen3.8-max",
+              "outputTokens": 4610,
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage",
+              "inputTokens": 2624
+            }
+          ],
+          "repairProviderUsage": []
+        },
+        "finalAnswer": {
+          "baselineExecutionStatus": "COMPLETED",
+          "repairExecutionStatus": "NOT_EXECUTED",
+          "baselineDurationMs": 42091,
+          "repairDurationMs": null,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [
+            {
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 2031,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 6746,
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 4715
+            }
+          ],
+          "repairProviderUsage": []
+        }
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "baselineRunId": "development-tgt-2-1",
+      "repairRunId": "repair-b8192-tgt-control-1-1",
+      "baselineResponseSha256": "453e344871b626552cf5343b788c9d1266c623b877a1f08e1dc5c478372423d5",
+      "repairResponseSha256": null,
+      "sourceCaseMatchesBaseline": true,
+      "group": "SUCCESSFUL_CONTROL",
+      "baselineExecutionStatus": "PASS",
+      "repairExecutionStatus": "NO_DATA",
+      "stages": {
+        "analysis": {
+          "baselineExecutionStatus": "COMPLETED",
+          "repairExecutionStatus": "NOT_EXECUTED",
+          "baselineDurationMs": 156611,
+          "repairDurationMs": null,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [
+            {
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "outputTokens": 6935,
+              "totalTokens": 8673,
+              "inputTokens": 1738
+            }
+          ],
+          "repairProviderUsage": []
+        },
+        "finalAnswer": {
+          "baselineExecutionStatus": "COMPLETED",
+          "repairExecutionStatus": "NOT_EXECUTED",
+          "baselineDurationMs": 93366,
+          "repairDurationMs": null,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [
+            {
+              "usageSource": "PROVIDER",
+              "totalTokens": 9300,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 4518,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4782,
+              "scope": "final-answer"
+            }
+          ],
+          "repairProviderUsage": []
+        }
+      }
+    }
+  ],
+  "successfulControlPairs": [],
+  "successfulControlPairTotals": {
+    "stageCount": 0,
+    "baselineDurationMs": 0,
+    "repairDurationMs": 0,
+    "inputTokens": {
+      "baseline": 0,
+      "repair": 0
+    },
+    "outputTokens": {
+      "baseline": 0,
+      "repair": 0
+    },
+    "totalTokens": {
+      "baseline": 0,
+      "repair": 0
+    }
+  },
+  "budget4096AuditSha256": "0dbf5c2705a17fd018241af4267fe2a52778090a53fa2a327090e1b5dcd17710",
+  "budget8192AuditAdapterSha256": "aa4591f6aad6dde14e76ba2faa9dffd66c4c19aad8771d95dc027752f0cbcc4a",
+  "budget4096Comparisons": [
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "budget4096RunId": "repair-ibm-cash-1-1",
+      "budget8192RunId": "repair-b8192-ibm-cash-1-1",
+      "budget4096ResponseSha256": "4b02031f907cae9bbc6bf725f85be593d15f2e45b9dc38b74ec444af9a7cf8dd",
+      "budget8192ResponseSha256": null,
+      "stages": {
+        "analysis": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": null,
+          "budget4096DurationMs": 58111,
+          "budget8192DurationMs": null,
+          "completedPairDurationDeltaMs": null,
+          "budget4096Usage": [
+            {
+              "usageSource": "PROVIDER",
+              "totalTokens": 4830,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "actualModel": "qwen3.8-max",
+              "outputTokens": 2739,
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage",
+              "inputTokens": 2091
+            }
+          ],
+          "budget8192Usage": []
+        },
+        "finalAnswer": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": null,
+          "budget4096DurationMs": 33098,
+          "budget8192DurationMs": null,
+          "completedPairDurationDeltaMs": null,
+          "budget4096Usage": [
+            {
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 1629,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 6041,
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 4412
+            }
+          ],
+          "budget8192Usage": []
+        }
+      }
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "budget4096RunId": "repair-ibm-liquidity-1-1",
+      "budget8192RunId": "repair-b8192-ibm-liquidity-1-1",
+      "budget4096ResponseSha256": "0a502dfa83dcdbcee15595d9d11ac0e1c6c2372c4dcfd2b662a0ba1b83f9fc5d",
+      "budget8192ResponseSha256": null,
+      "stages": {
+        "analysis": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": null,
+          "budget4096DurationMs": 50167,
+          "budget8192DurationMs": null,
+          "completedPairDurationDeltaMs": null,
+          "budget4096Usage": [
+            {
+              "actualModel": "qwen3.8-max",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "outputTokens": 2623,
+              "totalTokens": 4916,
+              "usageSource": "PROVIDER",
+              "inputTokens": 2293,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis"
+            }
+          ],
+          "budget8192Usage": []
+        },
+        "finalAnswer": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": null,
+          "budget4096DurationMs": 35540,
+          "budget8192DurationMs": null,
+          "completedPairDurationDeltaMs": null,
+          "budget4096Usage": [
+            {
+              "totalTokens": 6408,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 1925,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4483,
+              "scope": "final-answer",
+              "usageSource": "PROVIDER"
+            }
+          ],
+          "budget8192Usage": []
+        }
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "budget4096RunId": "repair-jnj-cash-1-1",
+      "budget8192RunId": "repair-b8192-jnj-cash-1-1",
+      "budget4096ResponseSha256": "9318b1ac2b43a14a785bc0e091aea9a4ef0a1e1c3b36c064ed79378d615c0dd9",
+      "budget8192ResponseSha256": null,
+      "stages": {
+        "analysis": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": null,
+          "budget4096DurationMs": 83547,
+          "budget8192DurationMs": null,
+          "completedPairDurationDeltaMs": null,
+          "budget4096Usage": [
+            {
+              "inputTokens": 2022,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "outputTokens": 3896,
+              "totalTokens": 5918
+            }
+          ],
+          "budget8192Usage": []
+        },
+        "finalAnswer": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": null,
+          "budget4096DurationMs": 36615,
+          "budget8192DurationMs": null,
+          "completedPairDurationDeltaMs": null,
+          "budget4096Usage": [
+            {
+              "inputTokens": 4655,
+              "scope": "final-answer",
+              "usageSource": "PROVIDER",
+              "totalTokens": 6460,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 1805,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT"
+            }
+          ],
+          "budget8192Usage": []
+        }
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-liquidity",
+      "budget4096RunId": "repair-jnj-liquidity-1-1",
+      "budget8192RunId": "repair-b8192-jnj-liquidity-1-1",
+      "budget4096ResponseSha256": "7db48c180c98589ca44259b18159f4a8bc2f37a2b1b324f959da4473de1bff0f",
+      "budget8192ResponseSha256": null,
+      "stages": {
+        "analysis": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": null,
+          "budget4096DurationMs": 46913,
+          "budget8192DurationMs": null,
+          "completedPairDurationDeltaMs": null,
+          "budget4096Usage": [
+            {
+              "inputTokens": 2023,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "outputTokens": 2336,
+              "totalTokens": 4359
+            }
+          ],
+          "budget8192Usage": []
+        },
+        "finalAnswer": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": null,
+          "budget4096DurationMs": 31240,
+          "budget8192DurationMs": null,
+          "completedPairDurationDeltaMs": null,
+          "budget4096Usage": [
+            {
+              "scope": "final-answer",
+              "usageSource": "PROVIDER",
+              "totalTokens": 5803,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 1738,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4065
+            }
+          ],
+          "budget8192Usage": []
+        }
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "budget4096RunId": "repair-pep-control-1-1",
+      "budget8192RunId": "repair-b8192-pep-control-1-1",
+      "budget4096ResponseSha256": "a98735edc2a80c559dd84b450ef834bf04dc4d55cc54fac87e979adc623e5e34",
+      "budget8192ResponseSha256": null,
+      "stages": {
+        "analysis": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": null,
+          "budget4096DurationMs": 46925,
+          "budget8192DurationMs": null,
+          "completedPairDurationDeltaMs": null,
+          "budget4096Usage": [
+            {
+              "kind": "model-usage",
+              "inputTokens": 2612,
+              "usageSource": "PROVIDER",
+              "totalTokens": 4851,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "actualModel": "qwen3.8-max",
+              "outputTokens": 2239,
+              "scope": "fundamentals-analysis"
+            }
+          ],
+          "budget8192Usage": []
+        },
+        "finalAnswer": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": null,
+          "budget4096DurationMs": 30835,
+          "budget8192DurationMs": null,
+          "completedPairDurationDeltaMs": null,
+          "budget4096Usage": [
+            {
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 4671,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 1645,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 6316
+            }
+          ],
+          "budget8192Usage": []
+        }
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "budget4096RunId": "repair-tgt-control-1-1",
+      "budget8192RunId": "repair-b8192-tgt-control-1-1",
+      "budget4096ResponseSha256": "7c410209a3ac7f8b139cf14ab50de978e3fefacd1a0ef473696e68391d0ba918",
+      "budget8192ResponseSha256": null,
+      "stages": {
+        "analysis": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": null,
+          "budget4096DurationMs": 44325,
+          "budget8192DurationMs": null,
+          "completedPairDurationDeltaMs": null,
+          "budget4096Usage": [
+            {
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage",
+              "inputTokens": 1726,
+              "actualModel": "qwen3.8-max",
+              "totalTokens": 3906,
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "outputTokens": 2180
+            }
+          ],
+          "budget8192Usage": []
+        },
+        "finalAnswer": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": null,
+          "budget4096DurationMs": 28102,
+          "budget8192DurationMs": null,
+          "completedPairDurationDeltaMs": null,
+          "budget4096Usage": [
+            {
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 3700,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 1510,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 5210
+            }
+          ],
+          "budget8192Usage": []
+        }
+      }
+    }
+  ]
+}

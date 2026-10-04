@@ -1,0 +1,35 @@
+CISCO SYSTEMS, INC. CONDENSED CONSOLIDATED BALANCE SHEETS (In millions) (Unaudited)
+
+ | April 26, 2025 |  | July 27, 2024
+ASSETS |  |  | 
+Current assets: |  |  | 
+Cash and cash equivalents | $ 8,161 |  | $ 7,508
+Investments | 7,481 |  | 10,346
+Accounts receivable, net of allowance of $82 at April 26, 2025 and $87 at July 27, 2024 | 5,277 |  | 6,685
+Inventories | 2,832 |  | 3,373
+Financing receivables, net | 2,958 |  | 3,338
+Other current assets | 6,107 |  | 5,612
+Total current assets | 32,816 |  | 36,862
+Property and equipment, net | 2,076 |  | 2,090
+Financing receivables, net | 3,247 |  | 3,376
+Goodwill | 59,024 |  | 58,660
+Purchased intangible assets, net | 9,643 |  | 11,219
+Deferred tax assets | 7,016 |  | 6,262
+Other assets | 5,960 |  | 5,944
+TOTAL ASSETS | $ 119,782 |  | $ 124,413
+LIABILITIES AND EQUITY |  |  | 
+Current liabilities: |  |  | 
+Short-term debt | $ 6,422 |  | $ 11,341
+Accounts payable | 2,260 |  | 2,304
+Income taxes payable | 1,821 |  | 1,439
+Accrued compensation | 3,210 |  | 3,608
+Deferred revenue | 16,081 |  | 16,249
+Other current liabilities | 4,701 |  | 5,643
+Total current liabilities | 34,495 |  | 40,584
+Long-term debt | 22,857 |  | 19,621
+Income taxes payable | 1,874 |  | 3,985
+Deferred revenue | 11,910 |  | 12,226
+Other long-term liabilities | 2,711 |  | 2,540
+Total liabilities | 73,847 |  | 78,956
+Total equity | 45,935 |  | 45,457
+TOTAL LIABILITIES AND EQUITY | $ 119,782 |  | $ 124,413

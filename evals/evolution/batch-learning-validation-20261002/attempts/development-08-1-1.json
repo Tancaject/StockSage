@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-08-1-1",
+    "caseId": "jnj-fy2025q3-cash-deployment-bridge",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-validation-20261002\\raw-development-08",
+  "executionSha256": "fa86d8fff6a98c2e5a53f32a792ff67150861b1ac046e24900646d1862b861cd",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

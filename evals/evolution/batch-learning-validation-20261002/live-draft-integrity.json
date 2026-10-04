@@ -1,0 +1,109 @@
+{
+  "scope": "ACTUAL_SAVED_TWO_STAGE_INPUTS",
+  "status": "PASS_FOR_8_COMPLETED_ANALYSES",
+  "completedAnalysisCount": 8,
+  "notAssessableAnalysisCount": 2,
+  "overFormer4500CharacterLimitCount": 2,
+  "cases": [
+    {
+      "caseId": "ibm-fy2025q3-quarter-control",
+      "runId": "development-01-1-1",
+      "responseFileSha256": "d00a600a708b3db361114f264b1bd9f9323f923f2e538d9d32e4d767d5504636",
+      "analysisStatus": "COMPLETED",
+      "analysisCharacters": 1705,
+      "draftFullyPresentInFinalMessages": true,
+      "finalMessageCharactersIncludingSeparators": 6767,
+      "analystStatus": "COMPLETED"
+    },
+    {
+      "caseId": "jnj-fy2025q3-quarter-reconstruction",
+      "runId": "development-02-1-1",
+      "responseFileSha256": "b693853ae317ea36dac75b5e62407e9d155a68d0d8f77f41a325e546aef18adb",
+      "analysisStatus": "COMPLETED",
+      "analysisCharacters": 2302,
+      "draftFullyPresentInFinalMessages": true,
+      "finalMessageCharactersIncludingSeparators": 10941,
+      "analystStatus": "COMPLETED"
+    },
+    {
+      "caseId": "pep-fy2025q3-cash-quality",
+      "runId": "development-03-1-1",
+      "responseFileSha256": "29a3d5c793db1459ef80a990ad2fa47cc0db8aba2ab1410b4226697147bada08",
+      "analysisStatus": "COMPLETED",
+      "analysisCharacters": 4091,
+      "draftFullyPresentInFinalMessages": true,
+      "finalMessageCharactersIncludingSeparators": 8858,
+      "analystStatus": "COMPLETED"
+    },
+    {
+      "caseId": "pep-fy2025q3-liquidity",
+      "runId": "development-04-1-1",
+      "responseFileSha256": "8add9d3838fe73480602f5697b9b8dd22b8e2b86b2147ca50ba2ad434264b00a",
+      "analysisStatus": "COMPLETED",
+      "analysisCharacters": 3784,
+      "draftFullyPresentInFinalMessages": true,
+      "finalMessageCharactersIncludingSeparators": 8473,
+      "analystStatus": "COMPLETED"
+    },
+    {
+      "caseId": "tgt-fy2025q3-quarter-reconstruction",
+      "runId": "development-05-1-1",
+      "responseFileSha256": "1c560e86597ba69e46457760117e21af7b314d2f43d468da38845fc770ebfaf3",
+      "analysisStatus": "COMPLETED",
+      "analysisCharacters": 3194,
+      "draftFullyPresentInFinalMessages": true,
+      "finalMessageCharactersIncludingSeparators": 9710,
+      "analystStatus": "COMPLETED"
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity",
+      "runId": "development-06-1-1",
+      "responseFileSha256": "95cf79c58dbce796a298aba8c386a612343dbbf951f0d6f5213257502d92e48e",
+      "analysisStatus": "COMPLETED",
+      "analysisCharacters": 4640,
+      "draftFullyPresentInFinalMessages": true,
+      "finalMessageCharactersIncludingSeparators": 9303,
+      "analystStatus": "COMPLETED"
+    },
+    {
+      "caseId": "ibm-fy2025q3-oneoff-cash-comparability",
+      "runId": "development-07-1-1",
+      "responseFileSha256": "74949e92611d42b76ef426b4207daaccbe73e08ae022aae5f464574a63fe3567",
+      "analysisStatus": "COMPLETED",
+      "analysisCharacters": 4139,
+      "draftFullyPresentInFinalMessages": true,
+      "finalMessageCharactersIncludingSeparators": 9347,
+      "analystStatus": "COMPLETED"
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-deployment-bridge",
+      "runId": "development-08-1-1",
+      "responseFileSha256": "df9c63f19af976e95fb18830ac53a430824cec53d5d63ece1e7c77f4b05f6cce",
+      "analysisStatus": "FAILED",
+      "analysisCharacters": 0,
+      "draftFullyPresentInFinalMessages": null,
+      "finalMessageCharactersIncludingSeparators": 0,
+      "analystStatus": "FAILED"
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-cash-comparison",
+      "runId": "development-09-1-1",
+      "responseFileSha256": "160ad47ae9007c0e2f375d0577170c4101f3bb19dc6f3d17ca2f4e727fa2b303",
+      "analysisStatus": "COMPLETED",
+      "analysisCharacters": 5201,
+      "draftFullyPresentInFinalMessages": true,
+      "finalMessageCharactersIncludingSeparators": 12300,
+      "analystStatus": "COMPLETED"
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity-cash-synthesis",
+      "runId": "development-10-1-1",
+      "responseFileSha256": "3a55ed920e997d91d78ed598974d72989b8b9fa8ac20306bd672a14f783a05f0",
+      "analysisStatus": "FAILED",
+      "analysisCharacters": 0,
+      "draftFullyPresentInFinalMessages": null,
+      "finalMessageCharactersIncludingSeparators": 0,
+      "analystStatus": "FAILED"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "fundamentals_screen_registration_static_audit_v1",
+  "createdAt": "2026-10-02T13:26:31.179202+00:00",
+  "status": "PASS",
+  "scope": "REGISTRATION_AND_IDENTITY_ONLY",
+  "phaseManifestSha256": "5053b6f15efa64191def16cb49955fabb1ef059933afa2eb671d364be9089adb",
+  "generationSourceAuditSha256": "2ce6e4c998ece0a85033d939e0aaba366f6bd8eb9f0d67801c60bb43eaf0d92d",
+  "caseCount": 3,
+  "plannedStageCalls": 6,
+  "checks": {
+    "planSha256": true,
+    "auditPhaseSha256": true,
+    "bundleFileSha256": true,
+    "controlsSha256": true,
+    "generationRegistrationSha256": true,
+    "bundleId": true,
+    "expectedCases": true,
+    "evals/evolution/batch-learning-validation-20261002/screen-g1-01.execution.json": true,
+    "evals/evolution/batch-learning-validation-20261002/screen-g1-01.execution.json:bundle": true,
+    "evals/evolution/batch-learning-validation-20261002/screen-g1-02.execution.json": true,
+    "evals/evolution/batch-learning-validation-20261002/screen-g1-02.execution.json:bundle": true,
+    "evals/evolution/batch-learning-validation-20261002/screen-g1-03.execution.json": true,
+    "evals/evolution/batch-learning-validation-20261002/screen-g1-03.execution.json:bundle": true,
+    "exactRegisteredRuns": true
+  },
+  "providerCallsMadeByAudit": 0,
+  "screeningAnswersRead": false,
+  "businessQuality": "NOT_ASSESSED",
+  "releaseEligible": false
+}

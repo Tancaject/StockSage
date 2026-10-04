@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-jnj-2-1",
+    "caseId": "jnj-fy2025q3-cash-quality",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-20261002\\raw-development-jnj",
+  "executionSha256": "8e1d7dc190714960d8f58142b5b1d03d39effb3aabe99e5ce3f6a0cab923eb1a",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

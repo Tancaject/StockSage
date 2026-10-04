@@ -76,9 +76,12 @@ public class Coordinator {
     @Value("${stocksage.chat.model-routing.temperature:${STOCKSAGE_CHAT_TEMPERATURE:0.7}}")
     private double modelRoutingTemperature;
 
-    /** 最终回答的最大输出 token 数。 */
+    /** 最终回答正文的 token 上限；Max 的思考预算单独设置。 */
     @Value("${stocksage.chat.model-routing.max-output-tokens:${STOCKSAGE_CHAT_MAX_OUTPUT_TOKENS:4096}}")
     private int modelRoutingMaxOutputTokens;
+
+    @Value("${stocksage.chat.model-routing.standard-thinking-budget:32768}")
+    private int standardThinkingBudget;
 
     /** 注入意图识别、最终回答和服务器计划目录。 */
     @Autowired
@@ -214,6 +217,10 @@ public class Coordinator {
             invocation.put("temperature", modelRoutingTemperature);
             invocation.put("maxOutputTokens", modelRoutingMaxOutputTokens);
             invocation.put("configurationSource", "REQUEST_OPTIONS");
+            if (selected.tier() == ModelTier.STANDARD && "qwen3.8-max".equals(selected.modelName())) {
+                invocation.put("enableThinking", true);
+                invocation.put("thinkingBudget", standardThinkingBudget);
+            }
         } else {
             invocation.put("configurationSource", "CLIENT_DEFAULT");
         }
@@ -239,6 +246,10 @@ public class Coordinator {
             if (modelName != null) {
                 options.model(modelName).temperature(((Number) invocation.get("temperature")).doubleValue())
                         .maxTokens(((Number) invocation.get("maxOutputTokens")).intValue());
+            }
+            if (invocation.containsKey("thinkingBudget")) {
+                options.extraBody(Map.of("enable_thinking", invocation.get("enableThinking"),
+                        "thinking_budget", invocation.get("thinkingBudget")));
             }
             observeFinalAnswer(observer, invocation);
             AtomicBoolean usageReported = new AtomicBoolean();

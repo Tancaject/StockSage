@@ -5,7 +5,7 @@
 - stocksage-backend (Java, Spring AI Alibaba) → :8080
 - stocksage-data-service (Python, FastAPI) → :8001，后端通过 REST 调用
 - stocksage-frontend (Vue 3, Vite) → :5173
-- evals：项目级 RAG、Agent 与自进化评测，入口见 [evals/README.md](evals/README.md)
+- evals：财报入库工具、评测数据与历史报告；离线评测脚本已按用户要求移除，范围见 [evals/README.md](evals/README.md)
 
 README 和后端配置使用 data-service 端口 `8001`。除非用户明确改变本地 setup，否则旧的 `8000` 引用视为过时。
 
@@ -50,32 +50,23 @@ README 和后端配置使用 data-service 端口 `8001`。除非用户明确改�
 .\init.ps1 -Mode fast
 ```
 
-单项检查：
+当前自动化测试文件已按用户要求移除；以下仅检查源码编译与构建，不代表测试通过。历史评测复现的限制见 [evals/README.md](evals/README.md)。单项检查：
 
 ```powershell
 cd stocksage-backend
-.\mvnw.cmd test
+.\mvnw.cmd compile
 ```
 
 ```powershell
 cd stocksage-frontend
-npm run test
 npm run build
 ```
 
 ```powershell
 python -m compileall stocksage-data-service\main.py stocksage-data-service\app
-python -m unittest discover stocksage-data-service\tests
-python -m unittest discover evals
 ```
 
-RAG evaluation 需要 backend、data-service、MySQL、Redis、Milvus 和 Ollama 运行：
-
-```powershell
-.\.venv-rag-eval\Scripts\Activate.ps1
-python .\evals\run_retrieval_eval.py
-python .\evals\run_rag_eval.py
-```
+离线 RAG、Agent 与自进化评测脚本已移除，`init.ps1` 不再提供 `rag` 模式。不要执行历史文档中的已删除入口，也不要未经新授权恢复测试或评测脚本。
 
 ## 完成标准
 

@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Frozen files and preregistration hashes unchanged",
+    "Actual method-only analysis intervention verified",
+    "Full draft replacement and final prompt budget verified",
+    "Provider request settings, stop/DONE and power restoration verified",
+    "All 16 review bindings, source/answer quotes and Decimal comparisons verified",
+    "Fixed denominators and token accounting recomputed"
+  ],
+  "calls": 16,
+  "reviews": 16,
+  "resultSha256": "9474a2f8f7e97a6acab753bd21f6306f0c4ce35635ed4b1f38a07066eec246e0",
+  "semanticReviewLimit": "This audit verifies evidence bindings and arithmetic, not independent semantic adjudication."
+}

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 2,
+  "kind": "RESEARCH_EXPERIENCE",
+  "status": "PROPOSED",
+  "reviewStatus": "UNREVIEWED",
+  "validationStatus": "NOT_RUN",
+  "triggerTags": [
+    "cumulative-to-single-quarter-reconstruction",
+    "working-capital-sub-item-derivation"
+  ],
+  "requiredEvidence": [
+    "two-cumulative-periods-same-start-date",
+    "cash-flow-statement-line-items"
+  ],
+  "requiredCapabilities": [
+    "evidence-reading",
+    "period-comparison",
+    "arithmetic"
+  ],
+  "method": "当用两期同起点累计现金流量表还原单季数据时，除用户指定的汇总行外，还应对同一张表内所有可还原的明细行（如存货变动、应付账款变动、应计负债变动等）逐一做差值计算。还原完成后，在数据缺口部分声明某类数据缺失前，必须先检查该明细是否已通过上述差值还原得出；若已得出，不得将其列入缺口，而应报告还原值并注明商业原因尚无法确认。",
+  "applicabilityBoundary": "仅适用于同一公司、同一财年、期初日期相同的两期累计现金流量表之间的单季还原场景；两期期初不同或存在重述、合并范围变化时不适用。",
+  "counterexamples": [
+    "两期累计报表期初日期不同",
+    "公司发生重述或合并范围变更导致累计数不可直接相减",
+    "仅有一期累计报表无法做差"
+  ],
+  "forbiddenInferences": [
+    "不得将还原出的会计变动直接推断为商业原因",
+    "不得将明细还原值等同于管理层披露的单季数据",
+    "不得因明细可还原就声称已掌握经营驱动因素"
+  ],
+  "version": 1,
+  "role": "FUNDAMENTALS",
+  "taskType": "ORDINARY_FUNDAMENTALS",
+  "sourceRunIds": [
+    "development-05-1-1"
+  ],
+  "sources": [
+    {
+      "caseId": "tgt-fy2025q3-quarter-reconstruction",
+      "split": "DEVELOPMENT",
+      "origin": "PUBLIC_AUTHORIZED",
+      "issuerId": "TGT",
+      "issuerName": "TGT",
+      "traceSha256": "054a147e1c14894d819c5de11706ea5a8ad2e40f529fdbe868bedf30f54e3b33",
+      "externalFeedbackSha256": "4b815eb27ac9089b788ca7a84bcda1c1cff26c2e810f612c1e99f2c0571d32e4",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR"
+    }
+  ],
+  "parentExperienceHashes": [],
+  "methodSha256": "feebd64e276f04781a361cea68e6f780834a4f4c738729f884442474e1aeb71d",
+  "experienceId": "exp-af3ac31b4ade4be35e439c18",
+  "recordSha256": "af3ac31b4ade4be35e439c185b0673b18e8147f17a809d29a0ae6022b36e5f92"
+}

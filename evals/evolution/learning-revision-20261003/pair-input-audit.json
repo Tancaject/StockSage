@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "cases": [
+    {
+      "case": 5,
+      "onlyChangedMessageRole": "system",
+      "nonSystemMessagesByteEqual": true,
+      "sourceCaseId": "tgt-fy2025q3-quarter-reconstruction"
+    },
+    {
+      "case": 9,
+      "onlyChangedMessageRole": "system",
+      "nonSystemMessagesByteEqual": true,
+      "sourceCaseId": "pep-fy2025q3-quarter-cash-comparison"
+    },
+    {
+      "case": 6,
+      "onlyChangedMessageRole": "system",
+      "nonSystemMessagesByteEqual": true,
+      "sourceCaseId": "tgt-fy2025q3-liquidity"
+    }
+  ]
+}

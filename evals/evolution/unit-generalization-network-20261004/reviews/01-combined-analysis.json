@@ -1,0 +1,124 @@
+{
+  "schema": "fundamentals_two_stage_ai_source_review_v1",
+  "origin": "CODEX_NONBLIND_AI_SOURCE_REVIEW_NOT_HUMAN_OR_CALIBRATED_JUDGE",
+  "case": 1,
+  "caseId": "ibm-fy2025q3-quarter-control",
+  "arm": "combined",
+  "stage": "analysis",
+  "releaseEligible": false,
+  "rubric": {
+    "schema": "fundamentals_evolution_rubric_v1",
+    "sha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+    "scope": "FUNDAMENTALS_ANALYSIS",
+    "invocationScope": "fundamentals-analysis",
+    "dimensions": {
+      "claim_support": "核查基本面分析稿的事实、额外主张及推断是否由该阶段实际可见证据支持；可接受有边界的一般机制，不将其当作公司已证实事实。",
+      "numeric_period_correctness": "核查分析稿所用科目、金额、单位、期间、比较基数及派生计算，包括自行增加的合计；按本题 gold 的数值口径和用户问题范围判定。",
+      "counterevidence": "核查分析稿是否保留实际证据中影响结论的相反信号及方法不适用条件；没有相关反向证据时不强造风险，也不要求未问的同行比较。",
+      "unknowns": "核查分析方法是否把证据缺口与相应结论的强度对应起来；缺数据不能补成原因或保证，可计算且证据充分的内容也不应被误称未知。"
+    }
+  },
+  "binding": {
+    "answerSha256": "d8a3128338b5d6ec2b5ff1afcf7c168640a87397eac52e4e83d93828973dfbed",
+    "resultSha256": "229434846e64e4e58eadfc1159e11bd45c3db7639a2fd8d4aea743eb40c79349",
+    "requestSha256": "702b43ab85f1641af131a8745e3dc1db7b779bf092afdae642811dad3c874ce1",
+    "sourceTraceSha256": "d00a600a708b3db361114f264b1bd9f9323f923f2e538d9d32e4d767d5504636",
+    "goldSha256": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+    "policySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad"
+  },
+  "requiredFacts": [
+    {
+      "field": "quarterOperatingCashFlow",
+      "period": "2025-07-01/2025-09-30",
+      "unit": "million",
+      "observed": "3081",
+      "expected": "3081",
+      "answerQuote": "  **Net Cash Provided by Operating Activities = $3,081 million** [E1]",
+      "status": "PASS"
+    },
+    {
+      "field": "quarterNetIncome",
+      "period": "2025-07-01/2025-09-30",
+      "unit": "million",
+      "observed": "1744",
+      "expected": "1744",
+      "answerQuote": "  本轮证据中可用于单季净利润的已披露项目为现金流量表起始行 **“Net Income/(Loss) from Operations” = $1,744 million**；本答复以此作为用户要求的单季 GAAP 净利润计算口径 [E1]",
+      "status": "PASS"
+    },
+    {
+      "field": "cashIncomeGap",
+      "period": "2025-07-01/2025-09-30",
+      "unit": "million",
+      "observed": "1337",
+      "expected": "1337.0000",
+      "answerQuote": "  经营现金流 - 净利润 = 3,081 - 1,744 = 1,337",
+      "status": "PASS"
+    },
+    {
+      "field": "cashConversionRatio",
+      "period": "2025-07-01/2025-09-30",
+      "unit": "ratio",
+      "observed": "1.77",
+      "expected": "1.7666",
+      "answerQuote": "  保留两位小数：**1.77**  ",
+      "status": "PASS"
+    }
+  ],
+  "additionalNumericChecks": [
+    {
+      "observed": "176.66",
+      "expected": "176.6628440366972477064220183",
+      "formula": "3081/1744*100",
+      "answerQuote": "  对应百分比：**176.66%**",
+      "status": "PASS"
+    }
+  ],
+  "dimensions": {
+    "claim_support": {
+      "status": "PASS",
+      "answerQuote": "- IBM 2025Q3 经营现金流 **高于** 单季净利润，现金转化较强：每 **1美元** 净利润对应约 **1.77美元** 经营现金流 [E1]",
+      "reason": "Read against original evidence, not the analyst draft as independent authority."
+    },
+    "counterevidence": {
+      "status": "PASS",
+      "answerQuote": "- 经营现金流/净利润较高主要受非现金加回和营运资本项目影响，不能单独证明盈利质量持续改善；本轮未提供多季度趋势或管理层对商业原因的说明 [E1]",
+      "reason": "Relevant opposing signals and comparison boundaries retained."
+    },
+    "unknowns": {
+      "status": "PASS",
+      "answerQuote": "- 缺少管理层对 2025Q3 现金转化驱动因素的商业解释；本答复仅基于报表项目列示，不推断经营原因",
+      "reason": "Unavailable commercial causes or disclosure details remain bounded."
+    },
+    "numeric_period_correctness": {
+      "status": "PASS",
+      "answerQuote": "  **Net Cash Provided by Operating Activities = $3,081 million** [E1]",
+      "reason": "Required facts, source units and fiscal periods reviewed; additional calculations use the frozen absolute tolerance 0.01."
+    }
+  },
+  "requiredPoints": [
+    {
+      "id": "p1",
+      "requirement": "正确读取单季经营现金流3081和净利润1744百万美元，不使用九个月累计值",
+      "status": "PASS"
+    },
+    {
+      "id": "p2",
+      "requirement": "差额1337百万美元，经营现金流/净利润约1.77倍",
+      "status": "PASS"
+    },
+    {
+      "id": "p3",
+      "requirement": "给出与本季度经营现金流高于净利润一致的现金转化判断。",
+      "status": "PASS"
+    }
+  ],
+  "sourceQuotes": [
+    "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109",
+    "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115",
+    "Depreciation/Amortization of Intangibles (1) |  | 1,283 |  | 1,268 |  | 3,725 |  | 3,555"
+  ],
+  "notes": [
+    "Quarter source column and bridge 1283+444+298-688=1337 correct; 0.3 billion x1000=300 million unit conversion correct."
+  ],
+  "semanticStatus": "PASS"
+}

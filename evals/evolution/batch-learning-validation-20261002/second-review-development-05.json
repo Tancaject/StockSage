@@ -1,0 +1,663 @@
+{
+  "schema": "independent_source_second_review_v1",
+  "reviewType": "AI_INDEPENDENT_SOURCE_REVIEW_NOT_HUMAN",
+  "humanReviewStatus": "AI_ONLY",
+  "reviewer": "batch_dataset_design",
+  "createdAt": "2026-10-02T13:12:09.512530+00:00",
+  "status": "COMPLETE",
+  "scope": "development-05 analysis only; original answer, frozen execution evidence and policy/rubric inspected. No other reviewer or evaluator judgments inspected. No finalAnswer judgment in this review.",
+  "caseId": "tgt-fy2025q3-quarter-reconstruction",
+  "runId": "development-05-1-1",
+  "caseSha256": "d6bdda90b5b42ffd9ab84e2505e9304dbdcee7b89bdd2dd5be14e8e185f78d36",
+  "answerStage": "analysis",
+  "answerSha256": "2b088dff376616b1d801f8a583bb292f6619d0aca06d0f6227a6b3b68caadfbe",
+  "responsePath": "evals/evolution/batch-learning-validation-20261002/raw-development-05/development-05-1-1.response.json",
+  "responseSha256": "1c560e86597ba69e46457760117e21af7b314d2f43d468da38845fc770ebfaf3",
+  "executionPath": "evals/evolution/batch-learning-validation-20261002/development-05.execution.json",
+  "executionSha256": "54eebe8b77a0b6b26694c48d88b48498638db7d391f603ff62a80f3c35876fd1",
+  "reviewPolicyPath": "evals/evolution/batch-learning-validation-20261002/review-policy.json",
+  "reviewPolicySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+  "rubricPath": "evals/evolution_rubric.py",
+  "rubricFileSha256": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea",
+  "executionStatus": "COMPLETED",
+  "analysisProviderStatus": "COMPLETED",
+  "analystStatus": "COMPLETED",
+  "taskOutcome": "COMPLETED",
+  "sourceBindings": [
+    {
+      "evidenceId": "E1",
+      "sourceRef": "https://corporate.target.com/press/release/2025/11/target-corporation-reports-third-quarter-earnings",
+      "sourceVersion": "TGT-FY2025-Q3-cashflow",
+      "visibleSha256": "ec5b45fedd4b52e997f108a88a9a1f612604754571b694b43ec3c3ed201de2d3",
+      "periodStart": "2025-02-02",
+      "periodEnd": "2025-11-01",
+      "currency": "USD",
+      "unit": "million"
+    },
+    {
+      "evidenceId": "E2",
+      "sourceRef": "https://corporate.target.com/press/release/2025/08/target-corporation-reports-second-quarter-earnings",
+      "sourceVersion": "TGT-FY2025-Q2-cashflow",
+      "visibleSha256": "bbe4011ce35f86a677236b5a9cfcca905298d69023fc365a15ece13cc3b2dfb0",
+      "periodStart": "2025-02-02",
+      "periodEnd": "2025-08-02",
+      "currency": "USD",
+      "unit": "million"
+    }
+  ],
+  "assessment": {
+    "analysisStatus": "FAIL",
+    "isMethodError": true,
+    "learningAttribution": "METHOD_ERROR",
+    "mechanism": "FALSE_MISSING_DERIVABLE_PERIOD_DETAIL",
+    "primaryDimension": "unknowns",
+    "requiredNumericResult": "PASS",
+    "reason": "The analyst correctly reconstructs quarter CFO and capex, then states that quarterly inventory, payables and accrued-liability changes are missing. The same frozen tables contain all cumulative inputs needed for those same-period differences. This is a definite false evidence-gap claim, not merely omitted optional analysis or an uncertain business-cause explanation."
+  },
+  "dimensions": {
+    "claim_support": {
+      "status": "PASS",
+      "reason": "Main supplied financial claims and stated arithmetic are supported; the specific false-data-gap failure is assigned to unknowns rather than double-counting it. No separate unsupported operational cause found.",
+      "answerQuotes": [
+        "**FY2025 Q3 单季 = FY2025 九个月累计数 [E1] − FY2025 六个月累计数 [E2]**。",
+        "- 本季还原结果显示，TGT FY2025 Q3 单季经营现金流为 **1,127 百万美元**，高于同季购建固定资产现金支出 **978 百万美元**，因此本季实现 **正简化自由现金流 149 百万美元**。"
+      ],
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+        }
+      ]
+    },
+    "numeric_period_correctness": {
+      "status": "PASS",
+      "reason": "Required CFO1127, gross-capex978 and simple-FCF149 plus voluntary coverage, cumulative FCF comparison and Other arithmetic are correct; period is FY2025 Q3 2025-08-03 through2025-11-01, no prior-column mismatch.",
+      "answerQuotes": [
+        "**FY2025 Q3 单季 = FY2025 九个月累计数 [E1] − FY2025 六个月累计数 [E2]**。",
+        "基于 [E1] 九个月累计期末为 **2025-11-01**、[E2] 六个月累计期末为 **2025-08-02**，且两者期初均为 **2025-02-02**，可推断本季单季期间约为 **2025-08-03 至 2025-11-01**。该单季期间为基于累计报表连续性的还原口径，并非证据中直接列示的单季现金流量表期间。"
+      ],
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": " |  | Nine Months Ended"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "(millions) (unaudited) |  | November 1, 2025 |  | November 2,2024"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": " |  | Six Months Ended"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "(millions) (unaudited) |  | August 2, 2025 |  | August 3, 2024"
+        }
+      ]
+    },
+    "counterevidence": {
+      "status": "PASS",
+      "reason": "Does not confuse positive quarter coverage with stronger cumulative FCF; retains the adverse cumulative comparison. No obligation to add all optional bridge details.",
+      "answerQuotes": [
+        "- 若看年内累计口径，[E1] 显示 FY2025 九个月经营现金流为 **3,485 百万美元**，低于上年同期 **4,078 百万美元**；同时九个月购建固定资产现金支出为 **2,842 百万美元**，高于上年同期 **1,968 百万美元**。据此，FY2025 九个月简化自由现金流为 **643 百万美元**，较上年同期 **2,110 百万美元**下降 **69.53%**。  "
+      ],
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+        }
+      ]
+    },
+    "unknowns": {
+      "status": "FAIL",
+      "reason": "Specific assertion that quarter operating-account movements are missing conflicts with determinate signed subtraction available from E1/E2. Commercial reasons behind those changes remain genuinely unavailable, but the answer explicitly includes the accounting movements themselves as unavailable.",
+      "answerQuotes": [
+        "- 缺少本季经营现金流的具体驱动因素拆分，例如存货、应付账款、应计负债等营运资本项目的单季变化。"
+      ],
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": " |  | Nine Months Ended"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "(millions) (unaudited) |  | November 1, 2025 |  | November 2,2024"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": " |  | Six Months Ended"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "(millions) (unaudited) |  | August 2, 2025 |  | August 3, 2024"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Inventory |  | (2,156) |  | (3,279)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Inventory |  | (141) |  | (718)"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Accounts payable |  | 658 |  | 2,362"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Accounts payable |  | (1,125) |  | 522"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Accrued and other liabilities |  | 102 |  | (113)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Accrued and other liabilities |  | (302) |  | (194)"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Other assets |  | (294) |  | (265)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Other assets |  | 151 |  | (53)"
+        }
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "false-missing-quarter-operating-accounts",
+      "severity": "MATERIAL_METHOD_ERROR",
+      "dimension": "unknowns",
+      "answerQuote": "- 缺少本季经营现金流的具体驱动因素拆分，例如存货、应付账款、应计负债等营运资本项目的单季变化。",
+      "ruleQuote": "核查分析方法是否把证据缺口与相应结论的强度对应起来；缺数据不能补成原因或保证，可计算且证据充分的内容也不应被误称未知。",
+      "sourceFactsAndFormulas": [
+        {
+          "field": "inventoryCashFlow",
+          "operation": "DIFFERENCE",
+          "formula": "(-2156) - (-141) = -2015",
+          "nineMonthValue": "-2156",
+          "sixMonthValue": "-141",
+          "quarterValue": "-2015",
+          "currency": "USD",
+          "unit": "million",
+          "period": "2025-08-03/2025-11-01",
+          "sourceEvidence": [
+            {
+              "evidenceId": "E1",
+              "quote": "Inventory |  | (2,156) |  | (3,279)"
+            },
+            {
+              "evidenceId": "E2",
+              "quote": "Inventory |  | (141) |  | (718)"
+            }
+          ]
+        },
+        {
+          "field": "accountsPayableCashFlow",
+          "operation": "DIFFERENCE",
+          "formula": "(658) - (-1125) = 1783",
+          "nineMonthValue": "658",
+          "sixMonthValue": "-1125",
+          "quarterValue": "1783",
+          "currency": "USD",
+          "unit": "million",
+          "period": "2025-08-03/2025-11-01",
+          "sourceEvidence": [
+            {
+              "evidenceId": "E1",
+              "quote": "Accounts payable |  | 658 |  | 2,362"
+            },
+            {
+              "evidenceId": "E2",
+              "quote": "Accounts payable |  | (1,125) |  | 522"
+            }
+          ]
+        },
+        {
+          "field": "accruedOtherLiabilitiesCashFlow",
+          "operation": "DIFFERENCE",
+          "formula": "(102) - (-302) = 404",
+          "nineMonthValue": "102",
+          "sixMonthValue": "-302",
+          "quarterValue": "404",
+          "currency": "USD",
+          "unit": "million",
+          "period": "2025-08-03/2025-11-01",
+          "sourceEvidence": [
+            {
+              "evidenceId": "E1",
+              "quote": "Accrued and other liabilities |  | 102 |  | (113)"
+            },
+            {
+              "evidenceId": "E2",
+              "quote": "Accrued and other liabilities |  | (302) |  | (194)"
+            }
+          ]
+        },
+        {
+          "field": "otherAssetsCashFlow",
+          "operation": "DIFFERENCE",
+          "formula": "(-294) - (151) = -445",
+          "nineMonthValue": "-294",
+          "sixMonthValue": "151",
+          "quarterValue": "-445",
+          "currency": "USD",
+          "unit": "million",
+          "period": "2025-08-03/2025-11-01",
+          "sourceEvidence": [
+            {
+              "evidenceId": "E1",
+              "quote": "Other assets |  | (294) |  | (265)"
+            },
+            {
+              "evidenceId": "E2",
+              "quote": "Other assets |  | 151 |  | (53)"
+            }
+          ]
+        }
+      ],
+      "unit": "million USD",
+      "period": "2025-08-03/2025-11-01",
+      "whyMaterial": "The response makes a definite false statement about what can be established from its evidence, in the same quarter-reconstruction task for which it has already used cumulative subtraction. It narrows the answerable information incorrectly and would prevent a legitimate bridge explanation. The numerical answer to the user remains correct; this is a separate method/evidence-coverage failure.",
+      "scopeBoundary": "The question did not require those component calculations, so their omission alone would pass. The failure is the voluntary assertion that they are missing. Missing management narrative or root business causes remains a valid limitation. This review does not infer actual inventory stocking strategy, supplier terms or management intent."
+    }
+  ],
+  "numericChecks": [
+    {
+      "name": "quarterCFO",
+      "status": "PASS",
+      "observedText": "1,127",
+      "observedNormalizedValue": "1127",
+      "expectedValue": "1127",
+      "absoluteError": "0",
+      "tolerance": "0.01",
+      "answerQuote": "- **经营现金流**：**1,127 百万美元**。",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339"
+        }
+      ]
+    },
+    {
+      "name": "quarterGrossCapex",
+      "status": "PASS",
+      "observedText": "978",
+      "observedNormalizedValue": "978",
+      "expectedValue": "978",
+      "absoluteError": "0",
+      "tolerance": "0.01",
+      "answerQuote": "- **购建固定资产现金支出**：**978 百万美元**。",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+        }
+      ]
+    },
+    {
+      "name": "quarterSimpleFCF",
+      "status": "PASS",
+      "observedText": "149",
+      "observedNormalizedValue": "149",
+      "expectedValue": "149",
+      "absoluteError": "0",
+      "tolerance": "0.01",
+      "answerQuote": "- **简化自由现金流**：**149 百万美元**。",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+        }
+      ]
+    },
+    {
+      "name": "coverageRatio",
+      "status": "PASS",
+      "observedText": "1.15",
+      "observedNormalizedValue": "1.15",
+      "expectedValue": "1.152351738241308793456032720",
+      "absoluteError": "0.002351738241308793456032720",
+      "tolerance": "0.01",
+      "answerQuote": "**1,127 / 978 = 1.15 倍**。",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+        }
+      ]
+    },
+    {
+      "name": "coveragePercent",
+      "status": "PASS",
+      "observedText": "115.24%",
+      "observedNormalizedValue": "115.24",
+      "expectedValue": "115.2351738241308793456032720",
+      "absoluteError": "0.0048261758691206543967280",
+      "tolerance": "0.01",
+      "answerQuote": "**115.24%**。",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+        }
+      ]
+    },
+    {
+      "name": "nineMonthFCF",
+      "status": "PASS",
+      "observedText": "643",
+      "observedNormalizedValue": "643",
+      "expectedValue": "643",
+      "absoluteError": "0",
+      "tolerance": "0.01",
+      "answerQuote": "| 简化自由现金流 | 643 | 494 | **149** |",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+        }
+      ]
+    },
+    {
+      "name": "sixMonthFCF",
+      "status": "PASS",
+      "observedText": "494",
+      "observedNormalizedValue": "494",
+      "expectedValue": "494",
+      "absoluteError": "0",
+      "tolerance": "0.01",
+      "answerQuote": "| 简化自由现金流 | 643 | 494 | **149** |",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+        }
+      ]
+    },
+    {
+      "name": "priorNineMonthCFO",
+      "status": "PASS",
+      "observedText": "4,078",
+      "observedNormalizedValue": "4078",
+      "expectedValue": "4078",
+      "absoluteError": "0",
+      "tolerance": "0.01",
+      "answerQuote": "- 若看年内累计口径，[E1] 显示 FY2025 九个月经营现金流为 **3,485 百万美元**，低于上年同期 **4,078 百万美元**；同时九个月购建固定资产现金支出为 **2,842 百万美元**，高于上年同期 **1,968 百万美元**。据此，FY2025 九个月简化自由现金流为 **643 百万美元**，较上年同期 **2,110 百万美元**下降 **69.53%**。  ",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+        }
+      ]
+    },
+    {
+      "name": "priorNineMonthCapex",
+      "status": "PASS",
+      "observedText": "1,968",
+      "observedNormalizedValue": "1968",
+      "expectedValue": "1968",
+      "absoluteError": "0",
+      "tolerance": "0.01",
+      "answerQuote": "- 若看年内累计口径，[E1] 显示 FY2025 九个月经营现金流为 **3,485 百万美元**，低于上年同期 **4,078 百万美元**；同时九个月购建固定资产现金支出为 **2,842 百万美元**，高于上年同期 **1,968 百万美元**。据此，FY2025 九个月简化自由现金流为 **643 百万美元**，较上年同期 **2,110 百万美元**下降 **69.53%**。  ",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+        }
+      ]
+    },
+    {
+      "name": "priorNineMonthFCF",
+      "status": "PASS",
+      "observedText": "2,110",
+      "observedNormalizedValue": "2110",
+      "expectedValue": "2110",
+      "absoluteError": "0",
+      "tolerance": "0.01",
+      "answerQuote": "- 若看年内累计口径，[E1] 显示 FY2025 九个月经营现金流为 **3,485 百万美元**，低于上年同期 **4,078 百万美元**；同时九个月购建固定资产现金支出为 **2,842 百万美元**，高于上年同期 **1,968 百万美元**。据此，FY2025 九个月简化自由现金流为 **643 百万美元**，较上年同期 **2,110 百万美元**下降 **69.53%**。  ",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+        }
+      ]
+    },
+    {
+      "name": "nineMonthFCFDeclinePercent",
+      "status": "PASS",
+      "observedText": "69.53%",
+      "observedNormalizedValue": "69.53",
+      "expectedValue": "69.52606635071090047393364929",
+      "absoluteError": "0.00393364928909952606635071",
+      "tolerance": "0.01",
+      "answerQuote": "- 若看年内累计口径，[E1] 显示 FY2025 九个月经营现金流为 **3,485 百万美元**，低于上年同期 **4,078 百万美元**；同时九个月购建固定资产现金支出为 **2,842 百万美元**，高于上年同期 **1,968 百万美元**。据此，FY2025 九个月简化自由现金流为 **643 百万美元**，较上年同期 **2,110 百万美元**下降 **69.53%**。  ",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Cash provided by operating activities |  | 2,358 |  | 3,339"
+        },
+        {
+          "evidenceId": "E1",
+          "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+        }
+      ]
+    },
+    {
+      "name": "nineMonthOther",
+      "status": "PASS",
+      "observedText": "52",
+      "observedNormalizedValue": "52",
+      "expectedValue": "52",
+      "absoluteError": "0",
+      "tolerance": "0.01",
+      "answerQuote": "- **未抵扣资产出售回款或投资活动 Other**：[E1] 九个月投资活动 Other 为 **52 百万美元**，[E2] 六个月为 **11 百万美元**，还原本季 Other 为 **41 百万美元**。按用户口径，本季简化自由现金流未抵扣该 **41 百万美元**。若采用包含投资活动 Other 的口径，本季自由现金流结果会不同。",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Other |  | 52 |  | 26"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Other |  | 11 |  | 8"
+        }
+      ]
+    },
+    {
+      "name": "sixMonthOther",
+      "status": "PASS",
+      "observedText": "11",
+      "observedNormalizedValue": "11",
+      "expectedValue": "11",
+      "absoluteError": "0",
+      "tolerance": "0.01",
+      "answerQuote": "- **未抵扣资产出售回款或投资活动 Other**：[E1] 九个月投资活动 Other 为 **52 百万美元**，[E2] 六个月为 **11 百万美元**，还原本季 Other 为 **41 百万美元**。按用户口径，本季简化自由现金流未抵扣该 **41 百万美元**。若采用包含投资活动 Other 的口径，本季自由现金流结果会不同。",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Other |  | 52 |  | 26"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Other |  | 11 |  | 8"
+        }
+      ]
+    },
+    {
+      "name": "quarterOther",
+      "status": "PASS",
+      "observedText": "41",
+      "observedNormalizedValue": "41",
+      "expectedValue": "41",
+      "absoluteError": "0",
+      "tolerance": "0.01",
+      "answerQuote": "- **未抵扣资产出售回款或投资活动 Other**：[E1] 九个月投资活动 Other 为 **52 百万美元**，[E2] 六个月为 **11 百万美元**，还原本季 Other 为 **41 百万美元**。按用户口径，本季简化自由现金流未抵扣该 **41 百万美元**。若采用包含投资活动 Other 的口径，本季自由现金流结果会不同。",
+      "sourceEvidence": [
+        {
+          "evidenceId": "E1",
+          "quote": "Other |  | 52 |  | 26"
+        },
+        {
+          "evidenceId": "E2",
+          "quote": "Other |  | 11 |  | 8"
+        }
+      ]
+    }
+  ],
+  "additionalChecks": {
+    "quarterOperatingAccountAggregate": {
+      "formula": "(-2015) + 1783 + 404 + (-445) = -273",
+      "value": "-273",
+      "purpose": "Reviewer demonstration only; not an additional business-answer requirement."
+    }
+  },
+  "nonFailures": [
+    {
+      "answerQuote": "- 缺少 Target **FY2025 Q3 单季直接披露的现金流量表**。",
+      "reason": "Accurate distinction: supplied reports are cumulative, even though quarter values can be reconstructed."
+    },
+    {
+      "answerQuote": "- **缺乏原因解释**：本轮证据仅提供现金流量表累计数，未提供管理层对经营现金流、资本支出变化的单季解释，因此无法确认本季经营现金流和资本支出变化的具体驱动因素。",
+      "reason": "This statement is acceptable when referring to unprovided management/business causes; it does not cure the separate explicit claim that accounting component quarter changes are missing."
+    }
+  ]
+}

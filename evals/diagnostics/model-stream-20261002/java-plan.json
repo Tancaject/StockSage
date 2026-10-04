@@ -1,0 +1,11 @@
+{
+  "schema": "java_stream_transport_diagnostic_v1",
+  "maxProviderCalls": 1,
+  "automaticRetries": 0,
+  "scope": "FINAL_ONLY_FIXED_MESSAGES",
+  "baselineSourceSha256": "e2eddf1d75409722d6ae10758bc25f017317168afbafe772369507e067da6c40",
+  "promptSha256": "42fe34f8ca23c09b4bf2960c14ddc1bcf491277a856eff56d1d70adc498e657a",
+  "runtimeSettings": "NEW_JAR_PRODUCTION_DEFAULTS",
+  "qualityAssessed": false,
+  "controls": "Same stored stage messages/model/temp/text/thinking/deadline settings; new sampling/time; no full experiment gain claim."
+}

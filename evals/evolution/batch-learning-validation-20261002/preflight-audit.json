@@ -1,0 +1,28 @@
+{
+  "schema": "fundamentals_batch_defaults_preflight_audit_v1",
+  "status": "PASS",
+  "scope": "NO_MODEL_PREFLIGHT",
+  "releaseEligible": false,
+  "businessQuality": "NOT_ASSESSED",
+  "errors": [],
+  "runtimePath": "evals\\evolution\\batch-learning-validation-20261002\\preflight\\runtime.json",
+  "runtimeSha256": "8135f401884645bfcdf27e13cb29e388528d7a0d22bcd3249fa238dfcdea3616",
+  "planSha256": "fa948d7e1ffc12ec4e3509990f214d25a4cf005fabba9289bf62273be1b12663",
+  "auditAdapterSha256": "d9d6e158545f871cb789c388b17b9f12d4ec57dadf43e1c0c59deae13c050cb1",
+  "observedFundamentalsDefaults": {
+    "enableThinking": true,
+    "maxTokens": 4096,
+    "model": "qwen3.8-max",
+    "scope": "CLIENT_DEFAULTS",
+    "systemPromptHash": "d67bcfd6c689ed7abaf67f0b700cebd401d72f03a166783ec2e8dec0f7b64d38",
+    "temperature": 0.7,
+    "thinkingBudget": 32768,
+    "unknownProviderRevision": true
+  },
+  "observedHttpTransport": {
+    "readTimeout": "PT5M",
+    "connectTimeout": "UNSET",
+    "configuration": "BOOT_AUTO_CONFIGURATION"
+  },
+  "finalAnswerOptions": "Verified from actual per-stage invocations by the execution audit."
+}

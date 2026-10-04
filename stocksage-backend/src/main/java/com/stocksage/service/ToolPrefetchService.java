@@ -10,7 +10,6 @@ import com.stocksage.research.ResearchSubmissionService;
 
 import com.stocksage.evidence.adapter.EvidenceEnvelopeMapper;
 
-import com.stocksage.util.PromptText;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,7 +49,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -231,9 +231,10 @@ public class ToolPrefetchService {
         AnalystSection analystSection = null;
         if (analyst != null && evidence.hasUsefulResult() && !outcome.equals("BLOCKED")) {
             String agentInput = context.toString();
-            CompletableFuture<String> future = null;
+            FutureTask<String> future = null;
             try {
-                future = CompletableFuture.supplyAsync(
+                // FutureTask propagates cancellation to the running worker; CompletableFuture does not.
+                future = new FutureTask<>(
                     () -> safeAgentCall(analyst.label(), () -> switch (analyst) {
                         case FUNDAMENTALS_AGENT -> {
                             var observation = fundamentalsAgent.analyzeObserved(userQuery, agentInput, pinnedMethod);
@@ -243,7 +244,9 @@ public class ToolPrefetchService {
                         case MARKET_AGENT -> marketAgent.analyze(userQuery, agentInput);
                         case NEWS_AGENT -> newsAgent.analyze(userQuery, agentInput);
                         default -> throw new IllegalStateException("Unsupported analyst: " + analyst);
-                    }), agentTaskExecutor);
+                    }));
+                agentTaskExecutor.execute(future);
+                emitProgress(traceId, conversationId, "thought", "证据已取得，正在等待领域分析完成。");
                 String result = future.get(agentPrefetchTimeoutSeconds, TimeUnit.SECONDS);
                 AnalystDraft draft = appendAnalystDraft(context.toString(), analyst.label(), result, outcome);
                 context = new StringBuilder(draft.context());
@@ -255,6 +258,12 @@ public class ToolPrefetchService {
                 analystStatus = "CAPACITY_REJECTED";
                 context.append("\n在线分析容量不足，领域分析未执行；仅使用已取得的原始证据。\n");
                 log.warn("Optional analyst not submitted, traceId={}, role={}, reason=CAPACITY_REJECTED", traceId, analyst);
+            } catch (InterruptedException interrupted) {
+                if (future != null) future.cancel(true);
+                Thread.currentThread().interrupt();
+                var cancelled = new CancellationException("领域分析等待已取消。");
+                cancelled.initCause(interrupted);
+                throw cancelled;
             } catch (Exception error) {
                 if (future != null) future.cancel(true);
                 outcome = "DEGRADED";
@@ -377,16 +386,14 @@ public class ToolPrefetchService {
         chatStreamEmitter.emit(traceId, conversationId, type, content);
     }
 
-    /** 普通执行与冻结回放共用草稿截断、状态及可消融范围，避免回放绕过生产限制。 */
+    /** 草稿完整性由最终 Prompt 总预算统一检查；普通执行与冻结回放共享状态和可消融范围。 */
     public static AnalystDraft appendAnalystDraft(String context, String name, String content, String taskOutcome) {
         if (content == null || content.isBlank()) {
             return new AnalystDraft(context, "DEGRADED", "EMPTY", null);
         }
-        String combined = context + "## " + name + "\n" + PromptText.truncate(content, 4500) + "\n\n";
-        boolean truncated = content.length() > 4500;
-        return new AnalystDraft(combined, truncated ? "DEGRADED" : taskOutcome,
-                truncated ? "TRUNCATED" : "COMPLETED",
-                truncated ? null : new AnalystSection(context.length(), combined.length()));
+        String combined = context + "## " + name + "\n" + content + "\n\n";
+        return new AnalystDraft(combined, taskOutcome, "COMPLETED",
+                new AnalystSection(context.length(), combined.length()));
     }
 
     public static String finishOrdinaryContext(String context, String taskOutcome) {

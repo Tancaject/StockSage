@@ -1,0 +1,40 @@
+{
+  "schema": "learning_packet_transmission_review_v1",
+  "requestSha256": "8bf299f9b459496d29a4618dfbaf077487b52a45163dc1d018bd0e8b14053642",
+  "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+  "model": "qwen3.8-max",
+  "requestBytes": 18395,
+  "contents": [
+    "Generic procedural generator instructions and original analysis method",
+    "Synthetic IBM public-financial-report evaluation question",
+    "Public IBM financial statement excerpts retained in frozen source snapshots",
+    "Previously generated AI analysis answer and source-checked AI feedback",
+    "Rejected generated unit lesson and engineering correction instruction"
+  ],
+  "sourceOrigin": "PUBLIC_AUTHORIZED",
+  "publicSourceUrls": [
+    "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS"
+  ],
+  "excluded": [
+    "application-local.properties and other configuration files",
+    "API key in request body",
+    "real user chat history",
+    "database records",
+    "account information",
+    "private repository source files"
+  ],
+  "credentialUse": "Existing provider key is read locally and used only in the HTTPS Authorization header to the configured provider; never printed or written to request JSON.",
+  "safetyLimits": "Local payload provenance/binding verification, not a claim that AI-generated financial commentary is official source text.",
+  "priorUserScope": [
+    "你建立一个评测数据集然后跑一下不就行了，数据集要合理设计",
+    "继续吧，我把额度设置好了",
+    "现在用max做默认模型，然后开始测试自进化策略效果和优化点",
+    "允许 AI 离线试验（建议）",
+    "继续"
+  ],
+  "calls": {
+    "oneGenerator": 1,
+    "registeredBusinessUpperBound": 16
+  },
+  "automaticApproval": "Earlier escalation rejected; no network-enabled invocation started."
+}

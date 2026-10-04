@@ -1,0 +1,88 @@
+{
+  "status": "PASS",
+  "modelCalls": 0,
+  "caseCount": 4,
+  "build": {
+    "schema": "fundamentals_evolution_build_v1",
+    "gitSha": "1abd3c197ee8543a3ab5c3f796d3beb656b70f4c",
+    "sourceState": "WORKTREE_SNAPSHOT",
+    "sourceTreeSha256": "3b68ef2e5210c9647fd4bf1443c45271a6ce8521d9c78bbd3695bc5757b750e2",
+    "artifactSha256": "97382b9439d532580416e27eb1deff32896d64de783798aef403cfca41e8af54",
+    "artifactFormat": "SPRING_BOOT_JAR",
+    "builtAt": "2026-10-02T12:44:32.779370+00:00"
+  },
+  "driverSourceSha256": "c5ac63df4cd319dfd1fdaa78e43c08b6458f0c60b71382b72d7742205c392e1e",
+  "traceSha256": "d2e22cbd37332f76342b8acac9979b57b81dc43fe91dbf39a1d97c82b0d51224",
+  "compileCommand": [
+    "javac",
+    "-encoding",
+    "UTF-8",
+    "-cp",
+    "D:\\programming\\StockSage\\stocksage-backend\\target\\draft-budget-verification-20261002\\compile-api;D:\\programming\\StockSage\\stocksage-backend\\target\\draft-budget-verification-20261002\\libs\\*",
+    "-d",
+    "D:\\programming\\StockSage\\stocksage-backend\\target\\draft-budget-verification-20261002\\classes",
+    "D:\\programming\\StockSage\\stocksage-backend\\target\\draft-budget-verification-20261002\\DraftBudgetReplay.java"
+  ],
+  "runCommand": [
+    "java",
+    "-Dloader.main=DraftBudgetReplay",
+    "-Dloader.path=D:\\programming\\StockSage\\stocksage-backend\\target\\draft-budget-verification-20261002\\classes",
+    "-cp",
+    "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-build-batch-learning-validation-20261002\\stocksage-backend.jar",
+    "org.springframework.boot.loader.launch.PropertiesLauncher",
+    "D:\\programming\\StockSage",
+    "D:\\programming\\StockSage\\stocksage-backend\\target\\draft-budget-verification-20261002\\manual-trace.json"
+  ],
+  "productionCodeSource": "jar:nested:/D:/programming/StockSage/stocksage-backend/target/evolution-build-batch-learning-validation-20261002/stocksage-backend.jar/!BOOT-INF/classes/!/",
+  "qualityBoundary": "No regenerated final answers; this verifies complete input assembly only.",
+  "cases": [
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "originalAnalystStatus": "TRUNCATED",
+      "originalTaskOutcome": "DEGRADED",
+      "reassembledAnalystStatus": "COMPLETED",
+      "reassembledTaskOutcome": "COMPLETED",
+      "analysisChars": 6692,
+      "usedChars": 11758,
+      "maxChars": 24000,
+      "fullDraftPreserved": true,
+      "evidencePreserved": true
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "originalAnalystStatus": "TRUNCATED",
+      "originalTaskOutcome": "DEGRADED",
+      "reassembledAnalystStatus": "COMPLETED",
+      "reassembledTaskOutcome": "COMPLETED",
+      "analysisChars": 5344,
+      "usedChars": 10628,
+      "maxChars": 24000,
+      "fullDraftPreserved": true,
+      "evidencePreserved": true
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "originalAnalystStatus": "TRUNCATED",
+      "originalTaskOutcome": "DEGRADED",
+      "reassembledAnalystStatus": "COMPLETED",
+      "reassembledTaskOutcome": "COMPLETED",
+      "analysisChars": 4837,
+      "usedChars": 10339,
+      "maxChars": 24000,
+      "fullDraftPreserved": true,
+      "evidencePreserved": true
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "originalAnalystStatus": "TRUNCATED",
+      "originalTaskOutcome": "DEGRADED",
+      "reassembledAnalystStatus": "COMPLETED",
+      "reassembledTaskOutcome": "COMPLETED",
+      "analysisChars": 4785,
+      "usedChars": 9223,
+      "maxChars": 24000,
+      "fullDraftPreserved": true,
+      "evidencePreserved": true
+    }
+  ]
+}

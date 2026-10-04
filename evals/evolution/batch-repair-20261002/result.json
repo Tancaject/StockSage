@@ -1,0 +1,373 @@
+{
+  "schema": "fundamentals_batch_repair_result_v1",
+  "generatedAt": "2026-10-02T10:55:50.810067+00:00",
+  "status": "REPAIRED_WITH_RECORDED_LIMITATIONS",
+  "scope": "FIXED_EVIDENCE_REAL_PROVIDER_COMPONENT_DIAGNOSTIC",
+  "releaseEligible": false,
+  "humanReviewed": false,
+  "formalQuality": "NO_DATA",
+  "automaticLearningAuthorized": false,
+  "evolutionBenefit": "UNVERIFIED",
+  "businessProfiles": [
+    {
+      "thinkingBudget": 4096,
+      "stageTimeoutSeconds": 180,
+      "cases": 6,
+      "completedAnswerPairs": 6,
+      "requiredNumericClaimsPerStage": {
+        "correct": 38,
+        "total": 39
+      },
+      "analysisSemanticPass": 0,
+      "finalSemanticPass": 0,
+      "reviewOrigin": "INDEPENDENT_AI_SOURCE_REVIEW",
+      "calls": 12,
+      "usage": {
+        "inputTokens": 38753,
+        "outputTokens": 26265,
+        "totalTokens": 65018
+      },
+      "executionAudit": {
+        "path": "evals/evolution/batch-repair-20261002/execution-audit.json",
+        "sha256": "0dbf5c2705a17fd018241af4267fe2a52778090a53fa2a327090e1b5dcd17710"
+      },
+      "qualityReview": {
+        "path": "evals/evolution/batch-repair-20261002/secondary-business-review.json",
+        "sha256": "2fb1e21fd7323d38bb80fda064e4e152ff3cf9333d7ed5e68f02e5dc57b8009b"
+      },
+      "plan": {
+        "path": "evals/evolution/batch-repair-20261002/plan.json",
+        "sha256": "a48760e67360d6510dff4a21a4e68df698381784ef3d18d7d976a1aa8ba6eebb"
+      }
+    },
+    {
+      "thinkingBudget": 8192,
+      "stageTimeoutSeconds": 180,
+      "cases": 6,
+      "completedAnswerPairs": 6,
+      "requiredNumericClaimsPerStage": {
+        "correct": 39,
+        "total": 39
+      },
+      "analysisSemanticPass": 1,
+      "finalSemanticPass": 0,
+      "reviewOrigin": "INDEPENDENT_AI_SOURCE_REVIEW",
+      "calls": 12,
+      "usage": {
+        "inputTokens": 41755,
+        "outputTokens": 34720,
+        "totalTokens": 76475
+      },
+      "executionAudit": {
+        "path": "evals/evolution/batch-repair-20261002/budget8192/execution-audit.json",
+        "sha256": "8b79155cde1b08cb9efdb5eea2bbdc36f7731988fbef4be9a924a8c9ecc8e3e5"
+      },
+      "qualityReview": {
+        "path": "evals/evolution/batch-repair-20261002/budget8192/secondary-business-review.json",
+        "sha256": "8ac037a210bdf4de241733df8f8ee081d88d25995db92c7aa8735a44d5ec1078"
+      },
+      "plan": {
+        "path": "evals/evolution/batch-repair-20261002/budget8192/plan.json",
+        "sha256": "5a4dbe365bff911834e242f241a45ded3a6f39602a1d2f56e507e77ccdfa5b64"
+      }
+    },
+    {
+      "thinkingBudget": 32768,
+      "stageTimeoutSeconds": 300,
+      "cases": 6,
+      "completedAnswerPairs": 6,
+      "requiredNumericClaimsPerStage": {
+        "correct": 39,
+        "total": 39
+      },
+      "analysisSemanticPass": 6,
+      "finalSemanticPass": 6,
+      "reviewOrigin": "INDEPENDENT_AI_SOURCE_REVIEW",
+      "calls": 12,
+      "usage": {
+        "inputTokens": 43620,
+        "outputTokens": 81681,
+        "totalTokens": 125301
+      },
+      "executionAudit": {
+        "path": "evals/evolution/batch-repair-20261002/budget32768-timeout300/execution-audit.json",
+        "sha256": "bc229e94505111b16143d8754253fcc93e1ecd413d962875a6fefe3cc4a4b8ba"
+      },
+      "qualityReview": {
+        "path": "evals/evolution/batch-repair-20261002/budget32768-timeout300/secondary-business-review.json",
+        "sha256": "ab4f94d31360f48b54186db21bc0945a71ab0793e82a7303db934f745430a88b"
+      },
+      "plan": {
+        "path": "evals/evolution/batch-repair-20261002/budget32768-timeout300/plan.json",
+        "sha256": "ade78ce31111e0ef3c9575acac423317227f6dd43b74d0e8368d40262180f77a"
+      }
+    }
+  ],
+  "selectedBusinessDefaults": {
+    "model": "qwen3.8-max",
+    "thinkingBudget": 32768,
+    "enableThinking": true,
+    "stageTimeoutSeconds": 300,
+    "httpReadTimeout": "PT5M",
+    "retryAttempts": 1
+  },
+  "defaultVerification": {
+    "path": "evals/evolution/batch-repair-20261002/production-defaults-preflight/verification.json",
+    "sha256": "e94c419cb769991399b6ae171fc2a91a1c633909ff9b78e34eb688bd92fb3192"
+  },
+  "selectedBusinessOutcomes": {
+    "caseCount": 6,
+    "degradedTasks": 4,
+    "truncatedAnalystDrafts": 4,
+    "sumOfTwoStageDurationMs": {
+      "min": 145198,
+      "max": 445639,
+      "sum": 1780265
+    },
+    "audit": {
+      "path": "evals/evolution/batch-repair-20261002/budget32768-timeout300/execution-outcomes.json",
+      "sha256": "838f45c0b5fd490f7587f3a9ac23c73e2ac4a6bad6e4e8563d6ce63f26616723"
+    }
+  },
+  "nativeEvaluator": {
+    "use": "AI_ASSISTED_DIAGNOSTIC_ONLY",
+    "currentConfig": {
+      "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+      "model": "qwen3.8-max",
+      "temperature": 0,
+      "enable_thinking": true,
+      "thinking_budget": 32768,
+      "timeout_seconds": 300,
+      "max_tokens": 12000,
+      "max_calls": 4
+    },
+    "v4FullFirstAttempt": {
+      "counts": {
+        "planned": 16,
+        "completed": 16,
+        "providerCalls": 38,
+        "technicalValid": 12,
+        "technicalInvalid": 4,
+        "validPass": 3,
+        "validFail": 8,
+        "validNoData": 1,
+        "correctDecisions": 11,
+        "falsePasses": 0,
+        "falseFailures": 0,
+        "noDecision": 5,
+        "allAttemptAgreement": 0.6875,
+        "technicalCoverage": 0.75,
+        "negativeStages": 12,
+        "negativeCorrectFail": 8,
+        "negativeNoDecision": 4,
+        "positiveStages": 4,
+        "positiveCorrectPass": 3,
+        "positiveNoDecision": 1
+      },
+      "audit": {
+        "path": "evals/evolution/batch-repair-20261002/judge-v4-high-summary.json",
+        "sha256": "371fd3f81cc6f19d88644d5534199928fbc3856ba5196aa3eea204794a80b1cf"
+      }
+    },
+    "v5TargetedLengthRecheck": {
+      "stages": 3,
+      "correctDecisions": 3,
+      "technicalValid": 3,
+      "truncated": 0,
+      "audit": {
+        "path": "evals/evolution/batch-repair-20261002/judge-v5-length-summary.json",
+        "sha256": "342ace82630a5b1656caa1ee81c772c7f741f55a0162a8b0f0ed174961219abb"
+      },
+      "selection": "ONLY_THREE_V4_LENGTH_FAILURES",
+      "fullV5Accuracy": null
+    },
+    "unresolvedSamples": [
+      "new-pep-control-analysis",
+      "old-tgt-cash-analysis"
+    ],
+    "dimensionAccuracy": "NOT_ESTABLISHED",
+    "knownLimits": [
+      "Unresolved placeholder output remains in the original records.",
+      "Correct stage decisions do not establish correct decisions for every dimension.",
+      "Targeted retests must not be combined into a new full-suite first-attempt accuracy."
+    ]
+  },
+  "judgeUsageGroups": [
+    {
+      "group": "v2_live",
+      "calls": 37,
+      "usage": {
+        "prompt_tokens": 274132,
+        "completion_tokens": 72144,
+        "total_tokens": 346276
+      },
+      "rawReports": [
+        {
+          "path": "evals/evolution/batch-repair-20261002/judge-ibm.json",
+          "sha256": "fde3742cac6f86f9e5aa4478f1a4da12fdd05e0ad98c0d4cdbdca3f3d61392be"
+        },
+        {
+          "path": "evals/evolution/batch-repair-20261002/judge-jnj.json",
+          "sha256": "c1bb88ec2a57d5702a13b524ac98e5b06794cde026545f0c41918337d2b97212"
+        },
+        {
+          "path": "evals/evolution/batch-repair-20261002/judge-pep.json",
+          "sha256": "96c189475ae9b93341dd4e93cdd40560122e0669ddc1a9e747c8e1d8f543fb6b"
+        },
+        {
+          "path": "evals/evolution/batch-repair-20261002/judge-tgt.json",
+          "sha256": "0b08c4e0d93dd7b7bf472e2fe2332b7174a74bb653811a4241a5b874a45a2562"
+        },
+        {
+          "path": "evals/evolution/batch-repair-20261002/judge-negative-controls.json",
+          "sha256": "e530a2d58f7e02ad35f9856a5102dc83b1e593477abad0f573d12d56e814527f"
+        }
+      ]
+    },
+    {
+      "group": "v3_real_wrong_answers",
+      "calls": 24,
+      "usage": {
+        "prompt_tokens": 191968,
+        "completion_tokens": 80953,
+        "total_tokens": 272921
+      },
+      "rawReports": [
+        {
+          "path": "evals/evolution/batch-repair-20261002/judge-new-ibm-cash.json",
+          "sha256": "2197e6a2aeeabe1dc6dfbe40574dc3787759b57330c23d347ef7cba14a22e19a"
+        },
+        {
+          "path": "evals/evolution/batch-repair-20261002/judge-new-ibm-liquidity.json",
+          "sha256": "6186c243e77263385983f5a8685e3a77c00902142d0b5889620da4e1eab5a0a9"
+        },
+        {
+          "path": "evals/evolution/batch-repair-20261002/judge-new-jnj-cash.json",
+          "sha256": "5140536636d9f3806cd5ea20e869ac4a7c13b7a6a7a449914205b4e985323e40"
+        },
+        {
+          "path": "evals/evolution/batch-repair-20261002/judge-new-jnj-liquidity.json",
+          "sha256": "36d42a1509cad90586d435db00432187e2114daa5275b4afce34732bd8f0a385"
+        },
+        {
+          "path": "evals/evolution/batch-repair-20261002/judge-new-pep-control.json",
+          "sha256": "6ed0296e21cc179a1868651634fe3fcde7836a2703aafaf52d3e6f4130d19f91"
+        },
+        {
+          "path": "evals/evolution/batch-repair-20261002/judge-new-tgt-control.json",
+          "sha256": "d002f08120a4fdf9c96c67270054c31d8733d16b67438cddd4252dd6da5c2b06"
+        }
+      ]
+    },
+    {
+      "group": "v4_full",
+      "calls": 38,
+      "usage": {
+        "prompt_tokens": 464514,
+        "completion_tokens": 198367,
+        "total_tokens": 662881
+      },
+      "rawReports": [
+        {
+          "path": "evals/evolution/batch-repair-20261002/judge-v4-high.json",
+          "sha256": "a4d015d23f95b9e6a3f490cbb58ec967d12dad911622af94e3e58ba20e7d1ac7"
+        }
+      ]
+    },
+    {
+      "group": "v5_targeted",
+      "calls": 7,
+      "usage": {
+        "prompt_tokens": 82863,
+        "completion_tokens": 42134,
+        "total_tokens": 124997
+      },
+      "rawReports": [
+        {
+          "path": "evals/evolution/batch-repair-20261002/judge-v5-length.json",
+          "sha256": "7422ad26723879da0f36187ae189020ed75c7cb45f10d7fa6ce3d98c4844279c"
+        }
+      ]
+    }
+  ],
+  "totalProviderCalls": 142,
+  "totalProviderTokens": 1673869,
+  "unknownUsageCalls": 0,
+  "usageScope": "THIS_REPAIR_ONLY_EXCLUDES_ORIGINAL_BATCH_LEARNING_CALLS",
+  "cachedReplayProviderCalls": 0,
+  "monetaryCost": {
+    "status": "NO_DATA",
+    "reason": "No bound billing rate card; no monetary estimate."
+  },
+  "validation": {
+    "fastHarness": "PASS",
+    "pythonEvaluationChecks": 246,
+    "pythonEvidence": {
+      "source": "ACTUAL_TERMINAL_TOOL_OUTPUT",
+      "standaloneLog": null,
+      "audit": {
+        "path": "evals/evolution/batch-repair-20261002/judge-v5-length-summary.json",
+        "sha256": "342ace82630a5b1656caa1ee81c772c7f741f55a0162a8b0f0ed174961219abb"
+      }
+    },
+    "backendHttpContract": {
+      "path": "evals/evolution/batch-repair-20261002/production-defaults-preflight/http-contract-test.xml",
+      "sha256": "e0e52885bef8f72e930050a0a13166a4f1e6b68a948402351b515bddd99d8364"
+    },
+    "finalJar": {
+      "schema": "fundamentals_evolution_build_v1",
+      "gitSha": "1abd3c197ee8543a3ab5c3f796d3beb656b70f4c",
+      "sourceState": "WORKTREE_SNAPSHOT",
+      "sourceTreeSha256": "1b715a6000c2e37bcd8c5dbc73ed636faeaae957215518de6b0cce9fb9a2a0ce",
+      "artifactSha256": "91097907edef9c32d1ecb5af93f7b98b8ba7bc4cf8df96a8c57abeafa8b8da91",
+      "artifactFormat": "SPRING_BOOT_JAR",
+      "builtAt": "2026-10-02T10:32:29.383056+00:00"
+    },
+    "residentServiceRestarted": false,
+    "fullStackAcceptance": false
+  },
+  "frozenArchives": [
+    {
+      "path": "evals/evolution/batch-repair-20261002/../batch-learning-20261002/frozen-inputs.zip",
+      "sha256": "b4a05be8d86b2729a351ee3313695aeeec0f7bf411460e7b28d5d561e3a78773"
+    },
+    {
+      "path": "evals/evolution/batch-repair-20261002/frozen-v3-inputs.zip",
+      "sha256": "45117353b84bc881424bfc4e2d41adce2828d3eede891a19e44f859e9bbea034"
+    }
+  ],
+  "sourceSnapshots": [
+    {
+      "path": "evals/evolution/batch-repair-20261002/evolution_ai_review.v2.py",
+      "sha256": "740d2c9105dd2e342ced0d642c443054cb2ef34244444ee91da8195aef2666f8"
+    },
+    {
+      "path": "evals/evolution/batch-repair-20261002/evolution_ai_review.v3.py",
+      "sha256": "28b754f495003bc8267ce3515769836f1dc4f4d7ecbf138f0a230cdc1956bb74"
+    },
+    {
+      "path": "evals/evolution/batch-repair-20261002/evolution_ai_review.v4.py",
+      "sha256": "da95a027aed5985328d1a73569991c3044c86382f0a8266c2b7ee8fc20c97397"
+    },
+    {
+      "path": "evals/evolution/batch-repair-20261002/evolution_ai_review.v5.py",
+      "sha256": "b471b41a303222f6b9dd526fccc00f607a885dd5457935a557c764fb94a46411"
+    },
+    {
+      "path": "evals/evolution/batch-repair-20261002/evolution_quality.v4.py",
+      "sha256": "e0d1f17d52003287a1010ce58b34880e07f1df1004d9252e69eb1c24c8bfb35b"
+    }
+  ],
+  "learning": {
+    "generatedExperiences": 0,
+    "generatedCandidates": 0,
+    "transferCasesRun": 0,
+    "activated": false
+  },
+  "followUps": [
+    "Retain remaining native-review errors for calibration.",
+    "Address existing 4500-character analyst-draft truncation.",
+    "Evaluate ordinary SSE whole-generation deadline separately.",
+    "Learn only from source-confirmed method failures under the selected business configuration."
+  ]
+}

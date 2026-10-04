@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-02-1-1",
+    "caseId": "jnj-fy2025q3-quarter-reconstruction",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-validation-20261002\\raw-development-02",
+  "executionSha256": "260111154adbaf1d041fa2695b1dd17e475526ee5a06e5b34424a2ff4aaaaab0",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

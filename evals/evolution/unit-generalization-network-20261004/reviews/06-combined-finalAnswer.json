@@ -1,0 +1,177 @@
+{
+  "schema": "fundamentals_two_stage_ai_source_review_v1",
+  "origin": "CODEX_NONBLIND_AI_SOURCE_REVIEW_NOT_HUMAN_OR_CALIBRATED_JUDGE",
+  "case": 6,
+  "caseId": "tgt-fy2025q3-liquidity",
+  "arm": "combined",
+  "stage": "finalAnswer",
+  "releaseEligible": false,
+  "rubric": {
+    "schema": "fundamentals_evolution_rubric_v1",
+    "sha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+    "scope": "FINAL_ANSWER",
+    "invocationScope": "final-answer",
+    "dimensions": {
+      "claim_support": "核查最终回答是否有实际可见证据支持，包括整合时新增的事实和因果；不能仅因分析稿曾这样表述就判为有据，也不能把分析中的可能性写成确定事实。",
+      "numeric_period_correctness": "核查最终呈现的金额、科目、单位、期间与公式是否正确，是否在汇总时遗漏、误归类或改写；以最终答案和本题 gold 复核，不沿用分析稿分数。",
+      "counterevidence": "核查最终判断是否保留与用户问题有关、足以改变结论的反向证据；允许压缩分析稿，但不能只留下有利部分，不要求照搬所有段落。",
+      "unknowns": "核查最终答案是否保留实际影响判断的证据局限，避免把账面关系扩大为经营原因、未来结果或偿付保证；不以机械复述限制词或额外免责声明作为通过条件。"
+    }
+  },
+  "binding": {
+    "answerSha256": "7164bf82c4ed35099228a91edc735a4085167814b6208fd56fb937b9d7779a94",
+    "resultSha256": "b4ad385a474cdd66a870a347afd64af824f966e8ad2bca3b8be499345b7d304e",
+    "requestSha256": "a7a28187bcfd984847beae82aa99a11dbb114668d8999fd23eb567ae64ef438e",
+    "sourceTraceSha256": "95cf79c58dbce796a298aba8c386a612343dbbf951f0d6f5213257502d92e48e",
+    "goldSha256": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+    "policySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad"
+  },
+  "requiredFacts": [
+    {
+      "field": "currentRatioCurrent",
+      "period": "2025-11-01",
+      "unit": "ratio",
+      "observed": "0.97",
+      "expected": "0.9746",
+      "answerQuote": "按用户指定口径，Target Corporation（TGT）截至 **2025-11-01** 的短期流动性缓冲较 **2025-02-01** **没有明显增强**：流动比率从 **0.94** 小幅升至 **0.97**，但仍低于 1；同时现金下降使净债务明显上升，抵消了流动比率改善和一年内到期债务下降带来的正面影响。[E1]",
+      "status": "PASS"
+    },
+    {
+      "field": "totalDebtCurrent",
+      "period": "2025-11-01",
+      "unit": "million",
+      "observed": "16499",
+      "expected": "16499.0000",
+      "answerQuote": "| 有息债务总额 | **16,499 百万美元** | 1,133 + 15,366 |",
+      "status": "PASS"
+    },
+    {
+      "field": "netDebtCurrent",
+      "period": "2025-11-01",
+      "unit": "million",
+      "observed": "12677",
+      "expected": "12677.0000",
+      "answerQuote": "| 净债务 | **12,677 百万美元** | 16,499 − 3,822 |",
+      "status": "PASS"
+    },
+    {
+      "field": "currentRatioPrior",
+      "period": "2025-02-01",
+      "unit": "ratio",
+      "observed": "0.94",
+      "expected": "0.9353",
+      "answerQuote": "按用户指定口径，Target Corporation（TGT）截至 **2025-11-01** 的短期流动性缓冲较 **2025-02-01** **没有明显增强**：流动比率从 **0.94** 小幅升至 **0.97**，但仍低于 1；同时现金下降使净债务明显上升，抵消了流动比率改善和一年内到期债务下降带来的正面影响。[E1]",
+      "status": "PASS"
+    },
+    {
+      "field": "totalDebtPrior",
+      "period": "2025-02-01",
+      "unit": "million",
+      "observed": "15940",
+      "expected": "15940.0000",
+      "answerQuote": "| 有息债务总额 | **15,940 百万美元** | 1,636 + 14,304 |",
+      "status": "PASS"
+    },
+    {
+      "field": "netDebtPrior",
+      "period": "2025-02-01",
+      "unit": "million",
+      "observed": "11178",
+      "expected": "11178.0000",
+      "answerQuote": "| 净债务 | **11,178 百万美元** | 15,940 − 4,762 |",
+      "status": "PASS"
+    }
+  ],
+  "additionalNumericChecks": [
+    {
+      "observed": "4.20",
+      "expected": "4.195855101497121293624585000",
+      "formula": "(20702/21242/(19454/20799)-1)*100",
+      "answerQuote": "| 流动比率 | 0.94 | 0.97 | +0.04 | +4.20% |",
+      "status": "PASS"
+    },
+    {
+      "observed": "3.51",
+      "expected": "3.506900878293601003764115433",
+      "formula": "559/15940*100",
+      "answerQuote": "| 有息债务总额 | 15,940 百万美元 | 16,499 百万美元 | +559 百万美元 | +3.51% |",
+      "status": "PASS"
+    },
+    {
+      "observed": "13.41",
+      "expected": "13.41027017355519770978708177",
+      "formula": "1499/11178*100",
+      "answerQuote": "| 净债务 | 11,178 百万美元 | 12,677 百万美元 | +1,499 百万美元 | +13.41% |",
+      "status": "PASS"
+    },
+    {
+      "observed": "-19.74",
+      "expected": "-19.73960520789584208315833683",
+      "formula": "-940/4762*100",
+      "answerQuote": "| 现金及现金等价物 | 4,762 百万美元 | 3,822 百万美元 | -940 百万美元 | -19.74% |",
+      "status": "PASS"
+    },
+    {
+      "observed": "30.75",
+      "expected": "30.74572127139364303178484108",
+      "formula": "503/1636*100",
+      "answerQuote": "| 一年内到期的长期债务及其他借款 | 1,636 百万美元 | 1,133 百万美元 | -503 百万美元 | -30.75% |",
+      "status": "PASS"
+    }
+  ],
+  "dimensions": {
+    "claim_support": {
+      "status": "FAIL",
+      "answerQuote": "因此，基于本轮资产负债表证据，TGT 的短期流动性缓冲较 **2025-02-01** **并未明显增强**。公司短期流动性仍较依赖经营现金流入、应付账款周转和外部融资能力，而不是仅靠账面现金与流动资产覆盖。[E1]",
+      "reason": "Same unqualified company financing-dependence inference survives final synthesis. The statement goes beyond static asset/liability coverage; the evidence supplies no operating cash flow, turnover or financing arrangement. Conditional need for future inflows would be supported as a general mechanism."
+    },
+    "counterevidence": {
+      "status": "PASS",
+      "answerQuote": "### 第四，一年内到期债务下降是正面因素",
+      "reason": "Relevant opposing signals and comparison boundaries retained."
+    },
+    "unknowns": {
+      "status": "PASS",
+      "answerQuote": "2. **缺少授信额度信息**：无法确认公司是否有未使用银行授信作为备用流动性。  ",
+      "reason": "Unavailable commercial causes or disclosure details remain bounded."
+    },
+    "numeric_period_correctness": {
+      "status": "PASS",
+      "answerQuote": "按用户指定口径，Target Corporation（TGT）截至 **2025-11-01** 的短期流动性缓冲较 **2025-02-01** **没有明显增强**：流动比率从 **0.94** 小幅升至 **0.97**，但仍低于 1；同时现金下降使净债务明显上升，抵消了流动比率改善和一年内到期债务下降带来的正面影响。[E1]",
+      "reason": "Required facts, source units and fiscal periods reviewed; additional calculations use the frozen absolute tolerance 0.01."
+    }
+  },
+  "requiredPoints": [
+    {
+      "id": "p1",
+      "requirement": "两个报表时点和流动比率正确，以期末流动资产/期末流动负债计算",
+      "status": "PASS"
+    },
+    {
+      "id": "p2",
+      "requirement": "按题目定义加总有息债务，不将总负债当债务或重复加计流动部分",
+      "status": "PASS"
+    },
+    {
+      "id": "p3",
+      "requirement": "两个时点净债务按指定现金和投资口径计算正确",
+      "status": "PASS"
+    },
+    {
+      "id": "p4",
+      "requirement": "结合实际比率及净债务变化给出审慎判断；方向混合时如实反映",
+      "status": "PASS"
+    }
+  ],
+  "sourceQuotes": [
+    "Total current assets |  | 20,702 |  | 19,454 |  | 20,554",
+    "Total current liabilities |  | 21,242 |  | 20,799 |  | 21,792",
+    "Current portion of long-term debt and other borrowings |  | 1,133 |  | 1,636 |  | 1,635",
+    "Long-term debt and other borrowings |  | 15,366 |  | 14,304 |  | 14,346",
+    "Cash and cash equivalents |  | $ 3,822 |  | $ 4,762 |  | $ 3,433"
+  ],
+  "notes": [
+    "Core amounts, ratios, mixed signals and inventory-versus-cash composition are correct. Failure concerns the scope/qualification of one additional inference, not a fabricated transaction or wrong core calculation."
+  ],
+  "semanticStatus": "FAIL"
+}

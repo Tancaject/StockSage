@@ -1,0 +1,58 @@
+INTERNATIONAL BUSINESS MACHINES CORPORATION COMPARATIVE FINANCIAL RESULTS (Unaudited; Dollars in millions except per share amounts)
+
+ | Three Months Ended September 30, |  |  | Nine Months Ended September 30, | 
+ | 2025 |  |  | 2024 |  |  | 2025 |  |  | 2024 | 
+REVENUE BY SEGMENT |  |  |  |  |  |  |  |  |  |  | 
+Software | $ 7,209 |  |  | $ 6,524 |  |  | $ 20,932 |  |  | $ 19,162 | 
+Consulting | 5,324 |  |  | 5,152 |  |  | 15,706 |  |  | 15,517 | 
+Infrastructure | 3,559 |  |  | 3,042 |  |  | 10,586 |  |  | 9,764 | 
+Financing | 200 |  |  | 181 |  |  | 557 |  |  | 543 | 
+Other | 38 |  |  | 68 |  |  | 68 |  |  | 214 | 
+TOTAL REVENUE | 16,331 |  |  | 14,968 |  |  | 47,849 |  |  | 45,199 | 
+ |  |  |  |  |  |  |  |  |  |  | 
+GROSS PROFIT | 9,360 |  |  | 8,420 |  |  | 27,369 |  |  | 25,112 | 
+ |  |  |  |  |  |  |  |  |  |  | 
+GROSS PROFIT MARGIN |  |  |  |  |  |  |  |  |  |  | 
+Software | 83.1 | % |  | 83.2 | % |  | 83.5 | % |  | 83.1 | %
+Consulting | 29.3 | % |  | 28.4 | % |  | 28.0 | % |  | 26.7 | %
+Infrastructure | 57.2 | % |  | 55.0 | % |  | 57.7 | % |  | 55.3 | %
+Financing | 45.6 | % |  | 47.2 | % |  | 45.7 | % |  | 48.2 | %
+ |  |  |  |  |  |  |  |  |  |  | 
+TOTAL GROSS PROFIT MARGIN | 57.3 | % |  | 56.3 | % |  | 57.2 | % |  | 55.6 | %
+ |  |  |  |  |  |  |  |  |  |  | 
+EXPENSE AND OTHER INCOME |  |  |  |  |  |  |  |  |  |  | 
+SG&A | 4,748 |  |  | 4,911 |  |  | 14,661 |  |  | 14,823 | 
+R&D | 2,082 |  |  | 1,876 |  |  | 6,129 |  |  | 5,512 | 
+Intellectual property and custom development income | (219) |  |  | (238) |  |  | (687) |  |  | (696) | 
+Other (income) and expense (1) | (173) |  |  | 2,244 |  |  | (376) |  |  | 1,694 | 
+Interest expense | 492 |  |  | 429 |  |  | 1,457 |  |  | 1,288 | 
+TOTAL EXPENSE AND OTHER INCOME | 6,931 |  |  | 9,222 |  |  | 21,184 |  |  | 22,621 | 
+ |  |  |  |  |  |  |  |  |  |  | 
+INCOME/(LOSS) FROM CONTINUING OPERATIONS BEFORE INCOME TAXES | 2,430 |  |  | (802) |  |  | 6,185 |  |  | 2,491 | 
+Pre-tax margin | 14.9 | % |  | (5.4) | % |  | 12.9 | % |  | 5.5 | %
+Provision for/(Benefit from) income taxes (1) | 686 |  |  | (485) |  |  | 1,193 |  |  | (597) | 
+Effective tax rate | 28.2 | % |  | 60.4 | % |  | 19.3 | % |  | (24.0) | %
+ |  |  |  |  |  |  |  |  |  |  | 
+INCOME/(LOSS) FROM CONTINUING OPERATIONS | $ 1,744 |  |  | $ (317) |  |  | $ 4,992 |  |  | $ 3,088 | 
+ |  |  |  |  |  |  |  |  |  |  | 
+DISCONTINUED OPERATIONS |  |  |  |  |  |  |  |  |  |  | 
+Income/(loss) from discontinued operations, net of taxes | 0 |  |  | (13) |  |  | 1 |  |  | 21 | 
+ |  |  |  |  |  |  |  |  |  |  | 
+NET INCOME/(LOSS) (1) | $ 1,744 |  |  | $ (330) |  |  | $ 4,993 |  |  | $ 3,109 | 
+ |  |  |  |  |  |  |  |  |  |  | 
+EARNINGS/(LOSS) PER SHARE OF COMMON STOCK (1) |  |  |  |  |  |  |  |  |  |  | 
+Assuming Dilution |  |  |  |  |  |  |  |  |  |  | 
+Continuing Operations | $ 1.84 |  |  | $ (0.34) |  |  | $ 5.27 |  |  | $ 3.30 | 
+Discontinued Operations | $ 0.00 |  |  | $ (0.01) |  |  | $ 0.00 |  |  | $ 0.02 | 
+TOTAL | $ 1.84 |  |  | $ (0.36) |  |  | $ 5.27 |  |  | $ 3.32 | 
+ |  |  |  |  |  |  |  |  |  |  | 
+Basic |  |  |  |  |  |  |  |  |  |  | 
+Continuing Operations | $ 1.87 |  |  | $ (0.34) |  |  | $ 5.36 |  |  | $ 3.36 | 
+Discontinued Operations | $ 0.00 |  |  | $ (0.01) |  |  | $ 0.00 |  |  | $ 0.02 | 
+TOTAL | $ 1.87 |  |  | $ (0.36) |  |  | $ 5.36 |  |  | $ 3.38 | 
+ |  |  |  |  |  |  |  |  |  |  | 
+WEIGHTED-AVERAGE NUMBER OF COMMON SHARES OUTSTANDING (M's) |  |  |  |  |  |  |  |  |  |  | 
+Assuming Dilution | 948.9 |  |  | 923.6 |  |  | 947.4 |  |  | 935.4 | 
+Basic | 933.9 |  |  | 923.6 |  |  | 930.9 |  |  | 920.3 | 
+____________________
+(1) 2024 includes the impact of a pension settlement charge of $2.7 billion ($2.0 billion net of tax).

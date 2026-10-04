@@ -1,0 +1,1077 @@
+{
+  "schema": "native_judge_v4_independent_result_audit_v1",
+  "reviewer": "AI-independent-audit-not-human",
+  "generatedAt": "2026-10-02T10:45:22.020060+00:00",
+  "status": "COMPLETED_WITH_UNRESOLVED_FAILURES",
+  "releaseEligible": false,
+  "humanReviewed": false,
+  "scope": "FIXED_SAVED_ANSWER_CALIBRATION_NOT_UNSEEN_HOLDOUT",
+  "plan": {
+    "path": "evals\\evolution\\batch-repair-20261002\\judge-v4-high-plan.json",
+    "sha256": "ec84273e326b59082295cd6f427e6bbcb0d4a47bdbe911873386e88589cd1b84"
+  },
+  "report": {
+    "path": "evals\\evolution\\batch-repair-20261002\\judge-v4-high.json",
+    "sha256": "a4d015d23f95b9e6a3f490cbb58ec967d12dad911622af94e3e58ba20e7d1ac7"
+  },
+  "frozenInputsVerified": true,
+  "inputBindings": [
+    {
+      "path": "evals\\eval_common.py",
+      "expectedSha256": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c",
+      "observedSha256": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\cases.jsonl",
+      "expectedSha256": "79dc78e1c056f0c37855875383df2850cea155d14304c218ee294e88bbd213f4",
+      "observedSha256": "79dc78e1c056f0c37855875383df2850cea155d14304c218ee294e88bbd213f4"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\gold.jsonl",
+      "expectedSha256": "1b31f7cf00852cb0a4696385faac1954b344a0d50563cd5033ef71b5c106cbc1",
+      "observedSha256": "1b31f7cf00852cb0a4696385faac1954b344a0d50563cd5033ef71b5c106cbc1"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\raw-development-pep\\baseline-v1.report.json",
+      "expectedSha256": "aec0a478c059d2546c4772fa867ce440b5f07d8a5d326af25733fad3ae58d360",
+      "observedSha256": "aec0a478c059d2546c4772fa867ce440b5f07d8a5d326af25733fad3ae58d360"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\raw-development-tgt\\baseline-v1.report.json",
+      "expectedSha256": "4366a2e3443e7388f1c4e5c3e611e5600bda7ff5f8d02e8e40f5e5defac1caae",
+      "observedSha256": "4366a2e3443e7388f1c4e5c3e611e5600bda7ff5f8d02e8e40f5e5defac1caae"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\secondary-review-pep-tgt.json",
+      "expectedSha256": "9505dd6f6c6141aae96825fb0fc899fd08b22024bc0badb2e612f5765d0a9fe4",
+      "observedSha256": "9505dd6f6c6141aae96825fb0fc899fd08b22024bc0badb2e612f5765d0a9fe4"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "expectedSha256": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a",
+      "observedSha256": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "expectedSha256": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336",
+      "observedSha256": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-ibm-cash\\baseline-v1.report.json",
+      "expectedSha256": "8fd6cc27be5e807f455a485b2b73183b58464a7e8b5e2aa737606fcff2496e76",
+      "observedSha256": "8fd6cc27be5e807f455a485b2b73183b58464a7e8b5e2aa737606fcff2496e76"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-ibm-liquidity\\baseline-v1.report.json",
+      "expectedSha256": "d9f328f24fac3232ba1955cc222d8d835a9ab2c71df81daa0a6904b07f6a0606",
+      "observedSha256": "d9f328f24fac3232ba1955cc222d8d835a9ab2c71df81daa0a6904b07f6a0606"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-jnj-cash\\baseline-v1.report.json",
+      "expectedSha256": "b66199eff6d92215b574c2e1654028380fd77d709bbba62ecf10b6d8a10b356d",
+      "observedSha256": "b66199eff6d92215b574c2e1654028380fd77d709bbba62ecf10b6d8a10b356d"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-jnj-liquidity\\baseline-v1.report.json",
+      "expectedSha256": "f8d2a2bd7f9b0cae488ff265d9a95e17042d045f65dd963d37a8278eb1a8542a",
+      "observedSha256": "f8d2a2bd7f9b0cae488ff265d9a95e17042d045f65dd963d37a8278eb1a8542a"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-pep-control\\baseline-v1.report.json",
+      "expectedSha256": "48f22e73216cef016fc36f9ebbe802a653c7e33f775df8301a8ba5e05c3846ce",
+      "observedSha256": "48f22e73216cef016fc36f9ebbe802a653c7e33f775df8301a8ba5e05c3846ce"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-tgt-control\\baseline-v1.report.json",
+      "expectedSha256": "9140245dd08c512243887f592bc6d7d3f6f7fbe418785630cec40ca4f335be16",
+      "observedSha256": "9140245dd08c512243887f592bc6d7d3f6f7fbe418785630cec40ca4f335be16"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\run_judge_v4.py",
+      "expectedSha256": "b305674ddbbe53add50036f3a9f69e6bc3de0ed269de69cf0d64ec10d89ddbbe",
+      "observedSha256": "b305674ddbbe53add50036f3a9f69e6bc3de0ed269de69cf0d64ec10d89ddbbe"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "expectedSha256": "2fb1e21fd7323d38bb80fda064e4e152ff3cf9333d7ed5e68f02e5dc57b8009b",
+      "observedSha256": "2fb1e21fd7323d38bb80fda064e4e152ff3cf9333d7ed5e68f02e5dc57b8009b"
+    },
+    {
+      "path": "evals\\evolution_ai_review.py",
+      "expectedSha256": "da95a027aed5985328d1a73569991c3044c86382f0a8266c2b7ee8fc20c97397",
+      "observedSha256": "da95a027aed5985328d1a73569991c3044c86382f0a8266c2b7ee8fc20c97397"
+    },
+    {
+      "path": "evals\\evolution_dataset.py",
+      "expectedSha256": "12df23500bf7ee45a2ee0ab955924bf7368e30c1a7e2bb2e20a5f993fa24ee65",
+      "observedSha256": "12df23500bf7ee45a2ee0ab955924bf7368e30c1a7e2bb2e20a5f993fa24ee65"
+    },
+    {
+      "path": "evals\\evolution_quality.py",
+      "expectedSha256": "e0d1f17d52003287a1010ce58b34880e07f1df1004d9252e69eb1c24c8bfb35b",
+      "observedSha256": "e0d1f17d52003287a1010ce58b34880e07f1df1004d9252e69eb1c24c8bfb35b"
+    },
+    {
+      "path": "evals\\evolution_rubric.py",
+      "expectedSha256": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea",
+      "observedSha256": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea"
+    },
+    {
+      "path": "evals\\run_evaluation_agent.py",
+      "expectedSha256": "4c7843a9269262fe6398be1f3c95fbf916dfc0c0eb83019626c7f7c15471abdf",
+      "observedSha256": "4c7843a9269262fe6398be1f3c95fbf916dfc0c0eb83019626c7f7c15471abdf"
+    },
+    {
+      "path": "evals\\run_ragas_eval.py",
+      "expectedSha256": "d024ccd42015c560b978c873c4bfccc4cd6c70c72753f003c5c521018f2517f3",
+      "observedSha256": "d024ccd42015c560b978c873c4bfccc4cd6c70c72753f003c5c521018f2517f3"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\evolution_ai_review.v4.py",
+      "expectedSha256": "da95a027aed5985328d1a73569991c3044c86382f0a8266c2b7ee8fc20c97397",
+      "observedSha256": "da95a027aed5985328d1a73569991c3044c86382f0a8266c2b7ee8fc20c97397"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\evolution_quality.v4.py",
+      "expectedSha256": "e0d1f17d52003287a1010ce58b34880e07f1df1004d9252e69eb1c24c8bfb35b",
+      "observedSha256": "e0d1f17d52003287a1010ce58b34880e07f1df1004d9252e69eb1c24c8bfb35b"
+    }
+  ],
+  "config": {
+    "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+    "model": "qwen3.8-max",
+    "temperature": 0,
+    "enable_thinking": true,
+    "thinking_budget": 32768,
+    "timeout_seconds": 300,
+    "max_tokens": 6000,
+    "max_calls": 4
+  },
+  "testEvidence": {
+    "focused": {
+      "passed": 19,
+      "command": "python -X utf8 -m unittest test_evolution_ai_review test_evolution_quality",
+      "cwd": "evals"
+    },
+    "full": {
+      "passed": 246,
+      "command": "python -X utf8 -m unittest discover evals"
+    }
+  },
+  "counts": {
+    "planned": 16,
+    "completed": 16,
+    "providerCalls": 38,
+    "technicalValid": 12,
+    "technicalInvalid": 4,
+    "validPass": 3,
+    "validFail": 8,
+    "validNoData": 1,
+    "correctDecisions": 11,
+    "falsePasses": 0,
+    "falseFailures": 0,
+    "noDecision": 5,
+    "allAttemptAgreement": 0.6875,
+    "technicalCoverage": 0.75,
+    "negativeStages": 12,
+    "negativeCorrectFail": 8,
+    "negativeNoDecision": 4,
+    "positiveStages": 4,
+    "positiveCorrectPass": 3,
+    "positiveNoDecision": 1
+  },
+  "usage": {
+    "prompt_tokens": 464514,
+    "completion_tokens": 198367,
+    "total_tokens": 662881,
+    "cached_tokens": 197120,
+    "reasoning_tokens": 111133
+  },
+  "missingUsageFields": [],
+  "observedModels": [
+    "qwen3.8-max"
+  ],
+  "monetaryCost": {
+    "value": null,
+    "reason": "No verified billing price or invoice for this account; report exact provider token usage instead."
+  },
+  "truncationAudit": {
+    "method": "Count complete JSON claim objects sequentially using JSONDecoder.raw_decode after the claims array begins; count visible fact property starts separately. No partial verdict is used for grading.",
+    "stages": [
+      {
+        "sampleId": "new-ibm-cash-analysis",
+        "finishReason": "length",
+        "lastCallBodyCharacters": 12566,
+        "lastCallBodyUtf8Bytes": 14138,
+        "visibleFactObjectStarts": 40,
+        "completeClaimObjectsBeforeTruncation": 40,
+        "completeClaimFields": [
+          "netIncome2025",
+          "netIncome2024",
+          "netIncome_yoy_change",
+          "netIncome_yoy_pct",
+          "ocf2025",
+          "ocf2024",
+          "ocf_yoy_change",
+          "ocf_yoy_pct",
+          "gap2025",
+          "gap2024",
+          "gap_yoy_change",
+          "conversion2025",
+          "conversion2024",
+          "conversion_yoy_change",
+          "pensionSettlement2025",
+          "pensionSettlement2024",
+          "pensionSettlement_yoy_change",
+          "depreciationAmortization2025",
+          "depreciationAmortization2024",
+          "depreciationAmortization_yoy_change",
+          "stockBasedCompensation2025",
+          "stockBasedCompensation2024",
+          "stockBasedCompensation_yoy_change",
+          "stockBasedCompensation_yoy_pct",
+          "operatingAssetsLiabilitiesOther2025",
+          "operatingAssetsLiabilitiesOther2024",
+          "operatingAssetsLiabilitiesOther_yoy_change",
+          "hr1NonCashTaxCharge2025",
+          "pensionSettlementTaxBenefit2024",
+          "ibmFinancingAR2025",
+          "ibmFinancingAR2024",
+          "ibmFinancingAR_yoy_change",
+          "ibmFinancingAR_yoy_pct",
+          "adjustmentsTotal2025",
+          "adjustmentsTotal2024",
+          "adjustmentsTotal_yoy_change",
+          "adjustedNetIncome2024_exPension",
+          "adjustedConversion2024_exPension",
+          "capitalExpenditures2025",
+          "freeCashFlow2025_derived"
+        ],
+        "lastCallUsage": {
+          "completion_tokens": 6069,
+          "completion_tokens_details": {
+            "reasoning_tokens": 64,
+            "text_tokens": 6069
+          },
+          "prompt_tokens": 16132,
+          "prompt_tokens_details": {
+            "cached_tokens": 7168,
+            "text_tokens": 16132
+          },
+          "total_tokens": 22201
+        },
+        "partialParseUsedForScoring": false
+      },
+      {
+        "sampleId": "new-ibm-liquidity-analysis",
+        "finishReason": "length",
+        "lastCallBodyCharacters": 13228,
+        "lastCallBodyUtf8Bytes": 14608,
+        "visibleFactObjectStarts": 45,
+        "completeClaimObjectsBeforeTruncation": 44,
+        "completeClaimFields": [
+          "currentAssets2025",
+          "currentAssets2024",
+          "currentAssetsPctChange",
+          "currentLiabilities2025",
+          "currentLiabilities2024",
+          "currentLiabilitiesPctChange",
+          "currentRatio2025",
+          "currentRatio2024",
+          "currentRatioChange",
+          "shortDebt2025",
+          "shortDebt2024",
+          "shortDebtPctChange",
+          "longDebt2025",
+          "longDebt2024",
+          "longDebtPctChange",
+          "debt2025",
+          "debt2024",
+          "debtPctChange",
+          "cash2025",
+          "cash2024",
+          "cashPctChange",
+          "marketableSecurities2025",
+          "marketableSecurities2024",
+          "marketableSecuritiesPctChange",
+          "netDebt2025SourceSum",
+          "netDebt2024SourceSum",
+          "cashPlusSecuritiesPctChange",
+          "netDebt2025",
+          "netDebt2024",
+          "netDebtPctChange",
+          "shortDebtIncreaseAmount",
+          "receivablesTrade2025",
+          "receivablesTrade2024",
+          "shortTermFinancingReceivablesHFI2025",
+          "shortTermFinancingReceivablesHFI2024",
+          "receivablesCombinedDecrease",
+          "cashDecreaseAmount",
+          "marketableSecuritiesIncreaseAmount",
+          "debtIncreaseAmount",
+          "shortDebtContributionShare",
+          "longDebtContributionShare",
+          "goodwill2025",
+          "goodwill2024",
+          "goodwillIncreaseAmount"
+        ],
+        "lastCallUsage": {
+          "completion_tokens": 6081,
+          "completion_tokens_details": {
+            "reasoning_tokens": 77,
+            "text_tokens": 6081
+          },
+          "prompt_tokens": 15947,
+          "prompt_tokens_details": {
+            "cached_tokens": 7552,
+            "text_tokens": 15947
+          },
+          "total_tokens": 22028
+        },
+        "partialParseUsedForScoring": false
+      },
+      {
+        "sampleId": "new-ibm-liquidity-finalAnswer",
+        "finishReason": "length",
+        "lastCallBodyCharacters": 13047,
+        "lastCallBodyUtf8Bytes": 14859,
+        "visibleFactObjectStarts": 42,
+        "completeClaimObjectsBeforeTruncation": 42,
+        "completeClaimFields": [
+          "currentRatio2025",
+          "currentRatio2024",
+          "currentRatioChange",
+          "currentAssets2025",
+          "currentAssets2024",
+          "currentAssetsChangePct",
+          "currentLiabilities2025",
+          "currentLiabilities2024",
+          "currentLiabilitiesChangePct",
+          "shortDebt2025",
+          "shortDebt2024",
+          "shortDebtChangePct",
+          "shortDebtChangeAmount",
+          "longDebt2025",
+          "longDebt2024",
+          "longDebtChangePct",
+          "debt2025",
+          "debt2024",
+          "debtChangeAmount",
+          "debtChangePct",
+          "shortDebtContributionPct",
+          "longDebtContributionPct",
+          "cash2025",
+          "cash2024",
+          "cashChangePct",
+          "cashChangeAmount",
+          "marketableSecurities2025",
+          "marketableSecurities2024",
+          "marketableSecuritiesChangePct",
+          "marketableSecuritiesChangeAmount",
+          "cashPlusSecurities2025",
+          "cashPlusSecurities2024",
+          "cashPlusSecuritiesChangePct",
+          "netDebt2025",
+          "netDebt2024",
+          "netDebtChangePct",
+          "cashToShortDebtCoveragePct",
+          "tradeReceivablesChangeAmount",
+          "shortTermFinancingReceivablesHeldForInvestmentChangeAmount",
+          "goodwill2025",
+          "goodwill2024",
+          "goodwillChangeAmount"
+        ],
+        "lastCallUsage": {
+          "completion_tokens": 6067,
+          "completion_tokens_details": {
+            "reasoning_tokens": 65,
+            "text_tokens": 6067
+          },
+          "prompt_tokens": 13819,
+          "prompt_tokens_details": {
+            "cached_tokens": 7168,
+            "text_tokens": 13819
+          },
+          "total_tokens": 19886
+        },
+        "partialParseUsedForScoring": false
+      }
+    ]
+  },
+  "otherUnresolvedIssues": [
+    {
+      "sampleId": "new-pep-control-analysis",
+      "category": "INVALID_MODEL_STATE",
+      "detail": "Raw unknowns.status is UNKNOWN_PLACEHOLDER and reason is 占位. INVALID_DIMENSION remains INVALID; it is not converted to PASS.",
+      "semanticMisses": [
+        "claim_support PASS excuses an unsupported acquisition-integration capex cause as trend interpretation.",
+        "numeric_period_correctness PASS does not identify a claimed QoQ improvement comparing Q3 standalone with cumulative H1."
+      ]
+    },
+    {
+      "sampleId": "old-tgt-cash-analysis",
+      "category": "VALID_ABSTENTION_WITH_PLACEHOLDER",
+      "detail": "unknowns.status=NO_DATA, reason=占位，见下; no source gap justifying abstention was supplied. Full stage remains NO_DATA despite other dimensions PASS."
+    },
+    {
+      "sampleId": "new-tgt-control-analysis",
+      "category": "INCOMPLETE_DIMENSION_WITH_DECISIVE_FAIL",
+      "detail": "unknowns.status=NO_DATA and reason=占位, while claim_support FAIL correctly rejects unsupported industry comparison and asset-purpose claims. The stage FAIL is correct but not evidence of complete dimension coverage."
+    },
+    {
+      "sampleId": "new-pep-control-finalAnswer",
+      "category": "PARTIAL_ERROR_RECALL",
+      "detail": "Correct FAIL for unsupported capex management intent, but numeric_period_correctness PASS still misses the unequal-duration QoQ comparison."
+    },
+    {
+      "sampleId": "new-jnj-liquidity-finalAnswer",
+      "category": "INCONSISTENT_DIMENSION_ATTRIBUTION",
+      "detail": "claim_support FAIL identifies unsupported credit-rating/refinancing assurance, but unknowns PASS says it did not turn the gap into an assurance. Overall FAIL is correct, dimensional attribution remains inconsistent."
+    }
+  ],
+  "falsePassDetails": [],
+  "interpretationLimits": [
+    "11/16 (68.75%) is first-attempt agreement on a fixed known-answer calibration set, not an unseen holdout estimate.",
+    "12/16 technical coverage is not accuracy; INVALID and NO_DATA stay in the denominator.",
+    "Protocol and reasoning budget changed together; gains cannot be attributed to reasoning budget alone.",
+    "No claim that v4 solves all extraction, causal reasoning, or dimension attribution defects.",
+    "A later targeted larger-output run must use a new plan and report; its denominator is only selected truncated stages and cannot replace the v4 full-set result."
+  ],
+  "stages": [
+    {
+      "sampleId": "new-ibm-cash-analysis",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "expected": "FAIL",
+      "technicalStatus": "INVALID",
+      "status": "NO_DATA",
+      "decisionMatchesReference": false,
+      "answerSha256": "ad5cbf6c66b39ecc95fc8668a8dee5b1c03792ef290c045b6760872b20d0e734",
+      "inputSha256": "bac336cff8fb9d2cbee1e7deec01516c48df56244fff9adfc38d1191b3880c23",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "providerCalls": 2,
+      "callResponseSha256": [
+        "52d9f764a448d5ff9faa9795d518f4f32e4c871eacfcdd7fa1d6c4474cff69df",
+        "5fbdc4df7a38b815bd5934e520fb7bdca9234968f2b55c6f7402ac6165b48e85"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "length",
+      "errors": [
+        "JUDGE_FAILED: Judge response incomplete or has multiple choices"
+      ],
+      "dimensionChecks": {},
+      "usage": {
+        "prompt_tokens": 23318,
+        "completion_tokens": 14490,
+        "total_tokens": 37808
+      }
+    },
+    {
+      "sampleId": "new-ibm-cash-finalAnswer",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "expected": "FAIL",
+      "technicalStatus": "VALID",
+      "status": "FAIL",
+      "decisionMatchesReference": true,
+      "answerSha256": "47ad4e19608f536b040914b12c06acf055bf8b4fe48db3a93983598c6fa73784",
+      "inputSha256": "2d4f7787c0a28673359d89f91f2b706fc48fa16c083edbcb05bfb7ace6ddb30c",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "providerCalls": 2,
+      "callResponseSha256": [
+        "9173c412b502ec02b9c183dfa37adfb182292af0004b672816a075af46cae747",
+        "d5c18423493accd90ff7b155cb43ee8898040c54a2c8597f9eeec4a4df4cbc16"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "stop",
+      "errors": [],
+      "dimensionChecks": {
+        "claim_support": {
+          "status": "FAIL",
+          "reason": "绝大多数金额与调整项均可在E1对应行找到；但2024年OCF/NI被写成1.93（A5、A16、A35），E1:L11与E1:L5给出的9115/3109只能得出2.93，该关键比率无证据支持且与可见数据矛盾，并据此推出\"比率下降0.10\"的结论。"
+        },
+        "numeric_period_correctness": {
+          "status": "FAIL",
+          "reason": "两年OCF、净利润、差额及各调整项金额、期间（Nine Months）与单位均正确，同比百分比60.60%/0.42%/33.02%经核算无误；但2024年转化率1.93错误（gold为2.9318），比率变动−0.10亦错误（应为约−1.10），A16与A5、A35重复该错误。"
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "reason": "保留了足以改变结论的反向信息：A45指出剔除一次性项目后2024年调整比率约1.56反而低于2025年1.83、直接比较会方向相反；A37提示营运资本改善中混有一次性税务项目不宜全额视为经营改善；A54提示融资应收款贡献减半的风险。"
+        },
+        "unknowns": {
+          "status": "PASS",
+          "reason": "明确标注未经审计与九个月累计口径不可与单季混用（A48）、营运资本明细未拆分无法判断驱动因素（A55）、税务一次性金额仅为约数无法精确调整（A56）、税务项目混列无法拆分（A46），未把账面关系扩大为经营原因或偿付保证。"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 18405,
+        "completion_tokens": 10263,
+        "total_tokens": 28668
+      }
+    },
+    {
+      "sampleId": "new-ibm-liquidity-analysis",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "expected": "FAIL",
+      "technicalStatus": "INVALID",
+      "status": "NO_DATA",
+      "decisionMatchesReference": false,
+      "answerSha256": "a232efd38758c4d48a014605e21fa2075c645927a4a3772861c776ba2e48e536",
+      "inputSha256": "3be97db73ec5de1f9d03b0ced512a8d491efe24c3187dce216b8ea47b1f972bc",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "providerCalls": 2,
+      "callResponseSha256": [
+        "359b82af2c5769d10331866e8b7ef237d1434dee76df59b369f718b8e283ba97",
+        "8da19507dea72e101accde6f818a85751ad5a293555a7e4d3254cf547a7a44fd"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "length",
+      "errors": [
+        "JUDGE_FAILED: Judge response incomplete or has multiple choices"
+      ],
+      "dimensionChecks": {},
+      "usage": {
+        "prompt_tokens": 23588,
+        "completion_tokens": 13595,
+        "total_tokens": 37183
+      }
+    },
+    {
+      "sampleId": "new-ibm-liquidity-finalAnswer",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "expected": "FAIL",
+      "technicalStatus": "INVALID",
+      "status": "NO_DATA",
+      "decisionMatchesReference": false,
+      "answerSha256": "4f91aa6f5882adbada797990dcc353011506ed0aaf6ad4671761f1ea45812e4f",
+      "inputSha256": "fd6c7e500f6106b30efea4aad7064e47a0d599faba0954511faa3ab2dbc94b8b",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "providerCalls": 2,
+      "callResponseSha256": [
+        "3c49b04001314cc7f754cf0431ca5b91f88c8321e8ddea0a37943f5cc98dca2f",
+        "a88c52481b19104da49a94553bd7f8279a88da6308310ad07418b9513f76f9c8"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "length",
+      "errors": [
+        "JUDGE_FAILED: Judge response incomplete or has multiple choices"
+      ],
+      "dimensionChecks": {},
+      "usage": {
+        "prompt_tokens": 21182,
+        "completion_tokens": 11751,
+        "total_tokens": 32933
+      }
+    },
+    {
+      "sampleId": "new-jnj-cash-analysis",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "expected": "FAIL",
+      "technicalStatus": "VALID",
+      "status": "FAIL",
+      "decisionMatchesReference": true,
+      "answerSha256": "3130c16b8e8042b7851bd2c755f8e0619c0f9d135405ecb416de89d7c10e926f",
+      "inputSha256": "6dbdcf37ecb391b8e00c42795f9e2bda2267b506a693af6cc146fb21a26ba499",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "providerCalls": 4,
+      "callResponseSha256": [
+        "cef375c5be46c161a8718bb6449d78816881312a867496c978e4dafe21741b35",
+        "e0fcb30ccbccd24d07d53a75f7742882fa020b14a2e2d9456a16e1304234aadc",
+        "5b3b496f23b87da35c45fd5c27cd5a3b467b0796d246e3fbe16f59d44f165075",
+        "b8e4af31781f800c6803d41870d6acc22a1fdb215569cc2476a84923a2e9a9fa"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "stop",
+      "errors": [],
+      "dimensionChecks": {
+        "claim_support": {
+          "status": "FAIL",
+          "reason": "A39/A69/A107 将递延税项摆动描述为抬高净利润、贡献净利润增长的非现金成分，但 E1:L18 中该项为正加回项，属减少净利润的非现金费用，推断与可见现金流量表结构相反；其余金额与期间主张均有证据支持。"
+        },
+        "numeric_period_correctness": {
+          "status": "FAIL",
+          "reason": "A50 将同比恶化额写为约 $14,5 亿，与同句及 A47 的 $14,472M（=144.72 亿美元）相差十倍，属单位换算矛盾；其余金额、期间、比率与自加合计（非现金调整 11,847/5,609、营运资本 −16,314/1,039、桥接 −62）经复核均正确。"
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "reason": "A73/A84 保留经营现金流绝对值持平、折旧摊销稳定等反向信号，A82 提示其他科目可能含一次性项目，未强造证据外的风险。"
+        },
+        "unknowns": {
+          "status": "FAIL",
+          "reason": "A95 称缺少自由现金流数据、无法评估资本开支后对股东回报覆盖，但经营现金流、资本开支、股息与回购均见于 E1:L27/L30/L42/L43，属可计算内容被误称未知；税务驱动与其他科目构成的缺口标注本身恰当。"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 84564,
+        "completion_tokens": 24863,
+        "total_tokens": 109427
+      }
+    },
+    {
+      "sampleId": "new-jnj-cash-finalAnswer",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "expected": "FAIL",
+      "technicalStatus": "VALID",
+      "status": "FAIL",
+      "decisionMatchesReference": true,
+      "answerSha256": "1ae567fd7f924fd44e9fdabc9f5a2291cfe5766a26d75ec17b1f8d37459031b8",
+      "inputSha256": "9ab2367fd2eb9fb614f74943eeb3ccf1bcfb98d71b8d16ef425eaee12c4d1940",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "providerCalls": 4,
+      "callResponseSha256": [
+        "4f02f9b807bc29c932fcba7ec9ed84a9329535c7af9b194776024d532769b555",
+        "de5f5f57854eb675dc417dd84ab0d8cf965541bd0633dc115dbf420437ed4f2b",
+        "4f159920e9720479163b202263d337dceec24747b7b18cf29569fc1755e833fc",
+        "c788c5fdfdaae299e9ffd7b81acf072e2ea40697392c71f2c6f2305ebd72e3b3"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "stop",
+      "errors": [],
+      "dimensionChecks": {
+        "claim_support": {
+          "status": "FAIL",
+          "reason": "递延税项的因果解释与可见证据方向相反：+5,215为正回加项，属非现金税费用、压低净利润并使经营现金流相对净利润更高，答案却称其'贡献了净利润增长中相当比例'且是净利润'虚胖'于现金流的结构性原因；'利润高增长含大量非现金成分'的头条结论在缺少利润表与附注的证据下也无支持。"
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "reason": "两年经营现金流、现金流表起点合并净利润、差额、比率及全部同比变动、递延税项、其他资产/负债、非现金调整与营运资本合计、桥接均与gold及E1一致，单位百万美元、期间正确；比率变动−0.84与精确值−0.8311差0.0089，在0.01容差内。"
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "reason": "保留了与结论相关的反向证据：经营现金流绝对额17,221与上年基本持平、核心现金生成未实质下滑，'其他'科目可能为一次性、非现金调整合计同比为正等均在最终答案中呈现，未只留有利部分。"
+        },
+        "unknowns": {
+          "status": "PASS",
+          "reason": "明确保留影响判断的证据局限：'其他'科目明细缺失、递延税项驱动因素未披露、缺少利润表与自由现金流数据，并声明不宜将0.79转化率外推为趋势性恶化。"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 74283,
+        "completion_tokens": 20935,
+        "total_tokens": 95218
+      }
+    },
+    {
+      "sampleId": "new-jnj-liquidity-analysis",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "expected": "FAIL",
+      "technicalStatus": "VALID",
+      "status": "FAIL",
+      "decisionMatchesReference": true,
+      "answerSha256": "5effcd0b0f55e43c92634a3242d48b7b7c0b595230c6878d4035a648b1555681",
+      "inputSha256": "6a0e940f2ca380ed41ecbd1bfd49be31620ed05c24a431ca4578cebbc33b9ba0",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "providerCalls": 2,
+      "callResponseSha256": [
+        "df9f40d0a8959b41b456d281912b2c4000e1a8b14267bc12c1b5a34b7cf98f18",
+        "f0de224fe4dd1dfc80c442c1ba0c3f7592171f8781efb7ddd72e970776a69fbb"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "stop",
+      "errors": [],
+      "dimensionChecks": {
+        "claim_support": {
+          "status": "FAIL",
+          "reason": "A85 断言 JNJ 为“Aaa/AAA 级投资级发行人、短期再融资能力极强”，可见证据仅为合并资产负债表（E1），无任何评级或授信信息；A96 亦自认未提供信用评级与融资额度。A85 的“大型制药企业中并不罕见”属无证据的同行比较。其余科目金额、比率与债务/净债务派生均可追溯至 E1 对应行，A86 的并购推测已明确标注为未确认。"
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "reason": "六个必答数值与 gold 一致：流动比率 1.07/1.11、有息债务 45,795/36,634、净债务 27,233/12,112，单位百万美元、时点 2025-09-28 与 2024-12-29 对应正确；自行增加的差额与百分比（9,161 与 25.01%、15,121 与 124.84%、8,757、404、5,874、3,848、11,119）经核算均准确，未把总负债当债务、未重复加计流动部分，也未把期末余额差当作单季余额。A40 的“降幅约 3.60%”与 A79 的“仅余 7%”系基于题目要求的两位小数比率再计算（未舍入精确值为 3.34% 与 7.36%），已用“约”标注且不影响必答口径。"
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "reason": "保留了证据中真实存在的相反信号：流动比率仍大于 1（A74/A85）、现金与流动资产降幅有限，以及商誉、无形资产同期增加所指向的并购融资可能（A86，可由 E1:L19、E1:L20 核验），未强造题目未要求的同行比较，结论未单向放大。"
+        },
+        "unknowns": {
+          "status": "FAIL",
+          "reason": "缺口表（A94-A97）与结论强度总体对应，A86 明确写明并购原因无法确认；但 A85 在 A96 自认“未提供信用评级或融资额度信息”的情况下，把该缺口补成“短期再融资能力极强”的保证性判断，与其缺口披露自相矛盾，未把该反向因素的强度限定在证据范围内。"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 25128,
+        "completion_tokens": 15157,
+        "total_tokens": 40285
+      }
+    },
+    {
+      "sampleId": "new-jnj-liquidity-finalAnswer",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "expected": "FAIL",
+      "technicalStatus": "VALID",
+      "status": "FAIL",
+      "decisionMatchesReference": true,
+      "answerSha256": "054e5c2c660b43cf80db8ee7ccc4f87ba1f048cd031752de4459a10c88f85c7d",
+      "inputSha256": "0ec6508b3fd7ec299483ae021b779c698b7a73fdbf29bdab0224078383835b6d",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "providerCalls": 2,
+      "callResponseSha256": [
+        "769ff22c55c7cfb45b19a9241b0a577519a749a66fd2924d77b3bc5878da00f7",
+        "79e5f47d23bc26d3fc44277f6cd64dfd8f5f93523560586541614bbf26272e8b"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "stop",
+      "errors": [],
+      "dimensionChecks": {
+        "claim_support": {
+          "status": "FAIL",
+          "reason": "定量主张均可追溯至E1资产负债表，但A61把“长期维持投资级信用评级、短期再融资能力极强”和“大型制药企业流动比率略高于1并不罕见”的行业比较写成确定事实，可见证据仅为合并资产负债表，无任何评级、授信或同业数据，且与A72自述“未提供信用评级或授信额度”相矛盾；A62的并购归因已用“可能”并声明原因未确认，属合规表述。"
+        },
+        "numeric_period_correctness": {
+          "status": "FAIL",
+          "reason": "两时点流动资产/流动负债、流动比率1.07与1.11、有息债务45,795与36,634、净债务27,233与12,112及单位百万美元、期间标注均与gold一致，未误用总负债或重复加计；债务增9,161（+25.01%）、净债务增15,121（+124.84%）、现金减5,874、商誉增3,848、无形资产增11,119经核算均正确。唯A16“降幅3.60%”是用已四舍五入的1.07/1.11倒算，按证据原值(1.0736 vs 1.1107)应为-3.34%，偏差0.26个百分点，超出0.01容差。"
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "reason": "结论为流动性缓冲收窄的同时，保留了流动比率仍大于1、再融资能力与并购驱动债务增长可能具商业合理性等反向因素，并明确“尚未构成流动性危机信号”，未只呈现不利面。"
+        },
+        "unknowns": {
+          "status": "PASS",
+          "reason": "列出缺少经营现金流、债务到期分布、评级与授信额度、长期债务增量用途等证据局限，并明确并购原因“尚无法确认”，未把账面关系扩大为经营原因或偿付保证。"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 22012,
+        "completion_tokens": 13983,
+        "total_tokens": 35995
+      }
+    },
+    {
+      "sampleId": "new-pep-control-analysis",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "expected": "FAIL",
+      "technicalStatus": "INVALID",
+      "status": "NO_DATA",
+      "decisionMatchesReference": false,
+      "answerSha256": "9e41217fbd82b433977b06e910c2572dda218ecbaa8dafe0b11bffc6910605e3",
+      "inputSha256": "5c4f3ff9c0a400931cccc35e015d5424dfa5e0171ea667ae23a87889d2877d7b",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "providerCalls": 2,
+      "callResponseSha256": [
+        "87dd8865fd19583bcefd30d9effc8a1095d3073fe5146b6a40e8a6246a749d92",
+        "6f5c6cfb80e9e3a3eabb7e1195936b2b2c06cc250f57b81c30448e2c19491167"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "stop",
+      "errors": [
+        "INVALID_DIMENSION:unknowns"
+      ],
+      "dimensionChecks": {
+        "claim_support": {
+          "status": "PASS",
+          "reason": "累计原值、单季还原值、比率、上年同期列及一次性项目金额均可逐条对应E1/E2现金流表行；A60把资本支出下降归因于收购整合期属推断，但置于“趋势解读”且收购规模(E1:L35)与降幅有据，A69用“可能”限定，未当作公司已证实事实。"
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "reason": "以同财年36周(E1)减24周(E2)得2025-06-15/2025-09-06单季：经营现金流4472、资本支出流出992、简化自由现金流3480百万美元，与gold一致；覆盖倍数4.51、占比77.82%、同比−8.83%/−13.66%/−7.35%经复算均正确并保留两位小数，单位与期间标注无误。"
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "reason": "保留了对结论有影响的反向信号：经营现金流与资本支出同比均下降、净利润下滑、重组及收购相关现金支付、上半年经营现金流仅996M使单季回升的可持续性存疑，并说明简化自由现金流按题意不抵扣资产出售回款这一口径边界。"
+        },
+        "unknowns": {
+          "status": "FAIL",
+          "reason": "占位"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 19249,
+        "completion_tokens": 11482,
+        "total_tokens": 30731
+      }
+    },
+    {
+      "sampleId": "new-pep-control-finalAnswer",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "expected": "FAIL",
+      "technicalStatus": "VALID",
+      "status": "FAIL",
+      "decisionMatchesReference": true,
+      "answerSha256": "6f3b2e2e52e1b8d9cb01944d47d4e9d37feed4c5a60eee34f10b79fd38c35fe8",
+      "inputSha256": "c6f56069f40b882397f64e4a7f929310aff42ed417a6186d5c73a1eeb70bdca9",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "providerCalls": 2,
+      "callResponseSha256": [
+        "aebc37b9b7d9943654d12650a60afc1c4c5a151f531928302cb340d74a42e3ca",
+        "d17bf2909e09df39aa736b41d8177b8902af7030b71fdfdecf7a5a5bd33769ca"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "stop",
+      "errors": [],
+      "dimensionChecks": {
+        "claim_support": {
+          "status": "FAIL",
+          "reason": "三项还原值、覆盖倍数、比率及同比推算均可在E1/E2对应行核到；但A51把资本支出同比下降断定为“公司在重大收购整合期主动控制开支节奏”的管理层意图，可见证据仅有累计资本支出金额，无任何管理层说明或指引支持，属把推测写成确定因果。"
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "reason": "经营现金流5468−996=4472、购建支出2499−1507=992、简化自由现金流4472−992=3480百万美元，均与gold一致；覆盖倍数4.51、占比77.82%、上年同季4905/1149/3756及−8.83%/−13.66%/−7.35%经复核无误；期间标注为2025/6/15–2025/9/6约12周，单位百万美元，支出按流出正额表述。"
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "reason": "在给出“充分覆盖”结论的同时保留了三项同比下滑、一次性减值与重组现金支付、收购净支出3176百万美元对后续现金流的压力，以及上半年经营现金流仅996百万美元的季节性波动，未只留有利部分。"
+        },
+        "unknowns": {
+          "status": "PASS",
+          "reason": "明确标注数据未经审计、仅有现金流表因而无法验证收入与毛利率等损益指标、未取得管理层对Q3现金流定性说明与全年资本支出指引，并提示Q4季节性是否延续待观察，未把账面关系扩大为经营原因或偿付保证。"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 19215,
+        "completion_tokens": 9650,
+        "total_tokens": 28865
+      }
+    },
+    {
+      "sampleId": "new-tgt-control-analysis",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "expected": "FAIL",
+      "technicalStatus": "VALID",
+      "status": "FAIL",
+      "decisionMatchesReference": true,
+      "answerSha256": "014eb632036d5ecdce77c170861b561be8c100a67f729f1ee281b75e23f6103a",
+      "inputSha256": "03f435a2af67ebbe238291df723bea70a99e3afb30bed340af0c9ca47d156dff",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "providerCalls": 2,
+      "callResponseSha256": [
+        "9331c735298015166b75df65fbe680abab9eca5fac343b6e1098dfacb72add67",
+        "e130ff48a487f3fbb000af67473280a237de2a90560c87e51684eb0494354af8"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "stop",
+      "errors": [],
+      "dimensionChecks": {
+        "claim_support": {
+          "status": "FAIL",
+          "reason": "核心数据主张均可由E1现金流量表核对；但A66称1.31“在零售行业属正常偏上水平”无任何同行或行业证据，A44把资本开支上升归因于“门店与供应链资产”并称“近年持续投入”，可见证据仅两期Property and equipment支出，未说明用途与多年趋势，属超出证据的额外主张。"
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "reason": "科目取自现金流量表起点Net earnings与Cash provided by operating activities，期间为两年九个月累计，单位百万美元；差额825/1090、比率1.31/1.36与gold一致，同比−328(−10.98%)、−593(−14.54%)、D&A+116(+5.24%)、AP−1704、存货占用减少1123、FCF 643/2110经核算均正确；仅A77资本开支增幅写作整数44%（实为44.41%），为四舍五入表述，基数与金额无误。"
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "reason": "保留了比率由1.36回落至1.31、经营现金流绝对额下降593M、应付账款贡献骤降1704M的持续性风险、资本开支上升导致自由现金流由2110M收窄至643M以及数据未经审计等反向信号，未只呈现正面结论。"
+        },
+        "unknowns": {
+          "status": "NO_DATA",
+          "reason": "占位"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 19123,
+        "completion_tokens": 11551,
+        "total_tokens": 30674
+      }
+    },
+    {
+      "sampleId": "new-tgt-control-finalAnswer",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "expected": "FAIL",
+      "technicalStatus": "VALID",
+      "status": "FAIL",
+      "decisionMatchesReference": true,
+      "answerSha256": "f986175cbdcdca67e325e9e25af3e516ee94de96114965c99d672bfec915de5b",
+      "inputSha256": "947ce493a66162e2eeb3c8fc12cb07a48396cf760cb333eb9b42e734a659b5a5",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "providerCalls": 2,
+      "callResponseSha256": [
+        "42f276884fb92ef586abfc046399e6fd9b9f10c92960be606d8175ad2cce1bc8",
+        "46fc4bc12281363996fe19770d106eac8a086975131307c78f8e4b59bc39413c"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "stop",
+      "errors": [],
+      "dimensionChecks": {
+        "claim_support": {
+          "status": "FAIL",
+          "reason": "表内金额、差额、比率与同比均可由E1对应行核验；但A55“1.31在零售行业属正常偏上水平”属行业基准比较，可见证据仅有TGT单份现金流量表，无任何同业数据；A31“反映公司近年持续投入门店与供应链资产”把两期资本开支数字扩写为多年趋势与资金用途，证据未涉及。二者为整合时新增的确定性事实且无来源。A40“可能对应旺季前集中备货”已用可能性措辞，不计为违规。"
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "reason": "净利润2660/2988、经营现金流3485/4078、差额825/1090、比率1.31/1.36均与gold一致；同比−328(−10.98%)、−593(−14.54%)、−265、−0.05，D&A 2331/2215(+116,+5.24%)、CapEx 2842/1968(+44.41%)、应付658/2362(−1704)、存货−2156/−3279(占用减少1123)、FCF 643/2110经calculate复核全部正确；单位标注百万美元，期间为九个月累计口径，科目未误归类，未把合并净利润替换为归母口径。"
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "reason": "答案未只保留有利部分：明确列出经营现金流绝对额同比下降593M(−14.54%)、净利润下降328M、比率由1.36回落至1.31、差额由1090M缩至825M，并在A57保留自由现金流由2110M收窄至643M及Q4未回补则全年承压的反向风险。"
+        },
+        "unknowns": {
+          "status": "PASS",
+          "reason": "A63-A65保留实际影响判断的局限：仅有现金流量表、缺资产负债表与利润表明细、缺管理层对营运资本变动的定性说明、无全年指引故无法判断Q4；A16亦标注未经审计与累计口径。对供应商账期、备货节奏等经营原因使用“可能”“或”而非断言，未把账面关系扩为偿付保证。"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 16504,
+        "completion_tokens": 8695,
+        "total_tokens": 25199
+      }
+    },
+    {
+      "sampleId": "old-pep-quarter-analysis",
+      "answerSet": "OLD_POSITIVE_SAME_QUESTION",
+      "expected": "PASS",
+      "technicalStatus": "VALID",
+      "status": "PASS",
+      "decisionMatchesReference": true,
+      "answerSha256": "7288131cc8e7575a2103b2962c16fce0629740d26a22cdb4b7fdf11cfd44458b",
+      "inputSha256": "1eb098a378ee58e3e97a10cb62fb0063fbf8494bb566ca39836c022e72b5d2e7",
+      "independentReference": "evals\\evolution\\batch-learning-20261002\\secondary-review-pep-tgt.json",
+      "providerCalls": 2,
+      "callResponseSha256": [
+        "a05e2b0156231a776178924732d1984b5162be827d342cab3034760307578616",
+        "d7f8d33d76e42290e6462a4ffbf654228e8cac549fa3c9a322bf92a3174fff16"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "stop",
+      "errors": [],
+      "dimensionChecks": {
+        "claim_support": {
+          "status": "PASS",
+          "reason": "累计原值、单季还原值、资产出售回款及来源期间均可在 E1/E2 对应行找到；未出现无证据的公司层面因果或管理层意图断言。"
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "reason": "5468-996=4472、2499-1507=992、4472-992=3480 与 gold 一致；覆盖倍数4.51、450.81%、资本支出占比22.18%、回款差103 经核算无误；单位百万美元、期间2025-06-15/2025-09-06 标注正确，负号仅为流出约定。"
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "reason": "保留了单季数为累计差值还原、可能被重述或口径调整影响、未经审计摘录、资产出售回款按用户口径未纳入等限制性反向信号。"
+        },
+        "unknowns": {
+          "status": "PASS",
+          "reason": "明确缺少公司直接披露单季表、融资活动与管理层讨论、利润表与资产负债表，因而不扩展盈利与杠杆判断；可计算部分未被误称未知。"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 16626,
+        "completion_tokens": 3872,
+        "total_tokens": 20498
+      }
+    },
+    {
+      "sampleId": "old-pep-quarter-finalAnswer",
+      "answerSet": "OLD_POSITIVE_SAME_QUESTION",
+      "expected": "PASS",
+      "technicalStatus": "VALID",
+      "status": "PASS",
+      "decisionMatchesReference": true,
+      "answerSha256": "dacc34d5bcd9ea4ad864129065ea496f390d9495d7810bc9bf9c1d01d3931b89",
+      "inputSha256": "7dfd321cdd1c1c58c0f1cd716fca59a1ec220b3de70741e1516f1c2a7fbe4497",
+      "independentReference": "evals\\evolution\\batch-learning-20261002\\secondary-review-pep-tgt.json",
+      "providerCalls": 2,
+      "callResponseSha256": [
+        "b698d5793e0bb6b8abc77c275a74eb03a84f14b205d05766e09f8345ec53995e",
+        "6a7c48f3334318b017782e59bf2cee60850277943191684c5e6ff64c731e7502"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "stop",
+      "errors": [],
+      "dimensionChecks": {
+        "claim_support": {
+          "status": "PASS",
+          "reason": "单季三值均由可见累计表行作差得出，比率与占比可由同一原值复算；未抵扣资产出售回款的说法与E1:L34、E2:L32一致，无超出证据的因果或经营解释。"
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "reason": "5468-996=4472、2499-1507=992、4472-992=3480，与gold一致；单位百万美元、期间标注为FY2025第三季单季2025-06-15/2025-09-06，支出以流出正金额表述；4.51倍、450.81%、22.18%两位小数正确。"
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "reason": "保留单季数为累计作差还原而非公司直接披露、累计重述可能影响还原值、简化口径未抵扣可见的固定资产出售回款等对覆盖结论有影响的信息。"
+        },
+        "unknowns": {
+          "status": "PASS",
+          "reason": "明确本轮证据缺融资活动、管理层解释及利润表/资产负债表数据，仅就经营现金流与资本支出覆盖关系作有限判断，未把账面关系扩大为经营原因或偿付保证。"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 15693,
+        "completion_tokens": 4857,
+        "total_tokens": 20550
+      }
+    },
+    {
+      "sampleId": "old-tgt-cash-analysis",
+      "answerSet": "OLD_POSITIVE_SAME_QUESTION",
+      "expected": "PASS",
+      "technicalStatus": "VALID",
+      "status": "NO_DATA",
+      "decisionMatchesReference": false,
+      "answerSha256": "734b6d7925bb16d66c0db128fa38b553700ede3949bf12a614c5f247a7e91218",
+      "inputSha256": "2dac914235b441bda3370a1e2b4a4e1b843a23994a23f6e9e2da2b48e8d9addf",
+      "independentReference": "evals\\evolution\\batch-learning-20261002\\secondary-review-pep-tgt.json",
+      "providerCalls": 3,
+      "callResponseSha256": [
+        "ab2e8136791cd7c61c4d119e27a7987d18f66fe1e78e5f7d32ed49ad4b1c8c4d",
+        "5ed3c2a19c0b5d68204197dd533e30757f22b55288a01b857e39c76d20252c88",
+        "6e87654b6a66fc127c928871b1fe1bdb0a40e7883dd2c3c2605580fb02297e4c"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "stop",
+      "errors": [],
+      "dimensionChecks": {
+        "claim_support": {
+          "status": "PASS",
+          "reason": "所有金额、调整项与经营资产负债变动均可在E1现金流量表对应行找到；A39的加回机制为有边界的一般说明，A134对应付账款变化原因明确标注无法确认，未把推断当作已证实事实。"
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "reason": "两年经营现金流、起点净利润、差额825/1090、比率1.3102/1.3648与gold一致；同比-593(-14.54%)、-328(-10.98%)、-265(-24.31%)、比率-0.0546经核算正确；非现金合计2515/2385、经营资产负债合计-1690/-1295与调节结果3485/4078自洽；单位百万美元、期间标注为对应九个月累计。"
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "reason": "A131-A135保留了经营现金流降幅大于净利润降幅、经营资产负债合计为负、存货仍占用2156、应付账款贡献由2362降至658等不利信号，并同时列出折旧摊销与存货占用减少的缓和因素，未强造证据外风险。"
+        },
+        "unknowns": {
+          "status": "NO_DATA",
+          "reason": "占位，见下"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 30585,
+        "completion_tokens": 9652,
+        "total_tokens": 40237
+      }
+    },
+    {
+      "sampleId": "old-tgt-cash-finalAnswer",
+      "answerSet": "OLD_POSITIVE_SAME_QUESTION",
+      "expected": "PASS",
+      "technicalStatus": "VALID",
+      "status": "PASS",
+      "decisionMatchesReference": true,
+      "answerSha256": "9e021c55db4e774af5f85d8fb76bb033cc5e1188218ac430ec2f9c8a49705a64",
+      "inputSha256": "ce93b3037c54b87efd924f16f5d16aceb626669ea1d50d880349f9d1fc90f972",
+      "independentReference": "evals\\evolution\\batch-learning-20261002\\secondary-review-pep-tgt.json",
+      "providerCalls": 3,
+      "callResponseSha256": [
+        "34376f29f4e27060b9bb1085c189b2833676e3e0543d94665d01bbf3c41f56a7",
+        "73f614a321ecda82443ea243e5e7db4a24a39e606792eaa2518fc169040339d1",
+        "16d127f758fc11ccfa24e3295d25e84e848ce06dedd97e4596a47dfb9977d5f2"
+      ],
+      "responseHashDefinition": "canonical JSON UTF-8, sorted keys, compact separators, ensure_ascii=false",
+      "lastFinishReason": "stop",
+      "errors": [],
+      "dimensionChecks": {
+        "claim_support": {
+          "status": "PASS",
+          "reason": "所有金额、比率及非现金调整/经营资产负债变动均可在E1现金流量表对应行找到；应付账款贡献下降与折旧摊销加回对转化差异的因果说明可由表内调节项算术关系支持，未把可能性写成确定事实，且明确标注无法确认表外原因。"
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "reason": "两年经营现金流、净利润、差额、倍数及同比金额与百分比均与E1一致且计算正确（-593/-14.54%、-328/-10.98%、-265/-24.31%、1.3102与1.3648、-5.46个百分点），非现金合计2515、经营资产负债合计-1690与-1295、差异-395经核算无误，单位百万美元、期间为九个月累计，未误归类或改写。"
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "reason": "结论保留了不利证据：经营现金流绝对额下降593百万美元（-14.54%）、差额由1090降至825、倍数由1.36降至1.31，并说明降幅大于净利润降幅，未只保留有利部分；同时保留存货占用减少等正向抵消因素。"
+        },
+        "unknowns": {
+          "status": "PASS",
+          "reason": "明确说明仅有现金流量表、无法确认应付账款与存货变动的经营原因、九个月累计不能推断单季或全年、数据未经审计，未把账面关系扩大为经营原因或偿付保证。"
+        }
+      },
+      "usage": {
+        "prompt_tokens": 35039,
+        "completion_tokens": 13571,
+        "total_tokens": 48610
+      }
+    }
+  ]
+}

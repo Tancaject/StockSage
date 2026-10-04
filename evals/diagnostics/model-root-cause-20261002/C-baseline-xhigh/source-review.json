@@ -1,0 +1,327 @@
+{
+  "schema": "provider_reasoning_diagnostic_source_review_v1",
+  "createdAt": "2026-10-02T15:21:40.099427+00:00",
+  "arm": "C-baseline-xhigh",
+  "caseId": "pep-fy2025q3-quarter-cash-comparison",
+  "stage": "analysis",
+  "origin": "AI_SOURCE_REVIEW_NOT_HUMAN",
+  "releaseEligible": false,
+  "verdict": "PASS",
+  "completeness": {
+    "status": "PASS",
+    "finishReason": "stop",
+    "doneMarker": true,
+    "sourcesComplete": true,
+    "firstAnswerSeconds": 297.625,
+    "durationSeconds": 356.156,
+    "wouldExceedOriginal300SecondStageDeadline": true,
+    "secondsFromFirstAnswerUntilOriginalDeadline": "2.375"
+  },
+  "requiredFactChecks": [
+    {
+      "field": "quarterConsolidatedNetIncome2025",
+      "expected": "2618.0000",
+      "observed": "2618.0000",
+      "unit": "million",
+      "period": "2025-06-15/2025-09-06",
+      "status": "PASS",
+      "answerLocation": "2.1 core table"
+    },
+    {
+      "field": "quarterOperatingCashFlow2025",
+      "expected": "4472.0000",
+      "observed": "4472.0000",
+      "unit": "million",
+      "period": "2025-06-15/2025-09-06",
+      "status": "PASS",
+      "answerLocation": "2.1 core table"
+    },
+    {
+      "field": "quarterSimpleFreeCashFlow2025",
+      "expected": "3480.0000",
+      "observed": "3480.0000",
+      "unit": "million",
+      "period": "2025-06-15/2025-09-06",
+      "status": "PASS",
+      "answerLocation": "2.1 core table"
+    },
+    {
+      "field": "quarterConsolidatedNetIncome2024",
+      "expected": "2945.0000",
+      "observed": "2945.0000",
+      "unit": "million",
+      "period": "2024-06-16/2024-09-07",
+      "status": "PASS",
+      "answerLocation": "2.1 core table"
+    },
+    {
+      "field": "quarterOperatingCashFlow2024",
+      "expected": "4905.0000",
+      "observed": "4905.0000",
+      "unit": "million",
+      "period": "2024-06-16/2024-09-07",
+      "status": "PASS",
+      "answerLocation": "2.1 core table"
+    },
+    {
+      "field": "quarterSimpleFreeCashFlow2024",
+      "expected": "3756.0000",
+      "observed": "3756.0000",
+      "unit": "million",
+      "period": "2024-06-16/2024-09-07",
+      "status": "PASS",
+      "answerLocation": "2.1 core table"
+    }
+  ],
+  "requiredPointChecks": [
+    {
+      "id": "p1",
+      "status": "PASS",
+      "note": "Covered in the answer; additional material errors are assessed separately."
+    },
+    {
+      "id": "p2",
+      "status": "PASS",
+      "note": "Covered in the answer; additional material errors are assessed separately."
+    },
+    {
+      "id": "p3",
+      "status": "PASS",
+      "note": "Covered in the answer; additional material errors are assessed separately."
+    },
+    {
+      "id": "p4",
+      "status": "PASS",
+      "note": "Covered in the answer; additional material errors are assessed separately."
+    },
+    {
+      "id": "p5",
+      "status": "PASS",
+      "note": "Explicit actual quarter ranges, correct main values/directions and weaker overall cash generation; commercial causes are explicitly qualified in the surrounding uncertainty section."
+    }
+  ],
+  "dimensions": {
+    "claim_support": {
+      "status": "PASS",
+      "note": "All six core results and material additional numeric statements are traceable to the supplied columns; possibilities about working-capital mechanisms are qualified, not asserted company causes."
+    },
+    "numeric_period_correctness": {
+      "status": "PASS",
+      "note": "Both actual quarter ranges, gross-capex FCF definition, all core values, working-capital signs and additional ratios pass the frozen tolerance."
+    },
+    "counterevidence": {
+      "status": "PASS",
+      "note": "Preserves reduced capex, positive working-capital contribution, positive FCF and improved cash-to-income ratios while retaining the absolute decline."
+    },
+    "unknowns": {
+      "status": "PASS",
+      "note": "Correctly limits cause/sustainability inference, distinguishes combined payable/current-liability line and missing revenue/management discussion. Does not claim the already calculated core values or three working-capital values are missing."
+    }
+  },
+  "additionalChecks": {
+    "ratios": [
+      {
+        "name": "net_income_yoy",
+        "expected": "-11.10356536502546689303904924",
+        "observed": "-11.10",
+        "absoluteDifference": "0.00356536502546689303904924",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "cfo_yoy",
+        "expected": "-8.827726809378185524974515800",
+        "observed": "-8.83",
+        "absoluteDifference": "0.002273190621814475025484200",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "capex_yoy",
+        "expected": "-13.66405570060922541340295909",
+        "observed": "-13.66",
+        "absoluteDifference": "0.00405570060922541340295909",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "fcf_yoy",
+        "expected": "-7.348242811501597444089456869",
+        "observed": "-7.35",
+        "absoluteDifference": "0.001757188498402555910543131",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "cfo_ni_2025",
+        "expected": "1.708174178762414056531703591",
+        "observed": "1.71",
+        "absoluteDifference": "0.001825821237585943468296409",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "cfo_ni_2024",
+        "expected": "1.665534804753820033955857385",
+        "observed": "1.67",
+        "absoluteDifference": "0.004465195246179966044142615",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "fcf_ni_2025",
+        "expected": "1.329258976317799847211611917",
+        "observed": "1.33",
+        "absoluteDifference": "0.000741023682200152788388083",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "fcf_ni_2024",
+        "expected": "1.275382003395585738539898132",
+        "observed": "1.28",
+        "absoluteDifference": "0.004617996604414261460101868",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "capex_cfo_2025",
+        "expected": "22.18246869409660107334525939",
+        "observed": "22.18",
+        "absoluteDifference": "0.00246869409660107334525939",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "capex_cfo_2024",
+        "expected": "23.42507645259938837920489297",
+        "observed": "23.42",
+        "absoluteDifference": "0.00507645259938837920489297",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      }
+    ],
+    "working_capital": {
+      "2025": [
+        -165,
+        351,
+        436
+      ],
+      "2024": [
+        -383,
+        204,
+        656
+      ],
+      "totals": [
+        622,
+        477
+      ],
+      "change": 145,
+      "status": "PASS"
+    },
+    "gross_capex": {
+      "2025": 992,
+      "2024": 1149,
+      "status": "PASS"
+    },
+    "year_on_year_absolute_changes": {
+      "netIncome": -327,
+      "cfo": -433,
+      "capex": -157,
+      "fcf": -276,
+      "status": "PASS"
+    },
+    "rawCumulativeInputs": {
+      "netIncome2025": [
+        5740,
+        3122
+      ],
+      "netIncome2024": [
+        8092,
+        5147
+      ],
+      "cfo2025": [
+        5468,
+        996
+      ],
+      "cfo2024": [
+        6220,
+        1315
+      ],
+      "capexCashSign2025": [
+        -2499,
+        -1507
+      ],
+      "capexCashSign2024": [
+        -2850,
+        -1701
+      ],
+      "status": "PASS"
+    },
+    "cashflowBridge": {
+      "cfoChange": -433,
+      "netIncomeChange": -327,
+      "threeWorkingCapitalChange": 145,
+      "otherNetAdjustmentChange": -251,
+      "explanation": "Aggregate three-item working-capital improvement cannot explain the total decline; lower income plus remaining adjustments account for it. No specific commercial cause claimed.",
+      "status": "PASS"
+    }
+  },
+  "findings": [],
+  "nonFailingNotes": [
+    {
+      "answerLine": 72,
+      "note": "The FY2024 capex/CFO figure 23.42% is not nearest-two-decimal 23.43%, but differs from the exact 23.425076...% by 0.005076... percentage point and passes the frozen 0.01 tolerance."
+    },
+    {
+      "answerLine": 119,
+      "note": "The wording about insufficient detail to completely decompose all adjustments is broad; some rows are directly calculable, but the separate acquisition/divestiture charge/payment amounts are not disclosed in E2. This does not assert every adjustment is unavailable. No requirement to compute unrequested full-table details was added."
+    },
+    {
+      "answerLines": [
+        96,
+        100
+      ],
+      "note": "The no-working-capital-drag statement is read as the aggregate of the named three items, which improves by 145, not as a claim that every individual item improved."
+    }
+  ],
+  "reasoningInspection": {
+    "fullTextInspected": true,
+    "rawContentQuotedInReview": false,
+    "reasoningChars": 29498,
+    "reasoningTokens": 11276,
+    "observation": "Despite no learned experience, the trace repeatedly revisits core quarter reconstruction, signs, percentages, period dates and report design before drafting. At least three core-computation passes are identifiable, with further result/table restatements and repeated attempts to settle final structure. No new source or tool evidence entered during the call.",
+    "approximateRepeatedBlocks": [
+      {
+        "topic": "Core quarter values, rates and working-capital computations",
+        "minimumDistinctPasses": 3,
+        "privateLineRanges": [
+          "6-43",
+          "80-123",
+          "179-205"
+        ]
+      },
+      {
+        "topic": "Report organization and table planning",
+        "minimumDistinctPasses": 3,
+        "privateLineRanges": [
+          "68-76",
+          "133-173",
+          "227-270",
+          "298-327",
+          "359-378"
+        ],
+        "note": "Later blocks include partial restatements; the minimum count does not imply independent calculations."
+      }
+    ],
+    "scopeComparisonWithA": "C considers a few extra adjustment rows but does not reconstruct and publish the full operating/investing table appendix seen in A. C ultimately restricts the report to core values, required working-capital lines, ratios and bounded context.",
+    "degenerationVerdict": "REPEATED_COMPUTATION_AND_PLANNING_OBSERVED_BUT_NO_FIXED_VERBATIM_INFINITE_LOOP",
+    "limits": "Eventually stops normally. Repetition is observable in both xhigh arms, so it cannot be attributed solely to the learned experience. One trace is not a stable latency estimate."
+  },
+  "limitations": [
+    "AI source review only; no human review, formal release acceptance or production selection.",
+    "One new sample per arm. This source review does not establish stable causal gains or quality preservation for a changed thinking budget.",
+    "Natural completion at 356.156 seconds still exceeds the original 300-second whole-analysis deadline. First-token-before-deadline is insufficient for that contract.",
+    "No rubric, historical verdict, request or response was changed."
+  ],
+  "artifactHashes": {
+    "evals/diagnostics/model-root-cause-20261002/plan.json": "3d67e61bd50e14a9dc32c31ed5de7ea27820572b52288c51bffaf21daf93b46f",
+    "evals/diagnostics/model-root-cause-20261002/C-baseline-xhigh/request.json": "ef30a2d9ca34d41bfaf35681f64fc35529e36850c9f6ff2f94640dacfc729799",
+    "evals/diagnostics/model-root-cause-20261002/C-baseline-xhigh/result.json": "eb9d4d83db94547af62225a518c1d092b6891a27485de1f197c4be1276ed2186",
+    "evals/diagnostics/model-root-cause-20261002/C-baseline-xhigh/answer.txt": "c4efd0f0762efc537fe670747cf757e14768f72fd8c51532ca5790cd60ba8935",
+    "evals/diagnostics/model-root-cause-20261002/C-baseline-xhigh/reasoning.txt": "f7e0ec316bb7cfa0af95d63aba3565d23086e5bfa18af85b7d72b2f4a89843af",
+    "evals/evolution/batch-learning-validation-20261002/gold.jsonl": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+    "evals/evolution/batch-learning-validation-20261002/review-policy.json": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+    "evals/evolution_rubric.py": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea"
+  }
+}

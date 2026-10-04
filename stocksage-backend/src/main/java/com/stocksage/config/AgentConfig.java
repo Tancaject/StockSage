@@ -48,9 +48,12 @@ public class AgentConfig {
     @Value("${stocksage.chat.model-routing.manager-score-temperature:0.0}")
     private double managerScoreTemperature;
 
-    /** 单次 Agent 调用允许生成的最大 token 数。 */
+    /** 单次 Agent 回答正文的 token 上限；Max 的思考预算单独设置。 */
     @Value("${stocksage.chat.model-routing.max-output-tokens:${STOCKSAGE_CHAT_MAX_OUTPUT_TOKENS:4096}}")
     private int modelRoutingMaxOutputTokens;
+
+    @Value("${stocksage.chat.model-routing.standard-thinking-budget:32768}")
+    private int standardThinkingBudget;
 
     /**
      * 创建基本面分析师客户端。
@@ -63,7 +66,12 @@ public class AgentConfig {
      */
     @Bean("fundamentalsAgentChatClient")
     public ChatClient fundamentalsAgentChatClient(ChatClient.Builder builder) {
-        return roleClient(builder, "fundamentals", chatOptions(standardModel),
+        var options = chatOptions(standardModel);
+        // Max's max_tokens caps the answer only; ordinary analysis needs a separate reasoning bound.
+        if ("qwen3.8-max".equals(options.getModel())) {
+            options.setExtraBody(java.util.Map.of("enable_thinking", true, "thinking_budget", standardThinkingBudget));
+        }
+        return roleClient(builder, "fundamentals", options,
                 FundamentalsPrompts.system(FundamentalsPrompts.baselineMethod()));
     }
 

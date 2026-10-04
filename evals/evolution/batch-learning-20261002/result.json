@@ -1,0 +1,283 @@
+{
+  "schema": "fundamentals_batch_learning_result_v1",
+  "createdAt": "2026-10-02T08:54:33.323271+00:00",
+  "scope": "FROZEN_COMPONENT_CHAIN_AI_DIAGNOSTIC",
+  "releaseEligible": false,
+  "humanReviewed": false,
+  "decision": "KEEP_BASELINE_NO_CONFIRMED_ANALYSIS_METHOD_ERROR_IN_AVAILABLE_ANSWERS",
+  "learningEffect": "UNPROVEN",
+  "formalAnswerQuality": "NO_DATA",
+  "primaryDenominator": 12,
+  "completedTasks": 8,
+  "executionFailures": 4,
+  "missingTasks": 0,
+  "independentAIReview": {
+    "analysis": {
+      "PASS": 8,
+      "NO_DATA": 4
+    },
+    "finalAnswer": {
+      "PASS": 8,
+      "NO_DATA": 4
+    },
+    "allPlannedPassRate": 0.6666666666666666,
+    "completedTaskPassRate": 1.0,
+    "sourceGrounded": true,
+    "humanReference": false
+  },
+  "automaticReview": {
+    "plannedStages": 24,
+    "availableAnswerStages": 16,
+    "validReviews": 3,
+    "technicalFailuresOnAvailableAnswers": 13,
+    "businessUnavailableStages": 8,
+    "validCoverageOfAvailableAnswers": 0.1875,
+    "statusCounts": {
+      "NO_DATA": 21,
+      "PASS": 3
+    },
+    "mayTriggerLearning": false,
+    "ordinaryCalibrationInherited": false
+  },
+  "learning": {
+    "confirmedMethodFailureGroups": 0,
+    "generatorCalls": 0,
+    "proposedExperiences": 0,
+    "screenedCandidates": 0,
+    "combinedCandidates": 0,
+    "validationCalls": 0,
+    "untouchedValidationCases": 12,
+    "productionActivated": false
+  },
+  "accounting": {
+    "businessObservedCalls": 20,
+    "businessKnownUsageCalls": 16,
+    "businessUnknownUsageCalls": 4,
+    "businessKnownTokens": {
+      "inputTokens": 55733,
+      "outputTokens": 71718,
+      "totalTokens": 127451
+    },
+    "judgeCalls": 26,
+    "judgeUsage": {
+      "prompt_tokens": 175304,
+      "completion_tokens": 51495,
+      "total_tokens": 226799
+    },
+    "costEstimate": null,
+    "independentReviewProviderCalls": 0,
+    "note": "Independent AI review occurred in Codex; zero means no additional DashScope calls, not zero platform cost."
+  },
+  "cases": [
+    {
+      "caseId": "ibm-fy2025q3-quarter-control",
+      "runId": "development-ibm-1-1",
+      "responsePath": "raw-development-ibm\\development-ibm-1-1.response.json",
+      "responseSha256": "9e2e71a791c740bd70a672655922a194d40a531c5cfb99177fdf0bbe6a5006f1",
+      "execution": "PASS",
+      "analysis": "PASS",
+      "finalAnswer": "PASS",
+      "executionErrors": {
+        "analysis": null,
+        "finalAnswer": null
+      }
+    },
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "runId": "development-ibm-2-1",
+      "responsePath": "raw-development-ibm\\development-ibm-2-1.response.json",
+      "responseSha256": "b20f9e023d08233bf8d17eac8344a862e3f21e262d3f1a433578ebf2e0ac775f",
+      "execution": "FAIL",
+      "analysis": "NO_DATA",
+      "finalAnswer": "NO_DATA",
+      "executionErrors": {
+        "analysis": "TIMEOUT",
+        "finalAnswer": null
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-quarter-reconstruction",
+      "runId": "development-jnj-1-1",
+      "responsePath": "raw-development-jnj\\development-jnj-1-1.response.json",
+      "responseSha256": "3bff51249020c94c944b28f09e8dfdf9bb6e0ea58267597a27973ad120aa5b70",
+      "execution": "PASS",
+      "analysis": "PASS",
+      "finalAnswer": "PASS",
+      "executionErrors": {
+        "analysis": null,
+        "finalAnswer": null
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "runId": "development-jnj-2-1",
+      "responsePath": "raw-development-jnj\\development-jnj-2-1.response.json",
+      "responseSha256": "97ad35deecbf9aa3bd03fe6e82407db2e386218d47d8dd79ea8fba8709c727d7",
+      "execution": "FAIL",
+      "analysis": "NO_DATA",
+      "finalAnswer": "NO_DATA",
+      "executionErrors": {
+        "analysis": "TIMEOUT",
+        "finalAnswer": null
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "runId": "development-pep-1-1",
+      "responsePath": "raw-development-pep\\development-pep-1-1.response.json",
+      "responseSha256": "122c9ab6e5947dc997e45629169e36afc199dfdb88bf39966bac144b728ebb72",
+      "execution": "PASS",
+      "analysis": "PASS",
+      "finalAnswer": "PASS",
+      "executionErrors": {
+        "analysis": null,
+        "finalAnswer": null
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-cash-quality",
+      "runId": "development-pep-2-1",
+      "responsePath": "raw-development-pep\\development-pep-2-1.response.json",
+      "responseSha256": "055e2bff4c49f1a07336ecd0c929aad3699fc996424abe8fb428df6c720ca3dc",
+      "execution": "PASS",
+      "analysis": "PASS",
+      "finalAnswer": "PASS",
+      "executionErrors": {
+        "analysis": null,
+        "finalAnswer": null
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-liquidity",
+      "runId": "development-pep-3-1",
+      "responsePath": "raw-development-pep\\development-pep-3-1.response.json",
+      "responseSha256": "44f5b4f095317bb4c76b71c1dc0d044b3e29414b8e498fc53b6dd68b6c5ef0ce",
+      "execution": "PASS",
+      "analysis": "PASS",
+      "finalAnswer": "PASS",
+      "executionErrors": {
+        "analysis": null,
+        "finalAnswer": null
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-quarter-reconstruction",
+      "runId": "development-tgt-1-1",
+      "responsePath": "raw-development-tgt\\development-tgt-1-1.response.json",
+      "responseSha256": "8398e9729b40feebf11969c612ef63ea8ad525f62e4301a5e213eed3a1d767cb",
+      "execution": "PASS",
+      "analysis": "PASS",
+      "finalAnswer": "PASS",
+      "executionErrors": {
+        "analysis": null,
+        "finalAnswer": null
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "runId": "development-tgt-2-1",
+      "responsePath": "raw-development-tgt\\development-tgt-2-1.response.json",
+      "responseSha256": "453e344871b626552cf5343b788c9d1266c623b877a1f08e1dc5c478372423d5",
+      "execution": "PASS",
+      "analysis": "PASS",
+      "finalAnswer": "PASS",
+      "executionErrors": {
+        "analysis": null,
+        "finalAnswer": null
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity",
+      "runId": "development-tgt-3-1",
+      "responsePath": "raw-development-tgt\\development-tgt-3-1.response.json",
+      "responseSha256": "8897301a0814a4854a8cc1581d79cf7491b852e0886bb230663657eb99791599",
+      "execution": "PASS",
+      "analysis": "PASS",
+      "finalAnswer": "PASS",
+      "executionErrors": {
+        "analysis": null,
+        "finalAnswer": null
+      }
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "runId": "development-unsubmitted-ibm-1-1",
+      "responsePath": "raw-development-unsubmitted-ibm\\development-unsubmitted-ibm-1-1.response.json",
+      "responseSha256": "af0fb0021a53133ba01740f85f0f0e504c92e2ff7eb5713c63a8096093e80c9f",
+      "execution": "FAIL",
+      "analysis": "NO_DATA",
+      "finalAnswer": "NO_DATA",
+      "executionErrors": {
+        "analysis": "TIMEOUT",
+        "finalAnswer": null
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-liquidity",
+      "runId": "development-unsubmitted-jnj-1-1",
+      "responsePath": "raw-development-unsubmitted-jnj\\development-unsubmitted-jnj-1-1.response.json",
+      "responseSha256": "0ada9d17f95d7727e4d68d49a0ffd21eab6cc61b8592481f22be8e01b099c6ed",
+      "execution": "FAIL",
+      "analysis": "NO_DATA",
+      "finalAnswer": "NO_DATA",
+      "executionErrors": {
+        "analysis": "TIMEOUT",
+        "finalAnswer": null
+      }
+    }
+  ],
+  "inputArtifacts": [
+    {
+      "path": "plan.json",
+      "sha256": "d8947900c36f3334cf5fca2c8e2c8dc0c89b7ee54e61336414227bacf157cb3b"
+    },
+    {
+      "path": "cases.jsonl",
+      "sha256": "79dc78e1c056f0c37855875383df2850cea155d14304c218ee294e88bbd213f4"
+    },
+    {
+      "path": "gold.jsonl",
+      "sha256": "1b31f7cf00852cb0a4696385faac1954b344a0d50563cd5033ef71b5c106cbc1"
+    },
+    {
+      "path": "source-review.json",
+      "sha256": "888f1a642ee243600a8608c8fb835c4e65f18c5882402aa6c4b1fafe6edcc47e"
+    },
+    {
+      "path": "campaign/baseline-execution-audit.json",
+      "sha256": "b74d2df69c976867b805febb51c2f8dc46c15c5c5579ee574856c14eccc91ea9"
+    },
+    {
+      "path": "secondary-review-ibm-jnj.json",
+      "sha256": "ab137c218cdd5f26258a71a2b647f47b84bf8557b21908128906f4f2ea48360a"
+    },
+    {
+      "path": "secondary-review-pep-tgt.json",
+      "sha256": "9505dd6f6c6141aae96825fb0fc899fd08b22024bc0badb2e612f5765d0a9fe4"
+    },
+    {
+      "path": "judge-development-ibm.json",
+      "sha256": "6d1c814f9071fcd287b47c1c4dc2663fa153bc1110a1d884c4ebd2dc281adb62"
+    },
+    {
+      "path": "judge-development-jnj.json",
+      "sha256": "aff31b0dead7ec585858f6cf0f18e90536996e7901dde9b880963bb22455ba52"
+    },
+    {
+      "path": "judge-development-pep.json",
+      "sha256": "59a164c5b3daa3b4571575a2346587732e9fd1e152c5b29404ef9809de0ccc9b"
+    },
+    {
+      "path": "judge-development-tgt.json",
+      "sha256": "165b3de02107d1c3c196cf8befbf6d34453d8cc3ab19f49f0678c4d64cb6593a"
+    },
+    {
+      "path": "judge-development-unsubmitted-ibm.json",
+      "sha256": "ecc1fdf1f2f7331d9ba14c35329163f397a37d99b615395498cb8b22e71a2eb1"
+    },
+    {
+      "path": "judge-development-unsubmitted-jnj.json",
+      "sha256": "399d3b76519a6ba95c16eba98d122dc2a4dbe5a214463468171c5164eaef512a"
+    }
+  ]
+}

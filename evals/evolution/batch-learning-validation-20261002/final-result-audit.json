@@ -1,0 +1,109 @@
+{
+  "schema": "fundamentals_final_result_audit_v1",
+  "createdAt": "2026-10-02T14:04:46.854824+00:00",
+  "status": "PASS",
+  "scope": "STATISTICS_MAPPING_AND_ARTIFACT_BINDINGS_ONLY",
+  "semanticLabelsChanged": false,
+  "providerApiCalls": 0,
+  "testsRerun": false,
+  "resultSha256": "e1e6a01a42c4859745576f98c758dc2c2854f5112a3519c22cab3f869500819c",
+  "verifiedArtifactHashCount": 21,
+  "verifiedFrozenInputCount": 28,
+  "checkCount": 200,
+  "issues": [],
+  "denominators": {
+    "baselineCases": 10,
+    "candidateCases": 10,
+    "plannedStagesPerArm": 20,
+    "requiredFactsPerStagePerArm": 58,
+    "candidateScreenRunsReused": 3,
+    "freshCandidateRuns": 7,
+    "uniqueBusinessRuns": 20
+  },
+  "rawResponseHashesCanonicalSha256": "495468a5db155e267e29f868650d8e7d6c91f30193e704807974137c67a5b529",
+  "usageRecomputed": {
+    "byArm": {
+      "baseline": {
+        "invocations": 18,
+        "unknownUsageInvocations": 2,
+        "knownTokens": {
+          "inputTokens": 58909,
+          "outputTokens": 96207,
+          "totalTokens": 155116
+        }
+      },
+      "candidate": {
+        "invocations": 17,
+        "unknownUsageInvocations": 5,
+        "knownTokens": {
+          "inputTokens": 43080,
+          "outputTokens": 76271,
+          "totalTokens": 119351
+        }
+      }
+    },
+    "businessInvocations": 35,
+    "businessKnownTokens": {
+      "inputTokens": 101989,
+      "outputTokens": 172478,
+      "totalTokens": 274467
+    },
+    "screenSubsetTokensAlreadyIncluded": {
+      "inputTokens": 22441,
+      "outputTokens": 27452,
+      "totalTokens": 49893
+    },
+    "generatorCalls": 2,
+    "generatorKnownTokens": {
+      "prompt_tokens": 51330,
+      "completion_tokens": 4112,
+      "total_tokens": 55442
+    },
+    "allKnownTokens": 329909,
+    "unknownBusinessUsage": [
+      {
+        "runId": "development-08-1-1",
+        "stage": "analysis",
+        "errorCode": "TIMEOUT"
+      },
+      {
+        "runId": "development-10-1-1",
+        "stage": "analysis",
+        "errorCode": "TIMEOUT"
+      },
+      {
+        "runId": "candidate-dev-02-1-1",
+        "stage": "finalAnswer",
+        "errorCode": "WebClientResponseException"
+      },
+      {
+        "runId": "candidate-dev-04-1-1",
+        "stage": "finalAnswer",
+        "errorCode": "WebClientResponseException"
+      },
+      {
+        "runId": "candidate-dev-08-1-1",
+        "stage": "analysis",
+        "errorCode": "TIMEOUT"
+      },
+      {
+        "runId": "candidate-dev-09-1-1",
+        "stage": "analysis",
+        "errorCode": "TIMEOUT"
+      },
+      {
+        "runId": "candidate-dev-10-1-1",
+        "stage": "analysis",
+        "errorCode": "TIMEOUT"
+      }
+    ],
+    "unknownUsageTreatedAsZero": false
+  },
+  "generatorOutcomes": {
+    "PROPOSED": 1,
+    "NOT_GENERATED_LENGTH": 1
+  },
+  "selectedCandidates": 0,
+  "transferCalls": 0,
+  "limits": "Checks recorded labels, counts, mappings and hashes only; no semantic rescoring or estimate of unknown usage or money."
+}

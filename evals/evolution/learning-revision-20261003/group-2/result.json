@@ -1,0 +1,18 @@
+{
+  "status": "NOT_GENERATED",
+  "releaseEligible": false,
+  "usage": {
+    "completion_tokens": 1397,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1186,
+      "text_tokens": 1397
+    },
+    "prompt_tokens": 5482,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 5482
+    },
+    "total_tokens": 6879
+  },
+  "errorType": "ValueError"
+}

@@ -1,0 +1,30 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "{\"triggerTags\":[\"cumulative-to-single-quarter-reconstruction\",\"working-capital-sub-item-derivation\"],\"requiredEvidence\":[\"two-cumulative-periods-same-start-date\",\"cash-flow-statement-line-items\"],\"requiredCapabilities\":[\"evidence-reading\",\"period-comparison\",\"arithmetic\"],\"method\":\"当用两期同起点累计现金流量表还原单季数据时，除用户指定的汇总行外，还应对同一张表内所有可还原的明细行（如存货变动、应付账款变动、应计负债变动等）逐一做差值计算。还原完成后，在数据缺口部分声明某类数据缺失前，必须先检查该明细是否已通过上述差值还原得出；若已得出，不得将其列入缺口，而应报告还原值并注明商业原因尚无法确认。\",\"applicabilityBoundary\":\"仅适用于同一公司、同一财年、期初日期相同的两期累计现金流量表之间的单季还原场景；两期期初不同或存在重述、合并范围变化时不适用。\",\"counterexamples\":[\"两期累计报表期初日期不同\",\"公司发生重述或合并范围变更导致累计数不可直接相减\",\"仅有一期累计报表无法做差\"],\"forbiddenInferences\":[\"不得将还原出的会计变动直接推断为商业原因\",\"不得将明细还原值等同于管理层披露的单季数据\",\"不得因明细可还原就声称已掌握经营驱动因素\"]}",
+        "reasoning_content": "Let me analyze the failure mechanism and the verified feedback to understand what went wrong.\n\n**Failure Mechanism**: `FALSE_MISSING_DERIVABLE_PERIOD_DETAIL`\n\n**What happened**: The analysis correctly reconstructed the single-quarter cash flow figures (operating cash flow, capex, simplified FCF) by subtracting the 6-month cumulative from the 9-month cumulative. However, in the \"数据缺口\" (data gaps) section, the analyst claimed:\n\n> \"缺少本季经营现金流的具体驱动因素拆分，例如存货、应付账款、应计负债等营运资本项目的单季变化。\"\n\nThis is **false** because the working capital line items (Inventory, Accounts payable, Accrued and other liabilities) are also available in both cumulative statements and can be similarly differenced to get the single-quarter values:\n- Inventory: -2,156 - (-141) = -2,015\n- Accounts payable: 658 - (-1,125) = +1,783\n- Accrued and other liabilities: 102 - (-302) = +404\n\nThe analyst correctly performed the subtraction for the top-level items (operating CF, capex) but failed to recognize that the same subtraction method applies to all sub-line items within the cash flow statement. It then incorrectly declared these as \"missing data.\"\n\n**Root cause**: When reconstructing single-quarter figures from cumulative statements, the analyst only applied the differencing to the headline items explicitly asked about, but did not systematically apply it to all available line items. Then it falsely claimed the sub-item details were unavailable.\n\n**What the experience should address**: When performing period reconstruction via cumulative differencing, the method must systematically apply the subtraction to ALL line items present in both cumulative statements, not just the headline metrics requested. Before declaring any sub-item as a \"data gap,\" verify whether it can be derived from the same differencing operation.\n\nLet me formulate this as a transferable conditional experience:\n\n- **Trigger**: When the task requires reconstructing single-period figures from cumulative statements via differencing\n- **Required evidence**: cumulative-cash-flow-statements with shared start date\n- **Method**: Before listing any line item as a data gap, check whether it appears in both cumulative statements and can be derived by the same subtraction. Apply the differencing systematically to all sub-line items, not just the headline figures explicitly requested.\n- **Applicability boundary**: Two cumulative statements covering the same fiscal year with the same start date\n- **Counterexamples**: When line items exist in only one of the two statements; when the fiscal year start dates differ\n- **Forbidden inferences**: Cannot infer commercial causes from the derived sub-item figures alone\n\nLet me write the JSON output.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1790947199,
+  "id": "chatcmpl-c15264dd-214d-95dc-b070-bca25c96f38b",
+  "model": "qwen3.8-max",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 862,
+    "completion_tokens_details": {
+      "reasoning_tokens": 578,
+      "text_tokens": 862
+    },
+    "prompt_tokens": 25932,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 25932
+    },
+    "total_tokens": 26794
+  }
+}

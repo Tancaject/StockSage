@@ -1,0 +1,109 @@
+{
+  "schema": "remaining_analysis_timeouts_result_v1",
+  "providerCalls": 2,
+  "automaticRetries": 0,
+  "maxConcurrency": 1,
+  "knownProviderTokens": {
+    "input": 5634,
+    "output": 28019,
+    "total": 33653,
+    "reasoningIncludedInOutput": 20130
+  },
+  "unknownUsageCalls": 0,
+  "arms": [
+    {
+      "id": "candidate-dev-08",
+      "caseId": "jnj-fy2025q3-cash-deployment-bridge",
+      "firstReasoningSeconds": 1.062,
+      "firstAnswerSeconds": 269.828,
+      "durationSeconds": 350.015,
+      "maxEventGapSeconds": 1.093999999999994,
+      "reasoningTokens": 11231,
+      "answerChars": 6387,
+      "finishReason": "length",
+      "transportCompleted": true,
+      "answerComplete": false,
+      "deadlineReproduction": "EXCEEDS_ORIGINAL_300_SECONDS",
+      "semanticQuality": "NOT_SCORED",
+      "rawResult": "candidate-dev-08/result.json"
+    },
+    {
+      "id": "candidate-dev-10",
+      "caseId": "tgt-fy2025q3-liquidity-cash-synthesis",
+      "firstReasoningSeconds": 1.219,
+      "firstAnswerSeconds": 208.235,
+      "durationSeconds": 297.797,
+      "maxEventGapSeconds": 1.219,
+      "reasoningTokens": 8899,
+      "answerChars": 6272,
+      "finishReason": "stop",
+      "transportCompleted": true,
+      "answerComplete": true,
+      "deadlineReproduction": "NOT_REPRODUCED_IN_THIS_SAMPLE",
+      "semanticQuality": "NOT_SCORED",
+      "rawResult": "candidate-dev-10/result.json"
+    }
+  ],
+  "historicalBaselines": {
+    "evals/evolution/batch-learning-validation-20261002/raw-development-08/development-08-1-1.response.json": {
+      "sha256": "df9c63f19af976e95fb18830ac53a430824cec53d5d63ece1e7c77f4b05f6cce",
+      "status": "FAILED",
+      "errorCode": "TIMEOUT",
+      "durationMs": 300010
+    },
+    "evals/evolution/batch-learning-validation-20261002/raw-development-10/development-10-1-1.response.json": {
+      "sha256": "3a55ed920e997d91d78ed598974d72989b8b9fa8ac20306bd672a14f783a05f0",
+      "status": "FAILED",
+      "errorCode": "TIMEOUT",
+      "durationMs": 300008
+    }
+  },
+  "inspection": {
+    "rawReasoningQuoted": false,
+    "jnj": "Core cash-flow comparison and balance bridge appear in the opening portion, followed by repeated checks, extra prior-year bridge/coverage/share metrics and report planning. Output ends mid-risk-section, before data gaps and sources.",
+    "tgt": "Core current ratio, net debt and cash bridge are recalculated in at least three spans; extra ratios, year-over-year comparisons and report planning expand the work.",
+    "learnedMethodApplicability": "Both questions request cumulative analysis, not same-year single-quarter reconstruction. Traces consider and reject the reconstruction rule.",
+    "causalLimit": "Visible repetition and expansion do not isolate their latency effects or prove model-internal causes; no fixed infinite loop established."
+  },
+  "terminationContract": {
+    "status": "STATIC_CONFIRMED_FINISH_REASON_NOT_PROPAGATED",
+    "sharedProducer": "FundamentalsAgent.invoke:94-117 extracts body, model and usage without generation finish reason",
+    "replayConsumer": "EvolutionReplayService:241-246 marks any nonblank returned analysis COMPLETED",
+    "ordinaryConsumer": "ToolPrefetchService.appendAnalystDraft:390-396 marks any nonblank draft COMPLETED",
+    "dependency": "org.springframework.ai:spring-ai-openai:1.1.5",
+    "class": "OpenAiChatModel.buildGeneration",
+    "classBytesSha256": "d089086714e8b92df0b05c03e6102130b9b720753173bbaf3617b89d741b3ba7",
+    "dependencyObservation": "Provider finish reason is copied to ChatGenerationMetadata; the project adapter discards it.",
+    "sourceSnapshots": "verification.json",
+    "javaTruncationReplayPerformed": false,
+    "fixImplemented": false,
+    "relationToHistoricalTimeout": "Independent completeness defect; not claimed as cause of the original 300-second timeout."
+  },
+  "limits": [
+    "Historical nonstream provider activity cannot be recovered by a new sample.",
+    "Python streaming 600-second execution differs from historical Java nonstream 300-second execution.",
+    "One sample per case; same model name does not guarantee immutable provider revision.",
+    "Execution diagnosis only; no new semantic PASS or candidate selection.",
+    "TGT completed only 2.203 seconds before 300 in this Python sample; no deployed latency guarantee.",
+    "No explicit Python proxy does not prove OS TUN/VPN bypass."
+  ],
+  "productionSettingsChanged": false,
+  "businessCodeChanged": false,
+  "residentServiceRestarted": false,
+  "releaseEligible": false,
+  "artifacts": {
+    "candidate-dev-08/answer.txt": "6faac8093aebb197734696646cf86c7680641beb220cc54d51f690b58e076052",
+    "candidate-dev-08/plan.json": "0be0f6a476d496fff89eb225087f1e150089d4e682d0ddc17422d09f52be01a9",
+    "candidate-dev-08/reasoning.txt": "4e4642ac7639d589cf72ee547f7be9231f2249843472c570726ba8f9bed3c3ff",
+    "candidate-dev-08/request.json": "d1daf6bd04e69bc71c85bf87125e287b3e641efe3295a3de97a058048fae3049",
+    "candidate-dev-08/result.json": "3a345afc18144449d8307c066ed88714f5af33779d20d4b99491cead63358788",
+    "candidate-dev-10/answer.txt": "1d707c5c7d7f60fd74bd86266772c2b4ee08bd7b13a2d0bd2ad19a737471b554",
+    "candidate-dev-10/plan.json": "b5d2cd14e99c2588d1dfe74e029c9b1d459e701197f4e03ae5d3743688641c34",
+    "candidate-dev-10/reasoning.txt": "3cc29d3023a9dc282ac0d95a6d8f9cd6ccfd9504999cba8fac97a6475f412c96",
+    "candidate-dev-10/request.json": "cc6b791335d865cf9e76401c167d97214e52c6a404b90a4244569caf79f022aa",
+    "candidate-dev-10/result.json": "b812aad9b5825d7de4495a2575df9841f7e4858487761901914a135be28e0e57",
+    "plan.json": "1615878a8c88228d49dfd162902af8f380bf154601a095896f106188ab71017f",
+    "RESULTS.md": "904bba887924d74746247a4837c58944c3328a747d45d7f72b60b29537965271",
+    "verification.json": "854075f10dbf00b9cd772f6aab3a559fad9bd8d258dc0f7dec8d511141c37b58"
+  }
+}

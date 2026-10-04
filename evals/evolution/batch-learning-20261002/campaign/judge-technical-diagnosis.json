@@ -1,0 +1,120 @@
+{
+  "schema": "batch_native_judge_technical_diagnosis_v1",
+  "generatedAt": "2026-10-02T08:45:50.171070+00:00",
+  "scope": "AI_ADAPTER_FAILURES_ONLY",
+  "ordinaryCalibrationInherited": false,
+  "releaseEligible": false,
+  "businessAnswerErrorEstablished": false,
+  "additionalProviderCalls": 0,
+  "rawArtifacts": [
+    {
+      "path": "judge-development-ibm.json",
+      "sha256": "6d1c814f9071fcd287b47c1c4dc2663fa153bc1110a1d884c4ebd2dc281adb62",
+      "status": "INCOMPLETE"
+    },
+    {
+      "path": "judge-development-jnj.json",
+      "sha256": "aff31b0dead7ec585858f6cf0f18e90536996e7901dde9b880963bb22455ba52",
+      "status": "INCOMPLETE"
+    },
+    {
+      "path": "judge-development-pep.json",
+      "sha256": "59a164c5b3daa3b4571575a2346587732e9fd1e152c5b29404ef9809de0ccc9b",
+      "status": "INCOMPLETE"
+    }
+  ],
+  "findings": [
+    {
+      "kind": "SINGLE_RESPONSE_TOOL_LIMIT",
+      "cause": "The model requests more than four calculator calls in its first response. The adapter rejects before executing any; this is not exhaustion of the four provider rounds. The protocol does not state the four-tools-per-response limit.",
+      "examples": [
+        {
+          "file": "judge-development-pep.json",
+          "id": "pep-fy2025q3-cash-quality@1",
+          "stage": "analysis",
+          "callIndex": 0,
+          "finishReason": "tool_calls",
+          "requestedTools": 10,
+          "executedTools": 0
+        },
+        {
+          "file": "judge-development-pep.json",
+          "id": "pep-fy2025q3-liquidity@1",
+          "stage": "analysis",
+          "callIndex": 0,
+          "finishReason": "tool_calls",
+          "requestedTools": 8,
+          "executedTools": 0
+        },
+        {
+          "file": "judge-development-pep.json",
+          "id": "pep-fy2025q3-liquidity@1",
+          "stage": "finalAnswer",
+          "callIndex": 0,
+          "finishReason": "tool_calls",
+          "requestedTools": 5,
+          "executedTools": 0
+        }
+      ],
+      "outputTruncationObserved": false
+    },
+    {
+      "kind": "JSON_WRAPPER",
+      "file": "judge-development-pep.json",
+      "id": "pep-fy2025q3-quarter-reconstruction@1",
+      "stage": "analysis",
+      "callIndex": 1,
+      "finishReason": "stop",
+      "completionTokens": 5037,
+      "maxTokens": 6000,
+      "startsWith": "```json\n",
+      "endsWith": "\n```",
+      "rawPreserved": true,
+      "parseAfterLiteralFenceRemoval": [
+        "dimensions",
+        "extraction_complete",
+        "claims",
+        "points",
+        "response_kind"
+      ],
+      "cause": "A complete JSON object is wrapped in a Markdown JSON fence, so strict json.loads fails at character zero.",
+      "outputTruncationObserved": false
+    },
+    {
+      "kind": "DUPLICATE_FACT_EXTRACTION",
+      "file": "judge-development-ibm.json",
+      "id": "ibm-fy2025q3-quarter-control@1",
+      "stage": "finalAnswer",
+      "factKey": [
+        "E1",
+        "cashConversionRatio",
+        "2025-07-01/2025-09-30"
+      ],
+      "extractedRepresentations": [
+        {
+          "value": "1.77",
+          "unit": "ratio"
+        },
+        {
+          "value": "176.66",
+          "unit": "percent"
+        }
+      ],
+      "cause": "The same cash conversion measure is extracted twice in two units under one fact identity instead of normalization and deduplication. The rejection does not establish a business numeric error.",
+      "outputTruncationObserved": false
+    },
+    {
+      "kind": "SOURCE_ID_MISMATCH",
+      "file": "judge-development-pep.json",
+      "id": "pep-fy2025q3-quarter-reconstruction@1",
+      "stage": "finalAnswer",
+      "field": "quarterCapexShareOfOperatingCashFlowPercent",
+      "claimedEvidenceId": "E1",
+      "actualExcerptEvidenceId": "E2",
+      "evidenceExcerpt": "Net Cash Provided by Operating Activities 996 1,315",
+      "cause": "The quote exists verbatim in visible evidence, but belongs to E2 while the extracted fact names E1. The source binding is invalid; this is not an invented business answer quote.",
+      "outputTruncationObserved": false
+    }
+  ],
+  "policy": "Preserve original frozen judgments. These technical failures remain NO_DATA and are not METHOD_ERROR training labels; independent source-based review adjudicates the business outputs."
+}

@@ -1,0 +1,186 @@
+{
+  "schema": "learning_revision_result_v1",
+  "scope": "DIRECT_PROVIDER_ANALYSIS_ONLY",
+  "releaseEligible": false,
+  "selectedCandidate": null,
+  "transferCalls": 0,
+  "calls": {
+    "generator": 2,
+    "business": 6,
+    "automaticRetries": 0
+  },
+  "usage": {
+    "knownTotalTokens": 71172,
+    "unknownBusinessUsageCalls": 1,
+    "includesCodexReviewTokens": false
+  },
+  "counts": {
+    "old": {
+      "plannedCases": 3,
+      "complete": 2,
+      "withinOriginal300Seconds": 2,
+      "semantic": {
+        "PASS": 1,
+        "FAIL": 1,
+        "NO_DATA": 1
+      }
+    },
+    "revised": {
+      "plannedCases": 3,
+      "complete": 3,
+      "withinOriginal300Seconds": 2,
+      "semantic": {
+        "PASS": 2,
+        "FAIL": 1,
+        "NO_DATA": 0
+      }
+    }
+  },
+  "rows": [
+    {
+      "case": 5,
+      "arm": "old",
+      "complete": true,
+      "semanticStatus": "FAIL",
+      "requiredFactsStatus": "PASS",
+      "withinOriginal300Seconds": true,
+      "durationSeconds": 247.562,
+      "firstAnswerSeconds": 194.875,
+      "answerChars": 4176,
+      "usage": {
+        "completion_tokens": 9558,
+        "completion_tokens_details": {
+          "reasoning_tokens": 7447,
+          "text_tokens": 9558
+        },
+        "prompt_tokens": 2950,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 2950
+        },
+        "total_tokens": 12508
+      },
+      "finishReason": "stop",
+      "transportStatus": "COMPLETED"
+    },
+    {
+      "case": 5,
+      "arm": "revised",
+      "complete": true,
+      "semanticStatus": "PASS",
+      "requiredFactsStatus": "PASS",
+      "withinOriginal300Seconds": true,
+      "durationSeconds": 148.86,
+      "firstAnswerSeconds": 109.907,
+      "answerChars": 2758,
+      "usage": {
+        "completion_tokens": 5300,
+        "completion_tokens_details": {
+          "reasoning_tokens": 3630,
+          "text_tokens": 5300
+        },
+        "prompt_tokens": 2935,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 2935
+        },
+        "total_tokens": 8235
+      },
+      "finishReason": "stop",
+      "transportStatus": "COMPLETED"
+    },
+    {
+      "case": 9,
+      "arm": "old",
+      "complete": false,
+      "semanticStatus": "NO_DATA",
+      "requiredFactsStatus": "NO_DATA",
+      "withinOriginal300Seconds": false,
+      "durationSeconds": 600.0,
+      "firstAnswerSeconds": 537.937,
+      "answerChars": 4052,
+      "usage": null,
+      "finishReason": null,
+      "transportStatus": "FAILED"
+    },
+    {
+      "case": 9,
+      "arm": "revised",
+      "complete": true,
+      "semanticStatus": "FAIL",
+      "requiredFactsStatus": "PASS",
+      "withinOriginal300Seconds": false,
+      "durationSeconds": 331.844,
+      "firstAnswerSeconds": 265.703,
+      "answerChars": 4541,
+      "usage": {
+        "completion_tokens": 12301,
+        "completion_tokens_details": {
+          "reasoning_tokens": 9577,
+          "text_tokens": 12301
+        },
+        "prompt_tokens": 2961,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 2961
+        },
+        "total_tokens": 15262
+      },
+      "finishReason": "stop",
+      "transportStatus": "COMPLETED"
+    },
+    {
+      "case": 6,
+      "arm": "old",
+      "complete": true,
+      "semanticStatus": "PASS",
+      "requiredFactsStatus": "PASS",
+      "withinOriginal300Seconds": true,
+      "durationSeconds": 225.984,
+      "firstAnswerSeconds": 175.969,
+      "answerChars": 3191,
+      "usage": {
+        "completion_tokens": 8683,
+        "completion_tokens_details": {
+          "reasoning_tokens": 6732,
+          "text_tokens": 8683
+        },
+        "prompt_tokens": 2298,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 2298
+        },
+        "total_tokens": 10981
+      },
+      "finishReason": "stop",
+      "transportStatus": "COMPLETED"
+    },
+    {
+      "case": 6,
+      "arm": "revised",
+      "complete": true,
+      "semanticStatus": "PASS",
+      "requiredFactsStatus": "PASS",
+      "withinOriginal300Seconds": true,
+      "durationSeconds": 200.031,
+      "firstAnswerSeconds": 134.218,
+      "answerChars": 4723,
+      "usage": {
+        "completion_tokens": 7828,
+        "completion_tokens_details": {
+          "reasoning_tokens": 4774,
+          "text_tokens": 7828
+        },
+        "prompt_tokens": 2283,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 2283
+        },
+        "total_tokens": 10111
+      },
+      "finishReason": "stop",
+      "transportStatus": "COMPLETED"
+    }
+  ],
+  "decision": "Retain revision as diagnostic artifact; narrower scope helped the original case, but no stable end-to-end gain or production qualification is established."
+}

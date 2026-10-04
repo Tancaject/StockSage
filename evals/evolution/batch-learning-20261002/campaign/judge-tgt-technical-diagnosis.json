@@ -1,0 +1,145 @@
+{
+  "schema": "batch_native_judge_tgt_technical_diagnosis_v1",
+  "generatedAt": "2026-10-02T08:55:09.129386+00:00",
+  "scope": "AI_ADAPTER_FAILURES_ONLY",
+  "ordinaryCalibrationInherited": false,
+  "releaseEligible": false,
+  "businessAnswerErrorEstablished": false,
+  "additionalProviderCalls": 0,
+  "rawArtifact": {
+    "path": "judge-development-tgt.json",
+    "sha256": "165b3de02107d1c3c196cf8befbf6d34453d8cc3ab19f49f0678c4d64cb6593a",
+    "status": "INCOMPLETE"
+  },
+  "findings": [
+    {
+      "id": "tgt-fy2025q3-cash-quality@1",
+      "stage": "analysis",
+      "originalErrors": [
+        "JUDGE_FAILED: Judge tool budget exceeded"
+      ],
+      "kind": "SINGLE_RESPONSE_TOOL_LIMIT",
+      "callIndex": 0,
+      "requestedTools": 6,
+      "executedTools": 0,
+      "providerRoundsUsed": 1,
+      "finishReason": "tool_calls",
+      "sameCauseAsPriorDiagnosis": true,
+      "cause": "First response exceeds the adapter limit of four tools; the four-round provider budget was not exhausted."
+    },
+    {
+      "id": "tgt-fy2025q3-cash-quality@1",
+      "stage": "finalAnswer",
+      "originalErrors": [
+        "JUDGE_FAILED: Judge response incomplete or has multiple choices"
+      ],
+      "kind": "OUTPUT_TRUNCATION",
+      "callIndex": 1,
+      "choiceCount": 1,
+      "finishReason": "length",
+      "requestedMaxTokens": 6000,
+      "providerUsage": {
+        "completion_tokens": 6351,
+        "completion_tokens_details": {
+          "reasoning_tokens": 349,
+          "text_tokens": 6351
+        },
+        "prompt_tokens": 7519,
+        "prompt_tokens_details": {
+          "cached_tokens": 6144,
+          "text_tokens": 7519
+        },
+        "total_tokens": 13870
+      },
+      "contentCharacterCount": 12634,
+      "tail": "方向。\", \"answerExcerpt\": \"其中，**折旧与摊销 2,331 百万美元** 是最主要的非现金加回项。折旧与摊销会减少账面净利润，但并不直接消耗当期现金，因此是经营现金流高于净利润的重要原因。\"}, \"p4\": {\"status\": \"PASS\", \"reason\": \"判断与数据",
+      "jsonParseError": "Unterminated string starting at: line 1 column 12629 (char 12628)",
+      "sameCauseAsPriorDiagnosis": false,
+      "cause": "The single response ends with finish_reason=length inside an unfinished JSON reason string. This is confirmed output truncation, not multiple choices or a business answer defect."
+    },
+    {
+      "id": "tgt-fy2025q3-liquidity@1",
+      "stage": "analysis",
+      "originalErrors": [
+        "JUDGE_FAILED: Judge tool budget exceeded"
+      ],
+      "kind": "SINGLE_RESPONSE_TOOL_LIMIT",
+      "callIndex": 0,
+      "requestedTools": 8,
+      "executedTools": 0,
+      "providerRoundsUsed": 1,
+      "finishReason": "tool_calls",
+      "sameCauseAsPriorDiagnosis": true,
+      "cause": "First response exceeds the adapter limit of four tools; the four-round provider budget was not exhausted."
+    },
+    {
+      "id": "tgt-fy2025q3-liquidity@1",
+      "stage": "finalAnswer",
+      "originalErrors": [
+        "JUDGE_FAILED: Judge tool budget exceeded"
+      ],
+      "kind": "SINGLE_RESPONSE_TOOL_LIMIT",
+      "callIndex": 0,
+      "requestedTools": 6,
+      "executedTools": 0,
+      "providerRoundsUsed": 1,
+      "finishReason": "tool_calls",
+      "sameCauseAsPriorDiagnosis": true,
+      "cause": "First response exceeds the adapter limit of four tools; the four-round provider budget was not exhausted."
+    },
+    {
+      "id": "tgt-fy2025q3-quarter-reconstruction@1",
+      "stage": "analysis",
+      "originalErrors": [
+        "TASK_POINT_EXCERPT_MISMATCH:p4"
+      ],
+      "kind": "EXACT_QUOTE_WHITESPACE_CHANGED",
+      "point": "p4",
+      "expectedPoint": "覆盖判断与单季经营现金流和购建支出大小一致",
+      "judgeQuote": "**覆盖。**\n\n- 覆盖金额：  \n  \\[\n  1,127 - 978 = 149\n  \\]\n  \n  即经营现金流覆盖该支出后剩余 **149 百万美元**。",
+      "actualAnswerExcerpt": "**覆盖。**\n\n- 覆盖金额：  \n  \\[\n  1,127 - 978 = 149\n  \\]  \n  即经营现金流覆盖该支出后剩余 **149 百万美元**。",
+      "lineDiff": [
+        "--- actual\n",
+        "+++ judge\n",
+        "@@ -3,5 +3,6 @@\n",
+        " - 覆盖金额：  ",
+        "   \\[",
+        "   1,127 - 978 = 149",
+        "-  \\]  ",
+        "+  \\]",
+        "+  ",
+        "   即经营现金流覆盖该支出后剩余 **149 百万美元**。"
+      ],
+      "sameCauseAsPriorDiagnosis": false,
+      "cause": "The judge removes two trailing spaces after the closing display-math delimiter and inserts an extra blank line. The copied passage is therefore not a literal substring, although the actual answer explicitly says the cash flow covers the expenditure."
+    },
+    {
+      "id": "tgt-fy2025q3-quarter-reconstruction@1",
+      "stage": "finalAnswer",
+      "originalErrors": [
+        "JUDGE_FAILED: Expecting value: line 1 column 1 (char 0)"
+      ],
+      "kind": "JSON_WRAPPER",
+      "callIndex": 1,
+      "finishReason": "stop",
+      "parseAfterLiteralFenceRemoval": [
+        "dimensions",
+        "extraction_complete",
+        "claims",
+        "points",
+        "response_kind"
+      ],
+      "sameCauseAsPriorDiagnosis": true,
+      "cause": "Complete JSON is wrapped in a Markdown JSON fence. The raw payload is preserved and remains technically invalid under the frozen parser; it is not truncated."
+    }
+  ],
+  "completeCampaignCounts": {
+    "plannedStages": 24,
+    "savedReviews": 24,
+    "validPassReviews": 3,
+    "invalidReviewsWithProviderCalls": 13,
+    "skippedBecauseBusinessInputUnavailable": 8,
+    "providerCalls": 26
+  },
+  "policy": "Preserve all frozen raw reviews and the previous technical diagnosis. Technical-invalid reviews are not business METHOD_ERROR evidence; independently review business answers against source and gold."
+}

@@ -1,0 +1,939 @@
+{
+  "schema": "fundamentals_independent_source_review_compact_v1",
+  "reviewer": "Codex /root/batch_stage_review; not a dataset author",
+  "reviewType": "AI_SOURCE_CHECKED",
+  "humanReviewed": false,
+  "releaseEligible": false,
+  "reviewedAt": "2026-10-02T13:54:54.790676+00:00",
+  "reviewPolicySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+  "rubricSha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+  "sourceCasesFileSha256": "1260c579bae043263d3c1ac88cdd2663186ccf6a34d38c7cffcd9dcffceeb145",
+  "goldFileSha256": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+  "scope": "Candidate development 07 and 09; independent source review of complete saved answers; no model API calls.",
+  "coverage": "Read every completed answer including repeated values, material explanations, limitations and source metadata. Equivalent repetitions share checks. Frozen tolerance 0.01; Decimal arithmetic. No inference from candidate experience relevance.",
+  "plannedCases": 2,
+  "plannedStages": 4,
+  "summary": {
+    "stagePass": 2,
+    "stageFail": 0,
+    "stageNoData": 2
+  },
+  "cases": [
+    {
+      "caseId": "ibm-fy2025q3-oneoff-cash-comparability",
+      "runId": "candidate-dev-07-1-1",
+      "sourceCaseSha256": "f2837a7340885004b8fb8f125c86a42dc5706079aa253ebb1739921e00e2dcc8",
+      "goldRecordSha256": "7800765b8f94eaedcb937b11d180422098f16064e53a24b3ee7aa7b0178ee4b9",
+      "executionFileSha256": "3e1dba36305b7d5a1261a911c9c463a8bf20806026549590200e7ad9e2e0189b",
+      "reportPath": "evals/evolution/batch-learning-validation-20261002/raw-candidate-dev-07/candidate-a7a92cfaac38c01535486362.report.json",
+      "reportSha256": "63a9054c1cb2f5707e06b09bdf99db91053b15e65cbb6ae849878f566259757b",
+      "rawResponsePath": "evals/evolution/batch-learning-validation-20261002/raw-candidate-dev-07/candidate-dev-07-1-1.response.json",
+      "rawResponseSha256": "71ee910012d5387806ea0f669208f2d1b35205b2d939af96b4ae3b62b467a1be",
+      "methodBundle": {
+        "bundleSha256": "959c7d820bd43eb29bfe0494fb480f53830ba316bfa5e8dbb2c42c12d764644d",
+        "fixedContractSha256": "03b588fd86fc9f75047578665fa5227d2e73ca1bca734463fb3feddebe8df193",
+        "bundleId": "candidate-a7a92cfaac38c01535486362",
+        "scope": "FUNDAMENTALS_METHOD"
+      },
+      "executionStatus": "COMPLETED",
+      "analystStatus": "COMPLETED",
+      "taskOutcome": "COMPLETED",
+      "bindingErrors": [],
+      "sourceQuotes": {
+        "period": {
+          "evidenceId": "E1",
+          "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "visibleSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        },
+        "units": {
+          "evidenceId": "E1",
+          "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "visibleSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        },
+        "income": {
+          "evidenceId": "E1",
+          "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "visibleSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        },
+        "ocf": {
+          "evidenceId": "E1",
+          "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "visibleSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        },
+        "pension": {
+          "evidenceId": "E1",
+          "quote": "Pension Settlement Charge |  | - |  | 2,725 |  | - |  | 2,725",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "visibleSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        },
+        "tax": {
+          "evidenceId": "E1",
+          "quote": "(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter.",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "visibleSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        },
+        "other": {
+          "evidenceId": "E1",
+          "quote": "Operating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "visibleSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        }
+      },
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "status": "COMPLETED",
+          "answerSha256": "178aacc13355c30dc501147b5a17322e36ba68337ef07f2110178fd77d30441d",
+          "evidenceSha256": "6970093ee7dafa33fe6949b7400f077104b529d8e91b68740a163a12980f6874",
+          "binding": {
+            "id": "ibm-fy2025q3-oneoff-cash-comparability@1",
+            "scope": "FUNDAMENTALS_ANALYSIS",
+            "rubricSha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+            "caseSha256": "254eeee1a8ce42f9525fa61bfd92dd73cb553298736a0178f8dc9e25c5436203",
+            "answerSha256": "178aacc13355c30dc501147b5a17322e36ba68337ef07f2110178fd77d30441d",
+            "promptSha256": "db910870ae63b33c37e00994b756f927626c83b57bad1a4e839f255864e304fc",
+            "contextSha256": "9d5416f83d49934f1b4aeeb320f2c0532f3d89b61dcf41804ded4633ec5a8a11",
+            "evidenceSha256": "6970093ee7dafa33fe6949b7400f077104b529d8e91b68740a163a12980f6874",
+            "modelName": "qwen3.8-max",
+            "modelTier": "STANDARD",
+            "invocationSha256": "bd1d7b14c6796eb3682ce510e3008d31405d82187dcf59408d87f7a181056ad0"
+          },
+          "requiredFacts": [
+            {
+              "field": "illustrativeAdjustedNetIncome2025",
+              "expected": "5293.0000",
+              "observed": "5293",
+              "unit": "million",
+              "period": "2025-01-01/2025-09-30",
+              "absoluteError": "0.0000",
+              "status": "PASS",
+              "answerQuote": "| 示意调整后净利润，百万美元 | **5,293** | **5,134** |"
+            },
+            {
+              "field": "illustrativeAdjustedNetIncome2024",
+              "expected": "5134.0000",
+              "observed": "5134",
+              "unit": "million",
+              "period": "2024-01-01/2024-09-30",
+              "absoluteError": "0.0000",
+              "status": "PASS",
+              "answerQuote": "| 示意调整后净利润，百万美元 | **5,293** | **5,134** |"
+            },
+            {
+              "field": "illustrativeAdjustedCashConversion2025",
+              "expected": "1.7293",
+              "observed": "1.73",
+              "unit": "ratio",
+              "period": "2025-01-01/2025-09-30",
+              "absoluteError": "0.0007",
+              "status": "PASS",
+              "answerQuote": "| 示意调整后经营现金流 / 示意调整后净利润 | **1.73** | **1.78** |"
+            },
+            {
+              "field": "illustrativeAdjustedCashConversion2024",
+              "expected": "1.7754",
+              "observed": "1.78",
+              "unit": "ratio",
+              "period": "2024-01-01/2024-09-30",
+              "absoluteError": "0.0046",
+              "status": "PASS",
+              "answerQuote": "| 示意调整后经营现金流 / 示意调整后净利润 | **1.73** | **1.78** |"
+            },
+            {
+              "field": "reportedCashConversion2025",
+              "expected": "1.8332",
+              "observed": "1.83",
+              "unit": "ratio",
+              "period": "2025-01-01/2025-09-30",
+              "absoluteError": "0.0032",
+              "status": "PASS",
+              "answerQuote": "| 经营现金流 / 净利润 | **1.83** | **2.93** |"
+            },
+            {
+              "field": "reportedCashConversion2024",
+              "expected": "2.9318",
+              "observed": "2.93",
+              "unit": "ratio",
+              "period": "2024-01-01/2024-09-30",
+              "absoluteError": "0.0018",
+              "status": "PASS",
+              "answerQuote": "| 经营现金流 / 净利润 | **1.83** | **2.93** |"
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "status": "PASS",
+              "answerQuote": "| 项目 | 2025年前三季度 | 2024年前三季度 |",
+              "reason": "Both nine-month columns; raw ratios 1.83 and 2.93."
+            },
+            {
+              "id": "p2",
+              "status": "PASS",
+              "answerQuote": "3,109 + 2,725 - 700 = 5,134",
+              "reason": "Pension charge added and related tax benefit removed; 2025 separately adds 300 to 4993."
+            },
+            {
+              "id": "p3",
+              "status": "PASS",
+              "answerQuote": "经营现金流保持披露值",
+              "reason": "OCF remains 9153/9115 and is not called newly created cash."
+            },
+            {
+              "id": "p4",
+              "status": "PASS",
+              "answerQuote": "2025年仍略低",
+              "reason": "The remaining gap is small; limited illustrative normalization and approximate tax inputs retained."
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "status": "PASS",
+              "answerQuote": "主要来自于净利润基数受到一次性项目影响",
+              "reason": "The explicitly limited denominator exercise supports the accounting explanation; no unsupported commercial cause or newly created cash is asserted. Source identity and dates agree.",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            "numeric_period_correctness": {
+              "status": "PASS",
+              "answerQuote": "| 示意调整后比率，百分比 | **172.93%** | **177.54%** |",
+              "reason": "All six required facts and additional amounts, units, periods, ratios and percentage changes pass Decimal checks. 4.61 pp differs from exact 4.61537 by 0.00537, within frozen 0.01. The analysis ratio-unit wording has explicit 2.93-1.83 context.",
+              "sourceRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            "counterevidence": {
+              "status": "PASS",
+              "answerQuote": "调整后2025年比率仍略低于2024年",
+              "reason": "Retains the residual decline despite a smaller normalized gap and near-flat/slightly higher OCF.",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            "unknowns": {
+              "status": "PASS",
+              "answerQuote": "不是公司披露的调整后指标",
+              "reason": "Limited adjustment, rounded tax inputs and undisclosed detailed OCF drivers are distinguished from the available calculations; no invented missing prerequisite blocks the requested result.",
+              "sourceRefs": [
+                "tax",
+                "other"
+              ]
+            }
+          },
+          "additionalChecks": [
+            {
+              "label": "raw2025Percent",
+              "formula": "9153/4993*100",
+              "expected": "183.3166433006208692169036651",
+              "observed": "183.32",
+              "unit": "percent",
+              "absoluteError": "0.0033566993791307830963349",
+              "status": "PASS",
+              "answerQuote": "183.32%",
+              "sourceRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "raw2024Percent",
+              "formula": "9115/3109*100",
+              "expected": "293.1810871662914120295915085",
+              "observed": "293.18",
+              "unit": "percent",
+              "absoluteError": "0.0010871662914120295915085",
+              "status": "PASS",
+              "answerQuote": "293.18%",
+              "sourceRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "rawRatioDecline",
+              "formula": "9115/3109-9153/4993",
+              "expected": "1.098644438656705428126878434",
+              "observed": "1.10",
+              "unit": "ratio",
+              "absoluteError": "0.001355561343294571873121566",
+              "status": "PASS",
+              "answerQuote": "1.10",
+              "sourceRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "rawPercentagePointDecline",
+              "formula": "(9115/3109-9153/4993)*100",
+              "expected": "109.8644438656705428126878434",
+              "observed": "109.86",
+              "unit": "pp",
+              "absoluteError": "0.0044438656705428126878434",
+              "status": "PASS",
+              "answerQuote": "109.86",
+              "sourceRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "adjusted2025Percent",
+              "formula": "9153/5293*100",
+              "expected": "172.9265067069714717551483091",
+              "observed": "172.93",
+              "unit": "percent",
+              "absoluteError": "0.0034932930285282448516909",
+              "status": "PASS",
+              "answerQuote": "172.93%",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "tax"
+              ]
+            },
+            {
+              "label": "adjusted2024Percent",
+              "formula": "9115/5134*100",
+              "expected": "177.5418776782236073237241917",
+              "observed": "177.54",
+              "unit": "percent",
+              "absoluteError": "0.0018776782236073237241917",
+              "status": "PASS",
+              "answerQuote": "177.54%",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "tax",
+                "pension"
+              ]
+            },
+            {
+              "label": "adjustedRatioDecline",
+              "formula": "9115/5134-9153/5293",
+              "expected": "0.046153709712521355685758826",
+              "observed": ".05",
+              "unit": "ratio",
+              "absoluteError": "0.003846290287478644314241174",
+              "status": "PASS",
+              "answerQuote": "0.05",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "tax",
+                "pension"
+              ]
+            },
+            {
+              "label": "adjustedPercentagePointDecline",
+              "formula": "(9115/5134-9153/5293)*100",
+              "expected": "4.615370971252135568575882600",
+              "observed": "4.61",
+              "unit": "pp",
+              "absoluteError": "0.005370971252135568575882600",
+              "status": "PASS",
+              "answerQuote": "4.61",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "tax",
+                "pension"
+              ]
+            },
+            {
+              "label": "OCFdelta",
+              "formula": "9153-9115",
+              "expected": "38",
+              "observed": "38",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "status": "PASS",
+              "answerQuote": "38",
+              "sourceRefs": [
+                "ocf"
+              ]
+            },
+            {
+              "label": "OCFgrowth",
+              "formula": "(9153/9115-1)*100",
+              "expected": "0.416895227646736149204607800",
+              "observed": ".42",
+              "unit": "percent",
+              "absoluteError": "0.003104772353263850795392200",
+              "status": "PASS",
+              "answerQuote": "0.42%",
+              "sourceRefs": [
+                "ocf"
+              ]
+            },
+            {
+              "label": "Source operands, signs and units",
+              "status": "PASS",
+              "observedMillionUSD": {
+                "income2025": "4993",
+                "income2024": "3109",
+                "OCF2025": "9153",
+                "OCF2024": "9115",
+                "pension2024": "2725",
+                "taxBenefit2024": "700",
+                "taxCharge2025": "300"
+              },
+              "answerQuote": "4,993 + 300 = 5,293",
+              "reason": "All occurrences checked. Analysis 0.3/0.7 billion equal 300/700 million; no erroneous 亿美元 conversion. Income adjustment signs are correct.",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            }
+          ],
+          "findings": []
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "status": "COMPLETED",
+          "answerSha256": "2bf00782e6d1cac00c1127ca0740004bc4b4eb193fa7133be242d63dc936eefc",
+          "evidenceSha256": "6970093ee7dafa33fe6949b7400f077104b529d8e91b68740a163a12980f6874",
+          "binding": {
+            "id": "ibm-fy2025q3-oneoff-cash-comparability@1",
+            "scope": "FINAL_ANSWER",
+            "rubricSha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+            "caseSha256": "378a38c706c0c2d501d8112510ea73e071f6581fffa37fe5b15bcd6ead1a5dd7",
+            "answerSha256": "2bf00782e6d1cac00c1127ca0740004bc4b4eb193fa7133be242d63dc936eefc",
+            "promptSha256": "6a4d1dea2fc610b8d0a2d5590a87fae50c317673d32bd4dcc5a636fcc13df503",
+            "contextSha256": "a1496eaf1e1b874f948d90b0872bd2f4327c4ec2368de1f8db886d5d9272fb07",
+            "evidenceSha256": "6970093ee7dafa33fe6949b7400f077104b529d8e91b68740a163a12980f6874",
+            "modelName": "qwen3.8-max",
+            "modelTier": "STANDARD",
+            "invocationSha256": "24af0eb8c1077efb10ae4b3c13d54ef0bb519182c23ebfb29e97b40bda6d711e"
+          },
+          "requiredFacts": [
+            {
+              "field": "illustrativeAdjustedNetIncome2025",
+              "expected": "5293.0000",
+              "observed": "5293",
+              "unit": "million",
+              "period": "2025-01-01/2025-09-30",
+              "absoluteError": "0.0000",
+              "status": "PASS",
+              "answerQuote": "| 示意调整后净利润 | **5,293 百万美元** | **5,134 百万美元** |"
+            },
+            {
+              "field": "illustrativeAdjustedNetIncome2024",
+              "expected": "5134.0000",
+              "observed": "5134",
+              "unit": "million",
+              "period": "2024-01-01/2024-09-30",
+              "absoluteError": "0.0000",
+              "status": "PASS",
+              "answerQuote": "| 示意调整后净利润 | **5,293 百万美元** | **5,134 百万美元** |"
+            },
+            {
+              "field": "illustrativeAdjustedCashConversion2025",
+              "expected": "1.7293",
+              "observed": "1.73",
+              "unit": "ratio",
+              "period": "2025-01-01/2025-09-30",
+              "absoluteError": "0.0007",
+              "status": "PASS",
+              "answerQuote": "| 示意调整后经营现金流 / 示意调整后净利润 | **1.73** | **1.78** |"
+            },
+            {
+              "field": "illustrativeAdjustedCashConversion2024",
+              "expected": "1.7754",
+              "observed": "1.78",
+              "unit": "ratio",
+              "period": "2024-01-01/2024-09-30",
+              "absoluteError": "0.0046",
+              "status": "PASS",
+              "answerQuote": "| 示意调整后经营现金流 / 示意调整后净利润 | **1.73** | **1.78** |"
+            },
+            {
+              "field": "reportedCashConversion2025",
+              "expected": "1.8332",
+              "observed": "1.83",
+              "unit": "ratio",
+              "period": "2025-01-01/2025-09-30",
+              "absoluteError": "0.0032",
+              "status": "PASS",
+              "answerQuote": "| 经营现金流 / 净利润 | **1.83** | **2.93** |"
+            },
+            {
+              "field": "reportedCashConversion2024",
+              "expected": "2.9318",
+              "observed": "2.93",
+              "unit": "ratio",
+              "period": "2024-01-01/2024-09-30",
+              "absoluteError": "0.0018",
+              "status": "PASS",
+              "answerQuote": "| 经营现金流 / 净利润 | **1.83** | **2.93** |"
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "status": "PASS",
+              "answerQuote": "| 项目 | 2025年前三季度 | 2024年前三季度 |",
+              "reason": "Both nine-month columns; raw ratios 1.83 and 2.93."
+            },
+            {
+              "id": "p2",
+              "status": "PASS",
+              "answerQuote": "3,109 + 2,725 - 700 = 5,134",
+              "reason": "Pension charge added and related tax benefit removed; 2025 separately adds 300 to 4993."
+            },
+            {
+              "id": "p3",
+              "status": "PASS",
+              "answerQuote": "经营现金流保持披露值",
+              "reason": "OCF remains 9153/9115 and is not called newly created cash."
+            },
+            {
+              "id": "p4",
+              "status": "PASS",
+              "answerQuote": "2025 年仍略低于 2024 年",
+              "reason": "The remaining gap is small; limited illustrative normalization and approximate tax inputs retained."
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "status": "PASS",
+              "answerQuote": "主要受一次性项目影响",
+              "reason": "The explicitly limited denominator exercise supports the accounting explanation; no unsupported commercial cause or newly created cash is asserted. Source identity and dates agree.",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            "numeric_period_correctness": {
+              "status": "PASS",
+              "answerQuote": "| 示意调整后比率百分比 | **172.93%** | **177.54%** |",
+              "reason": "All six required facts and additional amounts, units, periods, ratios and percentage changes pass Decimal checks. 4.61 pp differs from exact 4.61537 by 0.00537, within frozen 0.01. The analysis ratio-unit wording has explicit 2.93-1.83 context.",
+              "sourceRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            "counterevidence": {
+              "status": "PASS",
+              "answerQuote": "2025 年比率仍略低于 2024 年",
+              "reason": "Retains the residual decline despite a smaller normalized gap and near-flat/slightly higher OCF.",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            "unknowns": {
+              "status": "PASS",
+              "answerQuote": "不是公司公布的调整后指标",
+              "reason": "Limited adjustment, rounded tax inputs and undisclosed detailed OCF drivers are distinguished from the available calculations; no invented missing prerequisite blocks the requested result.",
+              "sourceRefs": [
+                "tax",
+                "other"
+              ]
+            }
+          },
+          "additionalChecks": [
+            {
+              "label": "raw2025Percent",
+              "formula": "9153/4993*100",
+              "expected": "183.3166433006208692169036651",
+              "observed": "183.32",
+              "unit": "percent",
+              "absoluteError": "0.0033566993791307830963349",
+              "status": "PASS",
+              "answerQuote": "183.32%",
+              "sourceRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "raw2024Percent",
+              "formula": "9115/3109*100",
+              "expected": "293.1810871662914120295915085",
+              "observed": "293.18",
+              "unit": "percent",
+              "absoluteError": "0.0010871662914120295915085",
+              "status": "PASS",
+              "answerQuote": "293.18%",
+              "sourceRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "rawRatioDecline",
+              "formula": "9115/3109-9153/4993",
+              "expected": "1.098644438656705428126878434",
+              "observed": "1.10",
+              "unit": "ratio",
+              "absoluteError": "0.001355561343294571873121566",
+              "status": "PASS",
+              "answerQuote": "1.10",
+              "sourceRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "rawPercentagePointDecline",
+              "formula": "(9115/3109-9153/4993)*100",
+              "expected": "109.8644438656705428126878434",
+              "observed": "109.86",
+              "unit": "pp",
+              "absoluteError": "0.0044438656705428126878434",
+              "status": "PASS",
+              "answerQuote": "109.86",
+              "sourceRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "adjusted2025Percent",
+              "formula": "9153/5293*100",
+              "expected": "172.9265067069714717551483091",
+              "observed": "172.93",
+              "unit": "percent",
+              "absoluteError": "0.0034932930285282448516909",
+              "status": "PASS",
+              "answerQuote": "172.93%",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "tax"
+              ]
+            },
+            {
+              "label": "adjusted2024Percent",
+              "formula": "9115/5134*100",
+              "expected": "177.5418776782236073237241917",
+              "observed": "177.54",
+              "unit": "percent",
+              "absoluteError": "0.0018776782236073237241917",
+              "status": "PASS",
+              "answerQuote": "177.54%",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "tax",
+                "pension"
+              ]
+            },
+            {
+              "label": "adjustedRatioDecline",
+              "formula": "9115/5134-9153/5293",
+              "expected": "0.046153709712521355685758826",
+              "observed": ".05",
+              "unit": "ratio",
+              "absoluteError": "0.003846290287478644314241174",
+              "status": "PASS",
+              "answerQuote": "0.05",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "tax",
+                "pension"
+              ]
+            },
+            {
+              "label": "adjustedPercentagePointDecline",
+              "formula": "(9115/5134-9153/5293)*100",
+              "expected": "4.615370971252135568575882600",
+              "observed": "4.61",
+              "unit": "pp",
+              "absoluteError": "0.005370971252135568575882600",
+              "status": "PASS",
+              "answerQuote": "4.61",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "tax",
+                "pension"
+              ]
+            },
+            {
+              "label": "OCFdelta",
+              "formula": "9153-9115",
+              "expected": "38",
+              "observed": "38",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "status": "PASS",
+              "answerQuote": "38",
+              "sourceRefs": [
+                "ocf"
+              ]
+            },
+            {
+              "label": "OCFgrowth",
+              "formula": "(9153/9115-1)*100",
+              "expected": "0.416895227646736149204607800",
+              "observed": ".42",
+              "unit": "percent",
+              "absoluteError": "0.003104772353263850795392200",
+              "status": "PASS",
+              "answerQuote": "0.42%",
+              "sourceRefs": [
+                "ocf"
+              ]
+            },
+            {
+              "label": "Source operands, signs and units",
+              "status": "PASS",
+              "observedMillionUSD": {
+                "income2025": "4993",
+                "income2024": "3109",
+                "OCF2025": "9153",
+                "OCF2024": "9115",
+                "pension2024": "2725",
+                "taxBenefit2024": "700",
+                "taxCharge2025": "300"
+              },
+              "answerQuote": "4,993 + 300 = 5,293",
+              "reason": "All occurrences checked. Analysis 0.3/0.7 billion equal 300/700 million; no erroneous 亿美元 conversion. Income adjustment signs are correct.",
+              "sourceRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            }
+          ],
+          "findings": []
+        }
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-cash-comparison",
+      "runId": "candidate-dev-09-1-1",
+      "sourceCaseSha256": "2778493c2f09f8f6fd06873ca4b0a6c2faee49922812fb2d0ef806ae8e992d11",
+      "goldRecordSha256": "b7764eac2e8f3ea2abfb19f3f98374fd2f2365bcff338d45aa7cc5711dcfe0d5",
+      "executionFileSha256": "1b6a2583fa456c8cb4d137fdceea86519b6435d5944b9110be3cf1e0ae96fdad",
+      "reportPath": "evals/evolution/batch-learning-validation-20261002/raw-candidate-dev-09/candidate-a7a92cfaac38c01535486362.report.json",
+      "reportSha256": "5ecaa7bca489c11baebc064cde1c3d84496d0c0c26799f2e82a2df3628c54ea2",
+      "rawResponsePath": "evals/evolution/batch-learning-validation-20261002/raw-candidate-dev-09/candidate-dev-09-1-1.response.json",
+      "rawResponseSha256": "58c0c02856534630a6ab088f2112d64c17a9f2ab33b12b7029ecb289e335ea1d",
+      "methodBundle": {
+        "fixedContractSha256": "03b588fd86fc9f75047578665fa5227d2e73ca1bca734463fb3feddebe8df193",
+        "bundleSha256": "959c7d820bd43eb29bfe0494fb480f53830ba316bfa5e8dbb2c42c12d764644d",
+        "scope": "FUNDAMENTALS_METHOD",
+        "bundleId": "candidate-a7a92cfaac38c01535486362"
+      },
+      "executionStatus": "FAILED",
+      "analystStatus": "FAILED",
+      "taskOutcome": "DEGRADED",
+      "bindingErrors": [],
+      "sourceQuotes": {},
+      "stages": {
+        "analysis": {
+          "verdict": "NO_DATA",
+          "status": "FAILED",
+          "errorCode": "TIMEOUT",
+          "durationMs": 300010,
+          "answerSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evidenceSha256": "381f5c785120f9b5022daa9745a75d3a9eb648ba6da9913942cbb5995faea14d",
+          "promptSha256": "218758584b59dadb2a523fa039e69d84a718948e47cbd05676462405059a146b",
+          "providerCompletionUnknown": true,
+          "providerUsage": [
+            {
+              "usageSource": "NO_DATA",
+              "providerCompletionUnknown": true,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis"
+            }
+          ],
+          "requiredFacts": [
+            {
+              "field": "quarterConsolidatedNetIncome2025",
+              "observed": null,
+              "status": "NO_DATA"
+            },
+            {
+              "field": "quarterOperatingCashFlow2025",
+              "observed": null,
+              "status": "NO_DATA"
+            },
+            {
+              "field": "quarterSimpleFreeCashFlow2025",
+              "observed": null,
+              "status": "NO_DATA"
+            },
+            {
+              "field": "quarterConsolidatedNetIncome2024",
+              "observed": null,
+              "status": "NO_DATA"
+            },
+            {
+              "field": "quarterOperatingCashFlow2024",
+              "observed": null,
+              "status": "NO_DATA"
+            },
+            {
+              "field": "quarterSimpleFreeCashFlow2024",
+              "observed": null,
+              "status": "NO_DATA"
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "status": "NO_DATA"
+            },
+            {
+              "id": "p2",
+              "status": "NO_DATA"
+            },
+            {
+              "id": "p3",
+              "status": "NO_DATA"
+            },
+            {
+              "id": "p4",
+              "status": "NO_DATA"
+            },
+            {
+              "id": "p5",
+              "status": "NO_DATA"
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "status": "NO_DATA",
+              "reason": "Empty timed-out analysis or downstream stage not executed; no semantic conclusion."
+            },
+            "numeric_period_correctness": {
+              "status": "NO_DATA",
+              "reason": "Empty timed-out analysis or downstream stage not executed; no semantic conclusion."
+            },
+            "counterevidence": {
+              "status": "NO_DATA",
+              "reason": "Empty timed-out analysis or downstream stage not executed; no semantic conclusion."
+            },
+            "unknowns": {
+              "status": "NO_DATA",
+              "reason": "Empty timed-out analysis or downstream stage not executed; no semantic conclusion."
+            }
+          },
+          "additionalChecks": [],
+          "findings": [],
+          "classification": "EXECUTION_FAILURE",
+          "reason": "Retained in planned denominator. No output exists to support a method-error label."
+        },
+        "finalAnswer": {
+          "verdict": "NO_DATA",
+          "status": "NOT_EXECUTED",
+          "errorCode": null,
+          "durationMs": null,
+          "answerSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evidenceSha256": null,
+          "promptSha256": null,
+          "providerCompletionUnknown": null,
+          "providerUsage": [],
+          "requiredFacts": [
+            {
+              "field": "quarterConsolidatedNetIncome2025",
+              "observed": null,
+              "status": "NO_DATA"
+            },
+            {
+              "field": "quarterOperatingCashFlow2025",
+              "observed": null,
+              "status": "NO_DATA"
+            },
+            {
+              "field": "quarterSimpleFreeCashFlow2025",
+              "observed": null,
+              "status": "NO_DATA"
+            },
+            {
+              "field": "quarterConsolidatedNetIncome2024",
+              "observed": null,
+              "status": "NO_DATA"
+            },
+            {
+              "field": "quarterOperatingCashFlow2024",
+              "observed": null,
+              "status": "NO_DATA"
+            },
+            {
+              "field": "quarterSimpleFreeCashFlow2024",
+              "observed": null,
+              "status": "NO_DATA"
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "status": "NO_DATA"
+            },
+            {
+              "id": "p2",
+              "status": "NO_DATA"
+            },
+            {
+              "id": "p3",
+              "status": "NO_DATA"
+            },
+            {
+              "id": "p4",
+              "status": "NO_DATA"
+            },
+            {
+              "id": "p5",
+              "status": "NO_DATA"
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "status": "NO_DATA",
+              "reason": "Empty timed-out analysis or downstream stage not executed; no semantic conclusion."
+            },
+            "numeric_period_correctness": {
+              "status": "NO_DATA",
+              "reason": "Empty timed-out analysis or downstream stage not executed; no semantic conclusion."
+            },
+            "counterevidence": {
+              "status": "NO_DATA",
+              "reason": "Empty timed-out analysis or downstream stage not executed; no semantic conclusion."
+            },
+            "unknowns": {
+              "status": "NO_DATA",
+              "reason": "Empty timed-out analysis or downstream stage not executed; no semantic conclusion."
+            }
+          },
+          "additionalChecks": [],
+          "findings": [],
+          "classification": "NOT_EXECUTED",
+          "reason": "Retained in planned denominator. No output exists to support a method-error label."
+        }
+      }
+    }
+  ]
+}

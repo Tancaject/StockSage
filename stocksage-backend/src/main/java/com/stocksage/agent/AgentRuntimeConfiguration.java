@@ -58,6 +58,11 @@ public class AgentRuntimeConfiguration {
         defaults.put("model", options.getModel());
         defaults.put("temperature", options.getTemperature());
         defaults.put("maxTokens", options.getMaxTokens());
+        var extra = options.getExtraBody();
+        if (extra != null) {
+            if (extra.get("enable_thinking") instanceof Boolean enabled) defaults.put("enableThinking", enabled);
+            if (extra.get("thinking_budget") instanceof Number budget) defaults.put("thinkingBudget", budget);
+        }
         defaults.put("systemPromptHash", sha256(systemPrompt));
         defaults.put("unknownProviderRevision", true);
         clients.put(role, Collections.unmodifiableMap(defaults));

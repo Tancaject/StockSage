@@ -1,0 +1,94 @@
+我们需要回答中文。任务：基于E1和E2，计算TGT FY2025第三季度单季的经营现金流、购建固定资产现金支出、简化自由现金流。给定的是年内累计现金流量表：E1 Nine Months Ended Nov 1, 2025 (FY2025 Q3 YTD 39周? Target fiscal quarters usually 13 weeks; Q3 ended Nov 1, 2025; Q2 ended Aug 2, 2025 six months). E2 Six Months Ended Aug 2, 2025. 单季Q3 = Nine months ended Nov 1, 2025 minus Six months ended Aug 2, 2025. Need ensure periods align: FY2025? Wait Target fiscal year: FY2025 ends around Jan 31, 2026? The press release says third quarter earnings Nov 19 2025, period end Nov 1 2025. They label sourceVersion TGT-FY2025-Q3-cashflow. It may be FY2025? Actually Target FY2025 Q3 is Nov 2, 2024? Target fiscal year 2025 ends Jan 31, 2026? Let's check: Target FY2024 Q3 ended Nov 2, 2024; FY2025 Q3 ended Nov 1, 2025? If fiscal year ending Jan 31 2026 is FY2025? Retail often label fiscal year by ending year? Target FY2024 ended Jan 31 2025? Hmm. The evidence sourceVersion says TGT-FY2025-Q3-cashflow for periodEnd 2025-11-01 and periodStart 2025-02-02. So accept FY2025 Q3 as period ending Nov 1, 2025, nine months ended. Need not challenge. User asks FY2025第三季度单季. Use E1 minus E2.
+
+Compute:
+Operating cash flow nine months: 3,485 million USD. Six months: 2,358 million USD. Q3 single = 3,485 - 2,358 = 1,127 million USD.
+Expenditures for property and equipment nine months: (2,842). Six months: (1,864). Q3 single gross expenditure = 2,842 - 1,864 = 978 million USD (cash outflow; if sign negative -978). Need simplified FCF = operating cash flow - expenditures gross = 1,127 - 978 = 149 million USD. If using negative capex: OCF + capex? They specify 经营现金流减上述支出毛额计算，不抵扣资产出售回款. So 1,127 - 978 = 149.
+Does OCF cover expenditure? Yes, 1,127 > 978. Coverage ratio = 1,127 / 978 = 1.15235 -> 1.15. Or excess 149. Could mention coverage 115.23%? Ratio maybe 1.15. User says 比率和百分比保留两位小数. We can provide coverage ratio 1.15倍 or 115.23%. Need decide. They ask 说明本季经营现金流是否覆盖该支出. We can say覆盖，覆盖比率1.15倍（或115.23%），净覆盖额149百万美元.
+
+Need output fixed sections: 标的与数据范围 / 已验证事实 / 财务趋势与经营质量 / 风险与反向证据 / 数据缺口 / 来源. Keep concise but thorough. Mention periods: Q3 single reconstructed from nine months ended Nov 1, 2025 minus six months ended Aug 2, 2025. Units million USD. Note E1 includes investing Other 52 YTD and E2 Other 11, but simplified FCF does not deduct/add asset sale proceeds; we ignore Other. Actually user says not deduct asset sale回款. In cash flow, investing Other may include proceeds? We don't use it. We only subtract expenditures gross. Need maybe mention that the reported investing line “Other” was excluded per user instruction; thus simplified FCF differs from total investing cash flow. Also Q3 single “Other” could be 52-11=41, but not used.
+
+Need ensure no hidden chain of thought. We can present calculations. Need cite [E1], [E2]. Need maybe mention unaudited. Need mention currency USD.
+
+Check arithmetic:
+OCF Q3 = 3485 - 2358 = 1127.
+Capex Q3 = 2842 - 1864 = 978.
+Simplified FCF = 1127 - 978 = 149.
+Coverage: OCF/capex = 1127/978 =? 978*1.15=1124.7, yes 1.1523517. Percentage 115.23%. Excess = 149.
+Maybe if sign: capex as outflow -978. Simplified FCF positive 149.
+
+Need be careful: The Q2 six months ended Aug 2, 2025 includes period start Feb 2, 2025. Nine months ended Nov 1, 2025 includes same start. Difference is 13 weeks? Good.
+
+Need mention “FY2025第三季度” per sourceVersion. However possible mismatch: E1 prior-year column Nov 2, 2024. But we only use current. Could say还原的财报期间为Target fiscal 2025第三季度单季，即从2025-08-03? Wait Q3 single start? Since six months ended Aug 2, 2025 and nine months ended Nov 1, 2025, the difference is Aug 3, 2025 to Nov 1, 2025. Need note if exact single-quarter period is implied by subtraction: 2025-08-03至2025-11-01（约13周），但原表仅披露累计口径，未单独列示单季。 Should we state periodStart? The evidence periodStart for E1 is 2025-02-02; E2 periodStart 2025-02-02. Difference period start is day after Q2 period end: Aug 3, 2025. We can say based on cumulative difference. Need avoid fabricating exact fiscal quarter label? SourceVersion says Q3. Good.
+
+Need include “已验证事实” maybe list cumulative values. Then “财务趋势与经营质量” maybe answer. But user asks specific; don't expand too much. Could include that Q3 OCF positive and covers capex; simplified FCF positive. Could mention compared to prior YTD? Not necessary but maybe small.
+
+Potential issue: Target Q3 FY2025? If sourceVersion says FY2025 Q3 but period end 2025-11-01, maybe actually FY2026? But we follow evidence. Need maybe mention “按证据标注的FY2025 Q3”。
+
+Need data gaps: No direct single-quarter cash flow statement; reconstructed by subtraction. No detailed capex breakdown or asset sale proceeds; simplified FCF definition per user. No 10-Q? Only press release cash flow. Maybe note if accounting period alignment not independently verified beyond evidence. But evidence completed.
+
+Need sources section with E1 sourceRef, E2 sourceRef. Include availableAt/publishedAt? Could.
+
+Need ensure final in Chinese. Use units: 百万美元. Ratios two decimals. Percentages two decimals. Could use “149百万美元” not “1.49亿美元”? Both. Need maybe “1,127百万美元”. Use comma? Chinese okay.
+
+Let's draft:
+
+标的与数据范围
+- 标的：Target Corporation (TGT)，美股。
+- 期间：按证据E1为截至2025-11-01的九个月现金流量表；E2为截至2025-08-02的六个月现金流量表。单季为二者差额，即还原的FY2025第三季度（约2025-08-03至2025-11-01）。
+- 口径：合并现金流量表，未经审计，单位百万美元。简化自由现金流=经营现金流-购建固定资产现金支出毛额；不扣除/不加入投资活动Other/资产出售回款。
+
+已验证事实
+- Nine months OCF 3,485 [E1]
+- Six months OCF 2,358 [E2]
+- Nine months expenditures for property and equipment (2,842) [E1]
+- Six months (1,864) [E2]
+- Compute Q3: OCF 1,127; capex 978; simplified FCF 149.
+Maybe table:
+项目 | 九个月截至2025-11-01 [E1] | 六个月截至2025-08-02 [E2] | 单季还原Q3
+经营现金流 | 3,485 | 2,358 | 1,127
+购建固定资产现金支出毛额 | 2,842 | 1,864 | 978
+简化自由现金流 | 1,643? Wait nine months simplified FCF = 3485-2842=643, six months = 2358-1864=494, Q3 = 149. Could include but not necessary. If include ensure correct. Nine months simplified FCF 643; six months 494. But user only asks Q3. Maybe table with only Q3 derived from cumulative. But to show calculation include cumulative.
+
+Need be careful with sign: reported expenditures are negative. For “毛额” present positive 978 as cash outflow. Could note if保留现金流符号为-978百万美元.
+
+财务趋势与经营质量
+- Q3 OCF 1,127 > capex 978, coverage ratio 1.15x (115.23%), simplified FCF +149. This indicates operating cash generation covered property/equipment spend in the quarter.
+- Because only two cumulative snapshots, cannot assess sustainability or reasons; no management commentary used.
+
+风险与反向证据
+- Reconstruction assumes E1 and E2 same fiscal year, same accounting policies, no restatement; no direct single-quarter disclosure.
+- Simplified FCF excludes “Other” investing cash flows; E1 YTD Other 52, E2 YTD Other 11, implied Q3 Other 41 but excluded per instruction; if included, FCF would differ? Actually if other is inflow, total investing required less negative; but simplified FCF not include. Could say it may over/understate cash available depending on nature of Other. But user specified. Also capex may include financed/noncash? The line is cash expenditures; okay.
+- OCF can be working-capital driven; Q3 single not directly disclosed; cannot infer trend beyond quarter.
+
+数据缺口
+- No direct Q3 cash flow statement; only reconstructed.
+- No breakdown of capex or Other; no reason for changes.
+- No 10-Q excerpt? But press release available. Could say no further evidence.
+
+来源
+[E1] Target Corporation Reports Third Quarter Earnings, consolidated statements of cash flows, nine months ended Nov 1, 2025, published/available 2025-11-19, USD millions. URL.
+[E2] Target Corporation Reports Second Quarter Earnings, consolidated statements of cash flows, six months ended Aug 2, 2025, published/available 2025-08-20, USD millions. URL.
+
+Need maybe include exact calculation formulas:
+Q3 OCF = 3,485 - 2,358 = 1,127
+Q3 capex = 2,842 - 1,864 = 978
+Q3 simplified FCF = 1,127 - 978 = 149
+Coverage = 1,127 / 978 = 1.15倍 = 115.23%.
+
+Need maybe mention “本季经营现金流覆盖该支出，超出149百万美元。”
+
+Double-check if FY2025 Q3 single quarter maybe should subtract Q2 (six months) from Q3 (nine months). Yes.
+
+Need consider if “购建固定资产现金支出” is “Expenditures for property and equipment” negative. They ask “单季的经营现金流、购建固定资产现金支出和简化自由现金流各是多少？” Could answer capex as “978百万美元（现金流出；表内口径为-978）”. Good.
+
+Need maybe mention “简化自由现金流按经营现金流减上述支出毛额计算，不抵扣资产出售回款” exactly. Good.
+
+Need avoid saying final investment rating. Fine.
+
+Potential issue: The source E1 periodStart 2025-02-02, periodEnd 2025-11-01; E2 periodStart 2025-02-02, periodEnd 2025-08-02. The single quarter start is 2025-08-03. Should we state “约2025-08-03至2025-11-01”。 Need not overstate exact if fiscal calendar? It is implied. Use “推算为”。 Good.
+
+Need ensure “比率和百分比保留两位小数”: coverage ratio 1.15倍, 115.23%. If we mention any other ratio? Maybe no.
+
+Need maybe mention “单位：百万美元”。 Good.
+
+Let's produce final with sections. Ensure no analysis hidden. final only.

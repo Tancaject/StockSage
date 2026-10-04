@@ -1,0 +1,40 @@
+ORACLE CORPORATION
+ |  |  |  |  |  | 
+Q3 FISCAL 2025 FINANCIAL RESULTS
+CONDENSED CONSOLIDATED BALANCE SHEETS
+($ in millions)
+ |  |  |  |  |  | 
+ |  |  | February 28,2025 | 
+ |  |  | May 31,2024
+ASSETS |  |  |  | 
+Current Assets: |  |  |  | 
+ | Cash and cash equivalents | $ 17,406 |  | $ 10,454 | 
+ | Marketable securities | 417 |  | 207 | 
+ | Trade receivables, net | 8,051 |  | 7,874 | 
+ | Prepaid expenses and other current assets | 4,242 |  | 4,019 | 
+ |  | Total Current Assets | 30,116 |  | 22,554 | 
+Non-Current Assets: |  |  |  | 
+ | Property, plant and equipment, net | 31,970 |  | 21,536 | 
+ | Intangible assets, net | 5,131 |  | 6,890 | 
+ | Goodwill, net | 62,171 |  | 62,230 | 
+ | Deferred tax assets | 11,799 |  | 12,273 | 
+ | Other non-current assets | 20,191 |  | 15,493 | 
+ |  | Total Non-Current Assets | 131,262 |  | 118,422 | 
+TOTAL ASSETS | $ 161,378 |  | $ 140,976 | 
+LIABILITIES AND STOCKHOLDERS' EQUITY |  |  |  | 
+Current Liabilities: |  |  |  | 
+ | Notes payable and other borrowings, current | $ 8,167 |  | $ 10,605 | 
+ | Accounts payable | 2,423 |  | 2,357 | 
+ | Accrued compensation and related benefits | 1,839 |  | 1,916 | 
+ | Deferred revenues | 9,019 |  | 9,313 | 
+ | Other current liabilities | 8,175 |  | 7,353 | 
+ |  | Total Current Liabilities | 29,623 |  | 31,544 | 
+Non-Current Liabilities: |  |  |  | 
+ | Notes payable and other borrowings, non-current | 88,109 |  | 76,264 | 
+ | Income taxes payable | 9,813 |  | 10,817 | 
+ | Deferred tax liabilities | 2,208 |  | 3,692 | 
+ | Other non-current liabilities | 14,364 |  | 9,420 | 
+ |  | Total Non-Current Liabilities | 114,494 |  | 100,193 | 
+Stockholders' Equity | 17,261 |  | 9,239 | 
+TOTAL LIABILITIES AND STOCKHOLDERS' EQUITY | $ 161,378 |  | $ 140,976 | 
+ |  |  |  |  |  | 

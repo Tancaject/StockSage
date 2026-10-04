@@ -1,0 +1,95 @@
+{
+  "planSha256": "fa948d7e1ffc12ec4e3509990f214d25a4cf005fabba9289bf62273be1b12663",
+  "cases": [
+    {
+      "name": "development-01",
+      "caseId": "ibm-fy2025q3-quarter-control",
+      "registration": {
+        "status": "REGISTERED",
+        "cases": 1,
+        "businessCalls": 2
+      }
+    },
+    {
+      "name": "development-02",
+      "caseId": "jnj-fy2025q3-quarter-reconstruction",
+      "registration": {
+        "status": "REGISTERED",
+        "cases": 1,
+        "businessCalls": 2
+      }
+    },
+    {
+      "name": "development-03",
+      "caseId": "pep-fy2025q3-cash-quality",
+      "registration": {
+        "status": "REGISTERED",
+        "cases": 1,
+        "businessCalls": 2
+      }
+    },
+    {
+      "name": "development-04",
+      "caseId": "pep-fy2025q3-liquidity",
+      "registration": {
+        "status": "REGISTERED",
+        "cases": 1,
+        "businessCalls": 2
+      }
+    },
+    {
+      "name": "development-05",
+      "caseId": "tgt-fy2025q3-quarter-reconstruction",
+      "registration": {
+        "status": "REGISTERED",
+        "cases": 1,
+        "businessCalls": 2
+      }
+    },
+    {
+      "name": "development-06",
+      "caseId": "tgt-fy2025q3-liquidity",
+      "registration": {
+        "status": "REGISTERED",
+        "cases": 1,
+        "businessCalls": 2
+      }
+    },
+    {
+      "name": "development-07",
+      "caseId": "ibm-fy2025q3-oneoff-cash-comparability",
+      "registration": {
+        "status": "REGISTERED",
+        "cases": 1,
+        "businessCalls": 2
+      }
+    },
+    {
+      "name": "development-08",
+      "caseId": "jnj-fy2025q3-cash-deployment-bridge",
+      "registration": {
+        "status": "REGISTERED",
+        "cases": 1,
+        "businessCalls": 2
+      }
+    },
+    {
+      "name": "development-09",
+      "caseId": "pep-fy2025q3-quarter-cash-comparison",
+      "registration": {
+        "status": "REGISTERED",
+        "cases": 1,
+        "businessCalls": 2
+      }
+    },
+    {
+      "name": "development-10",
+      "caseId": "tgt-fy2025q3-liquidity-cash-synthesis",
+      "registration": {
+        "status": "REGISTERED",
+        "cases": 1,
+        "businessCalls": 2
+      }
+    }
+  ]
+}

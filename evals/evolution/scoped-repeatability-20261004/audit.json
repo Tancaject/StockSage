@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "slots": 16,
+  "reviewedCompleteCalls": 16,
+  "resultSha256": "59300d6359f977a85f7ce3f5485549cc2c55ce8a6a2be75cb4b18a50e98c5ed4",
+  "checks": [
+    "Frozen dependencies",
+    "Scope selection and noninterference",
+    "Actual payload and complete-draft replacement",
+    "Completion and usage",
+    "Review/source/gold binding and arithmetic",
+    "Fixed denominator aggregation"
+  ],
+  "limits": "No independent semantic adjudication claimed."
+}

@@ -1,5 +1,7 @@
 # StockSage 评测入口
 
+> 离线评测、实验及诊断脚本已按用户要求删除，不保留备份。本目录保留财报入库工具 [ingest_corpus.py](ingest_corpus.py)、数据与历史报告。下文作为历史评测说明保留，其中引用的已删除脚本、运行命令和离线验收流程不再可用；业务服务源码未变。
+
 这里按评测对象维护标准、数据和运行脚本。**没有覆盖所有对象的统一评分标准或总分**：检索质量、规划正确性、执行契约、回答质量和方法改进分别评价。数值阈值以各项目的代码、配置或冻结实验策略为准，本页只链接这些来源。
 
 命令从仓库根目录执行。现有 Python 环境仍使用 `.venv-rag-eval`：
@@ -21,7 +23,9 @@ New-Item -ItemType Directory -Force evals/results | Out-Null
 | Harness / DEEP | [harness_golden_set.jsonl](harness_golden_set.jsonl)、[harness_live_cases.jsonl](harness_live_cases.jsonl)、[harness_live_manifest.json](harness_live_manifest.json)；生产策略 [DeepResearchCompletionPolicy](../stocksage-backend/src/main/java/com/stocksage/harness/DeepResearchCompletionPolicy.java)；评价器 [harness_eval_summary.py](harness_eval_summary.py)，门禁 [harness_eval_gates.json](harness_eval_gates.json) | 完成策略的决策/违规/恢复匹配与真实任务安全终态；不能替代研究内容质量 |
 | FUNDAMENTALS 方法进化 | [evolution_rubric.py](evolution_rubric.py)、[evolution_dataset.py](evolution_dataset.py)、[evolution_quality.py](evolution_quality.py)、[evolution_acceptance.py](evolution_acceptance.py)；业务事实和改善门槛来自实验自己的冻结 gold / policy | 分别评价分析稿与最终回答，再判定候选是否改善；执行通过不等于进化有效 |
 
-脚本保留平铺入口，相关 `test_*.py` 验证各自评测实现。[eval_common.py](eval_common.py)、[eval_utils.py](eval_utils.py) 和 [eval_http.py](eval_http.py) 提供共享计算、绑定或传输能力；共享代码不提供跨项目的默认业务标准。离线回归入口为 `python -m unittest discover -s evals`，不调用真实模型。
+脚本保留平铺入口。[eval_common.py](eval_common.py)、[eval_utils.py](eval_utils.py) 和 [eval_http.py](eval_http.py) 提供共享计算、绑定或传输能力；共享代码不提供跨项目的默认业务标准。
+
+自动化测试文件、测试辅助文件与测试产物已按用户要求移除；评测实现、数据和历史记录保留。依赖 `EvolutionLiveBaselineTest` 或后端 `target/test-classes` 的历史实验入口无法直接重跑，需要先从版本历史恢复对应测试驱动及测试依赖。历史记录中的测试结果不代表当前工作区仍包含这些测试。
 
 ## RAG
 
@@ -102,7 +106,7 @@ python evals/run_harness_eval.py --fail-on-gate
 python evals/run_harness_live_eval.py --email "$env:STOCKSAGE_EVAL_EMAIL" --password-env STOCKSAGE_EVAL_PASSWORD --fail-on-gate
 ```
 
-离线 runner 通过 [HarnessGoldenSetTest](../stocksage-backend/src/test/java/com/stocksage/harness/HarnessGoldenSetTest.java) 调用生产策略，核对完整预期决策。live runner 提交真实 DEEP 任务并核对终态、Trace 和 Harness 决策；数据集与策略身份由 manifest 约束。用 `--case-limit` 缩小运行范围只构成 smoke，不能视为完整发布门禁。
+离线 runner 原先通过 `HarnessGoldenSetTest` 调用生产策略；该测试驱动已移除，需要恢复驱动和测试依赖后才能重跑。live runner 提交真实 DEEP 任务并核对终态、Trace 和 Harness 决策；数据集与策略身份由 manifest 约束。用 `--case-limit` 缩小运行范围只构成 smoke，不能视为完整发布门禁。
 
 DEEP Replan 的证据支撑覆盖、新增证据利用率及配对 A/B 门槛在[有界重规划计划](../docs/architecture/deep-bounded-replan-plan.md)中定义；没有独立的已实现语义 runner，不能用 Harness 通过代替这些收益验证。
 

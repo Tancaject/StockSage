@@ -1,0 +1,53 @@
+{
+  "origin": "AI_GENERATED_WITH_ENGINEER_REVISION_FEEDBACK",
+  "generatorCalls": 2,
+  "acceptedProposals": 1,
+  "retries": 0,
+  "releaseEligible": false,
+  "groups": [
+    {
+      "group": 1,
+      "status": "PROPOSED",
+      "observedModel": "qwen3.8-max",
+      "finishReason": "stop",
+      "usage": {
+        "completion_tokens": 866,
+        "completion_tokens_details": {
+          "reasoning_tokens": 597,
+          "text_tokens": 866
+        },
+        "prompt_tokens": 6330,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 6330
+        },
+        "total_tokens": 7196
+      },
+      "requestSha256": "414a519e2d0776d7e689ce92a00d3ed392b1885b247876500edc7ca70e058195",
+      "responseSha256": "eaaa7d0c7626b9ffbf668f325eff1d0226589c2ed96fcd74fb20d63e410a07f7",
+      "reason": "Generated revision v2 with original parent lineage"
+    },
+    {
+      "group": 2,
+      "status": "NOT_GENERATED",
+      "observedModel": "qwen3.8-max",
+      "finishReason": "stop",
+      "usage": {
+        "completion_tokens": 1397,
+        "completion_tokens_details": {
+          "reasoning_tokens": 1186,
+          "text_tokens": 1397
+        },
+        "prompt_tokens": 5482,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 5482
+        },
+        "total_tokens": 6879
+      },
+      "requestSha256": "84a2851b2e5e7cbbcd19561b3c7e0739a3a4b4ab12e91d5237de99ea84be82f5",
+      "responseSha256": "15f331d7a6f07c80d67794a9a4193dcb5f244366268e571b0b36e78cf0cd656c",
+      "reason": "Specific original-case numeric values in method; rejected by existing scope validator"
+    }
+  ]
+}

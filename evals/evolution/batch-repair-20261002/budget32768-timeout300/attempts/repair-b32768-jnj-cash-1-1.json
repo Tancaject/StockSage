@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "repair-b32768-jnj-cash-1-1",
+    "caseId": "jnj-fy2025q3-cash-quality",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\raw-repair-b32768-jnj-cash",
+  "executionSha256": "c8102cc487edae3497077c3446c0e1c12775125bcff8da23320a2f8f205ec4b9",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

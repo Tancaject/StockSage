@@ -2,6 +2,8 @@ package com.stocksage.config;
 
 import com.stocksage.agent.AgentRuntimeConfiguration;
 import com.stocksage.agent.ChatConcurrencyAdvisor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientCustomizer;
 import org.springframework.ai.openai.OpenAiChatOptions;
@@ -14,11 +16,20 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * 各模型职责使用的 ChatClient 定义。
@@ -30,6 +41,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @EnableConfigurationProperties({ModelPricingProperties.class, ModelTokenBudgetProperties.class})
 public class AiConfig {
 
+    private static final Logger log = LoggerFactory.getLogger(AiConfig.class);
     private final AgentRuntimeConfiguration runtimeConfiguration;
 
     public AiConfig(AgentRuntimeConfiguration runtimeConfiguration) {
@@ -67,11 +79,70 @@ public class AiConfig {
                 .embeddingsPath("/v1/embeddings")
                 .restClientBuilder(restBuilders.getIfAvailable(RestClient::builder))
                 .webClientBuilder(webBuilders.getIfAvailable(WebClient::builder).clone()
-                        .filter(ChatConcurrencyAdvisor.cancellationFilter()))
+                        .filter(ChatConcurrencyAdvisor.cancellationFilter())
+                        .filter(streamTransportObservation()))
                 .responseErrorHandler(errorHandler)
                 .build();
         runtimeConfiguration.recordChatProvider(baseUrl, completionsPath);
         return api;
+    }
+
+    static ExchangeFilterFunction streamTransportObservation() {
+        return (request, next) -> Mono.defer(() -> {
+            long started = System.nanoTime();
+            AtomicInteger status = new AtomicInteger();
+            AtomicReference<String> requestId = new AtomicReference<>("UNAVAILABLE");
+            AtomicReference<String> errorType = new AtomicReference<>("NONE");
+            AtomicLong headersMs = new AtomicLong(-1);
+            AtomicLong firstBodyMs = new AtomicLong(-1);
+            AtomicLong lastBodyMs = new AtomicLong(-1);
+            AtomicLong chunks = new AtomicLong();
+            AtomicLong bytes = new AtomicLong();
+            AtomicBoolean reported = new AtomicBoolean();
+            Consumer<Throwable> recordError = error -> {
+                Throwable cause = error;
+                while (cause.getCause() != null && cause.getCause() != cause) cause = cause.getCause();
+                errorType.set(cause.getClass().getSimpleName());
+            };
+            Consumer<SignalType> report = signal -> {
+                // WebClient can subscribe to the failed body again while constructing its exception.
+                // That subscription can cancel first; an observed transport error remains the cause.
+                String failureType = errorType.get();
+                SignalType termination = failureType.equals("NONE") ? signal : SignalType.ON_ERROR;
+                if (reported.compareAndSet(false, true)) log.info(
+                        "Model HTTP stream terminated, requestId={}, status={}, headersMs={}, firstBodyMs={}, lastBodyMs={}, durationMs={}, bodyChunks={}, bodyBytes={}, termination={}, errorType={}",
+                        requestId.get(), status.get(), headersMs.get(), firstBodyMs.get(), lastBodyMs.get(),
+                        (System.nanoTime() - started) / 1_000_000, chunks.get(), bytes.get(), termination, failureType);
+            };
+            return next.exchange(request)
+                    .map(response -> {
+                        status.set(response.statusCode().value());
+                        headersMs.set((System.nanoTime() - started) / 1_000_000);
+                        for (String header : new String[]{"x-request-id", "x-dashscope-request-id", "x-acs-request-id"}) {
+                            String value = response.headers().header(header).stream().findFirst().orElse(null);
+                            if (value != null && value.matches("[A-Za-z0-9._:-]{1,128}")) {
+                                requestId.set(value);
+                                break;
+                            }
+                        }
+                        // Observe transport bytes without reading/releasing buffers or logging model content.
+                        // The SDK also cancels a successful stream after [DONE]; cancellation alone is not a failure.
+                        return response.mutate().body(body -> body
+                                .doOnNext(buffer -> {
+                                    long elapsedMs = (System.nanoTime() - started) / 1_000_000;
+                                    firstBodyMs.compareAndSet(-1, elapsedMs);
+                                    lastBodyMs.set(elapsedMs);
+                                    chunks.incrementAndGet();
+                                    bytes.addAndGet(buffer.readableByteCount());
+                                })
+                                .doOnError(recordError)
+                                .doFinally(report)).build();
+                    })
+                    .doOnError(recordError)
+                    .doFinally(signal -> {
+                        if (status.get() == 0) report.accept(signal);
+                    });
+        });
     }
 
     /** 查询改写、路由和记忆摘要使用的快速模型。 */

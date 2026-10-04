@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 2,
+  "cases": [
+    {
+      "caseId": "ibm-fy2025q3-quarter-control",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "6ea62fbaecbeb03f9b29e3f5267955e24b877b135fb0f2d87336a3b2c594074a",
+      "query": "IBM 2025第三季度单季经营现金流和GAAP净利润分别是多少？算出两者差额及经营现金流/净利润，用简短结论说明本季度现金转化情况。使用报表已披露的单季数据，金额注明单位。比率和百分比保留两位小数。",
+      "resolvedQuery": "IBM 2025第三季度单季经营现金流和GAAP净利润分别是多少？算出两者差额及经营现金流/净利润，用简短结论说明本季度现金转化情况。使用报表已披露的单季数据，金额注明单位。比率和百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-02",
+      "context": "[E1] {\"availableAt\":\"2025-10-22T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-30\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2025-10-22T00:00:00Z\",\"rawSha256\":\"625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b\",\"retrievedAt\":\"2026-10-02T08:00:40.120877+00:00\",\"sourceRef\":\"https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS\",\"sourceVersion\":\"IBM-Q3-2025-official-IR-cashflow\",\"target\":\"IBM\",\"unit\":\"million\",\"visibleSha256\":\"625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b\"}\nINTERNATIONAL BUSINESS MACHINES CORPORATION CASH FLOW (Unaudited)\n\n |  | Three Months Ended September 30, |  | Nine Months Ended September 30,\n(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024\nNet Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109\nPension Settlement Charge |  | - |  | 2,725 |  | - |  | 2,725\nDepreciation/Amortization of Intangibles (1) |  | 1,283 |  | 1,268 |  | 3,725 |  | 3,555\nStock-based Compensation |  | 444 |  | 330 |  | 1,285 |  | 966\nOperating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)\nIBM Financing A/R |  | 298 |  | 873 |  | 905 |  | 1,824\nNet Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115\n |  |  |  |  |  |  |  | \nCapital Expenditures, net of payments & proceeds (3) |  | (410) |  | 55 |  | (1,067) |  | (705)\nDivestitures, net of cash transferred |  | - |  | 2 |  | (1) |  | 705\nAcquisitions, net of cash acquired |  | (58) |  | (2,513) |  | (7,903) |  | (2,748)\nMarketable Securities / Other Investments, net |  | 30 |  | 869 |  | (2,748) |  | (810)\nNet Cash Provided by/(Used in) Investing Activities |  | $ (437) |  | $ (1,587) |  | $ (11,719) |  | $ (3,558)\n |  |  |  |  |  |  |  | \nDebt, net of payments & proceeds |  | (1,108) |  | (1,259) |  | 4,683 |  | (777)\nDividends |  | (1,569) |  | (1,542) |  | (4,681) |  | (4,601)\nFinancing - Other |  | (334) |  | 35 |  | (425) |  | (26)\nNet Cash Provided by/(Used in) Financing Activities |  | $ (3,012) |  | $ (2,766) |  | $ (423) |  | $ (5,403)\n |  |  |  |  |  |  |  | \nEffect of Exchange Rate changes on Cash |  | (59) |  | 207 |  | 429 |  | (29)\nNet Change in Cash, Cash Equivalents and Restricted Cash |  | $ (426) |  | $ (1,264) |  | $ (2,561) |  | $ 125\n____________________\n(1) Includes operating lease right-of-use assets amortization.\n(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter.\n(3) 2024 includes proceeds of $0.4 billion from the sale of certain QRadar SaaS assets in the third quarter.",
+      "contextSha256": "6970093ee7dafa33fe6949b7400f077104b529d8e91b68740a163a12980f6874",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "IBM",
+      "requestAttributes": {
+        "reportPeriod": "quarterly",
+        "reportCount": 2
+      },
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：IBM\n请求参数：{reportPeriod=quarterly, reportCount=2}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2025-10-22T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-30\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2025-10-22T00:00:00Z\",\"rawSha256\":\"625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b\",\"retrievedAt\":\"2026-10-02T08:00:40.120877+00:00\",\"sourceRef\":\"https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS\",\"sourceVersion\":\"IBM-Q3-2025-official-IR-cashflow\",\"target\":\"IBM\",\"unit\":\"million\",\"visibleSha256\":\"625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b\"}\nINTERNATIONAL BUSINESS MACHINES CORPORATION CASH FLOW (Unaudited)\n\n |  | Three Months Ended September 30, |  | Nine Months Ended September 30,\n(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024\nNet Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109\nPension Settlement Charge |  | - |  | 2,725 |  | - |  | 2,725\nDepreciation/Amortization of Intangibles (1) |  | 1,283 |  | 1,268 |  | 3,725 |  | 3,555\nStock-based Compensation |  | 444 |  | 330 |  | 1,285 |  | 966\nOperating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)\nIBM Financing A/R |  | 298 |  | 873 |  | 905 |  | 1,824\nNet Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115\n |  |  |  |  |  |  |  | \nCapital Expenditures, net of payments & proceeds (3) |  | (410) |  | 55 |  | (1,067) |  | (705)\nDivestitures, net of cash transferred |  | - |  | 2 |  | (1) |  | 705\nAcquisitions, net of cash acquired |  | (58) |  | (2,513) |  | (7,903) |  | (2,748)\nMarketable Securities / Other Investments, net |  | 30 |  | 869 |  | (2,748) |  | (810)\nNet Cash Provided by/(Used in) Investing Activities |  | $ (437) |  | $ (1,587) |  | $ (11,719) |  | $ (3,558)\n |  |  |  |  |  |  |  | \nDebt, net of payments & proceeds |  | (1,108) |  | (1,259) |  | 4,683 |  | (777)\nDividends |  | (1,569) |  | (1,542) |  | (4,681) |  | (4,601)\nFinancing - Other |  | (334) |  | 35 |  | (425) |  | (26)\nNet Cash Provided by/(Used in) Financing Activities |  | $ (3,012) |  | $ (2,766) |  | $ (423) |  | $ (5,403)\n |  |  |  |  |  |  |  | \nEffect of Exchange Rate changes on Cash |  | (59) |  | 207 |  | 429 |  | (29)\nNet Change in Cash, Cash Equivalents and Restricted Cash |  | $ (426) |  | $ (1,264) |  | $ (2,561) |  | $ 125\n____________________\n(1) Includes operating lease right-of-use assets amortization.\n(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter.\n(3) 2024 includes proceeds of $0.4 billion from the sale of certain QRadar SaaS assets in the third quarter.",
+      "preAnalystContextSha256": "9d5416f83d49934f1b4aeeb320f2c0532f3d89b61dcf41804ded4633ec5a8a11",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261002-batch-learning",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-02T08:23:03.229467+00:00",
+        "asOfInstant": "2026-10-02T08:23:03.229467+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-02T08:23:03.229467+00:00",
+        "sourceManifestSha256": "0dacb5cabf217e2d0687141eaafc28c814e99ac3a54e14962f243650cc58c418"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2025-10-22T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-09-30",
+          "periodStart": "2025-01-01",
+          "publishedAt": "2025-10-22T00:00:00Z",
+          "rawSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b",
+          "retrievedAt": "2026-10-02T08:00:40.120877+00:00",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "sourceVersion": "IBM-Q3-2025-official-IR-cashflow",
+          "target": "IBM",
+          "unit": "million",
+          "visibleSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b",
+          "visibleText": "INTERNATIONAL BUSINESS MACHINES CORPORATION CASH FLOW (Unaudited)\n\n |  | Three Months Ended September 30, |  | Nine Months Ended September 30,\n(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024\nNet Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109\nPension Settlement Charge |  | - |  | 2,725 |  | - |  | 2,725\nDepreciation/Amortization of Intangibles (1) |  | 1,283 |  | 1,268 |  | 3,725 |  | 3,555\nStock-based Compensation |  | 444 |  | 330 |  | 1,285 |  | 966\nOperating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)\nIBM Financing A/R |  | 298 |  | 873 |  | 905 |  | 1,824\nNet Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115\n |  |  |  |  |  |  |  | \nCapital Expenditures, net of payments & proceeds (3) |  | (410) |  | 55 |  | (1,067) |  | (705)\nDivestitures, net of cash transferred |  | - |  | 2 |  | (1) |  | 705\nAcquisitions, net of cash acquired |  | (58) |  | (2,513) |  | (7,903) |  | (2,748)\nMarketable Securities / Other Investments, net |  | 30 |  | 869 |  | (2,748) |  | (810)\nNet Cash Provided by/(Used in) Investing Activities |  | $ (437) |  | $ (1,587) |  | $ (11,719) |  | $ (3,558)\n |  |  |  |  |  |  |  | \nDebt, net of payments & proceeds |  | (1,108) |  | (1,259) |  | 4,683 |  | (777)\nDividends |  | (1,569) |  | (1,542) |  | (4,681) |  | (4,601)\nFinancing - Other |  | (334) |  | 35 |  | (425) |  | (26)\nNet Cash Provided by/(Used in) Financing Activities |  | $ (3,012) |  | $ (2,766) |  | $ (423) |  | $ (5,403)\n |  |  |  |  |  |  |  | \nEffect of Exchange Rate changes on Cash |  | (59) |  | 207 |  | 429 |  | (29)\nNet Change in Cash, Cash Equivalents and Restricted Cash |  | $ (426) |  | $ (1,264) |  | $ (2,561) |  | $ 125\n____________________\n(1) Includes operating lease right-of-use assets amortization.\n(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter.\n(3) 2024 includes proceeds of $0.4 billion from the sale of certain QRadar SaaS assets in the third quarter."
+        }
+      ]
+    },
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "a8842c055593dd4c782c6eb433fd3ea45d0ad111222e0df6c3284f31b409f2c1",
+      "query": "IBM 2025年前三季度的GAAP净利润转化为经营现金流的情况怎么样？与2024年同期比较两者金额、差额和经营现金流/净利润。结合给出的现金流调整项解释主要差异，说明同比比较需要注意什么。比率和百分比保留两位小数。",
+      "resolvedQuery": "IBM 2025年前三季度的GAAP净利润转化为经营现金流的情况怎么样？与2024年同期比较两者金额、差额和经营现金流/净利润。结合给出的现金流调整项解释主要差异，说明同比比较需要注意什么。比率和百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-02",
+      "context": "[E1] {\"availableAt\":\"2025-10-22T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-30\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2025-10-22T00:00:00Z\",\"rawSha256\":\"625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b\",\"retrievedAt\":\"2026-10-02T08:00:40.120877+00:00\",\"sourceRef\":\"https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS\",\"sourceVersion\":\"IBM-Q3-2025-official-IR-cashflow\",\"target\":\"IBM\",\"unit\":\"million\",\"visibleSha256\":\"625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b\"}\nINTERNATIONAL BUSINESS MACHINES CORPORATION CASH FLOW (Unaudited)\n\n |  | Three Months Ended September 30, |  | Nine Months Ended September 30,\n(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024\nNet Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109\nPension Settlement Charge |  | - |  | 2,725 |  | - |  | 2,725\nDepreciation/Amortization of Intangibles (1) |  | 1,283 |  | 1,268 |  | 3,725 |  | 3,555\nStock-based Compensation |  | 444 |  | 330 |  | 1,285 |  | 966\nOperating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)\nIBM Financing A/R |  | 298 |  | 873 |  | 905 |  | 1,824\nNet Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115\n |  |  |  |  |  |  |  | \nCapital Expenditures, net of payments & proceeds (3) |  | (410) |  | 55 |  | (1,067) |  | (705)\nDivestitures, net of cash transferred |  | - |  | 2 |  | (1) |  | 705\nAcquisitions, net of cash acquired |  | (58) |  | (2,513) |  | (7,903) |  | (2,748)\nMarketable Securities / Other Investments, net |  | 30 |  | 869 |  | (2,748) |  | (810)\nNet Cash Provided by/(Used in) Investing Activities |  | $ (437) |  | $ (1,587) |  | $ (11,719) |  | $ (3,558)\n |  |  |  |  |  |  |  | \nDebt, net of payments & proceeds |  | (1,108) |  | (1,259) |  | 4,683 |  | (777)\nDividends |  | (1,569) |  | (1,542) |  | (4,681) |  | (4,601)\nFinancing - Other |  | (334) |  | 35 |  | (425) |  | (26)\nNet Cash Provided by/(Used in) Financing Activities |  | $ (3,012) |  | $ (2,766) |  | $ (423) |  | $ (5,403)\n |  |  |  |  |  |  |  | \nEffect of Exchange Rate changes on Cash |  | (59) |  | 207 |  | 429 |  | (29)\nNet Change in Cash, Cash Equivalents and Restricted Cash |  | $ (426) |  | $ (1,264) |  | $ (2,561) |  | $ 125\n____________________\n(1) Includes operating lease right-of-use assets amortization.\n(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter.\n(3) 2024 includes proceeds of $0.4 billion from the sale of certain QRadar SaaS assets in the third quarter.",
+      "contextSha256": "6970093ee7dafa33fe6949b7400f077104b529d8e91b68740a163a12980f6874",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "IBM",
+      "requestAttributes": {
+        "reportPeriod": "quarterly",
+        "reportCount": 2
+      },
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：IBM\n请求参数：{reportPeriod=quarterly, reportCount=2}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2025-10-22T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-30\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2025-10-22T00:00:00Z\",\"rawSha256\":\"625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b\",\"retrievedAt\":\"2026-10-02T08:00:40.120877+00:00\",\"sourceRef\":\"https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS\",\"sourceVersion\":\"IBM-Q3-2025-official-IR-cashflow\",\"target\":\"IBM\",\"unit\":\"million\",\"visibleSha256\":\"625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b\"}\nINTERNATIONAL BUSINESS MACHINES CORPORATION CASH FLOW (Unaudited)\n\n |  | Three Months Ended September 30, |  | Nine Months Ended September 30,\n(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024\nNet Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109\nPension Settlement Charge |  | - |  | 2,725 |  | - |  | 2,725\nDepreciation/Amortization of Intangibles (1) |  | 1,283 |  | 1,268 |  | 3,725 |  | 3,555\nStock-based Compensation |  | 444 |  | 330 |  | 1,285 |  | 966\nOperating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)\nIBM Financing A/R |  | 298 |  | 873 |  | 905 |  | 1,824\nNet Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115\n |  |  |  |  |  |  |  | \nCapital Expenditures, net of payments & proceeds (3) |  | (410) |  | 55 |  | (1,067) |  | (705)\nDivestitures, net of cash transferred |  | - |  | 2 |  | (1) |  | 705\nAcquisitions, net of cash acquired |  | (58) |  | (2,513) |  | (7,903) |  | (2,748)\nMarketable Securities / Other Investments, net |  | 30 |  | 869 |  | (2,748) |  | (810)\nNet Cash Provided by/(Used in) Investing Activities |  | $ (437) |  | $ (1,587) |  | $ (11,719) |  | $ (3,558)\n |  |  |  |  |  |  |  | \nDebt, net of payments & proceeds |  | (1,108) |  | (1,259) |  | 4,683 |  | (777)\nDividends |  | (1,569) |  | (1,542) |  | (4,681) |  | (4,601)\nFinancing - Other |  | (334) |  | 35 |  | (425) |  | (26)\nNet Cash Provided by/(Used in) Financing Activities |  | $ (3,012) |  | $ (2,766) |  | $ (423) |  | $ (5,403)\n |  |  |  |  |  |  |  | \nEffect of Exchange Rate changes on Cash |  | (59) |  | 207 |  | 429 |  | (29)\nNet Change in Cash, Cash Equivalents and Restricted Cash |  | $ (426) |  | $ (1,264) |  | $ (2,561) |  | $ 125\n____________________\n(1) Includes operating lease right-of-use assets amortization.\n(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter.\n(3) 2024 includes proceeds of $0.4 billion from the sale of certain QRadar SaaS assets in the third quarter.",
+      "preAnalystContextSha256": "9d5416f83d49934f1b4aeeb320f2c0532f3d89b61dcf41804ded4633ec5a8a11",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261002-batch-learning",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-02T08:23:03.229467+00:00",
+        "asOfInstant": "2026-10-02T08:23:03.229467+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-02T08:23:03.229467+00:00",
+        "sourceManifestSha256": "0dacb5cabf217e2d0687141eaafc28c814e99ac3a54e14962f243650cc58c418"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2025-10-22T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-09-30",
+          "periodStart": "2025-01-01",
+          "publishedAt": "2025-10-22T00:00:00Z",
+          "rawSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b",
+          "retrievedAt": "2026-10-02T08:00:40.120877+00:00",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "sourceVersion": "IBM-Q3-2025-official-IR-cashflow",
+          "target": "IBM",
+          "unit": "million",
+          "visibleSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b",
+          "visibleText": "INTERNATIONAL BUSINESS MACHINES CORPORATION CASH FLOW (Unaudited)\n\n |  | Three Months Ended September 30, |  | Nine Months Ended September 30,\n(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024\nNet Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109\nPension Settlement Charge |  | - |  | 2,725 |  | - |  | 2,725\nDepreciation/Amortization of Intangibles (1) |  | 1,283 |  | 1,268 |  | 3,725 |  | 3,555\nStock-based Compensation |  | 444 |  | 330 |  | 1,285 |  | 966\nOperating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)\nIBM Financing A/R |  | 298 |  | 873 |  | 905 |  | 1,824\nNet Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115\n |  |  |  |  |  |  |  | \nCapital Expenditures, net of payments & proceeds (3) |  | (410) |  | 55 |  | (1,067) |  | (705)\nDivestitures, net of cash transferred |  | - |  | 2 |  | (1) |  | 705\nAcquisitions, net of cash acquired |  | (58) |  | (2,513) |  | (7,903) |  | (2,748)\nMarketable Securities / Other Investments, net |  | 30 |  | 869 |  | (2,748) |  | (810)\nNet Cash Provided by/(Used in) Investing Activities |  | $ (437) |  | $ (1,587) |  | $ (11,719) |  | $ (3,558)\n |  |  |  |  |  |  |  | \nDebt, net of payments & proceeds |  | (1,108) |  | (1,259) |  | 4,683 |  | (777)\nDividends |  | (1,569) |  | (1,542) |  | (4,681) |  | (4,601)\nFinancing - Other |  | (334) |  | 35 |  | (425) |  | (26)\nNet Cash Provided by/(Used in) Financing Activities |  | $ (3,012) |  | $ (2,766) |  | $ (423) |  | $ (5,403)\n |  |  |  |  |  |  |  | \nEffect of Exchange Rate changes on Cash |  | (59) |  | 207 |  | 429 |  | (29)\nNet Change in Cash, Cash Equivalents and Restricted Cash |  | $ (426) |  | $ (1,264) |  | $ (2,561) |  | $ 125\n____________________\n(1) Includes operating lease right-of-use assets amortization.\n(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter.\n(3) 2024 includes proceeds of $0.4 billion from the sale of certain QRadar SaaS assets in the third quarter."
+        }
+      ]
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "1e97ad1589482aafb24c70f331928613db86082ee3ea493a0ecf3a867316aea7",
+      "query": "根据IBM 2025年9月末资产负债表，计算流动比率、有息债务（短期债务加长期债务），以及现金和现金等价物加有价证券后的净债务。与2024年末比较变化，并给出审慎的短期流动性判断。此处净债务不扣受限现金，债务不含租赁负债。比率和百分比保留两位小数。",
+      "resolvedQuery": "根据IBM 2025年9月末资产负债表，计算流动比率、有息债务（短期债务加长期债务），以及现金和现金等价物加有价证券后的净债务。与2024年末比较变化，并给出审慎的短期流动性判断。此处净债务不扣受限现金，债务不含租赁负债。比率和百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-02",
+      "context": "[E1] {\"availableAt\":\"2025-10-22T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-30\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2025-10-22T00:00:00Z\",\"rawSha256\":\"dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f\",\"retrievedAt\":\"2026-10-02T08:00:40.120877+00:00\",\"sourceRef\":\"https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS\",\"sourceVersion\":\"IBM-Q3-2025-official-IR-balance\",\"target\":\"IBM\",\"unit\":\"million\",\"visibleSha256\":\"dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f\"}\nINTERNATIONAL BUSINESS MACHINES CORPORATION CONDENSED CONSOLIDATED BALANCE SHEET (Unaudited)\n\n(Dollars in Millions) |  | At September 30, 2025 |  | At December 31, 2024\nASSETS: |  |  |  | \nCurrent Assets: |  |  |  | \nCash and cash equivalents |  | $ 11,569 |  | $ 13,947\nRestricted cash |  | 30 |  | 214\nMarketable securities |  | 3,286 |  | 644\nNotes and accounts receivable - trade, net |  | 5,532 |  | 6,804\nShort-term financing receivables |  |  |  | \nHeld for investment, net |  | 5,156 |  | 6,259\nHeld for sale |  | 745 |  | 900\nOther accounts receivable, net |  | 1,174 |  | 947\nInventories |  | 1,397 |  | 1,289\nDeferred costs |  | 1,113 |  | 959\nPrepaid expenses and other current assets |  | 2,739 |  | 2,520\nTotal Current Assets |  | 32,740 |  | 34,482\n |  |  |  | \nProperty, plant and equipment, net |  | 5,851 |  | 5,731\nOperating right-of-use assets, net |  | 3,223 |  | 3,197\nLong-term financing receivables, net |  | 6,258 |  | 5,353\nPrepaid pension assets |  | 8,044 |  | 7,492\nDeferred costs |  | 768 |  | 788\nDeferred taxes |  | 8,505 |  | 6,978\nGoodwill |  | 67,396 |  | 60,706\nIntangibles, net |  | 11,729 |  | 10,660\nInvestments and sundry assets |  | 1,796 |  | 1,787\nTotal Assets |  | $ 146,312 |  | $ 137,175\n |  |  |  | \nLIABILITIES: |  |  |  | \nCurrent Liabilities: |  |  |  | \nTaxes |  | $ 1,663 |  | $ 2,033\nShort-term debt |  | 7,942 |  | 5,089\nAccounts payable |  | 3,867 |  | 4,032\nCompensation and benefits |  | 3,508 |  | 3,605\nDeferred income |  | 13,878 |  | 13,907\nOperating lease liabilities |  | 807 |  | 768\nOther liabilities |  | 3,477 |  | 3,709\nTotal Current Liabilities |  | 35,142 |  | 33,142\n |  |  |  | \nLong-term debt |  | 55,174 |  | 49,884\nRetirement-related obligations |  | 9,735 |  | 9,432\nDeferred income |  | 3,863 |  | 3,622\nOperating lease liabilities |  | 2,646 |  | 2,655\nOther liabilities |  | 11,762 |  | 11,048\nTotal Liabilities |  | 118,322 |  | 109,783\n |  |  |  | \nEQUITY: |  |  |  | \nIBM Stockholders' Equity: |  |  |  | \nCommon stock |  | 62,819 |  | 61,380\nRetained earnings |  | 151,581 |  | 151,163\nTreasury stock - at cost |  | (170,512) |  | (169,968)\nAccumulated other comprehensive income/(loss) |  | (15,983) |  | (15,269)\nTotal IBM Stockholders' Equity |  | 27,905 |  | 27,307\n |  |  |  | \nNoncontrolling interests |  | 85 |  | 86\nTotal Equity |  | 27,990 |  | 27,393\n |  |  |  | \nTotal Liabilities and Equity |  | $ 146,312 |  | $ 137,175",
+      "contextSha256": "56136db25a55ab0c158da95d7c070dc151390ecc685a580ed95e3bdba088145a",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "IBM",
+      "requestAttributes": {
+        "reportPeriod": "quarterly",
+        "reportCount": 2
+      },
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：IBM\n请求参数：{reportPeriod=quarterly, reportCount=2}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2025-10-22T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-30\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2025-10-22T00:00:00Z\",\"rawSha256\":\"dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f\",\"retrievedAt\":\"2026-10-02T08:00:40.120877+00:00\",\"sourceRef\":\"https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS\",\"sourceVersion\":\"IBM-Q3-2025-official-IR-balance\",\"target\":\"IBM\",\"unit\":\"million\",\"visibleSha256\":\"dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f\"}\nINTERNATIONAL BUSINESS MACHINES CORPORATION CONDENSED CONSOLIDATED BALANCE SHEET (Unaudited)\n\n(Dollars in Millions) |  | At September 30, 2025 |  | At December 31, 2024\nASSETS: |  |  |  | \nCurrent Assets: |  |  |  | \nCash and cash equivalents |  | $ 11,569 |  | $ 13,947\nRestricted cash |  | 30 |  | 214\nMarketable securities |  | 3,286 |  | 644\nNotes and accounts receivable - trade, net |  | 5,532 |  | 6,804\nShort-term financing receivables |  |  |  | \nHeld for investment, net |  | 5,156 |  | 6,259\nHeld for sale |  | 745 |  | 900\nOther accounts receivable, net |  | 1,174 |  | 947\nInventories |  | 1,397 |  | 1,289\nDeferred costs |  | 1,113 |  | 959\nPrepaid expenses and other current assets |  | 2,739 |  | 2,520\nTotal Current Assets |  | 32,740 |  | 34,482\n |  |  |  | \nProperty, plant and equipment, net |  | 5,851 |  | 5,731\nOperating right-of-use assets, net |  | 3,223 |  | 3,197\nLong-term financing receivables, net |  | 6,258 |  | 5,353\nPrepaid pension assets |  | 8,044 |  | 7,492\nDeferred costs |  | 768 |  | 788\nDeferred taxes |  | 8,505 |  | 6,978\nGoodwill |  | 67,396 |  | 60,706\nIntangibles, net |  | 11,729 |  | 10,660\nInvestments and sundry assets |  | 1,796 |  | 1,787\nTotal Assets |  | $ 146,312 |  | $ 137,175\n |  |  |  | \nLIABILITIES: |  |  |  | \nCurrent Liabilities: |  |  |  | \nTaxes |  | $ 1,663 |  | $ 2,033\nShort-term debt |  | 7,942 |  | 5,089\nAccounts payable |  | 3,867 |  | 4,032\nCompensation and benefits |  | 3,508 |  | 3,605\nDeferred income |  | 13,878 |  | 13,907\nOperating lease liabilities |  | 807 |  | 768\nOther liabilities |  | 3,477 |  | 3,709\nTotal Current Liabilities |  | 35,142 |  | 33,142\n |  |  |  | \nLong-term debt |  | 55,174 |  | 49,884\nRetirement-related obligations |  | 9,735 |  | 9,432\nDeferred income |  | 3,863 |  | 3,622\nOperating lease liabilities |  | 2,646 |  | 2,655\nOther liabilities |  | 11,762 |  | 11,048\nTotal Liabilities |  | 118,322 |  | 109,783\n |  |  |  | \nEQUITY: |  |  |  | \nIBM Stockholders' Equity: |  |  |  | \nCommon stock |  | 62,819 |  | 61,380\nRetained earnings |  | 151,581 |  | 151,163\nTreasury stock - at cost |  | (170,512) |  | (169,968)\nAccumulated other comprehensive income/(loss) |  | (15,983) |  | (15,269)\nTotal IBM Stockholders' Equity |  | 27,905 |  | 27,307\n |  |  |  | \nNoncontrolling interests |  | 85 |  | 86\nTotal Equity |  | 27,990 |  | 27,393\n |  |  |  | \nTotal Liabilities and Equity |  | $ 146,312 |  | $ 137,175",
+      "preAnalystContextSha256": "a2fd6fc59bc7179540774e84dfc5b09eb90861c6f639d3dd78e6e1756155ef48",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261002-batch-learning",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-02T08:23:03.229467+00:00",
+        "asOfInstant": "2026-10-02T08:23:03.229467+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-02T08:23:03.229467+00:00",
+        "sourceManifestSha256": "0dacb5cabf217e2d0687141eaafc28c814e99ac3a54e14962f243650cc58c418"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2025-10-22T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-09-30",
+          "periodStart": "2025-01-01",
+          "publishedAt": "2025-10-22T00:00:00Z",
+          "rawSha256": "dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f",
+          "retrievedAt": "2026-10-02T08:00:40.120877+00:00",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "sourceVersion": "IBM-Q3-2025-official-IR-balance",
+          "target": "IBM",
+          "unit": "million",
+          "visibleSha256": "dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f",
+          "visibleText": "INTERNATIONAL BUSINESS MACHINES CORPORATION CONDENSED CONSOLIDATED BALANCE SHEET (Unaudited)\n\n(Dollars in Millions) |  | At September 30, 2025 |  | At December 31, 2024\nASSETS: |  |  |  | \nCurrent Assets: |  |  |  | \nCash and cash equivalents |  | $ 11,569 |  | $ 13,947\nRestricted cash |  | 30 |  | 214\nMarketable securities |  | 3,286 |  | 644\nNotes and accounts receivable - trade, net |  | 5,532 |  | 6,804\nShort-term financing receivables |  |  |  | \nHeld for investment, net |  | 5,156 |  | 6,259\nHeld for sale |  | 745 |  | 900\nOther accounts receivable, net |  | 1,174 |  | 947\nInventories |  | 1,397 |  | 1,289\nDeferred costs |  | 1,113 |  | 959\nPrepaid expenses and other current assets |  | 2,739 |  | 2,520\nTotal Current Assets |  | 32,740 |  | 34,482\n |  |  |  | \nProperty, plant and equipment, net |  | 5,851 |  | 5,731\nOperating right-of-use assets, net |  | 3,223 |  | 3,197\nLong-term financing receivables, net |  | 6,258 |  | 5,353\nPrepaid pension assets |  | 8,044 |  | 7,492\nDeferred costs |  | 768 |  | 788\nDeferred taxes |  | 8,505 |  | 6,978\nGoodwill |  | 67,396 |  | 60,706\nIntangibles, net |  | 11,729 |  | 10,660\nInvestments and sundry assets |  | 1,796 |  | 1,787\nTotal Assets |  | $ 146,312 |  | $ 137,175\n |  |  |  | \nLIABILITIES: |  |  |  | \nCurrent Liabilities: |  |  |  | \nTaxes |  | $ 1,663 |  | $ 2,033\nShort-term debt |  | 7,942 |  | 5,089\nAccounts payable |  | 3,867 |  | 4,032\nCompensation and benefits |  | 3,508 |  | 3,605\nDeferred income |  | 13,878 |  | 13,907\nOperating lease liabilities |  | 807 |  | 768\nOther liabilities |  | 3,477 |  | 3,709\nTotal Current Liabilities |  | 35,142 |  | 33,142\n |  |  |  | \nLong-term debt |  | 55,174 |  | 49,884\nRetirement-related obligations |  | 9,735 |  | 9,432\nDeferred income |  | 3,863 |  | 3,622\nOperating lease liabilities |  | 2,646 |  | 2,655\nOther liabilities |  | 11,762 |  | 11,048\nTotal Liabilities |  | 118,322 |  | 109,783\n |  |  |  | \nEQUITY: |  |  |  | \nIBM Stockholders' Equity: |  |  |  | \nCommon stock |  | 62,819 |  | 61,380\nRetained earnings |  | 151,581 |  | 151,163\nTreasury stock - at cost |  | (170,512) |  | (169,968)\nAccumulated other comprehensive income/(loss) |  | (15,983) |  | (15,269)\nTotal IBM Stockholders' Equity |  | 27,905 |  | 27,307\n |  |  |  | \nNoncontrolling interests |  | 85 |  | 86\nTotal Equity |  | 27,990 |  | 27,393\n |  |  |  | \nTotal Liabilities and Equity |  | $ 146,312 |  | $ 137,175"
+        }
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "runId": "development-ibm-1-1",
+      "caseId": "ibm-fy2025q3-quarter-control",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "development-ibm-2-1",
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "development-ibm-3-1",
+      "caseId": "ibm-fy2025q3-liquidity",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    }
+  ],
+  "context": {
+    "experimentId": "fundamentals-batch-learning-20261002",
+    "evaluatorVersion": "2c08f66dc96e9061e3dd753cf5c041c78c3e8e036e8c969ba0eccaa32fb132ed",
+    "runMode": "DEVELOPMENT"
+  }
+}

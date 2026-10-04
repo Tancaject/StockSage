@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "repair-pep-control-1-1",
+    "caseId": "pep-fy2025q3-quarter-reconstruction",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-repair-20261002\\raw-repair-pep-control",
+  "executionSha256": "d72d34bf5caf668aab68fd83ae7537bffa6ad702ff57e66a26ab7d400c84b1d4",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

@@ -1,0 +1,10 @@
+{
+  "schema": "batch_phase_decision_v1",
+  "phase": 2,
+  "decision": "AUTHORIZE_REGISTERED_FOUR_CASES",
+  "basis": "Both independently reviewed controls pass the unchanged source-based standard; explicit coordinator continuation received. AI review is not human release approval.",
+  "reviewPath": "evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\secondary-controls-review.json",
+  "reviewSha256": "c7a79adb577471a1dabbe23d1a63f8b44f3d179ea758dfe24a8624e17473fde5",
+  "reviewType": "AI_INDEPENDENT_TEXT_REVIEW_NOT_HUMAN",
+  "releaseEligible": false
+}

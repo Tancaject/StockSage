@@ -1,0 +1,19 @@
+**结论：** 在本轮证据范围内，IBM 2025 年第三季度单季经营现金流明显高于净利润，现金转化较强：每 **1 美元净利润**约对应 **1.77 美元经营现金流** [E1]。
+
+| 指标 | 2025Q3 单季 | 说明 |
+|---|---:|---|
+| 经营现金流 | **3,081 百万美元** | 经营活动产生的净现金流入 [E1] |
+| GAAP 净利润口径 | **1,744 百万美元** | 本轮证据仅能使用现金流量表起始行 “Net Income/(Loss) from Operations” 作为净利润口径 [E1] |
+| 差额：经营现金流 - 净利润 | **1,337 百万美元** | 经营现金流高于净利润 [E1] |
+| 经营现金流 / 净利润 | **1.77** | 即 **176.66%**，现金利润覆盖较强 [E1] |
+
+**现金转化情况简述：**  
+本季度 IBM 净利润到经营现金流的转化较好，主要正向因素包括折旧/摊销 **1,283 百万美元**、股权激励 **444 百万美元**、IBM Financing A/R **298 百万美元**；但 “Operating assets and liabilities/Other, net” 为 **-688 百万美元**，对现金流形成一定拖累 [E1]。
+
+**数据缺口与口径说明：**  
+本轮未提供 2025Q3 利润表或 10-Q 原文，因此“GAAP 净利润”只能基于现金流量表起始行计算；若严格使用利润表归母净利润口径，需进一步验证 [E1]。
+
+**数据来源与时间说明：**  
+- [E1] IBM Q3 2025 official IR cash flow, “INTERNATIONAL BUSINESS MACHINES CORPORATION CASH FLOW (Unaudited)”, Three Months Ended September 30, 2025, USD millions, published 2025-10-22. 来源：https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS
+
+仅供参考，不构成投资建议。

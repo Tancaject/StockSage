@@ -1,0 +1,316 @@
+{
+  "schema": "native_judge_v4_high_calibration_plan_v1",
+  "status": "DRAFT_WAITING_FOR_SHARED_CHECKER",
+  "createdAt": "2026-10-02T10:21:52.907946+00:00",
+  "authority": "USER_AUTHORIZED_REPAIR_ACCEPTANCE",
+  "scope": "FIXED_SAVED_ANSWER_CALIBRATION_NOT_UNSEEN_HOLDOUT",
+  "releaseEligible": false,
+  "humanReviewed": false,
+  "expectedStageReviews": 16,
+  "positiveStages": 4,
+  "negativeStages": 12,
+  "maxProviderCalls": 64,
+  "maxConcurrentStageReviews": 6,
+  "automaticRetries": 0,
+  "judgeConfig": {
+    "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+    "model": "qwen3.8-max",
+    "temperature": 0,
+    "enable_thinking": true,
+    "thinking_budget": 32768,
+    "timeout_seconds": 300,
+    "max_tokens": 6000,
+    "max_calls": 4
+  },
+  "protocolSha256": "c3dfd5725a29e088e3a16e39402b8e1b61c55c21e15c2be3da68c29c63b3558d",
+  "rubricSha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+  "output": "evals\\evolution\\batch-repair-20261002\\judge-v4-high.json",
+  "runner": "evals\\evolution\\batch-repair-20261002\\run_judge_v4.py",
+  "pending": "Wait for active business runs before editing the shared checker; then run focused checks, save v4 snapshots and create a separate FROZEN judge-v4-high-plan.json. This draft cannot authorize execution.",
+  "comparisonPolicy": "Reference labels are bound before execution but never included in judge_stage input. Count every stage, including INVALID and NO_DATA, in the primary agreement denominator; report false passes, false failures and technical coverage separately.",
+  "changeAttribution": "Protocol and reasoning budget change together; results measure this combined revision and cannot attribute any gain to thinking budget alone.",
+  "inputs": [
+    {
+      "path": "evals\\eval_common.py",
+      "sha256": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\cases.jsonl",
+      "sha256": "79dc78e1c056f0c37855875383df2850cea155d14304c218ee294e88bbd213f4"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\gold.jsonl",
+      "sha256": "1b31f7cf00852cb0a4696385faac1954b344a0d50563cd5033ef71b5c106cbc1"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\raw-development-pep\\baseline-v1.report.json",
+      "sha256": "aec0a478c059d2546c4772fa867ce440b5f07d8a5d326af25733fad3ae58d360"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\raw-development-tgt\\baseline-v1.report.json",
+      "sha256": "4366a2e3443e7388f1c4e5c3e611e5600bda7ff5f8d02e8e40f5e5defac1caae"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\secondary-review-pep-tgt.json",
+      "sha256": "9505dd6f6c6141aae96825fb0fc899fd08b22024bc0badb2e612f5765d0a9fe4"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "sha256": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "sha256": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-ibm-cash\\baseline-v1.report.json",
+      "sha256": "8fd6cc27be5e807f455a485b2b73183b58464a7e8b5e2aa737606fcff2496e76"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-ibm-liquidity\\baseline-v1.report.json",
+      "sha256": "d9f328f24fac3232ba1955cc222d8d835a9ab2c71df81daa0a6904b07f6a0606"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-jnj-cash\\baseline-v1.report.json",
+      "sha256": "b66199eff6d92215b574c2e1654028380fd77d709bbba62ecf10b6d8a10b356d"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-jnj-liquidity\\baseline-v1.report.json",
+      "sha256": "f8d2a2bd7f9b0cae488ff265d9a95e17042d045f65dd963d37a8278eb1a8542a"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-pep-control\\baseline-v1.report.json",
+      "sha256": "48f22e73216cef016fc36f9ebbe802a653c7e33f775df8301a8ba5e05c3846ce"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-tgt-control\\baseline-v1.report.json",
+      "sha256": "9140245dd08c512243887f592bc6d7d3f6f7fbe418785630cec40ca4f335be16"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\run_judge_v4.py",
+      "sha256": "b305674ddbbe53add50036f3a9f69e6bc3de0ed269de69cf0d64ec10d89ddbbe"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json",
+      "sha256": "2fb1e21fd7323d38bb80fda064e4e152ff3cf9333d7ed5e68f02e5dc57b8009b"
+    },
+    {
+      "path": "evals\\evolution_ai_review.py",
+      "sha256": "da95a027aed5985328d1a73569991c3044c86382f0a8266c2b7ee8fc20c97397"
+    },
+    {
+      "path": "evals\\evolution_dataset.py",
+      "sha256": "12df23500bf7ee45a2ee0ab955924bf7368e30c1a7e2bb2e20a5f993fa24ee65"
+    },
+    {
+      "path": "evals\\evolution_quality.py",
+      "sha256": null
+    },
+    {
+      "path": "evals\\evolution_rubric.py",
+      "sha256": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea"
+    },
+    {
+      "path": "evals\\run_evaluation_agent.py",
+      "sha256": "4c7843a9269262fe6398be1f3c95fbf916dfc0c0eb83019626c7f7c15471abdf"
+    },
+    {
+      "path": "evals\\run_ragas_eval.py",
+      "sha256": "d024ccd42015c560b978c873c4bfccc4cd6c70c72753f003c5c521018f2517f3"
+    }
+  ],
+  "samples": [
+    {
+      "sampleId": "new-ibm-cash-analysis",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-ibm-cash\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "stage": "analysis",
+      "answerSha256": "ad5cbf6c66b39ecc95fc8668a8dee5b1c03792ef290c045b6760872b20d0e734",
+      "independentStatus": "FAIL",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json"
+    },
+    {
+      "sampleId": "new-ibm-cash-finalAnswer",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-ibm-cash\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "stage": "finalAnswer",
+      "answerSha256": "47ad4e19608f536b040914b12c06acf055bf8b4fe48db3a93983598c6fa73784",
+      "independentStatus": "FAIL",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json"
+    },
+    {
+      "sampleId": "new-ibm-liquidity-analysis",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-ibm-liquidity\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "caseId": "ibm-fy2025q3-liquidity",
+      "stage": "analysis",
+      "answerSha256": "a232efd38758c4d48a014605e21fa2075c645927a4a3772861c776ba2e48e536",
+      "independentStatus": "FAIL",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json"
+    },
+    {
+      "sampleId": "new-ibm-liquidity-finalAnswer",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-ibm-liquidity\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "caseId": "ibm-fy2025q3-liquidity",
+      "stage": "finalAnswer",
+      "answerSha256": "4f91aa6f5882adbada797990dcc353011506ed0aaf6ad4671761f1ea45812e4f",
+      "independentStatus": "FAIL",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json"
+    },
+    {
+      "sampleId": "new-jnj-cash-analysis",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-jnj-cash\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "stage": "analysis",
+      "answerSha256": "3130c16b8e8042b7851bd2c755f8e0619c0f9d135405ecb416de89d7c10e926f",
+      "independentStatus": "FAIL",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json"
+    },
+    {
+      "sampleId": "new-jnj-cash-finalAnswer",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-jnj-cash\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "stage": "finalAnswer",
+      "answerSha256": "1ae567fd7f924fd44e9fdabc9f5a2291cfe5766a26d75ec17b1f8d37459031b8",
+      "independentStatus": "FAIL",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json"
+    },
+    {
+      "sampleId": "new-jnj-liquidity-analysis",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-jnj-liquidity\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "caseId": "jnj-fy2025q3-liquidity",
+      "stage": "analysis",
+      "answerSha256": "5effcd0b0f55e43c92634a3242d48b7b7c0b595230c6878d4035a648b1555681",
+      "independentStatus": "FAIL",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json"
+    },
+    {
+      "sampleId": "new-jnj-liquidity-finalAnswer",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-jnj-liquidity\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "caseId": "jnj-fy2025q3-liquidity",
+      "stage": "finalAnswer",
+      "answerSha256": "054e5c2c660b43cf80db8ee7ccc4f87ba1f048cd031752de4459a10c88f85c7d",
+      "independentStatus": "FAIL",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json"
+    },
+    {
+      "sampleId": "new-pep-control-analysis",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-pep-control\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "stage": "analysis",
+      "answerSha256": "9e41217fbd82b433977b06e910c2572dda218ecbaa8dafe0b11bffc6910605e3",
+      "independentStatus": "FAIL",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json"
+    },
+    {
+      "sampleId": "new-pep-control-finalAnswer",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-pep-control\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "stage": "finalAnswer",
+      "answerSha256": "6f3b2e2e52e1b8d9cb01944d47d4e9d37feed4c5a60eee34f10b79fd38c35fe8",
+      "independentStatus": "FAIL",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json"
+    },
+    {
+      "sampleId": "new-tgt-control-analysis",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-tgt-control\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "stage": "analysis",
+      "answerSha256": "014eb632036d5ecdce77c170861b561be8c100a67f729f1ee281b75e23f6103a",
+      "independentStatus": "FAIL",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json"
+    },
+    {
+      "sampleId": "new-tgt-control-finalAnswer",
+      "answerSet": "NEW_4096_BUSINESS_ANSWER",
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-tgt-control\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "stage": "finalAnswer",
+      "answerSha256": "f986175cbdcdca67e325e9e25af3e516ee94de96114965c99d672bfec915de5b",
+      "independentStatus": "FAIL",
+      "independentReference": "evals\\evolution\\batch-repair-20261002\\secondary-business-review.json"
+    },
+    {
+      "sampleId": "old-pep-quarter-analysis",
+      "answerSet": "OLD_POSITIVE_SAME_QUESTION",
+      "report": "evals\\evolution\\batch-learning-20261002\\raw-development-pep\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-learning-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-learning-20261002\\gold.jsonl",
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "stage": "analysis",
+      "answerSha256": "7288131cc8e7575a2103b2962c16fce0629740d26a22cdb4b7fdf11cfd44458b",
+      "independentStatus": "PASS",
+      "independentReference": "evals\\evolution\\batch-learning-20261002\\secondary-review-pep-tgt.json"
+    },
+    {
+      "sampleId": "old-pep-quarter-finalAnswer",
+      "answerSet": "OLD_POSITIVE_SAME_QUESTION",
+      "report": "evals\\evolution\\batch-learning-20261002\\raw-development-pep\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-learning-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-learning-20261002\\gold.jsonl",
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "stage": "finalAnswer",
+      "answerSha256": "dacc34d5bcd9ea4ad864129065ea496f390d9495d7810bc9bf9c1d01d3931b89",
+      "independentStatus": "PASS",
+      "independentReference": "evals\\evolution\\batch-learning-20261002\\secondary-review-pep-tgt.json"
+    },
+    {
+      "sampleId": "old-tgt-cash-analysis",
+      "answerSet": "OLD_POSITIVE_SAME_QUESTION",
+      "report": "evals\\evolution\\batch-learning-20261002\\raw-development-tgt\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-learning-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-learning-20261002\\gold.jsonl",
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "stage": "analysis",
+      "answerSha256": "734b6d7925bb16d66c0db128fa38b553700ede3949bf12a614c5f247a7e91218",
+      "independentStatus": "PASS",
+      "independentReference": "evals\\evolution\\batch-learning-20261002\\secondary-review-pep-tgt.json"
+    },
+    {
+      "sampleId": "old-tgt-cash-finalAnswer",
+      "answerSet": "OLD_POSITIVE_SAME_QUESTION",
+      "report": "evals\\evolution\\batch-learning-20261002\\raw-development-tgt\\baseline-v1.report.json",
+      "sourceCases": "evals\\evolution\\batch-learning-20261002\\cases.jsonl",
+      "gold": "evals\\evolution\\batch-learning-20261002\\gold.jsonl",
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "stage": "finalAnswer",
+      "answerSha256": "9e021c55db4e774af5f85d8fb76bb033cc5e1188218ac430ec2f9c8a49705a64",
+      "independentStatus": "PASS",
+      "independentReference": "evals\\evolution\\batch-learning-20261002\\secondary-review-pep-tgt.json"
+    }
+  ]
+}

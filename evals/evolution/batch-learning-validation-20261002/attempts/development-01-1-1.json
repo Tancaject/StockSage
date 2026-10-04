@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-01-1-1",
+    "caseId": "ibm-fy2025q3-quarter-control",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-validation-20261002\\raw-development-01",
+  "executionSha256": "90b4d5798a67f15a7344e14d792e8b463d749254cae813bb67510de8e59aed07",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

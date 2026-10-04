@@ -1,0 +1,34 @@
+[
+  {
+    "mechanism": "FALSE_MISSING_DERIVABLE_PERIOD_DETAIL",
+    "attribution": "METHOD_ERROR",
+    "confirmedBy": "AI-independent-confirmed",
+    "fixedContractSha256": "03b588fd86fc9f75047578665fa5227d2e73ca1bca734463fb3feddebe8df193",
+    "members": [
+      {
+        "caseId": "tgt-fy2025q3-quarter-reconstruction",
+        "runId": "development-05-1-1",
+        "tracePath": "raw-development-05/development-05-1-1.response.json",
+        "traceSha256": "054a147e1c14894d819c5de11706ea5a8ad2e40f529fdbe868bedf30f54e3b33",
+        "feedbackPath": "feedback/tgt-fy2025q3-quarter-reconstruction.json",
+        "feedbackSha256": "4b815eb27ac9089b788ca7a84bcda1c1cff26c2e810f612c1e99f2c0571d32e4"
+      }
+    ]
+  },
+  {
+    "mechanism": "INCONSISTENT_UNIT_AND_DERIVED_NUMERIC_REPRESENTATIONS",
+    "attribution": "METHOD_ERROR",
+    "confirmedBy": "AI-independent-confirmed",
+    "fixedContractSha256": "03b588fd86fc9f75047578665fa5227d2e73ca1bca734463fb3feddebe8df193",
+    "members": [
+      {
+        "caseId": "ibm-fy2025q3-oneoff-cash-comparability",
+        "runId": "development-07-1-1",
+        "tracePath": "raw-development-07/development-07-1-1.response.json",
+        "traceSha256": "8c9dbc6e876b22dfa38001db68e52384908750d1d3d058d050f7d7f0b0df60ad",
+        "feedbackPath": "feedback/ibm-fy2025q3-oneoff-cash-comparability.json",
+        "feedbackSha256": "dae5f764ba949879e29a46f82f489e75aa4ff8db2de20ba6d3bfcd2aaad8354a"
+      }
+    ]
+  }
+]

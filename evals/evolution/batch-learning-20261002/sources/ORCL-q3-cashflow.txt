@@ -1,0 +1,44 @@
+ORACLE CORPORATION
+ |  |  |  |  | 
+Q3 FISCAL 2025 FINANCIAL RESULTS
+CONDENSED CONSOLIDATED STATEMENTS OF CASH FLOWS
+($ in millions)
+ |  |  |  |  | 
+ |  | Nine Months Ended
+ |  | February 28,2025 | February 29,2024
+Cash Flows From Operating Activities: |  |  |  | 
+Net income | $ 9,016 |  | $ 7,323 | 
+Adjustments to reconcile net income to net cash provided by operating activities: |  |  |  | 
+Depreciation | 2,715 |  | 2,318 | 
+Amortization of intangible assets | 1,763 |  | 2,267 | 
+Deferred income taxes | (1,097) |  | (1,755) | 
+Stock-based compensation | 3,374 |  | 2,927 | 
+Other, net | 422 |  | 631 | 
+Changes in operating assets and liabilities: |  |  |  | 
+Increase in trade receivables, net | (312) |  | (409) | 
+Decrease in prepaid expenses and other assets | 603 |  | 457 | 
+Decrease in accounts payable and other liabilities | (633) |  | (682) | 
+Decrease in income taxes payable | (1,222) |  | (788) | 
+Increase in deferred revenues | 35 |  | 303 | 
+Net cash provided by operating activities | 14,664 |  | 12,592 | 
+Cash Flows From Investing Activities: |  |  |  | 
+Purchases of marketable securities and other investments | (838) |  | (674) | 
+Proceeds from sales and maturities of marketable securities and other investments | 444 |  | 207 | 
+Acquisitions, net of cash acquired | - |  | (59) | 
+Capital expenditures | (12,135) |  | (4,068) | 
+Net cash used for investing activities | (12,529) |  | (4,594) | 
+Cash Flows From Financing Activities: |  |  |  | 
+Payments for repurchases of common stock | (450) |  | (1,050) | 
+Proceeds from issuances of common stock | 520 |  | 454 | 
+Shares repurchased for tax withholdings upon vesting of restricted stock-based awards | (900) |  | (1,865) | 
+Payments of dividends to stockholders | (3,340) |  | (3,289) | 
+(Repayments of) proceeds from issuances of commercial paper, net | (396) |  | 936 | 
+Proceeds from issuances of senior notes and term loan credit agreements, net of issuance costs | 19,548 |  | - | 
+Repayments of senior notes and term loan credit agreements | (9,771) |  | (3,500) | 
+Other, net | (299) |  | 34 | 
+Net cash provided by (used for) financing activities | 4,912 |  | (8,280) | 
+Effect of exchange rate changes on cash and cash equivalents | (95) |  | (2) | 
+Net increase (decrease) in cash and cash equivalents | 6,952 |  | (284) | 
+Cash and cash equivalents at beginning of period | 10,454 |  | 9,765 | 
+Cash and cash equivalents at end of period | $ 17,406 |  | $ 9,481 | 
+ |  |  |  |  | 

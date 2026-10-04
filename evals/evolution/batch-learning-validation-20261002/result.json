@@ -1,0 +1,350 @@
+{
+  "schema": "fundamentals_batch_learning_validation_result_v1",
+  "generatedAt": "2026-10-02T13:58:48.925805+00:00",
+  "status": "COMPLETE_WITHOUT_TRANSFER",
+  "scope": "FIXED_SOURCE_COMPONENT_CHAIN_AI_DIAGNOSTIC",
+  "releaseEligible": false,
+  "formalAcceptance": "NO_DATA",
+  "residentServiceReloaded": false,
+  "baseline": {
+    "analysis": {
+      "plannedCases": 10,
+      "verdictCounts": {
+        "PASS": 6,
+        "FAIL": 2,
+        "NO_DATA": 2
+      },
+      "requiredNumericCounts": {
+        "PASS": 42,
+        "NO_DATA": 16
+      }
+    },
+    "finalAnswer": {
+      "plannedCases": 10,
+      "verdictCounts": {
+        "PASS": 7,
+        "FAIL": 1,
+        "NO_DATA": 2
+      },
+      "requiredNumericCounts": {
+        "PASS": 42,
+        "NO_DATA": 16
+      }
+    }
+  },
+  "candidate": {
+    "analysis": {
+      "plannedCases": 10,
+      "verdictCounts": {
+        "PASS": 7,
+        "NO_DATA": 3
+      },
+      "requiredNumericCounts": {
+        "PASS": 36,
+        "NO_DATA": 22
+      }
+    },
+    "finalAnswer": {
+      "plannedCases": 10,
+      "verdictCounts": {
+        "PASS": 5,
+        "NO_DATA": 5
+      },
+      "requiredNumericCounts": {
+        "PASS": 27,
+        "NO_DATA": 31
+      }
+    }
+  },
+  "candidateCases": [
+    {
+      "caseId": "tgt-fy2025q3-quarter-reconstruction",
+      "runId": "screen-g1-01-1-1",
+      "reviewPath": "screen-g1-source-review.json",
+      "reviewSha256": "582dcced86e70bd4b79309a18bd30fc63ce3a933ce15103ac91110e8fa70e75d",
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 3
+          }
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 3
+          }
+        }
+      }
+    },
+    {
+      "caseId": "ibm-fy2025q3-quarter-control",
+      "runId": "screen-g1-02-1-1",
+      "reviewPath": "screen-g1-source-review.json",
+      "reviewSha256": "582dcced86e70bd4b79309a18bd30fc63ce3a933ce15103ac91110e8fa70e75d",
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 4
+          }
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 4
+          }
+        }
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity",
+      "runId": "screen-g1-03-1-1",
+      "reviewPath": "screen-g1-source-review.json",
+      "reviewSha256": "582dcced86e70bd4b79309a18bd30fc63ce3a933ce15103ac91110e8fa70e75d",
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 6
+          }
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 6
+          }
+        }
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-quarter-reconstruction",
+      "runId": "candidate-dev-02-1-1",
+      "reviewPath": "candidate-dev-review-original.json",
+      "reviewSha256": "723b735e1c8cafdf6a965a22137962d3e401e0c639304af17c11c387770ff48d",
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 3
+          }
+        },
+        "finalAnswer": {
+          "verdict": "NO_DATA",
+          "requiredNumeric": {
+            "NO_DATA": 3
+          }
+        }
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-cash-quality",
+      "runId": "candidate-dev-03-1-1",
+      "reviewPath": "candidate-dev-review-original.json",
+      "reviewSha256": "723b735e1c8cafdf6a965a22137962d3e401e0c639304af17c11c387770ff48d",
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 8
+          }
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 8
+          }
+        }
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-liquidity",
+      "runId": "candidate-dev-04-1-1",
+      "reviewPath": "candidate-dev-review-original.json",
+      "reviewSha256": "723b735e1c8cafdf6a965a22137962d3e401e0c639304af17c11c387770ff48d",
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 6
+          }
+        },
+        "finalAnswer": {
+          "verdict": "NO_DATA",
+          "requiredNumeric": {
+            "NO_DATA": 6
+          }
+        }
+      }
+    },
+    {
+      "caseId": "ibm-fy2025q3-oneoff-cash-comparability",
+      "runId": "candidate-dev-07-1-1",
+      "reviewPath": "candidate-dev-review-new.json",
+      "reviewSha256": "fc948dc0dbfbcc6f1d45d2292540f53efa1c7db8c894b1062e6e4d922ec3c377",
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 6
+          }
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 6
+          }
+        }
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-cash-comparison",
+      "runId": "candidate-dev-09-1-1",
+      "reviewPath": "candidate-dev-review-new.json",
+      "reviewSha256": "fc948dc0dbfbcc6f1d45d2292540f53efa1c7db8c894b1062e6e4d922ec3c377",
+      "stages": {
+        "analysis": {
+          "verdict": "NO_DATA",
+          "requiredNumeric": {
+            "NO_DATA": 6
+          }
+        },
+        "finalAnswer": {
+          "verdict": "NO_DATA",
+          "requiredNumeric": {
+            "NO_DATA": 6
+          }
+        }
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-deployment-bridge",
+      "runId": "candidate-dev-08-1-1",
+      "reviewPath": "candidate-dev-review-later.json",
+      "reviewSha256": "6a6880d899e4f5c055f2156236f07038038277f36b165a382a52ff29cd0e03f0",
+      "stages": {
+        "analysis": {
+          "verdict": "NO_DATA",
+          "requiredNumeric": {
+            "NO_DATA": 8
+          }
+        },
+        "finalAnswer": {
+          "verdict": "NO_DATA",
+          "requiredNumeric": {
+            "NO_DATA": 8
+          }
+        }
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity-cash-synthesis",
+      "runId": "candidate-dev-10-1-1",
+      "reviewPath": "candidate-dev-review-later.json",
+      "reviewSha256": "6a6880d899e4f5c055f2156236f07038038277f36b165a382a52ff29cd0e03f0",
+      "stages": {
+        "analysis": {
+          "verdict": "NO_DATA",
+          "requiredNumeric": {
+            "NO_DATA": 8
+          }
+        },
+        "finalAnswer": {
+          "verdict": "NO_DATA",
+          "requiredNumeric": {
+            "NO_DATA": 8
+          }
+        }
+      }
+    }
+  ],
+  "pairedDevelopmentTransitions": {
+    "analysis": {
+      "FAIL -> PASS": 2,
+      "PASS -> PASS": 5,
+      "PASS -> NO_DATA": 1,
+      "NO_DATA -> NO_DATA": 2
+    },
+    "finalAnswer": {
+      "PASS -> PASS": 4,
+      "PASS -> NO_DATA": 3,
+      "FAIL -> PASS": 1,
+      "NO_DATA -> NO_DATA": 2
+    }
+  },
+  "candidateDevelopmentReusedScreenRuns": 3,
+  "freshCandidateDevelopmentRuns": 7,
+  "generator": {
+    "registeredGroups": 2,
+    "observedGeneratorCalls": 2,
+    "proposed": 1,
+    "notGenerated": 1,
+    "screenableProposals": 1,
+    "retries": 0,
+    "newAuditProviderCalls": 0,
+    "usage": {
+      "prompt_tokens": 51330,
+      "completion_tokens": 4112,
+      "total_tokens": 55442
+    },
+    "reasoningTokens": 1425
+  },
+  "screening": {
+    "candidates": 1,
+    "cases": 3,
+    "stagePasses": 6
+  },
+  "candidateSelection": {
+    "status": "NOT_SELECTED",
+    "reason": "FULL_DEVELOPMENT_EXECUTION_INCOMPLETE"
+  },
+  "multipleExperienceInteractionTested": false,
+  "transfer": {
+    "status": "NOT_RUN",
+    "datasetCases": 12,
+    "modelCalls": 0
+  },
+  "evolutionBenefit": "LOCAL_ERROR_CORRECTED_IN_ONE_ATTEMPT; STABLE_FINAL_ANSWER_TRANSFER_BENEFIT_UNPROVEN",
+  "usage": {
+    "businessModelInvocations": 35,
+    "generatorModelInvocations": 2,
+    "businessKnownProviderTokens": {
+      "inputTokens": 101989,
+      "outputTokens": 172478,
+      "totalTokens": 274467
+    },
+    "generatorKnownProviderTokens": {
+      "prompt_tokens": 51330,
+      "completion_tokens": 4112,
+      "total_tokens": 55442
+    },
+    "allKnownProviderTokens": 329909,
+    "businessInvocationsWithUnknownUsage": 7,
+    "monetaryCost": null,
+    "codexReviewerUsageIncluded": false,
+    "accountingNote": "Screening runs are already in the full candidate audit and are counted only once. Unknown usage is not zero."
+  },
+  "artifactHashes": {
+    "plan.json": "fa948d7e1ffc12ec4e3509990f214d25a4cf005fabba9289bf62273be1b12663",
+    "frozen-inputs.zip": "78a1a68baafa232b697d5f22b5d3d06c7522a357fa3d86569ca5401103b16a4d",
+    "review-policy.json": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+    "generation-registration.json": "d29fd83e78c35e06e59d0150ec65eee99848f8c555da377dabadaf0626c18104",
+    "groups.json": "d598ed938d8d465fe410a00e0aa9efb1fba2aebf3a60a5035f908fb10f7db0d4",
+    "controls.json": "cf9f78ea2cbd143d6590f7ead67bbec214bc38db732ea450397f2f439ba3eb2f",
+    "development-quality-summary.json": "220b03f24fddfa9b599fc4ec5c3bb7ea4d0dc71ecf5a62322c8689439ba42b8b",
+    "development-execution-audit.json": "567f38c8d08503f5584cd4ca65340b0da96c5df601c239538b27a1e8528afdcf",
+    "generation-source-audit.json": "2ce6e4c998ece0a85033d939e0aaba366f6bd8eb9f0d67801c60bb43eaf0d92d",
+    "screen-g1-execution-audit.json": "1bf6a344d2f2ba662a7cbdebf94bc322180018f9ff91fb8e068629e268ae61e6",
+    "candidate-development-registration.json": "f1a08cfc461fde11ae158fed48107577a6ac1a20f4280a42707570a6f7e537b8",
+    "candidate-dev.phase.json": "3c46499d5ed536487f750e06af4ff3e590e82a25c9176e05f2509a5025e33d0b",
+    "candidate-dev-execution-audit.json": "81ab1737c80f6af391d3fcd1585c63c74e10446d6e15dfd3c572a54bfa0f300e",
+    "focused-verification.json": "f71faca709d67c2fbd8e0e27252a504a6a37c71fe5cfea3604aabfb4057ecf9b",
+    "live-draft-integrity.json": "8f68416f899b6fae9f678fb18cd8bb967418be8932823c76f17fc8ed0c38d6bf",
+    "generation-input-diagnostic.json": "7013ae6f35f3e5af731c442c55c4472ed00b29650ece0244beaabdf4c76c1f45",
+    "summarize_results.py": "1905545fadc4b0fdaf93134c0cc03710f5e56a58e4ad04c424cc08569e21c5fa",
+    "screen-g1-source-review.json": "582dcced86e70bd4b79309a18bd30fc63ce3a933ce15103ac91110e8fa70e75d",
+    "candidate-dev-review-original.json": "723b735e1c8cafdf6a965a22137962d3e401e0c639304af17c11c387770ff48d",
+    "candidate-dev-review-new.json": "fc948dc0dbfbcc6f1d45d2292540f53efa1c7db8c894b1062e6e4d922ec3c377",
+    "candidate-dev-review-later.json": "6a6880d899e4f5c055f2156236f07038038277f36b165a382a52ff29cd0e03f0"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "schema": "fundamentals_batch_generation_registration_v1",
+  "registeredAt": "2026-10-02T13:19:59.486956+00:00",
+  "planSha256": "fa948d7e1ffc12ec4e3509990f214d25a4cf005fabba9289bf62273be1b12663",
+  "inputs": {
+    "groups.json": "d598ed938d8d465fe410a00e0aa9efb1fba2aebf3a60a5035f908fb10f7db0d4",
+    "controls.json": "cf9f78ea2cbd143d6590f7ead67bbec214bc38db732ea450397f2f439ba3eb2f",
+    "secondary-review-original-first.json": "7cc5af17e13c2324049526de49dbecbd71b7bee0c8782cd6f68f1ac7c1002ff9",
+    "secondary-review-original-later.json": "24889076ade20305d16d3d608dbf75a5275bb8cf71395f3386998fdf4ec49cbd",
+    "secondary-review-new-four.json": "7c2f05519261383f2cef84e95ef54b57021ebb4b8c7bc3477a4b3ca1ef4148f7",
+    "second-review-development-05.json": "e0772a06846a920718327f981f4f7637d9d0b986d687aeb97cb48a34796944d7",
+    "second-review-development-07.json": "d2852d14919d62986f554e22d68f1a5518c4fe39571842a41b15a6dd5923783f",
+    "development-execution-audit.json": "567f38c8d08503f5584cd4ca65340b0da96c5df601c239538b27a1e8528afdcf",
+    "review-policy.json": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+    "audit_phase.py": "60132f732ce0706771dcf1cea189ac262a70c6e8841a5f2d6758782e1d9bda15"
+  },
+  "confirmedMechanismGroups": 2,
+  "maxGeneratorCalls": 2,
+  "automaticRetries": 0,
+  "controls": [
+    "ibm-fy2025q3-quarter-control",
+    "tgt-fy2025q3-liquidity"
+  ],
+  "screeningScope": "Each generated experience separately: its own failure case plus the two fixed controls; all six stages must be assessable; correct own analysis failure and no material final/numeric regression.",
+  "baselineQuality": {
+    "plannedCases": 10,
+    "analysis": {
+      "PASS": 6,
+      "FAIL": 2,
+      "NO_DATA": 2
+    },
+    "finalAnswer": {
+      "PASS": 7,
+      "FAIL": 1,
+      "NO_DATA": 2
+    }
+  },
+  "reviewOrigin": "AI_SOURCE_REVIEW_NOT_HUMAN",
+  "releaseEligible": false
+}

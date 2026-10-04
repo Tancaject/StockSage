@@ -1,0 +1,60 @@
+Table of Contents
+Johnson & Johnson and subsidiaries consolidated statements of
+cash flows
+
+(Unaudited; Dollars in Millions)
+
+Fiscal Nine Months Ended
+September 28, September 29,
+2025 2024
+Cash flows from operating activities
+Net earnings $21,688 10,635
+Adjustments to reconcile net earnings to cash flows from operating activities:
+Depreciation and amortization of property and intangibles 5,492 5,443
+Stock based compensation 1,045 938
+Asset write-downs 123 379
+Charges for acquired in-process research and development assets 109 1,252
+Net gain on sale of assets/businesses (131) (225)
+Deferred tax provision 5,215 (2,167)
+Credit losses and accounts receivable allowances (6) (11)
+Changes in assets and liabilities, net of effects from acquisitions and divestitures:
+Increase in accounts receivable (2,172) (1,259)
+Increase in inventories (1,404) (1,038)
+Increase in accounts payable and accrued liabilities 1,111 2,713
+(Increase)/Decrease in other current and non-current assets (7,653) 949
+Decrease in other current and non-current liabilities (6,196) (326)
+
+Net cash flows from operating activities 17,221 17,283
+
+Cash flows from investing activities
+Additions to property, plant and equipment (2,995) (2,812)
+Proceeds from the disposal of assets/businesses, net (Note 10) 408 623
+Acquisitions, net of cash acquired (Note 10) (14,459) (15,145)
+Acquired in-process research and development assets / related milestones (Note 10) (385) (1,250)
+Purchases of investments (677) (1,464)
+Sales of investments 1,442 2,172
+Credit support agreements activity, net (2,338) 699
+Other (including capitalized licenses and milestones) (99) (102)
+
+Net cash used for investing activities (19,103) (17,279)
+
+Cash flows from financing activities
+Dividends to shareholders (9,250) (8,839)
+Repurchase of common stock (4,029) (2,150)
+Proceeds from short-term debt, net 10,673 11,984
+Repayment of short-term debt, net (10,524) (8,354)
+Proceeds from long-term debt, net of issuance costs 9,138 6,660
+Repayment of long-term debt (1,755) (804)
+Proceeds from the exercise of stock options/employee withholding tax on stock awards, net 1,831 714
+Credit support agreements activity, net (246) 5
+Settlement of convertible debt acquired from Shockwave — (970)
+Other (8) (38)
+Net cash used for financing activities (4,170) (1,792)
+
+Effect of exchange rate changes on cash and cash equivalents 178 (91)
+Decrease in cash and cash equivalents (5,874) (1,879)
+Cash and cash equivalents, beginning of period 24,105 21,859
+Cash and cash equivalents, end of period 18,231 19,980
+
+See Notes to Consolidated Financial Statements
+Form 10-Q 7

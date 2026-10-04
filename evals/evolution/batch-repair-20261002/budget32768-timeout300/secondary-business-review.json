@@ -1,0 +1,973 @@
+{
+  "schema": "batch_secondary_answer_review_v1",
+  "reviewType": "AI_INDEPENDENT_TEXT_REVIEW_NOT_HUMAN",
+  "humanReviewStatus": "AI_ONLY",
+  "reviewer": "batch_dataset_design",
+  "scope": "All six real high-budget repair cases: two actual baseline controls, then four formerly timed-out cases after separate frozen control acceptance",
+  "standard": "Same frozen batch-learning-20261002 gold/source-only standard. Bounded general mechanisms allowed; specific company facts/causes need source support. Automatic evaluator results not inspected.",
+  "goldFile": "evals/evolution/batch-learning-20261002/gold.jsonl",
+  "goldFileSha256": "1b31f7cf00852cb0a4696385faac1954b344a0d50563cd5033ef71b5c106cbc1",
+  "status": "COMPLETED",
+  "reviewedStages": 12,
+  "cases": [
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "executionPath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/repair-b32768-pep-control.execution.json",
+      "executionSha256": "e3aed8f07cf2e32f9d94ad0969877db09abb476921fa0df3f739b35e8c895659",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-pep-control/repair-b32768-pep-control-1-1.response.json",
+      "goldLineSha256": "1b7ba36debac76f43f38375fdcd04b73287e6a6cf470f48bcbe0e7b2ed5d0579",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "450186a1640f538d9e02753b702e26f4751f61d758d30c0975fb9ae40871510e",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": "PASS: 5468 - 996 = 4472 USD million",
+          "quarterCapitalSpendingOutflowAmount": "PASS: 2499 - 1507 = 992 USD million, gross outflow",
+          "quarterSimpleFreeCashFlow": "PASS: 4472 - 992 = 3480 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: FY2025 fiscal Q3 2025-06-15 through 2025-09-06, 12 weeks",
+          "p2": "PASS: all three required amounts correct with units",
+          "p3": "PASS: consistent36-week minus24-week same-year cumulative data, correct gross-capex sign",
+          "p4": "PASS: OCF covers capex and leaves3480"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Capital spending (2,499) (2,850)\nSales of property, plant and equipment 272 177"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "24 Weeks Ended\n6/14/2025 6/15/2024"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "Net Cash Provided by Operating Activities 996 1,315"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "Capital spending (1,507) (1,701)\nSales of property, plant and equipment 169 127"
+          }
+        ],
+        "additionalNumericChecks": [
+          "4472/992=4.51times or450.81%;992/4472=22.18%: correct.",
+          "Asset-sale receipts272-169=103million, explicitly excluded from simpleFCF: correct."
+        ],
+        "issues": [],
+        "notes": [
+          "No Q3-versus-H1 quarter-on-quarter interpretation, definite seasonal explanation or acquisition-integration spending intent.",
+          "Statement that single-quarter cash flow may be affected by working capital, taxes and restructuring/acquisition cash is a bounded general mechanism supported by visible row categories, not an asserted company-specific cause.",
+          "Full answer read under the same standard as4096/8192, without automatic evaluator results."
+        ],
+        "attribution": "NONE"
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "87fa123e911a7bbb47f6b16c20889a0c9e26a68b0316ac02df5d90341a54a514",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": "PASS: 5468 - 996 = 4472 USD million",
+          "quarterCapitalSpendingOutflowAmount": "PASS: 2499 - 1507 = 992 USD million, gross outflow",
+          "quarterSimpleFreeCashFlow": "PASS: 4472 - 992 = 3480 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: FY2025 fiscal Q3 2025-06-15 through 2025-09-06, 12 weeks",
+          "p2": "PASS: all three required amounts correct with units",
+          "p3": "PASS: consistent36-week minus24-week same-year cumulative data, correct gross-capex sign",
+          "p4": "PASS: OCF covers capex and leaves3480"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Capital spending (2,499) (2,850)\nSales of property, plant and equipment 272 177"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "24 Weeks Ended\n6/14/2025 6/15/2024"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "Net Cash Provided by Operating Activities 996 1,315"
+          },
+          {
+            "evidenceId": "E2",
+            "quote": "Capital spending (1,507) (1,701)\nSales of property, plant and equipment 169 127"
+          }
+        ],
+        "additionalNumericChecks": [
+          "4472/992=4.51times or450.81%;992/4472=22.18%: correct.",
+          "Asset-sale receipts272-169=103million, explicitly excluded from simpleFCF: correct."
+        ],
+        "issues": [],
+        "notes": [
+          "No Q3-versus-H1 quarter-on-quarter interpretation, definite seasonal explanation or acquisition-integration spending intent.",
+          "Statement that single-quarter cash flow may be affected by working capital, taxes and restructuring/acquisition cash is a bounded general mechanism supported by visible row categories, not an asserted company-specific cause.",
+          "Full answer read under the same standard as4096/8192, without automatic evaluator results."
+        ],
+        "attribution": "NONE"
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-pep-control/repair-b32768-pep-control-1-1.response.json",
+      "responseSha256": "97b722dad9cf7ba344616434689c7b31a50fc1320aadd498ce53f3f6c70f3bb2",
+      "caseSha256": "f5f94dcbbdf6d11c805cfb35f2e0a73fd779898d77beafbfd9b1c19c2b36a0b0",
+      "executionStatus": "COMPLETED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "visibleSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928"
+        },
+        {
+          "evidenceId": "E2",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf",
+          "visibleSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38"
+        }
+      ],
+      "runtimeAnalystStatus": "COMPLETED",
+      "runtimeTaskOutcome": "COMPLETED"
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "executionPath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/repair-b32768-tgt-control.execution.json",
+      "executionSha256": "65d96873f76ba3810c95a8030325875320bff408e22adf970346fd7a7b215679",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-tgt-control/repair-b32768-tgt-control-1-1.response.json",
+      "goldLineSha256": "f1926e39ecc4a4f20c9b2d6a3475d9c989f7b03500cf9481e9e1b5a36c3337f6",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "d74c39e8d9af4676c9f6af5e26b63d2c282f4b2ee1a1612d1d8ed91285fb9510",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "PASS: 3485 USD million",
+          "ytdConsolidatedNetIncome": "PASS: 2660 USD million",
+          "priorOperatingCashFlow": "PASS: 4078 USD million",
+          "priorConsolidatedNetIncome": "PASS: 2988 USD million",
+          "ytdCashIncomeGap": "PASS: 825 = 3485 - 2660",
+          "priorCashIncomeGap": "PASS: 1090 = 4078 - 2988",
+          "ytdCashConversion": "PASS: 1.31, expected 1.3102",
+          "priorCashConversion": "PASS: 1.36, expected 1.3648"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: correct comparable fiscal nine-month OCF/NI amounts and dates",
+          "p2": "PASS: OCF minus NI gaps825/1090 and ratios1.31/1.36 or131.02%/136.48% correct",
+          "p3": "PASS: D&A added back; inventory cash use and AP positive contribution correctly interpreted",
+          "p4": "PASS: OCF and NI both decline, OCF declines more; positive conversion yet weaker versus prior period is explicitly reflected"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "(millions) (unaudited) |  | November 1, 2025 |  | November 2,2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net earnings |  | $ 2,660 |  | $ 2,988"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Depreciation and amortization |  | 2,331 |  | 2,215\nShare-based compensation expense |  | 197 |  | 229\nDeferred income taxes |  | (21) |  | (58)\nNoncash (gains) / losses and other, net |  | 8 |  | (1)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Inventory |  | (2,156) |  | (3,279)\nOther assets |  | (294) |  | (265)\nAccounts payable |  | 658 |  | 2,362\nAccrued and other liabilities |  | 102 |  | (113)\nCash provided by operating activities |  | 3,485 |  | 4,078"
+          }
+        ],
+        "additionalNumericChecks": [
+          "NI -328/-10.98%; OCF -593/-14.54%; gap -265/-24.31%; ratio decline5.46percentagepoints or approximately0.05: correct.",
+          "Noncash current2331+197-21+8=2515; prior2215+229-58-1=2385; increase130.",
+          "Operating-account current-2156-294+658+102=-1690; prior-3279-265+2362-113=-1295; additional cash use395.",
+          "Bridge2660+2515-1690=3485; change in OCF-NI gap130-395=-265.",
+          "AP cash contribution decreases1704; inventory cash use decreases1123; D&A increases116: correct."
+        ],
+        "issues": [],
+        "notes": [
+          "Specific supplier, procurement, inventory and seasonal drivers explicitly unconfirmed. No retail industry benchmark or categorical normalisation conclusion.",
+          "Judgement “still healthy/较好 but weaker” is tied to observed cash coverage and opposing evidence; unlike earlier claims, it does not establish absence of every earnings-quality problem.",
+          "Generic indirect cash-flow mechanisms are valid and allowed. Full answer reviewed under unchanged frozen standards; automatic evaluator results not read."
+        ],
+        "attribution": "NONE"
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "d65365df2d07021f8834980b0692d8d3582bb8ca140a32d4b6c27d0bd8aa700c",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "PASS: 3485 USD million",
+          "ytdConsolidatedNetIncome": "PASS: 2660 USD million",
+          "priorOperatingCashFlow": "PASS: 4078 USD million",
+          "priorConsolidatedNetIncome": "PASS: 2988 USD million",
+          "ytdCashIncomeGap": "PASS: 825 = 3485 - 2660",
+          "priorCashIncomeGap": "PASS: 1090 = 4078 - 2988",
+          "ytdCashConversion": "PASS: 1.31, expected 1.3102",
+          "priorCashConversion": "PASS: 1.36, expected 1.3648"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: correct comparable fiscal nine-month OCF/NI amounts and dates",
+          "p2": "PASS: OCF minus NI gaps825/1090 and ratios1.31/1.36 or131.02%/136.48% correct",
+          "p3": "PASS: D&A added back; inventory cash use and AP positive contribution correctly interpreted",
+          "p4": "PASS: OCF and NI both decline, OCF declines more; positive conversion yet weaker versus prior period is explicitly reflected"
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "(millions) (unaudited) |  | November 1, 2025 |  | November 2,2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net earnings |  | $ 2,660 |  | $ 2,988"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Depreciation and amortization |  | 2,331 |  | 2,215\nShare-based compensation expense |  | 197 |  | 229\nDeferred income taxes |  | (21) |  | (58)\nNoncash (gains) / losses and other, net |  | 8 |  | (1)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Inventory |  | (2,156) |  | (3,279)\nOther assets |  | (294) |  | (265)\nAccounts payable |  | 658 |  | 2,362\nAccrued and other liabilities |  | 102 |  | (113)\nCash provided by operating activities |  | 3,485 |  | 4,078"
+          }
+        ],
+        "additionalNumericChecks": [
+          "NI -328/-10.98%; OCF -593/-14.54%; gap -265/-24.31%; ratio decline5.46percentagepoints or approximately0.05: correct.",
+          "Noncash current2331+197-21+8=2515; prior2215+229-58-1=2385; increase130.",
+          "Operating-account current-2156-294+658+102=-1690; prior-3279-265+2362-113=-1295; additional cash use395.",
+          "Bridge2660+2515-1690=3485; change in OCF-NI gap130-395=-265.",
+          "AP cash contribution decreases1704; inventory cash use decreases1123; D&A increases116: correct."
+        ],
+        "issues": [],
+        "notes": [
+          "Specific supplier, procurement, inventory and seasonal drivers explicitly unconfirmed. No retail industry benchmark or categorical normalisation conclusion.",
+          "Judgement “still healthy/较好 but weaker” is tied to observed cash coverage and opposing evidence; unlike earlier claims, it does not establish absence of every earnings-quality problem.",
+          "Generic indirect cash-flow mechanisms are valid and allowed. Full answer reviewed under unchanged frozen standards; automatic evaluator results not read."
+        ],
+        "attribution": "NONE"
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-tgt-control/repair-b32768-tgt-control-1-1.response.json",
+      "responseSha256": "d6237cd1b20c044004a224d982b4cecd8053858d25d22313222226cf6d438e36",
+      "caseSha256": "db32f8596e00dd925957e1ec49fd61e8e7869a0b5b6722b7c5b032495fd7ca7d",
+      "executionStatus": "COMPLETED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://corporate.target.com/press/release/2025/11/target-corporation-reports-third-quarter-earnings",
+          "visibleSha256": "ec5b45fedd4b52e997f108a88a9a1f612604754571b694b43ec3c3ed201de2d3"
+        }
+      ],
+      "runtimeAnalystStatus": "TRUNCATED",
+      "runtimeTaskOutcome": "DEGRADED"
+    },
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "executionPath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/repair-b32768-ibm-cash.execution.json",
+      "executionSha256": "d57ef0695674664ed5d73dc8ce7860dc17fd8f01c73564b16c0c52dfedea7429",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-ibm-cash/repair-b32768-ibm-cash-1-1.response.json",
+      "goldLineSha256": "fd2fff1c050b0f4509ca9c6a99b00413c07716f3e03d1b5e55808d7f830407be",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "4728f766fa12c7ff489ff416aa849705e6650d1f677b2dae0295db7a26689726",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "ocf2025": "PASS: 9153 million USD, period 2025-01-01/2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "netIncome2025": "PASS: 4993 million USD, period 2025-01-01/2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "ocf2024": "PASS: 9115 million USD, period 2024-01-01/2024-09-30; answer agrees under frozen rounding/unit policy.",
+          "netIncome2024": "PASS: 3109 million USD, period 2024-01-01/2024-09-30; answer agrees under frozen rounding/unit policy.",
+          "gap2025": "PASS: 4160.0000 million USD, period 2025-01-01/2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "gap2024": "PASS: 6006.0000 million USD, period 2024-01-01/2024-09-30; answer agrees under frozen rounding/unit policy.",
+          "conversion2025": "PASS: 1.8332 ratio N/A, period 2025-01-01/2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "conversion2024": "PASS: 2.9318 ratio N/A, period 2024-01-01/2024-09-30; answer agrees under frozen rounding/unit policy."
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: All four amounts and same nine-month periods correctly stated, with gaps4160/6006 and ratios1.83/2.93.",
+          "p2": "PASS: OCF grows38 / 0.42% while NI grows1884 / 60.60%; conversion falls without an absolute OCF collapse.",
+          "p3": "PASS: Actual D&A, stock compensation, operating-assets/liabilities-other and IBM Financing A/R adjustments are explained with correct signs.",
+          "p4": "PASS: 2024 pension-settlement2725 add-back and depressed NI base are explained; comparison also preserves both2025 and2024 tax footnotes, avoiding an unsupported normalized-earnings-quality claim."
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Pension Settlement Charge |  | - |  | 2,725 |  | - |  | 2,725"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Depreciation/Amortization of Intangibles (1) |  | 1,283 |  | 1,268 |  | 3,725 |  | 3,555"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Stock-based Compensation |  | 444 |  | 330 |  | 1,285 |  | 966"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Operating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "IBM Financing A/R |  | 298 |  | 873 |  | 905 |  | 1,824"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter."
+          }
+        ],
+        "additionalNumericChecks": [
+          "NI +1884 / 60.60%, OCF +38 / 0.42%, gap -1846 / -30.74%, conversion -109.86percentage points / -37.47% relative: correct.",
+          "Adjustment differences1884-2725+170+319+1308-919=37 versus disclosed OCF change38: permitted source rounding difference of1million, explicitly acknowledged by answer.",
+          "2024 Q3 NI -330 and pension charge2725 correctly taken from quarter columns, separately identified from nine-month comparison.",
+          "2025 tax charge0.3billion and2024 tax benefit0.7billion match visible footnote; no invented fully adjusted comparative ratio."
+        ],
+        "issues": [],
+        "notes": [
+          "Answer is overcautious about GAAP wording because visible extract labels Net Income/(Loss) from Operations without the literal GAAP acronym. It nevertheless computes all requested values from the correct cash-flow starting NI and does not substitute a non-GAAP number or refuse the task; recorded as wording observation, not a material fact/method failure.",
+          "Statement that tax effects cannot be precisely isolated is unnecessarily cautious given the named footnote figures, but no wrong sign or adjusted numeric conclusion is asserted.",
+          "No unprovided acquisition name or firm assertion about receivables collection efficiency; Financing A/R is discussed as a positive reconciliation contribution with unknown underlying business composition.",
+          "Reported analystStatus=TRUNCATED and taskOutcome=DEGRADED are runtime limitations, retained separately from answer-content PASS. Final answer accurately preserves DEGRADED status.",
+          "Full actual answer independently read; automatic evaluator judgments not inspected."
+        ],
+        "attribution": "NONE"
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "7468ce442ce0792c8c3e78191ba1eb53a0a5c0b0bb59b71c86793b758e432515",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "ocf2025": "PASS: 9153 million USD, period 2025-01-01/2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "netIncome2025": "PASS: 4993 million USD, period 2025-01-01/2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "ocf2024": "PASS: 9115 million USD, period 2024-01-01/2024-09-30; answer agrees under frozen rounding/unit policy.",
+          "netIncome2024": "PASS: 3109 million USD, period 2024-01-01/2024-09-30; answer agrees under frozen rounding/unit policy.",
+          "gap2025": "PASS: 4160.0000 million USD, period 2025-01-01/2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "gap2024": "PASS: 6006.0000 million USD, period 2024-01-01/2024-09-30; answer agrees under frozen rounding/unit policy.",
+          "conversion2025": "PASS: 1.8332 ratio N/A, period 2025-01-01/2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "conversion2024": "PASS: 2.9318 ratio N/A, period 2024-01-01/2024-09-30; answer agrees under frozen rounding/unit policy."
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: All four amounts and same nine-month periods correctly stated, with gaps4160/6006 and ratios1.83/2.93.",
+          "p2": "PASS: OCF grows38 / 0.42% while NI grows1884 / 60.60%; conversion falls without an absolute OCF collapse.",
+          "p3": "PASS: Actual D&A, stock compensation, operating-assets/liabilities-other and IBM Financing A/R adjustments are explained with correct signs.",
+          "p4": "PASS: 2024 pension-settlement2725 add-back and depressed NI base are explained; comparison also preserves both2025 and2024 tax footnotes, avoiding an unsupported normalized-earnings-quality claim."
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Pension Settlement Charge |  | - |  | 2,725 |  | - |  | 2,725"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Depreciation/Amortization of Intangibles (1) |  | 1,283 |  | 1,268 |  | 3,725 |  | 3,555"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Stock-based Compensation |  | 444 |  | 330 |  | 1,285 |  | 966"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Operating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "IBM Financing A/R |  | 298 |  | 873 |  | 905 |  | 1,824"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter."
+          }
+        ],
+        "additionalNumericChecks": [
+          "NI +1884 / 60.60%, OCF +38 / 0.42%, gap -1846 / -30.74%, conversion -109.86percentage points / -37.47% relative: correct.",
+          "Adjustment differences1884-2725+170+319+1308-919=37 versus disclosed OCF change38: permitted source rounding difference of1million, explicitly acknowledged by answer.",
+          "2024 Q3 NI -330 and pension charge2725 correctly taken from quarter columns, separately identified from nine-month comparison.",
+          "2025 tax charge0.3billion and2024 tax benefit0.7billion match visible footnote; no invented fully adjusted comparative ratio."
+        ],
+        "issues": [],
+        "notes": [
+          "Answer is overcautious about GAAP wording because visible extract labels Net Income/(Loss) from Operations without the literal GAAP acronym. It nevertheless computes all requested values from the correct cash-flow starting NI and does not substitute a non-GAAP number or refuse the task; recorded as wording observation, not a material fact/method failure.",
+          "Statement that tax effects cannot be precisely isolated is unnecessarily cautious given the named footnote figures, but no wrong sign or adjusted numeric conclusion is asserted.",
+          "No unprovided acquisition name or firm assertion about receivables collection efficiency; Financing A/R is discussed as a positive reconciliation contribution with unknown underlying business composition.",
+          "Reported analystStatus=TRUNCATED and taskOutcome=DEGRADED are runtime limitations, retained separately from answer-content PASS. Final answer accurately preserves DEGRADED status.",
+          "Full actual answer independently read; automatic evaluator judgments not inspected."
+        ],
+        "attribution": "NONE",
+        "observations": [
+          {
+            "classification": "NON_MATERIAL_CAUTION",
+            "answerQuote": "因此下文按该现金流量表口径计算；若严格要求完整 GAAP 归母净利润，本轮证据不足。",
+            "reason": "Introduces unnecessary extra attribution qualification but preserves correct requested NI amounts, periods and substantive answer. GAAP consolidated versus attributable detail was not an additional required gold item."
+          },
+          {
+            "classification": "RUNTIME_DEGRADATION_DISCLOSED",
+            "answerQuote": "本轮证据验收状态为 **DEGRADED**",
+            "reason": "Raw response confirms taskOutcome=DEGRADED and analystStatus=TRUNCATED; content PASS must not erase this runtime limit."
+          }
+        ]
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-ibm-cash/repair-b32768-ibm-cash-1-1.response.json",
+      "responseSha256": "5bf4fbf5f8ee0e4bed20cc8f000e612ca49f33398ea52edfe9ceb15288a4b01c",
+      "caseSha256": "a8842c055593dd4c782c6eb433fd3ea45d0ad111222e0df6c3284f31b409f2c1",
+      "executionStatus": "COMPLETED",
+      "runtimeAnalystStatus": "TRUNCATED",
+      "runtimeTaskOutcome": "DEGRADED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "visibleSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        }
+      ]
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "executionPath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/repair-b32768-ibm-liquidity.execution.json",
+      "executionSha256": "3315a33fca05861c6ceed7bf14e7266fd899f0bf5e5c6c9f2bf6bcc06afaa204",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-ibm-liquidity/repair-b32768-ibm-liquidity-1-1.response.json",
+      "goldLineSha256": "5aec2187b0df31ae1ef95de1ba357c177daa353cb7f7915df4803e9cdfd8b3ce",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "b1974ad26a9d5eee0dcc471cb6ad3e230bb84eadb84926ad2522a0c71dc45557",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "currentRatio2025": "PASS: 0.9316 ratio N/A, period 2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "currentRatio2024": "PASS: 1.0404 ratio N/A, period 2024-12-31; answer agrees under frozen rounding/unit policy.",
+          "debt2025": "PASS: 63116.0000 million USD, period 2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "debt2024": "PASS: 54973.0000 million USD, period 2024-12-31; answer agrees under frozen rounding/unit policy.",
+          "netDebt2025": "PASS: 48261.0000 million USD, period 2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "netDebt2024": "PASS: 40382.0000 million USD, period 2024-12-31; answer agrees under frozen rounding/unit policy."
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: Two actual balance-sheet dates and ratios 0.93 / 1.04 correctly compared.",
+          "p2": "PASS: Debt 63116 / 54973: only short-term plus long-term debt; operating leases excluded from debt while total current liabilities retained for current ratio.",
+          "p3": "PASS: Net debt 48261 / 40382 deducts only cash plus marketable securities, not restricted cash.",
+          "p4": "PASS: Cautious weaker-buffer conclusion balances lower current ratio and higher net debt against cash-like assets covering short debt."
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "(Dollars in Millions) |  | At September 30, 2025 |  | At December 31, 2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Cash and cash equivalents |  | $ 11,569 |  | $ 13,947"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Restricted cash |  | 30 |  | 214"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Marketable securities |  | 3,286 |  | 644"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Total Current Assets |  | 32,740 |  | 34,482"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Short-term debt |  | 7,942 |  | 5,089"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Total Current Liabilities |  | 35,142 |  | 33,142"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Long-term debt |  | 55,174 |  | 49,884"
+          }
+        ],
+        "additionalNumericChecks": [
+          "Current-ratio change based on unrounded inputs: -10.46%; debt change 8143 / 14.81%; short debt 2853 / 56.06%; long debt 5290 / 10.60%: correct.",
+          "Cash -2378 / -17.05%; securities 2642 / 410.25%; sum 14855 versus14591, +264 / 1.81%; net debt +7879 / 19.51%: correct.",
+          "Working capital -2402 versus1340; cash-like / short debt1.87 versus2.87; cash-like / current liabilities42.27% versus44.03%: correct.",
+          "Lease raw amounts807/768 and2646/2655 and restricted cash30/214 match visible rows; no extra debt double counting."
+        ],
+        "issues": [],
+        "notes": [
+          "No unsupported historical current-ratio range, credit rating, or historical operating-cash-flow resilience asserted.",
+          "Deferred income remains within actual current liabilities; answer expressly says payment timing needs notes/cash-flow evidence and does not declare all deferred revenue cash-cost free.",
+          "Generic1.00 threshold is used only as balance-sheet coverage interpretation, with explicit warning that it cannot alone establish actual solvency problems.",
+          "Full actual answer independently read; automatic evaluator judgments not inspected."
+        ],
+        "attribution": "NONE"
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "340043a4327d7335038c7f459699e7cbb298f7a4c186a10fdbf49a0db278c1cd",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "currentRatio2025": "PASS: 0.9316 ratio N/A, period 2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "currentRatio2024": "PASS: 1.0404 ratio N/A, period 2024-12-31; answer agrees under frozen rounding/unit policy.",
+          "debt2025": "PASS: 63116.0000 million USD, period 2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "debt2024": "PASS: 54973.0000 million USD, period 2024-12-31; answer agrees under frozen rounding/unit policy.",
+          "netDebt2025": "PASS: 48261.0000 million USD, period 2025-09-30; answer agrees under frozen rounding/unit policy.",
+          "netDebt2024": "PASS: 40382.0000 million USD, period 2024-12-31; answer agrees under frozen rounding/unit policy."
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: Two actual balance-sheet dates and ratios 0.93 / 1.04 correctly compared.",
+          "p2": "PASS: Debt 63116 / 54973: only short-term plus long-term debt; operating leases excluded from debt while total current liabilities retained for current ratio.",
+          "p3": "PASS: Net debt 48261 / 40382 deducts only cash plus marketable securities, not restricted cash.",
+          "p4": "PASS: Cautious weaker-buffer conclusion balances lower current ratio and higher net debt against cash-like assets covering short debt."
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "(Dollars in Millions) |  | At September 30, 2025 |  | At December 31, 2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Cash and cash equivalents |  | $ 11,569 |  | $ 13,947"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Restricted cash |  | 30 |  | 214"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Marketable securities |  | 3,286 |  | 644"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Total Current Assets |  | 32,740 |  | 34,482"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Short-term debt |  | 7,942 |  | 5,089"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Total Current Liabilities |  | 35,142 |  | 33,142"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Long-term debt |  | 55,174 |  | 49,884"
+          }
+        ],
+        "additionalNumericChecks": [
+          "Current-ratio change based on unrounded inputs: -10.46%; debt change 8143 / 14.81%; short debt 2853 / 56.06%; long debt 5290 / 10.60%: correct.",
+          "Cash -2378 / -17.05%; securities 2642 / 410.25%; sum 14855 versus14591, +264 / 1.81%; net debt +7879 / 19.51%: correct.",
+          "Working capital -2402 versus1340; cash-like / short debt1.87 versus2.87; cash-like / current liabilities42.27% versus44.03%: correct.",
+          "Lease raw amounts807/768 and2646/2655 and restricted cash30/214 match visible rows; no extra debt double counting."
+        ],
+        "issues": [],
+        "notes": [
+          "No unsupported historical current-ratio range, credit rating, or historical operating-cash-flow resilience asserted.",
+          "Deferred income remains within actual current liabilities; answer expressly says payment timing needs notes/cash-flow evidence and does not declare all deferred revenue cash-cost free.",
+          "Generic1.00 threshold is used only as balance-sheet coverage interpretation, with explicit warning that it cannot alone establish actual solvency problems.",
+          "Full actual answer independently read; automatic evaluator judgments not inspected."
+        ],
+        "attribution": "NONE"
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-ibm-liquidity/repair-b32768-ibm-liquidity-1-1.response.json",
+      "responseSha256": "67d14df6e1cfc9295fb4ed1d444c2263504864a35d1f06c0453cab675c6102eb",
+      "caseSha256": "1e97ad1589482aafb24c70f331928613db86082ee3ea493a0ecf3a867316aea7",
+      "executionStatus": "COMPLETED",
+      "runtimeAnalystStatus": "TRUNCATED",
+      "runtimeTaskOutcome": "DEGRADED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "visibleSha256": "dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f"
+        }
+      ]
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "executionPath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/repair-b32768-jnj-cash.execution.json",
+      "executionSha256": "c8102cc487edae3497077c3446c0e1c12775125bcff8da23320a2f8f205ec4b9",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-jnj-cash/repair-b32768-jnj-cash-1-1.response.json",
+      "goldLineSha256": "1a68715d42bb84ae6d09d7a55cf3e05f2c57cb2beae6d36349757c007429b844",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "bee42b75f2dc417debe0b71f02809bcdea516fb71b9cbd425694a1900df2de59",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "PASS: 17221 million USD, period 2024-12-30/2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "ytdConsolidatedNetIncome": "PASS: 21688 million USD, period 2024-12-30/2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "priorOperatingCashFlow": "PASS: 17283 million USD, period 2024-01-01/2024-09-29; answer agrees under frozen rounding/unit policy.",
+          "priorConsolidatedNetIncome": "PASS: 10635 million USD, period 2024-01-01/2024-09-29; answer agrees under frozen rounding/unit policy.",
+          "ytdCashIncomeGap": "PASS: -4467.0000 million USD, period 2024-12-30/2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "priorCashIncomeGap": "PASS: 6648.0000 million USD, period 2024-01-01/2024-09-29; answer agrees under frozen rounding/unit policy.",
+          "ytdCashConversion": "PASS: 0.7940 ratio N/A, period 2024-12-30/2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "priorCashConversion": "PASS: 1.6251 ratio N/A, period 2024-01-01/2024-09-29; answer agrees under frozen rounding/unit policy."
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: Same fiscal nine-month periods, ending2025-09-28 and2024-09-29, and all four source amounts correctly stated.",
+          "p2": "PASS: Gaps -4467 / 6648 and ratios0.79 / 1.63 or79.40% / 162.51% are correct.",
+          "p3": "PASS: Deferred tax provision+5215, D&A+5492 and share compensation+1045 are correctly treated as positive cash-flow reconciliation adjustments; other assets-7653 and other liabilities-6196 are cash uses.",
+          "p4": "PASS: OCF -62 / -0.36% versus NI +11053 / 103.93%; lower conversion is not described as an absolute cash-flow collapse."
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net earnings $21,688 10,635"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Depreciation and amortization of property and intangibles 5,492 5,443"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Deferred tax provision 5,215 (2,167)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Increase in accounts receivable (2,172) (1,259)\nIncrease in inventories (1,404) (1,038)\nIncrease in accounts payable and accrued liabilities 1,111 2,713"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "(Increase)/Decrease in other current and non-current assets (7,653) 949\nDecrease in other current and non-current liabilities (6,196) (326)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net cash flows from operating activities 17,221 17,283"
+          }
+        ],
+        "additionalNumericChecks": [
+          "NI change11053 / 103.93%, OCF -62 / -0.36%, gap change-11115: correct.",
+          "Conversion percentage-point decline83.11 is correct. Analysis also writes ratio delta-0.84 from displayed1.63-0.79; unrounded delta=-0.8310722226, difference0.0089277774 is within frozen absoluteTolerance0.01; do not invent a tighter cutoff.",
+          "Other assets plus other liabilities cash use13849; AR-2172, inventory-1404 and AP/accrued+1111: correct.",
+          "Prior D&A5443, acquired IPR&D1252, AP/accrued2713, other assets949 and other liabilities-326 match source."
+        ],
+        "issues": [],
+        "notes": [
+          "No assertion that deferred tax provision is a positive profit benefit; it is correctly explained as an add-back relative to NI.",
+          "Possible litigation, pension, tax or other mechanisms are explicitly hypothetical and followed by inability to confirm business composition; this is permitted bounded reasoning, not a company-cause assertion.",
+          "Final Markdown table header line breaks are awkward, but periods/amounts remain unambiguous and no required content is missing.",
+          "Full actual answer independently read; automatic evaluator judgments not inspected."
+        ],
+        "attribution": "NONE",
+        "observations": [
+          {
+            "classification": "PASS_WITHIN_FROZEN_TOLERANCE",
+            "answerQuote": "| 经营现金流 / 合并净利润 | 0.79，即 79.40% | 1.63，即 162.51% | -0.84，即 -83.11 个百分点 |",
+            "reason": "Ratio delta from displayed rounded values differs by0.0089277774 from exact delta; frozen tolerance is0.01. Percentage-point delta is correctly83.11."
+          }
+        ]
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "028bd12b3c408c3445410a164d217ebfe7bbd91ec13413caaca1576fbd554678",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "PASS: 17221 million USD, period 2024-12-30/2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "ytdConsolidatedNetIncome": "PASS: 21688 million USD, period 2024-12-30/2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "priorOperatingCashFlow": "PASS: 17283 million USD, period 2024-01-01/2024-09-29; answer agrees under frozen rounding/unit policy.",
+          "priorConsolidatedNetIncome": "PASS: 10635 million USD, period 2024-01-01/2024-09-29; answer agrees under frozen rounding/unit policy.",
+          "ytdCashIncomeGap": "PASS: -4467.0000 million USD, period 2024-12-30/2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "priorCashIncomeGap": "PASS: 6648.0000 million USD, period 2024-01-01/2024-09-29; answer agrees under frozen rounding/unit policy.",
+          "ytdCashConversion": "PASS: 0.7940 ratio N/A, period 2024-12-30/2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "priorCashConversion": "PASS: 1.6251 ratio N/A, period 2024-01-01/2024-09-29; answer agrees under frozen rounding/unit policy."
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: Same fiscal nine-month periods, ending2025-09-28 and2024-09-29, and all four source amounts correctly stated.",
+          "p2": "PASS: Gaps -4467 / 6648 and ratios0.79 / 1.63 or79.40% / 162.51% are correct.",
+          "p3": "PASS: Deferred tax provision+5215, D&A+5492 and share compensation+1045 are correctly treated as positive cash-flow reconciliation adjustments; other assets-7653 and other liabilities-6196 are cash uses.",
+          "p4": "PASS: OCF -62 / -0.36% versus NI +11053 / 103.93%; lower conversion is not described as an absolute cash-flow collapse."
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net earnings $21,688 10,635"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Depreciation and amortization of property and intangibles 5,492 5,443"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Deferred tax provision 5,215 (2,167)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Increase in accounts receivable (2,172) (1,259)\nIncrease in inventories (1,404) (1,038)\nIncrease in accounts payable and accrued liabilities 1,111 2,713"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "(Increase)/Decrease in other current and non-current assets (7,653) 949\nDecrease in other current and non-current liabilities (6,196) (326)"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Net cash flows from operating activities 17,221 17,283"
+          }
+        ],
+        "additionalNumericChecks": [
+          "NI change11053 / 103.93%, OCF -62 / -0.36%, gap change-11115: correct.",
+          "Conversion percentage-point decline83.11 is correct. Analysis also writes ratio delta-0.84 from displayed1.63-0.79; unrounded delta=-0.8310722226, difference0.0089277774 is within frozen absoluteTolerance0.01; do not invent a tighter cutoff.",
+          "Other assets plus other liabilities cash use13849; AR-2172, inventory-1404 and AP/accrued+1111: correct.",
+          "Prior D&A5443, acquired IPR&D1252, AP/accrued2713, other assets949 and other liabilities-326 match source."
+        ],
+        "issues": [],
+        "notes": [
+          "No assertion that deferred tax provision is a positive profit benefit; it is correctly explained as an add-back relative to NI.",
+          "Possible litigation, pension, tax or other mechanisms are explicitly hypothetical and followed by inability to confirm business composition; this is permitted bounded reasoning, not a company-cause assertion.",
+          "Final Markdown table header line breaks are awkward, but periods/amounts remain unambiguous and no required content is missing.",
+          "Full actual answer independently read; automatic evaluator judgments not inspected."
+        ],
+        "attribution": "NONE"
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-jnj-cash/repair-b32768-jnj-cash-1-1.response.json",
+      "responseSha256": "f4b2c3ee57209b2f8735af8b6454d3ac4cf605c4bc85e18ad5a35c021a2fec8f",
+      "caseSha256": "318ad29a6acdc428282ea620b95961c697cf6463f7a99b2f28fa82bd55734087",
+      "executionStatus": "COMPLETED",
+      "runtimeAnalystStatus": "TRUNCATED",
+      "runtimeTaskOutcome": "DEGRADED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://s203.q4cdn.com/636242992/files/doc_financials/2025/q3/3Q-10Q-09-28-25-5.pdf",
+          "visibleSha256": "443b95abac4f379c3a26a88d7f5c29e1580980d5a6f9b561942a3f97b791535d"
+        }
+      ]
+    },
+    {
+      "caseId": "jnj-fy2025q3-liquidity",
+      "executionPath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/repair-b32768-jnj-liquidity.execution.json",
+      "executionSha256": "fbefdb9d0f99ff3051d6d4d426143a0197f32011766ab52b64cb8c4f3451f557",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-jnj-liquidity/repair-b32768-jnj-liquidity-1-1.response.json",
+      "goldLineSha256": "b44997b91cbea531ddab4aab3d0bb5348de0aa6280ef43c270047f49302a2769",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "f18491ddafc6de09967dfd60c754ad132b7bba86befd563d87b4f0ff67777bb4",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "currentRatioCurrent": "PASS: 1.0736 ratio N/A, period 2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "totalDebtCurrent": "PASS: 45795.0000 million USD, period 2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "netDebtCurrent": "PASS: 27233.0000 million USD, period 2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "currentRatioPrior": "PASS: 1.1107 ratio N/A, period 2024-12-29; answer agrees under frozen rounding/unit policy.",
+          "totalDebtPrior": "PASS: 36634.0000 million USD, period 2024-12-29; answer agrees under frozen rounding/unit policy.",
+          "netDebtPrior": "PASS: 12112.0000 million USD, period 2024-12-29; answer agrees under frozen rounding/unit policy."
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: 2025-09-28 versus2024-12-29 actual balance-sheet dates; current ratios1.07/1.11 use total current assets/liabilities.",
+          "p2": "PASS: Debt45795/36634 adds loans-and-notes-payable and long-term debt only, with no double counting.",
+          "p3": "PASS: Net debt27233/12112 deducts cash and marketable securities only.",
+          "p4": "PASS: Cautious weaker buffer conclusion while acknowledging ratio above1 and short-borrowing coverage; no unsupported rating, financing access or borrowing-purpose assurance."
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "September 28, 2025 December 29, 2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Cash and cash equivalents (Note 4) $18,231 24,105\nMarketable securities 331 417"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Total current assets 54,611 55,893"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Loans and notes payable $6,387 5,983"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Total current liabilities 50,869 50,321\nLong-term debt (Note 4) 39,408 30,651"
+          }
+        ],
+        "additionalNumericChecks": [
+          "CA -1282 / -2.29%; CL +548 / 1.09%; current-ratio change-3.35% uses unrounded ratios; displayed difference-0.04: correct.",
+          "Short debt+404 / 6.75%; long debt+8757 / 28.57%; total debt+9161 / 25.01%: correct.",
+          "Cash-5874 / -24.37%; securities-86 / -20.62%; cash-like18562/24522, -5960 / -24.30%; net debt+15121 / 124.84%: correct.",
+          "Excess current assets3742/5572 and cash-like-to-short-debt2.91/4.10: correct."
+        ],
+        "issues": [],
+        "notes": [
+          "No incorrect single-quarter label for change since year-end. No claim that net-debt percentage proves cash consumed faster than borrowing grew.",
+          "No unsupported active duration-management strategy, AAA rating or rebates-as-litigation-liabilities explanation; borrowing uses/maturities remain explicit unknowns.",
+          "Full actual answer independently read; automatic evaluator judgments not inspected."
+        ],
+        "attribution": "NONE"
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "49e96fd3030a4a813b62c5651f6f7392627f52429b870bd033e04b8e4b84472b",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "PASS"
+        },
+        "requiredFactChecks": {
+          "currentRatioCurrent": "PASS: 1.0736 ratio N/A, period 2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "totalDebtCurrent": "PASS: 45795.0000 million USD, period 2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "netDebtCurrent": "PASS: 27233.0000 million USD, period 2025-09-28; answer agrees under frozen rounding/unit policy.",
+          "currentRatioPrior": "PASS: 1.1107 ratio N/A, period 2024-12-29; answer agrees under frozen rounding/unit policy.",
+          "totalDebtPrior": "PASS: 36634.0000 million USD, period 2024-12-29; answer agrees under frozen rounding/unit policy.",
+          "netDebtPrior": "PASS: 12112.0000 million USD, period 2024-12-29; answer agrees under frozen rounding/unit policy."
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: 2025-09-28 versus2024-12-29 actual balance-sheet dates; current ratios1.07/1.11 use total current assets/liabilities.",
+          "p2": "PASS: Debt45795/36634 adds loans-and-notes-payable and long-term debt only, with no double counting.",
+          "p3": "PASS: Net debt27233/12112 deducts cash and marketable securities only.",
+          "p4": "PASS: Cautious weaker buffer conclusion while acknowledging ratio above1 and short-borrowing coverage; no unsupported rating, financing access or borrowing-purpose assurance."
+        },
+        "sourceEvidence": [
+          {
+            "evidenceId": "E1",
+            "quote": "September 28, 2025 December 29, 2024"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Cash and cash equivalents (Note 4) $18,231 24,105\nMarketable securities 331 417"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Total current assets 54,611 55,893"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Loans and notes payable $6,387 5,983"
+          },
+          {
+            "evidenceId": "E1",
+            "quote": "Total current liabilities 50,869 50,321\nLong-term debt (Note 4) 39,408 30,651"
+          }
+        ],
+        "additionalNumericChecks": [
+          "CA -1282 / -2.29%; CL +548 / 1.09%; current-ratio change-3.35% uses unrounded ratios; displayed difference-0.04: correct.",
+          "Short debt+404 / 6.75%; long debt+8757 / 28.57%; total debt+9161 / 25.01%: correct.",
+          "Cash-5874 / -24.37%; securities-86 / -20.62%; cash-like18562/24522, -5960 / -24.30%; net debt+15121 / 124.84%: correct.",
+          "Excess current assets3742/5572 and cash-like-to-short-debt2.91/4.10: correct."
+        ],
+        "issues": [],
+        "notes": [
+          "No incorrect single-quarter label for change since year-end. No claim that net-debt percentage proves cash consumed faster than borrowing grew.",
+          "No unsupported active duration-management strategy, AAA rating or rebates-as-litigation-liabilities explanation; borrowing uses/maturities remain explicit unknowns.",
+          "Full actual answer independently read; automatic evaluator judgments not inspected."
+        ],
+        "attribution": "NONE"
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/budget32768-timeout300/raw-repair-b32768-jnj-liquidity/repair-b32768-jnj-liquidity-1-1.response.json",
+      "responseSha256": "2d7360bf972b34d1b08757a4197fece9b86a18b648125c089a760da624f195fc",
+      "caseSha256": "5f9edbf546f66585d3968dcdeff964fa687210d2d6e96a2e3307ff5260d38150",
+      "executionStatus": "COMPLETED",
+      "runtimeAnalystStatus": "COMPLETED",
+      "runtimeTaskOutcome": "COMPLETED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://s203.q4cdn.com/636242992/files/doc_financials/2025/q3/3Q-10Q-09-28-25-5.pdf",
+          "visibleSha256": "47d9accc74e33b5340819da93d3a3d9c300f10c1b711c57693dd932a7bb2be91"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-10-02T10:32:31.477236+00:00",
+  "summary": {
+    "caseCount": 6,
+    "executionCompletedCases": 6,
+    "perStageRequiredNumericFacts": {
+      "analysis": {
+        "correct": 39,
+        "total": 39,
+        "allRequiredFactsCorrectCases": 6,
+        "caseCount": 6
+      },
+      "finalAnswer": {
+        "correct": 39,
+        "total": 39,
+        "allRequiredFactsCorrectCases": 6,
+        "caseCount": 6
+      }
+    },
+    "perStageFullSemanticCases": {
+      "analysis": {
+        "PASS": 6,
+        "FAIL": 0,
+        "NO_DATA": 0
+      },
+      "finalAnswer": {
+        "PASS": 6,
+        "FAIL": 0,
+        "NO_DATA": 0
+      }
+    },
+    "runtimeStatusCounts": {
+      "runtimeAnalystStatus": {
+        "COMPLETED": 2,
+        "TRUNCATED": 4
+      },
+      "runtimeTaskOutcome": {
+        "COMPLETED": 2,
+        "DEGRADED": 4
+      }
+    },
+    "primaryEvaluatorAgreement": "NOT_ASSESSED: automatic judgments not read",
+    "boundary": "AI source-only independent review, not human sign-off. Six selected diagnostic cases are not population/model accuracy or causal proof of thinking-budget effect; thinking budget and timeout differ from the lower-budget groups."
+  },
+  "controlGateReview": {
+    "path": "evals/evolution/batch-repair-20261002/budget32768-timeout300/secondary-controls-review.json",
+    "sha256": "c7a79adb577471a1dabbe23d1a63f8b44f3d179ea758dfe24a8624e17473fde5"
+  }
+}

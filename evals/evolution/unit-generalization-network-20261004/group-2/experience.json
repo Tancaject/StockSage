@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 2,
+  "kind": "RESEARCH_EXPERIENCE",
+  "status": "PROPOSED",
+  "reviewStatus": "UNREVIEWED",
+  "validationStatus": "NOT_RUN",
+  "triggerTags": [
+    "unit-conversion-billion-to-million",
+    "derived-ratio-percentage-rounding"
+  ],
+  "requiredEvidence": [
+    "source-footnote-unit",
+    "source-table-unit"
+  ],
+  "requiredCapabilities": [
+    "unit-comparison",
+    "arithmetic"
+  ],
+  "method": "当源文件以billion为单位披露金额而输出需以百万或中文亿为单位时，先写出换算等式（符号金额×倍率＝目标单位数值），确认等式两侧数值一致后再引用；禁止在中文表述中将billion误写为亿。计算派生比率时，先完成除法得到完整小数，再按题目要求的精度四舍五入，不得在中间步骤提前截断。",
+  "applicabilityBoundary": "源文件金额单位与输出单位不同，或需从除法结果推导百分比表示时适用。",
+  "counterexamples": [
+    "源文件与输出单位相同无需换算",
+    "题目未要求特定小数位数"
+  ],
+  "forbiddenInferences": [
+    "不得将billion直接等同于亿",
+    "不得在除法结果上叠加未说明的中间舍入"
+  ],
+  "version": 1,
+  "role": "FUNDAMENTALS",
+  "taskType": "ORDINARY_FUNDAMENTALS",
+  "sourceRunIds": [
+    "development-07-1-1"
+  ],
+  "sources": [
+    {
+      "caseId": "ibm-fy2025q3-oneoff-cash-comparability",
+      "split": "DEVELOPMENT",
+      "origin": "PUBLIC_AUTHORIZED",
+      "issuerId": "IBM",
+      "issuerName": "IBM",
+      "traceSha256": "8c9dbc6e876b22dfa38001db68e52384908750d1d3d058d050f7d7f0b0df60ad",
+      "externalFeedbackSha256": "dae5f764ba949879e29a46f82f489e75aa4ff8db2de20ba6d3bfcd2aaad8354a",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR"
+    }
+  ],
+  "parentExperienceHashes": [],
+  "methodSha256": "1f58413f8286f8ca1cc9cab6b7fbfa40fcc19becd9e2dd28abfb416ca408679d",
+  "experienceId": "exp-9d07d57b5ae81e1ab10723bd",
+  "recordSha256": "9d07d57b5ae81e1ab10723bd92e7be8a7f090fa87fe14af19541c599ded43b6c"
+}

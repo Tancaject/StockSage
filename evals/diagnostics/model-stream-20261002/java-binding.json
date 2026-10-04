@@ -1,0 +1,73 @@
+{
+  "schema": "provider_stream_java_binding_v1",
+  "build": {
+    "schema": "fundamentals_evolution_build_v1",
+    "gitSha": "1abd3c197ee8543a3ab5c3f796d3beb656b70f4c",
+    "sourceState": "WORKTREE_SNAPSHOT",
+    "sourceTreeSha256": "fc75c538f2f971928555cd12a913893c4c8720810af9809bd2a5b82eb284a7f2",
+    "artifactSha256": "8e841c402234fd62dd64e113b6b8dce93885552f155892cdf5659f89b535fa51",
+    "artifactFormat": "SPRING_BOOT_JAR",
+    "builtAt": "2026-10-02T14:36:21.886569+00:00"
+  },
+  "driverSource": {
+    "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\EvolutionLiveBaselineTest.java",
+    "sha256": "dcc6e660141aa2f7f1d325e62291b6a4a9db4d8c4ca2a90243dc561c63de8b68"
+  },
+  "driverClasses": [
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$1.class",
+      "sha256": "2f287337b290b1f7c41b1e65a3206b35979844fb41a9c2dcc24d724e24309ee5"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$DiagnosisFile.class",
+      "sha256": "96c58aad7e94217dbdde210afda92b1a4f6f47b3e0fb4498c387870f77c748e7"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$DiagnosisRun.class",
+      "sha256": "4484d693ab535452d6a28d1da6032bb7f1bcb7cfb0622eac8186e4e0a77276b0"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$HttpTransportConfiguration.class",
+      "sha256": "e552d6707ce5e2efbb5b38614fa31e7a4b2c3da9de5a1b02fcffed380afea3ed"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest.class",
+      "sha256": "8944862a1dafbf341849d20923ba595087299aab1b677b3c1903c8149c9c6a2e"
+    }
+  ],
+  "dependencies": [
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\junit\\jupiter\\junit-jupiter-api\\5.11.4\\junit-jupiter-api-5.11.4.jar",
+      "sha256": "ab83ef9e51ac4597d59d26b4b58812129550e2f579a404c8af7d09f5ce5b4293"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\opentest4j\\opentest4j\\1.3.0\\opentest4j-1.3.0.jar",
+      "sha256": "48e2df636cab6563ced64dcdff8abb2355627cb236ef0bf37598682ddf742f1b"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\junit\\platform\\junit-platform-commons\\1.11.4\\junit-platform-commons-1.11.4.jar",
+      "sha256": "9edd969b0d0670c54105bc91ae79bd1c6f503e12115faba82073b84c86bbc334"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\apiguardian\\apiguardian-api\\1.1.2\\apiguardian-api-1.1.2.jar",
+      "sha256": "b509448ac506d607319f182537f0b35d71007582ec741832a1f111e5b5b70b38"
+    }
+  ],
+  "inputHashes": {
+    "java-plan.json": "eb255354a665057d1487c0fc038a18144c04fc2c590a8a9ddf5e1bd046238690",
+    "java-execution.json": "b83f61550c27746fc3514fb7c61aeb4b1ad60406bf3a17e435c41b188195897c",
+    "java-diagnosis.json": "cc2eca156b8f5a1f5f59038fdee41ef02d7e70a3621530664c88a55fa8c25617"
+  },
+  "arguments": [
+    "java",
+    "-Dloader.main=com.stocksage.evolution.EvolutionLiveBaselineTest",
+    "-Dloader.path=D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes,C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\junit\\jupiter\\junit-jupiter-api\\5.11.4\\junit-jupiter-api-5.11.4.jar,C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\opentest4j\\opentest4j\\1.3.0\\opentest4j-1.3.0.jar,C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\junit\\platform\\junit-platform-commons\\1.11.4\\junit-platform-commons-1.11.4.jar,C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\apiguardian\\apiguardian-api\\1.1.2\\apiguardian-api-1.1.2.jar",
+    "-Devolution.live.execution=D:\\programming\\StockSage\\evals\\diagnostics\\model-stream-20261002\\java-execution.json",
+    "-Devolution.live.output=D:\\programming\\StockSage\\evals\\diagnostics\\model-stream-20261002\\java-final-02",
+    "-Devolution.live.diagnosis-file=D:\\programming\\StockSage\\evals\\diagnostics\\model-stream-20261002\\java-diagnosis.json",
+    "-Dstocksage.evolution.eval.build-manifest=D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-build-model-stream-diagnostic-20261002\\build.json",
+    "-cp",
+    "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-build-model-stream-diagnostic-20261002\\stocksage-backend.jar",
+    "org.springframework.boot.loader.launch.PropertiesLauncher"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "remaining_timeouts_binding_verification_v1",
+  "status": "PASS",
+  "verifiedAt": "2026-10-03T03:21:09.365375+00:00",
+  "frozenInputs": 3,
+  "oldRootCauseArtifactsUnchanged": 24,
+  "originalFrozenInputsUnchanged": 28,
+  "requestAndResponseBindings": "PASS",
+  "powerStateRestorations": 2,
+  "productionSourceSnapshots": {
+    "stocksage-backend/src/main/java/com/stocksage/agent/FundamentalsAgent.java": "24e231e50eb021c3c9446abb54eb62afab79fafd7c77a3369c9e36892bb9e0af",
+    "stocksage-backend/src/main/java/com/stocksage/evolution/EvolutionReplayService.java": "4703490e9ddfc6e1129c51c5756a47f58f4a5b5f3d52bc7a17f87082071831a6",
+    "stocksage-backend/src/main/java/com/stocksage/service/ToolPrefetchService.java": "1be47e7387363c42f5e487e57873e2e2ed9e3be89159125bc2b9f91dd3eda7af",
+    "stocksage-backend/src/main/java/com/stocksage/evolution/FundamentalsMethodRegistry.java": "915c19ab428eb875a045401c2152087b5d452ac7ab153130fc5edc16c7ff5cca",
+    "evals/evolution_batch.py": "e8d9f7c359486f0243a4643c3fafe05143712f548ebebd3d460737fa53b86533"
+  },
+  "businessTests": "NOT_RERUN_DIAGNOSTIC_ONLY",
+  "localLinksChecked": 28,
+  "localLinkCheck": "PASS",
+  "credentialPatternCheck": "PASS",
+  "scopedDiffCheck": "PASS",
+  "finalArtifactAndSourceBindings": "PASS"
+}

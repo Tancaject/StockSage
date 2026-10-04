@@ -1,0 +1,1157 @@
+{
+  "schema": "batch_secondary_answer_review_v1",
+  "reviewType": "AI_INDEPENDENT_TEXT_REVIEW_NOT_HUMAN",
+  "humanReviewStatus": "AI_ONLY",
+  "reviewer": "batch_dataset_design",
+  "scope": "All six real repair runs, two stages each; four formerly timed-out cases and two successful baseline controls",
+  "standard": "Frozen batch-learning-20261002 gold plus source-review; exact source-backed facts, required points and additional material claims; no automatic judgments inspected",
+  "goldFile": "evals/evolution/batch-learning-20261002/gold.jsonl",
+  "goldFileSha256": "1b31f7cf00852cb0a4696385faac1954b344a0d50563cd5033ef71b5c106cbc1",
+  "status": "COMPLETED",
+  "reviewedStages": 12,
+  "cases": [
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "executionPath": "evals/evolution/batch-repair-20261002/repair-ibm-cash.execution.json",
+      "executionSha256": "c6a1d64c60f3fbbc25c45ea3e9b2334ea33e54aa3e2e42ca6c0e5fa364b1f30d",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/raw-repair-ibm-cash/repair-ibm-cash-1-1.response.json",
+      "goldLineSha256": "fd2fff1c050b0f4509ca9c6a99b00413c07716f3e03d1b5e55808d7f830407be",
+      "analysis": {
+        "status": "FAIL",
+        "answerSha256": "ad5cbf6c66b39ecc95fc8668a8dee5b1c03792ef290c045b6760872b20d0e734",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "FAIL",
+          "claim_support": "FAIL"
+        },
+        "requiredFactChecks": {
+          "ocf2025": "PASS: 9153 USD million",
+          "netIncome2025": "PASS: 4993 USD million",
+          "ocf2024": "PASS: 9115 USD million",
+          "netIncome2024": "PASS: 3109 USD million",
+          "gap2025": "PASS: 9153 - 4993 = 4160",
+          "gap2024": "PASS: 9115 - 3109 = 6006",
+          "conversion2025": "PASS: 1.83, expected 1.8332",
+          "conversion2024": "FAIL: states 1.93; 9115 / 3109 = 2.93181087, expected 2.93"
+        },
+        "requiredPointChecks": {
+          "p1": "FAIL: same nine-month amounts correct, but mandatory 2024 ratio wrong",
+          "p2": "FAIL: OCF correctly described as stable, but ratio comparison 1.93 to 1.83 should be 2.93 to 1.83",
+          "p3": "PASS: main listed adjustment amounts and directions match evidence",
+          "p4": "PASS on required pension-base caveat: 2024 pension charge 2725 noted and added back; additional normalization claims assessed separately"
+        },
+        "additionalNumericChecks": [
+          "NI increase 1884 / 3109 = 60.60%; OCF increase 38 / 9115 = 0.42%; OCF minus NI gap change -1846: correct.",
+          "D&A +170; stock compensation +319 and +33.02%; operating assets/liabilities cash drag decreases 1308; financing receivables contribution decreases 919, approximately half: correct.",
+          "Reported 2024 bridge sum differs from raw rounded components by 1 USD million; frozen source-rounding allowance applies, so not a separate failure.",
+          "Mechanical 3109 + 2725 = 5834 and 9115 / 5834 = 1.56 are arithmetically true but omit the disclosed related tax benefit and do not establish comparable normalized performance."
+        ],
+        "issues": [
+          {
+            "id": "IBM_RATIO_2024",
+            "category": "METHOD_ARITHMETIC",
+            "dimension": "numeric_period_correctness",
+            "severity": "MATERIAL",
+            "answerQuote": "| **OCF / NI 比率** | **1.83** | **1.93** | −0.10 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ],
+            "correctCalculation": "9115 / 3109 = 2.9318108717 -> 2.93; 9153/4993 - 9115/3109 = -1.0986444387 -> -1.10, not -0.10",
+            "reason": "Both operands are correctly copied in the answer, but division result is wrong by about 1.00; direct arithmetic failure, not missing retrieval or source ambiguity.",
+            "attribution": "ANALYSIS_METHOD_ERROR"
+          },
+          {
+            "id": "IBM_AR_CAUSE_UNSUPPORTED",
+            "category": "UNSUPPORTED_CAUSAL_CLAIM",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "2025年IBM Financing A/R仅贡献$905M现金流入，较2024年的$1,824M下降约50%，反映融资业务应收款回收节奏放缓或新增放款增加。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "IBM Financing A/R |  | 298 |  | 873 |  | 905 |  | 1,824"
+              }
+            ],
+            "reason": "The evidence discloses a net financing-receivables cash-flow contribution, not originations, collection timing or customer delays. The categorical causal explanation is not established by this aggregate row, even though later passages list uncertainties.",
+            "attribution": "ANALYSIS_UNSUPPORTED_INFERENCE"
+          }
+        ],
+        "notes": [
+          "No automatic evaluator result inspected.",
+          "Tax footnote separately reports about 0.7 billion pension-related benefit in 2024 and 0.3 billion noncash tax expense in 2025. A claim that normalized conversion definitely improved requires a stated consistent after-tax normalization, not adding only the pension charge."
+        ],
+        "attribution": "ANALYSIS_METHOD_AND_SUPPORT_ERROR"
+      },
+      "finalAnswer": {
+        "status": "FAIL",
+        "answerSha256": "47ad4e19608f536b040914b12c06acf055bf8b4fe48db3a93983598c6fa73784",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "FAIL",
+          "claim_support": "FAIL"
+        },
+        "requiredFactChecks": {
+          "ocf2025": "PASS: 9153 USD million",
+          "netIncome2025": "PASS: 4993 USD million",
+          "ocf2024": "PASS: 9115 USD million",
+          "netIncome2024": "PASS: 3109 USD million",
+          "gap2025": "PASS: 9153 - 4993 = 4160",
+          "gap2024": "PASS: 9115 - 3109 = 6006",
+          "conversion2025": "PASS: 1.83, expected 1.8332",
+          "conversion2024": "FAIL: states 1.93; 9115 / 3109 = 2.93181087, expected 2.93"
+        },
+        "requiredPointChecks": {
+          "p1": "FAIL: same nine-month amounts correct, but mandatory 2024 ratio wrong",
+          "p2": "FAIL: OCF correctly described as stable, but ratio comparison 1.93 to 1.83 should be 2.93 to 1.83",
+          "p3": "PASS: main listed adjustment amounts and directions match evidence",
+          "p4": "PASS on required pension-base caveat: 2024 pension charge 2725 noted and added back; additional normalization claims assessed separately"
+        },
+        "additionalNumericChecks": [
+          "NI increase 1884 / 3109 = 60.60%; OCF increase 38 / 9115 = 0.42%; OCF minus NI gap change -1846: correct.",
+          "D&A +170; stock compensation +319 and +33.02%; operating assets/liabilities cash drag decreases 1308; financing receivables contribution decreases 919, approximately half: correct.",
+          "Reported 2024 bridge sum differs from raw rounded components by 1 USD million; frozen source-rounding allowance applies, so not a separate failure.",
+          "Mechanical 3109 + 2725 = 5834 and 9115 / 5834 = 1.56 are arithmetically true but omit the disclosed related tax benefit and do not establish comparable normalized performance."
+        ],
+        "issues": [
+          {
+            "id": "IBM_RATIO_2024",
+            "category": "METHOD_ARITHMETIC",
+            "dimension": "numeric_period_correctness",
+            "severity": "MATERIAL",
+            "answerQuote": "| **OCF / NI 比率** | **1.83** | **1.93** | −0.10 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ],
+            "correctCalculation": "9115 / 3109 = 2.9318108717 -> 2.93; 9153/4993 - 9115/3109 = -1.0986444387 -> -1.10, not -0.10",
+            "reason": "Both operands are correctly copied in the answer, but division result is wrong by about 1.00; direct arithmetic failure, not missing retrieval or source ambiguity.",
+            "attribution": "ANALYSIS_ERROR_PROPAGATED"
+          },
+          {
+            "id": "IBM_AR_CAUSE_UNSUPPORTED",
+            "category": "UNSUPPORTED_CAUSAL_CLAIM",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "2. **融资应收款释放减半（−$919M）**：反映IBM Financing业务应收款回收节奏放缓或新增放款增加。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "IBM Financing A/R |  | 298 |  | 873 |  | 905 |  | 1,824"
+              }
+            ],
+            "reason": "The evidence discloses a net financing-receivables cash-flow contribution, not originations, collection timing or customer delays. The categorical causal explanation is not established by this aggregate row, even though later passages list uncertainties.",
+            "attribution": "ANALYSIS_ERROR_PROPAGATED"
+          }
+        ],
+        "notes": [
+          "No automatic evaluator result inspected.",
+          "Tax footnote separately reports about 0.7 billion pension-related benefit in 2024 and 0.3 billion noncash tax expense in 2025. A claim that normalized conversion definitely improved requires a stated consistent after-tax normalization, not adding only the pension charge."
+        ],
+        "attribution": "ANALYSIS_ERROR_PROPAGATED"
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/raw-repair-ibm-cash/repair-ibm-cash-1-1.response.json",
+      "responseSha256": "4b02031f907cae9bbc6bf725f85be593d15f2e45b9dc38b74ec444af9a7cf8dd",
+      "caseSha256": "a8842c055593dd4c782c6eb433fd3ea45d0ad111222e0df6c3284f31b409f2c1",
+      "executionStatus": "COMPLETED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "visibleSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        }
+      ]
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "executionPath": "evals/evolution/batch-repair-20261002/repair-ibm-liquidity.execution.json",
+      "executionSha256": "28ba7591039c782600fe36675a9ecba839b7c1a1be00d2a63f0562a6ea387b9c",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/raw-repair-ibm-liquidity/repair-ibm-liquidity-1-1.response.json",
+      "goldLineSha256": "5aec2187b0df31ae1ef95de1ba357c177daa353cb7f7915df4803e9cdfd8b3ce",
+      "analysis": {
+        "status": "FAIL",
+        "answerSha256": "a232efd38758c4d48a014605e21fa2075c645927a4a3772861c776ba2e48e536",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "FAIL"
+        },
+        "requiredFactChecks": {
+          "currentRatio2025": "PASS: 32740 / 35142 = 0.9316 -> 0.93",
+          "currentRatio2024": "PASS: 34482 / 33142 = 1.0404 -> 1.04",
+          "debt2025": "PASS: 7942 + 55174 = 63116 USD million",
+          "debt2024": "PASS: 5089 + 49884 = 54973 USD million",
+          "netDebt2025": "PASS: 63116 - 11569 - 3286 = 48261 USD million",
+          "netDebt2024": "PASS: 54973 - 13947 - 644 = 40382 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: correct two balance dates and ratios",
+          "p2": "PASS: short plus long debt, excluding lease liabilities",
+          "p3": "PASS: subtracts cash plus securities, no restricted cash deduction",
+          "p4": "PARTIAL: direction of weaker ratios/higher net debt correct; confidence about risk is supported in part by invented historical evidence"
+        },
+        "additionalNumericChecks": [
+          "CA -5.05%, CL +6.03%, short debt +56.06%, long debt +10.60%, total debt +14.81%, cash -17.05%, securities +410.25%, cash/securities sum +1.81%, net debt +19.51%: all calculate correctly.",
+          "Short debt +2853; long debt +5290; total +8143; approximate shares 35%/65% correct.",
+          "Trade receivables -1272 and financing receivables held for investment -1103, combined -2375; cash -2378; securities +2642: correct.",
+          "Goodwill 67396 - 60706 = 6690; restricted cash 30: disclosed.",
+          "Cash plus securities 14855 / short debt 7942 = 1.87043566 -> 1.87 times, approximately 187%: correct. Historical range 0.9–1.1 is not verifiable from the supplied two-date source."
+        ],
+        "issues": [
+          {
+            "id": "IBM_HISTORICAL_LIQUIDITY_UNSUPPORTED",
+            "category": "UNSUPPORTED_HISTORICAL_FACT",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "- IBM 历史上经营现金流稳定，流动比率长期在 0.9–1.1 区间波动，并非首次低于 1。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | At September 30, 2025 |  | At December 31, 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Total Current Assets |  | 32,740 |  | 34,482"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Total Current Liabilities |  | 35,142 |  | 33,142"
+              }
+            ],
+            "reason": "Only two balance-sheet dates are supplied. They establish 0.93 and 1.04, not a historical 0.9–1.1 range or stable historical OCF. The answer promotes unsupported historical facts into a material liquidity-risk mitigant. This review identifies lack of supplied evidence, not a separately verified false real-world historical claim.",
+            "attribution": "ANALYSIS_UNSUPPORTED_FACT"
+          }
+        ],
+        "notes": [
+          "Acquisition financing is explicitly labeled inference and transaction confirmation missing, so not treated as a categorical source fact.",
+          "No automatic evaluator judgment inspected."
+        ],
+        "attribution": "ANALYSIS_UNSUPPORTED_FACT"
+      },
+      "finalAnswer": {
+        "status": "FAIL",
+        "answerSha256": "4f91aa6f5882adbada797990dcc353011506ed0aaf6ad4671761f1ea45812e4f",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "FAIL"
+        },
+        "requiredFactChecks": {
+          "currentRatio2025": "PASS: 32740 / 35142 = 0.9316 -> 0.93",
+          "currentRatio2024": "PASS: 34482 / 33142 = 1.0404 -> 1.04",
+          "debt2025": "PASS: 7942 + 55174 = 63116 USD million",
+          "debt2024": "PASS: 5089 + 49884 = 54973 USD million",
+          "netDebt2025": "PASS: 63116 - 11569 - 3286 = 48261 USD million",
+          "netDebt2024": "PASS: 54973 - 13947 - 644 = 40382 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: correct two balance dates and ratios",
+          "p2": "PASS: short plus long debt, excluding lease liabilities",
+          "p3": "PASS: subtracts cash plus securities, no restricted cash deduction",
+          "p4": "PARTIAL: direction of weaker ratios/higher net debt correct; confidence about risk is supported in part by invented historical evidence"
+        },
+        "additionalNumericChecks": [
+          "CA -5.05%, CL +6.03%, short debt +56.06%, long debt +10.60%, total debt +14.81%, cash -17.05%, securities +410.25%, cash/securities sum +1.81%, net debt +19.51%: all calculate correctly.",
+          "Short debt +2853; long debt +5290; total +8143; approximate shares 35%/65% correct.",
+          "Trade receivables -1272 and financing receivables held for investment -1103, combined -2375; cash -2378; securities +2642: correct.",
+          "Goodwill 67396 - 60706 = 6690; restricted cash 30: disclosed.",
+          "Cash plus securities 14855 / short debt 7942 = 1.87043566 -> 1.87 times, approximately 187%: correct. Historical range 0.9–1.1 is not verifiable from the supplied two-date source."
+        ],
+        "issues": [
+          {
+            "id": "IBM_HISTORICAL_LIQUIDITY_UNSUPPORTED",
+            "category": "UNSUPPORTED_HISTORICAL_FACT",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "IBM 2025年9月末流动比率降至 0.93（跌破 1.0），净债务较年初扩张近 20%，短期偿债对经营现金流的依赖度有所提高；但考虑到公司现金及有价证券仍可覆盖短期债务约 1.87 倍，且 IBM 历史上流动比率长期在 0.9–1.1 区间波动，当前尚不构成流动性危机信号，需持续跟踪经营现金流表现。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | At September 30, 2025 |  | At December 31, 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Total Current Assets |  | 32,740 |  | 34,482"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Total Current Liabilities |  | 35,142 |  | 33,142"
+              }
+            ],
+            "reason": "Only two balance-sheet dates are supplied. They establish 0.93 and 1.04, not a historical 0.9–1.1 range or stable historical OCF. The answer promotes unsupported historical facts into a material liquidity-risk mitigant. This review identifies lack of supplied evidence, not a separately verified false real-world historical claim.",
+            "attribution": "ANALYSIS_ERROR_PROPAGATED_TO_HEADLINE"
+          }
+        ],
+        "notes": [
+          "Acquisition financing is explicitly labeled inference and transaction confirmation missing, so not treated as a categorical source fact.",
+          "No automatic evaluator judgment inspected."
+        ],
+        "attribution": "ANALYSIS_UNSUPPORTED_FACT_PROPAGATED"
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/raw-repair-ibm-liquidity/repair-ibm-liquidity-1-1.response.json",
+      "responseSha256": "0a502dfa83dcdbcee15595d9d11ac0e1c6c2372c4dcfd2b662a0ba1b83f9fc5d",
+      "caseSha256": "1e97ad1589482aafb24c70f331928613db86082ee3ea493a0ecf3a867316aea7",
+      "executionStatus": "COMPLETED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "visibleSha256": "dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f"
+        }
+      ]
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "executionPath": "evals/evolution/batch-repair-20261002/repair-jnj-cash.execution.json",
+      "executionSha256": "4dc069df33e01129441caa4a95c3718321e93f9afceba8ce53ebe4e37552fff1",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/raw-repair-jnj-cash/repair-jnj-cash-1-1.response.json",
+      "goldLineSha256": "1a68715d42bb84ae6d09d7a55cf3e05f2c57cb2beae6d36349757c007429b844",
+      "analysis": {
+        "status": "FAIL",
+        "answerSha256": "3130c16b8e8042b7851bd2c755f8e0619c0f9d135405ecb416de89d7c10e926f",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "FAIL"
+        },
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "PASS: 17221 USD million, fiscal nine months ending 2025-09-28",
+          "ytdConsolidatedNetIncome": "PASS: 21688 USD million, same cash-flow starting line",
+          "priorOperatingCashFlow": "PASS: 17283 USD million, comparable fiscal nine months ending 2024-09-29",
+          "priorConsolidatedNetIncome": "PASS: 10635 USD million",
+          "ytdCashIncomeGap": "PASS: 17221 - 21688 = -4467",
+          "priorCashIncomeGap": "PASS: 17283 - 10635 = 6648",
+          "ytdCashConversion": "PASS: 0.79, expected 0.7940",
+          "priorCashConversion": "PASS: 1.63, expected 1.6251"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: periods and raw OCF / consolidated net earnings match",
+          "p2": "PASS: mandatory gaps and ratios correct",
+          "p3": "FAIL: operating-account cash-use directions correct, but selected noncash explanation reverses deferred-tax expense effect on net income",
+          "p4": "FAIL in material causal reasoning: OCF described as nearly flat correctly, but unsupported profit-inflation cause and certainty about core cash-generation quality go beyond the evidence"
+        },
+        "additionalNumericChecks": [
+          "NI delta 11053 and +103.93%; OCF delta -62 and -0.36%; gap delta -11115: correct.",
+          "0.79 - 1.63 = -0.84 from rounded displayed ratios; exact delta -0.83107222 differs by less than frozen 0.01 tolerance, so no numeric failure assigned.",
+          "Deferred-tax adjustment swing: 5215 - (-2167) = 7382; other-assets change -7653 - 949 = -8602; other-liabilities -6196 - (-326) = -5870: correct.",
+          "Other-assets/liabilities combined -13849 versus +623, delta -14472: correct in M units.",
+          "Noncash current 5492+1045+123+109-131+5215-6 = 11847; prior 5443+938+379+1252-225-2167-11 = 5609; delta 6238: correct.",
+          "Operating accounts current -2172-1404+1111-7653-6196 = -16314; prior -1259-1038+2713+949-326 = 1039; delta -17353. Bridge 11053+6238-17353 = -62: correct."
+        ],
+        "issues": [
+          {
+            "id": "JNJ_DEFERRED_TAX_DIRECTION",
+            "category": "METHOD_ACCOUNTING_DIRECTION",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "- **对转化率的影响：** 递延税项增加抬高了净利润但不带来对等现金流入，是净利润\"虚胖\"于现金流的结构性原因之一。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Net earnings $21,688 10,635\nAdjustments to reconcile net earnings to cash flows from operating activities:"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Deferred tax provision 5,215 (2,167)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              }
+            ],
+            "reason": "The +5215 deferred-tax provision is an expense/noncash adjustment added back in reconciling net income to operating cash flow. It does not inflate net income; a positive expense lowers income relative to the no-expense case. The answer reverses this accounting direction and incorrectly uses it to explain profit growth/“虚胖”, despite adding it correctly in the numerical bridge.",
+            "correctInterpretation": "Describe +5215 as a positive noncash reconciliation adjustment supporting OCF relative to NI; prior -2167 was a negative adjustment. Do not infer the source of NI growth from the positive addback.",
+            "attribution": "ANALYSIS_METHOD_ERROR"
+          }
+        ],
+        "observations": [
+          {
+            "category": "UNSUPPORTED_CONCLUSION_STRENGTH",
+            "severity": "MATERIAL_SUPPORT_CONCERN",
+            "answerQuote": "4. **经营现金流绝对水平仍稳健。** $17,221M 的九个月经营现金流在绝对金额上与上年持平，表明公司核心业务的现金生成能力并未实质性下滑；问题在于利润端的增长质量。",
+            "reason": "Nearly flat total OCF is observed. It does not isolate core recurring cash-generation ability from large tax and other balance movements; statement should be bounded to the observed total. Main FAIL already established by explicit tax-direction reversal."
+          }
+        ],
+        "notes": [
+          "No automatic evaluator result inspected.",
+          "The analysis typo “$14,5 亿（即 $14,472M）” is not used to establish the failure; exact M amounts and the bridge are unambiguous.",
+          "A reported numerical bridge can be fully correct while the accounting explanation of its signs is materially wrong."
+        ],
+        "attribution": "ANALYSIS_ACCOUNTING_DIRECTION_ERROR"
+      },
+      "finalAnswer": {
+        "status": "FAIL",
+        "answerSha256": "1ae567fd7f924fd44e9fdabc9f5a2291cfe5766a26d75ec17b1f8d37459031b8",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "FAIL"
+        },
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "PASS: 17221 USD million, fiscal nine months ending 2025-09-28",
+          "ytdConsolidatedNetIncome": "PASS: 21688 USD million, same cash-flow starting line",
+          "priorOperatingCashFlow": "PASS: 17283 USD million, comparable fiscal nine months ending 2024-09-29",
+          "priorConsolidatedNetIncome": "PASS: 10635 USD million",
+          "ytdCashIncomeGap": "PASS: 17221 - 21688 = -4467",
+          "priorCashIncomeGap": "PASS: 17283 - 10635 = 6648",
+          "ytdCashConversion": "PASS: 0.79, expected 0.7940",
+          "priorCashConversion": "PASS: 1.63, expected 1.6251"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: periods and raw OCF / consolidated net earnings match",
+          "p2": "PASS: mandatory gaps and ratios correct",
+          "p3": "FAIL: operating-account cash-use directions correct, but selected noncash explanation reverses deferred-tax expense effect on net income",
+          "p4": "FAIL in material causal reasoning: OCF described as nearly flat correctly, but unsupported profit-inflation cause and certainty about core cash-generation quality go beyond the evidence"
+        },
+        "additionalNumericChecks": [
+          "NI delta 11053 and +103.93%; OCF delta -62 and -0.36%; gap delta -11115: correct.",
+          "0.79 - 1.63 = -0.84 from rounded displayed ratios; exact delta -0.83107222 differs by less than frozen 0.01 tolerance, so no numeric failure assigned.",
+          "Deferred-tax adjustment swing: 5215 - (-2167) = 7382; other-assets change -7653 - 949 = -8602; other-liabilities -6196 - (-326) = -5870: correct.",
+          "Other-assets/liabilities combined -13849 versus +623, delta -14472: correct in M units.",
+          "Noncash current 5492+1045+123+109-131+5215-6 = 11847; prior 5443+938+379+1252-225-2167-11 = 5609; delta 6238: correct.",
+          "Operating accounts current -2172-1404+1111-7653-6196 = -16314; prior -1259-1038+2713+949-326 = 1039; delta -17353. Bridge 11053+6238-17353 = -62: correct."
+        ],
+        "issues": [
+          {
+            "id": "JNJ_DEFERRED_TAX_DIRECTION",
+            "category": "METHOD_ACCOUNTING_DIRECTION",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "**说明什么：** 递延税项为正，意味着利润表确认的所得税费用大于当期实际现金税负，差额计入递延税负债。该项从上年负值大幅翻转为正值，贡献了净利润增长中相当比例，但不产生对等现金流入——是净利润\"虚胖\"于现金流的结构性原因之一。[E1]",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Net earnings $21,688 10,635\nAdjustments to reconcile net earnings to cash flows from operating activities:"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Deferred tax provision 5,215 (2,167)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              }
+            ],
+            "reason": "The +5215 deferred-tax provision is an expense/noncash adjustment added back in reconciling net income to operating cash flow. It does not inflate net income; a positive expense lowers income relative to the no-expense case. The answer reverses this accounting direction and incorrectly uses it to explain profit growth/“虚胖”, despite adding it correctly in the numerical bridge.",
+            "correctInterpretation": "Describe +5215 as a positive noncash reconciliation adjustment supporting OCF relative to NI; prior -2167 was a negative adjustment. Do not infer the source of NI growth from the positive addback.",
+            "attribution": "ANALYSIS_ERROR_PROPAGATED"
+          }
+        ],
+        "observations": [
+          {
+            "category": "UNSUPPORTED_CONCLUSION_STRENGTH",
+            "severity": "MATERIAL_SUPPORT_CONCERN",
+            "answerQuote": "1. **现金转化率显著恶化，但核心现金生成能力未实质下滑。** $17,221M 的九个月经营现金流绝对值与上年持平，说明业务本身的\"造血\"能力稳定；问题出在利润端增长的质量。",
+            "reason": "Nearly flat total OCF is observed. It does not isolate core recurring cash-generation ability from large tax and other balance movements; statement should be bounded to the observed total. Main FAIL already established by explicit tax-direction reversal."
+          }
+        ],
+        "notes": [
+          "No automatic evaluator result inspected.",
+          "The analysis typo “$14,5 亿（即 $14,472M）” is not used to establish the failure; exact M amounts and the bridge are unambiguous.",
+          "A reported numerical bridge can be fully correct while the accounting explanation of its signs is materially wrong."
+        ],
+        "attribution": "ANALYSIS_ERROR_PROPAGATED"
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/raw-repair-jnj-cash/repair-jnj-cash-1-1.response.json",
+      "responseSha256": "9318b1ac2b43a14a785bc0e091aea9a4ef0a1e1c3b36c064ed79378d615c0dd9",
+      "caseSha256": "318ad29a6acdc428282ea620b95961c697cf6463f7a99b2f28fa82bd55734087",
+      "executionStatus": "COMPLETED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://s203.q4cdn.com/636242992/files/doc_financials/2025/q3/3Q-10Q-09-28-25-5.pdf",
+          "visibleSha256": "443b95abac4f379c3a26a88d7f5c29e1580980d5a6f9b561942a3f97b791535d"
+        }
+      ]
+    },
+    {
+      "caseId": "jnj-fy2025q3-liquidity",
+      "executionPath": "evals/evolution/batch-repair-20261002/repair-jnj-liquidity.execution.json",
+      "executionSha256": "5a01a29922bd1498191eeda460d38902f48f71b0f4b3cae4765d41a04e2094ef",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/raw-repair-jnj-liquidity/repair-jnj-liquidity-1-1.response.json",
+      "goldLineSha256": "b44997b91cbea531ddab4aab3d0bb5348de0aa6280ef43c270047f49302a2769",
+      "analysis": {
+        "status": "FAIL",
+        "answerSha256": "5effcd0b0f55e43c92634a3242d48b7b7c0b595230c6878d4035a648b1555681",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "FAIL",
+          "claim_support": "FAIL"
+        },
+        "requiredFactChecks": {
+          "currentRatioCurrent": "PASS: 54611 / 50869 = 1.0736 -> 1.07",
+          "currentRatioPrior": "PASS: 55893 / 50321 = 1.1107 -> 1.11",
+          "totalDebtCurrent": "PASS: 6387 + 39408 = 45795 USD million",
+          "totalDebtPrior": "PASS: 5983 + 30651 = 36634 USD million",
+          "netDebtCurrent": "PASS: 45795 - 18231 - 331 = 27233 USD million",
+          "netDebtPrior": "PASS: 36634 - 24105 - 417 = 12112 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: mandatory two dates and ratio values correct",
+          "p2": "PASS: Loans and notes payable plus long debt exactly once",
+          "p3": "PASS: specified cash and securities deducted, no other assets",
+          "p4": "PARTIAL: correct weaker current ratio and higher net debt direction; claimed refinancing strength is unsupported by given source"
+        },
+        "additionalNumericChecks": [
+          "Debt change 9161 / 36634 = 25.01%; net debt change 15121 / 12112 = 124.84%; cash decline 5874; debt components +8757 and +404: correct.",
+          "Goodwill increases 3848; intangibles increase 11119: correct. Related acquisition explanation explicitly tentative.",
+          "Absolute current-ratio fall 0.03716762 -> 0.04 is correct. Percentage fall from full-precision source ratios is 3.34623603% -> 3.35%; 3.60% comes from using already-rounded 1.07 and 1.11."
+        ],
+        "issues": [
+          {
+            "id": "JNJ_CREDIT_RATING_UNSUPPORTED",
+            "category": "UNSUPPORTED_EXTERNAL_FACT",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "- **反向因素：** 流动比率 >1 且 JNJ 作为投资级（Aaa/AAA 级）发行人，短期再融资能力极强，流动比率略高于 1 在大型制药企业中并不罕见，不宜过度解读为流动性危机信号。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Johnson & Johnson and subsidiaries consolidated balance sheets\n(Unaudited; Dollars in Millions Except Share and Per Share Data)\nSeptember 28, 2025 December 29, 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Loans and notes payable $6,387 5,983"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Long-term debt (Note 4) 39,408 30,651"
+              }
+            ],
+            "reason": "The supplied balance sheet has no credit-rating history or borrowing-capacity terms. The answer acknowledges missing credit ratings later but uses a specific rating / very strong refinancing ability as factual risk mitigation. Unsupported under the frozen source-only context; not an assertion that the rating is independently false.",
+            "attribution": "ANALYSIS_UNSUPPORTED_FACT"
+          },
+          {
+            "id": "JNJ_RATIO_PREMATURE_ROUNDING",
+            "category": "METHOD_PRECISION_LOSS",
+            "dimension": "numeric_period_correctness",
+            "severity": "ADDITIONAL_NUMERIC_ERROR",
+            "answerQuote": "**变化：** 下降 0.04（降幅约 3.60%）。流动比率仍大于 1，但缓冲空间收窄。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Total current assets 54,611 55,893"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Total current liabilities 50,869 50,321"
+              }
+            ],
+            "correctCalculation": "100 * (1 - (54611/50869)/(55893/50321)) = 3.3462360271% -> 3.35%; differs from 3.60% by 0.25376397 percentage points, above 0.01",
+            "reason": "Rounding intermediate ratios before percentage change loses precision. All mandatory ratios/debt values still pass; this added percentage error is separate from the material unsupported-rating failure.",
+            "attribution": "ANALYSIS_DERIVED_PRECISION_ERROR"
+          }
+        ],
+        "notes": [
+          "No automatic evaluator result inspected.",
+          "The low-impact percentage precision problem alone is not described as a failure of the main requested calculation; the unsupported rating/refinancing claim independently establishes the overall FAIL."
+        ],
+        "attribution": "ANALYSIS_SUPPORT_AND_ADDITIONAL_PRECISION_ERROR"
+      },
+      "finalAnswer": {
+        "status": "FAIL",
+        "answerSha256": "054e5c2c660b43cf80db8ee7ccc4f87ba1f048cd031752de4459a10c88f85c7d",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "FAIL",
+          "claim_support": "FAIL"
+        },
+        "requiredFactChecks": {
+          "currentRatioCurrent": "PASS: 54611 / 50869 = 1.0736 -> 1.07",
+          "currentRatioPrior": "PASS: 55893 / 50321 = 1.1107 -> 1.11",
+          "totalDebtCurrent": "PASS: 6387 + 39408 = 45795 USD million",
+          "totalDebtPrior": "PASS: 5983 + 30651 = 36634 USD million",
+          "netDebtCurrent": "PASS: 45795 - 18231 - 331 = 27233 USD million",
+          "netDebtPrior": "PASS: 36634 - 24105 - 417 = 12112 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: mandatory two dates and ratio values correct",
+          "p2": "PASS: Loans and notes payable plus long debt exactly once",
+          "p3": "PASS: specified cash and securities deducted, no other assets",
+          "p4": "PARTIAL: correct weaker current ratio and higher net debt direction; claimed refinancing strength is unsupported by given source"
+        },
+        "additionalNumericChecks": [
+          "Debt change 9161 / 36634 = 25.01%; net debt change 15121 / 12112 = 124.84%; cash decline 5874; debt components +8757 and +404: correct.",
+          "Goodwill increases 3848; intangibles increase 11119: correct. Related acquisition explanation explicitly tentative.",
+          "Absolute current-ratio fall 0.03716762 -> 0.04 is correct. Percentage fall from full-precision source ratios is 3.34623603% -> 3.35%; 3.60% comes from using already-rounded 1.07 and 1.11."
+        ],
+        "issues": [
+          {
+            "id": "JNJ_CREDIT_RATING_UNSUPPORTED",
+            "category": "UNSUPPORTED_EXTERNAL_FACT",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "- **不宜过度解读为危机信号：** JNJ 长期维持投资级信用评级，短期再融资能力极强；流动比率略高于 1 在大型制药企业中并不罕见。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Johnson & Johnson and subsidiaries consolidated balance sheets\n(Unaudited; Dollars in Millions Except Share and Per Share Data)\nSeptember 28, 2025 December 29, 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Loans and notes payable $6,387 5,983"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Long-term debt (Note 4) 39,408 30,651"
+              }
+            ],
+            "reason": "The supplied balance sheet has no credit-rating history or borrowing-capacity terms. The answer acknowledges missing credit ratings later but uses a specific rating / very strong refinancing ability as factual risk mitigation. Unsupported under the frozen source-only context; not an assertion that the rating is independently false.",
+            "attribution": "ANALYSIS_ERROR_PROPAGATED"
+          },
+          {
+            "id": "JNJ_RATIO_PREMATURE_ROUNDING",
+            "category": "METHOD_PRECISION_LOSS",
+            "dimension": "numeric_period_correctness",
+            "severity": "ADDITIONAL_NUMERIC_ERROR",
+            "answerQuote": "**变化：** 下降 0.04，降幅 **3.60%**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Total current assets 54,611 55,893"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Total current liabilities 50,869 50,321"
+              }
+            ],
+            "correctCalculation": "100 * (1 - (54611/50869)/(55893/50321)) = 3.3462360271% -> 3.35%; differs from 3.60% by 0.25376397 percentage points, above 0.01",
+            "reason": "Rounding intermediate ratios before percentage change loses precision. All mandatory ratios/debt values still pass; this added percentage error is separate from the material unsupported-rating failure.",
+            "attribution": "ANALYSIS_ERROR_PROPAGATED"
+          }
+        ],
+        "notes": [
+          "No automatic evaluator result inspected.",
+          "The low-impact percentage precision problem alone is not described as a failure of the main requested calculation; the unsupported rating/refinancing claim independently establishes the overall FAIL."
+        ],
+        "attribution": "ANALYSIS_ERRORS_PROPAGATED"
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/raw-repair-jnj-liquidity/repair-jnj-liquidity-1-1.response.json",
+      "responseSha256": "7db48c180c98589ca44259b18159f4a8bc2f37a2b1b324f959da4473de1bff0f",
+      "caseSha256": "5f9edbf546f66585d3968dcdeff964fa687210d2d6e96a2e3307ff5260d38150",
+      "executionStatus": "COMPLETED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://s203.q4cdn.com/636242992/files/doc_financials/2025/q3/3Q-10Q-09-28-25-5.pdf",
+          "visibleSha256": "47d9accc74e33b5340819da93d3a3d9c300f10c1b711c57693dd932a7bb2be91"
+        }
+      ]
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "executionPath": "evals/evolution/batch-repair-20261002/repair-pep-control.execution.json",
+      "executionSha256": "d72d34bf5caf668aab68fd83ae7537bffa6ad702ff57e66a26ab7d400c84b1d4",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/raw-repair-pep-control/repair-pep-control-1-1.response.json",
+      "goldLineSha256": "1b7ba36debac76f43f38375fdcd04b73287e6a6cf470f48bcbe0e7b2ed5d0579",
+      "analysis": {
+        "status": "FAIL",
+        "answerSha256": "9e41217fbd82b433977b06e910c2572dda218ecbaa8dafe0b11bffc6910605e3",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "FAIL",
+          "claim_support": "FAIL"
+        },
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": "PASS: 5468 - 996 = 4472 USD million",
+          "quarterCapitalSpendingOutflowAmount": "PASS: 2499 - 1507 = 992 USD million, gross outflow",
+          "quarterSimpleFreeCashFlow": "PASS: 4472 - 992 = 3480 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: requested reconstructed period 2025-06-15 through 2025-09-06 correct",
+          "p2": "PASS: all three required amounts correct",
+          "p3": "PASS: requested quarter derived by consistent 36-week less 24-week cumulative line items",
+          "p4": "PASS: 4472 covers 992; surplus 3480"
+        },
+        "additionalNumericChecks": [
+          "Asset-sale cash 272 - 169 = 103, excluded from simple FCF: correct.",
+          "4472 / 992 = 4.51 times; 3480 / 4472 = 77.82%: correct.",
+          "Prior-year reconstructed Q3 OCF 6220 - 1315 = 4905; capex 2850 - 1701 = 1149; FCF 3756: correct.",
+          "YoY OCF -8.83%, capex -13.66%, FCF -7.35%: all correct.",
+          "YTD source amounts 5740/8092 net income, 1960 impairment, 567 restructuring charges, 554 restructuring payments, 80 acquisition/divestiture charge payments, combined acquisition/investment/intangible cash row 3176/31 all present. The 3176 row is broader than acquisition-only spend, so interpret that label cautiously."
+        ],
+        "issues": [
+          {
+            "id": "PEP_QOQ_PERIOD_MISMATCH",
+            "category": "METHOD_PERIOD_COMPARISON",
+            "dimension": "numeric_period_correctness",
+            "severity": "MATERIAL",
+            "answerQuote": "3. **Q3 单季经营现金流环比大幅回升：** Q1+Q2 合计仅 $996M，Q3 单季 $4,472M，环比改善显著，可能与季节性收款节奏及应付账款周期有关，需关注后续季度是否可持续。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E2",
+                "quote": "24 Weeks Ended\n6/14/2025 6/15/2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net Cash Provided by Operating Activities 996 1,315"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ],
+            "reason": "996 is Q1+Q2 cumulative (24 weeks), whereas 4472 is Q3 (12 weeks). Quarter-on-quarter comparison requires Q2 alone; no Q1 cumulative or direct Q2 OCF is supplied. Different-duration amounts cannot establish the asserted quarter-on-quarter rebound.",
+            "attribution": "ANALYSIS_METHOD_ERROR"
+          },
+          {
+            "id": "PEP_CAPEX_INTENT_UNSUPPORTED",
+            "category": "UNSUPPORTED_CAUSAL_CLAIM",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "- 资本支出同比下降约 13.66%，反映公司在收购整合期适度控制资本开支节奏。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Capital spending (2,499) (2,850)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Capital spending (1,507) (1,701)"
+              }
+            ],
+            "reason": "Cash-flow tables establish spending amounts, not management intent or that acquisition integration caused the reduction. The answer itself states no management commentary or capex guidance is supplied.",
+            "attribution": "ANALYSIS_UNSUPPORTED_INFERENCE"
+          }
+        ],
+        "notes": [
+          "This is a real rerun of the previously passing PEP baseline control, not either AUTHORED_EVALUATOR_CONTROL fixture.",
+          "Mandatory requested computation remains correct, but additional material period/causal claims introduce a quality regression."
+        ],
+        "baselineControlComparison": {
+          "baselineResponse": "evals/evolution/batch-learning-20261002/raw-development-pep/development-pep-1-1.response.json",
+          "baselineIndependentStatus": "PASS",
+          "currentIndependentStatus": "FAIL",
+          "regression": "Extra period comparison and unsupported causal explanation, not the core quarter arithmetic"
+        },
+        "attribution": "ANALYSIS_METHOD_AND_SUPPORT_ERROR"
+      },
+      "finalAnswer": {
+        "status": "FAIL",
+        "answerSha256": "6f3b2e2e52e1b8d9cb01944d47d4e9d37feed4c5a60eee34f10b79fd38c35fe8",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "FAIL",
+          "claim_support": "FAIL"
+        },
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": "PASS: 5468 - 996 = 4472 USD million",
+          "quarterCapitalSpendingOutflowAmount": "PASS: 2499 - 1507 = 992 USD million, gross outflow",
+          "quarterSimpleFreeCashFlow": "PASS: 4472 - 992 = 3480 USD million"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: requested reconstructed period 2025-06-15 through 2025-09-06 correct",
+          "p2": "PASS: all three required amounts correct",
+          "p3": "PASS: requested quarter derived by consistent 36-week less 24-week cumulative line items",
+          "p4": "PASS: 4472 covers 992; surplus 3480"
+        },
+        "additionalNumericChecks": [
+          "Asset-sale cash 272 - 169 = 103, excluded from simple FCF: correct.",
+          "4472 / 992 = 4.51 times; 3480 / 4472 = 77.82%: correct.",
+          "Prior-year reconstructed Q3 OCF 6220 - 1315 = 4905; capex 2850 - 1701 = 1149; FCF 3756: correct.",
+          "YoY OCF -8.83%, capex -13.66%, FCF -7.35%: all correct.",
+          "YTD source amounts 5740/8092 net income, 1960 impairment, 567 restructuring charges, 554 restructuring payments, 80 acquisition/divestiture charge payments, combined acquisition/investment/intangible cash row 3176/31 all present. The 3176 row is broader than acquisition-only spend, so interpret that label cautiously."
+        ],
+        "issues": [
+          {
+            "id": "PEP_QOQ_PERIOD_MISMATCH",
+            "category": "METHOD_PERIOD_COMPARISON",
+            "dimension": "numeric_period_correctness",
+            "severity": "MATERIAL",
+            "answerQuote": "3. **季节性波动：** Q1+Q2 合计经营现金流仅 $996M，Q3 单季 $4,472M 环比大幅回升，与收款节奏和应付账款周期相关，需观察 Q4 是否延续。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E2",
+                "quote": "24 Weeks Ended\n6/14/2025 6/15/2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net Cash Provided by Operating Activities 996 1,315"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ],
+            "reason": "996 is Q1+Q2 cumulative (24 weeks), whereas 4472 is Q3 (12 weeks). Quarter-on-quarter comparison requires Q2 alone; no Q1 cumulative or direct Q2 OCF is supplied. Different-duration amounts cannot establish the asserted quarter-on-quarter rebound.",
+            "attribution": "ANALYSIS_ERROR_PROPAGATED"
+          },
+          {
+            "id": "PEP_CAPEX_INTENT_UNSUPPORTED",
+            "category": "UNSUPPORTED_CAUSAL_CLAIM",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "- 资本支出同比下降 13.66%，反映公司在重大收购整合期主动控制开支节奏。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Capital spending (2,499) (2,850)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Capital spending (1,507) (1,701)"
+              }
+            ],
+            "reason": "Cash-flow tables establish spending amounts, not management intent or that acquisition integration caused the reduction. The answer itself states no management commentary or capex guidance is supplied.",
+            "attribution": "ANALYSIS_ERROR_STRENGTHENED"
+          },
+          {
+            "id": "PEP_SEASONAL_CAUSE_UPGRADED",
+            "category": "FINAL_INTEGRATION_OVERCLAIM",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "3. **季节性波动：** Q1+Q2 合计经营现金流仅 $996M，Q3 单季 $4,472M 环比大幅回升，与收款节奏和应付账款周期相关，需观察 Q4 是否延续。",
+            "analysisQuote": "可能与季节性收款节奏及应付账款周期有关",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Accounts payable and other current liabilities (2,083) (2,968)"
+              }
+            ],
+            "reason": "Final answer removes the analysis qualifier “可能” and asserts correlation with collection timing and payment cycles; those business causes are not established by the supplied cash-flow rows.",
+            "attribution": "FINAL_INTEGRATION_STRENGTHENED_UNSUPPORTED_CLAIM"
+          }
+        ],
+        "notes": [
+          "This is a real rerun of the previously passing PEP baseline control, not either AUTHORED_EVALUATOR_CONTROL fixture.",
+          "Mandatory requested computation remains correct, but additional material period/causal claims introduce a quality regression."
+        ],
+        "baselineControlComparison": {
+          "baselineResponse": "evals/evolution/batch-learning-20261002/raw-development-pep/development-pep-1-1.response.json",
+          "baselineIndependentStatus": "PASS",
+          "currentIndependentStatus": "FAIL",
+          "regression": "Extra period comparison and unsupported causal explanation, not the core quarter arithmetic"
+        },
+        "attribution": "ANALYSIS_ERROR_PROPAGATED_WITH_STRONGER_CAUSAL_LANGUAGE"
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/raw-repair-pep-control/repair-pep-control-1-1.response.json",
+      "responseSha256": "a98735edc2a80c559dd84b450ef834bf04dc4d55cc54fac87e979adc623e5e34",
+      "caseSha256": "f5f94dcbbdf6d11c805cfb35f2e0a73fd779898d77beafbfd9b1c19c2b36a0b0",
+      "executionStatus": "COMPLETED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "visibleSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928"
+        },
+        {
+          "evidenceId": "E2",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf",
+          "visibleSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38"
+        }
+      ]
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "executionPath": "evals/evolution/batch-repair-20261002/repair-tgt-control.execution.json",
+      "executionSha256": "9015866802bd271b196b705e2ad9b2febddebc64c7199cd4125e198b229c9ded",
+      "expectedRawResponsePath": "evals/evolution/batch-repair-20261002/raw-repair-tgt-control/repair-tgt-control-1-1.response.json",
+      "goldLineSha256": "f1926e39ecc4a4f20c9b2d6a3475d9c989f7b03500cf9481e9e1b5a36c3337f6",
+      "analysis": {
+        "status": "FAIL",
+        "answerSha256": "014eb632036d5ecdce77c170861b561be8c100a67f729f1ee281b75e23f6103a",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "FAIL"
+        },
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "PASS: 3485 USD million",
+          "ytdConsolidatedNetIncome": "PASS: 2660 USD million",
+          "priorOperatingCashFlow": "PASS: 4078 USD million",
+          "priorConsolidatedNetIncome": "PASS: 2988 USD million",
+          "ytdCashIncomeGap": "PASS: 825 = 3485 - 2660",
+          "priorCashIncomeGap": "PASS: 1090 = 4078 - 2988",
+          "ytdCashConversion": "PASS: 1.31, expected 1.3102",
+          "priorCashConversion": "PASS: 1.36, expected 1.3648"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: fiscal nine-month current and prior periods and amounts correct",
+          "p2": "PASS: gaps and ratios correct",
+          "p3": "PASS for mechanisms: D&A addback positive; AP contribution and inventory cash use directions correct; extra business causes unsupported",
+          "p4": "FAIL: moves from OCF/NI > 1 to categorical no paper-profit issue and invented industry benchmark, stronger than source supports"
+        },
+        "additionalNumericChecks": [
+          "NI -328 and -10.98%; OCF -593 and -14.54%; gap -265; ratio difference approximately -0.05: correct.",
+          "D&A +116 / 2215 = 5.24%; AP cash contribution falls 1704; inventory cash use falls 1123: correct.",
+          "Capex 2842 versus 1968, +44.41% (analysis rounds to 44%); simplified FCF 3485 - 2842 = 643 versus 4078 - 1968 = 2110: correct.",
+          "Capex increase 874 plus OCF decrease 593 explains FCF decline 1467; increased capex is the larger arithmetic component."
+        ],
+        "issues": [
+          {
+            "id": "TGT_QUALITY_CERTAINTY",
+            "category": "UNSUPPORTED_QUALITY_CERTAINTY",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "两个期间经营现金流均显著高于净利润（比率 > 1），表明利润的现金含量充足，不存在\"纸面利润\"问题。FY2025 前九个月比率 1.31 较上年同期的 1.36 小幅回落，但仍处于健康区间。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Net earnings |  | $ 2,660 |  | $ 2,988"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+              }
+            ],
+            "reason": "OCF exceeds NI for the disclosed periods, but this aggregate ratio does not establish the absence of any paper-profit / earnings-quality problem. It is a categorical assurance absent from the supplied evidence.",
+            "attribution": "ANALYSIS_UNSUPPORTED_CERTAINTY"
+          },
+          {
+            "id": "TGT_INDUSTRY_BENCHMARK_UNSUPPORTED",
+            "category": "UNSUPPORTED_BENCHMARK",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "- **利润现金转化质量仍然良好**：1.31 的比率意味着每 $1 净利润对应约 $1.31 经营现金流入，在零售行业属正常偏上水平。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "TARGET CORPORATION\n\nConsolidated Statements of Cash Flows"
+              }
+            ],
+            "reason": "One company cash-flow table supplies no retail peer benchmark or distribution to classify 1.31 as above-normal for the industry.",
+            "attribution": "ANALYSIS_UNSUPPORTED_FACT"
+          },
+          {
+            "id": "TGT_CAPEX_PURPOSE_UNSUPPORTED",
+            "category": "UNSUPPORTED_CAUSAL_CLAIM",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "折旧摊销是最大的非现金加回项，本期增加 $116M，反映公司近年持续投入门店与供应链资产（与资本开支从 $1,968M 升至 $2,842M 一致）。该项对现金转化的正向贡献同比扩大。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization |  | 2,331 |  | 2,215"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+              }
+            ],
+            "reason": "The source gives D&A and total PP&E spending, not investment allocation to stores and supply-chain assets or multiyear investment history. The specific purpose/history explanation is asserted rather than labeled unknown.",
+            "attribution": "ANALYSIS_UNSUPPORTED_INFERENCE"
+          },
+          {
+            "id": "TGT_INVENTORY_CAUSE_UNSUPPORTED",
+            "category": "UNSUPPORTED_CAUSAL_CLAIM",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "存货占用现金同比减少 $1,123M，部分对冲了应付账款贡献的下降，说明本期备货节奏更为克制或库存管理效率有所改善。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Inventory |  | (2,156) |  | (3,279)"
+              }
+            ],
+            "reason": "Lower inventory cash use is observed; it does not establish more restrained stocking or improved inventory efficiency. The answer acknowledges missing inventory detail and management explanation but still asserts these business explanations.",
+            "attribution": "ANALYSIS_UNSUPPORTED_INFERENCE"
+          }
+        ],
+        "notes": [
+          "This is a real rerun of the previously passing TGT cash-quality baseline, not an authored evaluator negative control.",
+          "No automatic evaluator result inspected."
+        ],
+        "baselineControlComparison": {
+          "baselineResponse": "evals/evolution/batch-learning-20261002/raw-development-tgt/development-tgt-2-1.response.json",
+          "baselineIndependentStatus": "PASS",
+          "currentIndependentStatus": "FAIL",
+          "regression": "Correct mandatory facts retained, but added ungrounded peer benchmark, business causes and categorical quality assurance."
+        },
+        "attribution": "ANALYSIS_UNSUPPORTED_CLAIMS"
+      },
+      "finalAnswer": {
+        "status": "FAIL",
+        "answerSha256": "f986175cbdcdca67e325e9e25af3e516ee94de96114965c99d672bfec915de5b",
+        "dimensionStatuses": {
+          "numeric_period_correctness": "PASS",
+          "claim_support": "FAIL"
+        },
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": "PASS: 3485 USD million",
+          "ytdConsolidatedNetIncome": "PASS: 2660 USD million",
+          "priorOperatingCashFlow": "PASS: 4078 USD million",
+          "priorConsolidatedNetIncome": "PASS: 2988 USD million",
+          "ytdCashIncomeGap": "PASS: 825 = 3485 - 2660",
+          "priorCashIncomeGap": "PASS: 1090 = 4078 - 2988",
+          "ytdCashConversion": "PASS: 1.31, expected 1.3102",
+          "priorCashConversion": "PASS: 1.36, expected 1.3648"
+        },
+        "requiredPointChecks": {
+          "p1": "PASS: fiscal nine-month current and prior periods and amounts correct",
+          "p2": "PASS: gaps and ratios correct",
+          "p3": "PASS for mechanisms: D&A addback positive; AP contribution and inventory cash use directions correct; extra business causes unsupported",
+          "p4": "FAIL: moves from OCF/NI > 1 to categorical no paper-profit issue and invented industry benchmark, stronger than source supports"
+        },
+        "additionalNumericChecks": [
+          "NI -328 and -10.98%; OCF -593 and -14.54%; gap -265; ratio difference approximately -0.05: correct.",
+          "D&A +116 / 2215 = 5.24%; AP cash contribution falls 1704; inventory cash use falls 1123: correct.",
+          "Capex 2842 versus 1968, +44.41% (analysis rounds to 44%); simplified FCF 3485 - 2842 = 643 versus 4078 - 1968 = 2110: correct.",
+          "Capex increase 874 plus OCF decrease 593 explains FCF decline 1467; increased capex is the larger arithmetic component."
+        ],
+        "issues": [
+          {
+            "id": "TGT_QUALITY_CERTAINTY",
+            "category": "UNSUPPORTED_QUALITY_CERTAINTY",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "两个期间比率均大于 1，说明每 $1 净利润对应超过 $1 的经营现金流入，利润的现金含量充足，不存在\"纸面利润\"问题。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Net earnings |  | $ 2,660 |  | $ 2,988"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Cash provided by operating activities |  | 3,485 |  | 4,078"
+              }
+            ],
+            "reason": "OCF exceeds NI for the disclosed periods, but this aggregate ratio does not establish the absence of any paper-profit / earnings-quality problem. It is a categorical assurance absent from the supplied evidence.",
+            "attribution": "ANALYSIS_ERROR_PROPAGATED"
+          },
+          {
+            "id": "TGT_INDUSTRY_BENCHMARK_UNSUPPORTED",
+            "category": "UNSUPPORTED_BENCHMARK",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "1. **转化质量仍处健康区间。** 1.31 的比率在零售行业属正常偏上水平，表明利润有真实现金支撑。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "TARGET CORPORATION\n\nConsolidated Statements of Cash Flows"
+              }
+            ],
+            "reason": "One company cash-flow table supplies no retail peer benchmark or distribution to classify 1.31 as above-normal for the industry.",
+            "attribution": "ANALYSIS_ERROR_PROPAGATED"
+          },
+          {
+            "id": "TGT_CAPEX_PURPOSE_UNSUPPORTED",
+            "category": "UNSUPPORTED_CAUSAL_CLAIM",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "折旧摊销是现金流量表中最大的非现金加回项。本期增加 $116M，与资本开支从 $1,968M 升至 $2,842M（+44.41%）方向一致，反映公司近年持续投入门店与供应链资产。该项对现金转化的正向贡献同比扩大，是支撑比率的稳定因素。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization |  | 2,331 |  | 2,215"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Expenditures for property and equipment |  | (2,842) |  | (1,968)"
+              }
+            ],
+            "reason": "The source gives D&A and total PP&E spending, not investment allocation to stores and supply-chain assets or multiyear investment history. The specific purpose/history explanation is asserted rather than labeled unknown.",
+            "attribution": "ANALYSIS_ERROR_PROPAGATED"
+          },
+          {
+            "id": "TGT_INVENTORY_CAUSE_UNSUPPORTED",
+            "category": "UNSUPPORTED_CAUSAL_CLAIM",
+            "dimension": "claim_support",
+            "severity": "MATERIAL",
+            "answerQuote": "存货占用现金同比减少 $1,123M，部分对冲了应付账款贡献的下降，说明本期备货节奏更为克制或库存管理效率有所改善。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Inventory |  | (2,156) |  | (3,279)"
+              }
+            ],
+            "reason": "Lower inventory cash use is observed; it does not establish more restrained stocking or improved inventory efficiency. The answer acknowledges missing inventory detail and management explanation but still asserts these business explanations.",
+            "attribution": "ANALYSIS_ERROR_PROPAGATED"
+          }
+        ],
+        "notes": [
+          "This is a real rerun of the previously passing TGT cash-quality baseline, not an authored evaluator negative control.",
+          "No automatic evaluator result inspected."
+        ],
+        "baselineControlComparison": {
+          "baselineResponse": "evals/evolution/batch-learning-20261002/raw-development-tgt/development-tgt-2-1.response.json",
+          "baselineIndependentStatus": "PASS",
+          "currentIndependentStatus": "FAIL",
+          "regression": "Correct mandatory facts retained, but added ungrounded peer benchmark, business causes and categorical quality assurance."
+        },
+        "attribution": "ANALYSIS_UNSUPPORTED_CLAIMS_PROPAGATED"
+      },
+      "responsePath": "evals/evolution/batch-repair-20261002/raw-repair-tgt-control/repair-tgt-control-1-1.response.json",
+      "responseSha256": "7c410209a3ac7f8b139cf14ab50de978e3fefacd1a0ef473696e68391d0ba918",
+      "caseSha256": "db32f8596e00dd925957e1ec49fd61e8e7869a0b5b6722b7c5b032495fd7ca7d",
+      "executionStatus": "COMPLETED",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://corporate.target.com/press/release/2025/11/target-corporation-reports-third-quarter-earnings",
+          "visibleSha256": "ec5b45fedd4b52e997f108a88a9a1f612604754571b694b43ec3c3ed201de2d3"
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-10-02T09:59:08.653541+00:00",
+  "summary": {
+    "caseCount": 6,
+    "executionCompletedCases": 6,
+    "stages": {
+      "PASS": 0,
+      "FAIL": 12,
+      "NO_DATA": 0
+    },
+    "casesWithMandatoryNumericFactError": [
+      "ibm-fy2025q3-cash-quality"
+    ],
+    "casesWithAccountingDirectionError": [
+      "jnj-fy2025q3-cash-quality"
+    ],
+    "casesWithAdditionalPeriodComparisonError": [
+      "pep-fy2025q3-quarter-reconstruction"
+    ],
+    "casesWithUnsupportedAdditionalClaims": [
+      "ibm-fy2025q3-cash-quality",
+      "ibm-fy2025q3-liquidity",
+      "jnj-fy2025q3-liquidity",
+      "pep-fy2025q3-quarter-reconstruction",
+      "tgt-fy2025q3-cash-quality"
+    ],
+    "successfulBaselineControlRegressions": [
+      "pep-fy2025q3-quarter-reconstruction",
+      "tgt-fy2025q3-cash-quality"
+    ],
+    "primaryEvaluatorAgreement": "NOT_ASSESSED: automatic judgments not read",
+    "boundary": "AI independent review against frozen source-only context; this does not claim every source-unsupported historical statement is independently false in the real world. Completion improved, but all six contain at least one material quality error or unsupported material claim.",
+    "perStageRequiredNumericFacts": {
+      "analysis": {
+        "correct": 38,
+        "total": 39,
+        "allRequiredFactsCorrectCases": 5,
+        "caseCount": 6
+      },
+      "finalAnswer": {
+        "correct": 38,
+        "total": 39,
+        "allRequiredFactsCorrectCases": 5,
+        "caseCount": 6
+      }
+    },
+    "perStageFullSemanticCases": {
+      "analysis": {
+        "PASS": 0,
+        "FAIL": 6,
+        "NO_DATA": 0
+      },
+      "finalAnswer": {
+        "PASS": 0,
+        "FAIL": 6,
+        "NO_DATA": 0
+      }
+    }
+  }
+}

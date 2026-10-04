@@ -1,0 +1,1 @@
+{"operation":"STREAM","causes":[{"type":"org.springframework.web.reactive.function.client.WebClientResponseException","httpStatus":200},{"type":"reactor.netty.http.client.PrematureCloseException"}],"at":"2026-10-02T13:44:38.757650800Z"}

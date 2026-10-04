@@ -1,0 +1,11 @@
+{
+  "status": "ABORTED_BEFORE_HTTP",
+  "providerModelCalls": 0,
+  "businessCalls": 0,
+  "transportAttempts": 1,
+  "error": "urllib URLError getaddrinfo failed (11001) before connection",
+  "requestSha256": "8bf299f9b459496d29a4618dfbaf077487b52a45163dc1d018bd0e8b14053642",
+  "nextCampaign": "../unit-generalization-network-20261004",
+  "releaseEligible": false,
+  "note": "No model response or candidate existed. Fresh registration uses identical request in network-enabled execution; this failure remains preserved."
+}

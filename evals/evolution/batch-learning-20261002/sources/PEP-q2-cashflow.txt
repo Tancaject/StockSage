@@ -1,0 +1,55 @@
+PepsiCo, Inc. and Subsidiaries
+Condensed Consolidated Statement of Cash Flows
+(in millions, unaudited)
+
+24 Weeks Ended
+6/14/2025 6/15/2024
+Operating Activities
+Net income $ 3,122 $ 5,147
+Depreciation and amortization 1,491 1,379
+Impairment and other charges 1,860 —
+Product recall-related impact — 182
+Cash payments for product recall-related impact (2) (135)
+Operating lease right-of-use asset amortization 315 278
+Share-based compensation expense 131 183
+Restructuring and impairment charges 426 170
+Cash payments for restructuring charges (387) (173)
+Pension and retiree medical plan expense 99 67
+Pension and retiree medical plan contributions (354) (263)
+Deferred income taxes and other tax charges and credits (260) 142
+Tax payments related to the Tax Cuts and Jobs Act (772) (579)
+Change in assets and liabilities:
+Accounts and notes receivable (1,582) (1,138)
+Inventories (800) (696)
+Prepaid expenses and other current assets (354) (365)
+Accounts payable and other current liabilities (2,083) (2,968)
+Income taxes payable 415 287
+Other, net (269) (203)
+Net Cash Provided by Operating Activities 996 1,315
+
+Investing Activities
+Capital spending (1,507) (1,701)
+Sales of property, plant and equipment 169 127
+Acquisitions, net of cash acquired, investments in noncontrolled affiliates and
+purchases of intangible and other assets (3,130) (30)
+Divestitures, sales of investments in noncontrolled affiliates and other assets 5 135
+Short-term investments, by original maturity:
+More than three months - maturities 425 —
+Three months or less, net 22 1
+Other investing, net (111) 14
+Net Cash Used for Investing Activities (4,127) (1,454)
+
+(Continued on following page)
+
+
+
+
+
+
+
+
+
+
+
+
+A - 2

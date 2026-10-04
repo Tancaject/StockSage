@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-05-1-1",
+    "caseId": "tgt-fy2025q3-quarter-reconstruction",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-validation-20261002\\raw-development-05",
+  "executionSha256": "54eebe8b77a0b6b26694c48d88b48498638db7d391f603ff62a80f3c35876fd1",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

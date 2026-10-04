@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "checks": [
+    "model parameters unchanged",
+    "complete analysis answer and evidence retained",
+    "verified feedback retained",
+    "final-stage trace and repeated prompts excluded"
+  ],
+  "groups": [
+    {
+      "group": 1,
+      "beforeUserChars": 54664,
+      "afterUserChars": 13760,
+      "reductionPercent": 74.83
+    },
+    {
+      "group": 2,
+      "beforeUserChars": 48190,
+      "afterUserChars": 9957,
+      "reductionPercent": 79.34
+    }
+  ]
+}

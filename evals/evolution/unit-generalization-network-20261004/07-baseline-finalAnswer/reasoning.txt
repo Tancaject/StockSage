@@ -1,0 +1,97 @@
+我们需要回答中文用户。任务：基于给定证据 [E1] 分析 IBM 2025年前三季度经营现金流/净利润比率低于2024年同期，能否据此判断利润现金转化明显变差。要求：给出两年原表比率；做仅剔除已列示一次性项的示意比较：剔除2024养老金结算费用及相关税收利益，2025 H.R.1相关非现金税费；其余不调，经营现金流保持披露值。列出两年示意调整后的净利润及经营现金流/该净利润，解释与原表判断不同、还不能确认什么。强调这是可比性练习，非公司公布调整后指标；税项按脚注约数。金额注明单位，比率百分比保留两位小数。
+
+需要利用上下文中的 TOOL_OBSERVATIONS。它已经计算好：2025 nine months OCF 9,153; net income 4,993; ratio 1.83 / 183.32%. 2024 OCF 9,115; net income 3,109; ratio 2.93 / 293.18%. Adjusted: 2025 add back 300 -> 5,293; ratio 9153/5293 =? Let's recalc to ensure rounding. 9153/5293 = 1.729... 5293*1.73=9156.89, so 1.7293 => 1.73, 172.93% maybe. 9153/5293*100 = 172.92? Compute: 5293*1.729 = 9151.589; remainder 1.411; /5293=0.000266; so 1.729266 => 172.93%. Good.
+
+2024 adjusted net income: 3109 + 2725 - 700 = 5134. OCF 9115/5134 = 1.7756 => 1.78, 177.56? Let's compute: 5134*1.775 = 9112.85; remainder 2.15 -> 0.000419, total 1.775419 => 177.54? Let's precise: 9115 / 5134. Use calc: 5134*1.7754 = 5134*(1 + .7754)=5134+3980.? .7754*5134 = 3980.? 5134*0.775 =3978.85; 0.0004*5134=2.0536; sum 3980.9036; plus 5134=9114.9036. So 1.775419 gives 177.54%. If 1.77542*100=177.54. Good. Difference adjusted: 1.73 vs 1.78, -0.05; percentage -4.61 percentage points (172.93 - 177.54 = -4.61). Original diff: 1.83 - 2.93 = -1.10; percentage -109.86 points. Need maybe exact original ratio: 9153/4993 = 1.833? 4993*1.833 = 9152.?? 4993*1.833 = 4993*(1.8 + .033)=8987.4+164.769=9152.169; ratio 1.83317 => 183.32%. 2024: 9115/3109 = 2.9318 => 293.18%. Good.
+
+Need output structured Markdown. Start with conclusion: 不能仅凭原表比率下降判断明显变差；调整后差距大幅缩小，OCF基本持平；但仍不能确认经常性现金转化完全稳定。
+
+Need include table of original and adjusted. Explain adjustments: 2024 pension settlement charge 2,725m added back; related tax benefit ~700m subtracted; net +2,025m. 2025 H.R.1 one-time non-cash income tax charge ~300m add back. OCF unchanged. Note approx tax numbers.
+
+Need mention OCF change: +38m, +0.42%. Could include.
+
+Need risks/unknown: operating cash flow not adjusted; only specified items; tax approximations; working capital/other and IBM Financing A/R changes not fully unpacked; cannot confirm cash tax effects or recurring cash conversion. Also data gap: no full income statement/tax details, etc. But user asks what cannot confirm. Keep relevant.
+
+Need source section: [E1] IBM Q3 2025 official IR cash flow, period ended 2025-09-30, published 2025-10-22, USD millions. Also maybe availableAt 2025-10-22, retrieved 2026-10-02. Since current date 2026-10-02. Need data source and time说明. Use evidence [E1].
+
+Need ensure no unsupported facts. Use only [E1]. The tool observation includes all. We can cite [E1].
+
+Need be careful: user says “IBM 2025年前三季度经营现金流/净利润比率低于2024年同期，能否据此判断利润现金转化明显变差？” We answer no, not solely. Need maybe note 2024 ratio inflated by pension settlement charge. Also adjusted ratio slightly lower, so some mild weakening maybe but not material? Evidence: adjusted difference -0.05; OCF flat. We can say不足以证明明显恶化；但也不能确认完全稳定.
+
+Need maintain “仅供参考，不构成投资建议。” at end. Also source.
+
+Need no chain of thought. Final should be polished.
+
+Let's craft with tables.
+
+Potential format:
+
+**结论**：不能仅凭原表... 原表 2025 1.83 (183.32%) vs 2024 2.93 (293.18%)；剔除指定一次性项后 1.73 (172.93%) vs 1.78 (177.54%)，差距从-1.10收窄至-0.05。因此下降主要是2024养老金结算费用压低净利润造成的基数扰动，而非现金转化同等幅度恶化。但这是示意可比性练习...
+
+**一、原表比率**
+Table: 期间, 经营现金流(百万美元), 净利润(百万美元), 比率, 百分比.
+2025九个月 9,153 4,993 1.83 183.32%
+2024九个月 9,115 3,109 2.93 293.18%
+Explain: OCF nearly flat +38 (+0.42%); ratio drop because net income higher? Wait ratio drop because 2024 net income depressed. 2025 net income higher, OCF flat, ratio lower.
+
+**二、示意调整**
+Need show adjustments maybe table:
+2025: disclosed NI 4,993; add back H.R.1 non-cash tax ~300; adjusted NI 5,293; OCF 9,153; ratio 1.73 172.93%.
+2024: disclosed NI 3,109; add back pension settlement 2,725; subtract related tax benefit ~700; adjusted NI 5,134; OCF 9,115; ratio 1.78 177.54%.
+Could present combined table.
+
+**三、与原表判断不同**
+- original suggests large deterioration; adjusted shows small difference.
+- 2024 original ratio inflated due to non-operating/one-time pension settlement charge added back in OCF reconciliation but reducing net income.
+- 2025 H.R.1 tax charge lowers NI but not OCF; adding back reduces ratio slightly.
+- OCF itself flat, so cash generation not visibly weakened.
+
+**四、不能确认什么**
+- Not company non-GAAP; only adjusts net income denominator, OCF unchanged.
+- Tax amounts approximate; no exact tax impact.
+- Other items (working capital/other, financing receivables) may affect quality; [E1] shows operating assets/liabilities/other -1,755 vs -3,063; IBM Financing A/R 905 vs 1,824, but no detail. Could mention but not overinterpret.
+- Cannot confirm recurring cash conversion, future cash tax effects, pension settlement cash effects.
+- Need full statements, management FCF, etc.
+
+Need ensure percentages two decimals. Ratios two decimals.
+
+Need maybe use “九个月” instead of “前三季度”. Good.
+
+Need source section: 数据来源与时间说明: [E1] ... retrieved at? We can say 证据获取时间 2026-10-02; 财报发布 2025-10-22; 期间截至 2025-09-30. Current date 2026-10-02. This satisfies.
+
+Need cite [E1] inline maybe after numbers. Since requirement: RAG facts only if used label; ordinary tool facts use [E1]. We'll include [E1] near tables.
+
+Need avoid saying “当前” maybe no issue.
+
+Double-check math:
+2025 adjusted ratio: 9153/5293 = let's calculate more exact: 5293*1.7293 = 5293 + 0.7293*5293. 0.7=3705.1; 0.0293=155.0849; total 3860.1849; +5293=9153.1849. So 1.729265 maybe. percentage 172.93. Good.
+2024 adjusted ratio: 9115/5134. 5134*1.7754=9114.9036; 1.77542 adds 0.10268? Actually 0.00002*5134=0.10268, so 1.77542 gives 9115.0063. ratio 1.7754188 => 177.54. Good.
+Original 2025: 9153/4993. 4993*1.8332 = 4993 + 0.8332*4993. 0.8=3994.4; 0.0332=165.7676; sum 4160.1676 + 4993=9153.1676; so ratio 1.83317 => 183.32. Good.
+Original 2024: 3109*2.9318 = 3109 + 1.9318*3109. 1.9=5907.1; 0.0318=98.8662; total 6005.9662 +3109=9114.9662; ratio 2.93181 => 293.18. Good.
+Difference percentage original: 183.32 - 293.18 = -109.86. Adjusted: 172.93 - 177.54 = -4.61.
+
+Need maybe mention “经营现金流/净利润比率” as OCF/NI. Good.
+
+Need be careful with 2024 pension settlement charge: In cash flow table it's add-back to net income to arrive OCF. It is an expense in net income? Yes. The table shows Net Income/(Loss) from Operations 2024 Q3 (330), nine months 3,109; Pension Settlement Charge 2,725 addback. So yes.
+
+Potential final:
+
+> 结论：不能仅凭原表比率下降判断明显变差。原表差异主要受2024年养老金结算费用压低净利润影响；指定项目剔除后两年比率接近，且经营现金流同比基本持平。但由于只是局部示意调整，不能确认经常性现金转化质量完全稳定。
+
+Then tables.
+
+Need maybe include “金额单位：百万美元”。
+
+Let's draft final with enough detail but concise. Ensure final includes disclaimer.
+
+One nuance: The user asks “列出两年示意调整后的净利润及经营现金流/该净利润，解释与原表判断有什么不同、还不能确认什么。” So we need not list full income statement. Good.
+
+Need maybe mention “2024年相关税收利益约700百万美元” is included in 2024 footnotes: tax benefit associated with pension settlement charge in Q3. We subtract it because if removing charge and associated tax benefit, net effect +2,025. Good.
+
+Need maybe note “H.R.1” as legislation; no need elaborate.
+
+Need ensure not to call it “调整后净利润” maybe “示意调整后净利润” and caveat. Good.
+
+Need include “这是本题可比性练习，不是公司公布的调整后指标” explicitly.
+
+Let's produce final.

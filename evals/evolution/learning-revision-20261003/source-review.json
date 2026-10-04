@@ -1,0 +1,771 @@
+{
+  "schema": "fundamentals_analysis_revision_source_review_v1",
+  "origin": "CODEX_AI_SOURCE_REVIEW_NONBLIND_NOT_CALIBRATED_JUDGE",
+  "releaseEligible": false,
+  "rubric": {
+    "schema": "fundamentals_evolution_rubric_v1",
+    "sha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+    "scope": "FUNDAMENTALS_ANALYSIS",
+    "invocationScope": "fundamentals-analysis",
+    "dimensions": {
+      "claim_support": "核查基本面分析稿的事实、额外主张及推断是否由该阶段实际可见证据支持；可接受有边界的一般机制，不将其当作公司已证实事实。",
+      "numeric_period_correctness": "核查分析稿所用科目、金额、单位、期间、比较基数及派生计算，包括自行增加的合计；按本题 gold 的数值口径和用户问题范围判定。",
+      "counterevidence": "核查分析稿是否保留实际证据中影响结论的相反信号及方法不适用条件；没有相关反向证据时不强造风险，也不要求未问的同行比较。",
+      "unknowns": "核查分析方法是否把证据缺口与相应结论的强度对应起来；缺数据不能补成原因或保证，可计算且证据充分的内容也不应被误称未知。"
+    }
+  },
+  "goldSha256": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+  "policySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+  "rows": [
+    {
+      "arm": "old",
+      "case": 5,
+      "caseId": "tgt-fy2025q3-quarter-reconstruction",
+      "binding": {
+        "answerSha256": "2a8577335066bf559f91503be92eed72565453079104b041174322502f4f102c",
+        "inputSha256": "e5f9fa703d3949f26946635b7d18d553d943ad69f6507432e989572e40ab235e",
+        "evidenceTextSha256": "354fff44e94ed74b947c2194a8bb87e7e79a3252ad36eb86d18e66942362ae6f",
+        "resultSha256": "ea3af7da6b567be47a3d8d7f2fb4f48e73b21738e6e11a8996392571a6697505"
+      },
+      "releaseEligible": false,
+      "complete": true,
+      "withinOriginal300Seconds": true,
+      "requiredFacts": [
+        {
+          "field": "quarterOperatingCashFlow",
+          "observed": "1127",
+          "expected": "1127.0000",
+          "answerQuote": "| 经营现金流 | 3,485 [E1] − 2,358 [E2] | **1,127 百万美元** |",
+          "status": "PASS"
+        },
+        {
+          "field": "quarterCapitalSpendingOutflowAmount",
+          "observed": "978",
+          "expected": "978.0000",
+          "answerQuote": "| 购建固定资产现金支出毛额 | 2,842 [E1] − 1,864 [E2] | **978 百万美元** |",
+          "status": "PASS"
+        },
+        {
+          "field": "quarterSimpleFreeCashFlow",
+          "observed": "149",
+          "expected": "149.0000",
+          "answerQuote": "| 简化自由现金流 | 1,127 − 978 | **149 百万美元** |",
+          "status": "PASS"
+        }
+      ],
+      "additionalNumericChecks": [
+        {
+          "formula": "978/1127*100",
+          "expected": "86.77905944986690328305235138",
+          "observed": "86.79",
+          "answerQuote": "- **资本开支强度较高**：本季购建固定资产支出毛额 **978 百万美元**，占经营现金流的 **86.79%**（978 / 1,127 = 86.79%），说明资本开支消耗了大部分经营现金流，但尚未造成简化自由现金流转负。",
+          "status": "FAIL"
+        },
+        {
+          "formula": "1127/978*100",
+          "expected": "115.2351738241308793456032720",
+          "observed": "115.24",
+          "answerQuote": "- **覆盖率**：**115.24%**",
+          "status": "PASS"
+        },
+        {
+          "formula": "388/739*100",
+          "expected": "52.50338294993234100135317997",
+          "observed": "52.50",
+          "answerQuote": "- **同口径上年同期参考**：基于 [E1] 和 [E2] 中上年同期累计数还原，FY2024 Q3 单季经营现金流为 **739 百万美元**，购建固定资产支出毛额为 **655 百万美元**，简化自由现金流为 **84 百万美元**。本季经营现金流同比增长 **52.50%**，购建固定资产支出毛额同比增长 **49.31%**，简化自由现金流同比增长 **77.38%**。该比较仅为同口径累计数差值还原，不代表公司单独披露的单季数据。",
+          "status": "PASS"
+        },
+        {
+          "formula": "323/655*100",
+          "expected": "49.31297709923664122137404580",
+          "observed": "49.31",
+          "answerQuote": "- **同口径上年同期参考**：基于 [E1] 和 [E2] 中上年同期累计数还原，FY2024 Q3 单季经营现金流为 **739 百万美元**，购建固定资产支出毛额为 **655 百万美元**，简化自由现金流为 **84 百万美元**。本季经营现金流同比增长 **52.50%**，购建固定资产支出毛额同比增长 **49.31%**，简化自由现金流同比增长 **77.38%**。该比较仅为同口径累计数差值还原，不代表公司单独披露的单季数据。",
+          "status": "PASS"
+        },
+        {
+          "formula": "65/84*100",
+          "expected": "77.38095238095238095238095238",
+          "observed": "77.38",
+          "answerQuote": "- **同口径上年同期参考**：基于 [E1] 和 [E2] 中上年同期累计数还原，FY2024 Q3 单季经营现金流为 **739 百万美元**，购建固定资产支出毛额为 **655 百万美元**，简化自由现金流为 **84 百万美元**。本季经营现金流同比增长 **52.50%**，购建固定资产支出毛额同比增长 **49.31%**，简化自由现金流同比增长 **77.38%**。该比较仅为同口径累计数差值还原，不代表公司单独披露的单季数据。",
+          "status": "PASS"
+        }
+      ],
+      "dimensions": {
+        "claim_support": {
+          "status": "PASS",
+          "answerQuote": "- **经营现金流为正且覆盖资本开支**：FY2025 Q3 单季经营现金流 **1,127 百万美元**，高于购建固定资产支出毛额 **978 百万美元**，简化自由现金流为 **149 百万美元**，显示该季度经营现金创造能力足以覆盖当期主要固定资产投入。",
+          "reason": "Question-relevant conclusion checked against visible source and derived quantities."
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "answerQuote": "- **资本开支强度较高**：本季购建固定资产支出毛额 **978 百万美元**，占经营现金流的 **86.79%**（978 / 1,127 = 86.79%），说明资本开支消耗了大部分经营现金流，但尚未造成简化自由现金流转负。",
+          "reason": "Opposing cash/liquidity signals and applicable scope limits retained."
+        },
+        "unknowns": {
+          "status": "PASS",
+          "answerQuote": "- **营运资本变动不能直接解释为经营质量改善或恶化**：例如存货增加 **-2,015 百万美元** 可能对应旺季备货，也可能对应库存积压；应付账款增加 **+1,783 百万美元** 可能改善短期现金流，但也可能反映付款节奏变化。现有证据不足以确认商业原因。",
+          "reason": "Accounting facts are distinguished from unavailable commercial explanations or facilities."
+        },
+        "numeric_period_correctness": {
+          "status": "FAIL",
+          "answerQuote": "| 经营现金流 | 3,485 [E1] − 2,358 [E2] | **1,127 百万美元** |",
+          "reason": "Required facts, fiscal periods, units, gross spending definition and additional numerical claims checked; absolute tolerance 0.01."
+        }
+      },
+      "sourceQuotes": [
+        "Cash provided by operating activities |  | 3,485 |  | 4,078",
+        "Cash provided by operating activities |  | 2,358 |  | 3,339",
+        "Expenditures for property and equipment |  | (2,842) |  | (1,968)",
+        "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+      ],
+      "requiredPoints": [
+        {
+          "id": "p1",
+          "requirement": "正确还原财报第三季度2025-08-03/2025-11-01，不把累计金额或自然年季度当作所求单季",
+          "status": "PASS"
+        },
+        {
+          "id": "p2",
+          "requirement": "经营现金流1127、购建支出毛额978、简化自由现金流149百万美元",
+          "status": "PASS"
+        },
+        {
+          "id": "p3",
+          "requirement": "两个同财政年度、同科目的累计期间作差；支出按现金流出正金额表述",
+          "status": "PASS"
+        },
+        {
+          "id": "p4",
+          "requirement": "覆盖判断与单季经营现金流和购建支出大小一致",
+          "status": "PASS"
+        }
+      ],
+      "semanticStatus": "FAIL",
+      "notes": [
+        "Fiscal Q3 and adjacent cumulative endpoints correctly identify the period, although the start date is not written explicitly.",
+        "All additional cash-flow line differences and prior-year required aggregates were checked against both tables; 86.79% is the only numeric deviation over tolerance (expected 86.7791%)."
+      ],
+      "originalFalseMissingClaimPresent": false
+    },
+    {
+      "arm": "revised",
+      "case": 5,
+      "caseId": "tgt-fy2025q3-quarter-reconstruction",
+      "binding": {
+        "answerSha256": "dccd6c37765c3cbb93dbeadc6e8f5f9e4cd4fa38de2602d39291d93412b33298",
+        "inputSha256": "807c77667fa2fcc7145eeb83dc68f84fef67ef46fdd7bc3a7237d6255d9755f4",
+        "evidenceTextSha256": "354fff44e94ed74b947c2194a8bb87e7e79a3252ad36eb86d18e66942362ae6f",
+        "resultSha256": "bb86301cbf20e0b81e2a2acf323693f14344b0aadd772d4b0242be0337bf6cb9"
+      },
+      "releaseEligible": false,
+      "complete": true,
+      "withinOriginal300Seconds": true,
+      "requiredFacts": [
+        {
+          "field": "quarterOperatingCashFlow",
+          "observed": "1127",
+          "expected": "1127.0000",
+          "answerQuote": "| **FY2025 Q3 单季经营现金流** | **1,127 百万美元** | 3,485 − 2,358 |",
+          "status": "PASS"
+        },
+        {
+          "field": "quarterCapitalSpendingOutflowAmount",
+          "observed": "978",
+          "expected": "978.0000",
+          "answerQuote": "| **FY2025 Q3 单季购建固定资产现金支出** | **-978 百万美元** | -2,842 − (-1,864) |",
+          "status": "PASS"
+        },
+        {
+          "field": "quarterSimpleFreeCashFlow",
+          "observed": "149",
+          "expected": "149.0000",
+          "answerQuote": "| **FY2025 Q3 简化自由现金流** | **149 百万美元** |",
+          "status": "PASS"
+        }
+      ],
+      "additionalNumericChecks": [
+        {
+          "formula": "1127/978*100",
+          "expected": "115.2351738241308793456032720",
+          "observed": "115.24",
+          "answerQuote": "  即覆盖率为 **115.24%**。",
+          "status": "PASS"
+        }
+      ],
+      "dimensions": {
+        "claim_support": {
+          "status": "PASS",
+          "answerQuote": "  FY2025 Q3 经营现金流为 **1,127 百万美元**，购建固定资产现金支出毛额为 **978 百万美元**，经营现金流高于该项支出 **149 百万美元**。",
+          "reason": "Question-relevant conclusion checked against visible source and derived quantities."
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "answerQuote": "- **还原有效性依赖期初一致与无重述**：[E1] 与 [E2] 的期初均为 **2025-02-02**，支持直接相减；本轮证据未显示存在重述或合并范围变化。如果后续发现重述、会计调整或合并范围变化，可能影响还原结果。",
+          "reason": "Opposing cash/liquidity signals and applicable scope limits retained."
+        },
+        "unknowns": {
+          "status": "PASS",
+          "answerQuote": "- **商业原因未验证**：本轮证据仅支持会计数还原，未提供管理层对 FY2025 Q3 经营现金流或资本支出变化原因的解释，不能将还原出的会计变动直接推断为经营驱动因素。",
+          "reason": "Accounting facts are distinguished from unavailable commercial explanations or facilities."
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "answerQuote": "| **FY2025 Q3 单季经营现金流** | **1,127 百万美元** | 3,485 − 2,358 |",
+          "reason": "Required facts, fiscal periods, units, gross spending definition and additional numerical claims checked; absolute tolerance 0.01."
+        }
+      },
+      "sourceQuotes": [
+        "Cash provided by operating activities |  | 3,485 |  | 4,078",
+        "Cash provided by operating activities |  | 2,358 |  | 3,339",
+        "Expenditures for property and equipment |  | (2,842) |  | (1,968)",
+        "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+      ],
+      "requiredPoints": [
+        {
+          "id": "p1",
+          "requirement": "正确还原财报第三季度2025-08-03/2025-11-01，不把累计金额或自然年季度当作所求单季",
+          "status": "PASS"
+        },
+        {
+          "id": "p2",
+          "requirement": "经营现金流1127、购建支出毛额978、简化自由现金流149百万美元",
+          "status": "PASS"
+        },
+        {
+          "id": "p3",
+          "requirement": "两个同财政年度、同科目的累计期间作差；支出按现金流出正金额表述",
+          "status": "PASS"
+        },
+        {
+          "id": "p4",
+          "requirement": "覆盖判断与单季经营现金流和购建支出大小一致",
+          "status": "PASS"
+        }
+      ],
+      "semanticStatus": "PASS",
+      "originalFalseMissingClaimPresent": false
+    },
+    {
+      "arm": "old",
+      "case": 9,
+      "caseId": "pep-fy2025q3-quarter-cash-comparison",
+      "binding": {
+        "answerSha256": "b294a4492ac0973a81e7da5ba3718018e2d597cfddc107ad049865652bd57c4b",
+        "inputSha256": "15bd28f1e35adcf075ffbb5fb3aeba4928a6d685356397e0492c05b0bc430fd1",
+        "evidenceTextSha256": "381f5c785120f9b5022daa9745a75d3a9eb648ba6da9913942cbb5995faea14d",
+        "resultSha256": "6f3fc43e9e1726e75ec61c54fa0f76ac85d9c063826131c2d0b0b7091a93a1c0"
+      },
+      "releaseEligible": false,
+      "complete": false,
+      "withinOriginal300Seconds": false,
+      "semanticStatus": "NO_DATA",
+      "reason": "Provider did not supply a complete stop-terminated answer; no PASS inferred from the partial body"
+    },
+    {
+      "arm": "revised",
+      "case": 9,
+      "caseId": "pep-fy2025q3-quarter-cash-comparison",
+      "binding": {
+        "answerSha256": "eb04229ae02bff307e5f62e88b671d7d9022b9a5a3715b7402d132703ee312fc",
+        "inputSha256": "44ab977f39edaacfacfbbed26826edd5e2e26d819f63a4ecfd1f1d19f8dd3f1f",
+        "evidenceTextSha256": "381f5c785120f9b5022daa9745a75d3a9eb648ba6da9913942cbb5995faea14d",
+        "resultSha256": "d8368b49cc2ae6a6a97546176c620759fc29530a30246357ccfe28dc25ad3c22"
+      },
+      "releaseEligible": false,
+      "complete": true,
+      "withinOriginal300Seconds": false,
+      "requiredFacts": [
+        {
+          "field": "quarterConsolidatedNetIncome2025",
+          "observed": "2618",
+          "expected": "2618.0000",
+          "answerQuote": "| 合并净利润（现金流量表 “Net income”） | 2,945 | 2,618 | -327 | -11.10% |",
+          "status": "PASS"
+        },
+        {
+          "field": "quarterOperatingCashFlow2025",
+          "observed": "4472",
+          "expected": "4472.0000",
+          "answerQuote": "| 经营现金流 | 4,905 | 4,472 | -433 | -8.83% |",
+          "status": "PASS"
+        },
+        {
+          "field": "quarterSimpleFreeCashFlow2025",
+          "observed": "3480",
+          "expected": "3480.0000",
+          "answerQuote": "| 简化自由现金流 | 3,756 | 3,480 | -276 | -7.35% |",
+          "status": "PASS"
+        },
+        {
+          "field": "quarterConsolidatedNetIncome2024",
+          "observed": "2945",
+          "expected": "2945.0000",
+          "answerQuote": "| 合并净利润（现金流量表 “Net income”） | 2,945 | 2,618 | -327 | -11.10% |",
+          "status": "PASS"
+        },
+        {
+          "field": "quarterOperatingCashFlow2024",
+          "observed": "4905",
+          "expected": "4905.0000",
+          "answerQuote": "| 经营现金流 | 4,905 | 4,472 | -433 | -8.83% |",
+          "status": "PASS"
+        },
+        {
+          "field": "quarterSimpleFreeCashFlow2024",
+          "observed": "3756",
+          "expected": "3756.0000",
+          "answerQuote": "| 简化自由现金流 | 3,756 | 3,480 | -276 | -7.35% |",
+          "status": "PASS"
+        }
+      ],
+      "additionalNumericChecks": [
+        {
+          "formula": "-327/2945*100",
+          "expected": "-11.10356536502546689303904924",
+          "observed": "-11.10",
+          "answerQuote": "| 合并净利润（现金流量表 “Net income”） | 2,945 | 2,618 | -327 | -11.10% |",
+          "status": "PASS"
+        },
+        {
+          "formula": "-433/4905*100",
+          "expected": "-8.827726809378185524974515800",
+          "observed": "-8.83",
+          "answerQuote": "| 经营现金流 | 4,905 | 4,472 | -433 | -8.83% |",
+          "status": "PASS"
+        },
+        {
+          "formula": "-157/1149*100",
+          "expected": "-13.66405570060922541340295909",
+          "observed": "-13.66",
+          "answerQuote": "| 购建固定资产现金支出毛额 | 1,149 | 992 | -157 | -13.66% |",
+          "status": "PASS"
+        },
+        {
+          "formula": "-276/3756*100",
+          "expected": "-7.348242811501597444089456869",
+          "observed": "-7.35",
+          "answerQuote": "| 简化自由现金流 | 3,756 | 3,480 | -276 | -7.35% |",
+          "status": "PASS"
+        }
+      ],
+      "dimensions": {
+        "claim_support": {
+          "status": "FAIL",
+          "answerQuote": "因此，虽然经营现金流同比下降 **-8.83%**，简化自由现金流降幅较小，为 **-7.35%**。这说明自由现金流的同比改善并不来自经营现金流增强，而部分来自资本支出减少。",
+          "reason": "The additional phrase says FCF improved year over year, while 3480 is below 3756. Main conclusion and required numbers are correct; this is a local direction contradiction, not a wrong core answer."
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "answerQuote": "- 但整体现金创造并未增强，因为经营现金流仍从 **4,905 百万美元** 降至 **4,472 百万美元**。  ",
+          "reason": "Opposing cash/liquidity signals and applicable scope limits retained."
+        },
+        "unknowns": {
+          "status": "PASS",
+          "answerQuote": "- **商业原因尚无法确认**：本轮证据只有现金流量表摘要，没有管理层讨论、资产负债表明细或业务分部解释，不能把会计还原值直接解释为经营驱动因素。",
+          "reason": "Accounting facts are distinguished from unavailable commercial explanations or facilities."
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "answerQuote": "| 合并净利润（现金流量表 “Net income”） | 2,945 | 2,618 | -327 | -11.10% |",
+          "reason": "Required facts, fiscal periods, units, gross spending definition and additional numerical claims checked; absolute tolerance 0.01."
+        }
+      },
+      "sourceQuotes": [
+        "Net income $ 5,740 $ 8,092",
+        "Net income $ 3,122 $ 5,147",
+        "Net Cash Provided by Operating Activities 5,468 6,220",
+        "Net Cash Provided by Operating Activities 996 1,315",
+        "Capital spending (2,499) (2,850)",
+        "Capital spending (1,507) (1,701)"
+      ],
+      "requiredPoints": [
+        {
+          "id": "p1",
+          "requirement": "同为12周单季：2025-06-15至2025-09-06、2024-06-16至2024-09-07；分别以对应财年36周累计减24周累计。",
+          "status": "PASS"
+        },
+        {
+          "id": "p2",
+          "requirement": "2025单季合并净利润2618、经营现金流4472、简化自由现金流3480；2024单季分别2945、4905、3756百万美元。资本支出原值及单季还原额不强制单列；若列出，毛支出分别992/1149，不与资产出售回款净额混用。",
+          "status": "PASS"
+        },
+        {
+          "id": "p3",
+          "requirement": "2025单季应收-165为现金占用，存货+351及应付/其他流动负债+436为正现金贡献；可以只说明方向，无需强制列三个金额，但不得把累计负数直接当本单季方向。",
+          "status": "PASS"
+        },
+        {
+          "id": "p4",
+          "requirement": "同比净利润、经营现金流和简化自由现金流都下降，不能因为本季营运项目有正向贡献就称总体现金创造同比增强；仍有正自由现金流。",
+          "status": "PASS"
+        },
+        {
+          "id": "p5",
+          "requirement": "不能仅从表内方向断言季节性规律、收款效率改善、管理层意图或长期持续性；允许明确有条件的一般机制解释，不强制免责声明。",
+          "status": "PASS"
+        }
+      ],
+      "semanticStatus": "FAIL"
+    },
+    {
+      "arm": "old",
+      "case": 6,
+      "caseId": "tgt-fy2025q3-liquidity",
+      "binding": {
+        "answerSha256": "381c8c3c35190c4047f2349d357ab92063130578da7061335fc96a58dd8feaef",
+        "inputSha256": "cdd80252e56c3090f058c61d853100cb1cfde13a6deea251c3d4dc80c0baa578",
+        "evidenceTextSha256": "188296eb2af0315e5816ed9223ad950fe686cb6e90ec6e839d26af52e0df6cf9",
+        "resultSha256": "6b480d9611f9b6715a63b728c815a42309d83559eb9e23ab4b290e7c75499dae"
+      },
+      "releaseEligible": false,
+      "complete": true,
+      "withinOriginal300Seconds": true,
+      "requiredFacts": [
+        {
+          "field": "currentRatioCurrent",
+          "observed": "0.97",
+          "expected": "0.9746",
+          "answerQuote": "| 流动比率 | 流动资产合计 ÷ 流动负债合计 | **0.97** | **0.94** | +0.04，+4.20% |",
+          "status": "PASS"
+        },
+        {
+          "field": "totalDebtCurrent",
+          "observed": "16499",
+          "expected": "16499.0000",
+          "answerQuote": "| 有息债务总额 | 一年内到期长期债务及其他借款 + 非流动长期债务及其他借款 | **16,499 百万美元** | **15,940 百万美元** | +559 百万美元，+3.51% |",
+          "status": "PASS"
+        },
+        {
+          "field": "netDebtCurrent",
+          "observed": "12677",
+          "expected": "12677.0000",
+          "answerQuote": "| 净债务 | 有息债务总额 − 现金和现金等价物 | **12,677 百万美元** | **11,178 百万美元** | +1,499 百万美元，+13.41% |",
+          "status": "PASS"
+        },
+        {
+          "field": "currentRatioPrior",
+          "observed": "0.94",
+          "expected": "0.9353",
+          "answerQuote": "| 流动比率 | 流动资产合计 ÷ 流动负债合计 | **0.97** | **0.94** | +0.04，+4.20% |",
+          "status": "PASS"
+        },
+        {
+          "field": "totalDebtPrior",
+          "observed": "15940",
+          "expected": "15940.0000",
+          "answerQuote": "| 有息债务总额 | 一年内到期长期债务及其他借款 + 非流动长期债务及其他借款 | **16,499 百万美元** | **15,940 百万美元** | +559 百万美元，+3.51% |",
+          "status": "PASS"
+        },
+        {
+          "field": "netDebtPrior",
+          "observed": "11178",
+          "expected": "11178.0000",
+          "answerQuote": "| 净债务 | 有息债务总额 − 现金和现金等价物 | **12,677 百万美元** | **11,178 百万美元** | +1,499 百万美元，+13.41% |",
+          "status": "PASS"
+        }
+      ],
+      "additionalNumericChecks": [
+        {
+          "formula": "940/4762*100",
+          "expected": "19.73960520789584208315833683",
+          "observed": "19.74",
+          "answerQuote": "| 现金和现金等价物 | 3,822 百万美元 | 4,762 百万美元 | -940 百万美元，-19.74% | [E1] |",
+          "status": "PASS"
+        },
+        {
+          "formula": "1248/19454*100",
+          "expected": "6.415133134573866557006271204",
+          "observed": "6.41",
+          "answerQuote": "| 流动资产合计 | 20,702 百万美元 | 19,454 百万美元 | +1,248 百万美元，+6.41% | [E1] |",
+          "status": "PASS"
+        },
+        {
+          "formula": "443/20799*100",
+          "expected": "2.129910091831338045098322035",
+          "observed": "2.13",
+          "answerQuote": "| 流动负债合计 | 21,242 百万美元 | 20,799 百万美元 | +443 百万美元，+2.13% | [E1] |",
+          "status": "PASS"
+        },
+        {
+          "formula": "503/1636*100",
+          "expected": "30.74572127139364303178484108",
+          "observed": "30.75",
+          "answerQuote": "| 一年内到期的长期债务及其他借款 | 1,133 百万美元 | 1,636 百万美元 | -503 百万美元，-30.75% | [E1] |",
+          "status": "PASS"
+        },
+        {
+          "formula": "1062/14304*100",
+          "expected": "7.424496644295302013422818792",
+          "observed": "7.42",
+          "answerQuote": "| 非流动长期债务及其他借款 | 15,366 百万美元 | 14,304 百万美元 | +1,062 百万美元，+7.42% | [E1] |",
+          "status": "PASS"
+        },
+        {
+          "formula": "559/15940*100",
+          "expected": "3.506900878293601003764115433",
+          "observed": "3.51",
+          "answerQuote": "| 有息债务总额 | 一年内到期长期债务及其他借款 + 非流动长期债务及其他借款 | **16,499 百万美元** | **15,940 百万美元** | +559 百万美元，+3.51% |",
+          "status": "PASS"
+        },
+        {
+          "formula": "1499/11178*100",
+          "expected": "13.41027017355519770978708177",
+          "observed": "13.41",
+          "answerQuote": "| 净债务 | 有息债务总额 − 现金和现金等价物 | **12,677 百万美元** | **11,178 百万美元** | +1,499 百万美元，+13.41% |",
+          "status": "PASS"
+        },
+        {
+          "formula": "3822/21242*100",
+          "expected": "17.99265605875152998776009792",
+          "observed": "17.99",
+          "answerQuote": "| 现金 / 流动负债 | 现金和现金等价物 ÷ 流动负债合计 | **17.99%** | **22.90%** | -4.91 个百分点 |",
+          "status": "PASS"
+        },
+        {
+          "formula": "4762/20799*100",
+          "expected": "22.89533150632241934708399442",
+          "observed": "22.90",
+          "answerQuote": "| 现金 / 流动负债 | 现金和现金等价物 ÷ 流动负债合计 | **17.99%** | **22.90%** | -4.91 个百分点 |",
+          "status": "PASS"
+        },
+        {
+          "formula": "805/1345*100",
+          "expected": "59.85130111524163568773234201",
+          "observed": "59.85",
+          "answerQuote": "- 营运资金缺口由 **2025-02-01 的 -1,345 百万美元** 收窄至 **2025-11-01 的 -540 百万美元**，缺口收窄 **805 百万美元**，改善幅度为 **59.85%**。",
+          "status": "PASS"
+        },
+        {
+          "formula": "2156/12740*100",
+          "expected": "16.92307692307692307692307692",
+          "observed": "16.92",
+          "answerQuote": "   资产负债表显示存货从 **12,740 百万美元** 增至 **14,896 百万美元**，增加 **2,156 百万美元**，增幅 **16.92%** [E1]。若存货周转放缓，可能进一步占用现金并削弱流动性。",
+          "status": "PASS"
+        },
+        {
+          "formula": "739/13053*100",
+          "expected": "5.661533747031333792997778289",
+          "observed": "5.66",
+          "answerQuote": "   应付账款从 **13,053 百万美元** 增至 **13,792 百万美元**，增加 **739 百万美元**，增幅 **5.66%** [E1]。存货增长明显快于应付账款增长，可能意味着经营资金占用增加。",
+          "status": "PASS"
+        }
+      ],
+      "dimensions": {
+        "claim_support": {
+          "status": "PASS",
+          "answerQuote": "- **流动比率从 0.94 提升至 0.97**，显示短期资产对短期负债的覆盖能力略有改善。",
+          "reason": "Question-relevant conclusion checked against visible source and derived quantities."
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "answerQuote": "- 净债务从 **11,178 百万美元** 增至 **12,677 百万美元**，增长 **13.41%**，主要受现金下降和总债务上升共同影响。",
+          "reason": "Opposing cash/liquidity signals and applicable scope limits retained."
+        },
+        "unknowns": {
+          "status": "PASS",
+          "answerQuote": "- 本轮仅提供资产负债表，未提供现金流量表、债务到期明细、授信额度、商业票据、受限现金或可动用流动性安排，因此无法判断公司在压力情形下的完整流动性缓冲。",
+          "reason": "Accounting facts are distinguished from unavailable commercial explanations or facilities."
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "answerQuote": "| 流动比率 | 流动资产合计 ÷ 流动负债合计 | **0.97** | **0.94** | +0.04，+4.20% |",
+          "reason": "Required facts, fiscal periods, units, gross spending definition and additional numerical claims checked; absolute tolerance 0.01."
+        }
+      },
+      "sourceQuotes": [
+        "Total current assets |  | 20,702 |  | 19,454 |  | 20,554",
+        "Total current liabilities |  | 21,242 |  | 20,799 |  | 21,792",
+        "Cash and cash equivalents |  | $ 3,822 |  | $ 4,762 |  | $ 3,433",
+        "Current portion of long-term debt and other borrowings |  | 1,133 |  | 1,636 |  | 1,635",
+        "Long-term debt and other borrowings |  | 15,366 |  | 14,304 |  | 14,346"
+      ],
+      "requiredPoints": [
+        {
+          "id": "p1",
+          "requirement": "两个报表时点和流动比率正确，以期末流动资产/期末流动负债计算",
+          "status": "PASS"
+        },
+        {
+          "id": "p2",
+          "requirement": "按题目定义加总有息债务，不将总负债当债务或重复加计流动部分",
+          "status": "PASS"
+        },
+        {
+          "id": "p3",
+          "requirement": "两个时点净债务按指定现金和投资口径计算正确",
+          "status": "PASS"
+        },
+        {
+          "id": "p4",
+          "requirement": "结合实际比率及净债务变化给出审慎判断；方向混合时如实反映",
+          "status": "PASS"
+        }
+      ],
+      "semanticStatus": "PASS",
+      "notes": [
+        "Displayed asset growth 6.41% differs from correct two-decimal rounding 6.42%, but remains within the frozen 0.01 absolute tolerance; not relabeled FAIL."
+      ]
+    },
+    {
+      "arm": "revised",
+      "case": 6,
+      "caseId": "tgt-fy2025q3-liquidity",
+      "binding": {
+        "answerSha256": "99f17d051f8e414d106b8f0cce3fe587188aa88f4f245055b3a2e321aafb19dd",
+        "inputSha256": "f4dccdc74d86aeb05e0650221e0a10f89071fddb3411b0db4821dfc2127a8635",
+        "evidenceTextSha256": "188296eb2af0315e5816ed9223ad950fe686cb6e90ec6e839d26af52e0df6cf9",
+        "resultSha256": "c85abf906d85987cef1a5a26ebf84054e5c08d4c114941b7d90f079e2f108869"
+      },
+      "releaseEligible": false,
+      "complete": true,
+      "withinOriginal300Seconds": true,
+      "requiredFacts": [
+        {
+          "field": "currentRatioCurrent",
+          "observed": "0.97",
+          "expected": "0.9746",
+          "answerQuote": "| 2025-11-01 | 20,702 百万美元 | 21,242 百万美元 | **0.97** |",
+          "status": "PASS"
+        },
+        {
+          "field": "totalDebtCurrent",
+          "observed": "16499",
+          "expected": "16499.0000",
+          "answerQuote": "| 2025-11-01 | 1,133 百万美元 | 15,366 百万美元 | **16,499 百万美元** |",
+          "status": "PASS"
+        },
+        {
+          "field": "netDebtCurrent",
+          "observed": "12677",
+          "expected": "12677.0000",
+          "answerQuote": "| 2025-11-01 | 16,499 百万美元 | 3,822 百万美元 | **12,677 百万美元** |",
+          "status": "PASS"
+        },
+        {
+          "field": "currentRatioPrior",
+          "observed": "0.94",
+          "expected": "0.9353",
+          "answerQuote": "| 2025-02-01 | 19,454 百万美元 | 20,799 百万美元 | **0.94** |",
+          "status": "PASS"
+        },
+        {
+          "field": "totalDebtPrior",
+          "observed": "15940",
+          "expected": "15940.0000",
+          "answerQuote": "| 2025-02-01 | 1,636 百万美元 | 14,304 百万美元 | **15,940 百万美元** |",
+          "status": "PASS"
+        },
+        {
+          "field": "netDebtPrior",
+          "observed": "11178",
+          "expected": "11178.0000",
+          "answerQuote": "| 2025-02-01 | 15,940 百万美元 | 4,762 百万美元 | **11,178 百万美元** |",
+          "status": "PASS"
+        }
+      ],
+      "additionalNumericChecks": [
+        {
+          "formula": "1248/19454*100",
+          "expected": "6.415133134573866557006271204",
+          "observed": "6.42",
+          "answerQuote": "| 流动资产合计 | 20,702 百万美元 | 19,454 百万美元 | +1,248 百万美元，+6.42% |",
+          "status": "PASS"
+        },
+        {
+          "formula": "443/20799*100",
+          "expected": "2.129910091831338045098322035",
+          "observed": "2.13",
+          "answerQuote": "| 流动负债合计 | 21,242 百万美元 | 20,799 百万美元 | +443 百万美元，+2.13% |",
+          "status": "PASS"
+        },
+        {
+          "formula": "503/1636*100",
+          "expected": "30.74572127139364303178484108",
+          "observed": "30.75",
+          "answerQuote": "| 一年内到期的长期债务及其他借款 | 1,133 百万美元 | 1,636 百万美元 | -503 百万美元，-30.75% |",
+          "status": "PASS"
+        },
+        {
+          "formula": "1062/14304*100",
+          "expected": "7.424496644295302013422818792",
+          "observed": "7.42",
+          "answerQuote": "| 非流动长期债务及其他借款 | 15,366 百万美元 | 14,304 百万美元 | +1,062 百万美元，+7.42% |",
+          "status": "PASS"
+        },
+        {
+          "formula": "559/15940*100",
+          "expected": "3.506900878293601003764115433",
+          "observed": "3.51",
+          "answerQuote": "- 有息债务总额增加 **559 百万美元**，增幅 **3.51%**。",
+          "status": "PASS"
+        },
+        {
+          "formula": "1499/11178*100",
+          "expected": "13.41027017355519770978708177",
+          "observed": "13.41",
+          "answerQuote": "- 净债务增加 **1,499 百万美元**，增幅 **13.41%**。",
+          "status": "PASS"
+        },
+        {
+          "formula": "940/4762*100",
+          "expected": "19.73960520789584208315833683",
+          "observed": "19.74",
+          "answerQuote": "| 现金和现金等价物 | 3,822 百万美元 | 4,762 百万美元 | -940 百万美元，-19.74% |",
+          "status": "PASS"
+        }
+      ],
+      "dimensions": {
+        "claim_support": {
+          "status": "PASS",
+          "answerQuote": "- 两个时点流动比率均低于 **1.00**，说明按资产负债表静态口径，**流动资产对流动负债的覆盖仍不足**。  ",
+          "reason": "Question-relevant conclusion checked against visible source and derived quantities."
+        },
+        "counterevidence": {
+          "status": "PASS",
+          "answerQuote": "- **与 2025-02-01 相比，短期流动性呈现混合信号**：",
+          "reason": "Opposing cash/liquidity signals and applicable scope limits retained."
+        },
+        "unknowns": {
+          "status": "PASS",
+          "answerQuote": "因此，上述判断仅限于资产负债表静态口径，不能等同于对公司实际短期融资能力的完整评估。",
+          "reason": "Accounting facts are distinguished from unavailable commercial explanations or facilities."
+        },
+        "numeric_period_correctness": {
+          "status": "PASS",
+          "answerQuote": "| 2025-11-01 | 20,702 百万美元 | 21,242 百万美元 | **0.97** |",
+          "reason": "Required facts, fiscal periods, units, gross spending definition and additional numerical claims checked; absolute tolerance 0.01."
+        }
+      },
+      "sourceQuotes": [
+        "Total current assets |  | 20,702 |  | 19,454 |  | 20,554",
+        "Total current liabilities |  | 21,242 |  | 20,799 |  | 21,792",
+        "Cash and cash equivalents |  | $ 3,822 |  | $ 4,762 |  | $ 3,433",
+        "Current portion of long-term debt and other borrowings |  | 1,133 |  | 1,636 |  | 1,635",
+        "Long-term debt and other borrowings |  | 15,366 |  | 14,304 |  | 14,346"
+      ],
+      "requiredPoints": [
+        {
+          "id": "p1",
+          "requirement": "两个报表时点和流动比率正确，以期末流动资产/期末流动负债计算",
+          "status": "PASS"
+        },
+        {
+          "id": "p2",
+          "requirement": "按题目定义加总有息债务，不将总负债当债务或重复加计流动部分",
+          "status": "PASS"
+        },
+        {
+          "id": "p3",
+          "requirement": "两个时点净债务按指定现金和投资口径计算正确",
+          "status": "PASS"
+        },
+        {
+          "id": "p4",
+          "requirement": "结合实际比率及净债务变化给出审慎判断；方向混合时如实反映",
+          "status": "PASS"
+        }
+      ],
+      "semanticStatus": "PASS"
+    }
+  ]
+}

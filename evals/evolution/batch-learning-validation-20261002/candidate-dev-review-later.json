@@ -1,0 +1,621 @@
+{
+  "schema": "fundamentals_candidate_development_source_review_v1",
+  "createdAt": "2026-10-02T13:57:37.864261+00:00",
+  "reviewer": "AI-independent-batch-contract-audit",
+  "origin": "AI_SOURCE_REVIEW_NOT_HUMAN",
+  "releaseEligible": false,
+  "status": "COMPLETE_WITH_NO_DATA",
+  "scope": "Candidate development 08 and 10 only, both analysis/final independently; original source/gold were read before answers. No other candidate reviewer outputs read; zero provider API calls.",
+  "planSha256": "fa948d7e1ffc12ec4e3509990f214d25a4cf005fabba9289bf62273be1b12663",
+  "candidateDevelopmentRegistrationSha256": "f1a08cfc461fde11ae158fed48107577a6ac1a20f4280a42707570a6f7e537b8",
+  "reviewPolicySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+  "rubricSha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+  "goldFileSha256": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+  "summary": {
+    "plannedCases": 2,
+    "plannedStages": 4,
+    "PASS": 0,
+    "FAIL": 0,
+    "NO_DATA": 4,
+    "analysisTimeouts": 2,
+    "finalNotExecuted": 2,
+    "plannedRequiredFactChecks": 32,
+    "observedRequiredFactChecks": 0,
+    "noDataRequiredFactChecks": 32,
+    "newAuditProviderCalls": 0
+  },
+  "cases": [
+    {
+      "caseId": "jnj-fy2025q3-cash-deployment-bridge",
+      "runId": "candidate-dev-08-1-1",
+      "responsePath": "evals/evolution/batch-learning-validation-20261002/raw-candidate-dev-08/candidate-dev-08-1-1.response.json",
+      "responseSha256": "528ab56d8e31b47f3014a12c737d1e45c3aace0a2f9ef238516246560c0cea29",
+      "caseSha256": "77bcf9b19964d69e2d0ad25362a61c337d566e1f0761f49084a9c995019fc0fa",
+      "goldCanonicalSha256": "027a364b5b9f5522bda532c27030fd3a4294cc2d75f0011eed8e4320b8fe7394",
+      "bundleId": "candidate-a7a92cfaac38c01535486362",
+      "bundleContentSha256": "959c7d820bd43eb29bfe0494fb480f53830ba316bfa5e8dbb2c42c12d764644d",
+      "sources": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://s203.q4cdn.com/636242992/files/doc_financials/2025/q3/3Q-10Q-09-28-25-5.pdf",
+          "visibleSha256": "443b95abac4f379c3a26a88d7f5c29e1580980d5a6f9b561942a3f97b791535d",
+          "rawSha256": "443b95abac4f379c3a26a88d7f5c29e1580980d5a6f9b561942a3f97b791535d"
+        }
+      ],
+      "stages": {
+        "analysis": {
+          "verdict": "NO_DATA",
+          "executionStatus": "FAILED",
+          "errorCode": "TIMEOUT",
+          "durationMs": 300005,
+          "answerSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evidenceSha256": "3c6727eff268c79ca9c752835c534fe10977ed5b67b0469663ace6aef936ee57",
+          "answerCharacterCount": 0,
+          "requiredFacts": [
+            {
+              "field": "operatingCashFlowCurrent",
+              "period": "2024-12-30/2025-09-28",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "operatingCashFlowPrior",
+              "period": "2024-01-01/2024-09-29",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "investingNetCashFlowCurrent",
+              "period": "2024-12-30/2025-09-28",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "financingNetCashFlowCurrent",
+              "period": "2024-12-30/2025-09-28",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "exchangeRateEffectCurrent",
+              "period": "2024-12-30/2025-09-28",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "cashBeginning",
+              "period": "2024-12-29",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "cashEnding",
+              "period": "2025-09-28",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "netChangeInCash",
+              "period": "2024-12-30/2025-09-28",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p2",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p3",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p4",
+              "verdict": "NO_DATA"
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "verdict": "NO_DATA",
+              "reason": "Analysis invocation timed out after 300005 ms and returned no answer; source evidence alone cannot substitute for a business answer."
+            },
+            "numeric_period_correctness": {
+              "verdict": "NO_DATA",
+              "reason": "Analysis invocation timed out after 300005 ms and returned no answer; source evidence alone cannot substitute for a business answer."
+            },
+            "counterevidence": {
+              "verdict": "NO_DATA",
+              "reason": "Analysis invocation timed out after 300005 ms and returned no answer; source evidence alone cannot substitute for a business answer."
+            },
+            "unknowns": {
+              "verdict": "NO_DATA",
+              "reason": "Analysis invocation timed out after 300005 ms and returned no answer; source evidence alone cannot substitute for a business answer."
+            }
+          },
+          "additionalChecks": [
+            {
+              "check": "additional_numeric_factual_and_causal_claims",
+              "verdict": "NO_DATA",
+              "reason": "No answer claims exist to extract or assess."
+            }
+          ],
+          "findings": [
+            {
+              "attribution": "EXECUTION_FAILURE",
+              "reason": "Analysis invocation timed out after 300005 ms and returned no answer; source evidence alone cannot substitute for a business answer."
+            }
+          ],
+          "providerUsageKnown": false,
+          "providerCompletionUnknown": true
+        },
+        "finalAnswer": {
+          "verdict": "NO_DATA",
+          "executionStatus": "NOT_EXECUTED",
+          "errorCode": null,
+          "durationMs": null,
+          "answerSha256": null,
+          "evidenceSha256": null,
+          "answerCharacterCount": null,
+          "requiredFacts": [
+            {
+              "field": "operatingCashFlowCurrent",
+              "period": "2024-12-30/2025-09-28",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "operatingCashFlowPrior",
+              "period": "2024-01-01/2024-09-29",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "investingNetCashFlowCurrent",
+              "period": "2024-12-30/2025-09-28",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "financingNetCashFlowCurrent",
+              "period": "2024-12-30/2025-09-28",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "exchangeRateEffectCurrent",
+              "period": "2024-12-30/2025-09-28",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "cashBeginning",
+              "period": "2024-12-29",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "cashEnding",
+              "period": "2025-09-28",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "netChangeInCash",
+              "period": "2024-12-30/2025-09-28",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p2",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p3",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p4",
+              "verdict": "NO_DATA"
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "verdict": "NO_DATA",
+              "reason": "Final answer was not executed after upstream analysis timeout; there is no answer or observed final-stage evidence context."
+            },
+            "numeric_period_correctness": {
+              "verdict": "NO_DATA",
+              "reason": "Final answer was not executed after upstream analysis timeout; there is no answer or observed final-stage evidence context."
+            },
+            "counterevidence": {
+              "verdict": "NO_DATA",
+              "reason": "Final answer was not executed after upstream analysis timeout; there is no answer or observed final-stage evidence context."
+            },
+            "unknowns": {
+              "verdict": "NO_DATA",
+              "reason": "Final answer was not executed after upstream analysis timeout; there is no answer or observed final-stage evidence context."
+            }
+          },
+          "additionalChecks": [
+            {
+              "check": "additional_numeric_factual_and_causal_claims",
+              "verdict": "NO_DATA",
+              "reason": "No answer claims exist to extract or assess."
+            }
+          ],
+          "findings": [
+            {
+              "attribution": "UPSTREAM_EXECUTION_FAILURE",
+              "reason": "Final answer was not executed after upstream analysis timeout; there is no answer or observed final-stage evidence context."
+            }
+          ],
+          "providerUsageKnown": null,
+          "providerCompletionUnknown": null
+        }
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity-cash-synthesis",
+      "runId": "candidate-dev-10-1-1",
+      "responsePath": "evals/evolution/batch-learning-validation-20261002/raw-candidate-dev-10/candidate-dev-10-1-1.response.json",
+      "responseSha256": "1057fb22f0058c6c1e8f3dbfc3fc06a0e67212c3c6bd1f19a13187ae7fb58033",
+      "caseSha256": "79ed0ac122a75c5d56499b828a3ef7cb5e3e7a6a889ff25ab82cd94e04fba1f4",
+      "goldCanonicalSha256": "4c444686e86e920d2b1b30c0d524e56ea1b32120bc50a93cab04565d7bf4319d",
+      "bundleId": "candidate-a7a92cfaac38c01535486362",
+      "bundleContentSha256": "959c7d820bd43eb29bfe0494fb480f53830ba316bfa5e8dbb2c42c12d764644d",
+      "sources": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://corporate.target.com/press/release/2025/11/target-corporation-reports-third-quarter-earnings",
+          "visibleSha256": "ec5b45fedd4b52e997f108a88a9a1f612604754571b694b43ec3c3ed201de2d3",
+          "rawSha256": "ec5b45fedd4b52e997f108a88a9a1f612604754571b694b43ec3c3ed201de2d3"
+        },
+        {
+          "evidenceId": "E2",
+          "sourceRef": "https://corporate.target.com/press/release/2025/11/target-corporation-reports-third-quarter-earnings",
+          "visibleSha256": "f39c70b4699e8031f401f069c664f5a10e1a0c7ee6d3e1afc90adffd9e98c92b",
+          "rawSha256": "f39c70b4699e8031f401f069c664f5a10e1a0c7ee6d3e1afc90adffd9e98c92b"
+        }
+      ],
+      "stages": {
+        "analysis": {
+          "verdict": "NO_DATA",
+          "executionStatus": "FAILED",
+          "errorCode": "TIMEOUT",
+          "durationMs": 300005,
+          "answerSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "evidenceSha256": "3cc170bc9edc87f21902013a6e2db8973878f3ca7a47988ccb4c1a038616a274",
+          "answerCharacterCount": 0,
+          "requiredFacts": [
+            {
+              "field": "currentRatioCurrent",
+              "period": "2025-11-01",
+              "unit": "ratio",
+              "currency": "N/A",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "netDebtCurrent",
+              "period": "2025-11-01",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "currentRatioPrior",
+              "period": "2025-02-01",
+              "unit": "ratio",
+              "currency": "N/A",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "netDebtPrior",
+              "period": "2025-02-01",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "operatingNetCashFlow",
+              "period": "2025-02-02/2025-11-01",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "investingNetCashFlow",
+              "period": "2025-02-02/2025-11-01",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "financingNetCashFlow",
+              "period": "2025-02-02/2025-11-01",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "netChangeInCash",
+              "period": "2025-02-02/2025-11-01",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p2",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p3",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p4",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p5",
+              "verdict": "NO_DATA"
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "verdict": "NO_DATA",
+              "reason": "Analysis invocation timed out after 300005 ms and returned no answer; source evidence alone cannot substitute for a business answer."
+            },
+            "numeric_period_correctness": {
+              "verdict": "NO_DATA",
+              "reason": "Analysis invocation timed out after 300005 ms and returned no answer; source evidence alone cannot substitute for a business answer."
+            },
+            "counterevidence": {
+              "verdict": "NO_DATA",
+              "reason": "Analysis invocation timed out after 300005 ms and returned no answer; source evidence alone cannot substitute for a business answer."
+            },
+            "unknowns": {
+              "verdict": "NO_DATA",
+              "reason": "Analysis invocation timed out after 300005 ms and returned no answer; source evidence alone cannot substitute for a business answer."
+            }
+          },
+          "additionalChecks": [
+            {
+              "check": "additional_numeric_factual_and_causal_claims",
+              "verdict": "NO_DATA",
+              "reason": "No answer claims exist to extract or assess."
+            }
+          ],
+          "findings": [
+            {
+              "attribution": "EXECUTION_FAILURE",
+              "reason": "Analysis invocation timed out after 300005 ms and returned no answer; source evidence alone cannot substitute for a business answer."
+            }
+          ],
+          "providerUsageKnown": false,
+          "providerCompletionUnknown": true
+        },
+        "finalAnswer": {
+          "verdict": "NO_DATA",
+          "executionStatus": "NOT_EXECUTED",
+          "errorCode": null,
+          "durationMs": null,
+          "answerSha256": null,
+          "evidenceSha256": null,
+          "answerCharacterCount": null,
+          "requiredFacts": [
+            {
+              "field": "currentRatioCurrent",
+              "period": "2025-11-01",
+              "unit": "ratio",
+              "currency": "N/A",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "netDebtCurrent",
+              "period": "2025-11-01",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "currentRatioPrior",
+              "period": "2025-02-01",
+              "unit": "ratio",
+              "currency": "N/A",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "netDebtPrior",
+              "period": "2025-02-01",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "operatingNetCashFlow",
+              "period": "2025-02-02/2025-11-01",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "investingNetCashFlow",
+              "period": "2025-02-02/2025-11-01",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "financingNetCashFlow",
+              "period": "2025-02-02/2025-11-01",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            },
+            {
+              "field": "netChangeInCash",
+              "period": "2025-02-02/2025-11-01",
+              "unit": "million",
+              "currency": "USD",
+              "observedLiteral": null,
+              "normalizedObservedValue": null,
+              "verdict": "NO_DATA"
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p2",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p3",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p4",
+              "verdict": "NO_DATA"
+            },
+            {
+              "id": "p5",
+              "verdict": "NO_DATA"
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "verdict": "NO_DATA",
+              "reason": "Final answer was not executed after upstream analysis timeout; there is no answer or observed final-stage evidence context."
+            },
+            "numeric_period_correctness": {
+              "verdict": "NO_DATA",
+              "reason": "Final answer was not executed after upstream analysis timeout; there is no answer or observed final-stage evidence context."
+            },
+            "counterevidence": {
+              "verdict": "NO_DATA",
+              "reason": "Final answer was not executed after upstream analysis timeout; there is no answer or observed final-stage evidence context."
+            },
+            "unknowns": {
+              "verdict": "NO_DATA",
+              "reason": "Final answer was not executed after upstream analysis timeout; there is no answer or observed final-stage evidence context."
+            }
+          },
+          "additionalChecks": [
+            {
+              "check": "additional_numeric_factual_and_causal_claims",
+              "verdict": "NO_DATA",
+              "reason": "No answer claims exist to extract or assess."
+            }
+          ],
+          "findings": [
+            {
+              "attribution": "UPSTREAM_EXECUTION_FAILURE",
+              "reason": "Final answer was not executed after upstream analysis timeout; there is no answer or observed final-stage evidence context."
+            }
+          ],
+          "providerUsageKnown": null,
+          "providerCompletionUnknown": null
+        }
+      }
+    }
+  ],
+  "gateImplication": "These cases fail the pre-registered requirement that all ten candidate development cases be source-reviewable. They cannot be treated as semantic PASS or used to justify transfer; preserve unknown usage and do not retry.",
+  "comparisonBoundary": "Original runs also timed out; no semantic baseline label is inherited and no method improvement is claimed."
+}

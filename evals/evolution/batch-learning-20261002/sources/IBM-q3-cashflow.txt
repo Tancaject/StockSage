@@ -1,0 +1,29 @@
+INTERNATIONAL BUSINESS MACHINES CORPORATION CASH FLOW (Unaudited)
+
+ |  | Three Months Ended September 30, |  | Nine Months Ended September 30,
+(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024
+Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109
+Pension Settlement Charge |  | - |  | 2,725 |  | - |  | 2,725
+Depreciation/Amortization of Intangibles (1) |  | 1,283 |  | 1,268 |  | 3,725 |  | 3,555
+Stock-based Compensation |  | 444 |  | 330 |  | 1,285 |  | 966
+Operating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)
+IBM Financing A/R |  | 298 |  | 873 |  | 905 |  | 1,824
+Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115
+ |  |  |  |  |  |  |  | 
+Capital Expenditures, net of payments & proceeds (3) |  | (410) |  | 55 |  | (1,067) |  | (705)
+Divestitures, net of cash transferred |  | - |  | 2 |  | (1) |  | 705
+Acquisitions, net of cash acquired |  | (58) |  | (2,513) |  | (7,903) |  | (2,748)
+Marketable Securities / Other Investments, net |  | 30 |  | 869 |  | (2,748) |  | (810)
+Net Cash Provided by/(Used in) Investing Activities |  | $ (437) |  | $ (1,587) |  | $ (11,719) |  | $ (3,558)
+ |  |  |  |  |  |  |  | 
+Debt, net of payments & proceeds |  | (1,108) |  | (1,259) |  | 4,683 |  | (777)
+Dividends |  | (1,569) |  | (1,542) |  | (4,681) |  | (4,601)
+Financing - Other |  | (334) |  | 35 |  | (425) |  | (26)
+Net Cash Provided by/(Used in) Financing Activities |  | $ (3,012) |  | $ (2,766) |  | $ (423) |  | $ (5,403)
+ |  |  |  |  |  |  |  | 
+Effect of Exchange Rate changes on Cash |  | (59) |  | 207 |  | 429 |  | (29)
+Net Change in Cash, Cash Equivalents and Restricted Cash |  | $ (426) |  | $ (1,264) |  | $ (2,561) |  | $ 125
+____________________
+(1) Includes operating lease right-of-use assets amortization.
+(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter.
+(3) 2024 includes proceeds of $0.4 billion from the sale of certain QRadar SaaS assets in the third quarter.

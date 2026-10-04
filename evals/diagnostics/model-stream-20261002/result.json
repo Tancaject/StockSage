@@ -1,0 +1,64 @@
+{
+  "schema": "model_stream_diagnostic_result_v1",
+  "scope": "THREE_NEW_SINGLE_ATTEMPT_TRANSPORT_DIAGNOSTICS",
+  "providerCalls": 3,
+  "automaticRetries": 0,
+  "knownProviderTokens": {
+    "input": 12512,
+    "output": 5485,
+    "total": 17997
+  },
+  "unknownUsageCalls": 1,
+  "timeoutFinding": {
+    "caseId": "pep-fy2025q3-quarter-cash-comparison",
+    "firstReasoningSeconds": 0.953,
+    "lastEventSeconds": 299.984,
+    "maxEventGapSeconds": 1.328000000000003,
+    "reasoningChars": 37290,
+    "answerChars": 0,
+    "durationSeconds": 300.0,
+    "conclusion": "CONTINUOUS_REASONING_WITHOUT_FINAL_TEXT_UNTIL_LOCAL_DEADLINE",
+    "limits": "New streamed reproduction; does not retroactively expose original nonstream call timing."
+  },
+  "disconnectFinding": {
+    "caseId": "jnj-fy2025q3-quarter-reconstruction",
+    "pythonDurationSeconds": 55.438,
+    "javaDurationSeconds": 71.546,
+    "status": "NOT_REPRODUCED_IN_TWO_NEW_SAMPLES",
+    "rootCause": "UNRESOLVED",
+    "limits": "Transport/language/time/sampling differ; success does not prove old connection fault fixed."
+  },
+  "qualityAssessed": false,
+  "defaultModelChanged": false,
+  "thinkingBudgetChanged": false,
+  "automaticActivation": false,
+  "residentServiceRestarted": false,
+  "fixes": [
+    "INTERRUPT_ACTUAL_ANALYST_WORKER_ON_TIMEOUT_OR_CALLER_INTERRUPTION",
+    "SHOW_ACTUAL_ANALYSIS_WAIT_STAGE",
+    "RETAIN_PARTIAL_REPLY_WITH_INCOMPLETE_MARKER",
+    "RECORD_SAFE_STREAM_TRANSPORT_TIMING_AND_REQUEST_ID"
+  ],
+  "artifacts": {
+    "direct-analysis-09\\answer.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "direct-analysis-09\\plan.json": "16ef71451a7885bb4b235b67b9dc2361ca44b7863bf8c111b6ea33e60c00e90f",
+    "direct-analysis-09\\request.json": "1e6a6c1d9ee64ff0fe92b2155b916155f2b06b29588fff42f1cf7cb72ef7c8e6",
+    "direct-analysis-09\\result.json": "f647dd35b52c9abaff2ee8251b45b69bc299059f8b6044f0c12afc21624d8338",
+    "direct-final-02\\answer.txt": "47d7005920a470335d3fae9d7dcca9cce2ace710828f20e24184f531ce1787fa",
+    "direct-final-02\\plan.json": "412d50445dbfe24a78fe240d905a2edd4e9bf696c35468d0b14a2cd4c8738199",
+    "direct-final-02\\request.json": "6d530663edc6e8e1c15c722d4bf9cbc0d6ae020d3ad6402fe248a1209c708b09",
+    "direct-final-02\\result.json": "182c1119dc6494605a2fc461da952d292fcae02d63631687c7b4cc80ddd6ebb5",
+    "java-binding.json": "358628df1a8c451bd5cdfccaa793cec353ab3d71248268c387d4a63a5a0c906f",
+    "java-diagnosis.json": "cc2eca156b8f5a1f5f59038fdee41ef02d7e70a3621530664c88a55fa8c25617",
+    "java-execution.json": "b83f61550c27746fc3514fb7c61aeb4b1ad60406bf3a17e435c41b188195897c",
+    "java-final-02\\diagnosis.json": "cc2eca156b8f5a1f5f59038fdee41ef02d7e70a3621530664c88a55fa8c25617",
+    "java-final-02\\execution.json": "b83f61550c27746fc3514fb7c61aeb4b1ad60406bf3a17e435c41b188195897c",
+    "java-final-02\\java-final-02.request.json": "07d6c990a76c53e723e3f97a20f70489aae52ff98d7cffdb8160fe13fe2ab09a",
+    "java-final-02\\java-final-02.response.json": "f2192bffef82fbbb30e926e00428550189a03c637674720a8f396e345642c1a5",
+    "java-final-02\\runtime.json": "f7e094b662cb1fb9fe18cc7211b7c6167f8edd7c4d003dbabbd369741299ad99",
+    "java-final-02.log": "76ae8a1f67dd20d3a73c44de050ffc7d9686e149a4e0ae5aa28b8c256ddb829c",
+    "java-plan.json": "eb255354a665057d1487c0fc038a18144c04fc2c590a8a9ddf5e1bd046238690",
+    "probe.py": "3ad7d3f058b9621de9f86cbea43960d7cd3d46931269cf83a29690118dadbd3d",
+    "verification.json": "7e6feb7971f9fc30e670a0704ed269030875924974eda614f6368b83623480e9"
+  }
+}

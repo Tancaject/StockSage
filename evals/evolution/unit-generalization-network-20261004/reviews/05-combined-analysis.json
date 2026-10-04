@@ -1,0 +1,135 @@
+{
+  "schema": "fundamentals_two_stage_ai_source_review_v1",
+  "origin": "CODEX_NONBLIND_AI_SOURCE_REVIEW_NOT_HUMAN_OR_CALIBRATED_JUDGE",
+  "case": 5,
+  "caseId": "tgt-fy2025q3-quarter-reconstruction",
+  "arm": "combined",
+  "stage": "analysis",
+  "releaseEligible": false,
+  "rubric": {
+    "schema": "fundamentals_evolution_rubric_v1",
+    "sha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+    "scope": "FUNDAMENTALS_ANALYSIS",
+    "invocationScope": "fundamentals-analysis",
+    "dimensions": {
+      "claim_support": "核查基本面分析稿的事实、额外主张及推断是否由该阶段实际可见证据支持；可接受有边界的一般机制，不将其当作公司已证实事实。",
+      "numeric_period_correctness": "核查分析稿所用科目、金额、单位、期间、比较基数及派生计算，包括自行增加的合计；按本题 gold 的数值口径和用户问题范围判定。",
+      "counterevidence": "核查分析稿是否保留实际证据中影响结论的相反信号及方法不适用条件；没有相关反向证据时不强造风险，也不要求未问的同行比较。",
+      "unknowns": "核查分析方法是否把证据缺口与相应结论的强度对应起来；缺数据不能补成原因或保证，可计算且证据充分的内容也不应被误称未知。"
+    }
+  },
+  "binding": {
+    "answerSha256": "c136efb8604091fc263bdaf903eda966b8efad0286de47f9151d81f41ff2596e",
+    "resultSha256": "eafaa4cbd259ccb2c00bbfffd489ecb15c074611e4a787b2dbc09f4140a2aa37",
+    "requestSha256": "048af0e122b37a772b3e8a83e32c9a86c22178460679091a9a54e0af6d2ec2d8",
+    "sourceTraceSha256": "1c560e86597ba69e46457760117e21af7b314d2f43d468da38845fc770ebfaf3",
+    "goldSha256": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+    "policySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad"
+  },
+  "requiredFacts": [
+    {
+      "field": "quarterOperatingCashFlow",
+      "period": "2025-08-03/2025-11-01",
+      "unit": "million",
+      "observed": "1127",
+      "expected": "1127.0000",
+      "answerQuote": "| 经营现金流 | 3,485 − 2,358 | **1,127 百万美元** |",
+      "status": "PASS"
+    },
+    {
+      "field": "quarterCapitalSpendingOutflowAmount",
+      "period": "2025-08-03/2025-11-01",
+      "unit": "million",
+      "observed": "978",
+      "expected": "978.0000",
+      "answerQuote": "| 购建固定资产现金支出 | (2,842) − (1,864) | **(978) 百万美元**，即现金流出 978 百万美元 |",
+      "status": "PASS"
+    },
+    {
+      "field": "quarterSimpleFreeCashFlow",
+      "period": "2025-08-03/2025-11-01",
+      "unit": "million",
+      "observed": "149",
+      "expected": "149.0000",
+      "answerQuote": "| 简化自由现金流 | 1,127 − 978 | **149 百万美元** |",
+      "status": "PASS"
+    }
+  ],
+  "additionalNumericChecks": [
+    {
+      "observed": "115.24",
+      "expected": "115.2351738241308793456032720",
+      "formula": "1127/978*100",
+      "answerQuote": "- 覆盖率：1,127 ÷ 978 = **115.24%**。  ",
+      "status": "PASS"
+    },
+    {
+      "observed": "-14.54",
+      "expected": "-14.54144188327611574301128004",
+      "formula": "(3485-4078)/4078*100",
+      "answerQuote": "- 累计口径下，九个月经营现金流由上年同期的 4,078 百万美元降至 3,485 百万美元，降幅 **-14.54%**；九个月购建固定资产现金支出由上年同期的 1,968 百万美元升至 2,842 百万美元，现金流出增加 **44.41%** [E1]。该累计趋势提示资本支出压力上升，但不应直接等同于单季经营质量结论。",
+      "status": "PASS"
+    },
+    {
+      "observed": "44.41",
+      "expected": "44.41056910569105691056910569",
+      "formula": "(2842-1968)/1968*100",
+      "answerQuote": "- 累计口径下，九个月经营现金流由上年同期的 4,078 百万美元降至 3,485 百万美元，降幅 **-14.54%**；九个月购建固定资产现金支出由上年同期的 1,968 百万美元升至 2,842 百万美元，现金流出增加 **44.41%** [E1]。该累计趋势提示资本支出压力上升，但不应直接等同于单季经营质量结论。",
+      "status": "PASS"
+    }
+  ],
+  "dimensions": {
+    "claim_support": {
+      "status": "PASS",
+      "answerQuote": "结论：在按用户指定口径不抵扣资产出售回款的情况下，TGT FY2025 Q3 单季经营现金流仍可覆盖购建固定资产现金支出，并形成 **149 百万美元** 的正简化自由现金流。",
+      "reason": "Read against original evidence, not the analyst draft as independent authority."
+    },
+    "counterevidence": {
+      "status": "PASS",
+      "answerQuote": "- 累计口径下，九个月经营现金流由上年同期的 4,078 百万美元降至 3,485 百万美元，降幅 **-14.54%**；九个月购建固定资产现金支出由上年同期的 1,968 百万美元升至 2,842 百万美元，现金流出增加 **44.41%** [E1]。该累计趋势提示资本支出压力上升，但不应直接等同于单季经营质量结论。",
+      "reason": "Relevant opposing signals and comparison boundaries retained."
+    },
+    "unknowns": {
+      "status": "PASS",
+      "answerQuote": "- 本轮未直接提供 TGT FY2025 Q3 的**单季原始现金流量表**；但用户要求的经营现金流、购建固定资产现金支出和简化自由现金流已通过同起点累计报表差值还原，因此这三项**不构成数值缺口**。  ",
+      "reason": "Unavailable commercial causes or disclosure details remain bounded."
+    },
+    "numeric_period_correctness": {
+      "status": "PASS",
+      "answerQuote": "| 经营现金流 | 3,485 − 2,358 | **1,127 百万美元** |",
+      "reason": "Required facts, source units and fiscal periods reviewed; additional calculations use the frozen absolute tolerance 0.01."
+    }
+  },
+  "requiredPoints": [
+    {
+      "id": "p1",
+      "requirement": "正确还原财报第三季度2025-08-03/2025-11-01，不把累计金额或自然年季度当作所求单季",
+      "status": "PASS"
+    },
+    {
+      "id": "p2",
+      "requirement": "经营现金流1127、购建支出毛额978、简化自由现金流149百万美元",
+      "status": "PASS"
+    },
+    {
+      "id": "p3",
+      "requirement": "两个同财政年度、同科目的累计期间作差；支出按现金流出正金额表述",
+      "status": "PASS"
+    },
+    {
+      "id": "p4",
+      "requirement": "覆盖判断与单季经营现金流和购建支出大小一致",
+      "status": "PASS"
+    }
+  ],
+  "sourceQuotes": [
+    "Cash provided by operating activities |  | 3,485 |  | 4,078",
+    "Cash provided by operating activities |  | 2,358 |  | 3,339",
+    "Expenditures for property and equipment |  | (2,842) |  | (1,968)",
+    "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+  ],
+  "notes": [
+    "Fiscal start/end dates and gross-spending definition correct; no false missing-data claim or whole-table derivation."
+  ],
+  "semanticStatus": "PASS"
+}

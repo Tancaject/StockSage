@@ -1,0 +1,32 @@
+{
+  "schema" : "ordinary_answer_replay_v1",
+  "replayId" : "ad8f9833-e4fb-495f-b6af-7029f90ff00b",
+  "status" : "COMPLETED",
+  "answer" : "## 结论\n\n按用户指定的“简化自由现金流 = 经营现金流 − 购建固定资产现金支出毛额，且不抵扣资产出售回款”口径，强生（JNJ）**FY2025 第三季度单季**还原结果为：\n\n- **经营现金流：+9,169 百万美元**\n- **购建固定资产现金支出毛额：1,157 百万美元**\n- **简化自由现金流：+8,012 百万美元**\n\n本季经营现金流**足以覆盖**购建固定资产现金支出，覆盖倍数为 **7.92 倍**，该支出占经营现金流比例为 **12.62%**。\n\n---\n\n## 1. 还原财报期间\n\n本轮证据提供的是年内累计现金流量表：\n\n| 证据 | 报表期间 | 用途 |\n|---|---:|---|\n| [E1] | **2024-12-30 至 2025-09-28**，FY2025 九个月累计 | 提供 9M 累计数 |\n| [E2] | **2024-12-30 至 2025-06-29**，FY2025 六个月累计 | 提供 6M 累计数 |\n\n由于两期累计报表期初日相同，FY2025 Q3 单季还原期间为：\n\n> **2025-06-30 至 2025-09-28**\n\n单季数 = 九个月累计数 [E1] − 六个月累计数 [E2]。\n\n---\n\n## 2. 核心指标与计算\n\n| 指标 | FY2025 Q3 单季还原值 | 计算过程 | 说明 |\n|---|---:|---:|---|\n| 经营现金流 | **+9,169 百万美元** | 17,221 − 8,052 | 九个月累计经营现金流减去六个月累计经营现金流 [E1][E2] |\n| 购建固定资产现金支出毛额 | **1,157 百万美元** | 2,995 − 1,838 | 现金流量表中列示为现金流出 **-1,157 百万美元**；按支出毛额取正数 [E1][E2] |\n| 简化自由现金流 | **+8,012 百万美元** | 9,169 − 1,157 | 不抵扣资产出售回款 [E1][E2] |\n\n---\n\n## 3. 覆盖情况\n\n| 指标 | 数值 | 含义 |\n|---|---:|---|\n| 经营现金流 / 购建固定资产现金支出 | **7.92 倍** | 本季经营现金流约为资本性支出的 7.92 倍 |\n| 购建固定资产现金支出 / 经营现金流 | **12.62%** | 本季资本性支出仅占经营现金流的 12.62% |\n| 覆盖后剩余 | **+8,012 百万美元** | 即按用户指定口径计算的简化自由现金流 |\n\n因此，**FY2025 Q3 单季经营现金流可以覆盖购建固定资产现金支出**，且覆盖能力较强。\n\n---\n\n## 4. 口径说明与限制\n\n- 本季资产处置回款为 **76 百万美元**，但用户指定口径要求**不抵扣资产出售回款**，因此未纳入简化自由现金流计算 [E1][E2]。\n- 上述 FY2025 Q3 单季数据并非公司直接披露的单季现金流量表，而是由两期累计现金流量表相减还原得到。\n- 还原前提为两期累计报表口径一致、期初一致且无重述或合并范围变化影响。本轮证据支持期初一致，但未提供是否存在重述或合并范围变化的独立确认。\n\n---\n\n## 数据来源与时间说明\n\n- **[E1]** Johnson & Johnson consolidated statements of cash flows, Fiscal Nine Months Ended **2025-09-28**，期间 **2024-12-30 至 2025-09-28**，单位：百万美元，可用时间 **2025-10-22**，检索时间 **2026-10-02**。来源：`https://s203.q4cdn.com/636242992/files/doc_financials/2025/q3/3Q-10Q-09-28-25-5.pdf`\n- **[E2]** Johnson & Johnson consolidated statements of cash flows, Fiscal Six Months Ended **2025-06-29**，期间 **2024-12-30 至 2025-06-29**，单位：百万美元，可用时间 **2025-07-24**，检索时间 **2026-10-02**。来源：`https://s203.q4cdn.com/636242992/files/doc_financials/2025/q2/2Q-10Q-06-29-25-Final.pdf`\n\n仅供参考，不构成投资建议。",
+  "promptSha256" : "42fe34f8ca23c09b4bf2960c14ddc1bcf491277a856eff56d1d70adc498e657a",
+  "observations" : [ {
+    "schemaVersion" : 1,
+    "kind" : "model-invocation",
+    "enableThinking" : true,
+    "modelTier" : "STANDARD",
+    "modelName" : "qwen3.8-max",
+    "temperature" : 0.7,
+    "maxOutputTokens" : 4096,
+    "configurationSource" : "REQUEST_OPTIONS",
+    "scope" : "final-answer",
+    "thinkingBudget" : 32768
+  }, {
+    "totalTokens" : 9241,
+    "providerModelName" : "qwen3.8-max",
+    "outputTokens" : 2985,
+    "kind" : "model-usage",
+    "schemaVersion" : 1,
+    "usageSemantics" : "INVOCATION_SNAPSHOT",
+    "inputTokens" : 6256,
+    "scope" : "final-answer",
+    "usageSource" : "PROVIDER"
+  } ],
+  "durationMs" : 71546,
+  "errorCode" : null,
+  "timeoutSeconds" : 300
+}

@@ -1,0 +1,130 @@
+我们需要回答中文。任务：基于E1和E2，还原TGT FY2025第三季度单季经营现金流、购建固定资产现金支出、简化自由现金流（经营现金流 - 资本支出毛额，不抵扣资产出售回款）。需要说明本季经营现金流是否覆盖该支出，注明还原财报期间。金额单位，比率百分比两位小数。
+
+关键：E1是Nine Months Ended Nov 1, 2025（2025-02-02 to 2025-11-01? periodStart given 2025-02-02, periodEnd 2025-11-01）累计九个月。E2是Six Months Ended Aug 2, 2025（2025-02-02 to 2025-08-02）累计六个月。两者同起点2025-02-02，同财年FY2025，无重述迹象。可以用九个月累计减六个月累计得到第三单季（大致2025-08-03 to 2025-11-01，Target fiscal Q3）。
+
+计算：
+经营现金流：
+E1 9M Cash provided by operating activities = 3,485 million USD.
+E2 6M = 2,358 million USD.
+Q3 = 3,485 - 2,358 = 1,127 million USD.
+
+购建固定资产现金支出：
+E1 9M Expenditures for property and equipment = (2,842) million USD.
+E2 6M = (1,864) million USD.
+Q3 = -2,842 - (-1,864) = -978 million USD. 支出毛额 978 million USD.
+
+简化自由现金流 = 经营现金流 - 资本支出毛额 = 1,127 - 978 = 149 million USD. 或者用现金流符号：经营现金流 + CapEx(负) = 1,127 + (-978)=149.
+
+覆盖：经营现金流 1,127 / 978 = 1.152... 保留两位小数 1.15倍。覆盖支出，超出149 million，覆盖率115.24%? 1127/978*100=115.235... 115.24%。用户要求比率和百分比保留两位小数。可给1.15倍和115.24%。是否覆盖：是。
+
+需要注明还原期间：单季为FY2025第三季度，约2025-08-03至2025-11-01（基于E1九个月截至2025-11-01与E2六个月截至2025-08-02差值；财报期间标注为Three months ended November 1, 2025，但证据没有直接给Q3单季，期间起点可从E2 periodEnd next day? 证据E2 periodEnd 2025-08-02, E1 periodStart 2025-02-02; Target fiscal quarters: Q1 Feb-Apr, Q2 May-Aug? Actually Target fiscal Q2 ended Aug 2, Q3 ended Nov 1. So Q3 period is Aug 3, 2025 to Nov 1, 2025. We can state “还原所得单季期间为2025年8月3日至2025年11月1日（即截至2025-11-01的第三财季）”。但注意证据本身没有明确写Q3 start; it's inferred by difference of cumulative periods. We can say “按两期累计期间相减，对应第三财季（截至2025-11-01；起点为上一累计期末2025-08-02之后）”。
+
+还需要遵循输出结构：标的与数据范围 / 已验证事实 / 财务趋势与经营质量 / 风险与反向证据 / 数据缺口 / 来源。重点回答问题，不扩写太多。可以包含计算表。
+
+注意任务条件：cumulative-to-single-quarter-reconstruction, false-missing-data-claim. 在声明缺失前必须检查明细是否通过差值还原。我们已还原，不可说缺经营现金流和capex。可说明未直接披露单季原始现金流表，但通过累计差值还原；商业原因无法确认。数据缺口：没有单季直接披露；没有资产出售回款？用户明确不抵扣，所以不需要。也许 E1/E2 investing other line? But not needed. Could note we did not use “Other” investing. No missing required items.
+
+Need ensure no hidden chain of thought. Final should be concise but detailed enough. Use [E1][E2]. Mention currency USD, millions.
+
+Check numbers:
+E1 9M 2025: Net earnings 2660, D&A 2331 etc operating 3485. CapEx 2842. E2 6M: operating 2358, capex 1864. Difference: 1127, 978. Simplified FCF 149.
+
+Could mention coverage ratio = 1,127 / 978 = 1.1523517 -> 1.15. Percentage = 115.24%. Net coverage amount = 149.
+
+Potential issue: Target FY2025 Q3 ended November 1, 2025. The nine months ended November 1, 2025 and six months ended August 2, 2025. There is one day gap? Six months ended Aug 2; Q3 is 13 weeks? From Aug 3 to Nov 1 is 91 days? It's fine.
+
+Need maybe include formula:
+单季 = 九个月累计 - 六个月累计.
+经营现金流：3,485 - 2,358 = 1,127.
+购建固定资产现金支出：(-2,842) - (-1,864) = -978 (现金流出；支出毛额978).
+简化自由现金流：1,127 - 978 = 149.
+
+Need state “本季经营现金流覆盖该支出：覆盖，经营现金流高于资本支出149百万美元，覆盖率115.24%或1.15倍。”
+
+Potential risk: E1/E2 sourceRef are press release cash flow statements, unaudited. Mention they are consolidated statements of cash flows from earnings releases, unaudited. No restatement indicated. If restatement or merger changes not evidenced; assume direct subtraction valid. But as risk: if there were restatements/consolidation changes not shown, subtraction could be invalid; no evidence in provided materials.
+
+Need include “标的待确认”？ No, ticker TGT, company Target Corporation, market US? Evidence is corporate.target.com, USD. We can say market US (based on ticker and USD? But not explicitly evidence? TGT is NYSE? We shouldn't add unsupported? It's common but facts only from context? The context says 本轮标的 TGT. It doesn't state market. We can avoid market or say “美股代码 TGT（上下文给定）”. Not necessary.
+
+Need ensure no financial advice. We are fundamentals agent.
+
+Let's craft final in Chinese with sections.
+
+Could include table:
+项目 | FY2025 Q3还原值（百万美元） | 计算
+经营现金流 | 1,127 | 3,485 [E1] - 2,358 [E2]
+购建固定资产现金支出 | -978 / 支出毛额978 | (-2,842) [E1] - (-1,864) [E2]
+简化自由现金流 | 149 | 1,127 - 978
+
+Coverage:
+覆盖金额 149 million; coverage ratio 1.15; coverage percentage 115.24%.
+
+Need mention “简化自由现金流按用户指定：经营现金流减资本支出毛额，不抵扣资产出售回款；因此未使用投资活动中的Other 52/11 等。”
+
+Data gaps:
+- 无直接单季现金流量表；仅累计还原。
+- 商业原因（为什么Q3资本支出/经营现金流如此）未验证。
+- 若存在重述或合并范围变化，累计相减可能不适用；本轮证据未显示。
+But careful: task says if reconstructed, don't list as missing. We can list as “未直接披露单季报表” not missing data? It is a limitation. It's okay. Don't claim missing operating/capex because reconstructed.
+
+Need maybe mention “所还原财报期间：FY2025第三财季，截至2025-11-01；对应从2025-08-02之后至2025-11-01的单季。”
+
+Need include source section with E1 and E2 details. Use availableAt, sourceRef? Could list.
+
+Let's ensure ratios two decimals. 1.15, 115.24%. If we include coverage ratio as 1.15倍 and 115.24%. Good.
+
+Double-check arithmetic:
+3,485 - 2,358 = 1,127. Yes.
+2,842 - 1,864 = 978. Yes.
+1,127 - 978 = 149. Yes.
+1127/978 = 1.152351737... *100 = 115.2351737 -> 115.24. Good.
+
+Could mention “购建固定资产现金支出单季为净流出978百万美元；若按报表负号列为(978)。”
+
+Need not mention asset sale proceeds. But maybe “Other investing 52 million in 9M and 11 million in 6M not included due to user instruction.” This can be data gap or method note.
+
+Potential issue: “FY2025第三季度” could be fiscal quarter ended Nov 1, 2025. Evidence E1 periodStart 2025-02-02 and periodEnd 2025-11-01. E2 periodStart same. Good.
+
+Need ensure “已验证事实” includes only evidence. “财务趋势与经营质量” can be limited: Q3 operating cash flow positive and covers capex; simplified FCF positive. But avoid comparing to prior year? We have prior year cumulative in E1/E2, could reconstruct prior year Q3? User didn't ask. Maybe not. But financial trend maybe mention within FY2025 Q3 only. Could compute year-over-year if wanted? Not asked. But maybe we can avoid extra. However section requires financial trend; we can say “仅就还原的Q3看，经营现金流足以覆盖资本支出，简化自由现金流为正。” This is a trend/quality conclusion.
+
+Risk & contrary evidence: The cumulative nine months operating cash flow 3,485 vs prior year 4,078 lower, capex 2,842 vs 1,968 higher, but not directly Q3. Could mention as context but not necessary. It might be useful: 9M OCF down YoY, 9M capex up YoY, but Q3 reconstruction shows positive simplified FCF. But user asked Q3. We can include as risk: cumulative basis shows 9M OCF lower and capex higher than prior-year cumulative, but Q3 single-quarter causes not confirmed. Need ensure not overexpand. It's supported by E1. Could mention “反向证据/限制：九个月累计经营现金流同比下降（3,485 vs 4,078），九个月累计资本支出同比上升（2,842 vs 1,968）[E1]；但单季还原未提供管理层解释。” However prior-year Q3 reconstruction possible with E1 prior-year 9M and E2 prior-year 6M: OCF 4,078-3,339=739; capex 1,968-1,313=655; simplified FCF 84. That would show Q3 YoY OCF up, capex up, FCF up. But user didn't ask, and if we include may add complexity. Is it allowed? Evidence supports. But task says focus on user question, not expand irrelevant. We can skip prior-year single-quarter. But risk section can mention cumulative YoY only if relevant to quality? Maybe not needed. Keep focused.
+
+Need be careful: “已验证事实” maybe include the cumulative values and calculation. “基于数据的推断” maybe the single-quarter reconstruction. But it's arithmetic from same start cumulative, so can call “还原值（基于两期同起点累计数相减）”。
+
+Need output no hidden chain. Fine.
+
+Let's draft final:
+
+标的与数据范围
+- 标的：Target Corporation（TGT）。
+- 证据：E1九个月截至2025-11-01，期初2025-02-02；E2六个月截至2025-08-02，期初2025-02-02。单位百万美元，未经审计。
+- 还原期间：两累计期差值对应FY2025第三财季，即2025-08-03至2025-11-01（截至2025-11-01的季度）。
+
+已验证事实/还原结果
+Table.
+Formulas.
+
+Maybe separate “已验证事实” with cumulative inputs, then “单季还原结果” under same or financial trend? The output structure fixed but can include table in 已验证事实.
+
+财务趋势与经营质量
+- Q3经营现金流为正 1,127m, 覆盖资本支出 978m; coverage 1.15x/115.24%; simplified FCF 149m positive. This indicates Q3 operating cash generation sufficient to fund capex under simplified definition. However cause not confirmed.
+
+风险与反向证据
+- Only cumulative statements directly provided; single quarter is reconstructed, not direct disclosure.
+- The method relies on same fiscal year start and no restatement/consolidation change; evidence shows same periodStart, no restatement noted. If unknown restatement, could affect.
+- Not including asset sale/other investing inflows by user instruction; therefore simplified FCF may differ from net investing-based FCF.
+- Commercial drivers not confirmed.
+
+数据缺口
+- No direct Q3 cash flow statement; no management explanation for Q3 changes. But do not say OCF/capex missing. Maybe “除上述还原外，未提供单季原始现金流量表或管理层对Q3现金流变动的解释。”
+- If need asset disposal proceeds? Not required, but “资产出售回款未单独拆分，且按用户口径不抵扣；投资活动Other不作为简化FCF。” But since not needed, not a gap? Could state not used.
+
+来源
+[E1] Target Corporation Q3 FY2025 earnings press release consolidated cash flows, nine months ended Nov 1 2025, USD millions, available 2025-11-19, URL.
+[E2] Target Corporation Q2 FY2025 earnings press release consolidated cash flows, six months ended Aug 2 2025, USD millions, available 2025-08-20, URL.
+
+Need maybe include “publishedAt” etc. Fine.
+
+Ensure no investment rating. Good.
+
+One nuance: The evidence E1 sourceVersion TGT-FY2025-Q3-cashflow, periodEnd 2025-11-01, periodStart 2025-02-02. E2 periodStart 2025-02-02. Good.
+
+Let's final.

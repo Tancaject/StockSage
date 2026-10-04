@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "repair-b32768-ibm-cash-1-1",
+    "caseId": "ibm-fy2025q3-cash-quality",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\raw-repair-b32768-ibm-cash",
+  "executionSha256": "d57ef0695674664ed5d73dc8ce7860dc17fd8f01c73564b16c0c52dfedea7429",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

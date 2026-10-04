@@ -1,0 +1,160 @@
+{
+  "schema": "native_judge_new_business_answers_plan_v1",
+  "createdAt": "2026-10-02T09:59:28.356197+00:00",
+  "authority": "USER_AUTHORIZED_REPAIR_ACCEPTANCE",
+  "scope": "SIX_NEW_REAL_BUSINESS_RESPONSES_TWELVE_NATIVE_STAGES",
+  "releaseEligible": false,
+  "humanReviewed": false,
+  "expectedBusinessCases": 6,
+  "expectedStageReviews": 12,
+  "maxProviderCalls": 48,
+  "maxConcurrentStageReviews": 3,
+  "automaticRetries": 0,
+  "judgeConfig": {
+    "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+    "model": "qwen3.8-max",
+    "temperature": 0,
+    "enable_thinking": true,
+    "thinking_budget": 4096,
+    "timeout_seconds": 180,
+    "max_tokens": 6000,
+    "max_calls": 4
+  },
+  "protocolSha256": "eed2b7fa42fe553c9f06a80dcb78a3fdec06ee8bf69b33b5f43232dd35525336",
+  "rubricSha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+  "standards": "Unchanged native stage rubric, original gold and Decimal tolerance; all failed/incomplete attempts retained. Independent review decisions are not supplied to judge.",
+  "inputs": [
+    {
+      "path": "evals\\evolution_ai_review.py",
+      "sha256": "28b754f495003bc8267ce3515769836f1dc4f4d7ecbf138f0a230cdc1956bb74"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\evolution_ai_review.v3.py",
+      "sha256": "28b754f495003bc8267ce3515769836f1dc4f4d7ecbf138f0a230cdc1956bb74"
+    },
+    {
+      "path": "evals\\evolution_quality.py",
+      "sha256": "d01b12f5fd0b0ba020ed33301b95e4780a86c527462badd462a82d50647f754e"
+    },
+    {
+      "path": "evals\\evolution_rubric.py",
+      "sha256": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea"
+    },
+    {
+      "path": "evals\\evolution_dataset.py",
+      "sha256": "12df23500bf7ee45a2ee0ab955924bf7368e30c1a7e2bb2e20a5f993fa24ee65"
+    },
+    {
+      "path": "evals\\eval_common.py",
+      "sha256": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c"
+    },
+    {
+      "path": "evals\\run_evaluation_agent.py",
+      "sha256": "4c7843a9269262fe6398be1f3c95fbf916dfc0c0eb83019626c7f7c15471abdf"
+    },
+    {
+      "path": "evals\\run_ragas_eval.py",
+      "sha256": "d024ccd42015c560b978c873c4bfccc4cd6c70c72753f003c5c521018f2517f3"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "sha256": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "sha256": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-ibm-cash\\baseline-v1.report.json",
+      "sha256": "8fd6cc27be5e807f455a485b2b73183b58464a7e8b5e2aa737606fcff2496e76"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-ibm-liquidity\\baseline-v1.report.json",
+      "sha256": "d9f328f24fac3232ba1955cc222d8d835a9ab2c71df81daa0a6904b07f6a0606"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-jnj-cash\\baseline-v1.report.json",
+      "sha256": "b66199eff6d92215b574c2e1654028380fd77d709bbba62ecf10b6d8a10b356d"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-jnj-liquidity\\baseline-v1.report.json",
+      "sha256": "f8d2a2bd7f9b0cae488ff265d9a95e17042d045f65dd963d37a8278eb1a8542a"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-pep-control\\baseline-v1.report.json",
+      "sha256": "48f22e73216cef016fc36f9ebbe802a653c7e33f775df8301a8ba5e05c3846ce"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\raw-repair-tgt-control\\baseline-v1.report.json",
+      "sha256": "9140245dd08c512243887f592bc6d7d3f6f7fbe418785630cec40ca4f335be16"
+    }
+  ],
+  "runs": [
+    {
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-ibm-cash\\baseline-v1.report.json",
+      "output": "evals\\evolution\\batch-repair-20261002\\judge-new-ibm-cash.json",
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "stages": [
+        "analysis",
+        "finalAnswer"
+      ],
+      "maxProviderCalls": 8,
+      "workers": 1
+    },
+    {
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-ibm-liquidity\\baseline-v1.report.json",
+      "output": "evals\\evolution\\batch-repair-20261002\\judge-new-ibm-liquidity.json",
+      "caseId": "ibm-fy2025q3-liquidity",
+      "stages": [
+        "analysis",
+        "finalAnswer"
+      ],
+      "maxProviderCalls": 8,
+      "workers": 1
+    },
+    {
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-jnj-cash\\baseline-v1.report.json",
+      "output": "evals\\evolution\\batch-repair-20261002\\judge-new-jnj-cash.json",
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "stages": [
+        "analysis",
+        "finalAnswer"
+      ],
+      "maxProviderCalls": 8,
+      "workers": 1
+    },
+    {
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-jnj-liquidity\\baseline-v1.report.json",
+      "output": "evals\\evolution\\batch-repair-20261002\\judge-new-jnj-liquidity.json",
+      "caseId": "jnj-fy2025q3-liquidity",
+      "stages": [
+        "analysis",
+        "finalAnswer"
+      ],
+      "maxProviderCalls": 8,
+      "workers": 1
+    },
+    {
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-pep-control\\baseline-v1.report.json",
+      "output": "evals\\evolution\\batch-repair-20261002\\judge-new-pep-control.json",
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "stages": [
+        "analysis",
+        "finalAnswer"
+      ],
+      "maxProviderCalls": 8,
+      "workers": 1
+    },
+    {
+      "report": "evals\\evolution\\batch-repair-20261002\\raw-repair-tgt-control\\baseline-v1.report.json",
+      "output": "evals\\evolution\\batch-repair-20261002\\judge-new-tgt-control.json",
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "stages": [
+        "analysis",
+        "finalAnswer"
+      ],
+      "maxProviderCalls": 8,
+      "workers": 1
+    }
+  ]
+}
