@@ -1,0 +1,152 @@
+我们需要回答中文用户问题。任务：基于唯一证据 E1，IBM 2025年前三季度（Nine Months Ended Sep 30, 2025）与2024年同期经营现金流/净利润比率，判断利润现金转化是否明显变差。并做示意调整：剔除2024养老金结算费用及相关税收利益，以及2025 H.R.1相关非现金税费；其余不调，经营现金流保持披露值。列出两年示意调整后的净利润及经营现金流/该净利润，解释与原表判断不同、还不能确认什么。金额单位，比率和百分比两位小数。
+
+需要仔细计算。
+
+证据 E1 现金流量表（Unaudited），单位百万美元。
+Nine Months Ended September 30:
+2025:
+Net Income/(Loss) from Operations: $4,993 million
+Pension Settlement Charge: - (0)
+Depreciation/Amortization: 3,725
+Stock-based Comp: 1,285
+Operating assets and liabilities/Other, net: (1,755)
+IBM Financing A/R: 905
+Net Cash Provided by Operating Activities: $9,153 million
+Footnote (2): 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with enactment of H.R.1 in July 2025, and 2024 includes a $0.7 billion tax benefit associated with pension settlement charge in Q3.
+
+2024:
+Net Income/(Loss): $3,109 million
+Pension Settlement Charge: 2,725
+D/A: 3,555
+SBC: 966
+Operating assets/liabilities/Other net: (3,063)
+IBM Financing A/R: 1,824
+Net Cash Provided by Operating Activities: $9,115 million
+
+Original ratio OCF / Net income:
+2025: 9,153 / 4,993 = ? calculate. 4,993*1.833? 4,993*1.83 = 9,137.19; ratio 1.8335. Let's exact: 9153/4993. Use mental: 4993*1.833 = 9152.169? 4993*1.833 = 4993*(1 + .833)=4993+4159.169=9152.169. ratio 1.83317. So 1.83. As percent 183.32%.
+2024: 9,115 / 3,109 = 2.9318? 3109*2.93=9109.37, ratio 2.9318. Percent 293.18%.
+Thus original ratio 2025 lower than 2024 by about 1.10 or 109.86 percentage points. But can we judge profit cash conversion significantly worse? Need caution: 2024 net income depressed by pension settlement charge (non-cash? Actually pension settlement charge in net income, added back in OCF reconciliation; likely noncash or not operating cash? It increases ratio because denominator lower and addback). 2025 net income includes one-time non-cash tax charge $0.3B reducing net income but not cash, raising ratio? Wait if tax charge non-cash reduces net income but OCF unchanged, ratio OCF/NI higher. If exclude it, adjusted net income increases, ratio decreases. The question asks remove 2024 pension settlement charge and related tax benefit, and 2025 H.R.1 non-cash tax charge; OCF remains disclosed. Need compute adjusted net income.
+
+Need understand adjustments:
+2024: Pension Settlement Charge $2,725 million included as addback to net income in OCF reconciliation. It reduced net income? Yes likely pre-tax charge? Footnote says 2024 includes a $0.7 billion tax benefit associated with pension settlement charge in third quarter. User says “剔除2024年养老金结算费用及其相关税收利益”。 We need adjust net income: remove pension settlement charge and related tax benefit. If charge reduced pre-tax income by 2,725 and tax benefit increased income tax benefit by 700, net income impact = -2,725 + 700 = -2,025 (assuming tax benefit $0.7B). To exclude both, add back net-of-tax charge? Net income should increase by 2,725 and decrease by 700? Let's reason: reported NI includes -2,725 expense and +700 tax benefit, net -2,025. To remove both, adjusted NI = reported NI + 2,725 - 700 = 3,109 + 2,025 = 5,134. Alternatively “剔除费用及其相关税收利益” means add back charge, subtract tax benefit. Yes adjusted net income 5,134 million. If only net-of-tax addback 2,025. Good.
+
+2025: H.R.1 related non-cash income tax charge $0.3 billion. It reduced net income but no cash. To exclude, adjusted NI = 4,993 + 300 = 5,293 million. Footnote says $0.3 billion, approximate. Use 300 million. OCF remains 9,153.
+
+Adjusted ratios:
+2025 adjusted: 9,153 / 5,293 = ? 5,293*1.73 = 9,156.89, so 1.7293. Exact: 9153/5293. 5293*1.729 = 9152.? 5293*0.729=3858.597, +5293=9151.597; ratio 1.7293. Percent 172.93%.
+2024 adjusted: 9,115 / 5,134 = ? 5134*1.775 = 9112.85; ratio 1.7754. Percent 177.54%. Let's calculate: 9115/5134. 5134*1.775 = 5134 + 4043.?? 0.775*5134=3978.85? Wait compute: 5134*0.775 = 5134*(775/1000)=3978.85. +5134=9112.85. Difference 2.15 /5134=0.000419, ratio 1.7754. Yes.
+
+Thus adjusted ratios: 2025 1.73 vs 2024 1.78; 2025 still slightly lower by 0.05 or 4.61 percentage points. Original gap 1.83 vs 2.93 huge. So original suggests large deterioration, adjusted suggests only modestly lower and largely driven by 2024 pension settlement charge distorting denominator (and perhaps addback). Need explain cannot confirm cash conversion materially worsened. Need also note OCF is disclosed value and not adjusted for cash effects (if any) of these items; but footnote says non-cash tax charge, pension settlement charge added back; tax benefit? Need think: The 2024 pension settlement charge is added back in OCF reconciliation. The related tax benefit of $0.7B is in “Operating assets and liabilities/Other, net”? Or tax benefit would reduce taxes paid? It says included in Operating assets and liabilities/Other, net? Footnote (2) attached to Operating assets and liabilities/Other, net. It says 2025 includes one-time non-cash income tax charge $0.3B associated with H.R.1, and 2024 includes $0.7B tax benefit associated with pension settlement charge in third quarter. That line is reconciliation line, not net income. But if tax benefit is in operating assets/liabilities/Other, net, it may affect OCF? Let's inspect: Net income 3,109 + pension settlement charge 2,725 + D/A 3,555 + SBC 966 + operating assets/liabilities/Other net (3,063) + financing A/R 1,824 = 9,116? Let's sum: 3109+2725=5834; +3555=9389; +966=10355; -3063=7292; +1824=9116. Table says 9115 maybe rounding. The tax benefit may be within operating assets/liabilities/Other net? If it's a tax benefit associated with pension settlement charge, perhaps reduces tax expense but non-cash? Actually tax benefit associated with pension settlement charge may be included in income tax provision, increasing net income, but not cash? They note in line (2) maybe because line includes certain tax items? Need not adjust OCF per instruction: “经营现金流保持披露值”. So only adjust net income.
+
+Need ensure ratios: Original OCF/Net income:
+2025: 9,153 / 4,993 = 1.833... Use two decimals: 1.83 or 183.32%. 2024: 9,115 / 3,109 = 2.9318 -> 2.93 or 293.18%. Difference: 2025 lower by 1.10 (or -109.86 percentage points). Need maybe present both ratio and percent. User asks “给出两年的原表比率” and later “经营现金流/该净利润” ratios. Amounts units. Ratios and percentages two decimals. Could present ratio times and percent. Need include calculations.
+
+Need consider if net income/(loss) from operations is “Net Income/(Loss) from Operations” maybe not net income attributable? It is the table's net income. Use as denominator.
+
+Need mention “标的与数据范围” “已验证事实” “财务趋势与经营质量” “风险与反向证据” “数据缺口” “来源”. Must output fixed sections. Need not overexpand. But need include enough.
+
+Need ensure no hidden chain of thought in final. We can present concise calculations.
+
+Need discuss whether can judge profit cash conversion clearly worsened. Answer: Based on original reported ratio, yes it appears lower (1.83 vs 2.93), but cannot simply conclude cash conversion significantly worsened because 2024 ratio inflated by $2,725M pension settlement charge and related $700M tax benefit; 2025 includes $300M non-cash tax charge. After only removing specified items, adjusted ratio 2025 1.73 vs 2024 1.78, gap narrows to slight. Therefore original gap mainly due to one-time items, not necessarily operating cash conversion deterioration. Still cannot confirm because only adjusted net income, OCF not adjusted for any cash timing/working capital, and other non-recurring or non-cash items not adjusted; also nine-month cumulative may be affected by working capital, financing A/R, acquisitions/divestitures, taxes paid etc. Need maybe note OCF nearly flat: 9,153 vs 9,115 (+38M, +0.42%). Net income increased reported +1,884M (+60.60%) but adjusted net income increased 161M? Let's calculate adjusted net income difference: 5,293 vs 5,134 = +159M, +3.10%. Original net income difference 4,993-3,109=1,884 (+60.60%). OCF change 38 (+0.42%). This supports that original ratio change driven by denominator items. Need maybe include.
+
+Need verify adjusted 2024 net income: reported 3,109 + 2,725 - 700 = 5,134. If “tax benefit associated with pension settlement charge” $0.7B maybe already included in net income; removing it decreases adjusted NI. Yes.
+
+Need think about sign of tax benefit: A tax benefit increases net income. If pension settlement charge is expense, tax benefit offsets. To remove both, we should add back expense (increase NI) and remove tax benefit (decrease NI). Net +2,025. Good.
+
+Potential issue: If pension settlement charge is non-cash, OCF addback; if related tax benefit is cash? The footnote says operating assets and liabilities/Other includes $0.7B tax benefit associated with pension settlement charge. If tax benefit reduces cash taxes paid? But instruction says OCF keep disclosed. We can say this illustrative adjustment only normalizes net income, not OCF; thus adjusted ratio is not a full cash conversion metric and may still be distorted.
+
+Need maybe mention “H.R.1相关非现金税费” is $0.3 billion = $300 million. It reduces net income but not OCF; adding it back increases denominator and lowers ratio. Good.
+
+Need maybe compute original ratio using million USD:
+2025: OCF 9,153 / NI 4,993 = 1.83 (183.32%)
+2024: OCF 9,115 / NI 3,109 = 2.93 (293.18%)
+Difference: -1.10 ratio, -109.86 pct points. Need percentages two decimals: 183.32% and 293.18%; difference -109.86 pp. If ratio two decimals: 1.83 and 2.93. But if ratio difference 1.10? 2.93-1.83=1.10. Exact difference in percent 293.18-183.32=109.86.
+
+Adjusted:
+2025 adjusted NI = 4,993 + 300 = 5,293. Ratio = 9,153 / 5,293 = 1.7293 -> 1.73 (172.93%).
+2024 adjusted NI = 3,109 + 2,725 - 700 = 5,134. Ratio = 9,115 / 5,134 = 1.7754 -> 1.78 (177.54%).
+Difference: -0.05 ratio, -4.61 pp. Need compute percentages: 177.54 - 172.93 = 4.61 pp. If exact ratio 1.7754-1.7293=0.0461. Good.
+
+Need maybe note “仅剔除已列示一次性项的示意比较” not company reported adjusted metric. Use footnote approximate numbers. “税项按脚注已披露的约数计算”: 0.3B and 0.7B. Use 300 and 700 million. Need say approximate, may differ due to rounding.
+
+Need consider if 2024 pension settlement charge and tax benefit are both included in net income? The table shows pension settlement charge as addback to net income, so yes charge reduced net income. Tax benefit maybe in net income? It says 2024 includes a $0.7 billion tax benefit associated with pension settlement charge in third quarter, in footnote to Operating assets and liabilities/Other, net. Could be that line includes tax benefit? If the tax benefit is in OCF line not net income? Hmm. Let's parse table: “Operating assets and liabilities/Other, net (2)” line has footnote (2): 2025 includes one-time non-cash income tax charge of $0.3B associated with H.R.1, and 2024 includes a $0.7B tax benefit associated with pension settlement charge in third quarter. Wait this footnote is attached to the reconciliation line, not net income. It might mean the line “Operating assets and liabilities/Other, net” includes these tax items, not net income? But H.R.1 non-cash income tax charge would affect income tax expense and net income, and in cash flow reconciliation non-cash tax charge might be included in “Operating assets and liabilities/Other” or maybe deferred taxes? But table doesn't show deferred taxes separately. The footnote says line includes one-time non-cash income tax charge. But user explicitly asks “剔除2025年H.R.1相关非现金税费；其余项目不调，经营现金流保持披露值。列出两年示意调整后的净利润及经营现金流/该净利润”。 This implies adjust net income by adding back the non-cash tax charge, because it reduced net income. Even if the cash flow line includes it, OCF unchanged. For 2024 tax benefit associated with pension settlement charge, if it is included in net income as tax benefit, remove it. If it is only in reconciliation line? But “tax benefit” usually increases income tax benefit in income statement. The footnote likely clarifies that operating assets/liabilities/Other includes tax benefit? Let's not overcomplicate; user specified adjustment. Need maybe state assumption: “按题意假设该等税收利益/税费已包含在净利润中；经营现金流不做调整。” But is that safe? It may be necessary to avoid overclaim. We can say “在题目给定的示意口径下，将税收利益/税费视为影响净利润的项目”。 But if evidence doesn't explicitly say tax benefit in net income? It says Net income from operations and footnote to OCF line. However pension settlement charge definitely in net income (added back). Tax benefit associated with it likely in income tax provision; we can treat as net income impact. Need mention this is illustrative and dependent on assumption.
+
+Need maybe mention “Pension Settlement Charge” line in cash flow is addback, so original 2024 ratio is strongly affected: denominator 3,109 vs if add back net-of-tax 5,134. The original ratio 2.93 is not comparable.
+
+Need include “风险与反向证据”: reverse evidence: OCF year-over-year nearly unchanged, adjusted ratios close; original ratio drop may be one-time accounting items. Also working capital line improved? 2025 operating assets/liabilities/Other net outflow -1,755 vs 2024 -3,063 (less outflow by 1,308), IBM Financing A/R inflow 905 vs 1,824 (less inflow by 919). Net OCF flat. Could mention these operating asset/liability swings affect OCF and are not adjusted. Need not too much.
+
+Need “数据缺口”: no detailed income statement, tax rate, exact tax effect beyond approx $0.3B/$0.7B; no cash taxes paid; no reconciliation of whether pension settlement charge was entirely non-cash; no company adjusted metrics; no full 10-Q details; cannot isolate recurring cash conversion. Also if H.R.1 tax charge has future cash effects? Not known. The OCF remains disclosed; not adjusting for cash tax payments or pension settlement cash impacts. Also “标的待确认” not needed because ticker IBM clear.
+
+Need “来源”: [E1] IBM Q3 2025 official IR cash flow, period ended 2025-09-30, currency USD, unit millions, published 2025-10-22. Need cite.
+
+Need ensure final in Chinese. Use tables.
+
+Let's draft final with sections:
+
+标的与数据范围:
+- IBM, nine months ended Sep 30 2025 and 2024, from E1 cash flow, USD millions, unaudited. Only E1. Adjustments are illustrative.
+
+已验证事实:
+- Reported OCF and NI values.
+- One-time items footnote: 2024 pension settlement charge 2,725 and related tax benefit about 0.7B; 2025 H.R.1 non-cash tax charge about 0.3B.
+
+Maybe table:
+原表：
+2025: 净利润 4,993; 经营现金流 9,153; 比率 1.83 (183.32%)
+2024: 净利润 3,109; 经营现金流 9,115; 比率 2.93 (293.18%)
+变化: 比率 -1.10, -109.86 pp.
+
+Then 示意调整:
+Adjustment formula:
+2025 adjusted NI = 4,993 + 300 = 5,293
+2024 adjusted NI = 3,109 + 2,725 - 700 = 5,134
+OCF unchanged.
+Table:
+2025 adjusted: OCF 9,153 / adj NI 5,293 = 1.73 (172.93%)
+2024 adjusted: OCF 9,115 / adj NI 5,134 = 1.78 (177.54%)
+Diff: -0.05, -4.61 pp.
+
+Need maybe include “净利润调整不是公司披露指标”.
+
+财务趋势与经营质量:
+- Original ratio suggests conversion worsened, but after specified adjustments, gap narrows. OCF flat, adjusted net income slightly higher in 2025 (+159M, +3.10%). Therefore cannot based solely on original ratio conclude cash conversion materially worsened. It may reflect one-time pension settlement charge depressing 2024 NI and one-time tax charge in 2025.
+- However adjusted 2025 ratio still slightly below 2024; mild weakening cannot be ruled out but not “明显变差” based on this limited adjustment.
+
+风险与反向证据:
+- Reverse: OCF stable; adjusted ratios close.
+- But OCF not adjusted; working capital, financing A/R, acquisitions etc. could affect. The 2024 pension settlement addback may not be cash; tax benefit/charge approximations. If some items have cash tax effects, ratio could differ.
+- Original ratio can be distorted by non-cash/one-time items.
+
+数据缺口:
+- No exact tax rate or exact tax impact beyond approx; no cash taxes paid; no detailed pension settlement cash components; no full cash flow statement indirect method with deferred taxes; no company's adjusted OCF/FCF; cannot confirm recurring cash conversion.
+- Only nine-month cumulative; seasonality? maybe not.
+
+来源: [E1].
+
+Need be careful with “经营现金流/净利润比率低于2024年同期，能否据此判断利润现金转化明显变差？” Answer: 不能仅据此判断；原表比率确实低很多，但调整后差距大幅缩小。 Need explicit.
+
+Need maybe mention “2025年前三季度经营现金流/净利润比率 1.83；2024年同期 2.93。” Then “示意调整后 2025 1.73；2024 1.78。”
+
+Need ensure all amounts in millions USD. “0.3 billion” convert to 300 million; “0.7 billion” to 700 million. Use two decimals for ratios/percentages. For amounts maybe no decimals. Need maybe “百万美元”。
+
+Need check calculations with exact numbers:
+2025 OCF/NI: 9153/4993 = let's compute more exact for percent: 4993*1.833 = 9152.169; remainder 0.831; /4993=0.0001665, ratio 1.8331665. Percent 183.31665 -> 183.32%. Good.
+2024: 9115/3109. 3109*2.93=9109.37; rem 5.63; /3109=0.001811, ratio 2.931811; percent 293.18%. Good.
+2025 adjusted: 9153/5293. 5293*1.729 = 9151.597; rem 1.403; /5293=0.000265; ratio 1.729265; percent 172.93%. Good.
+2024 adjusted: 9115/5134. 5134*1.775=9112.85; rem 2.15; /5134=0.000419; ratio 1.775419; percent 177.54%. Good.
+Adjusted NI 2024 5,134. 2025 5,293. Difference 159. Percent 159/5134=3.10%. OCF difference 38/9115=0.42%. Original NI difference 1,884/3109=60.60%. Could include.
+
+Need maybe mention “经营现金流保持披露值，因此调整只改变分母，不改变分子；这不是现金转化率的完整修正。”
+
+Potential nuance: The 2024 pension settlement charge is added back to OCF; if we adjust net income upward by pre-tax charge and downward by tax benefit, but OCF unchanged, the ratio becomes lower. However should we also adjust OCF to remove addback? User says OCF保持披露值. Good.
+
+Need maybe mention “已列示一次性项” only those; not adjusting depreciation, SBC, working capital, financing A/R. Good.
+
+Need ensure not to output hidden chain-of-thought. Final is report.
+
+Need include “标的与数据范围 / 已验证事实 / 财务趋势与经营质量 / 风险与反向证据 / 数据缺口 / 来源” exactly. Could use headings.
+
+Need maybe include “证据验收：仅引用 [E1]”。
+
+Let's produce final. Ensure no external data. Use Chinese.

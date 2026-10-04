@@ -1,0 +1,51 @@
+CISCO SYSTEMS, INC. CONSOLIDATED STATEMENTS OF CASH FLOWS (In millions) (Unaudited)
+
+ | Nine Months Ended
+ | April 26,2025 |  | April 27,2024
+Cash flows from operating activities: |  |  | 
+Net income | $ 7,630 |  | $ 8,158
+Adjustments to reconcile net income to net cash provided by operating activities: |  |  | 
+Depreciation, amortization, and other | 2,176 |  | 1,684
+Share-based compensation expense | 2,693 |  | 2,274
+Provision for receivables | 17 |  | 19
+Deferred income taxes | (792) |  | (245)
+(Gains) losses on divestitures, investments and other, net | 52 |  | 224
+Change in operating assets and liabilities, net of effects of acquisitions and divestitures: |  |  | 
+Accounts receivable | 1,406 |  | 1,286
+Inventories | 541 |  | 530
+Financing receivables | 505 |  | 92
+Other assets | (516) |  | (382)
+Accounts payable | (10) |  | (300)
+Income taxes, net | (2,002) |  | (5,223)
+Accrued compensation | (431) |  | (1,092)
+Deferred revenue | (524) |  | 211
+Other liabilities | (786) |  | (86)
+Net cash provided by operating activities | 9,959 |  | 7,150
+Cash flows from investing activities: |  |  | 
+Purchases of investments | (3,066) |  | (3,044)
+Proceeds from sales of investments | 2,228 |  | 3,874
+Proceeds from maturities of investments | 3,985 |  | 5,804
+Acquisitions, net of cash and cash equivalents acquired and divestitures | (291) |  | (25,874)
+Purchases of investments in privately held companies | (265) |  | (82)
+Return of investments in privately held companies | 108 |  | 146
+Acquisition of property and equipment | (688) |  | (472)
+Other | (5) |  | (2)
+Net cash provided by (used in) investing activities | 2,006 |  | (19,650)
+Cash flows from financing activities: |  |  | 
+Issuances of common stock | 320 |  | 347
+Repurchases of common stock - repurchase program | (4,748) |  | (3,772)
+Shares repurchased for tax withholdings on vesting of restricted stock units | (910) |  | (765)
+Short-term borrowings, original maturities of 90 days or less, net | (479) |  | 1,547
+Issuances of debt | 17,388 |  | 24,159
+Repayments of debt | (18,545) |  | (2,195)
+Repayments of Splunk convertible debt, net | — |  | (3,140)
+Dividends paid | (4,812) |  | (4,778)
+Other | (80) |  | (52)
+Net cash provided by (used in) financing activities | (11,866) |  | 11,351
+Effect of foreign currency exchange rate changes on cash, cash equivalents, restricted cash and restricted cash equivalents | (23) |  | (39)
+Net increase (decrease) in cash, cash equivalents, restricted cash and restricted cash equivalents | 76 |  | (1,188)
+Cash, cash equivalents, restricted cash and restricted cash equivalents, beginning of period | 8,842 |  | 11,627
+Cash, cash equivalents, restricted cash and restricted cash equivalents, end of period | $ 8,918 |  | $ 10,439
+Supplemental cash flow information: |  |  | 
+Cash paid for interest | $ 1,370 |  | $ 350
+Cash paid for income taxes, net | $ 3,265 |  | $ 7,150

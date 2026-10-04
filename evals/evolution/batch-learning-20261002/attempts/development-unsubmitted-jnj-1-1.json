@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-unsubmitted-jnj-1-1",
+    "caseId": "jnj-fy2025q3-liquidity",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-20261002\\raw-development-unsubmitted-jnj",
+  "executionSha256": "c202ed074cd3d134d9489b8f74029ce63782be785a0ca8bb43c3732d9679cdb4",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

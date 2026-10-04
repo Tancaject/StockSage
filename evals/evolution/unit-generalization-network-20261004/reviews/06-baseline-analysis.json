@@ -1,0 +1,192 @@
+{
+  "schema": "fundamentals_two_stage_ai_source_review_v1",
+  "origin": "CODEX_NONBLIND_AI_SOURCE_REVIEW_NOT_HUMAN_OR_CALIBRATED_JUDGE",
+  "case": 6,
+  "caseId": "tgt-fy2025q3-liquidity",
+  "arm": "baseline",
+  "stage": "analysis",
+  "releaseEligible": false,
+  "rubric": {
+    "schema": "fundamentals_evolution_rubric_v1",
+    "sha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+    "scope": "FUNDAMENTALS_ANALYSIS",
+    "invocationScope": "fundamentals-analysis",
+    "dimensions": {
+      "claim_support": "核查基本面分析稿的事实、额外主张及推断是否由该阶段实际可见证据支持；可接受有边界的一般机制，不将其当作公司已证实事实。",
+      "numeric_period_correctness": "核查分析稿所用科目、金额、单位、期间、比较基数及派生计算，包括自行增加的合计；按本题 gold 的数值口径和用户问题范围判定。",
+      "counterevidence": "核查分析稿是否保留实际证据中影响结论的相反信号及方法不适用条件；没有相关反向证据时不强造风险，也不要求未问的同行比较。",
+      "unknowns": "核查分析方法是否把证据缺口与相应结论的强度对应起来；缺数据不能补成原因或保证，可计算且证据充分的内容也不应被误称未知。"
+    }
+  },
+  "binding": {
+    "answerSha256": "0e1078a99389799d109a0e4cc6d15933d4c2a88c67759add8ad5be07a8b1c054",
+    "resultSha256": "c4824a436140e5e67f1c099a41e6011d0fc3b3053b37cc3ed5e79f65d2a7d9b8",
+    "requestSha256": "f3908e2bba02e6291ac30f5fc265b949a7a437e51d27a724df273c281cda4810",
+    "sourceTraceSha256": "95cf79c58dbce796a298aba8c386a612343dbbf951f0d6f5213257502d92e48e",
+    "goldSha256": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+    "policySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad"
+  },
+  "requiredFacts": [
+    {
+      "field": "currentRatioCurrent",
+      "period": "2025-11-01",
+      "unit": "ratio",
+      "observed": "0.97",
+      "expected": "0.9746",
+      "answerQuote": "| 2025-11-01 | 20,702 百万美元 | 21,242 百万美元 | 0.97 |",
+      "status": "PASS"
+    },
+    {
+      "field": "totalDebtCurrent",
+      "period": "2025-11-01",
+      "unit": "million",
+      "observed": "16499",
+      "expected": "16499.0000",
+      "answerQuote": "| 2025-11-01 | 1,133 百万美元 | 15,366 百万美元 | 16,499 百万美元 |",
+      "status": "PASS"
+    },
+    {
+      "field": "netDebtCurrent",
+      "period": "2025-11-01",
+      "unit": "million",
+      "observed": "12677",
+      "expected": "12677.0000",
+      "answerQuote": "| 2025-11-01 | 16,499 百万美元 | 3,822 百万美元 | 12,677 百万美元 |",
+      "status": "PASS"
+    },
+    {
+      "field": "currentRatioPrior",
+      "period": "2025-02-01",
+      "unit": "ratio",
+      "observed": "0.94",
+      "expected": "0.9353",
+      "answerQuote": "| 2025-02-01 | 19,454 百万美元 | 20,799 百万美元 | 0.94 |",
+      "status": "PASS"
+    },
+    {
+      "field": "totalDebtPrior",
+      "period": "2025-02-01",
+      "unit": "million",
+      "observed": "15940",
+      "expected": "15940.0000",
+      "answerQuote": "| 2025-02-01 | 1,636 百万美元 | 14,304 百万美元 | 15,940 百万美元 |",
+      "status": "PASS"
+    },
+    {
+      "field": "netDebtPrior",
+      "period": "2025-02-01",
+      "unit": "million",
+      "observed": "11178",
+      "expected": "11178.0000",
+      "answerQuote": "| 2025-02-01 | 15,940 百万美元 | 4,762 百万美元 | 11,178 百万美元 |",
+      "status": "PASS"
+    }
+  ],
+  "additionalNumericChecks": [
+    {
+      "observed": "4.20",
+      "expected": "4.195855101497121293624585000",
+      "formula": "((20702/21242)/(19454/20799)-1)*100",
+      "answerQuote": "- 按未四舍五入比率计算，上升约 4.20%。",
+      "status": "PASS"
+    },
+    {
+      "observed": "3.51",
+      "expected": "3.506900878293601003764115433",
+      "formula": "559/15940*100",
+      "answerQuote": "- 增幅：559 ÷ 15,940 = 3.51%。",
+      "status": "PASS"
+    },
+    {
+      "observed": "13.41",
+      "expected": "13.41027017355519770978708177",
+      "formula": "1499/11178*100",
+      "answerQuote": "- 增幅：1,499 ÷ 11,178 = 13.41%。",
+      "status": "PASS"
+    },
+    {
+      "observed": "30.75",
+      "expected": "30.74572127139364303178484108",
+      "formula": "503/1636*100",
+      "answerQuote": "- 一年内到期债务减少 503 百万美元，降幅 30.75%。",
+      "status": "PASS"
+    },
+    {
+      "observed": "19.74",
+      "expected": "19.73960520789584208315833683",
+      "formula": "940/4762*100",
+      "answerQuote": "   现金及现金等价物从 4,762 百万美元降至 3,822 百万美元，减少 940 百万美元，降幅 19.74%。净债务从 11,178 百万美元升至 12,677 百万美元，增幅 13.41%。这表明资产负债表层面的净债务缓冲有所削弱。",
+      "status": "PASS"
+    },
+    {
+      "observed": "3.37",
+      "expected": "3.373345101500441306266548985",
+      "formula": "3822/1133",
+      "answerQuote": "   - 2025-11-01：3,822 ÷ 1,133 = 3.37 倍",
+      "status": "PASS"
+    },
+    {
+      "observed": "2.91",
+      "expected": "2.910757946210268948655256724",
+      "formula": "4762/1636",
+      "answerQuote": "   - 2025-02-01：4,762 ÷ 1,636 = 2.91 倍  ",
+      "status": "PASS"
+    }
+  ],
+  "dimensions": {
+    "claim_support": {
+      "status": "PASS",
+      "answerQuote": "   基于本轮资产负债表证据，TGT 的短期流动性缓冲在结构上有改善：流动比率上升、一年内到期债务下降、现金对短期到期债务覆盖提高。但现金余额下降、净债务上升，且流动比率仍低于 1，因此不能判断短期流动性明显增强。更准确的表述是：**短期流动性缓冲仍可覆盖短期到期有息债务，但整体资产负债表流动性较 2025-02-01 有所趋紧，外部融资或经营现金流依赖度仍需进一步验证。**",
+      "reason": "Read against original evidence, not the analyst draft as independent authority."
+    },
+    "counterevidence": {
+      "status": "PASS",
+      "answerQuote": "3. **短期到期债务下降，现金对短期债务覆盖仍较高**  ",
+      "reason": "Relevant opposing signals and comparison boundaries retained."
+    },
+    "unknowns": {
+      "status": "PASS",
+      "answerQuote": "- 本轮仅有资产负债表部分项目，缺少现金流量表数据，无法验证经营现金流、自由现金流对债务和营运资金的支持能力。",
+      "reason": "Unavailable commercial causes or disclosure details remain bounded."
+    },
+    "numeric_period_correctness": {
+      "status": "PASS",
+      "answerQuote": "| 2025-11-01 | 20,702 百万美元 | 21,242 百万美元 | 0.97 |",
+      "reason": "Required facts, source units and fiscal periods reviewed; additional calculations use the frozen absolute tolerance 0.01."
+    }
+  },
+  "requiredPoints": [
+    {
+      "id": "p1",
+      "requirement": "两个报表时点和流动比率正确，以期末流动资产/期末流动负债计算",
+      "status": "PASS"
+    },
+    {
+      "id": "p2",
+      "requirement": "按题目定义加总有息债务，不将总负债当债务或重复加计流动部分",
+      "status": "PASS"
+    },
+    {
+      "id": "p3",
+      "requirement": "两个时点净债务按指定现金和投资口径计算正确",
+      "status": "PASS"
+    },
+    {
+      "id": "p4",
+      "requirement": "结合实际比率及净债务变化给出审慎判断；方向混合时如实反映",
+      "status": "PASS"
+    }
+  ],
+  "sourceQuotes": [
+    "Total current assets |  | 20,702 |  | 19,454 |  | 20,554",
+    "Total current liabilities |  | 21,242 |  | 20,799 |  | 21,792",
+    "Current portion of long-term debt and other borrowings |  | 1,133 |  | 1,636 |  | 1,635",
+    "Long-term debt and other borrowings |  | 15,366 |  | 14,304 |  | 14,346",
+    "Cash and cash equivalents |  | $ 3,822 |  | $ 4,762 |  | $ 3,433"
+  ],
+  "notes": [
+    "Read as bounded static balance-sheet coverage, not an assurance about future solvency. Mixed liquidity signals retained.",
+    "Unlike combined arm, operating-cash-flow/external-financing dependence is explicitly left for further verification."
+  ],
+  "semanticStatus": "PASS"
+}

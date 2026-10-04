@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "repair-jnj-liquidity-1-1",
+    "caseId": "jnj-fy2025q3-liquidity",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-repair-20261002\\raw-repair-jnj-liquidity",
+  "executionSha256": "5a01a29922bd1498191eeda460d38902f48f71b0f4b3cae4765d41a04e2094ef",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

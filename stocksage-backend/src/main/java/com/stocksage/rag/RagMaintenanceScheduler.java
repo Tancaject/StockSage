@@ -1,6 +1,6 @@
 package com.stocksage.rag;
 
-import com.stocksage.service.KnowledgeIngestionService;
+import com.stocksage.knowledge.KnowledgeIngestionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

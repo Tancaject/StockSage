@@ -1,5 +1,7 @@
 package com.stocksage.service;
 
+import com.stocksage.exception.ResearchCapacityExceededException;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -243,7 +245,7 @@ public class RelationExtractionService {
     }
 
     /**
-     * 调用 LLM 抽取单个切片的关系候选，返回 JSON 数组节点；任何失败都返回空列表（fail-open）。
+     * 调用 LLM 抽取单个切片的关系候选；容量拒绝中止刷新，其他调用失败返回空列表。
      *
      * @param ticker 主体 ticker
      * @param company 主体公司名
@@ -253,7 +255,7 @@ public class RelationExtractionService {
      */
     private List<JsonNode> callExtraction(String ticker, String company, String section, String text) {
         try {
-            // 调用隔离的关系抽取 ChatClient；异常只丢弃当前切片，不终止整份年报。
+            // 容量拒绝不能被当作“未抽取到关系”而发布空图谱。
             String raw = chatClient.prompt()
                     .user(buildUserPrompt(ticker, company, section, text))
                     .call()
@@ -266,6 +268,7 @@ public class RelationExtractionService {
             array.forEach(candidates::add);
             return candidates;
         } catch (Exception e) {
+            ResearchCapacityExceededException.rethrowIfPresent(e);
             log.warn("Relation extraction failed for {} section '{}': {}", ticker, section, e.getMessage());
             return List.of();
         }

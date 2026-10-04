@@ -1,0 +1,40 @@
+{
+  "scope": "EXTERNAL_TEST_DRIVER_NOT_PART_OF_PRODUCTION_JAR_HASH",
+  "productionArtifactSha256": "af9d6382ae73f11106eb7fef574b72e3a1de6ec2a359eb8c7b52504115532d2f",
+  "driverSource": {
+    "path": "D:\\programming\\StockSage\\stocksage-backend\\src\\test\\java\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest.java",
+    "sha256": "c3b5af5132815ed7c023dfc3b7993d54670233eb44f7ac7cb33773145e06a790"
+  },
+  "dependencies": [
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\junit\\jupiter\\junit-jupiter-api\\5.11.4\\junit-jupiter-api-5.11.4.jar",
+      "sha256": "ab83ef9e51ac4597d59d26b4b58812129550e2f579a404c8af7d09f5ce5b4293"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\opentest4j\\opentest4j\\1.3.0\\opentest4j-1.3.0.jar",
+      "sha256": "48e2df636cab6563ced64dcdff8abb2355627cb236ef0bf37598682ddf742f1b"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\junit\\platform\\junit-platform-commons\\1.11.4\\junit-platform-commons-1.11.4.jar",
+      "sha256": "9edd969b0d0670c54105bc91ae79bd1c6f503e12115faba82073b84c86bbc334"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\apiguardian\\apiguardian-api\\1.1.2\\apiguardian-api-1.1.2.jar",
+      "sha256": "b509448ac506d607319f182537f0b35d71007582ec741832a1f111e5b5b70b38"
+    }
+  ],
+  "driverClasses": [
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\test-classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$1.class",
+      "sha256": "0fe11a2483545928b73a8b9517b576479353129804c7c40f446105c6e23e7cff"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\test-classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$HttpTransportConfiguration.class",
+      "sha256": "e3248748003e5606c32a4570397ff95af2a8c00fb7e61801bcaaac4f7691af2e"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\test-classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest.class",
+      "sha256": "a7ebd5dc18cbca51e628d97460ab546b6bd5e582af461f4ab90946ac51e972a4"
+    }
+  ]
+}

@@ -1,0 +1,439 @@
+{
+  "schema": "ordinary_judge_independent_label_review_v1",
+  "reviewed_at": "2026-10-02T04:05:44.417204+00:00",
+  "status": "AI_CROSS_CHECKED",
+  "diagnostic_only": true,
+  "release_eligible": false,
+  "reference_label_kind": "AI_AUTHORED_AI_CROSS_CHECKED_NOT_HUMAN_GOLD",
+  "rubric_sha256": "3396bd8f16f563fd04079836ed8280f58b2e37f39a508a2189fb82321068f870",
+  "dataset_sha256": "1fbd3baa823297e3ea71d6e5c7685187e2a44a7f53d10372db68793334bd2049",
+  "cases_file_sha256": "9f891cf829207a116d8315e90380bd2e834bc1bd9229880701493f77390bfac3",
+  "test_design_file_sha256": "7cc41ca812d9f64df3dd8478b8e1e5d9ac764beed7af60a36f62f5d914fdbca5",
+  "reviewers": [
+    "AI_AUTHOR:/root/retest_sources_a",
+    "AI_AUTHOR:/root/retest_sources_b",
+    "AI_INDEPENDENT_REVIEWER:/root/retest_label_review"
+  ],
+  "review_scope": "All 100 labels independently assessed against the frozen rubric, captured evidence and exact question; official URLs opened independently; numeric conversions and period/accounting attribution checked.",
+  "case_count": 20,
+  "source_group_count": 4,
+  "dimension_label_count": 100,
+  "independently_reviewed_case_count": 20,
+  "independently_reviewed_dimension_count": 100,
+  "variant_counts": {
+    "CORRECT_FACTUAL": 4,
+    "CORRECT_BOUNDED": 4,
+    "NUMERIC_ERROR": 4,
+    "OMISSION": 4,
+    "UNSUPPORTED_CERTAINTY": 4
+  },
+  "label_status_counts": {
+    "PASS": 68,
+    "FAIL": 22,
+    "NOT_APPLICABLE": 10
+  },
+  "unresolved_disputes": [],
+  "label_adjudications": [],
+  "adjudication_note": "No author-label changes were required by independent review. Before freezing, the author clarified FedEx evidence wording to distinguish U.S. volume from international export volume; no label changed.",
+  "source_groups": [
+    {
+      "group_id": "fedex-fy2025-q4",
+      "case_count": 5,
+      "source_url": "https://newsroom.fedex.com/newsroom/global-english/fedex-reports-fourth-quarter-diluted-eps-of-6-88-and-adjusted-diluted-eps-of-6-07",
+      "source_title": "FedEx Reports Fourth Quarter Diluted EPS of $6.88 and Adjusted Diluted EPS of $6.07",
+      "source_section": "Opening consolidated fourth-quarter results table; Fourth Quarter Results; Outlook; Forward-looking statements",
+      "official_source_independently_opened": true,
+      "source_checked_at": "2026-10-02",
+      "question_sha256": "5d5f7298223b4866a747c4c6f5183cd47622866f242754183a6cf4715f81bcbf",
+      "evidence_sha256": "6fcee1e71175ae2f87be1679835248d346a173749807af538bc24bbdce956b38"
+    },
+    {
+      "group_id": "hd-fy2025-q1",
+      "case_count": 5,
+      "source_url": "https://ir.homedepot.com/news-releases/2025/05-20-2025-110127912",
+      "source_title": "The Home Depot Announces First Quarter Fiscal 2025 Results; Reaffirms Fiscal 2025 Guidance",
+      "source_section": "Opening sales and earnings paragraphs; CEO commentary; Condensed Consolidated Statements of Earnings (Three Months Ended May 4, 2025 and April 28, 2024)",
+      "official_source_independently_opened": true,
+      "source_checked_at": "2026-10-02",
+      "question_sha256": "7310e78d9d64f2c6f0ddd2faa7d69b4c74162eb5a6779f8bda91cdc780bf1572",
+      "evidence_sha256": "95ab34a57c1e615696329312c22e61515b124149e3abab0be2d018f1e19c328e"
+    },
+    {
+      "group_id": "nike-fy2025-q4",
+      "case_count": 5,
+      "source_url": "https://investors.nike.com/investors/news-events-and-reports/investor-news/investor-news-details/2025/NIKE-Inc--Reports-Fiscal-2025-Fourth-Quarter-and-Full-Year-Results/default.aspx",
+      "source_title": "NIKE, Inc. Reports Fiscal 2025 Fourth Quarter and Full Year Results",
+      "source_section": "Fourth Quarter Income Statement Review; Consolidated Statements of Income (three months ended May 31, 2025/2024); Forward-Looking Statements; non-GAAP footnote",
+      "official_source_independently_opened": true,
+      "source_checked_at": "2026-10-02",
+      "question_sha256": "0d7d97d0919b3b62da1f9f575d4cc66ab03d5b24f92b38568fab5779da5bb7fb",
+      "evidence_sha256": "c595b1d53054f524e19c51e0ef4652dde3c4d040cacf9b0d0837c3fb96509146"
+    },
+    {
+      "group_id": "ups-cy2025-q1",
+      "case_count": 5,
+      "source_url": "https://investors.ups.com/news-events/press-releases/detail/2142/ups-releases-1q-2025-earnings",
+      "source_title": "UPS Releases 1Q 2025 Earnings",
+      "source_section": "International Segment table and growth bullet; 2025 Outlook; Forward-Looking Statements; reconciliation headings identifying Three Months Ended March 31",
+      "official_source_independently_opened": true,
+      "source_checked_at": "2026-10-02",
+      "question_sha256": "e1a0aef302fa531d0a5163328d76ae06eb92c028fe748c120e5b8e4c193200cd",
+      "evidence_sha256": "a50778508234b7aa0c53cab4355cb3a0c2024d1f72903bb58f9ffd92d388249f"
+    }
+  ],
+  "structural_checks": {
+    "status": "PASS",
+    "unique_ids": 20,
+    "same_question_and_evidence_per_group": true,
+    "five_preregistered_variants_per_group": true,
+    "all_correct_variants_without_FAIL": true,
+    "all_error_variants_have_target_dimension_FAIL": true,
+    "current_calibrator_preflight": "PASS",
+    "frozen_evaluator_source_hashes_unchanged": true
+  },
+  "arithmetic_checks": [
+    {
+      "calculation": "(39856-36418)/36418*100 rounded to 1 decimal",
+      "result": "9.4%"
+    },
+    {
+      "calculation": "(3433-3600)/3600*100 rounded to 1 decimal",
+      "result": "-4.6%"
+    },
+    {
+      "calculation": "4373 million USD / 100",
+      "result": "43.73 hundred-million USD"
+    },
+    {
+      "calculation": "(4373-4256)/4256*100 rounded to 1 decimal",
+      "result": "2.7%"
+    },
+    {
+      "calculation": "22.2 billion USD * 10",
+      "result": "222 hundred-million USD"
+    },
+    {
+      "calculation": "44.7% - 40.3%",
+      "result": "4.4 percentage points"
+    },
+    {
+      "calculation": "440 basis points / 100",
+      "result": "4.4 percentage points"
+    }
+  ],
+  "author_artifact_sha256": {
+    "part-a.jsonl": "65fc79341bffe2e99eb7fb1d9a4fd67eb95f35aaf5246c43fb9d3f37200f681f",
+    "part-b.jsonl": "48d4e76760038be6e19e08ddc9e7ddfa45c961dca1b4ea45adef8449d77e7091",
+    "part-a-sources.md": "cfc5ca70432154dd3dcf7a484a084e959d0d15a440d7251ee195127c215a6a0b",
+    "part-b-sources.md": "ab395f3877ec3ce7c58589e5cb0211ba8eabafc2dbc1cc13a9f2b5b3ab6a4fc4"
+  },
+  "case_reviews": [
+    {
+      "id": "hd-fy2025-q1-01",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "7eee4ef22340f5c64a74bc06fc726f74c904baab06caabfaba62c75ca9d0e6c2",
+      "expected_dimensions_sha256": "9f9a690393cd1d459988227854dead627033c46d750984000dd02d284d100e33",
+      "reason": "All values and periods match; total sales growth is explicitly balanced by declining comparable sales and net earnings, with the currency effect addressed. Every requested item is covered without unsupported inference."
+    },
+    {
+      "id": "hd-fy2025-q1-02",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "53e4bd4fc5e8938c004fcfbf0c523e7277fc9b9434e071106409ef41c9f48984",
+      "expected_dimensions_sha256": "5383d629444492ab44e3b5115f60dc2f5463f576c361baca31cdef918c56f496",
+      "reason": "The historical comparison is accurate and complete; refusing to infer broad renovation-demand recovery preserves the causal boundary. Both independent adverse metrics and the currency effect are addressed."
+    },
+    {
+      "id": "hd-fy2025-q1-03",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "ac23c3328e71b9a16020729b3348e91d210fcc3cf36c2d76813c74227fe7bec7",
+      "expected_dimensions_sha256": "5d1d0c54649351ede18cf7e217b0b0e2e0fe8b25fdff4189beaf2e555de6bcce",
+      "reason": "The comparable-sales sign is wrong, violating support and numeric correctness. The metric is discussed, so this is neither counterevidence omission nor task omission; no unknown information is invented."
+    },
+    {
+      "id": "hd-fy2025-q1-04",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "54d2eaec87df836967730e2cc2056bf8365af3a6937406039ffd3ce3a9635dae",
+      "expected_dimensions_sha256": "5b4d00612525df9cbec60665be8e00f2158b89d81dac88d9974d099cc4707e58",
+      "reason": "Written facts remain accurate. Discussing the currency driver does not supply the expressly requested comparable-sales result; this omits an independent adverse metric and an explicit task item, without uncertainty overreach."
+    },
+    {
+      "id": "hd-fy2025-q1-05",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "f3d664939524390a47071f989fb5843979d999da189a6430e60ed2d0017a5aaa",
+      "expected_dimensions_sha256": "003d3cef5a83d7fdca966736bc3bfc5d845b442be4c11e6873a94e5d252c75ce",
+      "reason": "Numbers, adverse metrics and task items remain covered. The added claim that renovation-demand recovery is the main growth cause is unestablished, violating support and the causal uncertainty boundary."
+    },
+    {
+      "id": "ups-cy2025-q1-01",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "d563d876b62ea02f5ae7458f87b206b8842b180497377c0bde3139851d5a8ea0",
+      "expected_dimensions_sha256": "9dded1f4534a44acbbed868f7adbab5a0a7f2979df6389000d11c3c09fa0d78e",
+      "reason": "Revenue, average daily volume and the reported relationship match. Profitability is expressly outside the question; the captured revenue-volume scope has no relevant adverse operating fact. Future growth is appropriately uncertain and coverage is complete."
+    },
+    {
+      "id": "ups-cy2025-q1-02",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "52377e89bf4b221bd414bb89e4204b73e96e0ef61047abcd5f76322f3c09a2ad",
+      "expected_dimensions_sha256": "113d9c7cbf0928c73e175fb414c6a0c802365861cc45b1d6411a524846d1a445",
+      "reason": "The growth-rate comparison is valid without quantifying an unsupported unit-revenue cause. All items are covered; macro and next-quarter uncertainty are preserved. Counterevidence is inapplicable within the explicit scope."
+    },
+    {
+      "id": "ups-cy2025-q1-03",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "9f150733ba6d3e38051401d4d7aef893be5ac8ad4aa3eae8c2f080fee23b6f93",
+      "expected_dimensions_sha256": "1b32b3a23fb3e72afd61d3b3ea632cfe56be8fdecc067a0648ca346d7dac0e73",
+      "reason": "The revenue conversion is ten times too large, failing support and numeric correctness. Growth measures, coverage and future uncertainty remain intact; the bounded evidence still has no applicable adverse fact."
+    },
+    {
+      "id": "ups-cy2025-q1-04",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "ef1cfa63b551650181f8e90be8a4ab8d257c8c74ebb23815378aab37a324b438",
+      "expected_dimensions_sha256": "7a66528ca1f74ed51a84f97ffd60d2677a9093d8650e3e71e0829624a1dacc7b",
+      "reason": "Written revenue facts and the future limitation are correct. Explicitly requested daily-volume growth and current volume change are absent, failing task completion alone; omission is neither a contrary fact nor unsupported certainty."
+    },
+    {
+      "id": "ups-cy2025-q1-05",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "4eae3368acf6a2c40d654ada385be53ec984d2afc8cd6e0fe87b053ba82e29b1",
+      "expected_dimensions_sha256": "8e5a2546f22f80ff784a6813bc88bb63eba69609d41a7d57d15ad3f409caa68f",
+      "reason": "Historical facts and coverage remain correct. One quarter cannot establish sustained recovery or certain next-quarter growth, failing support and unknowns. Forecast uncertainty itself is not counterevidence."
+    },
+    {
+      "id": "fedex-fy2025-q4-01",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "66271d2a61a4be0bbc1ccd091afd948620f8d01dc9af703bca975b208fd33aa3",
+      "expected_dimensions_sha256": "a63c9b8cd6d9dc397d173496541b57cbbf8ca70d3e815289115d185718e2d1c7",
+      "reason": "Period, revenue, both accounting-basis margins, opposite segment directions and guidance match. Freight decline addresses counterevidence; the forecast is conditional and all items are covered."
+    },
+    {
+      "id": "fedex-fy2025-q4-02",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "5c9369682d10008f51621b3053d10d51c66260f868798dabf948c0f31a53621e",
+      "expected_dimensions_sha256": "ee4f362d0c697579f6e5df6c5b00b09884389d107576c70c059a20535390ed4d",
+      "reason": "Both margin comparisons and the limited aggregate-versus-segment inference are supported. Freight decline prevents a blanket improvement claim; requested items and conditional guidance are retained."
+    },
+    {
+      "id": "fedex-fy2025-q4-03",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "87a03e02b5ecb4449609b540eab08d4649643b1471704f5e75daea9427d9ae05",
+      "expected_dimensions_sha256": "2040be3fbef967ad728e4b8b48db027875f07f7e1d9777c8f6cb18d60ba79741",
+      "reason": "GAAP and adjusted margins are reversed, failing support and numeric attribution. Both segments and every task item remain addressed, while conditional guidance preserves unknowns."
+    },
+    {
+      "id": "fedex-fy2025-q4-04",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "20a8530152883b88a06645dd2192b3576f2830c10a149eb07368705fa02913f3",
+      "expected_dimensions_sha256": "b9d741ecbfcfb8f15f3515448c5a4ba67a676b53fe780332479f0138b0850fcc",
+      "reason": "Every written fact, including Federal Express drivers, is supported. The explicitly requested Freight direction is absent, independently failing coverage and counterevidence. Numbers and uncertainty remain correct."
+    },
+    {
+      "id": "fedex-fy2025-q4-05",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "8e47c10b5a897778c0202cb267c91c604119b37f17eb3345a2e57408c6b0abb6",
+      "expected_dimensions_sha256": "97f4642d0783dff092bb5fe413e0849343d01fda77f13a4dae09a31fabede5f1",
+      "reason": "Historical figures, both segments and the guidance range are accurate. Guaranteeing realization violates support and unknowns. Coverage remains complete and Freight counterevidence is presented."
+    },
+    {
+      "id": "nike-fy2025-q4-01",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "937e473c6e33ec8995dbf0c611e4f0c27511c425b9145dedad9ecd5c9a76c8a7",
+      "expected_dimensions_sha256": "fdd20421f74857572d2860b69e0468447959c9fe342c9287e7cbd83879dd653a",
+      "reason": "Revenue, dual bases, margin, conversion and drivers are accurate. No captured opposing fact applies within scope; the missing future-margin guidance is preserved and all items are covered."
+    },
+    {
+      "id": "nike-fy2025-q4-02",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "ee86aec5bc96a4cd319c37e4e1707094d3bd27354e9c99fcea0395ab4f0fc665",
+      "expected_dimensions_sha256": "dd83d67ca2ea8af08a9a3eb9b4b54be7ae02aa1a7173f20b942445c933d1a629",
+      "reason": "Margin subtraction and dual revenue bases are correct. Named causes are distinguished from quantified contributions and the future gap is preserved. Coverage is complete and counterevidence remains inapplicable."
+    },
+    {
+      "id": "nike-fy2025-q4-03",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "bb911498290de7094114256432efad3fcdc24b58a9007eb58a68e29f2fa6f534",
+      "expected_dimensions_sha256": "8fe4d254486ab607143b055756059f5bf0df6c159d4e92e0b7346c19f32ba08f",
+      "reason": "440 basis points equals 4.4 percentage points, not 0.44. This fails support and numeric correctness. Coverage and future uncertainty remain intact, without introducing counterevidence applicability."
+    },
+    {
+      "id": "nike-fy2025-q4-04",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "74727febf76d9700f7ab14668e576c729d21384e3fb47e5412c3aa6bc590a167",
+      "expected_dimensions_sha256": "d1966d71437d50fcac571f44eecbfb35da733550dacc1980ff08e57fa96018b4",
+      "reason": "Written revenue facts and future limitation are valid. Requested current margin, its change and disclosed causes are omitted. Task completion fails without factual, uncertainty or counterevidence failures."
+    },
+    {
+      "id": "nike-fy2025-q4-05",
+      "decision": "AGREED",
+      "reviewed_dimensions": [
+        "claim_support",
+        "numeric_period_correctness",
+        "counterevidence",
+        "unknowns",
+        "task_completion"
+      ],
+      "reviewed_dimension_count": 5,
+      "input_sha256": "a355fe117a1fbed91f0f5e6b9b7e6fee2a9296555474e533e25c4d5af66c615b",
+      "expected_dimensions_sha256": "6bb3e571aa2bf09aa619236b32fdb7069957bc2e790f5518d6958110696fcfbc",
+      "reason": "Historical facts and conversion are correct and all questions receive answers. An established trough and inevitable recovery are unsupported, failing support and unknowns. Uncertainty itself is not omitted counterevidence."
+    }
+  ],
+  "boundaries": [
+    "Controlled authored answers, not captured business-Agent outputs.",
+    "Independent AI review is not human-reviewed ground truth.",
+    "No old raw evaluator outputs or business HOLDOUT were read by the independent reviewer.",
+    "No model-provider call during review; labels frozen before the new evaluator run.",
+    "No expected NO_DATA or numeric NOT_APPLICABLE examples are included."
+  ]
+}

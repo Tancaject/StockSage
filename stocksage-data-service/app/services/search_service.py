@@ -1,49 +1,31 @@
-"""
-网页搜索服务。
+"""Tavily 优先、DuckDuckGo 降级；共享出口验收结果与实际检索参数。"""
 
-provider 策略：优先使用 Tavily（需要 API Key，面向 LLM 检索设计、稳定、基本不限流）；
-当未配置 Tavily Key 或 Tavily 调用失败时，自动回退到免费的 DuckDuckGo。
-DuckDuckGo 免费接口很容易触发 202 Ratelimit，因此只作兜底，不作主力。
+from app.research_budget import check_budget, bounded_timeout
 
-对外返回结构在两个 provider 间保持一致（query/timelimit/provider/count/results），
-Java 后端与模型无需感知具体来源；results 里多一个 provider 字段方便排查实际走了哪条路。
-
-支持 timelimit 时间范围过滤（d/w/m/y），把"最新"类问题约束到近期结果，
-避免通用网页检索按相关性返回陈旧的权威页面。
-"""
-
+from datetime import datetime, timezone
 import logging
 from typing import Optional
 from urllib.parse import urlparse
 
 import httpx
 from duckduckgo_search import DDGS
+from duckduckgo_search.exceptions import RatelimitException, TimeoutException
+from pydantic import ValidationError
 
 from app.config import TAVILY_API_KEY, TAVILY_WEB_TOPIC
+from app.search_results import SearchResponse, normalize_search_result
 
 logger = logging.getLogger(__name__)
 
-# DuckDuckGo 接受的时间范围取值。news 接口不支持 'y'。
 _TEXT_TIMELIMITS = {"d", "w", "m", "y"}
 _NEWS_TIMELIMITS = {"d", "w", "m"}
-
-# Tavily 检索接口。
 _TAVILY_URL = "https://api.tavily.com/search"
-# Tavily basic 检索通常 1~3 秒返回；8 秒超时既留足余量，又能在 Tavily 卡住时
-# 尽快回退到 DuckDuckGo，避免拖垮 Java 端 10 秒的数据服务调用超时。
 _TAVILY_TIMEOUT = 8.0
-
-# timelimit 短码 -> Tavily 通用检索的 time_range 取值。
 _TAVILY_TIME_RANGE = {"d": "day", "w": "week", "m": "month", "y": "year"}
-# topic=news 时 Tavily 用 days（回溯天数）而非 time_range。
-_TAVILY_NEWS_DAYS = {"d": 1, "w": 7, "m": 30}
-
-# Tavily 检索深度合法取值。advanced 召回更全、相关性更好，但每次消耗 2 credit（basic 为 1）。
 _TAVILY_DEPTHS = {"basic", "advanced"}
 
 
 def _normalize_timelimit(value: Optional[str], allowed: set) -> Optional[str]:
-    """把外部传入的时间范围参数收敛为认可的取值，非法或空值按不过滤处理。"""
     if not value:
         return None
     normalized = value.strip().lower()
@@ -51,155 +33,119 @@ def _normalize_timelimit(value: Optional[str], allowed: set) -> Optional[str]:
 
 
 def _domain_of(url: str) -> str:
-    """从 URL 粗取域名，作为新闻 source 的兜底显示值。"""
-    if not url:
-        return ""
     try:
-        netloc = urlparse(url).netloc
-        return netloc[4:] if netloc.startswith("www.") else netloc
-    except Exception:
+        domain = urlparse(url).hostname or ""
+        return domain[4:] if domain.startswith("www.") else domain
+    except (TypeError, ValueError, AttributeError):
         return ""
+
+
+class InvalidProviderData(ValueError):
+    """供应商结果结构不满足搜索契约，不能视为合法空搜索。"""
+
+
+def _failure_kind(error: Exception) -> tuple[str, bool | None]:
+    if isinstance(error, (httpx.TimeoutException, TimeoutException, TimeoutError)):
+        return "UPSTREAM_TIMEOUT", True
+    if isinstance(error, RatelimitException):
+        return "UPSTREAM_RATE_LIMIT", True
+    if isinstance(error, httpx.HTTPStatusError):
+        code = error.response.status_code
+        return ("UPSTREAM_RATE_LIMIT", True) if code == 429 else ("UPSTREAM_ERROR", code >= 500)
+    if isinstance(error, (InvalidProviderData, ValidationError, ValueError)):
+        return "INVALID_PROVIDER_DATA", False
+    return "UPSTREAM_ERROR", None
 
 
 class SearchService:
-
     def search(self, query: str, max_results: int = 5,
                timelimit: Optional[str] = None, depth: str = "basic") -> dict:
-        """
-        搜索网页并返回靠前结果。每条结果包含标题、链接和摘要。
-
-        timelimit 限定结果时间范围：d=24 小时 / w=一周 / m=一月 / y=一年；None 表示不限。
-        depth 为 Tavily 检索深度（basic/advanced），仅对 Tavily 生效，DuckDuckGo 兜底时忽略。
-        优先 Tavily，失败或未配置 Key 时回退 DuckDuckGo。
-        """
-        tl = _normalize_timelimit(timelimit, _TEXT_TIMELIMITS)
-        if TAVILY_API_KEY:
-            try:
-                return self._search_tavily(query, max_results, tl,
-                                           topic=TAVILY_WEB_TOPIC, depth=depth)
-            except Exception as e:
-                logger.warning("Tavily web search failed, falling back to DuckDuckGo: %s", e)
-        return self._search_ddg(query, max_results, tl)
+        return self._search(query, max_results, timelimit, depth, "web")
 
     def search_news(self, query: str, max_results: int = 5,
                     timelimit: Optional[str] = None, depth: str = "basic") -> dict:
-        """
-        搜索近期新闻文章。
+        return self._search(query, max_results, timelimit, depth, "news")
 
-        timelimit 限定结果时间范围：d=24 小时 / w=一周 / m=一月；None 表示不限。
-        depth 为 Tavily 检索深度（basic/advanced），仅对 Tavily 生效，DuckDuckGo 兜底时忽略。
-        优先 Tavily，失败或未配置 Key 时回退 DuckDuckGo。
-        """
-        tl = _normalize_timelimit(timelimit, _NEWS_TIMELIMITS)
+    def _search(self, query, max_results, timelimit, depth, search_type) -> dict:
+        check_budget()
+        requested_time = _normalize_timelimit(timelimit, _TEXT_TIMELIMITS)
+        effective_time = _normalize_timelimit(requested_time, _NEWS_TIMELIMITS if search_type == "news" else _TEXT_TIMELIMITS)
+        requested_depth = depth if depth in _TAVILY_DEPTHS else "basic"
+        context = {
+            "query": query, "searchType": search_type, "requestedMaxResults": max_results,
+            "requestedTimelimit": requested_time, "effectiveTimelimit": effective_time,
+            "timelimit": effective_time, "requestedDepth": requested_depth,
+        }
+        fallback_reason = "PRIMARY_NOT_CONFIGURED"
         if TAVILY_API_KEY:
             try:
-                return self._search_tavily(query, max_results, tl,
-                                           topic="news", depth=depth)
-            except Exception as e:
-                logger.warning("Tavily news search failed, falling back to DuckDuckGo: %s", e)
-        return self._search_news_ddg(query, max_results, tl)
+                topic = "news" if search_type == "news" else TAVILY_WEB_TOPIC
+                raw = self._search_tavily(query, max_results, effective_time, topic, requested_depth)
+                return self._response(context, "tavily", topic, requested_depth, raw)
+            except Exception as error:
+                check_budget(error)
+                fallback_reason, _ = _failure_kind(error)
+                # 不把供应商异常正文或请求头写入日志/降级元数据。
+                logger.warning("Tavily %s search failed; falling back to DuckDuckGo (%s)", search_type, fallback_reason)
+        topic = "news" if search_type == "news" else "general"
+        try:
+            raw = self._search_news_ddg(query, max_results, effective_time) if search_type == "news" else self._search_ddg(query, max_results, effective_time)
+            return self._response(context, "ddg", topic, None, raw, fallback_reason)
+        except Exception as error:
+            check_budget(error)
+            error_code, retryable = _failure_kind(error)
+            return self._response(context, "ddg", topic, None, [], fallback_reason,
+                                  error_code=error_code, retryable=retryable)
 
-    # ===== Tavily（主力）=====
+    @staticmethod
+    def _response(context, provider, topic, depth, raw, fallback_reason=None, *, error_code=None, retryable=None):
+        check_budget()
+        # 验收位于 Tavily 的 try 范围内，坏行触发既有降级，不静默丢弃或伪装 EMPTY。
+        results = [normalize_search_result(row) for row in raw] if error_code is None else []
+        return SearchResponse.model_validate({
+            **context, "provider": provider, "topic": topic, "effectiveDepth": depth, "depth": depth,
+            "status": "ERROR" if error_code else ("SUCCESS" if results else "EMPTY"),
+            "count": len(results), "results": results, "fetchedAt": datetime.now(timezone.utc),
+            "fallbackFrom": "tavily" if fallback_reason is not None else None, "fallbackReason": fallback_reason,
+            "error": error_code is not None, "errorCode": error_code, "retryable": retryable,
+            "message": "Search provider request failed; retry later or use another source." if error_code else None,
+        }).model_dump(mode="json")
 
-    def _search_tavily(self, query: str, max_results: int,
-                       tl: Optional[str], topic: str, depth: str = "basic") -> dict:
-        """
-        调用 Tavily /search 接口。
-
-        topic 取 general/finance（通用网页/财经）或 news（新闻）；
-        depth 取 basic（1 credit/次）或 advanced（2 credit/次，召回更全、相关性更好），
-        非法值收敛为 basic。
-
-        任何 HTTP 错误（401 无效 Key、429/432 额度耗尽、超时等）都会抛异常，
-        由上层 search/search_news 捕获并回退到 DuckDuckGo。
-        """
-        search_depth = depth if depth in _TAVILY_DEPTHS else "basic"
-        payload = {
-            "query": query,
-            "max_results": max_results,
-            "topic": topic,
-            "search_depth": search_depth,
-        }
-        if topic == "news":
-            if tl in _TAVILY_NEWS_DAYS:
-                payload["days"] = _TAVILY_NEWS_DAYS[tl]
-        elif tl in _TAVILY_TIME_RANGE:
+    def _search_tavily(self, query: str, max_results: int, tl: Optional[str], topic: str, depth: str = "basic") -> list[dict]:
+        payload = {"query": query, "max_results": max_results, "topic": topic, "search_depth": depth}
+        if tl is not None:
+            # time_range 是实际发送的供应商过滤条件，不保证每条结果都有可检测的发布时间。
             payload["time_range"] = _TAVILY_TIME_RANGE[tl]
+        with httpx.Client(timeout=bounded_timeout(_TAVILY_TIMEOUT)) as client:
+            response = client.post(_TAVILY_URL, json=payload, headers={"Authorization": f"Bearer {TAVILY_API_KEY}"})
+            response.raise_for_status()
+            data = response.json()
+        if not isinstance(data, dict) or not isinstance(data.get("results"), list):
+            raise InvalidProviderData("Tavily results must be an array")
+        return self._adapt_results(data["results"], "tavily", topic == "news")
 
-        headers = {"Authorization": f"Bearer {TAVILY_API_KEY}"}
-        with httpx.Client(timeout=_TAVILY_TIMEOUT) as client:
-            resp = client.post(_TAVILY_URL, json=payload, headers=headers)
-            resp.raise_for_status()
-            data = resp.json()
+    def _search_ddg(self, query: str, max_results: int, tl: Optional[str]) -> list[dict]:
+        with DDGS(timeout=bounded_timeout(10)) as ddgs:
+            rows = ddgs.text(query, timelimit=tl, max_results=max_results)
+        return self._adapt_results(rows, "ddg", False)
 
+    def _search_news_ddg(self, query: str, max_results: int, tl: Optional[str]) -> list[dict]:
+        with DDGS(timeout=bounded_timeout(10)) as ddgs:
+            rows = ddgs.news(query, timelimit=tl, max_results=max_results)
+        return self._adapt_results(rows, "ddg", True)
+
+    @staticmethod
+    def _adapt_results(rows, provider: str, news: bool) -> list[dict]:
+        if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+            raise InvalidProviderData("Search results must be an array of objects")
         results = []
-        for r in data.get("results", []):
-            item = {
-                "title": r.get("title", ""),
-                "link": r.get("url", ""),
-                "snippet": r.get("content", ""),
+        for row in rows:
+            url = row.get("url" if provider == "tavily" or news else "href")
+            result = {
+                "title": row.get("title"), "link": url,
+                "snippet": row.get("content" if provider == "tavily" else "body"),
+                "date": row.get("published_date" if provider == "tavily" else "date") if provider == "tavily" or news else "",
+                "source": row.get("source") if provider == "ddg" and news else _domain_of(url),
             }
-            if topic == "news":
-                item["date"] = r.get("published_date", "")
-                item["source"] = _domain_of(r.get("url", ""))
-            results.append(item)
-
-        return {
-            "query": query,
-            "timelimit": tl,
-            "provider": "tavily",
-            "topic": topic,
-            "depth": search_depth,
-            "count": len(results),
-            "results": results,
-        }
-
-    # ===== DuckDuckGo（兜底）=====
-
-    def _search_ddg(self, query: str, max_results: int, tl: Optional[str]) -> dict:
-        """DuckDuckGo 通用网页检索兜底。被限流时返回 count=0 并带 error 字段。"""
-        try:
-            with DDGS() as ddgs:
-                results = list(ddgs.text(query, timelimit=tl, max_results=max_results))
-            return {
-                "query": query,
-                "timelimit": tl,
-                "provider": "ddg",
-                "count": len(results),
-                "results": [
-                    {
-                        "title": r.get("title", ""),
-                        "link": r.get("href", ""),
-                        "snippet": r.get("body", ""),
-                    }
-                    for r in results
-                ],
-            }
-        except Exception as e:
-            return {"query": query, "timelimit": tl, "provider": "ddg",
-                    "count": 0, "results": [], "error": str(e)}
-
-    def _search_news_ddg(self, query: str, max_results: int, tl: Optional[str]) -> dict:
-        """DuckDuckGo 新闻检索兜底。被限流时返回 count=0 并带 error 字段。"""
-        try:
-            with DDGS() as ddgs:
-                results = list(ddgs.news(query, timelimit=tl, max_results=max_results))
-            return {
-                "query": query,
-                "timelimit": tl,
-                "provider": "ddg",
-                "count": len(results),
-                "results": [
-                    {
-                        "title": r.get("title", ""),
-                        "link": r.get("url", ""),
-                        "snippet": r.get("body", ""),
-                        "date": r.get("date", ""),
-                        "source": r.get("source", ""),
-                    }
-                    for r in results
-                ],
-            }
-        except Exception as e:
-            return {"query": query, "timelimit": tl, "provider": "ddg",
-                    "count": 0, "results": [], "error": str(e)}
+            results.append({key: "" if value is None else value for key, value in result.items()})
+        return results

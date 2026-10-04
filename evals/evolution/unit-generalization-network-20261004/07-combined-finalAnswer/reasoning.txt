@@ -1,0 +1,103 @@
+我们需要回答用户中文问题。任务：基于已给工具观察 [E1] 和 Fundamentals Agent 内容，给出判断。用户要求很具体：IBM 2025年前三季度经营现金流/净利润比率低于2024年同期，能否据此判断利润现金转化明显变差？给出两年原表比率；再做仅剔除已列示一次性项的示意比较：剔除2024养老金结算费用及相关税收利益、2025 H.R.1相关非现金税费；其余不调，经营现金流保持披露值。列出两年示意调整后净利润及经营现金流/该净利润，解释与原表判断有什么不同、还不能确认什么。强调这是可比性练习，不是公司公布调整后指标；税项按脚注约数计算。金额注明单位，比率和百分比保留两位小数。
+
+我们需要使用证据 [E1]。当前日期 2026-10-02。证据 availableAt 2025-10-22, retrieved 2026-10-02。需要末尾数据来源与时间说明或参考来源。必须标注 [E1]。不能编造。需要给判断：不能仅据此判断明显变差，因为 2024 净利润被一次性养老金结算费用压低，比率被动抬高；调整后两年接近，经营现金流略增。需要保留不确定性。
+
+需要精确计算：
+原表：
+2025 Nine Months: Net income 4,993 million USD; OCF 9,153 million USD. Ratio = 9153/4993 =? Let's calculate precisely to two decimals and percentage two decimals. 4993*1.83 = 9137.19; remainder 15.81; /4993=0.003166; so 1.8332 -> 1.83; percentage 183.32%. If ratio to two decimal 1.83, percentage maybe computed exact 183.32. 9153/4993 = use division: 4993*1.833 = 9151.? 4993*1.833 = 4993*(1 + .833)=4993+4159.169=9152.169; remainder .831; .0001665 => 1.833166? Let's do exact: 9153/4993. 4993*1.8331 = 4993 + 0.8331*4993. 0.8331*4993 = 4159? 4993*0.8=3994.4; *0.0331=165.2683; sum 4159.6683; total 9152.6683; remainder .3317; /4993=.0000664; 1.8331664. Percent 183.31664 -> 183.32%. Good.
+2024: 9115/3109. 3109*2.93=9109.37; remainder 5.63; /3109=0.00181; 2.93181 -> 2.93; percent 293.18%. exact maybe 293.18.
+Adjusted:
+2025 adjusted NI = 4,993 + 300 = 5,293 million. OCF 9,153. Ratio = 9153/5293. 5293*1.73=9156.89? 5293*1.73 = 5293 + 0.73*5293=5293+3863.89=9156.89, too high. So ratio slightly under 1.73: 9153/5293 = 1.72926 -> 1.73; percent 172.93%. Check: 5293*1.729 = 5293 + 0.729*5293=5293+3858.597=9151.597; remainder 1.403; /5293=0.000265; 1.729265; percent 172.9265 -> 172.93.
+2024 adjusted NI = 3,109 + 2,725 - 700 = 5,134. OCF 9,115. Ratio = 9115/5134. 5134*1.775 = 9112.85? 5134*0.775=3978.85; +5134=9112.85; remainder 2.15; /5134=0.000419; 1.775419 -> 1.78; percent 177.54%. Good.
+Differences: original ratio diff 1.10 (2.93-1.83), percentage diff 109.86 pp. Adjusted diff 0.05 (1.78-1.73) or 4.61 pp (177.54-172.93). Need maybe mention 2025 adjusted lower by 0.05. OCF change +38 million, +0.42%. Need maybe calculate 38/9115 = 0.4168% -> 0.42%.
+
+Need ensure wording: “剔除2024年养老金结算费用及其相关税收利益” — The pension settlement charge is added back to net income because expense; related tax benefit is subtracted because benefit. Need explain: 3,109 + 2,725 - 700 = 5,134. But careful: The cash flow statement shows Pension Settlement Charge as add-back to net income in operating section, meaning noncash? Actually pension settlement charge is likely non-cash charge included in net income; the tax benefit associated reduces tax expense. The user's instruction says剔除养老金结算费用及相关税收利益. We'll do as above. Need note approximate tax amounts: 0.3 billion = 300 million, 0.7 billion = 700 million. Since approximate, adjusted numbers are示意. Need state not company non-GAAP.
+
+Need answer structure:
+- 一句话结论：不能仅凭原表比率下降判断利润现金转化明显变差；调整后差距大幅缩小，经营现金流基本持平略增。
+- 原表数据表：期间、净利润、经营现金流、比率、百分比。注明百万美元。
+- 示意调整：说明调整项：2025 +300; 2024 +2725 -700. Table: 调整后净利润、经营现金流、比率、百分比.
+- 比较和解释：原表 2024 比率被压低净利润抬高；调整后 1.73 vs 1.78 接近；经营现金流 9,153 vs 9,115 略高 38 (0.42%)；所以不是明显变差。但 2025 仍略低，不能排除小幅变化。
+- 还不能确认：精确税额未知；经营现金流未调整现金影响；营运资本、现金税、养老金缴付等明细不足；不是公司调整后指标；仅两期且一次性扰动，不能确认趋势。
+- 数据来源与时间说明： [E1] IBM Q3 2025 IR cash flow release, published/available 2025-10-22, retrieved 2026-10-02; period nine months ended 2025-09-30 and 2024-09-30; USD millions; unaudited. Also current date? Could include. Need maybe list source as 参考来源. Use [E1] in text.
+
+Need be careful with “2025年前三季度” = Nine Months Ended Sep 30, 2025. Current date 2026-10-02, but evidence published 2025-10-22. It's historical. We can say“基于本轮证据（2025年三季报现金流量表，未经审计）”。
+
+Need avoid overclaim. Could mention net income from operations is as reported. Use “Net Income/(Loss) from Operations” maybe. Need not include Q3 single quarter.
+
+Need include formulas maybe. User requested “列出两年示意调整后的净利润及经营现金流/该净利润”。 We'll include calculation formula.
+
+Need ensure all numbers with units. Ratio and percent two decimals. Table maybe:
+原表：
+2025年前九个月：净利润 4,993百万美元；经营现金流 9,153百万美元；比率 1.83；百分比 183.32%
+2024年前九个月：净利润 3,109百万美元；经营现金流 9,115百万美元；比率 2.93；百分比 293.18%
+
+示意调整：
+2025: 4,993 + 300 = 5,293; OCF 9,153; ratio 1.73; 172.93%
+2024: 3,109 + 2,725 - 700 = 5,134; OCF 9,115; ratio 1.78; 177.54%
+
+Need maybe mention H.R.1 tax charge is one-time non-cash income tax charge included in operating assets and liabilities/Other net. Add back to net income because expense. For 2024 pension settlement charge: The cash flow line adds back 2,725 to net income; but our adjustment to net income is conceptual. The related tax benefit 700 reduces tax expense, so remove by subtracting. Good.
+
+Potential nuance: If tax benefit associated with pension settlement charge was $0.7bn tax benefit in 2024 Q3 included in operating assets/liabilities/Other, net? Footnote says 2024 includes a $0.7bn tax benefit associated with pension settlement charge in third quarter. If we remove pension settlement charge and tax benefit, net income adjustment: +2,725 expense, -700 benefit. Yes.
+
+Need maybe say “经营现金流/净利润比率大于1通常说明净利润中有较多非现金费用或营运资本贡献，但不能单独证明质量好坏。” But maybe not necessary. Could include brief interpretation.
+
+Need ensure no mention of hidden chain. Final only. Need final in Chinese. Need include 免责 at end: “仅供参考，不构成投资建议。” The system says answer ending retain one sentence. We'll include. Also “数据来源与时间说明” after analysis maybe before disclaimer? It says if rely on external facts must retain source section. We can put source section then disclaimer. Or disclaimer last. Need maybe source section includes [E1]. Also in text cite [E1].
+
+Need check if we can use Fundamentals Agent content as evidence? It's within tool observations, but only [E1] evidence. We can rely on [E1]. We shouldn't cite Fundamentals Agent as source. Use [E1].
+
+Need maybe mention “证据验收 COMPLETED” not necessary and not to upgrade. We can ignore.
+
+Need maybe include “金额单位为百万美元；比率保留两位小数，百分比保留两位小数”。
+
+Let's craft with Markdown.
+
+Potential final:
+
+结论：不能仅凭原表比率下降判断 IBM 2025年前九个月利润现金转化明显变差。原表下降主要是 2024 年净利润被一次性养老金结算费用压低，导致 2024 年比率被动抬高；示意剔除后两年比率接近，且经营现金流同比略增。[E1]
+
+1. 原表比率
+Table.
+
+2. 示意调整
+说明：
+- 2025：剔除 H.R.1 一次性非现金税费约0.3bn=300百万，净利润加回300。
+- 2024：剔除养老金结算费用2,725百万（加回），剔除相关税收利益约0.7bn=700百万（扣减）。
+- 经营现金流保持披露值。
+Table.
+
+3. 与原表判断不同
+- 原表比率从2.93降至1.83，降幅1.10/109.86pp，表观恶化。
+- 调整后 1.73 vs 1.78，仅差0.05/4.61pp，差距明显缩小。
+- OCF 9,153 vs 9,115 +38 +0.42%，现金创造未下降。
+- 因此原表差异更多是口径/一次性项目扰动，不宜直接判断现金转化明显变差。
+
+4. 仍不能确认
+- 精确税额未知，约数。
+- 经营现金流未同步调整，若一次性项目有现金影响无法反映。
+- 未调整营运资本、现金税支付、养老金现金缴付等；不能确认经常性现金转化趋势。
+- 不是公司 non-GAAP。
+- 仅两期数据，不能确认趋势。
+
+数据来源与时间说明： [E1] IBM Q3 2025 official IR cash flow release ... published 2025-10-22, retrieved 2026-10-02; periods; unaudited; USD millions. Current date maybe not needed. 
+
+Finally: 仅供参考，不构成投资建议。
+
+Need ensure percentages: For adjusted 2025 172.93%, 2024 177.54%. Difference in percentage points 4.61. Original difference 109.86. Ratio difference 1.10 and 0.05. Good.
+
+Double-check arithmetic:
+2025 adjusted ratio: 9153/5293. Let's exact: 5293*1.7293 = 5293 + 0.7293*5293. 5293*0.7293 = 5293*(0.7+0.0293)=3705.1+155.0849=3860.1849; total 9153.1849, slightly high. So exact 1.729265. Percent 172.9265 -> 172.93. Good.
+2024 adjusted ratio: 9115/5134. 5134*1.7754 = 5134 + 0.7754*5134. 0.7754=0.7+0.0754; 3593.8+387.1036=3980.9036; total 9114.9036; exact 1.775419. Percent 177.5419 -> 177.54. Good.
+Original 2025 percent: 1.833166*100=183.3166 -> 183.32. 2024 2.931811? 3109*2.9318=9115? 3109*0.9318=2897.? 3109*2.9318 = 3109*2 + 3109*0.9318 = 6218 + 2896.9662 = 9114.9662; exact 2.9318109 -> 293.18. Good.
+
+Need maybe mention “2025年前九个月净利润高于2024，调整后净利润也略高：5,293 vs 5,134，差159百万美元”。 Could include but not required. It helps. But user asked list adjusted net income. We'll include.
+
+Need be careful “经营现金流/净利润” ratio if net income adjusted but OCF unchanged may be less meaningful; we state it's illustrative. Good.
+
+Need maybe include formula for adjusted net income:
+2025: 4,993 + 300 = 5,293
+2024: 3,109 + 2,725 - 700 = 5,134
+
+Need maybe mention tax amounts are approximate from footnotes: $0.3bn and $0.7bn. Good.
+
+Let's produce final. Ensure no analysis. final only.

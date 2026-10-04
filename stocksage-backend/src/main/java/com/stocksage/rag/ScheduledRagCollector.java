@@ -3,8 +3,9 @@ package com.stocksage.rag;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.client.DataServiceClient;
+import com.stocksage.client.DataServicePayloads;
 import com.stocksage.model.dto.KnowledgeIngestionResult;
-import com.stocksage.service.KnowledgeIngestionService;
+import com.stocksage.knowledge.KnowledgeIngestionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -125,7 +126,7 @@ public class ScheduledRagCollector {
             // webSearch 走 data-service 统一搜索管线；本类只消费返回的标题、链接和摘要。
             String response = dataServiceClient.webSearch(keyword, maxResults);
             JsonNode root = objectMapper.readTree(response);
-            if (root.has("error") && !root.path("error").asText("").isBlank()) {
+            if (DataServicePayloads.hasTopLevelError(root)) {
                 log.warn("Scheduled RAG search failed for keyword={}: {}", keyword, root.path("error").asText());
                 return results;
             }

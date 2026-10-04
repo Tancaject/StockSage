@@ -12,7 +12,7 @@ stocksage-frontend/dist/
 # Python environments, caches, and generated eval output
 .venv-rag-eval/
 stocksage-data-service/.venv/
-rag-eval/results/
+evals/results/
 **/__pycache__/
 **/*.py[cod]
 *$py.class

@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-09-1-1",
+    "caseId": "pep-fy2025q3-quarter-cash-comparison",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-validation-20261002\\raw-development-09",
+  "executionSha256": "375b756e0fbd90e1c9e093b035e9b129baf6b1c67fee9e948a952e0346a05636",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

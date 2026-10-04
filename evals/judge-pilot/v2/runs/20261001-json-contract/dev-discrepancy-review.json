@@ -1,0 +1,65 @@
+{
+  "schema": "judge_dev_discrepancy_review_v1",
+  "origin": "AI_INDEPENDENT_REVIEW",
+  "reviewer": "/root/eval_agent_plan_check",
+  "scope": "First fixed v2 DEV only; no VALIDATION used for tuning",
+  "rubric_unchanged": true,
+  "labels_unchanged": true,
+  "findings": [
+    {
+      "classification": "CLEAR_RULE_VIOLATION",
+      "cases": [
+        "wmt-fy2025-01",
+        "wmt-fy2025-03",
+        "goog-cy2024-q4-01",
+        "goog-cy2024-q4-03",
+        "dis-fy2025-q1-02"
+      ],
+      "dimension": "counterevidence",
+      "reason": "Already addressed relevant counter-indicators must be PASS under the frozen rubric, not NOT_APPLICABLE."
+    },
+    {
+      "classification": "SOURCE_CONTRADICTION",
+      "cases": [
+        "goog-cy2024-q4-02",
+        "dis-fy2025-q1-03"
+      ],
+      "dimension": "counterevidence",
+      "reason": "The claim that no opposite indicator exists contradicts the frozen Network revenue decline or Disney+ subscriber decline."
+    },
+    {
+      "classification": "METRIC_LABEL_MISSED",
+      "cases": [
+        "cost-fy2025-q2-03"
+      ],
+      "dimension": "numeric_period_correctness",
+      "reason": "Correct net-income arithmetic does not validate relabeling its result as core-business growth."
+    },
+    {
+      "classification": "DISCLOSURE_GAP_MISSED",
+      "cases": [
+        "meta-cy2024-q4-02"
+      ],
+      "dimension": "unknowns",
+      "reason": "The answer invents undisclosed full-year revenue guidance despite the judge stating that it does not."
+    },
+    {
+      "classification": "COVERAGE_OMISSION",
+      "cases": [
+        "goog-cy2024-q4-02"
+      ],
+      "dimension": "task_completion",
+      "reason": "The question asks about all advertising businesses, but the answer omits Network."
+    },
+    {
+      "classification": "INTERPRETATION_BOUNDARY",
+      "cases": [
+        "dis-fy2025-q1-03",
+        "orcl-fy2025-q3-03"
+      ],
+      "dimension": "task_completion",
+      "reason": "Coverage granularity and implicit comparison allow interpretive disagreement. Independent AI review favors retaining the frozen labels; do not report disagreement alone as indisputable ground truth."
+    }
+  ],
+  "limits": "AI reference-label agreement is not human agreement or production accuracy. Parsing/excerpt failures are technical and excluded from conditional semantic comparisons."
+}

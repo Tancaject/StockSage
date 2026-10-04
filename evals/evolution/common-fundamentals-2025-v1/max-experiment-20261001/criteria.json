@@ -1,0 +1,985 @@
+{
+  "schemaVersion": 1,
+  "kind": "PREDECLARED_AI_SOURCE_GROUNDED_COMPARISON_CRITERIA",
+  "createdAt": "2026-10-01T01:05:08.632031+00:00",
+  "reviewType": "AI_SOURCE_GROUNDED",
+  "humanReviewed": false,
+  "independentHumanAcceptance": false,
+  "freezeDeclaration": {
+    "currentExperimentOutputsRead": false,
+    "currentExperimentModelCallsByCriteriaAuthor": 0,
+    "candidateGeneratedByCriteriaAuthor": false,
+    "currentExperimentOutputDirectoriesRead": false,
+    "reviewedScope": "仅既有 DEVELOPMENT / VALIDATION 的 12 题 query、gold 草稿和各自源表；未审阅 HOLDOUT 问题、答案或源表。",
+    "baselinePlanned": {
+      "model": "qwen3.8-max",
+      "prompt": "当前生产提示模板；实际版本/哈希由运行计划单独冻结",
+      "timeoutSeconds": 180
+    },
+    "postFreezeRule": "看到本轮答案后不得悄悄变更标准。确有源证据或标准错误须附版本化更正、说明看到哪些答案、按同一更正重审两臂，并保留原判敏感性。"
+  },
+  "scope": {
+    "developmentCaseCount": 6,
+    "transferRetestCaseCount": 6,
+    "holdoutIncluded": false,
+    "validationCaveat": "原 VALIDATION 已被之前实验观察，当前仅称迁移复测集；不能作为独立未见验证集或独立泛化证明。",
+    "unitOfAnalysis": "同题 baseline/candidate 的最终回答；分析稿仅作故障定位的次级观测。",
+    "design": "先 6 道 DEVELOPMENT 新基线，再冻结 1 个候选，完成 DEVELOPMENT 对照及 6 道迁移复测集两臂对照。既有实验输出不替代本轮基线。",
+    "samplingLimit": "单次题目对照和同题重复均不能当作大量独立样本；不作统计显著或生产改善承诺。"
+  },
+  "evidencePolicy": {
+    "authorityOrder": [
+      "本题实际 query 决定必答范围",
+      "本轮固定输入中的原始证据决定公司、期间、科目和数字事实",
+      "既有 gold 草稿与 Decimal 运算是核对辅助，不能扩大用户必答范围"
+    ],
+    "additionalClaimRule": "全部自行增加的明确数字、合计、公司事实与因果按本题输入逐项核对；原文未给出的公司特定事实不能借常识确证。",
+    "generalMechanisms": "正确的一般财务机制、明确条件/可能性、明确举例可接受。不得仅因未逐句标“假设”或未在源表出现相同措辞扣分；应按整段实际语义判断。",
+    "inferenceRule": "可接受直接可复算的关系与有边界的推断；不允许把有限账面指标升级为确定未来结果或安全保证。",
+    "noRubricExpansion": "不要求投资建议、同行排名、未问历史年或额外风险清单；不因文风长短、表格样式或与参考答案措辞不同判失败。"
+  },
+  "numericPolicy": {
+    "calculator": "Decimal，使用未四舍五入的源金额复算",
+    "units": "先规范为同单位；million USD、billion USD、亿美元等正确换算等价。源表负数支出可换为正数毛额，不能改变经济符号。",
+    "normalRounding": "按展示精度正确四舍五入或明确合理概数均通过。不要求统一小数位。",
+    "minorRounding": "纯末位/二次舍入，百分比绝对偏差不超过 0.1 个百分点或比率偏差不超过 0.01 且不改变方向/门槛/含义时记 MINOR_NUMERIC_NOTE，单独列原值、展示值和误差，不作实质失败。金额的普通单位换算与末位舍入也同理，但不能据此容忍错科目、错期间、错单位或有意义的金额差异。",
+    "materialErrors": "错误分子/分母、错年度/季度、遗漏后仍称完整合计、错百分比与百分点、错误数量级，或舍入改变重要方向/结论，均属于实质错误。",
+    "dimensionSemantics": "requiredFactsCorrect/additionalNumbersCorrect 表示无实质数字错误，轻微舍入由 numericNotes 独立记录；遗漏必答值由 coreCoverageComplete 独立记录，不能把遗漏当已正确回答。"
+  },
+  "classification": {
+    "SUBSTANTIVE_ISSUE": "源证据可明确反驳的事实/数字/公式，或明确超出证据的公司因果、经济分类、确定性推断；须有精确答案引文、证据位置/算式和理由。",
+    "CORE_OMISSION": "实际 query 的核心金额/计算/区别/简评缺失；单独计核心完整性，不能算作已查实的事实错误。",
+    "AMBIGUITY_NOTE": "完整语境存在合理且有证据的解释，同时也可能被读成更强主张；只记备注和严格/宽松敏感性，不将主分析判失败。",
+    "MINOR_NUMERIC_NOTE": "小舍入或显示精度问题，按 numericPolicy 处理，不能放大成整体数字错误。",
+    "ACCEPTABLE_MECHANISM": "正确的一般机制、条件解释、用途举例和有边界账面判断；不记失败。",
+    "INCONCLUSIVE": "模型调用未完成、输出被截断、固定输入/来源无法恢复、运行条件不相同或无法可靠判定；报告原因，不冒充模型事实失败，也不从总尝试数中隐去。"
+  },
+  "verdictRules": {
+    "PASS": "可审阅，核心任务完整，且没有实质问题；允许只有歧义/轻微舍入备注。",
+    "ISSUES": "可审阅，但存在至少一项实质问题或核心缺漏；必须区分 issueCauses 为 SUBSTANTIVE_ISSUE / CORE_OMISSION，不把两者混成幻觉率。",
+    "INCONCLUSIVE": "符合不可判定条件；质量比较对该题不下胜负结论，独立报告完成率。"
+  },
+  "reviewRecordContract": {
+    "requiredFields": [
+      "caseId",
+      "answerId",
+      "stage",
+      "reviewType",
+      "humanReviewed",
+      "runComplete",
+      "requiredFactsCorrect",
+      "additionalNumbersCorrect",
+      "coreCoverageComplete",
+      "coreCoverageChecks",
+      "evidenceGrounded",
+      "substantiveIssue",
+      "substantiveIssues",
+      "ambiguityNotes",
+      "numericNotes",
+      "verdict",
+      "notes"
+    ],
+    "stageValues": [
+      "ANALYSIS",
+      "FINAL"
+    ],
+    "booleanFieldsMayBeNull": "当缺输出/输入不可信或某维度无法评价时用 null，并说明原因；不能把 null 当 true。",
+    "coreCoverageChecks": "按 family 的四项逐项记录 covered true/false/null；覆盖表示实际答到，正确性由其他维度评价。",
+    "substantiveIssuesItemFields": [
+      "category",
+      "exactQuote",
+      "sourceReference",
+      "reason"
+    ],
+    "ambiguityNotesItemFields": [
+      "exactQuote",
+      "supportedReading",
+      "strongerReading",
+      "mainVerdictEffect",
+      "strictSensitivity"
+    ],
+    "numericNotesItemFields": [
+      "exactQuote",
+      "expected",
+      "observed",
+      "absoluteDifference",
+      "material"
+    ],
+    "noteOnlyDoesNotFail": true,
+    "reviewBlinding": "尽量隐藏 baseline/candidate 标签；若不可能应记录非盲 AI 复核，不能称独立人工验收。"
+  },
+  "comparisonPolicy": {
+    "primary": "按 DEVELOPMENT 和迁移复测集分别报告最终回答的逐题配对 PASS/ISSUES/INCONCLUSIVE、实质问题率和核心完整率。",
+    "pairedDecision": "候选修复原有实质问题且未引入新的实质问题/核心缺漏时记修复；新增错误或漏答记回退；一修一坏记混合，不用统一 PASS 率隐藏。",
+    "secondary": [
+      "分析稿同标准结果及分析→最终的错误新增/修复",
+      "歧义备注和轻微舍入数单独报告",
+      "请求完成率、实际模型/提示模板/方法包/输入身份、耗时和用量按运行记录独立报告"
+    ],
+    "noCheatingByOmission": "减少解释、去掉所有结论或遗漏要求不能仅凭少错算收益；核心完整性不得退步后仍声称整体改善。",
+    "nonImprovementIsValid": "允许无改善、打平、变差或证据不足，完成既定有限试验后正常结束，不因结果不佳循环改候选直至出现好结果。",
+    "retuningLimit": "本轮仅 1 个候选；迁移复测结果只用于报告和下一轮待办，不反向修改本轮候选或评审标准。",
+    "generalizationLimit": "结果仅说明固定证据和当前 qwen3.8-max / 提示模板 / 180 秒配置下的局部方法效果；不能推断 RAG 检索/入库、线上自动进化已验证或批准发布。"
+  },
+  "candidateOptimizationCategories": [
+    {
+      "kind": "EVIDENCE_TO_CLAIM_BOUNDARY",
+      "focus": "改善从数字到结论的证据边界，减少具体业务归因和确定性外推。"
+    },
+    {
+      "kind": "ACCOUNTING_SCOPE",
+      "focus": "保持现金/流动资产、借款/总负债、流动/非流动、现金购建毛额/投资净额的范围。"
+    },
+    {
+      "kind": "NUMERIC_AND_PERIOD_ALIGNMENT",
+      "focus": "保持期间、单位、分子分母、合计范围与利润率方向；不要为规范末位舍入增加冗余。"
+    },
+    {
+      "kind": "TASK_COMPLETENESS",
+      "focus": "简短答齐用户要求，避免保守方法导致漏答或把可算内容变成拒答。"
+    },
+    {
+      "kind": "FINAL_SYNTHESIS_FIDELITY",
+      "focus": "最终回答保留分析中的有效限制与正确科目关系，不在总结中新增无据机制或丢失条件。"
+    },
+    {
+      "kind": "GENERALIZABLE_CONDITIONAL_METHOD",
+      "focus": "只从本轮 DEVELOPMENT 的可定位问题提出通用条件步骤，避免公司/答案数字特判；不预设一定需要更长提示。"
+    }
+  ],
+  "families": {
+    "growth": {
+      "requiredFactFields": [
+        "revenue2025",
+        "revenue2024",
+        "operatingIncome2025",
+        "operatingIncome2024",
+        "revenueGrowthPct",
+        "operatingIncomeGrowthPct",
+        "operatingMargin2025Pct",
+        "operatingMargin2024Pct"
+      ],
+      "coreCoverageChecks": [
+        "列出 FY2025/FY2024 总收入与营业利润，金额单位及全年口径可识别",
+        "分别给出 FY2025 收入、营业利润相对 FY2024 的同比增速",
+        "给出两个年度营业利润率，并比较方向",
+        "给出与上述收入、营业利润、利润率方向一致的简短增长质量评价"
+      ],
+      "formulas": {
+        "revenueGrowthPct": "(revenue2025 / revenue2024 - 1) * 100",
+        "operatingIncomeGrowthPct": "(operatingIncome2025 / operatingIncome2024 - 1) * 100",
+        "operatingMargin2025Pct": "operatingIncome2025 / revenue2025 * 100",
+        "operatingMargin2024Pct": "operatingIncome2024 / revenue2024 * 100"
+      },
+      "scopeClarifications": [
+        "各自同比按收入和营业利润各自的 FY2025 对 FY2024 增速判定；FY2024 对 FY2023 增速不作为必答，若自愿补充则核对",
+        "不强制披露 FY2023、不要求季度、同行或业务分部比较",
+        "不强制所有公式逐字展示；正确结果且计算口径明确即可，展示的公式必须正确"
+      ],
+      "interpretationBoundary": [
+        "利润快于收入及利润率提高可支持经营层面的盈利表现改善；这不自动证明现金质量、持续竞争优势或未来增长",
+        "可由源表费用率或业务行进行有边界的算术分解；公司特定因果、管理动作、分部驱动和行业领先需要本题输入支持",
+        "营业利润率的小幅下降可以称大致稳定或略降，不能为了积极结论反写成明显改善"
+      ]
+    },
+    "cashflow": {
+      "requiredFactFields": [
+        "operatingCashFlow2025",
+        "cashCapex2025",
+        "simpleFreeCashFlowMillion",
+        "cashCapexToOperatingCashFlowPct"
+      ],
+      "coreCoverageChecks": [
+        "列出 FY2025 经营现金流与现金购建固定资产毛额，单位及年度可识别",
+        "按经营现金流减现金购建毛额计算简化自由现金流",
+        "给出现金购建毛额占经营现金流比例",
+        "解释当年经营现金流覆盖该项资本开支情况和比例含义，保留题定简化口径且不混同净利润"
+      ],
+      "formulas": {
+        "simpleFreeCashFlowMillion": "operatingCashFlow2025 - cashCapex2025",
+        "cashCapexToOperatingCashFlowPct": "cashCapex2025 / operatingCashFlow2025 * 100"
+      },
+      "scopeClarifications": [
+        "只要求 FY2025，不强制 FY2024/FY2023、同比变化或其他融资/分红金额",
+        "允许以正数表达现金购建支出毛额，也允许先展示现金流量表负数后正确处理符号",
+        "不将资产出售回款抵减本题现金资本开支；不能用投资活动现金流净额代替现金购建毛额",
+        "不强制额外检索或逐项列出未给出的未来承诺；只须避免把局部覆盖写成全部义务保证"
+      ],
+      "interpretationBoundary": [
+        "当年经营现金流大于资本开支支持当年该项支出由经营现金流在年度汇总层面覆盖",
+        "正简化自由现金流可表示扣除该项支出后仍有账面年度余量；可说为其他用途提供资金空间，不自动保证满足全部其他用途",
+        "门店、设备、物流或云基础设施等明确标为一般用途举例或待核实假设不算事实编造；断言公司当年具体投向、回报、必要性或管理层计划需要源证据",
+        "不能将折旧等非现金调整直接称为现金流入；不能由经营现金流/资本开支差额证明无偿债压力、未来融资不需要或未来可持续"
+      ]
+    },
+    "liquidity": {
+      "requiredFactFields": [
+        "cash2025",
+        "noncurrentDebt2025",
+        "currentAssets2025",
+        "currentLiabilities2025",
+        "currentRatio"
+      ],
+      "coreCoverageChecks": [
+        "列出 FY2025 期末现金及现金等价物、非流动长期债务、流动资产和流动负债，单位及时点可识别",
+        "给出流动资产除以流动负债的流动比率",
+        "通过科目标签或解释区分现金与流动资产、非流动长期债务与总负债",
+        "给出有边界的流动性简评，表明单一时点比率不足以证明实际偿债安全或危机"
+      ],
+      "formulas": {
+        "currentRatio": "currentAssets2025 / currentLiabilities2025"
+      },
+      "scopeClarifications": [
+        "只要求 FY2025 期末，不强制历史同比、速动比率、现金比率、总负债或一年内到期债务的额外具体金额",
+        "总负债与总有息债务不是同义词；非流动长期债务金额不包含流动部分",
+        "不要求机械列全所有限制词；只要实质保留账面覆盖与实际偿付能力的边界即可",
+        "若自主把某项缺失数据写成零或做负债合计，须按源表范围完整核对"
+      ],
+      "interpretationBoundary": [
+        "可依据比率说账面流动资产覆盖流动负债、有一定缓冲、覆盖较薄或不足；不能只凭比率断言无风险或危机",
+        "现金与投资或其他流动资产不同；现金加短期投资等有标签的聚合可用，需准确标明范围，不能全称现金及现金等价物",
+        "递延/预收收入通常主要对应未来履约而不是等额还本；此一般机制可说，但不能因此认定无后续现金成本、从实际偿付需求中无条件全额扣除或宣称安全",
+        "可建议结合现金流、到期安排、资金可动用性及履约支出；无须在每份回答逐字重复全部项目",
+        "源表未单列某种借款不等于借款为零；不得虚构未提供的经营现金流强度、周转速度、管理策略或授信保障"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "caseId": "msft-fy2025-growth",
+      "originalSplit": "DEVELOPMENT",
+      "reportingCohort": "DEVELOPMENT",
+      "family": "growth",
+      "query": "微软（MSFT）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "caseReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/cases.jsonl",
+        "recordSelector": {
+          "caseId": "msft-fy2025-growth"
+        },
+        "goldCaseSha256": "267d495e65eb9769543589877d6b59692c4195f459f7b513955bfb82ad9d16e0",
+        "recordCanonicalSha256": "267d495e65eb9769543589877d6b59692c4195f459f7b513955bfb82ad9d16e0"
+      },
+      "goldReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/acceptance-preparation/gold-draft.jsonl",
+        "recordSelector": {
+          "caseId": "msft-fy2025-growth"
+        },
+        "recordCanonicalSha256": "ea811f636bb076cc768250790ff49a8fe0c99fa9cb3c4b6b9639a423bb263243",
+        "authority": "既有 AI 标准答案草稿；不是人工验收标签。数值与输入原文冲突时以本题源证据为准并记录标准问题。"
+      },
+      "evidenceReferences": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K",
+          "sourceVersion": "MSFT-FY2025-official-financial-statements",
+          "rawTextSha256": "aaf03d8136407ab87fabc857ec503a5c20adc2097d708d1049171bd57e04ccde",
+          "periodStart": "2024-07-01",
+          "periodEnd": "2025-06-30",
+          "unit": "million",
+          "currency": "USD"
+        }
+      ],
+      "requiredFactFields": [
+        "revenue2025",
+        "revenue2024",
+        "operatingIncome2025",
+        "operatingIncome2024",
+        "revenueGrowthPct",
+        "operatingIncomeGrowthPct",
+        "operatingMargin2025Pct",
+        "operatingMargin2024Pct"
+      ],
+      "derivationCrosscheck": [
+        {
+          "field": "revenueGrowthPct",
+          "operation": "PERCENT_CHANGE",
+          "unroundedDecimal": "14.93215623240671991906071260",
+          "goldDraftValue": "14.9322"
+        },
+        {
+          "field": "operatingIncomeGrowthPct",
+          "operation": "PERCENT_CHANGE",
+          "unroundedDecimal": "17.44903274149479590251569450",
+          "goldDraftValue": "17.4490"
+        },
+        {
+          "field": "operatingMargin2025Pct",
+          "operation": "PERCENT_OF",
+          "unroundedDecimal": "45.62195624085984864619272763",
+          "goldDraftValue": "45.6220"
+        },
+        {
+          "field": "operatingMargin2024Pct",
+          "operation": "PERCENT_OF",
+          "unroundedDecimal": "44.64429957327371676144940071",
+          "goldDraftValue": "44.6443"
+        }
+      ],
+      "caseSpecificNotes": []
+    },
+    {
+      "caseId": "msft-fy2025-cashflow",
+      "originalSplit": "DEVELOPMENT",
+      "reportingCohort": "DEVELOPMENT",
+      "family": "cashflow",
+      "query": "微软（MSFT）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "caseReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/cases.jsonl",
+        "recordSelector": {
+          "caseId": "msft-fy2025-cashflow"
+        },
+        "goldCaseSha256": "985a716ff385a86bc2c8dfddc46e93f74bbfbc3461073293860978f3bb80d0d4",
+        "recordCanonicalSha256": "985a716ff385a86bc2c8dfddc46e93f74bbfbc3461073293860978f3bb80d0d4"
+      },
+      "goldReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/acceptance-preparation/gold-draft.jsonl",
+        "recordSelector": {
+          "caseId": "msft-fy2025-cashflow"
+        },
+        "recordCanonicalSha256": "af6a14f2c5a340969439c8099afde308a3595c516094e2627f3e6aaf74adbef7",
+        "authority": "既有 AI 标准答案草稿；不是人工验收标签。数值与输入原文冲突时以本题源证据为准并记录标准问题。"
+      },
+      "evidenceReferences": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K",
+          "sourceVersion": "MSFT-FY2025-official-financial-statements",
+          "rawTextSha256": "9702b5601f262b22e1fbda4493d80853b759d30743839b4c404588598a1e30ca",
+          "periodStart": "2024-07-01",
+          "periodEnd": "2025-06-30",
+          "unit": "million",
+          "currency": "USD"
+        }
+      ],
+      "requiredFactFields": [
+        "operatingCashFlow2025",
+        "cashCapex2025",
+        "simpleFreeCashFlowMillion",
+        "cashCapexToOperatingCashFlowPct"
+      ],
+      "derivationCrosscheck": [
+        {
+          "field": "simpleFreeCashFlowMillion",
+          "operation": "DIFFERENCE",
+          "unroundedDecimal": "71611",
+          "goldDraftValue": "71611.0000"
+        },
+        {
+          "field": "cashCapexToOperatingCashFlowPct",
+          "operation": "PERCENT_OF",
+          "unroundedDecimal": "47.40749988983710580044358925",
+          "goldDraftValue": "47.4075"
+        }
+      ],
+      "caseSpecificNotes": []
+    },
+    {
+      "caseId": "msft-fy2025-liquidity",
+      "originalSplit": "DEVELOPMENT",
+      "reportingCohort": "DEVELOPMENT",
+      "family": "liquidity",
+      "query": "根据微软（MSFT）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "caseReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/cases.jsonl",
+        "recordSelector": {
+          "caseId": "msft-fy2025-liquidity"
+        },
+        "goldCaseSha256": "26dd425d5fd28ba56857bd63ee477e40230838566f93b96ae9bb8f00783644b5",
+        "recordCanonicalSha256": "26dd425d5fd28ba56857bd63ee477e40230838566f93b96ae9bb8f00783644b5"
+      },
+      "goldReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/acceptance-preparation/gold-draft.jsonl",
+        "recordSelector": {
+          "caseId": "msft-fy2025-liquidity"
+        },
+        "recordCanonicalSha256": "f0deb0995af667bfd7dc0e0cc6a758a1fd6f3129f7efcdc203045e34a5b7d875",
+        "authority": "既有 AI 标准答案草稿；不是人工验收标签。数值与输入原文冲突时以本题源证据为准并记录标准问题。"
+      },
+      "evidenceReferences": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/MSFT_FY25q4_10K",
+          "sourceVersion": "MSFT-FY2025-official-financial-statements",
+          "rawTextSha256": "393ca4834360debe8553f70ab7360ae46e210b66146e8eb9f9b0d3e71696471b",
+          "periodStart": "2024-07-01",
+          "periodEnd": "2025-06-30",
+          "unit": "million",
+          "currency": "USD"
+        }
+      ],
+      "requiredFactFields": [
+        "cash2025",
+        "noncurrentDebt2025",
+        "currentAssets2025",
+        "currentLiabilities2025",
+        "currentRatio"
+      ],
+      "derivationCrosscheck": [
+        {
+          "field": "currentRatio",
+          "operation": "RATIO",
+          "unroundedDecimal": "1.353446444504241668909062584",
+          "goldDraftValue": "1.3534"
+        }
+      ],
+      "caseSpecificNotes": [
+        "Short-term debt = 0 不意味着一年内到期债务为零；当前部分长期债务 2,999 非必答，但若声称短期债务义务为零须据此核对。",
+        "Other long-term liabilities 单项 45,186 与除长期债务外其他非流动负债合计 94,154 不是同一范围；各按其标题核对。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-growth",
+      "originalSplit": "DEVELOPMENT",
+      "reportingCohort": "DEVELOPMENT",
+      "family": "growth",
+      "query": "沃尔玛（WMT）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "caseReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/cases.jsonl",
+        "recordSelector": {
+          "caseId": "wmt-fy2025-growth"
+        },
+        "goldCaseSha256": "795857cef9897ce1384561a40292439c3dee8978ad534d2d6fac6c7a1cdc15d6",
+        "recordCanonicalSha256": "795857cef9897ce1384561a40292439c3dee8978ad534d2d6fac6c7a1cdc15d6"
+      },
+      "goldReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/acceptance-preparation/gold-draft.jsonl",
+        "recordSelector": {
+          "caseId": "wmt-fy2025-growth"
+        },
+        "recordCanonicalSha256": "d81ac314f868268eda6070cdb9ca5c0406473ac3e4291e6f59a0c9d0a78734df",
+        "authority": "既有 AI 标准答案草稿；不是人工验收标签。数值与输入原文冲突时以本题源证据为准并记录标准问题。"
+      },
+      "evidenceReferences": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://corporate.walmart.com/content/dam/corporate/documents/newsroom/2025/04/24/walmart-releases-2025-annual-report-and-proxy-statement/walmart-inc-2025-annual-report.pdf",
+          "sourceVersion": "WMT-FY2025-official-financial-statements",
+          "rawTextSha256": "867a13aeb916e2926e0079938ac98d66db84839a7fa30232bb695f84a409f746",
+          "periodStart": "2024-02-01",
+          "periodEnd": "2025-01-31",
+          "unit": "million",
+          "currency": "USD"
+        }
+      ],
+      "requiredFactFields": [
+        "revenue2025",
+        "revenue2024",
+        "operatingIncome2025",
+        "operatingIncome2024",
+        "revenueGrowthPct",
+        "operatingIncomeGrowthPct",
+        "operatingMargin2025Pct",
+        "operatingMargin2024Pct"
+      ],
+      "derivationCrosscheck": [
+        {
+          "field": "revenueGrowthPct",
+          "operation": "PERCENT_CHANGE",
+          "unroundedDecimal": "5.070009643201542912246866000",
+          "goldDraftValue": "5.0700"
+        },
+        {
+          "field": "operatingIncomeGrowthPct",
+          "operation": "PERCENT_CHANGE",
+          "unroundedDecimal": "8.648008292610691544498741300",
+          "goldDraftValue": "8.6480"
+        },
+        {
+          "field": "operatingMargin2025Pct",
+          "operation": "PERCENT_OF",
+          "unroundedDecimal": "4.309639713062695947781522354",
+          "goldDraftValue": "4.3096"
+        },
+        {
+          "field": "operatingMargin2024Pct",
+          "operation": "PERCENT_OF",
+          "unroundedDecimal": "4.167714561234329797492767599",
+          "goldDraftValue": "4.1677"
+        }
+      ],
+      "caseSpecificNotes": []
+    },
+    {
+      "caseId": "wmt-fy2025-cashflow",
+      "originalSplit": "DEVELOPMENT",
+      "reportingCohort": "DEVELOPMENT",
+      "family": "cashflow",
+      "query": "沃尔玛（WMT）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "caseReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/cases.jsonl",
+        "recordSelector": {
+          "caseId": "wmt-fy2025-cashflow"
+        },
+        "goldCaseSha256": "0ca50e3e9f734594a611af94001994677300a2b26aed833fdfa141cac34d06b6",
+        "recordCanonicalSha256": "0ca50e3e9f734594a611af94001994677300a2b26aed833fdfa141cac34d06b6"
+      },
+      "goldReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/acceptance-preparation/gold-draft.jsonl",
+        "recordSelector": {
+          "caseId": "wmt-fy2025-cashflow"
+        },
+        "recordCanonicalSha256": "a30538398ca204d52dbeca1a1c095359bc26cb0f874e871480b8204ab3c9459b",
+        "authority": "既有 AI 标准答案草稿；不是人工验收标签。数值与输入原文冲突时以本题源证据为准并记录标准问题。"
+      },
+      "evidenceReferences": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://corporate.walmart.com/content/dam/corporate/documents/newsroom/2025/04/24/walmart-releases-2025-annual-report-and-proxy-statement/walmart-inc-2025-annual-report.pdf",
+          "sourceVersion": "WMT-FY2025-official-financial-statements",
+          "rawTextSha256": "d9ece4cd152599b583ae616825f092c834814f77a8c0dca888ca318ff8c7e3dd",
+          "periodStart": "2024-02-01",
+          "periodEnd": "2025-01-31",
+          "unit": "million",
+          "currency": "USD"
+        }
+      ],
+      "requiredFactFields": [
+        "operatingCashFlow2025",
+        "cashCapex2025",
+        "simpleFreeCashFlowMillion",
+        "cashCapexToOperatingCashFlowPct"
+      ],
+      "derivationCrosscheck": [
+        {
+          "field": "simpleFreeCashFlowMillion",
+          "operation": "DIFFERENCE",
+          "unroundedDecimal": "12660",
+          "goldDraftValue": "12660.0000"
+        },
+        {
+          "field": "cashCapexToOperatingCashFlowPct",
+          "operation": "PERCENT_OF",
+          "unroundedDecimal": "65.26081826413851768515215542",
+          "goldDraftValue": "65.2608"
+        }
+      ],
+      "caseSpecificNotes": [
+        "“未来/当前其他现金需求”的合理双重解读只记 AMBIGUITY_NOTE，不算实质失败；仅明确说所余金额足够覆盖全部未证实义务、保证未来现金需求或不需融资，才记实质越界。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "originalSplit": "DEVELOPMENT",
+      "reportingCohort": "DEVELOPMENT",
+      "family": "liquidity",
+      "query": "根据沃尔玛（WMT）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "caseReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/cases.jsonl",
+        "recordSelector": {
+          "caseId": "wmt-fy2025-liquidity"
+        },
+        "goldCaseSha256": "66041e5c3c76f57d66211872e9b34f449e70e90555e244134156460a62594536",
+        "recordCanonicalSha256": "66041e5c3c76f57d66211872e9b34f449e70e90555e244134156460a62594536"
+      },
+      "goldReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/acceptance-preparation/gold-draft.jsonl",
+        "recordSelector": {
+          "caseId": "wmt-fy2025-liquidity"
+        },
+        "recordCanonicalSha256": "6693d216ca0ccb8e4afe7db039780c45b0df1c78e4166588713a99ad085a0a18",
+        "authority": "既有 AI 标准答案草稿；不是人工验收标签。数值与输入原文冲突时以本题源证据为准并记录标准问题。"
+      },
+      "evidenceReferences": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://corporate.walmart.com/content/dam/corporate/documents/newsroom/2025/04/24/walmart-releases-2025-annual-report-and-proxy-statement/walmart-inc-2025-annual-report.pdf",
+          "sourceVersion": "WMT-FY2025-official-financial-statements",
+          "rawTextSha256": "d778362929337a83b6f7b40629ec7d18909fd58d5e30ced0bb7b45b3abaa6978",
+          "periodStart": "2024-02-01",
+          "periodEnd": "2025-01-31",
+          "unit": "million",
+          "currency": "USD"
+        }
+      ],
+      "requiredFactFields": [
+        "cash2025",
+        "noncurrentDebt2025",
+        "currentAssets2025",
+        "currentLiabilities2025",
+        "currentRatio"
+      ],
+      "derivationCrosscheck": [
+        {
+          "field": "currentRatio",
+          "operation": "RATIO",
+          "unroundedDecimal": "0.8226828460200447279052431044",
+          "goldDraftValue": "0.8227"
+        }
+      ],
+      "caseSpecificNotes": [
+        "流动比率低于 1 可描述账面覆盖不足，不等同危机；零售一般周转机制可作条件性解释，不得将本期实际周转速度当作已知事实。"
+      ]
+    },
+    {
+      "caseId": "googl-fy2025-growth",
+      "originalSplit": "VALIDATION",
+      "reportingCohort": "PREVIOUSLY_EXPOSED_TRANSFER_RETEST",
+      "family": "growth",
+      "query": "Alphabet（GOOGL）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "caseReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/cases.jsonl",
+        "recordSelector": {
+          "caseId": "googl-fy2025-growth"
+        },
+        "goldCaseSha256": "398d2e7d9f0a794a4eac03b56aa1cb838f550f0e515d3d376e6a906ee84d2f71",
+        "recordCanonicalSha256": "398d2e7d9f0a794a4eac03b56aa1cb838f550f0e515d3d376e6a906ee84d2f71"
+      },
+      "goldReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/acceptance-preparation/gold-draft.jsonl",
+        "recordSelector": {
+          "caseId": "googl-fy2025-growth"
+        },
+        "recordCanonicalSha256": "0999509f95a2ad90c0362851af4167fd070ff5c2a79df8896d9fe2db3f68e576",
+        "authority": "既有 AI 标准答案草稿；不是人工验收标签。数值与输入原文冲突时以本题源证据为准并记录标准问题。"
+      },
+      "evidenceReferences": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://s206.q4cdn.com/479360582/files/doc_financials/2025/q4/2025q4-alphabet-earnings-release.pdf",
+          "sourceVersion": "GOOGL-FY2025-official-financial-statements",
+          "rawTextSha256": "69d311919a6e8060874efcdcca109e775044ba0d6d014987aa0349a72779c079",
+          "periodStart": "2025-01-01",
+          "periodEnd": "2025-12-31",
+          "unit": "million",
+          "currency": "USD"
+        }
+      ],
+      "requiredFactFields": [
+        "revenue2025",
+        "revenue2024",
+        "operatingIncome2025",
+        "operatingIncome2024",
+        "revenueGrowthPct",
+        "operatingIncomeGrowthPct",
+        "operatingMargin2025Pct",
+        "operatingMargin2024Pct"
+      ],
+      "derivationCrosscheck": [
+        {
+          "field": "revenueGrowthPct",
+          "operation": "PERCENT_CHANGE",
+          "unroundedDecimal": "15.09008108154437771771737450",
+          "goldDraftValue": "15.0901"
+        },
+        {
+          "field": "operatingIncomeGrowthPct",
+          "operation": "PERCENT_CHANGE",
+          "unroundedDecimal": "14.81359551561526826230091650",
+          "goldDraftValue": "14.8136"
+        },
+        {
+          "field": "operatingMargin2025Pct",
+          "operation": "PERCENT_OF",
+          "unroundedDecimal": "32.03263859238002561836578657",
+          "goldDraftValue": "32.0326"
+        },
+        {
+          "field": "operatingMargin2024Pct",
+          "operation": "PERCENT_OF",
+          "unroundedDecimal": "32.10977721145769646132484615",
+          "goldDraftValue": "32.1098"
+        }
+      ],
+      "caseSpecificNotes": [
+        "源表同时出现季度与全年列；必须使用 Year Ended December 31 的 FY2025/FY2024 数据。",
+        "营业利润率由约 32.1098% 至 32.0326%，下降约 0.0772 个百分点；“基本稳定、略降”均可，不能判为利润率显著提升。"
+      ]
+    },
+    {
+      "caseId": "googl-fy2025-cashflow",
+      "originalSplit": "VALIDATION",
+      "reportingCohort": "PREVIOUSLY_EXPOSED_TRANSFER_RETEST",
+      "family": "cashflow",
+      "query": "Alphabet（GOOGL）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "caseReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/cases.jsonl",
+        "recordSelector": {
+          "caseId": "googl-fy2025-cashflow"
+        },
+        "goldCaseSha256": "057e1cf1408bf7ec63765443bf75923ece122348fddb136fe5498e648d9e3797",
+        "recordCanonicalSha256": "057e1cf1408bf7ec63765443bf75923ece122348fddb136fe5498e648d9e3797"
+      },
+      "goldReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/acceptance-preparation/gold-draft.jsonl",
+        "recordSelector": {
+          "caseId": "googl-fy2025-cashflow"
+        },
+        "recordCanonicalSha256": "f169ffd7d6eb103be284c6158182e0baa114aed1583b9737cbe0f8f314c8798b",
+        "authority": "既有 AI 标准答案草稿；不是人工验收标签。数值与输入原文冲突时以本题源证据为准并记录标准问题。"
+      },
+      "evidenceReferences": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://s206.q4cdn.com/479360582/files/doc_financials/2025/q4/2025q4-alphabet-earnings-release.pdf",
+          "sourceVersion": "GOOGL-FY2025-official-financial-statements",
+          "rawTextSha256": "e667944c9ebea57dd13bb62eb3c30cac45d3f13d94adcdc103d8093bdb122d85",
+          "periodStart": "2025-01-01",
+          "periodEnd": "2025-12-31",
+          "unit": "million",
+          "currency": "USD"
+        }
+      ],
+      "requiredFactFields": [
+        "operatingCashFlow2025",
+        "cashCapex2025",
+        "simpleFreeCashFlowMillion",
+        "cashCapexToOperatingCashFlowPct"
+      ],
+      "derivationCrosscheck": [
+        {
+          "field": "simpleFreeCashFlowMillion",
+          "operation": "DIFFERENCE",
+          "unroundedDecimal": "73266",
+          "goldDraftValue": "73266.0000"
+        },
+        {
+          "field": "cashCapexToOperatingCashFlowPct",
+          "operation": "PERCENT_OF",
+          "unroundedDecimal": "55.51899364348897779774516887",
+          "goldDraftValue": "55.5190"
+        }
+      ],
+      "caseSpecificNotes": [
+        "源表同时出现季度与全年列；必须使用 Year Ended December 31 的 FY2025/FY2024 数据。"
+      ]
+    },
+    {
+      "caseId": "googl-fy2025-liquidity",
+      "originalSplit": "VALIDATION",
+      "reportingCohort": "PREVIOUSLY_EXPOSED_TRANSFER_RETEST",
+      "family": "liquidity",
+      "query": "根据Alphabet（GOOGL）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "caseReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/cases.jsonl",
+        "recordSelector": {
+          "caseId": "googl-fy2025-liquidity"
+        },
+        "goldCaseSha256": "fef9bdb61bb18101679dbea18eeea61158081a304b1d852448a700f7fc1f26e0",
+        "recordCanonicalSha256": "fef9bdb61bb18101679dbea18eeea61158081a304b1d852448a700f7fc1f26e0"
+      },
+      "goldReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/acceptance-preparation/gold-draft.jsonl",
+        "recordSelector": {
+          "caseId": "googl-fy2025-liquidity"
+        },
+        "recordCanonicalSha256": "329050fcd8c9888af7cac5163b1b07d2b98cc476a9623a97c1f70b9e96629cd4",
+        "authority": "既有 AI 标准答案草稿；不是人工验收标签。数值与输入原文冲突时以本题源证据为准并记录标准问题。"
+      },
+      "evidenceReferences": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://s206.q4cdn.com/479360582/files/doc_financials/2025/q4/2025q4-alphabet-earnings-release.pdf",
+          "sourceVersion": "GOOGL-FY2025-official-financial-statements",
+          "rawTextSha256": "b53366253401164954e06979917c67c5166bca0d0feeecb8c4845a48c7ea8c91",
+          "periodStart": "2025-01-01",
+          "periodEnd": "2025-12-31",
+          "unit": "million",
+          "currency": "USD"
+        }
+      ],
+      "requiredFactFields": [
+        "cash2025",
+        "noncurrentDebt2025",
+        "currentAssets2025",
+        "currentLiabilities2025",
+        "currentRatio"
+      ],
+      "derivationCrosscheck": [
+        {
+          "field": "currentRatio",
+          "operation": "RATIO",
+          "unroundedDecimal": "2.005333592875565720959657404",
+          "goldDraftValue": "2.0053"
+        }
+      ],
+      "caseSpecificNotes": [
+        "源表同时出现季度与全年列；必须使用 Year Ended December 31 的 FY2025/FY2024 数据。"
+      ]
+    },
+    {
+      "caseId": "cost-fy2025-growth",
+      "originalSplit": "VALIDATION",
+      "reportingCohort": "PREVIOUSLY_EXPOSED_TRANSFER_RETEST",
+      "family": "growth",
+      "query": "Costco（COST）FY2025的增长质量怎么样？请列出FY2025和FY2024的总收入、营业利润及各自同比增速，比较两年的营业利润率，再给出简短结论。金额请注明单位，不要把季度数字当作全年。",
+      "caseReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/cases.jsonl",
+        "recordSelector": {
+          "caseId": "cost-fy2025-growth"
+        },
+        "goldCaseSha256": "84d7c676f82c68464e990498183cddba470925ca76afe7038dfb8cdfc14beae7",
+        "recordCanonicalSha256": "84d7c676f82c68464e990498183cddba470925ca76afe7038dfb8cdfc14beae7"
+      },
+      "goldReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/acceptance-preparation/gold-draft.jsonl",
+        "recordSelector": {
+          "caseId": "cost-fy2025-growth"
+        },
+        "recordCanonicalSha256": "b32b5da2e7f884ff8a73d7aab61d44690d41bada575d400b8ac8d2336a82dc75",
+        "authority": "既有 AI 标准答案草稿；不是人工验收标签。数值与输入原文冲突时以本题源证据为准并记录标准问题。"
+      },
+      "evidenceReferences": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://s201.q4cdn.com/287523651/files/doc_financials/2025/ar/COST-Annual-Report-2025.pdf",
+          "sourceVersion": "COST-FY2025-official-financial-statements",
+          "rawTextSha256": "809b4d16b3c2b4e64b7addaa7b5a7d83a808674dd6e1a4f85eadf90f656468a9",
+          "periodStart": "2024-09-02",
+          "periodEnd": "2025-08-31",
+          "unit": "million",
+          "currency": "USD"
+        }
+      ],
+      "requiredFactFields": [
+        "revenue2025",
+        "revenue2024",
+        "operatingIncome2025",
+        "operatingIncome2024",
+        "revenueGrowthPct",
+        "operatingIncomeGrowthPct",
+        "operatingMargin2025Pct",
+        "operatingMargin2024Pct"
+      ],
+      "derivationCrosscheck": [
+        {
+          "field": "revenueGrowthPct",
+          "operation": "PERCENT_CHANGE",
+          "unroundedDecimal": "8.167323631476146871917407100",
+          "goldDraftValue": "8.1673"
+        },
+        {
+          "field": "operatingIncomeGrowthPct",
+          "operation": "PERCENT_CHANGE",
+          "unroundedDecimal": "11.82552504038772213247172860",
+          "goldDraftValue": "11.8255"
+        },
+        {
+          "field": "operatingMargin2025Pct",
+          "operation": "PERCENT_OF",
+          "unroundedDecimal": "3.772412665540356422693334787",
+          "goldDraftValue": "3.7724"
+        },
+        {
+          "field": "operatingMargin2024Pct",
+          "operation": "PERCENT_OF",
+          "unroundedDecimal": "3.649003941788856881231504443",
+          "goldDraftValue": "3.6490"
+        }
+      ],
+      "caseSpecificNotes": [
+        "FY2025 截止 2025-08-31，FY2024 截止 2024-09-01；不要求称为自然年度，额外跨 FY2023 比较需留意 53 周口径。"
+      ]
+    },
+    {
+      "caseId": "cost-fy2025-cashflow",
+      "originalSplit": "VALIDATION",
+      "reportingCohort": "PREVIOUSLY_EXPOSED_TRANSFER_RETEST",
+      "family": "cashflow",
+      "query": "Costco（COST）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "caseReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/cases.jsonl",
+        "recordSelector": {
+          "caseId": "cost-fy2025-cashflow"
+        },
+        "goldCaseSha256": "55fe920128d8625461a1a50e0c2cc9d029a8beca68b1903c89b8396a4f5d83b3",
+        "recordCanonicalSha256": "55fe920128d8625461a1a50e0c2cc9d029a8beca68b1903c89b8396a4f5d83b3"
+      },
+      "goldReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/acceptance-preparation/gold-draft.jsonl",
+        "recordSelector": {
+          "caseId": "cost-fy2025-cashflow"
+        },
+        "recordCanonicalSha256": "614682ea501bc9df9f4506a3590b324a8237721656b992709b4e8cb9d6905414",
+        "authority": "既有 AI 标准答案草稿；不是人工验收标签。数值与输入原文冲突时以本题源证据为准并记录标准问题。"
+      },
+      "evidenceReferences": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://s201.q4cdn.com/287523651/files/doc_financials/2025/ar/COST-Annual-Report-2025.pdf",
+          "sourceVersion": "COST-FY2025-official-financial-statements",
+          "rawTextSha256": "da6c021cfc4f48e1d7c54d23cec08501a09dc63b163903aab6de55cce641df15",
+          "periodStart": "2024-09-02",
+          "periodEnd": "2025-08-31",
+          "unit": "million",
+          "currency": "USD"
+        }
+      ],
+      "requiredFactFields": [
+        "operatingCashFlow2025",
+        "cashCapex2025",
+        "simpleFreeCashFlowMillion",
+        "cashCapexToOperatingCashFlowPct"
+      ],
+      "derivationCrosscheck": [
+        {
+          "field": "simpleFreeCashFlowMillion",
+          "operation": "DIFFERENCE",
+          "unroundedDecimal": "7837",
+          "goldDraftValue": "7837.0000"
+        },
+        {
+          "field": "cashCapexToOperatingCashFlowPct",
+          "operation": "PERCENT_OF",
+          "unroundedDecimal": "41.22984626921634795650543682",
+          "goldDraftValue": "41.2298"
+        }
+      ],
+      "caseSpecificNotes": [
+        "FY2025 截止 2025-08-31，FY2024 截止 2024-09-01；不要求称为自然年度，额外跨 FY2023 比较需留意 53 周口径。"
+      ]
+    },
+    {
+      "caseId": "cost-fy2025-liquidity",
+      "originalSplit": "VALIDATION",
+      "reportingCohort": "PREVIOUSLY_EXPOSED_TRANSFER_RETEST",
+      "family": "liquidity",
+      "query": "根据Costco（COST）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "caseReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/cases.jsonl",
+        "recordSelector": {
+          "caseId": "cost-fy2025-liquidity"
+        },
+        "goldCaseSha256": "f71074aa0bd32aab02568268414d0e2e46fc68c7cd94fdd07e2d8f71d72b5363",
+        "recordCanonicalSha256": "f71074aa0bd32aab02568268414d0e2e46fc68c7cd94fdd07e2d8f71d72b5363"
+      },
+      "goldReference": {
+        "path": "rag-eval/evolution/common-fundamentals-2025-v1/acceptance-preparation/gold-draft.jsonl",
+        "recordSelector": {
+          "caseId": "cost-fy2025-liquidity"
+        },
+        "recordCanonicalSha256": "5bb5681f15ddeb2f32675c4fe2e0ccada09ad13bd6440df5cb2c30c063dd3e75",
+        "authority": "既有 AI 标准答案草稿；不是人工验收标签。数值与输入原文冲突时以本题源证据为准并记录标准问题。"
+      },
+      "evidenceReferences": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://s201.q4cdn.com/287523651/files/doc_financials/2025/ar/COST-Annual-Report-2025.pdf",
+          "sourceVersion": "COST-FY2025-official-financial-statements",
+          "rawTextSha256": "aa027250d011b83aa3c66c639e6d4e0b0636c7c9127305686f902cb15f591bcd",
+          "periodStart": "2024-09-02",
+          "periodEnd": "2025-08-31",
+          "unit": "million",
+          "currency": "USD"
+        }
+      ],
+      "requiredFactFields": [
+        "cash2025",
+        "noncurrentDebt2025",
+        "currentAssets2025",
+        "currentLiabilities2025",
+        "currentRatio"
+      ],
+      "derivationCrosscheck": [
+        {
+          "field": "currentRatio",
+          "operation": "RATIO",
+          "unroundedDecimal": "1.034278322733642341274118788",
+          "goldDraftValue": "1.0343"
+        }
+      ],
+      "caseSpecificNotes": [
+        "FY2025 截止 2025-08-31，FY2024 截止 2024-09-01；不要求称为自然年度，额外跨 FY2023 比较需留意 53 周口径。"
+      ]
+    }
+  ]
+}

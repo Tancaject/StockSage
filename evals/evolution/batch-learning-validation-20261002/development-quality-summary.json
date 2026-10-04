@@ -1,0 +1,355 @@
+{
+  "schema": "fundamentals_batch_source_quality_summary_v1",
+  "scope": "AI_SOURCE_REVIEW_AGGREGATION_NOT_NATIVE_JUDGE_ACCURACY",
+  "releaseEligible": false,
+  "planSha256": "fa948d7e1ffc12ec4e3509990f214d25a4cf005fabba9289bf62273be1b12663",
+  "reviewPolicySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+  "summary": {
+    "analysis": {
+      "plannedCases": 10,
+      "verdictCounts": {
+        "PASS": 6,
+        "FAIL": 2,
+        "NO_DATA": 2
+      },
+      "requiredNumericCounts": {
+        "PASS": 42,
+        "NO_DATA": 16
+      }
+    },
+    "finalAnswer": {
+      "plannedCases": 10,
+      "verdictCounts": {
+        "PASS": 7,
+        "FAIL": 1,
+        "NO_DATA": 2
+      },
+      "requiredNumericCounts": {
+        "PASS": 42,
+        "NO_DATA": 16
+      }
+    }
+  },
+  "cases": [
+    {
+      "caseId": "ibm-fy2025q3-quarter-control",
+      "runId": "development-01-1-1",
+      "reviewPath": "secondary-review-original-first.json",
+      "reviewSha256": "7cc5af17e13c2324049526de49dbecbd71b7bee0c8782cd6f68f1ac7c1002ff9",
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 4
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 4
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-quarter-reconstruction",
+      "runId": "development-02-1-1",
+      "reviewPath": "secondary-review-original-first.json",
+      "reviewSha256": "7cc5af17e13c2324049526de49dbecbd71b7bee0c8782cd6f68f1ac7c1002ff9",
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 3
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 3
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-cash-quality",
+      "runId": "development-03-1-1",
+      "reviewPath": "secondary-review-original-first.json",
+      "reviewSha256": "7cc5af17e13c2324049526de49dbecbd71b7bee0c8782cd6f68f1ac7c1002ff9",
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 8
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 8
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-liquidity",
+      "runId": "development-04-1-1",
+      "reviewPath": "secondary-review-original-later.json",
+      "reviewSha256": "24889076ade20305d16d3d608dbf75a5275bb8cf71395f3386998fdf4ec49cbd",
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 6
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 6
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-quarter-reconstruction",
+      "runId": "development-05-1-1",
+      "reviewPath": "secondary-review-original-later.json",
+      "reviewSha256": "24889076ade20305d16d3d608dbf75a5275bb8cf71395f3386998fdf4ec49cbd",
+      "stages": {
+        "analysis": {
+          "verdict": "FAIL",
+          "requiredNumeric": {
+            "PASS": 3
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "FAIL"
+          }
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 3
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity",
+      "runId": "development-06-1-1",
+      "reviewPath": "secondary-review-original-later.json",
+      "reviewSha256": "24889076ade20305d16d3d608dbf75a5275bb8cf71395f3386998fdf4ec49cbd",
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 6
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 6
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "ibm-fy2025q3-oneoff-cash-comparability",
+      "runId": "development-07-1-1",
+      "reviewPath": "secondary-review-new-four.json",
+      "reviewSha256": "7c2f05519261383f2cef84e95ef54b57021ebb4b8c7bc3477a4b3ca1ef4148f7",
+      "stages": {
+        "analysis": {
+          "verdict": "FAIL",
+          "requiredNumeric": {
+            "PASS": 6
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "FAIL",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        },
+        "finalAnswer": {
+          "verdict": "FAIL",
+          "requiredNumeric": {
+            "PASS": 6
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "FAIL",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-deployment-bridge",
+      "runId": "development-08-1-1",
+      "reviewPath": "secondary-review-new-four.json",
+      "reviewSha256": "7c2f05519261383f2cef84e95ef54b57021ebb4b8c7bc3477a4b3ca1ef4148f7",
+      "stages": {
+        "analysis": {
+          "verdict": "NO_DATA",
+          "requiredNumeric": {
+            "NO_DATA": 8
+          },
+          "dimensions": {
+            "claim_support": "NO_DATA",
+            "numeric_period_correctness": "NO_DATA",
+            "counterevidence": "NO_DATA",
+            "unknowns": "NO_DATA"
+          }
+        },
+        "finalAnswer": {
+          "verdict": "NO_DATA",
+          "requiredNumeric": {
+            "NO_DATA": 8
+          },
+          "dimensions": {
+            "claim_support": "NO_DATA",
+            "numeric_period_correctness": "NO_DATA",
+            "counterevidence": "NO_DATA",
+            "unknowns": "NO_DATA"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-cash-comparison",
+      "runId": "development-09-1-1",
+      "reviewPath": "secondary-review-new-four.json",
+      "reviewSha256": "7c2f05519261383f2cef84e95ef54b57021ebb4b8c7bc3477a4b3ca1ef4148f7",
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 6
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "requiredNumeric": {
+            "PASS": 6
+          },
+          "dimensions": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity-cash-synthesis",
+      "runId": "development-10-1-1",
+      "reviewPath": "secondary-review-new-four.json",
+      "reviewSha256": "7c2f05519261383f2cef84e95ef54b57021ebb4b8c7bc3477a4b3ca1ef4148f7",
+      "stages": {
+        "analysis": {
+          "verdict": "NO_DATA",
+          "requiredNumeric": {
+            "NO_DATA": 8
+          },
+          "dimensions": {
+            "claim_support": "NO_DATA",
+            "numeric_period_correctness": "NO_DATA",
+            "counterevidence": "NO_DATA",
+            "unknowns": "NO_DATA"
+          }
+        },
+        "finalAnswer": {
+          "verdict": "NO_DATA",
+          "requiredNumeric": {
+            "NO_DATA": 8
+          },
+          "dimensions": {
+            "claim_support": "NO_DATA",
+            "numeric_period_correctness": "NO_DATA",
+            "counterevidence": "NO_DATA",
+            "unknowns": "NO_DATA"
+          }
+        }
+      }
+    }
+  ]
+}

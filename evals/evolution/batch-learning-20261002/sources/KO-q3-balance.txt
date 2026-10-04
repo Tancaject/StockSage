@@ -1,0 +1,43 @@
+ |  |  |  |  |  |  |  |  |  |  | 
+THE COCA-COLA COMPANY AND SUBSIDIARIES
+Consolidated Balance Sheets
+(In millions except par value)
+ |  |  | 
+ | September 26,2025 |  | December 31,2024
+ASSETS
+Current Assets |  |  | 
+Cash and cash equivalents | $ | 12,732 |  |  | $ | 10,828 | 
+Short-term investments | 1,142 |  |  | 2,020 | 
+Total Cash, Cash Equivalents and Short-Term Investments | 13,874 |  |  | 12,848 | 
+Marketable securities | 1,907 |  |  | 1,723 | 
+Trade accounts receivable, less allowances of $520 and $506, respectively | 3,946 |  |  | 3,569 | 
+Inventories | 4,802 |  |  | 4,728 | 
+Prepaid expenses and other current assets | 2,718 |  |  | 3,129 | 
+Total Current Assets | 27,247 |  |  | 25,997 | 
+Equity method investments | 20,323 |  |  | 18,087 | 
+Deferred income tax assets | 1,267 |  |  | 1,319 | 
+Property, plant and equipment — net | 10,902 |  |  | 10,303 | 
+Trademarks with indefinite lives | 13,515 |  |  | 13,301 | 
+Goodwill | 18,662 |  |  | 18,139 | 
+Other noncurrent assets | 14,129 |  |  | 13,403 | 
+Total Assets | $ | 106,045 |  |  | $ | 100,549 | 
+LIABILITIES AND EQUITY
+Current Liabilities |  |  | 
+Accounts payable and accrued expenses | $ | 17,692 |  |  | $ | 21,715 | 
+Loans and notes payable | 2,319 |  |  | 1,499 | 
+Current maturities of long-term debt | 1,920 |  |  | 648 | 
+Accrued income taxes | 568 |  |  | 1,387 | 
+Total Current Liabilities | 22,499 |  |  | 25,249 | 
+Long-term debt | 43,177 |  |  | 42,375 | 
+Other noncurrent liabilities | 4,667 |  |  | 4,084 | 
+Deferred income tax liabilities | 2,435 |  |  | 2,469 | 
+The Coca-Cola Company Shareowners’ Equity |  |  | 
+Common stock, $0.25 par value; authorized — 11,200 shares; issued — 7,040 shares | 1,760 |  |  | 1,760 | 
+Capital surplus | 20,489 |  |  | 19,801 | 
+Reinvested earnings | 80,305 |  |  | 76,054 | 
+Accumulated other comprehensive income (loss) | (14,952) |  |  | (16,843) | 
+Treasury stock, at cost — 2,738 and 2,738 shares, respectively | (56,355) |  |  | (55,916) | 
+Equity Attributable to Shareowners of The Coca-Cola Company | 31,247 |  |  | 24,856 | 
+Equity attributable to noncontrolling interests | 2,020 |  |  | 1,516 | 
+Total Equity | 33,267 |  |  | 26,372 | 
+Total Liabilities and Equity | $ | 106,045 |  |  | $ | 100,549 | 

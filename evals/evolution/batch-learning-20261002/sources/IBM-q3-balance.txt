@@ -1,0 +1,59 @@
+INTERNATIONAL BUSINESS MACHINES CORPORATION CONDENSED CONSOLIDATED BALANCE SHEET (Unaudited)
+
+(Dollars in Millions) |  | At September 30, 2025 |  | At December 31, 2024
+ASSETS: |  |  |  | 
+Current Assets: |  |  |  | 
+Cash and cash equivalents |  | $ 11,569 |  | $ 13,947
+Restricted cash |  | 30 |  | 214
+Marketable securities |  | 3,286 |  | 644
+Notes and accounts receivable - trade, net |  | 5,532 |  | 6,804
+Short-term financing receivables |  |  |  | 
+Held for investment, net |  | 5,156 |  | 6,259
+Held for sale |  | 745 |  | 900
+Other accounts receivable, net |  | 1,174 |  | 947
+Inventories |  | 1,397 |  | 1,289
+Deferred costs |  | 1,113 |  | 959
+Prepaid expenses and other current assets |  | 2,739 |  | 2,520
+Total Current Assets |  | 32,740 |  | 34,482
+ |  |  |  | 
+Property, plant and equipment, net |  | 5,851 |  | 5,731
+Operating right-of-use assets, net |  | 3,223 |  | 3,197
+Long-term financing receivables, net |  | 6,258 |  | 5,353
+Prepaid pension assets |  | 8,044 |  | 7,492
+Deferred costs |  | 768 |  | 788
+Deferred taxes |  | 8,505 |  | 6,978
+Goodwill |  | 67,396 |  | 60,706
+Intangibles, net |  | 11,729 |  | 10,660
+Investments and sundry assets |  | 1,796 |  | 1,787
+Total Assets |  | $ 146,312 |  | $ 137,175
+ |  |  |  | 
+LIABILITIES: |  |  |  | 
+Current Liabilities: |  |  |  | 
+Taxes |  | $ 1,663 |  | $ 2,033
+Short-term debt |  | 7,942 |  | 5,089
+Accounts payable |  | 3,867 |  | 4,032
+Compensation and benefits |  | 3,508 |  | 3,605
+Deferred income |  | 13,878 |  | 13,907
+Operating lease liabilities |  | 807 |  | 768
+Other liabilities |  | 3,477 |  | 3,709
+Total Current Liabilities |  | 35,142 |  | 33,142
+ |  |  |  | 
+Long-term debt |  | 55,174 |  | 49,884
+Retirement-related obligations |  | 9,735 |  | 9,432
+Deferred income |  | 3,863 |  | 3,622
+Operating lease liabilities |  | 2,646 |  | 2,655
+Other liabilities |  | 11,762 |  | 11,048
+Total Liabilities |  | 118,322 |  | 109,783
+ |  |  |  | 
+EQUITY: |  |  |  | 
+IBM Stockholders' Equity: |  |  |  | 
+Common stock |  | 62,819 |  | 61,380
+Retained earnings |  | 151,581 |  | 151,163
+Treasury stock - at cost |  | (170,512) |  | (169,968)
+Accumulated other comprehensive income/(loss) |  | (15,983) |  | (15,269)
+Total IBM Stockholders' Equity |  | 27,905 |  | 27,307
+ |  |  |  | 
+Noncontrolling interests |  | 85 |  | 86
+Total Equity |  | 27,990 |  | 27,393
+ |  |  |  | 
+Total Liabilities and Equity |  | $ 146,312 |  | $ 137,175

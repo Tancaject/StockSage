@@ -1,0 +1,405 @@
+我们需要回答中文。任务：基于E1 36周累计（2024-12-29至2025-09-06；对照2023-12-31? 实际9/7/2024）和E2 24周累计（2024-12-29至2025-06-14；对照6/15/2024），还原FY2025 Q3单季和FY2024 Q3单季。需要两期累计同一财年起始日：2024-12-29开始，对2025；2023-12-31? 2024列示的36周和24周起始应该也是同一财年的期初，但证据中E1 36 Weeks Ended 9/7/2024，E2 24 Weeks Ended 6/15/2024。虽然表头未显示2024 periodStart，但公司财年通常从12月末开始；证据元数据 E1 periodStart 2024-12-29 是2025财年起始，2024对照列可能起始2023-12-31，不是同一日期。但用户要求两年的单季起止期间。我们能否从证据确认2024 Q3起止？E1说36 Weeks Ended 9/7/2024，E2说24 Weeks Ended 6/15/2024。因此2024 Q3单季是24周结束后到36周结束：2024-06-16至2024-09-07（如果24周结束6/15，36周结束9/7，差12周）。2025 Q3单季：2025-06-15至2025-09-06（24周结束6/14，36周结束9/6）。需要说明。对于2025两累计期初均为2024-12-29（由元数据/表？2025列）。对于2024，两累计期初应为2023-12-31？证据没有明示，但24周结束6/15/2024倒推约24周：2023-12-31？ Let's calculate: 6/15/2024 是周六。24周=168天，起始应为2023-12-31（周日）? 6/15 minus 168 = 2023-12-30? Let's check: 2024 is leap. Day of year Jun 15 = Jan31+Feb29+Mar31+Apr30+May31+15=31+29+31+30+31+15=167. Minus 168 gives -1 day relative Jan 1 => Dec 31, 2023? If period includes start and end? 24 weeks ended 6/15/2024 likely begins 12/31/2023. 36 weeks ended 9/7/2024: day of year Sep 7 = 31+29+31+30+31+30+31+31+7=251; minus 252 = Dec 31? yes. So 2024 start 2023-12-31. But evidence not explicitly states. We can state based on 24/36 week ended dates, single quarter derived; if strict, periodStart for 2024 not in metadata. But user asks note two years single quarter start/end. We can give derived from week-ended dates. Need ensure same start for two cumulative periods within each year: 2025 24 and 36 weeks both start 2024-12-29 (E2/E1 metadata and 24/36 weeks ended). 2024 likely same start because both are 24/36 weeks ended respective dates; but not explicitly periodStart. We can mention 2024期初由周数与截止日推算为2023-12-31，若按披露口径；无重述证据。 But the special condition requires two cumulative periods same start date. For 2025 yes. For 2024 yes likely. We can proceed but note if start not explicit? Need not over-caveat? We can say “基于两份报表均为同一财年24周/36周累计，且截止日相差12周，可相减；2024期初未直接列示，按周数推算为2023-12-31”。
+
+Need reconstruct single quarter values: For each year Q3 = 36-week cumulative minus 24-week cumulative.
+
+Data:
+2025:
+Net income 36w 5,740 - 24w 3,122 = 2,618 million.
+Operating cash flow 5,468 - 996 = 4,472 million.
+Capital spending 2,499 - 1,507 = 992 million (cash outflow). Simplified FCF = OCF - capex gross = 4,472 - 992 = 3,480 million.
+Need maybe use absolute capex? The line Capital spending negative. We compute毛额: 992 outflow. FCF 3,480.
+
+2024:
+Net income 8,092 - 5,147 = 2,945 million.
+OCF 6,220 - 1,315 = 4,905 million.
+Capex 2,850 - 1,701 = 1,149 million.
+Simplified FCF = 4,905 - 1,149 = 3,756 million.
+
+Comparison:
+Net income Q3 2025 2,618 vs 2,945, change -327, -11.10%? Calculate 327/2945=0.111035. -11.10%.
+OCF 4,472 vs 4,905, change -433, -8.83%? 433/4905=0.088277. -8.83%.
+FCF 3,480 vs 3,756, change -276, -7.35%? 276/3756=0.07348. -7.35%.
+Capex down 157, -13.66%? 157/1149=0.13664.
+
+Question: cash creation enhanced? No, decreased. But need prudent judgment with working capital directions.
+
+Need reconstruct working capital sub-items for Q3 single quarter:
+2025:
+Accounts and notes receivable change: 36w (1,747) - 24w (1,582) = (165) million. Negative = increase in receivables uses cash.
+Inventories: (449) - (800) = +351 million. Wait cumulative inventories line is negative 449 for 36w, negative 800 for 24w. Difference = +351. In cash flow statement, positive change means cash provided? Usually line shown as (negative) when inventories increase. If cumulative 24w had -800, 36w -449 means Q3 inventory change is +351 (i.e., decrease in inventories or reversal, provides cash). Need be careful: The line item is “Inventories” under changes; negative means cash used by increase in inventories. Difference +351 means cash provided by decrease in inventories. So contributes cash.
+Accounts payable and other current liabilities: (1,647) - (2,083) = +436 million. Positive means cash provided? Usually AP & other current liabilities negative means decrease in liabilities uses cash; cumulative less negative in Q3 means Q3 positive, liability increase or smaller decrease? The reconstructed Q3 is +436, so contributes cash.
+Other? User asks “应收、存货、应付及其他流动负债三个经营项目分别贡献还是占用现金” Three items: receivables, inventories, accounts payable and other current liabilities. Need mention.
+2024:
+Accounts receivable: (1,521) - (1,138) = (383) million, uses cash.
+Inventories: (492) - (696) = +204 million, provides cash.
+Accounts payable and other current liabilities: (2,312) - (2,968) = +656 million, provides cash.
+
+Need maybe compare working capital contribution total? For Q3 2025: -165 +351 +436 = +622 million net from these three. 2024: -383 +204 +656 = +477 million net. So these three provided more net cash in 2025 Q3 than 2024 Q3 by +145 million. But OCF still lower due to net income lower and other items maybe. Need maybe reconstruct other operating items? User asks “再说明2025本单季应收、存货、应付及其他流动负债三个经营项目分别贡献还是占用现金，结合这些方向作审慎判断”. We can mention 2025 Q3: receivables占用165; inventories贡献351; AP & other current liabilities贡献436. Net +622. Thus working capital from these three supported cash, but not enough to offset lower net income and perhaps other noncash/operating items; cash creation still YoY lower. Need not infer commercial reasons. Special instruction: after reconstructing all detail lines, before saying missing must check if derived. We can include reconstructed detailed operating lines maybe all available? The condition says for same start cumulative, should do all reconstructable detail lines if reconstructing single-quarter. We need ensure not declare missing. We can include table of all operating line items single-quarter? The user specifically asks net income OCF FCF and three working capital items. But system says should do all detail lines if using difference. We can present supplementary reconstructed operating details perhaps concise. Need also maybe reconstruct investing? The task condition says all reconstructable detail lines in same cash flow statement, e.g., working capital sub-items. We can include a supplementary table for operating activities and capital spending maybe. But avoid irrelevant? The task condition requires. We'll include “为完整还原，以下列出可还原的经营/投资明细单季值” but focus. Need be careful with line “Impairment and other charges” 2025: 1,960-1,860=100. Product recall-related impact: 0-0=0? Cash payments: -5 - (-2)=-3. Operating lease ROU amort: 489-315=174. Share-based comp: 207-131=76. Restructuring and impairment charges: 567-426=141. Cash payments for restructuring: -554 - (-387)= -167. Acquisition/divestiture-related charges: 308? Wait E1 has Acquisition and divestiture-related charges 308 for 36w 2025, 7 for 2024; E2 24w 2025? It does not list this line? E2 operating list: Net income, D&A, Impairment and other charges, Product recall, cash payments, ROU, share-based, restructuring and impairment charges, cash payments for restructuring, Pension expense, contributions, Deferred income taxes, TCJA, changes. It omits Acquisition and divestiture-related charges and cash payments? In E2 maybe line omitted? Actually E2 has no acquisition/divestiture charges line. If missing, cannot reconstruct? If line not present in 24-week, maybe zero? Can't assume. But E1 36w has 308; if absent in E2 could be omitted due to not material? We cannot assume zero. Need mark not reconstructable if line missing in E2. But maybe E2 text omitted due formatting? It includes up to Pension. No acquisition/divestiture-related charges. For 2024 E1 has 7, E2? no line. So can't reconstruct. But if we claim all reconstructable, we should only include lines present in both cumulative periods. Need note that some line items not provided in 24-week evidence, thus not reconstructed. However special condition says before declaring missing check if derived; if not present both, cannot derive. We'll state.
+
+Need reconstruct pension: 2025 expense 164-99=65; contributions -400 - (-354)= -46. Deferred income taxes: 30 - (-260)=290. TCJA tax payments: -772 - (-772)=0. Income taxes payable: 6 - 415 = -409. Other, net: -441 - (-269)= -172. Prepaid expenses: -223 - (-354)=131. Need check signs.
+
+2024:
+D&A 2,118-1,379=739.
+Impairment and other charges 0? E1 2024 10, E2 2024 — (0) => 10.
+Product recall-related impact 184-182=2.
+Cash payments recall -138 - (-135)= -3.
+ROU amort 438-278=160.
+Share-based comp 260-183=77.
+Restructuring and impairment charges 415-170=245.
+Cash payments restructuring -284 - (-173)= -111.
+Pension expense 114-67=47.
+Contributions -300 - (-263)= -37.
+Deferred income taxes 124-142=-18.
+TCJA -579 - (-579)=0.
+Receivables -1,521 - (-1,138)= -383.
+Inventories -492 - (-696)=204.
+Prepaid -200 - (-365)=165.
+AP & other current liabilities -2,312 - (-2,968)=656.
+Income taxes payable 426-287=139.
+Other net -138 - (-203)=65.
+OCF 4,905.
+Investing: Capex -2,850 - (-1,701)= -1,149. Sales PP&E 177-127=50. Acquisitions -31 - (-30)= -1. Divestitures 145-135=10. Short-term investments more than 3 months purchases: E1 -425, E2? E2 has no purchases line? E2 only maturities 425? For 2024, E2 has “More than three months - maturities 425 —”? Wait E2 investing: Short-term investments, by original maturity: More than three months - maturities 425 — (for 2025? It shows 425 in 2025 column, blank 2024? Let's parse E2: after divestitures: Short-term investments, by original maturity: More than three months - maturities 425 — ; Three months or less, net 22 1; Other investing, net (111) 14. It doesn't show purchases line in 24w? E1 has purchases (190) (425), maturities 425 —. For 2024, 36w purchases -425, 24w maybe not shown? If missing, cannot reconstruct. But maybe E2 omitted purchases because none? It only shows maturities. Can't assume. For 2025, purchases -190 in 36w, absent in 24w? Can't reconstruct. More than three months maturities: 2025 425-425=0; 2024 0? E1 2024 maturities —, E2 2024 —? likely 0. Three months or less: 2025 43-22=21; 2024 4-1=3. Other investing: 2025 -117 - (-111)= -6; 2024 15-14=1. Acquisitions: 2025 -3,176 - (-3,130)= -46; 2024 -31 - (-30)= -1. Divestitures: 2025 5-5=0; 2024 145-135=10. Sales PP&E: 2025 272-169=103; 2024 177-127=50. Net investing: 2025 -5,237 - (-4,127)= -1,110; 2024 -2,965 - (-1,454)= -1,511. We can include maybe. But user only needs FCF simplified. However condition says all reconstructable detail lines in same table. We can include an appendix table with reconstructed operating and investing lines. But must not overwhelm? Desired oververbosity 9, okay.
+
+Need ensure arithmetic accurate. Let's recalc all differences.
+
+2025 Operating:
+Net income: 5740-3122=2618.
+D&A: 2315-1491=824.
+Impairment and other charges: 1960-1860=100.
+Product recall-related impact: 0-0=0.
+Cash payments for product recall: -5 - (-2)=-3.
+Operating lease ROU amort: 489-315=174.
+Share-based comp: 207-131=76.
+Restructuring and impairment charges: 567-426=141.
+Cash payments for restructuring: -554 - (-387)=-167.
+Acquisition/divestiture-related charges: E2 missing. If we assume missing not zero? Cannot reconstruct. But maybe line omitted because E2 didn't include; if no line, could be zero? Evidence E2 does not list it; we can't补编. Mark not reconstructed.
+Cash payments for acq/div: missing.
+Pension expense: 164-99=65.
+Pension contributions: -400 - (-354)=-46.
+Deferred income taxes and other tax charges/credits: 30 - (-260)=290.
+TCJA tax payments: -772 - (-772)=0.
+Accounts and notes receivable: -1747 - (-1582)=-165.
+Inventories: -449 - (-800)=351.
+Prepaid expenses and other current assets: -223 - (-354)=131.
+Accounts payable and other current liabilities: -1647 - (-2083)=436.
+Income taxes payable: 6-415=-409.
+Other, net: -441 - (-269)=-172.
+Net operating: 5468-996=4472.
+Let's sum reconstructed to verify? Need ensure missing acquisition/divestiture charges maybe affect sum. Let's sum known: 2618+824=3442; +100=3542; +0=3542; -3=3539; +174=3713; +76=3789; +141=3930; -167=3763; +65=3828; -46=3782; +290=4072; +0=4072; -165=3907; +351=4258; +131=4389; +436=4825; -409=4416; -172=4244. This sums 4,244, not 4,472; difference 228. Missing acquisition/divestiture-related charges? If 36w 308 and 24w unknown. To make OCF 4472, missing net items total +228. If 24w acquisition/div charges maybe 80? Actually E1 36w Acquisition and divestiture-related charges 308; cash payments -80. If E2 omitted maybe because not included? If 24w had maybe 80 charges and -? Let's see difference if 24w zero: charges 308, cash payments -80 -> net +228. Exactly difference! Ah! So E2 omitted lines but likely 24-week values were zero? Wait 308 - 80 = 228. The missing sum exactly equals 228. That suggests in Q3 there were acquisition/divestiture-related charges 308 and cash payments -80 if 24w values zero. But E2 omitted lines maybe because no line? Actually if 24-week had zero, the line might be omitted? The 36-week statement includes line with 308 and (80), and 24-week maybe no line because zero? But if zero, they may not show. The difference exactly equals 308-80=228, meaning Q3 acquisition/divestiture-related charges 308 and cash payments -80, with first half zero. Could we reconstruct by assuming omitted line = zero? Evidence E2 doesn't show line. The condition says facts only from evidence; cannot补编. But arithmetic gap indicates missing line values if we assume zero. But can't assume. However maybe the line is actually present in E2 but omitted in provided text? It says E2 operating list no Acquisition/divestiture-related charges. It may be because in Q2 there were no such charges, and they omitted zero lines. In financial statements, zero lines often omitted. Could we state “因24周报表未列示该项目，严格口径无法单独验证；但按已列示项目合计与OCF差额为+228，与36周新增并购/剥离费用308及现金支付-80的净额一致，推断Q3该项目净贡献+228（属基于算术的推断，非直接披露）”。 Need be cautious. The instruction says facts only; distinguish inference. We can include as inference, not fact. But for all reconstructable detail lines, if line missing in one period, not reconstructable as disclosed. We can note this arithmetic residual.
+
+Similarly 2024 operating sum known? Let's sum: Net income 2945 + D&A 739 =3684; + impairment 10=3694; + product recall impact 2=3696; -3=3693; +ROU160=3853; +SBC77=3930; +restructuring charges245=4175; -cash restructuring111=4064; +pension expense47=4111; -contributions37=4074; +deferred taxes -18=4056; TCJA0=4056; receivables -383=3673; inventories +204=3877; prepaid +165=4042; AP+656=4698; income taxes payable+139=4837; other+65=4902. OCF difference 4905; residual +3. Acquisition/divestiture-related charges E1 7, cash payments -4. If 24w zero, net +3. Exactly. So residual matches. Good. So we can mention residual likely acquisition/divestiture-related charges net +3 for 2024 Q3; but because 24-week evidence omitted lines, not directly reconstructed. But maybe we can reconstruct if we infer omitted zero? Need not use for main conclusion. But system says don't declare missing if already derived via difference. But here line missing in E2; however the total difference and 36-week line allow inference? The condition says two cumulative periods same start and cash flow line items; if line item present in one but not other, maybe absent means zero? In XBRL? But evidence text omitted. We can treat zero lines as omitted? We need decide. Since the 36-week table includes line and 24-week table doesn't, usual presentation: if amount zero, line omitted. The difference can be computed as 36w value minus 0 if omission indicates zero? But cannot be certain. But arithmetic residual exactly equals line amount net, strongly supports. We can label as “按报表列示惯例将未列示视为0的推断”。 However evidence rule: cannot supplement. Better to say “严格来说，24周文本未列示该项目，无法直接验证其为0；但已列示项目差额与总经营现金流差额分别余+228/+3，恰好等于36周该项目费用及现金支付净额，故可推断其单季净影响分别为+228/+3。” This is transparent.
+
+Need maybe reconstruct acquisition/divestiture-related charges single-quarter: 2025 charges 308, cash payments -80 if 24w zero; net +228. 2024 charges 7, cash payments -4; net +3. But not essential. We can include in appendix as “推断”。
+
+Need check 2025 Q3 OCF lower despite working capital positive. Need maybe identify drivers: Net income lower by 327. D&A higher by 85? 824 vs 739 +85. Impairment and other charges: 100 vs 10 +90. Restructuring charges 141 vs 245 lower by -104. Cash payments restructuring -167 vs -111 more outflow -56. Deferred taxes 290 vs -18 higher +308. Income taxes payable -409 vs +139 lower -548. Other net -172 vs +65 lower -237. Prepaid +131 vs +165 lower -34. Receivables -165 vs -383 less use +218. Inventories +351 vs +204 more source +147. AP & other current liabilities +436 vs +656 less source -220. Pension contributions -46 vs -37 more outflow -9. Product recall etc small. Acquisition/div net +228 vs +3 +225. Overall OCF down 433. Could mention main observed drags: lower net income, income taxes payable swing, other net, AP & other current liabilities lower source; partially offset by deferred taxes, acquisition/divestiture net charges, receivable/inventory. But avoid commercial cause. Need maybe not over attribute due to missing tax timing etc. We can state “从可还原明细看，净利润下降、所得税应付项目转为占用、Other net占用、应付及其他流动负债贡献减弱是主要拖累；递延税项和并购/剥离相关费用净影响、应收/存货贡献改善部分抵消。商业原因（如付款周期、税务缴纳节奏）无法由本证据确认。”
+
+Need ratios: User asks ratios and percentages two decimals. Which ratios? Maybe YoY percentages for net income, OCF, FCF, capex. Also maybe FCF margin? But no revenue provided. We can include YoY change percentages. Need two decimals.
+
+Need units: USD millions. Maybe also convert? No.
+
+Need “不把累计半年和单季当作环比”: We should explicitly compare YoY single-quarter only, not Q3 vs Q2. Mention cumulative 36 weeks vs 24 weeks not used as sequential. Also “注明两年的单季起止期间”: 2025 Q3: 2025-06-15 to 2025-09-06 (12 weeks? Let's verify 12 weeks: from Jun 15 to Sep 6 inclusive? If 24 weeks ended Jun 14, next day Jun 15 to Sep 6 = 84 days? Jun 15-30 16 days, July31, Aug31, Sep6 => 84 days = 12 weeks. Yes. 2024 Q3: 2024-06-16 to 2024-09-07 (84 days). Need note fiscal quarters may be 12 weeks; PepsiCo fiscal Q3 2025 ended Sep 6, 2024 ended Sep 7. The start dates derived from 24-week ended dates. For 2025, 24 weeks ended 6/14/2025, so Q3 begins 6/15/2025. For 2024, 24 weeks ended 6/15/2024, Q3 begins 6/16/2024. Good.
+
+Need “标的与数据范围 / 已验证事实 / 财务趋势与经营质量 / 风险与反向证据 / 数据缺口 / 来源”.
+
+Need include evidence IDs. Use [E1], [E2]. Need sourceRef maybe. We can cite.
+
+Need ensure no hidden chain of thought. Final report only.
+
+Let's plan output:
+
+Title: PepsiCo (PEP) FY2025 Q3 vs FY2024 Q3 单季现金创造还原
+
+1. 标的与数据范围
+- 标的: PepsiCo, Inc. and Subsidiaries, ticker PEP, consolidated, USD millions, unaudited.
+- 证据: E1 36 weeks ended 9/6/2025 and 9/7/2024; E2 24 weeks ended 6/14/2025 and 6/15/2024.
+- 方法: Q3 = 36周累计 - 24周累计. Same fiscal year start; 2025 start 2024-12-29 [E1/E2 metadata]; 2024 start inferred 2023-12-31 from week counts; no restatement evidence.
+- Single quarter periods: FY2025 Q3 2025-06-15至2025-09-06; FY2024 Q3 2024-06-16至2024-09-07. Note 12-week.
+- Definition: simplified FCF = OCF - capital spending gross outflow; not net of asset sale proceeds.
+
+2. 已验证事实 (maybe table)
+Table core:
+Item | FY2025 Q3 | FY2024 Q3 | YoY change | YoY %
+Net income: 2,618 vs 2,945; -327; -11.10%
+Net cash provided by operating activities: 4,472 vs 4,905; -433; -8.83%
+Capital spending (cash outflow): 992 vs 1,149; -157; -13.66% (outflow decreased)
+Simplified FCF: 3,480 vs 3,756; -276; -7.35%
+Need maybe present capex as positive outflow? To avoid sign confusion: “购建固定资产现金支出毛额（流出）” 992/1,149. OCF positive. FCF positive.
+
+Need show calculations:
+2025 OCF = 5,468 - 996 = 4,472; capex = 2,499 - 1,507 = 992; FCF=4,472-992=3,480.
+2024 OCF = 6,220 - 1,315 = 4,905; capex = 2,850 - 1,701=1,149; FCF=4,905-1,149=3,756.
+Net income similar.
+
+3. Working capital directions for FY2025 Q3:
+Table:
+Accounts and notes receivable: (1,747)-(1,582)= (165) -> 占用现金
+Inventories: (449)-(800)= +351 -> 贡献现金
+Accounts payable and other current liabilities: (1,647)-(2,083)= +436 -> 贡献现金
+Net of three: +622 contribution.
+For comparison 2024 Q3: receivables -383 use; inventories +204 source; AP & other current liabilities +656 source; net +477 source.
+Maybe mention 2025 three-item net working capital contribution YoY +145 (30.40%? 145/477=30.40). But OCF still lower.
+
+4. 财务趋势与经营质量
+- Cash creation YoY weakened: OCF -8.83%, simplified FCF -7.35%, net income -11.10%. Capex lower helped FCF less decline than OCF? Actually FCF decline less than OCF due capex lower. Cash conversion? Could compute OCF/Net income: 2025 4,472/2,618=1.71; 2024 4,905/2,945=1.67. Ratio up 0.04? Need percentages? This might be useful. But user didn't ask, but cash quality. Let's calculate: 4472/2618 = 1.7082 => 1.71; 4905/2945=1.6655 =>1.67. FCF/Net income: 3480/2618=1.329 =>1.33; 3756/2945=1.275 =>1.28. Could mention as inference: despite lower net income, OCF was > net income and conversion ratio slightly improved due noncash charges/working capital; but absolute cash lower. Need ensure ratios two decimals. Good.
+- Working capital: three items net source in both Q3; 2025 source larger by 145. Receivables still use but less than 2024; inventories source larger; AP & other current liabilities source smaller. This supports OCF but not enough.
+- Need not treat cumulative half as sequential. We compare single-quarter YoY only.
+
+5. 风险与反向证据
+- Negative: lower net income, OCF, FCF YoY. AP & other current liabilities contribution declined; income taxes payable turned to use in 2025 Q3 (-409 vs +139), Other net use (-172 vs +65). These are drags.
+- Positive/rebuttal: capex lower, working capital net positive, OCF/net income conversion high. But cannot offset absolute decline.
+- Potential one-offs: Impairment and other charges, restructuring, acquisition/divestiture charges; they are noncash/cash timing. But we cannot infer sustainability. Maybe mention 2025 Q3 includes acquisition/divestiture-related charges net +228 inference, impairment +100, restructuring charges +141 but cash payments -167. These can distort cash. Need careful.
+
+6. 数据缺口
+- 24周报表未单独列示 acquisition/divestiture-related charges and cash payments; strict direct reconstruction unavailable. But residual matches; mark as inference. Need maybe not call gap? It is gap for direct evidence.
+- 2024 cumulative period start not explicitly stated in evidence metadata; derived from 24/36 week end dates. If start not same, subtraction invalid; but week counts support same fiscal-year start. Need mention.
+- No revenue or segment data; cannot assess cash generation relative to sales or drivers.
+- No management discussion for working capital commercial reasons; cannot confirm why receivable/inventory/AP moved.
+- The cash flow statement provided only operating and investing excerpt; financing not provided; cannot assess total cash. But user didn't ask.
+- The 2025 Q3 report is unaudited.
+- If there were restatements or consolidation changes, not evidenced; assume none.
+
+Need maybe include “已还原明细” appendix to satisfy condition. Could include a table with all reconstructed operating line items and investing line items. But maybe too long. The system says “操作：当用两期同起点累计现金流量表还原单季数据时，除用户指定的汇总行外，还应对同一张表内所有可还原的明细行逐一做差值计算。” We should do it. We can include in report as “附录：可还原明细单季值”。 Need include all lines present in both E1/E2. Need maybe include acquisition/divestiture as “无法直接还原/推断”。 Also include investing lines present in both. Let's construct tables.
+
+Operating activities single-quarter reconstructed (only lines in both cumulative reports):
+For 2025 and 2024:
+Net income: 2,618 / 2,945
+Depreciation and amortization: 824 / 739
+Impairment and other charges: 100 / 10
+Product recall-related impact: 0 / 2
+Cash payments for product recall-related impact: -3 / -3
+Operating lease ROU asset amortization: 174 / 160
+Share-based compensation expense: 76 / 77
+Restructuring and impairment charges: 141 / 245
+Cash payments for restructuring charges: -167 / -111
+Pension and retiree medical plan expenses: 65 / 47
+Pension and retiree medical plan contributions: -46 / -37
+Deferred income taxes and other tax charges and credits: 290 / -18
+Tax payments related to TCJA: 0 / 0
+Change in assets/liabilities:
+Accounts and notes receivable: -165 / -383
+Inventories: +351 / +204
+Prepaid expenses and other current assets: +131 / +165
+Accounts payable and other current liabilities: +436 / +656
+Income taxes payable: -409 / +139
+Other, net: -172 / +65
+Net Cash Provided by Operating Activities: 4,472 / 4,905
+Acquisition and divestiture-related charges: not directly reconstructable; residual/inference +308? Actually line item charges: 308 if 24w zero; cash payments -80; net +228. For 2024: charges 7; cash payments -4; net +3. We can put separate note.
+
+But if we include table with known lines sum not equal OCF; need explain residual. Better include a row “未列示项目净差额（推断主要为并购/剥离相关费用及现金支付）” = +228 / +3. But this is inference. We can label. Let's calculate residual exactly: OCF 4472 - sum known 4244 = 228. 2024: 4905 - 4902 = 3. Good. We can include to reconcile. But if user only needs core, maybe appendix.
+
+Investing activities single-quarter reconstructed:
+Capital spending: -992 / -1,149 (outflow)
+Sales of property, plant and equipment: +103 / +50
+Acquisitions, net of cash acquired, investments in noncontrolled affiliates and purchases of intangible and other assets: -46 / -1 (E1/E2 both have line? Yes E2 has line but amount -3,130 for 2025, -30 for 2024; E1 -3,176/-31; difference -46/-1)
+Divestitures, sales of investments...: 0 / +10
+Short-term investments: More than three months - purchases: not reconstructable? E2 doesn't show purchases line. But maybe zero? We can omit or note. More than three months - maturities: 0 / 0? For 2025: 425-425=0. For 2024: E1 —, E2 —? It shows blank? Could treat 0. Three months or less, net: 21 / 3. Other investing, net: -6 / 1. Net Cash Used for Investing Activities: -1,110 / -1,511.
+Need maybe include because all reconstructable. But not necessary for FCF simplified except capex and maybe asset sales not deducted. Since user explicitly says not deduct sale asset proceeds; we can mention sales PP&E were +103/+50 but excluded from simplified FCF. Good.
+
+Need check investing net sum with missing purchases. For 2025 known: capex -992 + sales 103 + acquisitions -46 + divestitures 0 + maturities 0 + three months 21 + other -6 = -920. Net investing actual -1,110; residual -190, which equals purchases -190 if 24w zero. For 2024 known: -1,149 +50 -1 +10 +0 +3 +1 = -1,086; actual -1,511; residual -425, equals purchases -425. So missing purchases lines. Could note. But user only needs capex; but condition says all details. We can include appendix with “短期投资原到期>3个月购买：无法直接还原，24周未列示；按差额推断2025 Q3 -190、2024 Q3 -425”。 But be careful.
+
+Maybe include a concise appendix only operating, because task condition examples working capital sub-item. But “同一张表内所有可还原的明细行” includes investing. We can include full. Need avoid making final too huge but okay.
+
+Need ensure signs: In tables, negative parentheses maybe. Use “流出/占用” negative. For readability, present cash flow sign as in statement: positive source, negative use. For capex in core table maybe “资本开支（流出，绝对值）” positive. In appendix use statement sign.
+
+Need calculate percentages for working capital maybe:
+2025 Q3 receivables -165 vs 2024 -383: use decreased by 218, improvement 56.92%? Since both negative, “占用减少 218，改善56.92%” calculation 218/383=56.92. Inventories source 351 vs 204: +147, +72.06%. AP & other current liabilities source 436 vs 656: -220, -33.54%. Net three +622 vs +477: +145, +30.40%. Could include maybe.
+
+Need calculate OCF/NI and FCF/NI ratios:
+2025 OCF/NI = 4472/2618 = let's precise: 2618*1.71=4476.78, so 1.7082. two decimals 1.71. 2024 4905/2945 = 1.6655 ->1.67. FCF/NI: 3480/2618=1.3293 ->1.33; 3756/2945=1.2754 ->1.28. Capex/OCF: 992/4472=0.2218 ->22.18%; 1149/4905=0.2343 ->23.43%. Could mention. FCF margin no revenue.
+
+Need maybe compute simplified FCF YoY -7.35. OCF decline -8.83. Net income decline -11.10. Capex decline -13.66.
+
+Need be precise about fiscal year: PEP FY2025 Q3 ended 2025-09-06; FY2024 Q3 ended 2024-09-07. The 36 weeks ended dates. The single quarter start/end:
+- FY2025 Q3: 2025-06-15 to 2025-09-06. Because 24 weeks ended 2025-06-14 [E2], 36 weeks ended 2025-09-06 [E1].
+- FY2024 Q3: 2024-06-16 to 2024-09-07. Because 24 weeks ended 2024-06-15 [E2], 36 weeks ended 2024-09-07 [E1].
+Need maybe “起止期间按24周累计截止日次日推算”。
+
+Need mention currency USD, unit millions. Ratios two decimals.
+
+Potential issue: E1/E2 metadata periodStart for E2 2024-12-29, periodEnd 2025-06-14; E1 periodStart 2024-12-29 periodEnd 2025-09-06. For 2024 columns, metadata doesn't specify periodStart. But table says 24/36 weeks ended. We can say “2024对照列的期初未在证据元数据中单独列示；根据24/36周截止日推算为2023-12-31，且两期累计同为截至各自日期的24/36周，满足同一起点假设；若起点不同则不可相减。” Good.
+
+Need maybe note “FY2025 Q3不是日历季度；是财年第三季度（12周）”。
+
+Need not output hidden thinking. Final should be structured.
+
+Let's draft final in Chinese with sections.
+
+Detailed final outline:
+
+# PepsiCo (PEP) FY2025 Q3单季现金创造还原
+
+## 标的与数据范围
+- 公司, ticker, market? US stock. Data from cash flow statements, consolidated, USD millions, unaudited.
+- Evidence table: E1 36 weeks, E2 24 weeks.
+- Method and periods.
+- Key definitions.
+
+## 已验证事实：单季核心现金创造
+Table core with calculations maybe below.
+Use format:
+| 指标 | FY2025 Q3 | FY2024 Q3 | 同比变动 | 同比% |
+净利润 2,618 2,945 -327 -11.10%
+经营现金流 4,472 4,905 -433 -8.83%
+购建固定资产现金支出毛额 992 1,149 -157 -13.66% (流出减少)
+简化自由现金流 3,480 3,756 -276 -7.35%
+
+Then calculation formulas.
+Conclusion: 没有增强，下降。
+
+## 2025 Q3经营项目方向
+Table:
+| 项目 | 2025Q3还原值 | 现金含义 | 2024Q3对照 | 同比 |
+Accounts and notes receivable -165 占用 -383 占用减少218 (+56.92%改善)
+Inventories +351 贡献 +204 贡献增加147 (+72.06%)
+AP and other current liabilities +436 贡献 +656 贡献减少220 (-33.54%)
+三项合计 +622 贡献 +477 贡献增加145 (+30.40%)
+Need define signs.
+
+## 财务趋势与经营质量
+- Absolute cash creation down. Ratios OCF/NI, FCF/NI, capex/OCF.
+- Working capital supported but not enough. Lower net income and other items. Mention no commercial causes.
+
+## 风险与反向证据
+- Risks: declining NI/OCF/FCF; AP contribution lower; tax payable swing; other net swing; reliance on working capital/noncash add-backs; acquisition/divestiture charges maybe one-off.
+- Reverse: capex down, conversion >1, working capital net positive.
+
+## 数据缺口
+- 24周 not listing acquisition/divestiture and short-term investment purchases; direct reconstruction missing; residual inference.
+- 2024 start date not explicit.
+- No MD&A/segment/revenue; cannot explain drivers.
+- unaudited, no restatement evidence.
+
+## 来源
+- E1 sourceRef, period, etc.
+- E2 sourceRef.
+
+Appendix: maybe after sources or before? Could put “附录：可还原明细”。 The fixed output structure says organize by sections; maybe include appendix after 来源? It's okay. But the required sections are 标的与数据范围 / 已验证事实 / 财务趋势与经营质量 / 风险与反向证据 / 数据缺口 / 来源. We can include appendix under 已验证事实 or after 来源. To satisfy condition, include “已验证事实（附录：逐行还原）” maybe. But if too long, okay.
+
+Let's construct appendix tables carefully.
+
+Appendix A: Operating activities reconstructed.
+Need include “Acquisition and divestiture-related charges” and cash payments? Since not in E2, but we can present “未直接列示；按总差额推断”. Maybe table columns: 项目, FY2025Q3, FY2024Q3, 备注.
+
+Operating table:
+Net income 2,618 2,945
+D&A 824 739
+Impairment and other charges 100 10
+Product recall-related impact 0 2
+Cash payments for product recall-related impact -3 -3
+Operating lease ROU amortization 174 160
+Share-based compensation 76 77
+Restructuring and impairment charges 141 245
+Cash payments for restructuring charges -167 -111
+Acquisition and divestiture-related charges 308*? 7*?
+Cash payments for acquisition and divestiture-related charges -80*? -4*?
+Pension expense 65 47
+Pension contributions -46 -37
+Deferred income taxes... 290 -18
+TCJA tax payments 0 0
+Accounts and notes receivable -165 -383
+Inventories +351 +204
+Prepaid expenses and other current assets +131 +165
+Accounts payable and other current liabilities +436 +656
+Income taxes payable -409 +139
+Other, net -172 +65
+Net cash provided by operating activities 4,472 4,905
+
+But if we include * as inferred assuming 24w zero. Need footnote: 24周报表未列示；严格口径无法直接还原；按已列示项目与总经营现金流差额推断单季净影响为+228/+3，拆分按36周披露的308/-80和7/-4（假设24周为0）。 Maybe better not put values in main table with fact label; put in note.
+
+Could include row “未列示项目净差额（推断） +228 +3”. Then no need split. But condition says all reconstructable line items; acquisition line not reconstructable. We can note.
+
+Investing table:
+Capital spending -992 -1,149
+Sales of PP&E +103 +50
+Acquisitions... -46 -1
+Divestitures... 0 +10
+ST investments >3 months maturities 0 0
+ST investments <=3 months net +21 +3
+Other investing net -6 +1
+Net cash used for investing -1,110 -1,511
+Missing: purchases of >3 months ST investments: residual -190 / -425 inferred. If include row “未列示项目净差额（推断，主要为>3个月短期投资购买） -190 -425”.
+
+Need check 2025 investing net: Known sum -920, residual -190. 2024 known -1086, residual -425. Good.
+
+But maybe including investing appendix distracts. But condition. We'll include compact.
+
+Need be careful: E1 line “Acquisitions, net of cash acquired, investments in noncontrolled affiliates and (3,176) (31) purchases of intangible and other assets” formatting. We'll use full label.
+
+Need ensure no arithmetic mistakes in appendix known sums? We can state “下表仅列可直接相减的项目；未列示项目用差额推断”。
+
+Need maybe include “产品召回相关影响” 2025 0? E1 shows — for 2025 36w, E2 —? E2 product recall-related impact — for 2025? yes. So 0. Cash payments -5 - (-2) = -3. Good.
+
+Potential issue: “Impairment and other charges” and “Restructuring and impairment charges” both exist. We reconstruct as above.
+
+Need mention “比率和百分比保留两位小数”: We'll ensure percentages with two decimals. Ratios maybe 1.71 etc.
+
+Need maybe not say “FY2025第三季度单季现金创造较上年同一个财季增强了吗？” Answer: “未增强；经营现金流同比下降8.83%，简化自由现金流同比下降7.35%。”
+
+Need审慎: “尽管2025 Q3三项营运资本合计贡献现金且高于上年同期，但这只能部分解释现金创造；不能推断经营基本面改善，因为净利润和绝对现金流下降，且经营项目方向可能受时点影响。”
+
+Need mention “不把累计半年和单季当作环比”: We can say “本报告仅用36周减24周得到单季，并将2025 Q3与2024 Q3同比；不使用24周累计与36周累计之间的变化作为环比，也不把累计数当作单季趋势。”
+
+Need maybe include “合并净利润” is Net income from cash flow statement; not comprehensive income. It's consolidated net income. Good.
+
+Let's consider if any issue with FY2025 Q3 net income from cash flow vs income statement? It's cash flow net income line. Good.
+
+Need maybe “现金创造” could refer OCF/FCF. We answer.
+
+Let's produce final with enough detail.
+
+Double-check percentages:
+Net income: (2618-2945)/2945 = -327/2945 = -0.11103565 => -11.10%.
+OCF: -433/4905 = -0.08827727 => -8.83%.
+Capex outflow: 992 vs 1149, change -157/1149 = -13.66% (outflow decrease). If we present as positive outflow, percentage -13.66. Good.
+FCF: -276/3756 = -0.0734824 => -7.35%.
+OCF/NI: 1.71 vs 1.67. Change 0.04; percentage? Could say +0.04x.
+FCF/NI: 1.33 vs 1.28. +0.05x.
+Capex/OCF: 22.18% vs 23.43%, -1.25pp? Calculate 22.18-23.43=-1.25 percentage points. Could include.
+Working cap percentages: Receivable use decrease: 218/383=56.92%. Inventory source increase: 147/204=72.06%. AP source decrease: 220/656=33.54% (negative). Net three: 145/477=30.40%.
+
+Need maybe compute “经营现金流扣除三项营运资本后?” Not necessary.
+
+Need maybe note “Other current liabilities” included with accounts payable line. The line “Accounts payable and other current liabilities” includes both; cannot separate AP vs other current liabilities. User says “应付及其他流动负债” as one. Good.
+
+Need maybe note “其他流动负债” not separated. Good.
+
+Potential issue: “简化自由现金流按经营现金流减购建固定资产现金支出毛额计算，不抵扣出售资产回款。” We should explicitly exclude sales PP&E. Mention 2025 Q3 sales PP&E +103 and 2024 +50 not deducted. Good.
+
+Need maybe mention “Capital spending” line is negative in statement; we take absolute outflow. Good.
+
+Let's draft final.
+
+Need ensure final not too terse. Use markdown tables.
+
+Let's write in Chinese.
+
+Potential challenge: The system says “不要输出隐藏思维过程”. Fine.
+
+Let's include source IDs in tables maybe [E1][E2].
+
+Detailed final:
+
+标的与数据范围:
+- “本轮仅使用E1/E2。E1为36周累计，E2为24周累计。两表同一财年起始日（2025年为2024-12-29；2024年按周数推算为2023-12-31），因此36周-24周可还原12周单季。若存在重述或合并范围变化，证据未显示。”
+Need maybe “2024期初推算” as caveat.
+
+已验证事实:
+Core table and formulas.
+
+Appendix maybe under “已验证事实” after core. But maybe too much. We'll include “（二）逐行还原附录” under 已验证事实.
+
+Need be clear which values are “已披露事实” vs “推断”. In appendix, mark “推断” rows. Maybe use footnotes.
+
+Let's formulate acquisition/divestiture note:
+“24周报表未单独列示‘Acquisition and divestiture-related charges’及对应现金支付。严格口径下不能直接还原。但36周累计已列示该项目，且已列示经营明细合计与总经营现金流之间留下+228百万美元（2025）和+3百万美元（2024）的差额，恰好等于36周新增该项目费用308/现金支付-80及7/-4的净额。因此推断单季净影响分别为+228/+3；该处理属于算术推断，不是直接披露。” Good.
+Similarly short-term investment purchases: “24周未列示‘More than three months - purchases’；按投资活动总差额推断单季流出190/425。”
+
+Need maybe not overstate “恰好等于” because it's inference. Good.
+
+Risk section: include “如果24周未列示项目并非为零，则推断值会变化；但核心OCF/FCF由总行直接相减，不受该缺口影响。” Important: OCF and FCF are from total lines, robust. Working capital items directly reconstructed. Good.
+
+Need maybe mention “合并净利润” from cash flow statement may include noncontrolling interests? PepsiCo net income likely attributable to PepsiCo? The line says Net income. We can just call consolidated net income. No need.
+
+Let's ensure final sections order exactly: 标的与数据范围 / 已验证事实 / 财务趋势与经营质量 / 风险与反向证据 / 数据缺口 / 来源. We can have subsections.
+
+Let's draft final now. Ensure no analysis. final only.

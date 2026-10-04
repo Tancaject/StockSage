@@ -1,0 +1,369 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "final-synthesis-causal-diagnostic-20260930-001",
+  "status": "COMPLETED_AI_DIAGNOSTIC",
+  "humanReviewed": false,
+  "activationAuthorized": false,
+  "productionPromptChanged": false,
+  "terminalExitCode": 0,
+  "modelCalls": {
+    "analysis": 0,
+    "final": 12
+  },
+  "model": {
+    "requested": "qwen3.7-plus",
+    "providerReturned": "qwen3.7-plus",
+    "temperature": 0.7,
+    "maxOutputTokens": 4096,
+    "timeoutSeconds": 120,
+    "retryAttempts": 1
+  },
+  "primaryMetric": "Whole answer passes source-grounded AI criteria including task coverage; not formal release rubric.",
+  "arms": {
+    "original": {
+      "answers": 6,
+      "wholeAnswerPass": 1,
+      "requiredFactsCorrect": 6,
+      "additionalNumbersCorrect": 5,
+      "coverageComplete": 4,
+      "evidenceGrounded": 1
+    },
+    "bounded_judgment": {
+      "answers": 6,
+      "wholeAnswerPass": 4,
+      "requiredFactsCorrect": 6,
+      "additionalNumbersCorrect": 5,
+      "coverageComplete": 6,
+      "evidenceGrounded": 4
+    }
+  },
+  "cases": {
+    "msft-fy2025-liquidity": {
+      "original": {
+        "answers": 3,
+        "wholeAnswerPass": 1,
+        "requiredFactsCorrect": 3,
+        "additionalNumbersCorrect": 2,
+        "coverageComplete": 1,
+        "evidenceGrounded": 1
+      },
+      "bounded_judgment": {
+        "answers": 3,
+        "wholeAnswerPass": 1,
+        "requiredFactsCorrect": 3,
+        "additionalNumbersCorrect": 2,
+        "coverageComplete": 3,
+        "evidenceGrounded": 1
+      }
+    },
+    "wmt-fy2025-cashflow": {
+      "original": {
+        "answers": 3,
+        "wholeAnswerPass": 0,
+        "requiredFactsCorrect": 3,
+        "additionalNumbersCorrect": 3,
+        "coverageComplete": 3,
+        "evidenceGrounded": 0
+      },
+      "bounded_judgment": {
+        "answers": 3,
+        "wholeAnswerPass": 3,
+        "requiredFactsCorrect": 3,
+        "additionalNumbersCorrect": 3,
+        "coverageComplete": 3,
+        "evidenceGrounded": 3
+      }
+    }
+  },
+  "usage": {
+    "original": {
+      "calls": 6,
+      "inputTokens": 21291,
+      "outputTokens": 16674,
+      "totalTokens": 37965,
+      "medianDurationMs": 50312.5,
+      "medianAnswerCharacters": 1498.5
+    },
+    "bounded_judgment": {
+      "calls": 6,
+      "inputTokens": 21021,
+      "outputTokens": 15212,
+      "totalTokens": 36233,
+      "medianDurationMs": 41714.0,
+      "medianAnswerCharacters": 1430.5
+    }
+  },
+  "monetaryCost": null,
+  "monetaryCostStatus": "UNPRICED",
+  "externalAIReviewUsage": "NOT_IN_PROJECT_MODEL_LEDGER",
+  "records": [
+    {
+      "runId": "7db0b98e-34ad-4654-a034-e48a1e54f902",
+      "caseId": "wmt-fy2025-cashflow",
+      "variant": "original",
+      "repeatId": 2,
+      "answerId": "answer-14de18d9b2ad4146b1d6afe5880f5e22",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "evidenceGrounded": false,
+      "coverageComplete": true,
+      "verdict": "ISSUES",
+      "notes": [
+        "必答金额、相减口径、65.26%比例、百万美元单位与FY2025期间均正确；额外15.4%、2.0%、-16.3%、57.68%、+7.58 pct、126.6亿美元及0.65美元均可由原表复算。",
+        "“剩余的126.6亿美元自由现金流仍可支撑其庞大的股东回报计划（如股息与回购）”：来源未披露股息、回购及其他支付承诺明细，剩余数额不能证明已覆盖该公司实际回报计划；超出允许的一般可能用途。",
+        "“无需过度依赖外部融资”：只验证了年度经营现金流覆盖指定购建支出，未核对其他投资、融资、偿债和回报安排，不能推广为整体融资依赖判断。",
+        "“资本开支大幅加速”：FY2025资本开支增速为15.42%，FY2024为22.24%（20606/16857-1），若指支出增速则实际放缓；金额增加和投资强度上升有证据，但不能混同为资本开支增速加速。",
+        "原文：这通常意味着公司正在为未来的增长“埋单”（如供应链自动化、门店改造或电商履约中心建设）。 报表没有管理层意图或投向拆分。本句将通常机制用来解释该公司的现实行为；缺口段不能将前文企业具体归因变成已证实事实。",
+        "“未考虑资产出售回款等其他投资性现金流出”：资产出售回款属于现金流入，不能归入其他投资性现金流出。"
+      ]
+    },
+    {
+      "runId": "bf7646b6-fef3-43af-8b03-b52dbb9b5bc2",
+      "caseId": "wmt-fy2025-cashflow",
+      "variant": "bounded_judgment",
+      "repeatId": 2,
+      "answerId": "answer-f48a57e6c6cc44c7874aa27cb77f2222",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "evidenceGrounded": true,
+      "coverageComplete": true,
+      "verdict": "PASS",
+      "notes": [
+        "“36,443（经营现金流） - 23,783（购建固定资产支出） = **12,660 百万美元**”与65.26%比例、FY2025期间和毛额口径正确。",
+        "FY2024的35,726、20,606、15,120及57.68%，同比2.0%、15.4%、-16.3%，126.6亿美元和剩余约35%均可由原表复算；括号中的资本开支金额明确表示现金流出，后续相减按正额支出计算正确。",
+        "“剩余的约35%（即126.6亿美元自由现金流）可用于股东回报（如股息、股票回购）或债务偿还等资本配置”：表述一般可能用途，没有断言已覆盖公司的全部实际支付承诺，按冻结判据允许。",
+        "“若未来新增资本开支（如供应链、门店改造或电商基础设施等）未能带来同步的现金流增长”：明确为未来条件假设，且另行指出具体投向拆分缺失，未把所举例子写成FY2025已披露投向。"
+      ]
+    },
+    {
+      "runId": "9da2fdd5-2f07-487e-a461-a60bca09fa91",
+      "caseId": "wmt-fy2025-cashflow",
+      "variant": "original",
+      "repeatId": 3,
+      "answerId": "answer-8d837ff6e6bf409d9d1ba595aae9de00",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "evidenceGrounded": false,
+      "coverageComplete": true,
+      "verdict": "ISSUES",
+      "notes": [
+        "必答36,443、23,783、12,660、65.26%、期间、单位及毛额计算均正确；额外FY2024数据、2.0%、15.4%、-16.3%、57.68%、151.2/126.6亿美元、约35%及0.65美元均可复算。",
+        "“趋势变化反映的战略意图”及“公司正在用当期的自由现金流（同比缩减16.3%）去换取未来的运营效率或增长空间”：公司具体战略目的与效果预期没有现金流总额以外的披露支持；总额增加只支持投资强度增加。",
+        "“这表明沃尔玛正在主动加大投资力度（通常指向供应链升级、门店改造或电商/自动化基础设施）”：投资力度增加有来源，但供应链等具体方向未披露。此处放在公司结论中，并非仅作为明确未知项或未来条件假设。随后承认缺少投向明细不能补足该归因证据。",
+        "“剩余的约35%（即126.6亿美元的自由现金流）可用于股东回报（如股息、回购）或债务偿还”：一般可能用途本身按冻结判据允许，不因这一句判为问题。"
+      ]
+    },
+    {
+      "runId": "1c161085-70f4-42f5-9d33-88abc32702d0",
+      "caseId": "wmt-fy2025-cashflow",
+      "variant": "bounded_judgment",
+      "repeatId": 3,
+      "answerId": "answer-a70f7cfdc30049f79c0c28d9573a9d78",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "evidenceGrounded": true,
+      "coverageComplete": true,
+      "verdict": "PASS",
+      "notes": [
+        "36,443、23,783、12,660和65.26%正确，覆盖FY2025、百万美元单位、经营现金流减毛额支出、不含资产出售回款且不等于净利润。",
+        "额外FY2024占比约57.7%、自由现金流151.2亿美元，FY2025自由现金流126.6亿美元，资本开支15.4%、经营现金流2.0%、自由现金流-16.3%均可由原表复算。",
+        "“剩余的126.6亿美元自由现金流可灵活用于股东回报（如股息、回购）或债务偿还”：陈述可能资本配置用途，没有承诺覆盖全部实际回报或债务计划，按冻结判据允许。",
+        "原文：当前证据中缺乏 FY2025 资本开支的具体投向明细（如供应链、门店改造、自动化或电商基础设施等）。这些仅作为缺失明细的例子，不是已证实投向；投资强度增加及自由现金流受挤压有表内变化支持。"
+      ]
+    },
+    {
+      "runId": "0b598d32-eb5b-4a05-8cf8-1013b87018af",
+      "caseId": "wmt-fy2025-cashflow",
+      "variant": "bounded_judgment",
+      "repeatId": 1,
+      "answerId": "answer-94300a400455404a98f67de11ed56db5",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "evidenceGrounded": true,
+      "coverageComplete": true,
+      "verdict": "PASS",
+      "notes": [
+        "必答金额、期间、单位、36,443-23,783=12,660、65.26%与毛额口径正确；FY2024数据及所有新增比例、同比变化和亿美元换算均与原表一致。",
+        "“剩余的126.6亿美元自由现金流可用于股东回报（如股息、回购）或债务偿还等资本配置”：仅列一般可能用途，未称实际全部支付承诺已经得到覆盖。",
+        "“若未来经营现金流未能随资本开支的落地而实现同步增长，可能会限制公司在分红、回购等方面的资本配置灵活性”：明确条件风险，不是对未披露融资或回报安排的确定判断。",
+        "“当前证据未提供FY2025资本开支的具体投向明细”：供应链等例子位于未知项中，未被断言为公司已发生的具体投入。"
+      ]
+    },
+    {
+      "runId": "e35ec47b-42d2-4c49-a34b-5a4540f2c11f",
+      "caseId": "wmt-fy2025-cashflow",
+      "variant": "original",
+      "repeatId": 1,
+      "answerId": "answer-ce65372283bd476f88d867a2acc57f9d",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "evidenceGrounded": false,
+      "coverageComplete": true,
+      "verdict": "ISSUES",
+      "notes": [
+        "必答36,443、23,783、12,660、65.26%、FY2025和百万美元口径正确；额外2.0%、15.4%、-16.3%、57.68%、每1美元投入0.65美元均可复算。经营现金流增速放缓也可由FY2023与FY2024原值支持。",
+        "“表明管理层正在加大对基础设施（如供应链、门店改造或电商履约网络等）的投入”：来源仅披露购建支出总额，没有具体方向或管理层目的；本句断言企业实际投入，不是未知项或未来条件假设。",
+        "原文：这不是一个“缺钱”的故事，而是一个管理层正在“用当期自由现金流换取未来增长”的阶段。 从指定年度经营现金流覆盖购建支出，不能推出整体资金充足，也不能确认管理层用当前现金换未来增长的战略意图。",
+        "“安全垫仍在，无需过度依赖外部融资”：来源未披露完整融资、偿债、股东回报和其他资金约束，不能从该覆盖比例直接确认整体融资依赖。"
+      ]
+    },
+    {
+      "runId": "5207944f-1739-4e00-b067-83fd76b207cb",
+      "caseId": "msft-fy2025-liquidity",
+      "variant": "bounded_judgment",
+      "repeatId": 3,
+      "answerId": "answer-82fa6526b3f14ec79acac75adcd0328f",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "evidenceGrounded": false,
+      "coverageComplete": true,
+      "verdict": "ISSUES",
+      "notes": [
+        "「本轮上下文未提供 FY2025 现金流量表，无法评估强劲的经营现金流对债务和流动负债的实际覆盖能力」一面承认现金流缺失，一面将经营现金流预设为“强劲”；资产负债表和分析稿均未证明此强弱。这是轻度但真实的无依据定性预设，并非把“无法评估覆盖能力”本身判错。",
+        "必答四项金额和流动比率均正确；额外短期投资、应收账款、总负债和单位换算匹配来源。递延收入履约仍有现金成本的限制及静态比率局限均保留；未列2,999但也未宣称全部短期有息义务为零，不因此扣分。开头“账面流动性充裕”紧接实际偿债未知限定，未单独判成整体偿债保证。"
+      ]
+    },
+    {
+      "runId": "afec1927-b541-42e5-adcc-10f48a88ed72",
+      "caseId": "msft-fy2025-liquidity",
+      "variant": "original",
+      "repeatId": 3,
+      "answerId": "answer-02b19f3ac09448968dbbe809cad89067",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "evidenceGrounded": false,
+      "coverageComplete": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「如果将这部分无需现金偿还的“良性负债”剔除，微软真实的短期刚性流动性比 1.35 展现出的更为宽裕」将递延收入全额剔除后推断真实流动性更宽裕；履约可能需要现金、所需金额未知，源分析稿明确禁止此推断。结尾再列缺口不能撤销前文判断。",
+        "「反映出其对产业链上下游极强的占款能力」从期末负债余额确认议价/占款能力，缺少账期、合同或现金流证据。",
+        "「微软正处于 AI 基础设施的资本开支高峰期」没有本题资本开支或业务投向证据；仅有资产负债表，不能确认支出周期和AI具体用途。",
+        "必答数值正确，现金占流动资产15.8%、非流动长期债务占总负债14.6%及645.55亿美元换算正确。未把短期债务为零扩成全部到期有息义务清零，但遗漏履约现金成本并按剔除后的负债结构确认健康，不满足有限度流动性判断。"
+      ]
+    },
+    {
+      "runId": "88d55810-fc78-46f2-a854-2140d8e8701c",
+      "caseId": "msft-fy2025-liquidity",
+      "variant": "bounded_judgment",
+      "repeatId": 1,
+      "answerId": "answer-7406bd8c40b2478e93ea57a97f516a4d",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": false,
+      "evidenceGrounded": false,
+      "coverageComplete": true,
+      "verdict": "ISSUES",
+      "notes": [
+        "「其他非流动负债 | 91,444」不是该标题范围的合计：总负债275,524−流动负债141,218−非流动长期债务40,152=94,154。91,444仅合计25,986+2,835+17,437+45,186，遗漏长期未确认收入2,710；列举中写“等”不能将不完整小计称为全部其他非流动负债。",
+        "「业务规模扩张带来的资金占用」把应收账款余额解释为特定业务增长原因；仅有资产负债表，没有收入或账期等拆解，无法确认这个原因。",
+        "必答四项金额和流动比率正确；其他新增合计26,661=938+25,723、76,663=141,218−64,555正确。明确保留2,999到期债务、履约现金成本和资金/到期信息缺口，没有把递延收入剔除来保证偿债安全，任务边界覆盖保留。"
+      ]
+    },
+    {
+      "runId": "2500429d-b0e9-4db0-ad68-f622406056de",
+      "caseId": "msft-fy2025-liquidity",
+      "variant": "original",
+      "repeatId": 1,
+      "answerId": "answer-37aa55d938d44fc585b1b4455914bfcb",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "evidenceGrounded": true,
+      "coverageComplete": true,
+      "verdict": "PASS",
+      "notes": [
+        "必答四项金额、总负债275,524、短期投资64,323、应收账款69,905、递延收入64,555及流动比率1.35均与来源一致；现金占比“不到16%”也正确。未列2,999但未宣称短期有息义务清零。",
+        "边界判定：「短期账面偿债无忧」「短期账面偿债能力安全」措辞偏强，但均限定“账面”，同一回答明确说明「账面有钱不等于随时能变现」、保留履约现金成本，并要求结合现金流和到期安排才能评估真实安全。依冻结口径允许有边界的静态账面覆盖判断，本评审不将这些措辞单独判作真实偿债保证。",
+        "「1.35 处于健康区间」没有行业阈值来源，本评审将其按紧邻的账面资产覆盖负债的定性简评理解，不推导未陈述的行业排名、授信或真实兑付承诺；这是本组需要保留的边界解释。"
+      ]
+    },
+    {
+      "runId": "f5facd0a-507e-4400-8133-f9b8ffa05dc0",
+      "caseId": "msft-fy2025-liquidity",
+      "variant": "bounded_judgment",
+      "repeatId": 2,
+      "answerId": "answer-3a6ca947eafe4589828bf11f5353b076",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "evidenceGrounded": true,
+      "coverageComplete": true,
+      "verdict": "PASS",
+      "notes": [
+        "必答四项金额和191,131/141,218≈1.35正确；短期投资、应收账款、总负债、递延收入及亿美元概数与原表匹配。",
+        "结论限定为「账面流动性充裕」并说明静态表不能确认绝对偿债安全；明确履约仍有现金成本、不能全额剔除递延收入，保留现金流、到期安排及变现/授信缺口。软件和云服务出现在履约举例中，不是确认新增业务归因。不主动列2,999但未作短期有息义务清零推断，按冻结规则通过。"
+      ]
+    },
+    {
+      "runId": "06b1e2c6-ec12-4158-8eea-fbd59b22fb21",
+      "caseId": "msft-fy2025-liquidity",
+      "variant": "original",
+      "repeatId": 2,
+      "answerId": "answer-401af6738c754ac5b0e6e7b0ae4b18a7",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": false,
+      "evidenceGrounded": false,
+      "coverageComplete": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「现金储备翻倍」错误：30,242/18,315=1.6512，增加约65.12%，并未翻倍。必答四项金额、1.35以及FY2024流动比率1.27本身正确。",
+        "「微软的应收账款主要来自全球企业级客户和政府采购，坏账风险极低」「短期投资也多为高流动性固收产品」缺乏客户构成、信用/账龄和投资品种明细证据。原表9.44亿美元坏账准备数值正确，不能据此确认客户结构和极低风险。",
+        "「总负债的大幅增长并非因为微软借了更多钱，而是因为其云业务（Azure）和 AI 订阅服务的预收款（递延收入）大幅增加」缺少负债变动和业务投向证据；总负债增长31,838，而长短期递延收入仅增加7,081，余额变化也不能确认Azure/AI来源。",
+        "「剔除这部分后，微软真实的金融债务压力非常轻」按递延收入剔除确认真实压力；后文又禁止剔除，形成实质矛盾。加上「整体财务底盘依然极其稳固」，超过静态表所能支持的有限度偿债判断。",
+        "「依然需要支付服务器折旧、电力和人工等现金成本」将折旧列为当期支付的现金成本；折旧是非现金费用，不能与电力、人工现金支付混为一谈。",
+        "「公司正在将大量现金转化为 AI 数据中心等重资产」将固定资产净额增长确认为现金资本开支及AI数据中心用途；仅凭净额余额变化不能排除折旧、租赁、并购等其他因素，也没有资产类别/用途拆分。"
+      ]
+    }
+  ],
+  "sourceSha256": {
+    "plan.json": "75f881663471965da88471d7e65806dcacbe2bb6b7cc25a6edf2ea7ea64248d6",
+    "diagnosis.json": "6fedd66b8aa97e8d4489389431c30fc65cee652769bb82f94e225b671802739b",
+    "execution.json": "ba10d485496881917508757c5594a21c3d98a41f08b7ac49f453139bb5330bd2",
+    "raw/responses.jsonl": "076f8f8c0bb2fb8c67dee3b8c003e0124fc5dedc992d14a6ba6cb12026d9a8dc",
+    "raw/runtime.json": "0b6b8da037ab149302faf37adb262924660814cee92021bb9b9fe85c38fc9258",
+    "review-wmt.json": "1ed9bdecb4add846e2b7972460bbec6271b67e7de6c564ed8b8e6e66253ab1da",
+    "review-msft.json": "e4f4703a694e247772746857f43c56dba272514a0961615a3b9a9f60ce5a55fb",
+    "numeric-trace-audit.json": "1d4683db247bdf62653209f486c057de1561108288932e9234bd70c13b70d2c7",
+    "driver-dependencies.json": "48389f77b928050b8859b11b7e671b06d7f0caf8438574fb431d02dbd455d16e",
+    "retained-driver.json": "eac9da32e40c2dc0d1d0b75180bd2845450b586f7df4b284f9f677725cef4845"
+  },
+  "sensitivity": [
+    {
+      "description": "Treat WMT answer-8d837ff6e6bf409d9d1ba595aae9de00 business-intent interpretation as permissible despite main review; control-favorable post-hoc robustness check, original reviews unchanged.",
+      "overrideAnswerId": "answer-8d837ff6e6bf409d9d1ba595aae9de00",
+      "originalWholeAnswerPass": 2,
+      "boundedWholeAnswerPass": 4
+    },
+    {
+      "description": "Treat MSFT answer-82fa6526b3f14ec79acac75adcd0328f unsupported strong-CFO adjective as nonmaterial; original reviews unchanged.",
+      "overrideAnswerId": "answer-82fa6526b3f14ec79acac75adcd0328f",
+      "originalWholeAnswerPass": 1,
+      "boundedWholeAnswerPass": 5
+    }
+  ],
+  "findings": [
+    {
+      "claim": "Mandatory-judgment policy group has evidence of causal contribution to unsupported synthesis in selected WMT case.",
+      "basis": "Frozen all other messages and same model/options/build; same-batch sequential control 0/3 vs bounded 3/3, coverage retained.",
+      "scope": "Five-rule package, two selected cases, no population or single-sentence causality claim."
+    },
+    {
+      "claim": "The intervention is insufficient to solve all final synthesis faults.",
+      "basis": "MSFT whole-answer pass remains1/3 for each arm; bounded outputs still add wrong liability subtotal or unsupported CFO adjective."
+    },
+    {
+      "claim": "Arithmetic/accounting fidelity is a separate observed failure boundary.",
+      "basis": "Three earlier analyst errors have visible operands; two copied to final. New MSFT bounded final also adds an incorrect subtotal; extra numeric accuracy remains5/6 per arm."
+    },
+    {
+      "claim": "RAG ingestion/retrieval is not exercised by this diagnostic.",
+      "basis": "Frozen report snippets and saved messages supplied directly; online RAG health untested."
+    }
+  ],
+  "limitations": [
+    "Purposively selected two failed final cases; diagnostic not population benchmark.",
+    "One policy group, prompt length also changes; cannot attribute effect to one sentence.",
+    "No model-comparison or RAG validation; no model-weight causal claim.",
+    "No holdout/validation cases; no new fundamentals candidate or production change.",
+    "Randomized realized order executes WMT blocks then MSFT blocks; all MSFT pairs happen to run original before intervention. Not strictly order-balanced.",
+    "AI reviewers see opaque answers without mapping, but prior task context remains; not formal independent blind review.",
+    "Current experiment isolates system-policy group; no model replacement, temperature ablation or training-capacity conclusion."
+  ]
+}

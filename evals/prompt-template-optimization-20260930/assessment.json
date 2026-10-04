@@ -1,0 +1,282 @@
+{
+  "schemaVersion": 1,
+  "status": "SCOPED_IMPLEMENTATION_VERIFIED_WITH_RESIDUAL_SEMANTIC_FAILURES",
+  "reviewType": "NON_BLIND_AI_SMOKE_NOT_FORMAL_ACCEPTANCE",
+  "totalModelCalls": 20,
+  "totalProviderTokens": 39866,
+  "moneyCost": null,
+  "moneyCostStatus": "UNPRICED",
+  "selectedTemplateCapture": "capture-after.json",
+  "selectedTemplateCaptureSha256": "a5ec0fb459fa3851be3bc8528e32ba2e7a02132510b418da1f8a697f2ffb87a2",
+  "selectedNewsRevision": "INITIAL_EDIT_NO_EXTRA_SENTENCE",
+  "selectionReason": "The longer news instruction did not reliably remove unsupported project inferences; retain the smaller concrete responsibility/time/verification correction. No stable efficacy gain claimed.",
+  "finalSourceAndClassFingerprintsMatchInitialEditedCapture": true,
+  "finalRulesMatchPriorFrozenFiveRuleIntervention": true,
+  "checks": {
+    "scopedTests": {
+      "passed": 62,
+      "log": "../../stocksage-backend/target/verification-prompt-template-focused-20260930.log"
+    },
+    "extraNewsRuleTests": {
+      "passed": 23,
+      "log": "../../stocksage-backend/target/verification-prompt-news-refinement-20260930.log"
+    },
+    "selectedFinalCompile": {
+      "status": "PASSED",
+      "log": "../../stocksage-backend/target/verification-prompt-final-compile-20260930.log"
+    }
+  },
+  "results": {
+    "auxiliaryReview": "review-auxiliary.json",
+    "fundamentalsReview": "review-fundamentals.json",
+    "coverageClarification": "criteria-clarification-fundamentals.json",
+    "newsRefinementReview": "news-refinement/review.json"
+  },
+  "stages": [
+    {
+      "path": "raw",
+      "calls": 16,
+      "totalTokens": 30435,
+      "planSha256": "ef3e12119ddc4812da039199674384d61903349c10c4089cdb6cb64ea46c558d",
+      "runtimeSha256": "081711d4a554c2a569a1fd3e44dafba7364780926b70084de759f89585312f96",
+      "usage": [
+        {
+          "callId": "449e1c6e-a5e2-44b8-bae2-cd76d65cf749",
+          "caseId": "rewrite-comparison-exclusion",
+          "arm": "before",
+          "actualModel": "qwen3.8-flash",
+          "inputTokens": 214,
+          "outputTokens": 261,
+          "totalTokens": 475,
+          "elapsedMs": 5122,
+          "responseSha256": "203c587e8a262a4d75038d9a87f43171c0d66754cc89dc7aea536fec63720279"
+        },
+        {
+          "callId": "6b2c391a-5f9a-4868-ad72-4f61055cfdf8",
+          "caseId": "rewrite-comparison-exclusion",
+          "arm": "after",
+          "actualModel": "qwen3.8-flash",
+          "inputTokens": 253,
+          "outputTokens": 284,
+          "totalTokens": 537,
+          "elapsedMs": 6083,
+          "responseSha256": "7bfda585e23c081c903330fa5dc192fe052a90f9fd152ac0c09a1f2c85610920"
+        },
+        {
+          "callId": "0c231e1b-2a95-490d-8dd1-13d413715c18",
+          "caseId": "summary-correction-uncertainty",
+          "arm": "after",
+          "actualModel": "qwen3.8-flash",
+          "inputTokens": 252,
+          "outputTokens": 397,
+          "totalTokens": 649,
+          "elapsedMs": 6875,
+          "responseSha256": "8c25985e69b505b7bbd1145ff87550352edf8dc67889ce76bdaeb7f2c9c623e5"
+        },
+        {
+          "callId": "054f5f28-b299-4ea6-836c-ff556cb2290c",
+          "caseId": "summary-correction-uncertainty",
+          "arm": "before",
+          "actualModel": "qwen3.8-flash",
+          "inputTokens": 184,
+          "outputTokens": 305,
+          "totalTokens": 489,
+          "elapsedMs": 5428,
+          "responseSha256": "5dd660f8d778a42e896a524fae10b1ee3a9793242c7afb78870a285093278059"
+        },
+        {
+          "callId": "aa7cdafe-febf-4cd2-a0e2-a1907fcb8cda",
+          "caseId": "profile-assistant-suggestion",
+          "arm": "before",
+          "actualModel": "qwen3.8-flash",
+          "inputTokens": 216,
+          "outputTokens": 253,
+          "totalTokens": 469,
+          "elapsedMs": 3691,
+          "responseSha256": "28f9ff8197ca2f0d055a75b81cf40256746020dc636941b8a2c73f76b2b489ff"
+        },
+        {
+          "callId": "5146cd17-5d05-4ad9-ac90-45ec5f1f391d",
+          "caseId": "profile-assistant-suggestion",
+          "arm": "after",
+          "actualModel": "qwen3.8-flash",
+          "inputTokens": 295,
+          "outputTokens": 246,
+          "totalTokens": 541,
+          "elapsedMs": 3759,
+          "responseSha256": "e061f50231923f648d180c5e404517a42e657c1a6d6ec09dde6368d8c3f4b1fe"
+        },
+        {
+          "callId": "5d41e341-1cd3-4580-aac0-90d25490ff16",
+          "caseId": "title-financial-topic",
+          "arm": "after",
+          "actualModel": "qwen3.8-flash",
+          "inputTokens": 208,
+          "outputTokens": 287,
+          "totalTokens": 495,
+          "elapsedMs": 4731,
+          "responseSha256": "16fa08a98414f37f81564f1b5d321de42af3e6736c82a11d26426d2ff5f5202e"
+        },
+        {
+          "callId": "53a5b037-d729-45ee-9095-89073cc181da",
+          "caseId": "title-financial-topic",
+          "arm": "before",
+          "actualModel": "qwen3.8-flash",
+          "inputTokens": 181,
+          "outputTokens": 209,
+          "totalTokens": 390,
+          "elapsedMs": 3908,
+          "responseSha256": "c699c96f0547b4423a48d1300579d5ff222bb8ddbd71e85a0546cc58a4e7715e"
+        },
+        {
+          "callId": "f4df4576-8a05-4752-8754-c8a6c5ace992",
+          "caseId": "news-snippet-missing-event-time",
+          "arm": "before",
+          "actualModel": "qwen3.7-plus",
+          "inputTokens": 605,
+          "outputTokens": 1881,
+          "totalTokens": 2486,
+          "elapsedMs": 32846,
+          "responseSha256": "0eb3b9cd2e2bacf77e17d333895f23eddc38988b442408740795ed2bf9c2c3fc"
+        },
+        {
+          "callId": "df596635-f9e7-4884-913e-9a4ca1a4b285",
+          "caseId": "news-snippet-missing-event-time",
+          "arm": "after",
+          "actualModel": "qwen3.7-plus",
+          "inputTokens": 685,
+          "outputTokens": 1445,
+          "totalTokens": 2130,
+          "elapsedMs": 25129,
+          "responseSha256": "99d4439ab77133310079a8f230bb621fdbdc9ae396f796d3d09560c252fc9073"
+        },
+        {
+          "callId": "28a9a743-a353-4e2f-97b9-f400f89d61f1",
+          "caseId": "replan-financial-gap-stop",
+          "arm": "after",
+          "actualModel": "qwen3.8-flash",
+          "inputTokens": 464,
+          "outputTokens": 326,
+          "totalTokens": 790,
+          "elapsedMs": 4780,
+          "responseSha256": "3fbc0d4e40e4721aa1a675d03c8372caab860389262c976adba5c20d3ed52706"
+        },
+        {
+          "callId": "331b3638-a703-48a6-b8c1-053397821ed1",
+          "caseId": "replan-financial-gap-stop",
+          "arm": "before",
+          "actualModel": "qwen3.8-flash",
+          "inputTokens": 405,
+          "outputTokens": 313,
+          "totalTokens": 718,
+          "elapsedMs": 10213,
+          "responseSha256": "bad08d82fbf747b6f7bc919b5ad5f808b3a835b0790287ec5b9567c3a9e205cd"
+        },
+        {
+          "callId": "51dc2dd0-688c-4b34-bb01-9ae63cfb2d29",
+          "caseId": "fundamentals-msft-fy2025-liquidity",
+          "arm": "before",
+          "actualModel": "qwen3.7-plus",
+          "inputTokens": 2597,
+          "outputTokens": 3344,
+          "totalTokens": 5941,
+          "elapsedMs": 57587,
+          "responseSha256": "2a0b2a0ccd8d2ecae48fb3b8af0a9e1ea6928687265563f9dab6688d31d437f9"
+        },
+        {
+          "callId": "f6e1557f-7151-42ac-8a70-31fe76c03f5c",
+          "caseId": "fundamentals-msft-fy2025-liquidity",
+          "arm": "after",
+          "actualModel": "qwen3.7-plus",
+          "inputTokens": 2601,
+          "outputTokens": 3421,
+          "totalTokens": 6022,
+          "elapsedMs": 58607,
+          "responseSha256": "c57fcd53487d0f94a8032532145514898c72b35a6b3d17966bb84d4664dc93f9"
+        },
+        {
+          "callId": "5343bef2-d56f-4852-ad80-b278e64dde12",
+          "caseId": "fundamentals-wmt-fy2025-cashflow",
+          "arm": "after",
+          "actualModel": "qwen3.7-plus",
+          "inputTokens": 1454,
+          "outputTokens": 2706,
+          "totalTokens": 4160,
+          "elapsedMs": 46709,
+          "responseSha256": "b7204f23e7d21cfef05e9210198e87704caf2d8629cb027828427b0ffdb02241"
+        },
+        {
+          "callId": "87a3cd19-a4f8-43bd-afaa-b35776d7e85f",
+          "caseId": "fundamentals-wmt-fy2025-cashflow",
+          "arm": "before",
+          "actualModel": "qwen3.7-plus",
+          "inputTokens": 1450,
+          "outputTokens": 2693,
+          "totalTokens": 4143,
+          "elapsedMs": 46511,
+          "responseSha256": "a8f2b4ab12e2df6ac7a25944eda083a800a8ce5a550b55b3b516d68506126b9c"
+        }
+      ]
+    },
+    {
+      "path": "news-refinement/raw",
+      "calls": 4,
+      "totalTokens": 9431,
+      "planSha256": "56b38912172fd99bb8cbe8757654ab594ecf93067414b56dafb57509fba63e30",
+      "runtimeSha256": "89e7d39174713ea9cc303b9b2549f461b3543abbe5fa44ab7239e0f69fc3f86e",
+      "usage": [
+        {
+          "callId": "a7e6df37-a814-48fd-ae0e-8162126f509c",
+          "caseId": "news-snippet-missing-event-time",
+          "arm": "before",
+          "actualModel": "qwen3.7-plus",
+          "inputTokens": 685,
+          "outputTokens": 1765,
+          "totalTokens": 2450,
+          "elapsedMs": 31741,
+          "responseSha256": "297722e0c4bf583070b161b036c547cfed415574271288f7ad0f34a2fdd01eb9"
+        },
+        {
+          "callId": "063a44f6-4896-4a4d-961b-3ff809a16843",
+          "caseId": "news-snippet-missing-event-time",
+          "arm": "after",
+          "actualModel": "qwen3.7-plus",
+          "inputTokens": 726,
+          "outputTokens": 1419,
+          "totalTokens": 2145,
+          "elapsedMs": 25536,
+          "responseSha256": "46c09e8c520a27675f627142a79e455b29e0cce5c117b837649629121785c888"
+        },
+        {
+          "callId": "29a205a6-67e1-4d4c-b325-b1b90033014b",
+          "caseId": "news-complete-announcement-control",
+          "arm": "after",
+          "actualModel": "qwen3.7-plus",
+          "inputTokens": 778,
+          "outputTokens": 1615,
+          "totalTokens": 2393,
+          "elapsedMs": 28016,
+          "responseSha256": "f83757e92bad38e842a2fbaabbd7939c2c7f0120de150059a84c9b2cd94bc2f9"
+        },
+        {
+          "callId": "5ac48aed-68c9-401c-87a4-fbc3ec0de8c7",
+          "caseId": "news-complete-announcement-control",
+          "arm": "before",
+          "actualModel": "qwen3.7-plus",
+          "inputTokens": 737,
+          "outputTokens": 1706,
+          "totalTokens": 2443,
+          "elapsedMs": 29718,
+          "responseSha256": "aac2014948316f7ea131add81da7fb7b4fcfadf7a838291630d19491ae3524a9"
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "One sample per arm and case; cannot establish stable effect or statistical improvement",
+    "Fundamentals coverage criteria were clarified from actual questions before reviewing outputs; original captures remain intact",
+    "Semantic reviews are AI and non-blind, not independent signed acceptance",
+    "No production deployment, RAG retrieval/ingestion, storage persistence or full conversation flow evaluation",
+    "No validation/holdout execution or release/activation authorization"
+  ]
+}

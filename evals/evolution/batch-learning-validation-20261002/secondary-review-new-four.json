@@ -1,0 +1,3974 @@
+{
+  "schema": "fundamentals_independent_source_review_v1",
+  "reviewer": "Codex /root/batch_stage_review; not a dataset author",
+  "reviewType": "AI_SOURCE_CHECKED",
+  "humanReviewed": false,
+  "releaseEligible": false,
+  "reviewedAt": "2026-10-02T13:18:47.807639+00:00",
+  "scope": "Independent source review of fixed development-07..10 only; no other review output was read and no model API was called.",
+  "reviewPolicySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+  "rubricSha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+  "sourceCasesFileSha256": "1260c579bae043263d3c1ac88cdd2663186ccf6a34d38c7cffcd9dcffceeb145",
+  "goldFileSha256": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+  "plannedCases": 4,
+  "plannedStages": 8,
+  "completedAnswerStages": 4,
+  "summary": {
+    "stagePass": 2,
+    "stageFail": 2,
+    "stageNoData": 4,
+    "analysisMethodFailureCases": [
+      "ibm-fy2025q3-oneoff-cash-comparability"
+    ],
+    "executionFailureCases": [
+      "jnj-fy2025q3-cash-deployment-bridge",
+      "tgt-fy2025q3-liquidity-cash-synthesis"
+    ]
+  },
+  "numericPolicyNote": "Required values use frozen gold units/tolerance. Additional arithmetic is calculated with Decimal and checked in its explicitly displayed unit at absolute tolerance0.01; no failure is assigned for the adjusted -4.61 percentage-point result whose error is within0.01.",
+  "cases": [
+    {
+      "caseId": "ibm-fy2025q3-oneoff-cash-comparability",
+      "runId": "development-07-1-1",
+      "sourceCaseSha256": "f2837a7340885004b8fb8f125c86a42dc5706079aa253ebb1739921e00e2dcc8",
+      "sourceCaseRecordSha256": "f2837a7340885004b8fb8f125c86a42dc5706079aa253ebb1739921e00e2dcc8",
+      "goldRecordSha256": "7800765b8f94eaedcb937b11d180422098f16064e53a24b3ee7aa7b0178ee4b9",
+      "executionFileSha256": "164ed7a58d36f016065c4efdbd385bb8740e6983990d33ebe6669e37aac35633",
+      "reportPath": "evals\\evolution\\batch-learning-validation-20261002\\raw-development-07\\baseline-v1.report.json",
+      "reportSha256": "931edd72b39d67b9226afe5ad2c1a3b48a11c50c791a9352bc12cab0977776af",
+      "rawResponsePath": "evals\\evolution\\batch-learning-validation-20261002\\raw-development-07\\development-07-1-1.response.json",
+      "rawResponseSha256": "74949e92611d42b76ef426b4207daaccbe73e08ae022aae5f464574a63fe3567",
+      "executionStatus": "COMPLETED",
+      "executionErrorCode": null,
+      "analystStatus": "COMPLETED",
+      "taskOutcome": "COMPLETED",
+      "inputBindingErrors": [],
+      "sourceQuotes": {
+        "period": {
+          "evidenceId": "E1",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,",
+          "visibleTextSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        },
+        "units": {
+          "evidenceId": "E1",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024",
+          "visibleTextSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        },
+        "income": {
+          "evidenceId": "E1",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109",
+          "visibleTextSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        },
+        "ocf": {
+          "evidenceId": "E1",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115",
+          "visibleTextSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        },
+        "pension": {
+          "evidenceId": "E1",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "quote": "Pension Settlement Charge |  | - |  | 2,725 |  | - |  | 2,725",
+          "visibleTextSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        },
+        "tax": {
+          "evidenceId": "E1",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "quote": "(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter.",
+          "visibleTextSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        },
+        "other": {
+          "evidenceId": "E1",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "quote": "Operating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)",
+          "visibleTextSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        },
+        "financingAR": {
+          "evidenceId": "E1",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "quote": "IBM Financing A/R |  | 298 |  | 873 |  | 905 |  | 1,824",
+          "visibleTextSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        }
+      },
+      "stages": {
+        "analysis": {
+          "verdict": "FAIL",
+          "classification": "METHOD_ERROR",
+          "binding": {
+            "id": "ibm-fy2025q3-oneoff-cash-comparability@1",
+            "scope": "FUNDAMENTALS_ANALYSIS",
+            "rubricSha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+            "caseSha256": "af643e6dc34134a966ffbbead28cff140c8586b8943f17678a3c30c5e7fe2125",
+            "answerSha256": "edca021d873167b09638ca0a0921661260afb910527c887a2687f04377a12931",
+            "promptSha256": "76d7723c9f9f97459df5c5fc64d107237fc9b170a46aaed761bd84b5a379b1cb",
+            "contextSha256": "9d5416f83d49934f1b4aeeb320f2c0532f3d89b61dcf41804ded4633ec5a8a11",
+            "evidenceSha256": "6970093ee7dafa33fe6949b7400f077104b529d8e91b68740a163a12980f6874",
+            "modelName": "qwen3.8-max",
+            "modelTier": "STANDARD",
+            "invocationSha256": "f1bae4672b1b47a2f65b9841d14b73922f2c56e551f002ed78287f69f0b25e25"
+          },
+          "bindingErrors": [],
+          "status": "COMPLETED",
+          "durationMs": 220137,
+          "answerSha256": "edca021d873167b09638ca0a0921661260afb910527c887a2687f04377a12931",
+          "requiredFacts": [
+            {
+              "field": "illustrativeAdjustedNetIncome2025",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "illustrativeAdjustedNetIncome2025",
+                "value": "5293.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-01-01/2025-09-30"
+              },
+              "observedValue": "5293",
+              "observedUnit": "million",
+              "observedPeriod": "2025-01-01/2025-09-30",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "| 示意调整后净利润 | 5,293 | 5,134 |"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "field": "illustrativeAdjustedNetIncome2024",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "illustrativeAdjustedNetIncome2024",
+                "value": "5134.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-01-01/2024-09-30"
+              },
+              "observedValue": "5134",
+              "observedUnit": "million",
+              "observedPeriod": "2024-01-01/2024-09-30",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "| 示意调整后净利润 | 5,293 | 5,134 |"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "field": "illustrativeAdjustedCashConversion2025",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "illustrativeAdjustedCashConversion2025",
+                "value": "1.7293",
+                "unit": "ratio",
+                "currency": "N/A",
+                "period": "2025-01-01/2025-09-30"
+              },
+              "observedValue": "1.73",
+              "observedUnit": "ratio",
+              "observedPeriod": "2025-01-01/2025-09-30",
+              "absoluteError": "0.0007",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "| **披露经营现金流 / 示意调整后净利润，比率** | **1.73** | **1.78** |"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "field": "illustrativeAdjustedCashConversion2024",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "illustrativeAdjustedCashConversion2024",
+                "value": "1.7754",
+                "unit": "ratio",
+                "currency": "N/A",
+                "period": "2024-01-01/2024-09-30"
+              },
+              "observedValue": "1.78",
+              "observedUnit": "ratio",
+              "observedPeriod": "2024-01-01/2024-09-30",
+              "absoluteError": "0.0046",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "| **披露经营现金流 / 示意调整后净利润，比率** | **1.73** | **1.78** |"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "field": "reportedCashConversion2025",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "reportedCashConversion2025",
+                "value": "1.8332",
+                "unit": "ratio",
+                "currency": "N/A",
+                "period": "2025-01-01/2025-09-30"
+              },
+              "observedValue": "1.83",
+              "observedUnit": "ratio",
+              "observedPeriod": "2025-01-01/2025-09-30",
+              "absoluteError": "0.0032",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "| **经营现金流 / 净利润，比率** | **1.83** | **2.93** |"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "field": "reportedCashConversion2024",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "reportedCashConversion2024",
+                "value": "2.9318",
+                "unit": "ratio",
+                "currency": "N/A",
+                "period": "2024-01-01/2024-09-30"
+              },
+              "observedValue": "2.93",
+              "observedUnit": "ratio",
+              "observedPeriod": "2024-01-01/2024-09-30",
+              "absoluteError": "0.0018",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "| **经营现金流 / 净利润，比率** | **1.83** | **2.93** |"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "status": "PASS",
+              "answerQuotes": [
+                "| **经营现金流 / 净利润，比率** | **1.83** | **2.93** |",
+                "2025年前三季度",
+                "2024年前三季度"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "income",
+                "ocf"
+              ],
+              "reason": "The two nine-month columns and original OCF/income ratios are correct."
+            },
+            {
+              "id": "p2",
+              "status": "PASS",
+              "answerQuotes": [
+                "5,134",
+                "5,293",
+                "-700百万美元",
+                "+300"
+              ],
+              "sourceQuoteRefs": [
+                "income",
+                "pension",
+                "tax"
+              ],
+              "reason": "Required illustrative net income uses the correct pension/tax signs and amounts in million USD; separate contradictory Chinese-unit claims are checked below."
+            },
+            {
+              "id": "p3",
+              "status": "PASS",
+              "answerQuotes": [
+                "经营现金流保持披露值",
+                "| **披露经营现金流 / 示意调整后净利润，比率** | **1.73** | **1.78** |"
+              ],
+              "sourceQuoteRefs": [
+                "ocf",
+                "income",
+                "pension",
+                "tax"
+              ],
+              "reason": "Keeps reported OCF unchanged and computes both illustrative ratios; does not call the addback newly generated cash."
+            },
+            {
+              "id": "p4",
+              "status": "PASS",
+              "answerQuotes": [
+                "不是公司披露的调整后指标",
+                "略低",
+                "约数"
+              ],
+              "sourceQuoteRefs": [
+                "tax",
+                "other",
+                "financingAR"
+              ],
+              "reason": "Retains limited scope, approximate tax inputs and the small remaining decline; no blanket future-quality guarantee."
+            }
+          ],
+          "additionalNumericChecks": [
+            {
+              "label": "OCF2025",
+              "expression": "source amount",
+              "expectedValue": "9153",
+              "expectedRoundedTwoDecimals": "9153.00",
+              "observedValue": "9153",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "9,153",
+              "sourceQuoteRefs": [
+                "ocf"
+              ]
+            },
+            {
+              "label": "OCF2024",
+              "expression": "source amount",
+              "expectedValue": "9115",
+              "expectedRoundedTwoDecimals": "9115.00",
+              "observedValue": "9115",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "9,115",
+              "sourceQuoteRefs": [
+                "ocf"
+              ]
+            },
+            {
+              "label": "income2025",
+              "expression": "source amount",
+              "expectedValue": "4993",
+              "expectedRoundedTwoDecimals": "4993.00",
+              "observedValue": "4993",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "4,993",
+              "sourceQuoteRefs": [
+                "income"
+              ]
+            },
+            {
+              "label": "income2024",
+              "expression": "source amount",
+              "expectedValue": "3109",
+              "expectedRoundedTwoDecimals": "3109.00",
+              "observedValue": "3109",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "3,109",
+              "sourceQuoteRefs": [
+                "income"
+              ]
+            },
+            {
+              "label": "pension2024",
+              "expression": "source amount",
+              "expectedValue": "2725",
+              "expectedRoundedTwoDecimals": "2725.00",
+              "observedValue": "2725",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "2,725",
+              "sourceQuoteRefs": [
+                "pension"
+              ]
+            },
+            {
+              "label": "taxBenefit2024Million",
+              "expression": "source amount",
+              "expectedValue": "700",
+              "expectedRoundedTwoDecimals": "700.00",
+              "observedValue": "700",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "700",
+              "sourceQuoteRefs": [
+                "tax"
+              ]
+            },
+            {
+              "label": "taxCharge2025Million",
+              "expression": "source amount",
+              "expectedValue": "300",
+              "expectedRoundedTwoDecimals": "300.00",
+              "observedValue": "300",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "300",
+              "sourceQuoteRefs": [
+                "tax"
+              ]
+            },
+            {
+              "label": "taxBenefitWrongYiDollarUnit",
+              "expression": "0.7 billion USD = 700 million USD",
+              "expectedValue": "700",
+              "expectedRoundedTwoDecimals": "700.00",
+              "observedValue": "70",
+              "unit": "million USD",
+              "absoluteError": "630",
+              "absoluteTolerance": "0.01",
+              "status": "FAIL",
+              "answerQuote": "0.7亿美元**，即约 **700百万美元",
+              "sourceQuoteRefs": [
+                "tax"
+              ],
+              "normalization": "0.7 亿美元 × 100 million/亿美元 = 70 million USD; the same sentence contradicts its later correct 700 million equivalent."
+            },
+            {
+              "label": "taxChargeWrongYiDollarUnit",
+              "expression": "0.3 billion USD = 300 million USD",
+              "expectedValue": "300",
+              "expectedRoundedTwoDecimals": "300.00",
+              "observedValue": "30",
+              "unit": "million USD",
+              "absoluteError": "270",
+              "absoluteTolerance": "0.01",
+              "status": "FAIL",
+              "answerQuote": "0.3亿美元**，即约 **300百万美元",
+              "sourceQuoteRefs": [
+                "tax"
+              ],
+              "normalization": "0.3 亿美元 × 100 million/亿美元 = 30 million USD; correct Chinese amount is 3 亿美元."
+            },
+            {
+              "label": "reported2025Percent",
+              "expression": "9153/4993*100",
+              "expectedValue": "183.3166433006208692169036651",
+              "expectedRoundedTwoDecimals": "183.32",
+              "observedValue": "183.34",
+              "unit": "percent",
+              "absoluteError": "0.0233566993791307830963349",
+              "absoluteTolerance": "0.01",
+              "status": "FAIL",
+              "answerQuote": "183.34%",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "reported2024Percent",
+              "expression": "9115/3109*100",
+              "expectedValue": "293.1810871662914120295915085",
+              "expectedRoundedTwoDecimals": "293.18",
+              "observedValue": "293.18",
+              "unit": "percent",
+              "absoluteError": "0.0010871662914120295915085",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "293.18%",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "reportedRatioChange",
+              "expression": "9153/4993-9115/3109",
+              "expectedValue": "-1.098644438656705428126878434",
+              "expectedRoundedTwoDecimals": "-1.10",
+              "observedValue": "-1.10",
+              "unit": "ratio",
+              "absoluteError": "0.001355561343294571873121566",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-1.10",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "reportedPercentagePointChange",
+              "expression": "(9153/4993-9115/3109)*100",
+              "expectedValue": "-109.8644438656705428126878434",
+              "expectedRoundedTwoDecimals": "-109.86",
+              "observedValue": "-109.84",
+              "unit": "percentage point",
+              "absoluteError": "0.0244438656705428126878434",
+              "absoluteTolerance": "0.01",
+              "status": "FAIL",
+              "answerQuote": "-109.84个百分点",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "adjusted2025Percent",
+              "expression": "9153/5293*100",
+              "expectedValue": "172.9265067069714717551483091",
+              "expectedRoundedTwoDecimals": "172.93",
+              "observedValue": "172.93",
+              "unit": "percent",
+              "absoluteError": "0.0034932930285282448516909",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "172.93%",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf",
+                "tax"
+              ]
+            },
+            {
+              "label": "adjusted2024Percent",
+              "expression": "9115/5134*100",
+              "expectedValue": "177.5418776782236073237241917",
+              "expectedRoundedTwoDecimals": "177.54",
+              "observedValue": "177.54",
+              "unit": "percent",
+              "absoluteError": "0.0018776782236073237241917",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "177.54%",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "label": "adjustedRatioChange",
+              "expression": "9153/5293-9115/5134",
+              "expectedValue": "-0.046153709712521355685758826",
+              "expectedRoundedTwoDecimals": "-0.05",
+              "observedValue": "-0.05",
+              "unit": "ratio",
+              "absoluteError": "0.003846290287478644314241174",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-0.05",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "label": "adjustedPercentagePointChange",
+              "expression": "(9153/5293-9115/5134)*100",
+              "expectedValue": "-4.615370971252135568575882600",
+              "expectedRoundedTwoDecimals": "-4.62",
+              "observedValue": "-4.61",
+              "unit": "percentage point",
+              "absoluteError": "0.005370971252135568575882600",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-4.61个百分点",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "label": "OCFIncrease",
+              "expression": "9153-9115",
+              "expectedValue": "38",
+              "expectedRoundedTwoDecimals": "38.00",
+              "observedValue": "38",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "38百万美元",
+              "sourceQuoteRefs": [
+                "ocf"
+              ]
+            },
+            {
+              "label": "OCFGrowthPercent",
+              "expression": "(9153/9115-1)*100",
+              "expectedValue": "0.416895227646736149204607800",
+              "expectedRoundedTwoDecimals": "0.42",
+              "observedValue": "0.42",
+              "unit": "percent",
+              "absoluteError": "0.003104772353263850795392200",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "0.42%",
+              "sourceQuoteRefs": [
+                "ocf"
+              ]
+            },
+            {
+              "label": "reportedRelativeChange",
+              "expression": "((9153/4993)/(9115/3109)-1)*100",
+              "expectedValue": "-37.47323707936036397198535438",
+              "expectedRoundedTwoDecimals": "-37.47",
+              "observedValue": "-37.47",
+              "unit": "percent",
+              "absoluteError": "0.00323707936036397198535438",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-37.47%",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "adjustedRelativeChange",
+              "expression": "((9153/5293)/(9115/5134)-1)*100",
+              "expectedValue": "-2.599595673769442019645483410",
+              "expectedRoundedTwoDecimals": "-2.60",
+              "observedValue": "-2.60",
+              "unit": "percent",
+              "absoluteError": "0.000404326230557980354516590",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-2.60%",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "label": "adjustedIncomeIncrease",
+              "expression": "5293-5134",
+              "expectedValue": "159",
+              "expectedRoundedTwoDecimals": "159.00",
+              "observedValue": "159",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "159百万美元",
+              "sourceQuoteRefs": [
+                "income",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "label": "adjustedIncomeGrowth",
+              "expression": "(5293/5134-1)*100",
+              "expectedValue": "3.097000389559797428905337000",
+              "expectedRoundedTwoDecimals": "3.10",
+              "observedValue": "3.10",
+              "unit": "percent",
+              "absoluteError": "0.002999610440202571094663000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "3.10%",
+              "sourceQuoteRefs": [
+                "income",
+                "pension",
+                "tax"
+              ]
+            }
+          ],
+          "materialClaimChecks": [
+            {
+              "label": "Accounting interpretation",
+              "status": "PASS",
+              "answerQuotes": [
+                "养老金结算费用",
+                "机械抬高",
+                "经营现金流保持披露值"
+              ],
+              "sourceQuoteRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ],
+              "reason": "The pension adjustment is an explicit reconciliation item. Holding cash unchanged and normalizing the denominator explains most of the gap; this is a bounded accounting comparison, not an invented commercial cause."
+            },
+            {
+              "label": "Counterevidence and limits",
+              "status": "PASS",
+              "answerQuotes": [
+                "经营现金流本身并未下降",
+                "不是公司披露的调整后指标",
+                "约数",
+                "营运资本"
+              ],
+              "sourceQuoteRefs": [
+                "ocf",
+                "tax",
+                "other",
+                "financingAR"
+              ],
+              "reason": "Acknowledges flat/up OCF, finite adjustments and missing detailed operating/tax explanations. Dates, issuer and source identity agree with frozen evidence."
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "status": "PASS",
+              "reason": "Source-backed accounting comparison with the requested counterevidence and limits."
+            },
+            "numeric_period_correctness": {
+              "status": "FAIL",
+              "reason": "Additional reported percentage-point change is wrong; analysis also contains two factor-ten monetary-unit contradictions and an incorrect raw percentage. Required gold values themselves pass."
+            },
+            "counterevidence": {
+              "status": "PASS",
+              "reason": "Source-backed accounting comparison with the requested counterevidence and limits."
+            },
+            "unknowns": {
+              "status": "PASS",
+              "reason": "Source-backed accounting comparison with the requested counterevidence and limits."
+            }
+          },
+          "coverage": "Read the entire saved answer, including every table, repeated numeric statement, explanation, limitations and source section. Repeated identical claims share a check below.",
+          "failedAdditionalNumericLabels": [
+            "taxBenefitWrongYiDollarUnit",
+            "taxChargeWrongYiDollarUnit",
+            "reported2025Percent",
+            "reportedPercentagePointChange"
+          ]
+        },
+        "finalAnswer": {
+          "verdict": "FAIL",
+          "classification": "FINAL_NUMERIC_ERROR",
+          "binding": {
+            "id": "ibm-fy2025q3-oneoff-cash-comparability@1",
+            "scope": "FINAL_ANSWER",
+            "rubricSha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+            "caseSha256": "0d91d314060958ef2a60230e9fc434083e8d603bc0f6bfa84f62cbeebc71280a",
+            "answerSha256": "094b9e79e6fbc514b1d7a9026c847bb8e6190c9a32eb8b8a085c6b228f74f220",
+            "promptSha256": "6503664fa2f43de159c6b749ab90eb9ab120d0add57bb9b48410ae1d1fb0ee5f",
+            "contextSha256": "7a05320c0be396b1747ca547304e009cf61352a9a8fdc4cfa79f2ee98a4487ae",
+            "evidenceSha256": "6970093ee7dafa33fe6949b7400f077104b529d8e91b68740a163a12980f6874",
+            "modelName": "qwen3.8-max",
+            "modelTier": "STANDARD",
+            "invocationSha256": "24af0eb8c1077efb10ae4b3c13d54ef0bb519182c23ebfb29e97b40bda6d711e"
+          },
+          "bindingErrors": [],
+          "status": "COMPLETED",
+          "durationMs": 145779,
+          "answerSha256": "094b9e79e6fbc514b1d7a9026c847bb8e6190c9a32eb8b8a085c6b228f74f220",
+          "requiredFacts": [
+            {
+              "field": "illustrativeAdjustedNetIncome2025",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "illustrativeAdjustedNetIncome2025",
+                "value": "5293.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-01-01/2025-09-30"
+              },
+              "observedValue": "5293",
+              "observedUnit": "million",
+              "observedPeriod": "2025-01-01/2025-09-30",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "| 示意调整后净利润 | 5,293 | 5,134 |"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "field": "illustrativeAdjustedNetIncome2024",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "illustrativeAdjustedNetIncome2024",
+                "value": "5134.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-01-01/2024-09-30"
+              },
+              "observedValue": "5134",
+              "observedUnit": "million",
+              "observedPeriod": "2024-01-01/2024-09-30",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "| 示意调整后净利润 | 5,293 | 5,134 |"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "field": "illustrativeAdjustedCashConversion2025",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "illustrativeAdjustedCashConversion2025",
+                "value": "1.7293",
+                "unit": "ratio",
+                "currency": "N/A",
+                "period": "2025-01-01/2025-09-30"
+              },
+              "observedValue": "1.73",
+              "observedUnit": "ratio",
+              "observedPeriod": "2025-01-01/2025-09-30",
+              "absoluteError": "0.0007",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "| **经营现金流 / 示意调整后净利润** | **1.73** | **1.78** |"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "field": "illustrativeAdjustedCashConversion2024",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "illustrativeAdjustedCashConversion2024",
+                "value": "1.7754",
+                "unit": "ratio",
+                "currency": "N/A",
+                "period": "2024-01-01/2024-09-30"
+              },
+              "observedValue": "1.78",
+              "observedUnit": "ratio",
+              "observedPeriod": "2024-01-01/2024-09-30",
+              "absoluteError": "0.0046",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "| **经营现金流 / 示意调整后净利润** | **1.73** | **1.78** |"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "field": "reportedCashConversion2025",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "reportedCashConversion2025",
+                "value": "1.8332",
+                "unit": "ratio",
+                "currency": "N/A",
+                "period": "2025-01-01/2025-09-30"
+              },
+              "observedValue": "1.83",
+              "observedUnit": "ratio",
+              "observedPeriod": "2025-01-01/2025-09-30",
+              "absoluteError": "0.0032",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "| **经营现金流 / 净利润** | **1.83** | **2.93** |"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "field": "reportedCashConversion2024",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "reportedCashConversion2024",
+                "value": "2.9318",
+                "unit": "ratio",
+                "currency": "N/A",
+                "period": "2024-01-01/2024-09-30"
+              },
+              "observedValue": "2.93",
+              "observedUnit": "ratio",
+              "observedPeriod": "2024-01-01/2024-09-30",
+              "absoluteError": "0.0018",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "| **经营现金流 / 净利润** | **1.83** | **2.93** |"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "units",
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "status": "PASS",
+              "answerQuotes": [
+                "| **经营现金流 / 净利润** | **1.83** | **2.93** |",
+                "2025年前三季度",
+                "2024年前三季度"
+              ],
+              "sourceQuoteRefs": [
+                "period",
+                "income",
+                "ocf"
+              ],
+              "reason": "The two nine-month columns and original OCF/income ratios are correct."
+            },
+            {
+              "id": "p2",
+              "status": "PASS",
+              "answerQuotes": [
+                "5,134",
+                "5,293",
+                "-700",
+                "+300"
+              ],
+              "sourceQuoteRefs": [
+                "income",
+                "pension",
+                "tax"
+              ],
+              "reason": "Required illustrative net income uses the correct pension/tax signs and amounts in million USD; separate contradictory Chinese-unit claims are checked below."
+            },
+            {
+              "id": "p3",
+              "status": "PASS",
+              "answerQuotes": [
+                "经营现金流保持披露值",
+                "| **经营现金流 / 示意调整后净利润** | **1.73** | **1.78** |"
+              ],
+              "sourceQuoteRefs": [
+                "ocf",
+                "income",
+                "pension",
+                "tax"
+              ],
+              "reason": "Keeps reported OCF unchanged and computes both illustrative ratios; does not call the addback newly generated cash."
+            },
+            {
+              "id": "p4",
+              "status": "PASS",
+              "answerQuotes": [
+                "不是公司披露的调整后指标",
+                "略低",
+                "约数"
+              ],
+              "sourceQuoteRefs": [
+                "tax",
+                "other",
+                "financingAR"
+              ],
+              "reason": "Retains limited scope, approximate tax inputs and the small remaining decline; no blanket future-quality guarantee."
+            }
+          ],
+          "additionalNumericChecks": [
+            {
+              "label": "OCF2025",
+              "expression": "source amount",
+              "expectedValue": "9153",
+              "expectedRoundedTwoDecimals": "9153.00",
+              "observedValue": "9153",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "9,153",
+              "sourceQuoteRefs": [
+                "ocf"
+              ]
+            },
+            {
+              "label": "OCF2024",
+              "expression": "source amount",
+              "expectedValue": "9115",
+              "expectedRoundedTwoDecimals": "9115.00",
+              "observedValue": "9115",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "9,115",
+              "sourceQuoteRefs": [
+                "ocf"
+              ]
+            },
+            {
+              "label": "income2025",
+              "expression": "source amount",
+              "expectedValue": "4993",
+              "expectedRoundedTwoDecimals": "4993.00",
+              "observedValue": "4993",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "4,993",
+              "sourceQuoteRefs": [
+                "income"
+              ]
+            },
+            {
+              "label": "income2024",
+              "expression": "source amount",
+              "expectedValue": "3109",
+              "expectedRoundedTwoDecimals": "3109.00",
+              "observedValue": "3109",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "3,109",
+              "sourceQuoteRefs": [
+                "income"
+              ]
+            },
+            {
+              "label": "pension2024",
+              "expression": "source amount",
+              "expectedValue": "2725",
+              "expectedRoundedTwoDecimals": "2725.00",
+              "observedValue": "2725",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "2,725",
+              "sourceQuoteRefs": [
+                "pension"
+              ]
+            },
+            {
+              "label": "taxBenefit2024Million",
+              "expression": "source amount",
+              "expectedValue": "700",
+              "expectedRoundedTwoDecimals": "700.00",
+              "observedValue": "700",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "700",
+              "sourceQuoteRefs": [
+                "tax"
+              ]
+            },
+            {
+              "label": "taxCharge2025Million",
+              "expression": "source amount",
+              "expectedValue": "300",
+              "expectedRoundedTwoDecimals": "300.00",
+              "observedValue": "300",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "300",
+              "sourceQuoteRefs": [
+                "tax"
+              ]
+            },
+            {
+              "label": "reported2025Percent",
+              "expression": "9153/4993*100",
+              "expectedValue": "183.3166433006208692169036651",
+              "expectedRoundedTwoDecimals": "183.32",
+              "observedValue": "183.32",
+              "unit": "percent",
+              "absoluteError": "0.0033566993791307830963349",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "183.32%",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "reported2024Percent",
+              "expression": "9115/3109*100",
+              "expectedValue": "293.1810871662914120295915085",
+              "expectedRoundedTwoDecimals": "293.18",
+              "observedValue": "293.18",
+              "unit": "percent",
+              "absoluteError": "0.0010871662914120295915085",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "293.18%",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "reportedRatioChange",
+              "expression": "9153/4993-9115/3109",
+              "expectedValue": "-1.098644438656705428126878434",
+              "expectedRoundedTwoDecimals": "-1.10",
+              "observedValue": "-1.10",
+              "unit": "ratio",
+              "absoluteError": "0.001355561343294571873121566",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-1.10",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "reportedPercentagePointChange",
+              "expression": "(9153/4993-9115/3109)*100",
+              "expectedValue": "-109.8644438656705428126878434",
+              "expectedRoundedTwoDecimals": "-109.86",
+              "observedValue": "-109.84",
+              "unit": "percentage point",
+              "absoluteError": "0.0244438656705428126878434",
+              "absoluteTolerance": "0.01",
+              "status": "FAIL",
+              "answerQuote": "-109.84个百分点",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf"
+              ]
+            },
+            {
+              "label": "adjusted2025Percent",
+              "expression": "9153/5293*100",
+              "expectedValue": "172.9265067069714717551483091",
+              "expectedRoundedTwoDecimals": "172.93",
+              "observedValue": "172.93",
+              "unit": "percent",
+              "absoluteError": "0.0034932930285282448516909",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "172.93%",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf",
+                "tax"
+              ]
+            },
+            {
+              "label": "adjusted2024Percent",
+              "expression": "9115/5134*100",
+              "expectedValue": "177.5418776782236073237241917",
+              "expectedRoundedTwoDecimals": "177.54",
+              "observedValue": "177.54",
+              "unit": "percent",
+              "absoluteError": "0.0018776782236073237241917",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "177.54%",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "label": "adjustedRatioChange",
+              "expression": "9153/5293-9115/5134",
+              "expectedValue": "-0.046153709712521355685758826",
+              "expectedRoundedTwoDecimals": "-0.05",
+              "observedValue": "-0.05",
+              "unit": "ratio",
+              "absoluteError": "0.003846290287478644314241174",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-0.05",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "label": "adjustedPercentagePointChange",
+              "expression": "(9153/5293-9115/5134)*100",
+              "expectedValue": "-4.615370971252135568575882600",
+              "expectedRoundedTwoDecimals": "-4.62",
+              "observedValue": "-4.61",
+              "unit": "percentage point",
+              "absoluteError": "0.005370971252135568575882600",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-4.61个百分点",
+              "sourceQuoteRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ]
+            },
+            {
+              "label": "OCFIncrease",
+              "expression": "9153-9115",
+              "expectedValue": "38",
+              "expectedRoundedTwoDecimals": "38.00",
+              "observedValue": "38",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "38 百万美元",
+              "sourceQuoteRefs": [
+                "ocf"
+              ]
+            },
+            {
+              "label": "OCFGrowthPercent",
+              "expression": "(9153/9115-1)*100",
+              "expectedValue": "0.416895227646736149204607800",
+              "expectedRoundedTwoDecimals": "0.42",
+              "observedValue": "0.42",
+              "unit": "percent",
+              "absoluteError": "0.003104772353263850795392200",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "0.42%",
+              "sourceQuoteRefs": [
+                "ocf"
+              ]
+            }
+          ],
+          "materialClaimChecks": [
+            {
+              "label": "Accounting interpretation",
+              "status": "PASS",
+              "answerQuotes": [
+                "养老金结算费用",
+                "机械抬高",
+                "经营现金流保持披露值"
+              ],
+              "sourceQuoteRefs": [
+                "income",
+                "ocf",
+                "pension",
+                "tax"
+              ],
+              "reason": "The pension adjustment is an explicit reconciliation item. Holding cash unchanged and normalizing the denominator explains most of the gap; this is a bounded accounting comparison, not an invented commercial cause."
+            },
+            {
+              "label": "Counterevidence and limits",
+              "status": "PASS",
+              "answerQuotes": [
+                "经营现金流本身并没有下降",
+                "不是公司披露的调整后指标",
+                "约数",
+                "营运资本"
+              ],
+              "sourceQuoteRefs": [
+                "ocf",
+                "tax",
+                "other",
+                "financingAR"
+              ],
+              "reason": "Acknowledges flat/up OCF, finite adjustments and missing detailed operating/tax explanations. Dates, issuer and source identity agree with frozen evidence."
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "status": "PASS",
+              "reason": "Source-backed accounting comparison with the requested counterevidence and limits."
+            },
+            "numeric_period_correctness": {
+              "status": "FAIL",
+              "reason": "Additional reported percentage-point change is wrong; analysis also contains two factor-ten monetary-unit contradictions and an incorrect raw percentage. Required gold values themselves pass."
+            },
+            "counterevidence": {
+              "status": "PASS",
+              "reason": "Source-backed accounting comparison with the requested counterevidence and limits."
+            },
+            "unknowns": {
+              "status": "PASS",
+              "reason": "Source-backed accounting comparison with the requested counterevidence and limits."
+            }
+          },
+          "coverage": "Read the entire saved answer, including every table, repeated numeric statement, explanation, limitations and source section. Repeated identical claims share a check below.",
+          "failedAdditionalNumericLabels": [
+            "reportedPercentagePointChange"
+          ]
+        }
+      },
+      "classification": "METHOD_ERROR",
+      "learningEligibility": "REQUIRES_SECOND_INDEPENDENT_CONFIRMATION"
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-deployment-bridge",
+      "runId": "development-08-1-1",
+      "sourceCaseSha256": "77bcf9b19964d69e2d0ad25362a61c337d566e1f0761f49084a9c995019fc0fa",
+      "sourceCaseRecordSha256": "77bcf9b19964d69e2d0ad25362a61c337d566e1f0761f49084a9c995019fc0fa",
+      "goldRecordSha256": "027a364b5b9f5522bda532c27030fd3a4294cc2d75f0011eed8e4320b8fe7394",
+      "executionFileSha256": "fa86d8fff6a98c2e5a53f32a792ff67150861b1ac046e24900646d1862b861cd",
+      "reportPath": "evals\\evolution\\batch-learning-validation-20261002\\raw-development-08\\baseline-v1.report.json",
+      "reportSha256": "d63cc93fbf4d15c1713793e2223a230cabc41475c5f82977511280ba3c219fb5",
+      "rawResponsePath": "evals\\evolution\\batch-learning-validation-20261002\\raw-development-08\\development-08-1-1.response.json",
+      "rawResponseSha256": "df9c63f19af976e95fb18830ac53a430824cec53d5d63ece1e7c77f4b05f6cce",
+      "executionStatus": "FAILED",
+      "executionErrorCode": "TIMEOUT",
+      "analystStatus": "FAILED",
+      "taskOutcome": "DEGRADED",
+      "inputBindingErrors": [],
+      "sourceQuotes": {},
+      "stages": {
+        "analysis": {
+          "verdict": "NO_DATA",
+          "classification": "EXECUTION_FAILURE",
+          "status": "FAILED",
+          "durationMs": 300010,
+          "errorCode": "TIMEOUT",
+          "answerSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "providerCompletionUnknown": true,
+          "providerUsage": [
+            {
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "usageSource": "NO_DATA",
+              "providerCompletionUnknown": true
+            }
+          ],
+          "promptSha256": "b806b8274c0849617ff6a92d9d4e079fd0be9c5a96076f8e98b86fe5269a6bfd",
+          "evidenceSha256": "3c6727eff268c79ca9c752835c534fe10977ed5b67b0469663ace6aef936ee57",
+          "requiredFacts": [
+            {
+              "field": "operatingCashFlowCurrent",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "operatingCashFlowCurrent",
+                "value": "17221",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-12-30/2025-09-28"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "operatingCashFlowPrior",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "operatingCashFlowPrior",
+                "value": "17283",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-01-01/2024-09-29"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "investingNetCashFlowCurrent",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "investingNetCashFlowCurrent",
+                "value": "-19103",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-12-30/2025-09-28"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "financingNetCashFlowCurrent",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "financingNetCashFlowCurrent",
+                "value": "-4170",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-12-30/2025-09-28"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "exchangeRateEffectCurrent",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "exchangeRateEffectCurrent",
+                "value": "178",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-12-30/2025-09-28"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "cashBeginning",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "cashBeginning",
+                "value": "24105",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-12-29"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "cashEnding",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "cashEnding",
+                "value": "18231",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-09-28"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "netChangeInCash",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "netChangeInCash",
+                "value": "-5874.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-12-30/2025-09-28"
+              },
+              "answerQuotes": []
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p2",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p3",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p4",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            },
+            "numeric_period_correctness": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            },
+            "counterevidence": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            },
+            "unknowns": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            }
+          },
+          "reason": "Execution failure remains in the planned denominator; no semantic failure or learning label is inferred."
+        },
+        "finalAnswer": {
+          "verdict": "NO_DATA",
+          "classification": "NOT_EXECUTED",
+          "status": "NOT_EXECUTED",
+          "durationMs": null,
+          "errorCode": null,
+          "answerSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "providerCompletionUnknown": false,
+          "providerUsage": [],
+          "promptSha256": null,
+          "evidenceSha256": null,
+          "requiredFacts": [
+            {
+              "field": "operatingCashFlowCurrent",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "operatingCashFlowCurrent",
+                "value": "17221",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-12-30/2025-09-28"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "operatingCashFlowPrior",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "operatingCashFlowPrior",
+                "value": "17283",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-01-01/2024-09-29"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "investingNetCashFlowCurrent",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "investingNetCashFlowCurrent",
+                "value": "-19103",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-12-30/2025-09-28"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "financingNetCashFlowCurrent",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "financingNetCashFlowCurrent",
+                "value": "-4170",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-12-30/2025-09-28"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "exchangeRateEffectCurrent",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "exchangeRateEffectCurrent",
+                "value": "178",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-12-30/2025-09-28"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "cashBeginning",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "cashBeginning",
+                "value": "24105",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-12-29"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "cashEnding",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "cashEnding",
+                "value": "18231",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-09-28"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "netChangeInCash",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "netChangeInCash",
+                "value": "-5874.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-12-30/2025-09-28"
+              },
+              "answerQuotes": []
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p2",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p3",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p4",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            },
+            "numeric_period_correctness": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            },
+            "counterevidence": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            },
+            "unknowns": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            }
+          },
+          "reason": "Execution failure remains in the planned denominator; no semantic failure or learning label is inferred."
+        }
+      },
+      "classification": "EXECUTION_FAILURE",
+      "learningEligibility": "NOT_AN_ANALYSIS_METHOD_FAILURE"
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-cash-comparison",
+      "runId": "development-09-1-1",
+      "sourceCaseSha256": "2778493c2f09f8f6fd06873ca4b0a6c2faee49922812fb2d0ef806ae8e992d11",
+      "sourceCaseRecordSha256": "2778493c2f09f8f6fd06873ca4b0a6c2faee49922812fb2d0ef806ae8e992d11",
+      "goldRecordSha256": "b7764eac2e8f3ea2abfb19f3f98374fd2f2365bcff338d45aa7cc5711dcfe0d5",
+      "executionFileSha256": "375b756e0fbd90e1c9e093b035e9b129baf6b1c67fee9e948a952e0346a05636",
+      "reportPath": "evals\\evolution\\batch-learning-validation-20261002\\raw-development-09\\baseline-v1.report.json",
+      "reportSha256": "85bbcf61ad9f7a761358b23568c6eac843d924094926e04223cb060dce4d3b6c",
+      "rawResponsePath": "evals\\evolution\\batch-learning-validation-20261002\\raw-development-09\\development-09-1-1.response.json",
+      "rawResponseSha256": "160ad47ae9007c0e2f375d0577170c4101f3bb19dc6f3d17ca2f4e727fa2b303",
+      "executionStatus": "COMPLETED",
+      "executionErrorCode": null,
+      "analystStatus": "COMPLETED",
+      "taskOutcome": "COMPLETED",
+      "inputBindingErrors": [],
+      "sourceQuotes": {
+        "period36": {
+          "evidenceId": "E1",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "quote": "36 Weeks Ended",
+          "visibleTextSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928"
+        },
+        "dates36": {
+          "evidenceId": "E1",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "quote": "9/6/2025 9/7/2024",
+          "visibleTextSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928"
+        },
+        "units36": {
+          "evidenceId": "E1",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "quote": "(in millions, un audited)",
+          "visibleTextSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928"
+        },
+        "income36": {
+          "evidenceId": "E1",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "quote": "Net income $ 5,740 $ 8,092",
+          "visibleTextSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928"
+        },
+        "ocf36": {
+          "evidenceId": "E1",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "quote": "Net Cash Provided by Operating Activities 5,468 6,220",
+          "visibleTextSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928"
+        },
+        "capex36": {
+          "evidenceId": "E1",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "quote": "Capital spending (2,499) (2,850)",
+          "visibleTextSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928"
+        },
+        "receivables36": {
+          "evidenceId": "E1",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "quote": "Accounts and notes receivable (1,747) (1,521)",
+          "visibleTextSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928"
+        },
+        "inventory36": {
+          "evidenceId": "E1",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "quote": "Inventories (449) (492)",
+          "visibleTextSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928"
+        },
+        "payables36": {
+          "evidenceId": "E1",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "quote": "Accounts payable and other current liabilities (1,647) (2,312)",
+          "visibleTextSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928"
+        },
+        "period24": {
+          "evidenceId": "E2",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf",
+          "quote": "24 Weeks Ended",
+          "visibleTextSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38"
+        },
+        "dates24": {
+          "evidenceId": "E2",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf",
+          "quote": "6/14/2025 6/15/2024",
+          "visibleTextSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38"
+        },
+        "units24": {
+          "evidenceId": "E2",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf",
+          "quote": "(in millions, unaudited)",
+          "visibleTextSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38"
+        },
+        "income24": {
+          "evidenceId": "E2",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf",
+          "quote": "Net income $ 3,122 $ 5,147",
+          "visibleTextSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38"
+        },
+        "ocf24": {
+          "evidenceId": "E2",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf",
+          "quote": "Net Cash Provided by Operating Activities 996 1,315",
+          "visibleTextSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38"
+        },
+        "capex24": {
+          "evidenceId": "E2",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf",
+          "quote": "Capital spending (1,507) (1,701)",
+          "visibleTextSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38"
+        },
+        "receivables24": {
+          "evidenceId": "E2",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf",
+          "quote": "Accounts and notes receivable (1,582) (1,138)",
+          "visibleTextSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38"
+        },
+        "inventory24": {
+          "evidenceId": "E2",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf",
+          "quote": "Inventories (800) (696)",
+          "visibleTextSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38"
+        },
+        "payables24": {
+          "evidenceId": "E2",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf",
+          "quote": "Accounts payable and other current liabilities (2,083) (2,968)",
+          "visibleTextSha256": "b080183d7d34728af5f15bb412719d2f55777cd89910111fd15568fe73d45c38"
+        }
+      },
+      "stages": {
+        "analysis": {
+          "verdict": "PASS",
+          "classification": "PASS",
+          "binding": {
+            "id": "pep-fy2025q3-quarter-cash-comparison@1",
+            "scope": "FUNDAMENTALS_ANALYSIS",
+            "rubricSha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+            "caseSha256": "dcd7db0d981cf4b82a737cd5a3b6df5023009210ca4ff01d47b09e12c3782f92",
+            "answerSha256": "766262cbdaf95bf96e03a33fb4d76f9ca11c837b779ac255bde980a7a9f4b05c",
+            "promptSha256": "646e546d1653d22ac8c9d5a3e13c38dc2435ee9977b20a8f1dad982a310d0c48",
+            "contextSha256": "5605fe3200778b14bdab8526fb92dffa3fc9ded3ed9139448c544b8e11803b94",
+            "evidenceSha256": "381f5c785120f9b5022daa9745a75d3a9eb648ba6da9913942cbb5995faea14d",
+            "modelName": "qwen3.8-max",
+            "modelTier": "STANDARD",
+            "invocationSha256": "f1bae4672b1b47a2f65b9841d14b73922f2c56e551f002ed78287f69f0b25e25"
+          },
+          "bindingErrors": [],
+          "status": "COMPLETED",
+          "durationMs": 276307,
+          "answerSha256": "766262cbdaf95bf96e03a33fb4d76f9ca11c837b779ac255bde980a7a9f4b05c",
+          "requiredFacts": [
+            {
+              "field": "quarterConsolidatedNetIncome2025",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "quarterConsolidatedNetIncome2025",
+                "value": "2618.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-06-15/2025-09-06"
+              },
+              "observedValue": "2618",
+              "observedUnit": "million",
+              "observedPeriod": "2025-06-15/2025-09-06",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "- FY2025 Q3 合并净利润 = 5,740 − 3,122 = **2,618 百万美元**。  "
+              ],
+              "sourceQuoteRefs": [
+                "dates36",
+                "dates24",
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "field": "quarterConsolidatedNetIncome2024",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "quarterConsolidatedNetIncome2024",
+                "value": "2945.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-06-16/2024-09-07"
+              },
+              "observedValue": "2945",
+              "observedUnit": "million",
+              "observedPeriod": "2024-06-16/2024-09-07",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "- FY2024 Q3 合并净利润 = 8,092 − 5,147 = **2,945 百万美元**。  "
+              ],
+              "sourceQuoteRefs": [
+                "dates36",
+                "dates24",
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "field": "quarterOperatingCashFlow2025",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "quarterOperatingCashFlow2025",
+                "value": "4472.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-06-15/2025-09-06"
+              },
+              "observedValue": "4472",
+              "observedUnit": "million",
+              "observedPeriod": "2025-06-15/2025-09-06",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "- FY2025 Q3 经营现金流 = 5,468 − 996 = **4,472 百万美元**。  "
+              ],
+              "sourceQuoteRefs": [
+                "dates36",
+                "dates24",
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "field": "quarterOperatingCashFlow2024",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "quarterOperatingCashFlow2024",
+                "value": "4905.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-06-16/2024-09-07"
+              },
+              "observedValue": "4905",
+              "observedUnit": "million",
+              "observedPeriod": "2024-06-16/2024-09-07",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "- FY2024 Q3 经营现金流 = 6,220 − 1,315 = **4,905 百万美元**。  "
+              ],
+              "sourceQuoteRefs": [
+                "dates36",
+                "dates24",
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "field": "quarterSimpleFreeCashFlow2025",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "quarterSimpleFreeCashFlow2025",
+                "value": "3480.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-06-15/2025-09-06"
+              },
+              "observedValue": "3480",
+              "observedUnit": "million",
+              "observedPeriod": "2025-06-15/2025-09-06",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "- FY2025 Q3 简化自由现金流 = 4,472 − 992 = **3,480 百万美元**。  "
+              ],
+              "sourceQuoteRefs": [
+                "dates36",
+                "dates24",
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "field": "quarterSimpleFreeCashFlow2024",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "quarterSimpleFreeCashFlow2024",
+                "value": "3756.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-06-16/2024-09-07"
+              },
+              "observedValue": "3756",
+              "observedUnit": "million",
+              "observedPeriod": "2024-06-16/2024-09-07",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "- FY2024 Q3 简化自由现金流 = 4,905 − 1,149 = **3,756 百万美元**。  "
+              ],
+              "sourceQuoteRefs": [
+                "dates36",
+                "dates24",
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "status": "PASS",
+              "answerQuotes": [
+                "2025-06-15 至 2025-09-06",
+                "2024-06-16 至 2024-09-07",
+                "36 周累计数 − 24 周累计数"
+              ],
+              "sourceQuoteRefs": [
+                "period36",
+                "period24",
+                "dates36",
+                "dates24"
+              ],
+              "reason": "Correct 12-week intervals derived from the two cumulative fiscal cutoffs."
+            },
+            {
+              "id": "p2",
+              "status": "PASS",
+              "answerQuotes": [
+                "2,618",
+                "2,945",
+                "4,472",
+                "4,905",
+                "3,480",
+                "3,756",
+                "不纳入出售资产回款"
+              ],
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ],
+              "reason": "All six required results use consolidated income and gross capital expenditure."
+            },
+            {
+              "id": "p3",
+              "status": "PASS",
+              "answerQuotes": [
+                "-165",
+                "+351",
+                "+436",
+                "占用现金",
+                "贡献现金"
+              ],
+              "sourceQuoteRefs": [
+                "receivables36",
+                "receivables24",
+                "inventory36",
+                "inventory24",
+                "payables36",
+                "payables24"
+              ],
+              "reason": "Correct cash-flow signs after subtracting cumulative amounts; no mistake from the negative YTD inventory/payable totals."
+            },
+            {
+              "id": "p4",
+              "status": "PASS",
+              "answerQuotes": [
+                "同比下降",
+                "3,480",
+                "资本开支下降"
+              ],
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ],
+              "reason": "Recognizes lower absolute cash creation with positive FCF and offsetting lower capex/working-capital contributions."
+            },
+            {
+              "id": "p5",
+              "status": "PASS",
+              "answerQuotes": [
+                "本轮未提供资产负债表",
+                "无法完整拆解",
+                "累计口径"
+              ],
+              "sourceQuoteRefs": [
+                "period36",
+                "period24",
+                "units36",
+                "units24"
+              ],
+              "reason": "No definite seasonal pattern, collection-efficiency cause or managerial intent is invented; acknowledges limitations of cash-flow tables."
+            }
+          ],
+          "additionalNumericChecks": [
+            {
+              "label": "incomeChange",
+              "expression": "2618-2945",
+              "expectedValue": "-327",
+              "expectedRoundedTwoDecimals": "-327.00",
+              "observedValue": "-327",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-327",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "ocfChange",
+              "expression": "4472-4905",
+              "expectedValue": "-433",
+              "expectedRoundedTwoDecimals": "-433.00",
+              "observedValue": "-433",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-433",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "grossCapexChange",
+              "expression": "992-1149",
+              "expectedValue": "-157",
+              "expectedRoundedTwoDecimals": "-157.00",
+              "observedValue": "-157",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-157",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "fcfChange",
+              "expression": "3480-3756",
+              "expectedValue": "-276",
+              "expectedRoundedTwoDecimals": "-276.00",
+              "observedValue": "-276",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-276",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "incomeGrowth",
+              "expression": "(2618/2945-1)*100",
+              "expectedValue": "-11.10356536502546689303904924",
+              "expectedRoundedTwoDecimals": "-11.10",
+              "observedValue": "-11.10",
+              "unit": "percent",
+              "absoluteError": "0.00356536502546689303904924",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "11.10%",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "ocfGrowth",
+              "expression": "(4472/4905-1)*100",
+              "expectedValue": "-8.827726809378185524974515800",
+              "expectedRoundedTwoDecimals": "-8.83",
+              "observedValue": "-8.83",
+              "unit": "percent",
+              "absoluteError": "0.002273190621814475025484200",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "8.83%",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "capexGrowth",
+              "expression": "(992/1149-1)*100",
+              "expectedValue": "-13.66405570060922541340295909",
+              "expectedRoundedTwoDecimals": "-13.66",
+              "observedValue": "-13.66",
+              "unit": "percent",
+              "absoluteError": "0.00405570060922541340295909",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "13.66%",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "fcfGrowth",
+              "expression": "(3480/3756-1)*100",
+              "expectedValue": "-7.348242811501597444089456870",
+              "expectedRoundedTwoDecimals": "-7.35",
+              "observedValue": "-7.35",
+              "unit": "percent",
+              "absoluteError": "0.001757188498402555910543130",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "7.35%",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "ocfIncome2024",
+              "expression": "4905/2945",
+              "expectedValue": "1.665534804753820033955857385",
+              "expectedRoundedTwoDecimals": "1.67",
+              "observedValue": "1.67",
+              "unit": "ratio",
+              "absoluteError": "0.004465195246179966044142615",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "1.67",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "ocfIncome2025",
+              "expression": "4472/2618",
+              "expectedValue": "1.708174178762414056531703591",
+              "expectedRoundedTwoDecimals": "1.71",
+              "observedValue": "1.71",
+              "unit": "ratio",
+              "absoluteError": "0.001825821237585943468296409",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "1.71",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "fcfIncome2024",
+              "expression": "3756/2945",
+              "expectedValue": "1.275382003395585738539898132",
+              "expectedRoundedTwoDecimals": "1.28",
+              "observedValue": "1.28",
+              "unit": "ratio",
+              "absoluteError": "0.004617996604414261460101868",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "1.28",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "fcfIncome2025",
+              "expression": "3480/2618",
+              "expectedValue": "1.329258976317799847211611917",
+              "expectedRoundedTwoDecimals": "1.33",
+              "observedValue": "1.33",
+              "unit": "ratio",
+              "absoluteError": "0.000741023682200152788388083",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "1.33",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "grossCapex2025",
+              "expression": "2499-(1507)",
+              "expectedValue": "992",
+              "expectedRoundedTwoDecimals": "992.00",
+              "observedValue": "992",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "992",
+              "sourceQuoteRefs": [
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "grossCapex2024",
+              "expression": "2850-(1701)",
+              "expectedValue": "1149",
+              "expectedRoundedTwoDecimals": "1149.00",
+              "observedValue": "1149",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "1,149",
+              "sourceQuoteRefs": [
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "receivables2025",
+              "expression": "-1747-(-1582)",
+              "expectedValue": "-165",
+              "expectedRoundedTwoDecimals": "-165.00",
+              "observedValue": "-165",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-165",
+              "sourceQuoteRefs": [
+                "receivables36",
+                "receivables24"
+              ]
+            },
+            {
+              "label": "inventory2025",
+              "expression": "-449-(-800)",
+              "expectedValue": "351",
+              "expectedRoundedTwoDecimals": "351.00",
+              "observedValue": "351",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "+351",
+              "sourceQuoteRefs": [
+                "inventory36",
+                "inventory24"
+              ]
+            },
+            {
+              "label": "payables2025",
+              "expression": "-1647-(-2083)",
+              "expectedValue": "436",
+              "expectedRoundedTwoDecimals": "436.00",
+              "observedValue": "436",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "+436",
+              "sourceQuoteRefs": [
+                "payables36",
+                "payables24"
+              ]
+            },
+            {
+              "label": "workingCapitalTotal2025",
+              "expression": "-165+351+436",
+              "expectedValue": "622",
+              "expectedRoundedTwoDecimals": "622.00",
+              "observedValue": "622",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "622",
+              "sourceQuoteRefs": [
+                "receivables36",
+                "receivables24",
+                "inventory36",
+                "inventory24",
+                "payables36",
+                "payables24"
+              ]
+            },
+            {
+              "label": "workingCapitalShare2025",
+              "expression": "622/4472*100",
+              "expectedValue": "13.90876565295169946332737030",
+              "expectedRoundedTwoDecimals": "13.91",
+              "observedValue": "13.91",
+              "unit": "percent",
+              "absoluteError": "0.00123434704830053667262970",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "13.91%",
+              "sourceQuoteRefs": [
+                "receivables36",
+                "receivables24",
+                "inventory36",
+                "inventory24",
+                "payables36",
+                "payables24",
+                "ocf36",
+                "ocf24"
+              ]
+            },
+            {
+              "label": "workingCapitalTotal2024",
+              "expression": "(-1521+1138)+(-492+696)+(-2312+2968)",
+              "expectedValue": "477",
+              "expectedRoundedTwoDecimals": "477.00",
+              "observedValue": "477",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "477",
+              "sourceQuoteRefs": [
+                "receivables36",
+                "receivables24",
+                "inventory36",
+                "inventory24",
+                "payables36",
+                "payables24"
+              ]
+            },
+            {
+              "label": "incomeOperands5740",
+              "expression": "source amount",
+              "expectedValue": "5740",
+              "expectedRoundedTwoDecimals": "5740.00",
+              "observedValue": "5740",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "5,740",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24"
+              ]
+            },
+            {
+              "label": "incomeOperands3122",
+              "expression": "source amount",
+              "expectedValue": "3122",
+              "expectedRoundedTwoDecimals": "3122.00",
+              "observedValue": "3122",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "3,122",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24"
+              ]
+            },
+            {
+              "label": "incomeOperands8092",
+              "expression": "source amount",
+              "expectedValue": "8092",
+              "expectedRoundedTwoDecimals": "8092.00",
+              "observedValue": "8092",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "8,092",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24"
+              ]
+            },
+            {
+              "label": "incomeOperands5147",
+              "expression": "source amount",
+              "expectedValue": "5147",
+              "expectedRoundedTwoDecimals": "5147.00",
+              "observedValue": "5147",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "5,147",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24"
+              ]
+            },
+            {
+              "label": "ocfOperands5468",
+              "expression": "source amount",
+              "expectedValue": "5468",
+              "expectedRoundedTwoDecimals": "5468.00",
+              "observedValue": "5468",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "5,468",
+              "sourceQuoteRefs": [
+                "ocf36",
+                "ocf24"
+              ]
+            },
+            {
+              "label": "ocfOperands996",
+              "expression": "source amount",
+              "expectedValue": "996",
+              "expectedRoundedTwoDecimals": "996.00",
+              "observedValue": "996",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "996",
+              "sourceQuoteRefs": [
+                "ocf36",
+                "ocf24"
+              ]
+            },
+            {
+              "label": "ocfOperands6220",
+              "expression": "source amount",
+              "expectedValue": "6220",
+              "expectedRoundedTwoDecimals": "6220.00",
+              "observedValue": "6220",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "6,220",
+              "sourceQuoteRefs": [
+                "ocf36",
+                "ocf24"
+              ]
+            },
+            {
+              "label": "ocfOperands1315",
+              "expression": "source amount",
+              "expectedValue": "1315",
+              "expectedRoundedTwoDecimals": "1315.00",
+              "observedValue": "1315",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "1,315",
+              "sourceQuoteRefs": [
+                "ocf36",
+                "ocf24"
+              ]
+            },
+            {
+              "label": "capexOperands2499",
+              "expression": "source amount",
+              "expectedValue": "2499",
+              "expectedRoundedTwoDecimals": "2499.00",
+              "observedValue": "2499",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "2,499",
+              "sourceQuoteRefs": [
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "capexOperands1507",
+              "expression": "source amount",
+              "expectedValue": "1507",
+              "expectedRoundedTwoDecimals": "1507.00",
+              "observedValue": "1507",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "1,507",
+              "sourceQuoteRefs": [
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "capexOperands2850",
+              "expression": "source amount",
+              "expectedValue": "2850",
+              "expectedRoundedTwoDecimals": "2850.00",
+              "observedValue": "2850",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "2,850",
+              "sourceQuoteRefs": [
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "capexOperands1701",
+              "expression": "source amount",
+              "expectedValue": "1701",
+              "expectedRoundedTwoDecimals": "1701.00",
+              "observedValue": "1701",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "1,701",
+              "sourceQuoteRefs": [
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "receivables2024",
+              "expression": "-1521-(-1138)",
+              "expectedValue": "-383",
+              "expectedRoundedTwoDecimals": "-383.00",
+              "observedValue": "-383",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-383",
+              "sourceQuoteRefs": [
+                "receivables36",
+                "receivables24"
+              ]
+            },
+            {
+              "label": "inventory2024",
+              "expression": "-492-(-696)",
+              "expectedValue": "204",
+              "expectedRoundedTwoDecimals": "204.00",
+              "observedValue": "204",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "204",
+              "sourceQuoteRefs": [
+                "inventory36",
+                "inventory24"
+              ]
+            },
+            {
+              "label": "payables2024",
+              "expression": "-2312-(-2968)",
+              "expectedValue": "656",
+              "expectedRoundedTwoDecimals": "656.00",
+              "observedValue": "656",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "656",
+              "sourceQuoteRefs": [
+                "payables36",
+                "payables24"
+              ]
+            }
+          ],
+          "materialClaimChecks": [
+            {
+              "label": "Absolute cash versus conversion ratio",
+              "status": "PASS",
+              "answerQuotes": [
+                "绝对现金创造",
+                "单位净利润",
+                "资本开支",
+                "营运资本"
+              ],
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ],
+              "reason": "All are accounting comparisons derived from the reported figures; lower capex cushions the FCF decline without reversing it. Improved ratios are not asserted as proof of underlying collection efficiency."
+            },
+            {
+              "label": "Net-income/other reconciliation contribution",
+              "status": "PASS",
+              "answerQuotes": [
+                "净利润下降",
+                "其他经营项目带来的压力"
+              ],
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "receivables36",
+                "receivables24",
+                "inventory36",
+                "inventory24",
+                "payables36",
+                "payables24"
+              ],
+              "reason": "Supported as a cash-flow reconciliation: delta OCF=-433, delta income=-327, delta three working-capital items=+145, residual adjustments=-251. No unsupported specific commercial cause is asserted."
+            },
+            {
+              "label": "Working-capital direction and boundaries",
+              "status": "PASS",
+              "answerQuotes": [
+                "占用现金",
+                "贡献现金",
+                "无法直接核对",
+                "未经审计"
+              ],
+              "sourceQuoteRefs": [
+                "receivables36",
+                "receivables24",
+                "inventory36",
+                "inventory24",
+                "payables36",
+                "payables24",
+                "units36",
+                "units24"
+              ],
+              "reason": "Sign interpretation is limited to cash-flow contributions; no asserted company seasonality, intent or future sustainability. Balance movements and operating causes are explicitly left unverified."
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "status": "PASS",
+              "reason": "Material claims are source-backed arithmetic/accounting comparisons; no unprovided company cause."
+            },
+            "numeric_period_correctness": {
+              "status": "PASS",
+              "reason": "All mandatory and additional numbers, periods, signed differences and gross-capex definitions pass Decimal checks."
+            },
+            "counterevidence": {
+              "status": "PASS",
+              "reason": "Preserves positive FCF, lower capex, positive working-capital contributions and improved per-income ratios alongside lower absolute cash flow."
+            },
+            "unknowns": {
+              "status": "PASS",
+              "reason": "Keeps cumulative reconstruction, missing balance-sheet/profit-detail and unaudited-data limitations; no guarantee or invented operating explanation."
+            }
+          },
+          "coverage": "Read the entire saved answer, including every table, repeated numeric statement, explanation, limitations and source section. Repeated identical claims share a check below.",
+          "failedAdditionalNumericLabels": []
+        },
+        "finalAnswer": {
+          "verdict": "PASS",
+          "classification": "PASS",
+          "binding": {
+            "id": "pep-fy2025q3-quarter-cash-comparison@1",
+            "scope": "FINAL_ANSWER",
+            "rubricSha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+            "caseSha256": "1c233605344aa47da4c24bcd4d1c189524c05150ae326fb797faac64602c0ac0",
+            "answerSha256": "2f6aee48b0fde4546f1947418104276cf971a30a69c8bf7b9b894346f86a4fcd",
+            "promptSha256": "c0bf39a7f3194cddf8e5bb4c5e7e98507c48f30ecdb6f14dae0df585960344b4",
+            "contextSha256": "4df76333ca44494ad4fcc749e058c77d00744329a7ed9f4715e79fb24bd4c69a",
+            "evidenceSha256": "381f5c785120f9b5022daa9745a75d3a9eb648ba6da9913942cbb5995faea14d",
+            "modelName": "qwen3.8-max",
+            "modelTier": "STANDARD",
+            "invocationSha256": "24af0eb8c1077efb10ae4b3c13d54ef0bb519182c23ebfb29e97b40bda6d711e"
+          },
+          "bindingErrors": [],
+          "status": "COMPLETED",
+          "durationMs": 123104,
+          "answerSha256": "2f6aee48b0fde4546f1947418104276cf971a30a69c8bf7b9b894346f86a4fcd",
+          "requiredFacts": [
+            {
+              "field": "quarterConsolidatedNetIncome2025",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "quarterConsolidatedNetIncome2025",
+                "value": "2618.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-06-15/2025-09-06"
+              },
+              "observedValue": "2618",
+              "observedUnit": "million",
+              "observedPeriod": "2025-06-15/2025-09-06",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "- FY2025 Q3 合并净利润 = 5,740 − 3,122 = **2,618 百万美元**。[E1][E2]  "
+              ],
+              "sourceQuoteRefs": [
+                "dates36",
+                "dates24",
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "field": "quarterConsolidatedNetIncome2024",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "quarterConsolidatedNetIncome2024",
+                "value": "2945.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-06-16/2024-09-07"
+              },
+              "observedValue": "2945",
+              "observedUnit": "million",
+              "observedPeriod": "2024-06-16/2024-09-07",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "- FY2024 Q3 合并净利润 = 8,092 − 5,147 = **2,945 百万美元**。[E1][E2]  "
+              ],
+              "sourceQuoteRefs": [
+                "dates36",
+                "dates24",
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "field": "quarterOperatingCashFlow2025",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "quarterOperatingCashFlow2025",
+                "value": "4472.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-06-15/2025-09-06"
+              },
+              "observedValue": "4472",
+              "observedUnit": "million",
+              "observedPeriod": "2025-06-15/2025-09-06",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "- FY2025 Q3 经营现金流 = 5,468 − 996 = **4,472 百万美元**。[E1][E2]  "
+              ],
+              "sourceQuoteRefs": [
+                "dates36",
+                "dates24",
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "field": "quarterOperatingCashFlow2024",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "quarterOperatingCashFlow2024",
+                "value": "4905.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-06-16/2024-09-07"
+              },
+              "observedValue": "4905",
+              "observedUnit": "million",
+              "observedPeriod": "2024-06-16/2024-09-07",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "- FY2024 Q3 经营现金流 = 6,220 − 1,315 = **4,905 百万美元**。[E1][E2]  "
+              ],
+              "sourceQuoteRefs": [
+                "dates36",
+                "dates24",
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "field": "quarterSimpleFreeCashFlow2025",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "quarterSimpleFreeCashFlow2025",
+                "value": "3480.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-06-15/2025-09-06"
+              },
+              "observedValue": "3480",
+              "observedUnit": "million",
+              "observedPeriod": "2025-06-15/2025-09-06",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "- FY2025 Q3 简化自由现金流 = 4,472 − 992 = **3,480 百万美元**。[E1][E2]  "
+              ],
+              "sourceQuoteRefs": [
+                "dates36",
+                "dates24",
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "field": "quarterSimpleFreeCashFlow2024",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "quarterSimpleFreeCashFlow2024",
+                "value": "3756.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2024-06-16/2024-09-07"
+              },
+              "observedValue": "3756",
+              "observedUnit": "million",
+              "observedPeriod": "2024-06-16/2024-09-07",
+              "absoluteError": "0.0000",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuotes": [
+                "- FY2024 Q3 简化自由现金流 = 4,905 − 1,149 = **3,756 百万美元**。[E1][E2]"
+              ],
+              "sourceQuoteRefs": [
+                "dates36",
+                "dates24",
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "status": "PASS",
+              "answerQuotes": [
+                "2025-06-15 至 2025-09-06",
+                "2024-06-16 至 2024-09-07",
+                "36 周累计数 − 24 周累计数"
+              ],
+              "sourceQuoteRefs": [
+                "period36",
+                "period24",
+                "dates36",
+                "dates24"
+              ],
+              "reason": "Correct 12-week intervals derived from the two cumulative fiscal cutoffs."
+            },
+            {
+              "id": "p2",
+              "status": "PASS",
+              "answerQuotes": [
+                "2,618",
+                "2,945",
+                "4,472",
+                "4,905",
+                "3,480",
+                "3,756",
+                "不纳入出售资产回款"
+              ],
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ],
+              "reason": "All six required results use consolidated income and gross capital expenditure."
+            },
+            {
+              "id": "p3",
+              "status": "PASS",
+              "answerQuotes": [
+                "-165",
+                "+351",
+                "+436",
+                "占用现金",
+                "贡献现金"
+              ],
+              "sourceQuoteRefs": [
+                "receivables36",
+                "receivables24",
+                "inventory36",
+                "inventory24",
+                "payables36",
+                "payables24"
+              ],
+              "reason": "Correct cash-flow signs after subtracting cumulative amounts; no mistake from the negative YTD inventory/payable totals."
+            },
+            {
+              "id": "p4",
+              "status": "PASS",
+              "answerQuotes": [
+                "同比下降",
+                "3,480",
+                "资本开支下降"
+              ],
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ],
+              "reason": "Recognizes lower absolute cash creation with positive FCF and offsetting lower capex/working-capital contributions."
+            },
+            {
+              "id": "p5",
+              "status": "PASS",
+              "answerQuotes": [
+                "本轮未提供资产负债表",
+                "无法完整拆解",
+                "累计口径"
+              ],
+              "sourceQuoteRefs": [
+                "period36",
+                "period24",
+                "units36",
+                "units24"
+              ],
+              "reason": "No definite seasonal pattern, collection-efficiency cause or managerial intent is invented; acknowledges limitations of cash-flow tables."
+            }
+          ],
+          "additionalNumericChecks": [
+            {
+              "label": "incomeChange",
+              "expression": "2618-2945",
+              "expectedValue": "-327",
+              "expectedRoundedTwoDecimals": "-327.00",
+              "observedValue": "-327",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-327",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "ocfChange",
+              "expression": "4472-4905",
+              "expectedValue": "-433",
+              "expectedRoundedTwoDecimals": "-433.00",
+              "observedValue": "-433",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-433",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "grossCapexChange",
+              "expression": "992-1149",
+              "expectedValue": "-157",
+              "expectedRoundedTwoDecimals": "-157.00",
+              "observedValue": "-157",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-157",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "fcfChange",
+              "expression": "3480-3756",
+              "expectedValue": "-276",
+              "expectedRoundedTwoDecimals": "-276.00",
+              "observedValue": "-276",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-276",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "incomeGrowth",
+              "expression": "(2618/2945-1)*100",
+              "expectedValue": "-11.10356536502546689303904924",
+              "expectedRoundedTwoDecimals": "-11.10",
+              "observedValue": "-11.10",
+              "unit": "percent",
+              "absoluteError": "0.00356536502546689303904924",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "11.10%",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "ocfGrowth",
+              "expression": "(4472/4905-1)*100",
+              "expectedValue": "-8.827726809378185524974515800",
+              "expectedRoundedTwoDecimals": "-8.83",
+              "observedValue": "-8.83",
+              "unit": "percent",
+              "absoluteError": "0.002273190621814475025484200",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "8.83%",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "capexGrowth",
+              "expression": "(992/1149-1)*100",
+              "expectedValue": "-13.66405570060922541340295909",
+              "expectedRoundedTwoDecimals": "-13.66",
+              "observedValue": "-13.66",
+              "unit": "percent",
+              "absoluteError": "0.00405570060922541340295909",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "13.66%",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "fcfGrowth",
+              "expression": "(3480/3756-1)*100",
+              "expectedValue": "-7.348242811501597444089456870",
+              "expectedRoundedTwoDecimals": "-7.35",
+              "observedValue": "-7.35",
+              "unit": "percent",
+              "absoluteError": "0.001757188498402555910543130",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "7.35%",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "ocfIncome2024",
+              "expression": "4905/2945",
+              "expectedValue": "1.665534804753820033955857385",
+              "expectedRoundedTwoDecimals": "1.67",
+              "observedValue": "1.67",
+              "unit": "ratio",
+              "absoluteError": "0.004465195246179966044142615",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "1.67",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "ocfIncome2025",
+              "expression": "4472/2618",
+              "expectedValue": "1.708174178762414056531703591",
+              "expectedRoundedTwoDecimals": "1.71",
+              "observedValue": "1.71",
+              "unit": "ratio",
+              "absoluteError": "0.001825821237585943468296409",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "1.71",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "fcfIncome2024",
+              "expression": "3756/2945",
+              "expectedValue": "1.275382003395585738539898132",
+              "expectedRoundedTwoDecimals": "1.28",
+              "observedValue": "1.28",
+              "unit": "ratio",
+              "absoluteError": "0.004617996604414261460101868",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "1.28",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "fcfIncome2025",
+              "expression": "3480/2618",
+              "expectedValue": "1.329258976317799847211611917",
+              "expectedRoundedTwoDecimals": "1.33",
+              "observedValue": "1.33",
+              "unit": "ratio",
+              "absoluteError": "0.000741023682200152788388083",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "1.33",
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "grossCapex2025",
+              "expression": "2499-(1507)",
+              "expectedValue": "992",
+              "expectedRoundedTwoDecimals": "992.00",
+              "observedValue": "992",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "992",
+              "sourceQuoteRefs": [
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "grossCapex2024",
+              "expression": "2850-(1701)",
+              "expectedValue": "1149",
+              "expectedRoundedTwoDecimals": "1149.00",
+              "observedValue": "1149",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "1,149",
+              "sourceQuoteRefs": [
+                "capex36",
+                "capex24"
+              ]
+            },
+            {
+              "label": "receivables2025",
+              "expression": "-1747-(-1582)",
+              "expectedValue": "-165",
+              "expectedRoundedTwoDecimals": "-165.00",
+              "observedValue": "-165",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "-165",
+              "sourceQuoteRefs": [
+                "receivables36",
+                "receivables24"
+              ]
+            },
+            {
+              "label": "inventory2025",
+              "expression": "-449-(-800)",
+              "expectedValue": "351",
+              "expectedRoundedTwoDecimals": "351.00",
+              "observedValue": "351",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "+351",
+              "sourceQuoteRefs": [
+                "inventory36",
+                "inventory24"
+              ]
+            },
+            {
+              "label": "payables2025",
+              "expression": "-1647-(-2083)",
+              "expectedValue": "436",
+              "expectedRoundedTwoDecimals": "436.00",
+              "observedValue": "436",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "+436",
+              "sourceQuoteRefs": [
+                "payables36",
+                "payables24"
+              ]
+            },
+            {
+              "label": "workingCapitalTotal2025",
+              "expression": "-165+351+436",
+              "expectedValue": "622",
+              "expectedRoundedTwoDecimals": "622.00",
+              "observedValue": "622",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "622",
+              "sourceQuoteRefs": [
+                "receivables36",
+                "receivables24",
+                "inventory36",
+                "inventory24",
+                "payables36",
+                "payables24"
+              ]
+            },
+            {
+              "label": "workingCapitalShare2025",
+              "expression": "622/4472*100",
+              "expectedValue": "13.90876565295169946332737030",
+              "expectedRoundedTwoDecimals": "13.91",
+              "observedValue": "13.91",
+              "unit": "percent",
+              "absoluteError": "0.00123434704830053667262970",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "13.91%",
+              "sourceQuoteRefs": [
+                "receivables36",
+                "receivables24",
+                "inventory36",
+                "inventory24",
+                "payables36",
+                "payables24",
+                "ocf36",
+                "ocf24"
+              ]
+            },
+            {
+              "label": "workingCapitalTotal2024",
+              "expression": "(-1521+1138)+(-492+696)+(-2312+2968)",
+              "expectedValue": "477",
+              "expectedRoundedTwoDecimals": "477.00",
+              "observedValue": "477",
+              "unit": "million USD",
+              "absoluteError": "0",
+              "absoluteTolerance": "0.01",
+              "status": "PASS",
+              "answerQuote": "477",
+              "sourceQuoteRefs": [
+                "receivables36",
+                "receivables24",
+                "inventory36",
+                "inventory24",
+                "payables36",
+                "payables24"
+              ]
+            }
+          ],
+          "materialClaimChecks": [
+            {
+              "label": "Absolute cash versus conversion ratio",
+              "status": "PASS",
+              "answerQuotes": [
+                "绝对现金创造",
+                "单位净利润",
+                "资本开支",
+                "营运资本"
+              ],
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "capex36",
+                "capex24"
+              ],
+              "reason": "All are accounting comparisons derived from the reported figures; lower capex cushions the FCF decline without reversing it. Improved ratios are not asserted as proof of underlying collection efficiency."
+            },
+            {
+              "label": "Net-income/other reconciliation contribution",
+              "status": "PASS",
+              "answerQuotes": [
+                "净利润下降",
+                "其他经营项目带来的压力"
+              ],
+              "sourceQuoteRefs": [
+                "income36",
+                "income24",
+                "ocf36",
+                "ocf24",
+                "receivables36",
+                "receivables24",
+                "inventory36",
+                "inventory24",
+                "payables36",
+                "payables24"
+              ],
+              "reason": "Supported as a cash-flow reconciliation: delta OCF=-433, delta income=-327, delta three working-capital items=+145, residual adjustments=-251. No unsupported specific commercial cause is asserted."
+            },
+            {
+              "label": "Working-capital direction and boundaries",
+              "status": "PASS",
+              "answerQuotes": [
+                "占用现金",
+                "贡献现金",
+                "无法直接核对",
+                "未经审计"
+              ],
+              "sourceQuoteRefs": [
+                "receivables36",
+                "receivables24",
+                "inventory36",
+                "inventory24",
+                "payables36",
+                "payables24",
+                "units36",
+                "units24"
+              ],
+              "reason": "Sign interpretation is limited to cash-flow contributions; no asserted company seasonality, intent or future sustainability. Balance movements and operating causes are explicitly left unverified."
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "status": "PASS",
+              "reason": "Material claims are source-backed arithmetic/accounting comparisons; no unprovided company cause."
+            },
+            "numeric_period_correctness": {
+              "status": "PASS",
+              "reason": "All mandatory and additional numbers, periods, signed differences and gross-capex definitions pass Decimal checks."
+            },
+            "counterevidence": {
+              "status": "PASS",
+              "reason": "Preserves positive FCF, lower capex, positive working-capital contributions and improved per-income ratios alongside lower absolute cash flow."
+            },
+            "unknowns": {
+              "status": "PASS",
+              "reason": "Keeps cumulative reconstruction, missing balance-sheet/profit-detail and unaudited-data limitations; no guarantee or invented operating explanation."
+            }
+          },
+          "coverage": "Read the entire saved answer, including every table, repeated numeric statement, explanation, limitations and source section. Repeated identical claims share a check below.",
+          "failedAdditionalNumericLabels": []
+        }
+      },
+      "classification": "PASS",
+      "learningEligibility": "NOT_AN_ANALYSIS_METHOD_FAILURE"
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity-cash-synthesis",
+      "runId": "development-10-1-1",
+      "sourceCaseSha256": "79ed0ac122a75c5d56499b828a3ef7cb5e3e7a6a889ff25ab82cd94e04fba1f4",
+      "sourceCaseRecordSha256": "79ed0ac122a75c5d56499b828a3ef7cb5e3e7a6a889ff25ab82cd94e04fba1f4",
+      "goldRecordSha256": "4c444686e86e920d2b1b30c0d524e56ea1b32120bc50a93cab04565d7bf4319d",
+      "executionFileSha256": "4ac21b76fe9c26deab2102718e3be697d300f37a1a3e8a88a482d7d3dd7e0c50",
+      "reportPath": "evals\\evolution\\batch-learning-validation-20261002\\raw-development-10\\baseline-v1.report.json",
+      "reportSha256": "c687f921b65351ca10b7d27280c781b71d1cd55032c0f4c43df8105e65e37393",
+      "rawResponsePath": "evals\\evolution\\batch-learning-validation-20261002\\raw-development-10\\development-10-1-1.response.json",
+      "rawResponseSha256": "3a55ed920e997d91d78ed598974d72989b8b9fa8ac20306bd672a14f783a05f0",
+      "executionStatus": "FAILED",
+      "executionErrorCode": "TIMEOUT",
+      "analystStatus": "FAILED",
+      "taskOutcome": "DEGRADED",
+      "inputBindingErrors": [],
+      "sourceQuotes": {},
+      "stages": {
+        "analysis": {
+          "verdict": "NO_DATA",
+          "classification": "EXECUTION_FAILURE",
+          "status": "FAILED",
+          "durationMs": 300008,
+          "errorCode": "TIMEOUT",
+          "answerSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "providerCompletionUnknown": true,
+          "providerUsage": [
+            {
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "usageSource": "NO_DATA",
+              "providerCompletionUnknown": true
+            }
+          ],
+          "promptSha256": "0476e8b14d21579c087612f39bdd518894f63cb0792c0fb96a8ca9d15f2b814e",
+          "evidenceSha256": "3cc170bc9edc87f21902013a6e2db8973878f3ca7a47988ccb4c1a038616a274",
+          "requiredFacts": [
+            {
+              "field": "currentRatioCurrent",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E2",
+                "field": "currentRatioCurrent",
+                "value": "0.9746",
+                "unit": "ratio",
+                "currency": "N/A",
+                "period": "2025-11-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "netDebtCurrent",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E2",
+                "field": "netDebtCurrent",
+                "value": "12677.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-11-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "currentRatioPrior",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E2",
+                "field": "currentRatioPrior",
+                "value": "0.9353",
+                "unit": "ratio",
+                "currency": "N/A",
+                "period": "2025-02-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "netDebtPrior",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E2",
+                "field": "netDebtPrior",
+                "value": "11178.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-02-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "operatingNetCashFlow",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "operatingNetCashFlow",
+                "value": "3485",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-02-02/2025-11-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "investingNetCashFlow",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "investingNetCashFlow",
+                "value": "-2790",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-02-02/2025-11-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "financingNetCashFlow",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "financingNetCashFlow",
+                "value": "-1635",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-02-02/2025-11-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "netChangeInCash",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "netChangeInCash",
+                "value": "-940",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-02-02/2025-11-01"
+              },
+              "answerQuotes": []
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p2",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p3",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p4",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p5",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            },
+            "numeric_period_correctness": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            },
+            "counterevidence": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            },
+            "unknowns": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            }
+          },
+          "reason": "Execution failure remains in the planned denominator; no semantic failure or learning label is inferred."
+        },
+        "finalAnswer": {
+          "verdict": "NO_DATA",
+          "classification": "NOT_EXECUTED",
+          "status": "NOT_EXECUTED",
+          "durationMs": null,
+          "errorCode": null,
+          "answerSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "providerCompletionUnknown": false,
+          "providerUsage": [],
+          "promptSha256": null,
+          "evidenceSha256": null,
+          "requiredFacts": [
+            {
+              "field": "currentRatioCurrent",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E2",
+                "field": "currentRatioCurrent",
+                "value": "0.9746",
+                "unit": "ratio",
+                "currency": "N/A",
+                "period": "2025-11-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "netDebtCurrent",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E2",
+                "field": "netDebtCurrent",
+                "value": "12677.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-11-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "currentRatioPrior",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E2",
+                "field": "currentRatioPrior",
+                "value": "0.9353",
+                "unit": "ratio",
+                "currency": "N/A",
+                "period": "2025-02-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "netDebtPrior",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E2",
+                "field": "netDebtPrior",
+                "value": "11178.0000",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-02-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "operatingNetCashFlow",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "operatingNetCashFlow",
+                "value": "3485",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-02-02/2025-11-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "investingNetCashFlow",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "investingNetCashFlow",
+                "value": "-2790",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-02-02/2025-11-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "financingNetCashFlow",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "financingNetCashFlow",
+                "value": "-1635",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-02-02/2025-11-01"
+              },
+              "answerQuotes": []
+            },
+            {
+              "field": "netChangeInCash",
+              "status": "NO_DATA",
+              "expected": {
+                "evidenceId": "E1",
+                "field": "netChangeInCash",
+                "value": "-940",
+                "unit": "million",
+                "currency": "USD",
+                "period": "2025-02-02/2025-11-01"
+              },
+              "answerQuotes": []
+            }
+          ],
+          "requiredPoints": [
+            {
+              "id": "p1",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p2",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p3",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p4",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            },
+            {
+              "id": "p5",
+              "status": "NO_DATA",
+              "answerQuotes": []
+            }
+          ],
+          "dimensions": {
+            "claim_support": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            },
+            "numeric_period_correctness": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            },
+            "counterevidence": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            },
+            "unknowns": {
+              "status": "NO_DATA",
+              "reason": "No completed answer; provider timeout or downstream stage not executed."
+            }
+          },
+          "reason": "Execution failure remains in the planned denominator; no semantic failure or learning label is inferred."
+        }
+      },
+      "classification": "EXECUTION_FAILURE",
+      "learningEligibility": "NOT_AN_ANALYSIS_METHOD_FAILURE"
+    }
+  ]
+}

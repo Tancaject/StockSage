@@ -2,6 +2,7 @@ package com.stocksage.model.dto;
 
 import com.stocksage.agent.PlanAction;
 import com.stocksage.agent.PlanRoute;
+import com.stocksage.agent.RoutingDecisionMetadata.SignalSnapshot;
 
 import java.util.List;
 
@@ -41,6 +42,11 @@ import java.util.List;
  * @param expectedResolvedQueryContains 可选的期望消歧片段
  * @param actualResolvedQuery 执行计划实际使用的有界消歧问题
  * @param contextResolutionMatched 未提供期望片段或实际消歧问题包含该片段时为 true
+ * @param expectedClarification 可选的澄清标签
+ * @param actualClarification 路由元数据 needsClarification（含 Coordinator 安全覆盖，不含 ReadRequest 参数澄清）；缺失或执行失败时为 null
+ * @param clarificationMatched 已声明标签且观测存在时的匹配结果；否则为 null
+ * @param signalDiagnostics 各来源实际候选的安全快照；没有观测时为空
+ * @param reasonCodes 实际路由理由代码；没有观测时为空
  */
 public record PlannerEvalResult(
         String id,
@@ -75,6 +81,15 @@ public record PlannerEvalResult(
         boolean rawRouteMatched,
         String expectedResolvedQueryContains,
         String actualResolvedQuery,
-        boolean contextResolutionMatched
+        boolean contextResolutionMatched,
+        Boolean expectedClarification,
+        Boolean actualClarification,
+        Boolean clarificationMatched,
+        List<SignalSnapshot> signalDiagnostics,
+        List<String> reasonCodes
 ) {
+    public PlannerEvalResult {
+        signalDiagnostics = signalDiagnostics == null ? List.of() : List.copyOf(signalDiagnostics);
+        reasonCodes = reasonCodes == null ? List.of() : List.copyOf(reasonCodes);
+    }
 }

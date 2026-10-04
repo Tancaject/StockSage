@@ -1,0 +1,741 @@
+{
+  "schema": "provider_reasoning_diagnostic_source_review_v1",
+  "createdAt": "2026-10-02T15:17:00.337038+00:00",
+  "arm": "A-candidate-xhigh",
+  "caseId": "pep-fy2025q3-quarter-cash-comparison",
+  "stage": "analysis",
+  "origin": "AI_SOURCE_REVIEW_NOT_HUMAN",
+  "releaseEligible": false,
+  "verdict": "INCOMPLETE",
+  "completeness": {
+    "status": "FAIL",
+    "finishReason": "length",
+    "doneMarker": true,
+    "answerEndsInSourceEntry": true,
+    "firstAnswerSeconds": 388.672,
+    "durationSeconds": 484.094,
+    "reason": "Transport delivered DONE, but the answer ends mid-source entry at the output-token limit. This is not complete natural stop."
+  },
+  "predeclaredLateCompletionCriterion": {
+    "status": "NOT_MET",
+    "met": [
+      "First answer later than 300 seconds",
+      "DONE marker received"
+    ],
+    "notMet": [
+      "finishReason stop and complete answer"
+    ],
+    "supportedObservation": "Reasoning transitioned to answer text without reaching the requested thinking-budget ceiling, but the final report exhausted its text budget."
+  },
+  "semanticScope": "Received text was checked fully. No complete-answer acceptance verdict is assigned to this truncated output. Required values/points pass; two attribution statements are recorded as non-dispositive support concerns.",
+  "requiredFactChecks": [
+    {
+      "field": "quarterConsolidatedNetIncome2025",
+      "expected": "2618.0000",
+      "observed": "2618.0000",
+      "unit": "million",
+      "period": "2025-06-15/2025-09-06",
+      "status": "PASS",
+      "answerLocation": "2.1 core table"
+    },
+    {
+      "field": "quarterOperatingCashFlow2025",
+      "expected": "4472.0000",
+      "observed": "4472.0000",
+      "unit": "million",
+      "period": "2025-06-15/2025-09-06",
+      "status": "PASS",
+      "answerLocation": "2.1 core table"
+    },
+    {
+      "field": "quarterSimpleFreeCashFlow2025",
+      "expected": "3480.0000",
+      "observed": "3480.0000",
+      "unit": "million",
+      "period": "2025-06-15/2025-09-06",
+      "status": "PASS",
+      "answerLocation": "2.1 core table"
+    },
+    {
+      "field": "quarterConsolidatedNetIncome2024",
+      "expected": "2945.0000",
+      "observed": "2945.0000",
+      "unit": "million",
+      "period": "2024-06-16/2024-09-07",
+      "status": "PASS",
+      "answerLocation": "2.1 core table"
+    },
+    {
+      "field": "quarterOperatingCashFlow2024",
+      "expected": "4905.0000",
+      "observed": "4905.0000",
+      "unit": "million",
+      "period": "2024-06-16/2024-09-07",
+      "status": "PASS",
+      "answerLocation": "2.1 core table"
+    },
+    {
+      "field": "quarterSimpleFreeCashFlow2024",
+      "expected": "3756.0000",
+      "observed": "3756.0000",
+      "unit": "million",
+      "period": "2024-06-16/2024-09-07",
+      "status": "PASS",
+      "answerLocation": "2.1 core table"
+    }
+  ],
+  "requiredPointChecks": [
+    {
+      "id": "p1",
+      "status": "PASS",
+      "note": "Covered in the answer; additional material errors are assessed separately."
+    },
+    {
+      "id": "p2",
+      "status": "PASS",
+      "note": "Covered in the answer; additional material errors are assessed separately."
+    },
+    {
+      "id": "p3",
+      "status": "PASS",
+      "note": "Covered in the answer; additional material errors are assessed separately."
+    },
+    {
+      "id": "p4",
+      "status": "PASS",
+      "note": "Covered in the answer; additional material errors are assessed separately."
+    },
+    {
+      "id": "p5",
+      "status": "PASS",
+      "note": "Explicit actual quarter ranges, correct main values/directions and weaker overall cash generation; commercial causes are explicitly qualified in the surrounding uncertainty section."
+    }
+  ],
+  "dimensionsOnReceivedText": {
+    "claim_support": {
+      "status": "NO_DATA",
+      "note": "Core facts and residual-inference labeling are supported; two attribution statements remain support concerns below, and this incomplete answer is not semantically accepted."
+    },
+    "numeric_period_correctness": {
+      "status": "PASS",
+      "note": "All six mandatory values, actual quarter dates, common row differences, displayed ratios within frozen tolerance and both residual reconciliations checked."
+    },
+    "counterevidence": {
+      "status": "PASS",
+      "note": "Positive FCF, lower capex and stronger three-item working-capital contribution are retained beside absolute declines."
+    },
+    "unknowns": {
+      "status": "PASS",
+      "note": "Unlisted half-year acquisition rows are not individually assumed zero. Net residuals are labeled inferences; business causes remain unknown."
+    }
+  },
+  "additionalChecks": {
+    "ratios": [
+      {
+        "name": "net_income_yoy",
+        "expected": "-11.10356536502546689303904924",
+        "observed": "-11.10",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "cfo_yoy",
+        "expected": "-8.827726809378185524974515800",
+        "observed": "-8.83",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "capex_yoy",
+        "expected": "-13.66405570060922541340295909",
+        "observed": "-13.66",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "fcf_yoy",
+        "expected": "-7.348242811501597444089456869",
+        "observed": "-7.35",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "ar_use_reduction",
+        "expected": "56.91906005221932114882506527",
+        "observed": "56.92",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "inventory_contribution_increase",
+        "expected": "72.05882352941176470588235294",
+        "observed": "72.06",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "ap_contribution_decline",
+        "expected": "33.53658536585365853658536585",
+        "observed": "33.54",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "three_working_capital_increase",
+        "expected": "30.39832285115303983228511530",
+        "observed": "30.40",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "cfo_ni_2025",
+        "expected": "1.708174178762414056531703591",
+        "observed": "1.71",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "cfo_ni_2024",
+        "expected": "1.665534804753820033955857385",
+        "observed": "1.67",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "fcf_ni_2025",
+        "expected": "1.329258976317799847211611917",
+        "observed": "1.33",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "fcf_ni_2024",
+        "expected": "1.275382003395585738539898132",
+        "observed": "1.28",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "capex_cfo_2025",
+        "expected": "22.18246869409660107334525939",
+        "observed": "22.18",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      },
+      {
+        "name": "capex_cfo_2024",
+        "expected": "23.42507645259938837920489297",
+        "observed": "23.43",
+        "status": "PASS_WITHIN_FROZEN_TOLERANCE"
+      }
+    ],
+    "common_operating_detail_rows": [
+      {
+        "name": "depreciation",
+        "inputs2025_2024": [
+          2315,
+          1491,
+          2118,
+          1379
+        ],
+        "expected2025_2024": [
+          824,
+          739
+        ],
+        "observed2025_2024": [
+          824,
+          739
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "impairment",
+        "inputs2025_2024": [
+          1960,
+          1860,
+          10,
+          0
+        ],
+        "expected2025_2024": [
+          100,
+          10
+        ],
+        "observed2025_2024": [
+          100,
+          10
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "lease_amortization",
+        "inputs2025_2024": [
+          489,
+          315,
+          438,
+          278
+        ],
+        "expected2025_2024": [
+          174,
+          160
+        ],
+        "observed2025_2024": [
+          174,
+          160
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "share_compensation",
+        "inputs2025_2024": [
+          207,
+          131,
+          260,
+          183
+        ],
+        "expected2025_2024": [
+          76,
+          77
+        ],
+        "observed2025_2024": [
+          76,
+          77
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "restructuring_charges",
+        "inputs2025_2024": [
+          567,
+          426,
+          415,
+          170
+        ],
+        "expected2025_2024": [
+          141,
+          245
+        ],
+        "observed2025_2024": [
+          141,
+          245
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "restructuring_payments",
+        "inputs2025_2024": [
+          -554,
+          -387,
+          -284,
+          -173
+        ],
+        "expected2025_2024": [
+          -167,
+          -111
+        ],
+        "observed2025_2024": [
+          -167,
+          -111
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "pension_expense",
+        "inputs2025_2024": [
+          164,
+          99,
+          114,
+          67
+        ],
+        "expected2025_2024": [
+          65,
+          47
+        ],
+        "observed2025_2024": [
+          65,
+          47
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "pension_payments",
+        "inputs2025_2024": [
+          -400,
+          -354,
+          -300,
+          -263
+        ],
+        "expected2025_2024": [
+          -46,
+          -37
+        ],
+        "observed2025_2024": [
+          -46,
+          -37
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "deferred_tax",
+        "inputs2025_2024": [
+          30,
+          -260,
+          124,
+          142
+        ],
+        "expected2025_2024": [
+          290,
+          -18
+        ],
+        "observed2025_2024": [
+          290,
+          -18
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "tcja_tax_payments",
+        "inputs2025_2024": [
+          -772,
+          -772,
+          -579,
+          -579
+        ],
+        "expected2025_2024": [
+          0,
+          0
+        ],
+        "observed2025_2024": [
+          0,
+          0
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "prepaid_current_assets",
+        "inputs2025_2024": [
+          -223,
+          -354,
+          -200,
+          -365
+        ],
+        "expected2025_2024": [
+          131,
+          165
+        ],
+        "observed2025_2024": [
+          131,
+          165
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "income_tax_payable",
+        "inputs2025_2024": [
+          6,
+          415,
+          426,
+          287
+        ],
+        "expected2025_2024": [
+          -409,
+          139
+        ],
+        "observed2025_2024": [
+          -409,
+          139
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "other",
+        "inputs2025_2024": [
+          -441,
+          -269,
+          -138,
+          -203
+        ],
+        "expected2025_2024": [
+          -172,
+          65
+        ],
+        "observed2025_2024": [
+          -172,
+          65
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "product_recall_impact",
+        "inputs2025_2024": [
+          0,
+          0,
+          184,
+          182
+        ],
+        "expected2025_2024": [
+          0,
+          2
+        ],
+        "observed2025_2024": [
+          0,
+          2
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "product_recall_cash_payment",
+        "inputs2025_2024": [
+          -5,
+          -2,
+          -138,
+          -135
+        ],
+        "expected2025_2024": [
+          -3,
+          -3
+        ],
+        "observed2025_2024": [
+          -3,
+          -3
+        ],
+        "status": "PASS"
+      }
+    ],
+    "working_capital": {
+      "2025": [
+        -165,
+        351,
+        436
+      ],
+      "2024": [
+        -383,
+        204,
+        656
+      ],
+      "totals": [
+        622,
+        477
+      ],
+      "change": 145,
+      "status": "PASS"
+    },
+    "investing_rows": [
+      {
+        "name": "capital_spending",
+        "inputs2025_2024": [
+          -2499,
+          -1507,
+          -2850,
+          -1701
+        ],
+        "expected2025_2024": [
+          -992,
+          -1149
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "sales_ppe",
+        "inputs2025_2024": [
+          272,
+          169,
+          177,
+          127
+        ],
+        "expected2025_2024": [
+          103,
+          50
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "acquisitions_and_investments",
+        "inputs2025_2024": [
+          -3176,
+          -3130,
+          -31,
+          -30
+        ],
+        "expected2025_2024": [
+          -46,
+          -1
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "divestitures",
+        "inputs2025_2024": [
+          5,
+          5,
+          145,
+          135
+        ],
+        "expected2025_2024": [
+          0,
+          10
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "maturities",
+        "inputs2025_2024": [
+          425,
+          425,
+          0,
+          0
+        ],
+        "expected2025_2024": [
+          0,
+          0
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "short_investment_net",
+        "inputs2025_2024": [
+          43,
+          22,
+          4,
+          1
+        ],
+        "expected2025_2024": [
+          21,
+          3
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "other_investing",
+        "inputs2025_2024": [
+          -117,
+          -111,
+          15,
+          14
+        ],
+        "expected2025_2024": [
+          -6,
+          1
+        ],
+        "status": "PASS"
+      },
+      {
+        "name": "net_investing",
+        "inputs2025_2024": [
+          -5237,
+          -4127,
+          -2965,
+          -1454
+        ],
+        "expected2025_2024": [
+          -1110,
+          -1511
+        ],
+        "status": "PASS"
+      }
+    ],
+    "operatingReconciliation": {
+      "knownRows": [
+        4244,
+        4902
+      ],
+      "reportedTotals": [
+        4472,
+        4905
+      ],
+      "inferredResiduals": [
+        228,
+        3
+      ],
+      "status": "PASS",
+      "note": "Net residual inference, not proof of separate missing charge/payment amounts."
+    },
+    "investingReconciliation": {
+      "knownRows": [
+        -920,
+        -1086
+      ],
+      "reportedTotals": [
+        -1110,
+        -1511
+      ],
+      "inferredResiduals": [
+        -190,
+        -425
+      ],
+      "status": "PASS",
+      "note": "Residual clearly identified as inference."
+    }
+  },
+  "findings": [
+    {
+      "id": "A01",
+      "type": "OUTPUT_TOKEN_LIMIT",
+      "severity": "COMPLETENESS",
+      "answerLocation": "Source section, final line",
+      "evidence": "finishReason=length; final visible source entry is incomplete."
+    }
+  ],
+  "supportConcernsNotUsedAsNewFailureCriteria": [
+    {
+      "id": "A-N1",
+      "answerLine": 138,
+      "answerQuote": "简化自由现金流 / 净利润从 **1.28** 升至 **1.33**，主要受益于资本支出下降。",
+      "note": "A descriptive link to lower capex is supported, but the word mainly is not established. Under the exact identity FCF/NI=CFO/NI-CAPEX/NI, the observed ratio rise decomposes as shown. Different causal decompositions require explicit assumptions; this note does not create a new frozen requirement.",
+      "ratioDifferenceDecomposition": {
+        "cfo_to_ni_contribution": "0.042639374008594022575846206",
+        "minus_capex_to_ni_contribution": "0.0112375989136200860958675800",
+        "total": "0.0538769729222141086717137860"
+      }
+    },
+    {
+      "id": "A-N2",
+      "answerLine": 159,
+      "answerQuote": "这表明单季盈利质量与现金创造均弱于上年同期。",
+      "note": "The tables establish lower absolute earnings/cash generation, while the cash-to-income ratios rise. Stronger wording about earnings quality is not independently established; recorded as an attribution concern rather than a new numerical failure."
+    }
+  ],
+  "reasoningInspection": {
+    "fullTextInspected": true,
+    "rawContentQuotedInReview": false,
+    "reasoningChars": 37254,
+    "reasoningTokens": 13988,
+    "observation": "The trace revisits the same periods, core values, working-capital signs, unlisted-row inference and report scope several times. There are at least three distinct enumerations of operating-detail results and at least three full/near-full report-outline passes. Some revisits resolve genuine source ambiguity; later passes restate already resolved values and outline choices. No new source evidence or tool result entered during this call.",
+    "approximateRepeatedBlocks": [
+      {
+        "topic": "Operating-detail reconstruction and appendix values",
+        "minimumDistinctPasses": 3,
+        "privateLineRanges": [
+          "37-61",
+          "63-92",
+          "163-200",
+          "280-322"
+        ],
+        "note": "Some later blocks are outline/table restatements rather than fresh arithmetic; not counted as independent evidence."
+      },
+      {
+        "topic": "Report outline and section organization",
+        "minimumDistinctPasses": 3,
+        "privateLineRanges": [
+          "108-158",
+          "227-274",
+          "380-405"
+        ]
+      },
+      {
+        "topic": "Core ratios and year-on-year percentages",
+        "minimumDistinctPasses": 3,
+        "privateLineRanges": [
+          "18-22",
+          "204-210",
+          "350-358"
+        ]
+      }
+    ],
+    "comparisonWithB": "B contains finite sign checks and one full operating reconciliation before drafting; A repeatedly reconstructs/restates a substantially wider report and appendices. This is qualitative trace evidence, not a causal estimate from multiple samples.",
+    "degenerationVerdict": "REPEATED_COMPUTATION_AND_PLANNING_OBSERVED_BUT_NO_FIXED_VERBATIM_INFINITE_LOOP",
+    "limits": "The trace eventually transitioned to answer generation. Do not describe permanent loss of control, an infinite loop, or proof that all elapsed time was caused by repetition."
+  },
+  "limitations": [
+    "AI diagnostic only, no human review or release acceptance.",
+    "Single sample per configuration; model variation and elapsed-time effects remain.",
+    "Transport completion must not be equated with completed answer when finishReason is length.",
+    "No frozen rubric, original response or source evidence was altered."
+  ],
+  "artifactHashes": {
+    "evals/diagnostics/model-root-cause-20261002/plan.json": "3d67e61bd50e14a9dc32c31ed5de7ea27820572b52288c51bffaf21daf93b46f",
+    "evals/diagnostics/model-root-cause-20261002/A-candidate-xhigh/request.json": "1e6a6c1d9ee64ff0fe92b2155b916155f2b06b29588fff42f1cf7cb72ef7c8e6",
+    "evals/diagnostics/model-root-cause-20261002/A-candidate-xhigh/result.json": "c202b86e33f6969b784e90cb27e4fd1ea287ba91b7b81b6da5cf2d20e489b712",
+    "evals/diagnostics/model-root-cause-20261002/A-candidate-xhigh/answer.txt": "e2e414a341e6b8fd0a60cd04e0cbe225294974dcb747747240cc33b186019869",
+    "evals/diagnostics/model-root-cause-20261002/A-candidate-xhigh/reasoning.txt": "d9748da9149b37c8f41b3a77268c95eaabfda07730b8a25598cf7185cd74572f",
+    "evals/evolution/batch-learning-validation-20261002/gold.jsonl": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+    "evals/evolution/batch-learning-validation-20261002/review-policy.json": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+    "evals/evolution_rubric.py": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea"
+  }
+}

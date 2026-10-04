@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "final-synthesis-causal-diagnostic-20260930-001",
+  "createdAt": "2026-09-30T13:27:02.132226+00:00",
+  "authorization": "User requested verification of failure points and root causes; isolated diagnostic only, no candidate release or activation.",
+  "hypothesis": "Mandatory-judgment policy contributes to unsupported final synthesis despite intact correct analyst input.",
+  "design": "Two DEVELOPMENT cases; frozen existing analyst/evidence; 3 repetitions per arm; randomized block order and within-block order; sequential final-only calls.",
+  "changedFactor": "Five-rule mandatory-judgment policy group in first system message; not a single-sentence attribution.",
+  "replacements": [
+    {
+      "before": "- 涉及个股、财报、行情、行业的问题，必须明确表态：标的或这份财报整体偏强还是偏弱、核心看点是什么、核心风险或关键矛盾在哪。先给判断，再用数据支撑判断。",
+      "after": "- 涉及个股、财报、行情、行业的问题，先完成用户要求的事实、计算和解释。结论限于本轮证据能够支持的范围；缺少判断所需证据时，明确说明无法判断。"
+    },
+    {
+      "before": "- 把数字翻译成结论：每个关键指标都要说明它的同比/环比趋势、与同行或历史相比处在什么水平、对公司经营意味着什么。只摆数字、没有“所以呢”的回答不合格。",
+      "after": "- 解释关键指标：仅在本轮证据提供相应比较期、同行数据或经营依据时，说明趋势、相对水平和经营含义；资料不足时保留缺口。"
+    },
+    {
+      "before": "- 给判断不等于编造：在已有数据上做解释、推断和定性判断是你的本职；编造指虚构不存在的数字或事实。证据不足时，说明这是基于现有信息的判断并点出缺口——但不要因此回避表态。",
+      "after": "- 解释、推断和定性判断必须有本轮证据支持，并保留相应的不确定性。缺少结论所需证据时，明确说明不能据此确认，不要求对未知事项表态。"
+    },
+    {
+      "before": "- 给判断不等于给投资建议：你应当对“经营质量好不好”“这份财报强弱”“估值偏高还是偏低”明确表态并给出理由；但不对用户“该不该买入/卖出/加仓”下指令。回答结尾保留一句“仅供参考，不构成投资建议”。",
+      "after": "- 仅陈述本轮证据支持的经营质量、财报或估值结论；不对用户“该不该买入/卖出/加仓”下指令。回答结尾保留一句“仅供参考，不构成投资建议”。"
+    },
+    {
+      "before": "- 结构化 Markdown。分析类问题建议顺序：一句话核心判断 → 关键依据（数据 + 解读）→ 风险与未知 → 一句免责。",
+      "after": "- 结构化 Markdown。分析类问题建议顺序：一句话证据范围内的结论 → 关键依据（数据 + 解读）→ 风险与未知 → 一句免责。"
+    }
+  ],
+  "fixed": [
+    "all other messages",
+    "analyst draft",
+    "official evidence",
+    "query",
+    "qwen3.7-plus",
+    "temperature 0.7",
+    "max output tokens 4096",
+    "same production JAR and Coordinator",
+    "timeout 120 seconds",
+    "one attempt, no retry"
+  ],
+  "randomizationSeed": 2026093001,
+  "maxModelCalls": 12,
+  "moneyCost": "UNPRICED",
+  "sources": [
+    {
+      "caseId": "msft-fy2025-liquidity",
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\raw-development\\responses.jsonl",
+      "sha256": "157043985d5262188acf70b67b4fe2d9e2252ac6a284ea27495f52f51526835e",
+      "sourceRunId": "d0bd83ea-d145-47c2-9d53-ed06f959a041",
+      "analystSha256": "b213e806f0baa9196960eb6d21e716a693337b747961efe8eff58157bf834365",
+      "sourceFinalPromptSha256": "dd97c5354d2289a71d67fdd5841b590553b63083fbc977521966ffbcfc225b2a",
+      "analystCompleteInFinalInput": true,
+      "modelConfiguration": {
+        "analysisTimeoutSeconds": 120,
+        "finalAnswer": [
+          {
+            "modelTier": "STANDARD",
+            "temperature": 0.7,
+            "schemaVersion": 1,
+            "modelName": "qwen3.7-plus",
+            "scope": "final-answer",
+            "kind": "model-invocation",
+            "configurationSource": "REQUEST_OPTIONS",
+            "maxOutputTokens": 4096
+          }
+        ],
+        "provider": {
+          "protocol": "OPENAI_COMPATIBLE",
+          "excluded": "USERINFO_QUERY_FRAGMENT_HEADERS_CREDENTIALS",
+          "scope": "API_CONSTRUCTION",
+          "completions": {
+            "scheme": "",
+            "pathSha256": "2e3b96fc129d494b171c50c85551ee22c27344965d3231728851ed232d91c898",
+            "port": -1,
+            "host": ""
+          },
+          "unknownProviderRevision": true,
+          "base": {
+            "scheme": "https",
+            "pathSha256": "16435b6e8f369c4f10b359d0c6a29d735a79fdbfbb94d8bf97259f7522320110",
+            "port": -1,
+            "host": "dashscope.aliyuncs.com"
+          }
+        },
+        "promptMaxChars": 24000,
+        "analysis": {
+          "temperature": 0.7,
+          "maxTokens": 4096,
+          "unknownProviderRevision": true,
+          "model": "qwen3.7-plus",
+          "scope": "CLIENT_DEFAULTS"
+        }
+      }
+    },
+    {
+      "caseId": "wmt-fy2025-cashflow",
+      "path": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\results\\20260930-packaged-qwen37-baseline\\responses.jsonl",
+      "sha256": "5cdd40359547bdabf630e3807861ba2c252f22887efb6477eb6ad6b774011c21",
+      "sourceRunId": "d2695e30-2a20-46b9-894d-a7a734763bbc",
+      "analystSha256": "2819212f8b31b4fb21d97a867436419ec5f2665aec0ce08802393f52fea142d6",
+      "sourceFinalPromptSha256": "bd39f7226342182ba6a6e69edf0161ee033c8a16462325439ecc83bc81c5d0c2",
+      "analystCompleteInFinalInput": true,
+      "modelConfiguration": {
+        "provider": {
+          "completions": {
+            "port": -1,
+            "host": "",
+            "scheme": "",
+            "pathSha256": "2e3b96fc129d494b171c50c85551ee22c27344965d3231728851ed232d91c898"
+          },
+          "unknownProviderRevision": true,
+          "base": {
+            "port": -1,
+            "host": "dashscope.aliyuncs.com",
+            "scheme": "https",
+            "pathSha256": "16435b6e8f369c4f10b359d0c6a29d735a79fdbfbb94d8bf97259f7522320110"
+          },
+          "protocol": "OPENAI_COMPATIBLE",
+          "excluded": "USERINFO_QUERY_FRAGMENT_HEADERS_CREDENTIALS",
+          "scope": "API_CONSTRUCTION"
+        },
+        "promptMaxChars": 24000,
+        "analysis": {
+          "maxTokens": 4096,
+          "unknownProviderRevision": true,
+          "model": "qwen3.7-plus",
+          "scope": "CLIENT_DEFAULTS",
+          "temperature": 0.7
+        },
+        "analysisTimeoutSeconds": 120,
+        "finalAnswer": [
+          {
+            "scope": "final-answer",
+            "kind": "model-invocation",
+            "configurationSource": "REQUEST_OPTIONS",
+            "maxOutputTokens": 4096,
+            "modelTier": "STANDARD",
+            "temperature": 0.7,
+            "schemaVersion": 1,
+            "modelName": "qwen3.7-plus"
+          }
+        ]
+      }
+    }
+  ],
+  "diagnosisSha256": "6fedd66b8aa97e8d4489389431c30fc65cee652769bb82f94e225b671802739b",
+  "executionSha256": "ba10d485496881917508757c5594a21c3d98a41f08b7ac49f453139bb5330bd2",
+  "primaryOutcome": "No unsupported factual/causal/solvency assertion and all required task facts/calculations retained.",
+  "criteria": {
+    "msft-fy2025-liquidity": [
+      "Required cash30242,noncurrent long-term debt40152,current assets191131,current liabilities141218,ratio1.35; unit million USD, FY2025.",
+      "Short-term debt zero must not become all near-term interest-bearing obligations zero: current LT debt2999 remains. Mere omission of2999 without zero-debt claim is not itself failure.",
+      "Unearned revenue may settle through service; no evidence cash fulfillment costs vanish or entire balance can be excluded to prove safety.",
+      "Static coverage is supported; overall solvency assurance lacks cashflow,restricted funds,maturity evidence."
+    ],
+    "wmt-fy2025-cashflow": [
+      "CFO36443 minus gross cash PPE23783 equals12660; capex/CFO65.2608%; FY2025,million USD.",
+      "No asserted capex allocation to supply chain,stores,ecommerce without disclosed breakdown; explicitly hypothetical/examples of missing detail are allowed.",
+      "CFO covers specified annual gross capex; does not prove no external financing needed or all shareholder-return commitments fully covered. General possible uses of residual cash are allowed."
+    ]
+  },
+  "review": "Opaque output IDs, source-based AI review with exact quotes, assess all additional claims and task coverage; raw results retained. Prior context exposure means not formal independent blind review.",
+  "limits": [
+    "Purposively selected two failed final cases; diagnostic not population benchmark.",
+    "One policy group, prompt length also changes; cannot attribute effect to one sentence.",
+    "No model-comparison or RAG validation; no model-weight causal claim.",
+    "No holdout/validation cases; no new fundamentals candidate or production change."
+  ]
+}

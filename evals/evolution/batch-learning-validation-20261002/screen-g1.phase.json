@@ -1,0 +1,50 @@
+{
+  "schema": "fundamentals_registered_subset_phase_v1",
+  "phaseId": "individual-screening-group-1",
+  "registeredAt": "2026-10-02T13:24:03.125738+00:00",
+  "planSha256": "fa948d7e1ffc12ec4e3509990f214d25a4cf005fabba9289bf62273be1b12663",
+  "auditPhaseSha256": "60132f732ce0706771dcf1cea189ac262a70c6e8841a5f2d6758782e1d9bda15",
+  "split": "DEVELOPMENT",
+  "prefix": "screen-g1-",
+  "bundleId": "candidate-a7a92cfaac38c01535486362",
+  "bundleFile": "generated/group-1/bundle.json",
+  "bundleFileSha256": "f6f1729a9360af217e4e435a5fd6a457bb3390e27cfdb47b92f81cebb770793c",
+  "controlsSha256": "cf9f78ea2cbd143d6590f7ead67bbec214bc38db732ea450397f2f439ba3eb2f",
+  "generationRegistrationSha256": "d29fd83e78c35e06e59d0150ec65eee99848f8c555da377dabadaf0626c18104",
+  "expectedRuns": [
+    {
+      "caseId": "tgt-fy2025q3-quarter-reconstruction",
+      "runId": "screen-g1-01-1-1"
+    },
+    {
+      "caseId": "ibm-fy2025q3-quarter-control",
+      "runId": "screen-g1-02-1-1"
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity",
+      "runId": "screen-g1-03-1-1"
+    }
+  ],
+  "executions": [
+    {
+      "path": "evals/evolution/batch-learning-validation-20261002/screen-g1-01.execution.json",
+      "sha256": "73c7af993d02679dce6519f16bb39d5abe976e925d20408c441579a68ae480a0"
+    },
+    {
+      "path": "evals/evolution/batch-learning-validation-20261002/screen-g1-02.execution.json",
+      "sha256": "46c74bf1b2c5b7302944442c30fceb319133532bddb99a7f3423c98180b38b75"
+    },
+    {
+      "path": "evals/evolution/batch-learning-validation-20261002/screen-g1-03.execution.json",
+      "sha256": "315402865530750c1165844b4abfbf67e1de181d2e3bf2aedc92e6220a870334"
+    }
+  ],
+  "baselineRuns": [
+    "development-05-1-1",
+    "development-01-1-1",
+    "development-06-1-1"
+  ],
+  "criterion": "Correct own-group analysis failure, all six stages assessable and no material final-answer or numeric regression on own case and controls.",
+  "automaticRetries": 0,
+  "releaseEligible": false
+}

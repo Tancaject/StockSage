@@ -1,0 +1,19 @@
+{
+  "schema": "judge_pilot_outcome_v1",
+  "status": "DIAGNOSTIC_COMPLETE_NOT_QUALIFIED",
+  "attempts": 96,
+  "provider_calls": 318,
+  "provider_tokens": 567425,
+  "proposal_tokens": 21753,
+  "monetary_cost": null,
+  "pricing_status": "UNCONFIGURED",
+  "selected": "baseline",
+  "candidate_installed": false,
+  "candidate_comparison_passed": false,
+  "judge_reliability_accepted": false,
+  "pilot_validation_state": "USED_FOR_THIS_FROZEN_VERSION",
+  "business_holdout": "UNTOUCHED",
+  "label_origin": "AI_SOURCE_CHECKED",
+  "answer_origin": "AUTHORED_CALIBRATION",
+  "release_eligible": false
+}

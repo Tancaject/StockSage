@@ -1,0 +1,17 @@
+{
+  "schema": "reasoning_cause_binding_verification_v1",
+  "verifiedAt": "2026-10-02T15:26:02.974063+00:00",
+  "status": "PASS",
+  "newFrozenInputs": 5,
+  "originalFrozenInputsUnchanged": 28,
+  "priorRawArtifactsUnchanged": 20,
+  "perArmRequestResponseAndReviewBindings": "PASS",
+  "abOnlyDifference": "thinking_budget",
+  "acOnlyDifference": "604-character insertion in system message; user message identical",
+  "completePowerStateRestorations": 3,
+  "probeSelfCheck": "PASS",
+  "localMarkdownTargetsChecked": 37,
+  "localMarkdownTargets": "PASS",
+  "credentialPatternCheck": "PASS",
+  "scopedDiffCheck": "PASS"
+}

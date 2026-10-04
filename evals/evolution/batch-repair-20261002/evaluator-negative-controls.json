@@ -1,0 +1,86 @@
+{
+  "artifactType": "AUTHORED_EVALUATOR_CONTROL",
+  "humanReviewStatus": "AI_ONLY",
+  "controls": [
+    {
+      "controlId": "pep-quarter-fcf-wrong-number",
+      "sourceRawResponsePath": "evals/evolution/batch-learning-20261002/raw-development-pep/development-pep-1-1.response.json",
+      "stage": "finalAnswer",
+      "replace": {
+        "old": "简化自由现金流为 **3,480 百万美元**。",
+        "new": "简化自由现金流为 **4,480 百万美元**。",
+        "count": 1
+      },
+      "expectedDimensions": {
+        "numeric_period_correctness": "FAIL"
+      },
+      "sourceFactBasis": {
+        "caseId": "pep-fy2025q3-quarter-reconstruction",
+        "field": "quarterSimpleFreeCashFlow",
+        "period": "2025-06-15/2025-09-06",
+        "unit": "million",
+        "currency": "USD",
+        "sourceExtracts": [
+          {
+            "path": "evals/evolution/batch-learning-20261002/sources/PEP-q3-cashflow.txt",
+            "rows": [
+              "Net Cash Provided by Operating Activities 5,468 6,220",
+              "Capital spending (2,499) (2,850)"
+            ]
+          },
+          {
+            "path": "evals/evolution/batch-learning-20261002/sources/PEP-q2-cashflow.txt",
+            "rows": [
+              "Net Cash Provided by Operating Activities 996 1,315",
+              "Capital spending (1,507) (1,701)"
+            ]
+          }
+        ],
+        "formula": "(5468 - 996) - (2499 - 1507) = 3480",
+        "correctValue": "3480",
+        "authoredWrongValue": "4480",
+        "whyUnambiguous": "The changed opening sentence asserts an incorrect mandatory answer amount; all later correct repetitions do not make the contradictory amount true. Difference 1000 USD million exceeds frozen tolerance 0.01."
+      }
+    },
+    {
+      "controlId": "tgt-liquidity-wrong-period-column",
+      "sourceRawResponsePath": "evals/evolution/batch-learning-20261002/raw-development-tgt/development-tgt-3-1.response.json",
+      "stage": "finalAnswer",
+      "replace": {
+        "old": "| 指标 | 2025-02-01 | 2025-11-01 | 变化 | 说明 |",
+        "new": "| 指标 | 2024-11-02 | 2025-11-01 | 变化 | 说明 |",
+        "count": 1
+      },
+      "expectedDimensions": {
+        "numeric_period_correctness": "FAIL"
+      },
+      "sourceFactBasis": {
+        "caseId": "tgt-fy2025q3-liquidity",
+        "sourceExtracts": [
+          {
+            "path": "evals/evolution/batch-learning-20261002/sources/TGT-q3-balance.txt",
+            "rows": [
+              "(millions, except footnotes) (unaudited) |  | November 1, 2025 |  | February 1, 2025 |  | November 2, 2024",
+              "Cash and cash equivalents |  | $ 3,822 |  | $ 4,762 |  | $ 3,433",
+              "Current portion of long-term debt and other borrowings |  | 1,133 |  | 1,636 |  | 1,635",
+              "Long-term debt and other borrowings |  | 15,366 |  | 14,304 |  | 14,346"
+            ]
+          }
+        ],
+        "correctPeriod": "2025-02-01",
+        "authoredWrongPeriod": "2024-11-02",
+        "unit": "million",
+        "currency": "USD",
+        "sourceCorrect2025February": {
+          "totalDebt": "1636 + 14304 = 15940",
+          "netDebt": "15940 - 4762 = 11178"
+        },
+        "sourceCorrect2024November": {
+          "totalDebt": "1635 + 14346 = 15981",
+          "netDebt": "15981 - 3433 = 12548"
+        },
+        "whyUnambiguous": "The changed table header binds its retained 15940 total debt and 11178 net debt to the wrong disclosed balance-sheet date. The source has both dates and distinct debt/cash amounts, so this is a provable period/source mismatch, not a date-format preference."
+      }
+    }
+  ]
+}

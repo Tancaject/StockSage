@@ -1,0 +1,83 @@
+{
+  "schema": "fundamentals_repair_judge_plan_v1",
+  "createdAt": "2026-10-02T09:33:00.370715+00:00",
+  "scope": "SAVED_ANSWERS_ADAPTER_REPAIR",
+  "releaseEligible": false,
+  "humanReviewed": false,
+  "change": "Line references resolved by code, complete JSON-fence parsing, explicit 16-calculator per-response limit; native rubric, Decimal tolerance, original answers and gold unchanged.",
+  "expectedRealAnswerStages": 16,
+  "expectedUnavailableStages": 8,
+  "expectedReference": "Independent source review: all 16 available answer stages PASS; unavailable stages stay NO_DATA.",
+  "controlledNegatives": "Two separately registered authored controls; never count as actual business output.",
+  "judgeModel": "qwen3.8-max",
+  "temperature": 0,
+  "thinkingBudget": 4096,
+  "maxTokens": 6000,
+  "timeoutSeconds": 180,
+  "maxCallsPerStage": 4,
+  "maxProviderCalls": 72,
+  "maxConcurrentStageReviews": 8,
+  "acceptance": "No regression in frozen numeric/source checks; all authored wrong-answer controls must be rejected; report technical coverage and all-attempt decision agreement separately, with every failed attempt retained. No automatic release qualification.",
+  "inputs": [
+    {
+      "path": "evals\\evolution_ai_review.py",
+      "sha256": "740d2c9105dd2e342ced0d642c443054cb2ef34244444ee91da8195aef2666f8"
+    },
+    {
+      "path": "evals\\evolution_quality.py",
+      "sha256": "d01b12f5fd0b0ba020ed33301b95e4780a86c527462badd462a82d50647f754e"
+    },
+    {
+      "path": "evals\\evolution_rubric.py",
+      "sha256": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea"
+    },
+    {
+      "path": "evals\\run_evaluation_agent.py",
+      "sha256": "4c7843a9269262fe6398be1f3c95fbf916dfc0c0eb83019626c7f7c15471abdf"
+    },
+    {
+      "path": "evals\\eval_common.py",
+      "sha256": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\cases.jsonl",
+      "sha256": "79dc78e1c056f0c37855875383df2850cea155d14304c218ee294e88bbd213f4"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\gold.jsonl",
+      "sha256": "1b31f7cf00852cb0a4696385faac1954b344a0d50563cd5033ef71b5c106cbc1"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\secondary-review-ibm-jnj.json",
+      "sha256": "ab137c218cdd5f26258a71a2b647f47b84bf8557b21908128906f4f2ea48360a"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\secondary-review-pep-tgt.json",
+      "sha256": "9505dd6f6c6141aae96825fb0fc899fd08b22024bc0badb2e612f5765d0a9fe4"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\raw-development-ibm\\baseline-v1.report.json",
+      "sha256": "2bcab7153c8cee6cc0576bcb9372807678795732c1d0472a8c15eedb75a245c6"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\raw-development-jnj\\baseline-v1.report.json",
+      "sha256": "f4a69188e7f757fb0b52cf357f621ddb043181856cc0a0923b97ea822ae37b1c"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\raw-development-pep\\baseline-v1.report.json",
+      "sha256": "aec0a478c059d2546c4772fa867ce440b5f07d8a5d326af25733fad3ae58d360"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\raw-development-tgt\\baseline-v1.report.json",
+      "sha256": "4366a2e3443e7388f1c4e5c3e611e5600bda7ff5f8d02e8e40f5e5defac1caae"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\raw-development-unsubmitted-ibm\\baseline-v1.report.json",
+      "sha256": "522e2026c0dfd7557b221943b78ba0e970d4d69c889bf894d3c5d5a9a0e957bd"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\raw-development-unsubmitted-jnj\\baseline-v1.report.json",
+      "sha256": "6540723f2b853fef383f75271221d3e6848d2f757e839bf2dc0abd0e0a9604cd"
+    }
+  ]
+}

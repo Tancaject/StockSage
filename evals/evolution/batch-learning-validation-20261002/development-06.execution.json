@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 2,
+  "cases": [
+    {
+      "caseId": "tgt-fy2025q3-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "8a36261f0e5d4e3e7c08518cfb59eaf6958c2c30f0db4ed622a8431dd6ab0114",
+      "query": "按塔吉特（TGT）截至2025-11-01及2025-02-01的资产负债表，计算两个时点的流动比率、有息债务总额和净债务，比较变化后判断短期流动性缓冲。有息债务按一年内到期的长期债务及其他借款加非流动长期债务及其他借款；净债务减去现金和现金等价物。不加入其他负债或扣除其他投资。金额注明单位，比率和百分比保留两位小数。",
+      "resolvedQuery": "按塔吉特（TGT）截至2025-11-01及2025-02-01的资产负债表，计算两个时点的流动比率、有息债务总额和净债务，比较变化后判断短期流动性缓冲。有息债务按一年内到期的长期债务及其他借款加非流动长期债务及其他借款；净债务减去现金和现金等价物。不加入其他负债或扣除其他投资。金额注明单位，比率和百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-02",
+      "context": "[E1] {\"availableAt\":\"2025-11-19T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-11-01\",\"periodStart\":\"2025-02-02\",\"publishedAt\":\"2025-11-19T00:00:00Z\",\"rawSha256\":\"f39c70b4699e8031f401f069c664f5a10e1a0c7ee6d3e1afc90adffd9e98c92b\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://corporate.target.com/press/release/2025/11/target-corporation-reports-third-quarter-earnings\",\"sourceVersion\":\"TGT-FY2025-Q3-balance\",\"target\":\"TGT\",\"unit\":\"million\",\"visibleSha256\":\"f39c70b4699e8031f401f069c664f5a10e1a0c7ee6d3e1afc90adffd9e98c92b\"}\nTARGET CORPORATION\n\nConsolidated Statements of Financial Position\n(millions, except footnotes) (unaudited) |  | November 1, 2025 |  | February 1, 2025 |  | November 2, 2024\nAssets |  |  |  |  |  | \nCash and cash equivalents |  | $ 3,822 |  | $ 4,762 |  | $ 3,433\nInventory |  | 14,896 |  | 12,740 |  | 15,165\nOther current assets |  | 1,984 |  | 1,952 |  | 1,956\nTotal current assets |  | 20,702 |  | 19,454 |  | 20,554\nProperty and equipment, net |  | 33,710 |  | 33,022 |  | 32,931\nOperating lease assets |  | 3,739 |  | 3,763 |  | 3,513\nOther noncurrent assets |  | 1,840 |  | 1,530 |  | 1,533\nTotal assets |  | $ 59,991 |  | $ 57,769 |  | $ 58,531\nLiabilities and shareholders' investment |  |  |  |  |  | \nAccounts payable |  | $ 13,792 |  | $ 13,053 |  | $ 14,419\nAccrued and other current liabilities |  | 6,317 |  | 6,110 |  | 5,738\nCurrent portion of long-term debt and other borrowings |  | 1,133 |  | 1,636 |  | 1,635\nTotal current liabilities |  | 21,242 |  | 20,799 |  | 21,792\nLong-term debt and other borrowings |  | 15,366 |  | 14,304 |  | 14,346\nNoncurrent operating lease liabilities |  | 3,542 |  | 3,582 |  | 3,418\nDeferred income taxes |  | 2,279 |  | 2,303 |  | 2,419\nOther noncurrent liabilities |  | 2,061 |  | 2,115 |  | 2,067\nTotal noncurrent liabilities |  | 23,248 |  | 22,304 |  | 22,250\nShareholders' investment |  |  |  |  |  | \nCommon stock |  | 38 |  | 38 |  | 38\nAdditional paid-in capital |  | 7,157 |  | 6,996 |  | 6,916\nRetained earnings |  | 8,777 |  | 8,090 |  | 8,009\nAccumulated other comprehensive loss |  | (471) |  | (458) |  | (474)\nTotal shareholders' investment |  | 15,501 |  | 14,666 |  | 14,489\nTotal liabilities and shareholders' investment |  | $ 59,991 |  | $ 57,769 |  | $ 58,531\n",
+      "contextSha256": "188296eb2af0315e5816ed9223ad950fe686cb6e90ec6e839d26af52e0df6cf9",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "TGT",
+      "requestAttributes": {
+        "reportPeriod": "quarterly",
+        "reportCount": 2
+      },
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：TGT\n请求参数：{reportPeriod=quarterly, reportCount=2}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2025-11-19T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-11-01\",\"periodStart\":\"2025-02-02\",\"publishedAt\":\"2025-11-19T00:00:00Z\",\"rawSha256\":\"f39c70b4699e8031f401f069c664f5a10e1a0c7ee6d3e1afc90adffd9e98c92b\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://corporate.target.com/press/release/2025/11/target-corporation-reports-third-quarter-earnings\",\"sourceVersion\":\"TGT-FY2025-Q3-balance\",\"target\":\"TGT\",\"unit\":\"million\",\"visibleSha256\":\"f39c70b4699e8031f401f069c664f5a10e1a0c7ee6d3e1afc90adffd9e98c92b\"}\nTARGET CORPORATION\n\nConsolidated Statements of Financial Position\n(millions, except footnotes) (unaudited) |  | November 1, 2025 |  | February 1, 2025 |  | November 2, 2024\nAssets |  |  |  |  |  | \nCash and cash equivalents |  | $ 3,822 |  | $ 4,762 |  | $ 3,433\nInventory |  | 14,896 |  | 12,740 |  | 15,165\nOther current assets |  | 1,984 |  | 1,952 |  | 1,956\nTotal current assets |  | 20,702 |  | 19,454 |  | 20,554\nProperty and equipment, net |  | 33,710 |  | 33,022 |  | 32,931\nOperating lease assets |  | 3,739 |  | 3,763 |  | 3,513\nOther noncurrent assets |  | 1,840 |  | 1,530 |  | 1,533\nTotal assets |  | $ 59,991 |  | $ 57,769 |  | $ 58,531\nLiabilities and shareholders' investment |  |  |  |  |  | \nAccounts payable |  | $ 13,792 |  | $ 13,053 |  | $ 14,419\nAccrued and other current liabilities |  | 6,317 |  | 6,110 |  | 5,738\nCurrent portion of long-term debt and other borrowings |  | 1,133 |  | 1,636 |  | 1,635\nTotal current liabilities |  | 21,242 |  | 20,799 |  | 21,792\nLong-term debt and other borrowings |  | 15,366 |  | 14,304 |  | 14,346\nNoncurrent operating lease liabilities |  | 3,542 |  | 3,582 |  | 3,418\nDeferred income taxes |  | 2,279 |  | 2,303 |  | 2,419\nOther noncurrent liabilities |  | 2,061 |  | 2,115 |  | 2,067\nTotal noncurrent liabilities |  | 23,248 |  | 22,304 |  | 22,250\nShareholders' investment |  |  |  |  |  | \nCommon stock |  | 38 |  | 38 |  | 38\nAdditional paid-in capital |  | 7,157 |  | 6,996 |  | 6,916\nRetained earnings |  | 8,777 |  | 8,090 |  | 8,009\nAccumulated other comprehensive loss |  | (471) |  | (458) |  | (474)\nTotal shareholders' investment |  | 15,501 |  | 14,666 |  | 14,489\nTotal liabilities and shareholders' investment |  | $ 59,991 |  | $ 57,769 |  | $ 58,531\n",
+      "preAnalystContextSha256": "542370e85de7874fb744b7c888ad095df026d52177de6f8fa2d0a39f05269077",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261002-batch-learning",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-02T08:23:03.229467+00:00",
+        "asOfInstant": "2026-10-02T08:23:03.229467+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-02T08:23:03.229467+00:00",
+        "sourceManifestSha256": "0dacb5cabf217e2d0687141eaafc28c814e99ac3a54e14962f243650cc58c418"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2025-11-19T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-11-01",
+          "periodStart": "2025-02-02",
+          "publishedAt": "2025-11-19T00:00:00Z",
+          "rawSha256": "f39c70b4699e8031f401f069c664f5a10e1a0c7ee6d3e1afc90adffd9e98c92b",
+          "retrievedAt": "2026-10-02T08:17:08.907227+00:00",
+          "sourceRef": "https://corporate.target.com/press/release/2025/11/target-corporation-reports-third-quarter-earnings",
+          "sourceVersion": "TGT-FY2025-Q3-balance",
+          "target": "TGT",
+          "unit": "million",
+          "visibleSha256": "f39c70b4699e8031f401f069c664f5a10e1a0c7ee6d3e1afc90adffd9e98c92b",
+          "visibleText": "TARGET CORPORATION\n\nConsolidated Statements of Financial Position\n(millions, except footnotes) (unaudited) |  | November 1, 2025 |  | February 1, 2025 |  | November 2, 2024\nAssets |  |  |  |  |  | \nCash and cash equivalents |  | $ 3,822 |  | $ 4,762 |  | $ 3,433\nInventory |  | 14,896 |  | 12,740 |  | 15,165\nOther current assets |  | 1,984 |  | 1,952 |  | 1,956\nTotal current assets |  | 20,702 |  | 19,454 |  | 20,554\nProperty and equipment, net |  | 33,710 |  | 33,022 |  | 32,931\nOperating lease assets |  | 3,739 |  | 3,763 |  | 3,513\nOther noncurrent assets |  | 1,840 |  | 1,530 |  | 1,533\nTotal assets |  | $ 59,991 |  | $ 57,769 |  | $ 58,531\nLiabilities and shareholders' investment |  |  |  |  |  | \nAccounts payable |  | $ 13,792 |  | $ 13,053 |  | $ 14,419\nAccrued and other current liabilities |  | 6,317 |  | 6,110 |  | 5,738\nCurrent portion of long-term debt and other borrowings |  | 1,133 |  | 1,636 |  | 1,635\nTotal current liabilities |  | 21,242 |  | 20,799 |  | 21,792\nLong-term debt and other borrowings |  | 15,366 |  | 14,304 |  | 14,346\nNoncurrent operating lease liabilities |  | 3,542 |  | 3,582 |  | 3,418\nDeferred income taxes |  | 2,279 |  | 2,303 |  | 2,419\nOther noncurrent liabilities |  | 2,061 |  | 2,115 |  | 2,067\nTotal noncurrent liabilities |  | 23,248 |  | 22,304 |  | 22,250\nShareholders' investment |  |  |  |  |  | \nCommon stock |  | 38 |  | 38 |  | 38\nAdditional paid-in capital |  | 7,157 |  | 6,996 |  | 6,916\nRetained earnings |  | 8,777 |  | 8,090 |  | 8,009\nAccumulated other comprehensive loss |  | (471) |  | (458) |  | (474)\nTotal shareholders' investment |  | 15,501 |  | 14,666 |  | 14,489\nTotal liabilities and shareholders' investment |  | $ 59,991 |  | $ 57,769 |  | $ 58,531\n"
+        }
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "runId": "development-06-1-1",
+      "caseId": "tgt-fy2025q3-liquidity",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    }
+  ],
+  "context": {
+    "experimentId": "fundamentals-batch-learning-validation-20261002",
+    "evaluatorVersion": "9596583720838d6dca2a514788ecf9eaa00072401cf66d3df3b4f16a89bc006e",
+    "runMode": "DEVELOPMENT"
+  }
+}

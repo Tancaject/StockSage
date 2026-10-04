@@ -1,0 +1,15 @@
+{
+  "harness_policy_id_expected": "deep-equity-v1",
+  "harness_policy_version_expected": 6,
+  "harness_case_count_min": 60,
+  "harness_exact_accuracy_min": 1.0,
+  "harness_decision_contract_exact_match_rate_min": 1.0,
+  "harness_violation_exact_match_rate_min": 1.0,
+  "harness_recovery_exact_match_rate_min": 1.0,
+  "harness_unsafe_pass_count_max": 0,
+  "harness_live_case_count_min": 30,
+  "harness_live_dataset_sha256_expected": "137682582a19674681da154d4689f96aa4a3de4242300648f0c6af1fc03ab223",
+  "harness_live_completed_rate_min": 1.0,
+  "harness_live_safe_terminal_rate_min": 1.0,
+  "harness_live_unsafe_result_count_max": 0
+}

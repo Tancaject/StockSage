@@ -1,0 +1,14 @@
+{
+  "schema": "provider_reasoning_cause_diagnostic_v1",
+  "registeredAt": "2026-10-03T14:07:23.840583+00:00",
+  "source": "D:\\programming\\StockSage\\evals\\evolution\\learning-revision-20261003\\input-05-revised.json",
+  "sourceSha256": "807c77667fa2fcc7145eeb83dc68f84fef67ef46fdd7bc3a7237d6255d9755f4",
+  "stage": "analysis",
+  "requestSha256": "4e86ec95d1d79428797cc8d2cbc29d2bc549c96228d25becc52d1d2171eea700",
+  "transport": "PYTHON_STDLIB_HTTPS_DIRECT_NO_PROXY",
+  "maxCalls": 1,
+  "retries": 0,
+  "deadlineSeconds": 600,
+  "qualityAssessed": false,
+  "limits": "Transport diagnostic; sampling and execution time differ from the original Java call."
+}

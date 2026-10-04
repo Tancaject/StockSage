@@ -1,0 +1,29 @@
+{
+  "status": "FAILED",
+  "startedAt": "2026-10-03T14:08:48.078903+00:00",
+  "headersSeconds": 2.656,
+  "firstEventSeconds": 2.656,
+  "firstReasoningSeconds": 2.656,
+  "firstAnswerSeconds": 537.937,
+  "lastEventSeconds": 599.89,
+  "maxEventGapSeconds": 2.656,
+  "events": 6353,
+  "reasoningChars": 53086,
+  "answerChars": 4052,
+  "usage": null,
+  "finishReason": null,
+  "doneMarker": false,
+  "httpStatus": 200,
+  "responseHeaders": {
+    "content-type": "text/event-stream;charset=utf-8",
+    "x-request-id": "bbbc75a0-18cf-9c11-b06d-de1284070a0c",
+    "server": "istio-envoy",
+    "transfer-encoding": "chunked"
+  },
+  "responseId": "chatcmpl-bbbc75a0-18cf-9c11-b06d-de1284070a0c",
+  "errorType": "TimeoutError",
+  "error": "The read operation timed out",
+  "powerStateRestored": true,
+  "automaticSleepInhibited": true,
+  "durationSeconds": 600.0
+}

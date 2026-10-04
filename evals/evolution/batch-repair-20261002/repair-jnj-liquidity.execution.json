@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 2,
+  "cases": [
+    {
+      "caseId": "jnj-fy2025q3-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "5f9edbf546f66585d3968dcdeff964fa687210d2d6e96a2e3307ff5260d38150",
+      "query": "按强生（JNJ）截至2025-09-28及2024-12-29的资产负债表，计算两个时点的流动比率、有息债务总额和净债务，比较变化后判断短期流动性缓冲。有息债务按短期的Loans and notes payable加长期债务；净债务减去现金和现金等价物加有价证券。不加入其他负债或扣除其他投资。金额注明单位，比率和百分比保留两位小数。",
+      "resolvedQuery": "按强生（JNJ）截至2025-09-28及2024-12-29的资产负债表，计算两个时点的流动比率、有息债务总额和净债务，比较变化后判断短期流动性缓冲。有息债务按短期的Loans and notes payable加长期债务；净债务减去现金和现金等价物加有价证券。不加入其他负债或扣除其他投资。金额注明单位，比率和百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-02",
+      "context": "[E1] {\"availableAt\":\"2025-10-22T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-28\",\"periodStart\":\"2024-12-30\",\"publishedAt\":\"2025-10-22T00:00:00Z\",\"rawSha256\":\"47d9accc74e33b5340819da93d3a3d9c300f10c1b711c57693dd932a7bb2be91\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://s203.q4cdn.com/636242992/files/doc_financials/2025/q3/3Q-10Q-09-28-25-5.pdf\",\"sourceVersion\":\"JNJ-FY2025-Q3-balance\",\"target\":\"JNJ\",\"unit\":\"million\",\"visibleSha256\":\"47d9accc74e33b5340819da93d3a3d9c300f10c1b711c57693dd932a7bb2be91\"}\nTable of Contents\n\nPart I — Financial information\nItem 1 — Financial statements\nJohnson & Johnson and subsidiaries consolidated balance sheets\n(Unaudited; Dollars in Millions Except Share and Per Share Data)\nSeptember 28, 2025 December 29, 2024\nAssets\nCurrent assets:\nCash and cash equivalents (Note 4) $18,231 24,105\nMarketable securities 331 417\nAccounts receivable, trade, less allowances $176 (2 024, $167 ) 17,611 14,842\nInventories (Note 2) 14,146 12,444\nPrepaid expenses and other 4,292 4,085\nTotal current assets 54,611 55,893\nProperty, plant and equipment at cost 53,375 48,768\nLess: accumulated depreciation (31,037) (28,250)\nProperty, plant and equipment, net 22,338 20,518\nIntangible assets, net (Note 3) 48,737 37,618\nGoodwill (Note 3) 48,048 44,200\nDeferred taxes on income (Note 5) 6,666 10,461\nOther assets 12,416 11,414\nTotal assets $192,816 180,104\nLiabilities and shareholders’ equity\nCurrent liabilities:\nLoans and notes payable $6,387 5,983\nAccounts payable 9,625 10,311\nAccrued liabilities 7,601 8,549\nAccrued rebates, returns and promotions 21,356 17,580\nAccrued compensation and employee related obligations 3,972 4,126\nAccrued taxes on income (Note 5) 1,928 3,772\nTotal current liabilities 50,869 50,321\nLong-term debt (Note 4) 39,408 30,651\nDeferred taxes on income (Note 5) 5,988 2,448\nEmployee related obligations (Note 6) 6,930 7,255\nLong-term taxes payable (Note 5) 418 390\nOther liabilities 9,926 17,549\nTotal liabilities $113,539 108,614\nCommitments and Contingencies (Note 11)\nShareholders’ equity:\nCommon stock — par value $1.00 per share (authorized 4,320,000,000 shares; $3,120 3,120\nissued 3,119,843,000 shares)\nAccumulated other comprehensive income (loss) (Note 7) (15,237) (11,741)\nRetained earnings and Additional paid-in capital 167,281 155,791\nLess: common stock held in treasury, at cost ( 713,648,000 a nd 712,921,000 shares) 75,887 75,680\nTotal shareholders’ equity $79,277 71,490\nTotal liabilities and shareholders’ equity $192,816 180,104\n\nSee Notes to Consolidated Financial Statements\n\n\n\n\n\n\n\nForm 10-Q 1\n",
+      "contextSha256": "a26f962ed13225bd4c8ba324e9281b9a880185a2762c7974034cf940a83dd1f1",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "JNJ",
+      "requestAttributes": {
+        "reportPeriod": "quarterly",
+        "reportCount": 2
+      },
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：JNJ\n请求参数：{reportPeriod=quarterly, reportCount=2}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2025-10-22T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-28\",\"periodStart\":\"2024-12-30\",\"publishedAt\":\"2025-10-22T00:00:00Z\",\"rawSha256\":\"47d9accc74e33b5340819da93d3a3d9c300f10c1b711c57693dd932a7bb2be91\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://s203.q4cdn.com/636242992/files/doc_financials/2025/q3/3Q-10Q-09-28-25-5.pdf\",\"sourceVersion\":\"JNJ-FY2025-Q3-balance\",\"target\":\"JNJ\",\"unit\":\"million\",\"visibleSha256\":\"47d9accc74e33b5340819da93d3a3d9c300f10c1b711c57693dd932a7bb2be91\"}\nTable of Contents\n\nPart I — Financial information\nItem 1 — Financial statements\nJohnson & Johnson and subsidiaries consolidated balance sheets\n(Unaudited; Dollars in Millions Except Share and Per Share Data)\nSeptember 28, 2025 December 29, 2024\nAssets\nCurrent assets:\nCash and cash equivalents (Note 4) $18,231 24,105\nMarketable securities 331 417\nAccounts receivable, trade, less allowances $176 (2 024, $167 ) 17,611 14,842\nInventories (Note 2) 14,146 12,444\nPrepaid expenses and other 4,292 4,085\nTotal current assets 54,611 55,893\nProperty, plant and equipment at cost 53,375 48,768\nLess: accumulated depreciation (31,037) (28,250)\nProperty, plant and equipment, net 22,338 20,518\nIntangible assets, net (Note 3) 48,737 37,618\nGoodwill (Note 3) 48,048 44,200\nDeferred taxes on income (Note 5) 6,666 10,461\nOther assets 12,416 11,414\nTotal assets $192,816 180,104\nLiabilities and shareholders’ equity\nCurrent liabilities:\nLoans and notes payable $6,387 5,983\nAccounts payable 9,625 10,311\nAccrued liabilities 7,601 8,549\nAccrued rebates, returns and promotions 21,356 17,580\nAccrued compensation and employee related obligations 3,972 4,126\nAccrued taxes on income (Note 5) 1,928 3,772\nTotal current liabilities 50,869 50,321\nLong-term debt (Note 4) 39,408 30,651\nDeferred taxes on income (Note 5) 5,988 2,448\nEmployee related obligations (Note 6) 6,930 7,255\nLong-term taxes payable (Note 5) 418 390\nOther liabilities 9,926 17,549\nTotal liabilities $113,539 108,614\nCommitments and Contingencies (Note 11)\nShareholders’ equity:\nCommon stock — par value $1.00 per share (authorized 4,320,000,000 shares; $3,120 3,120\nissued 3,119,843,000 shares)\nAccumulated other comprehensive income (loss) (Note 7) (15,237) (11,741)\nRetained earnings and Additional paid-in capital 167,281 155,791\nLess: common stock held in treasury, at cost ( 713,648,000 a nd 712,921,000 shares) 75,887 75,680\nTotal shareholders’ equity $79,277 71,490\nTotal liabilities and shareholders’ equity $192,816 180,104\n\nSee Notes to Consolidated Financial Statements\n\n\n\n\n\n\n\nForm 10-Q 1\n",
+      "preAnalystContextSha256": "3c28f023fe5a805c1af852f2c732dd232ba052262781a861171ea4d0fcbb95e5",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261002-batch-learning",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-02T08:23:03.229467+00:00",
+        "asOfInstant": "2026-10-02T08:23:03.229467+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-02T08:23:03.229467+00:00",
+        "sourceManifestSha256": "0dacb5cabf217e2d0687141eaafc28c814e99ac3a54e14962f243650cc58c418"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2025-10-22T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-09-28",
+          "periodStart": "2024-12-30",
+          "publishedAt": "2025-10-22T00:00:00Z",
+          "rawSha256": "47d9accc74e33b5340819da93d3a3d9c300f10c1b711c57693dd932a7bb2be91",
+          "retrievedAt": "2026-10-02T08:17:08.907227+00:00",
+          "sourceRef": "https://s203.q4cdn.com/636242992/files/doc_financials/2025/q3/3Q-10Q-09-28-25-5.pdf",
+          "sourceVersion": "JNJ-FY2025-Q3-balance",
+          "target": "JNJ",
+          "unit": "million",
+          "visibleSha256": "47d9accc74e33b5340819da93d3a3d9c300f10c1b711c57693dd932a7bb2be91",
+          "visibleText": "Table of Contents\n\nPart I — Financial information\nItem 1 — Financial statements\nJohnson & Johnson and subsidiaries consolidated balance sheets\n(Unaudited; Dollars in Millions Except Share and Per Share Data)\nSeptember 28, 2025 December 29, 2024\nAssets\nCurrent assets:\nCash and cash equivalents (Note 4) $18,231 24,105\nMarketable securities 331 417\nAccounts receivable, trade, less allowances $176 (2 024, $167 ) 17,611 14,842\nInventories (Note 2) 14,146 12,444\nPrepaid expenses and other 4,292 4,085\nTotal current assets 54,611 55,893\nProperty, plant and equipment at cost 53,375 48,768\nLess: accumulated depreciation (31,037) (28,250)\nProperty, plant and equipment, net 22,338 20,518\nIntangible assets, net (Note 3) 48,737 37,618\nGoodwill (Note 3) 48,048 44,200\nDeferred taxes on income (Note 5) 6,666 10,461\nOther assets 12,416 11,414\nTotal assets $192,816 180,104\nLiabilities and shareholders’ equity\nCurrent liabilities:\nLoans and notes payable $6,387 5,983\nAccounts payable 9,625 10,311\nAccrued liabilities 7,601 8,549\nAccrued rebates, returns and promotions 21,356 17,580\nAccrued compensation and employee related obligations 3,972 4,126\nAccrued taxes on income (Note 5) 1,928 3,772\nTotal current liabilities 50,869 50,321\nLong-term debt (Note 4) 39,408 30,651\nDeferred taxes on income (Note 5) 5,988 2,448\nEmployee related obligations (Note 6) 6,930 7,255\nLong-term taxes payable (Note 5) 418 390\nOther liabilities 9,926 17,549\nTotal liabilities $113,539 108,614\nCommitments and Contingencies (Note 11)\nShareholders’ equity:\nCommon stock — par value $1.00 per share (authorized 4,320,000,000 shares; $3,120 3,120\nissued 3,119,843,000 shares)\nAccumulated other comprehensive income (loss) (Note 7) (15,237) (11,741)\nRetained earnings and Additional paid-in capital 167,281 155,791\nLess: common stock held in treasury, at cost ( 713,648,000 a nd 712,921,000 shares) 75,887 75,680\nTotal shareholders’ equity $79,277 71,490\nTotal liabilities and shareholders’ equity $192,816 180,104\n\nSee Notes to Consolidated Financial Statements\n\n\n\n\n\n\n\nForm 10-Q 1\n"
+        }
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "runId": "repair-jnj-liquidity-1-1",
+      "caseId": "jnj-fy2025q3-liquidity",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    }
+  ],
+  "context": {
+    "experimentId": "fundamentals-batch-repair-20261002",
+    "evaluatorVersion": "28b754f495003bc8267ce3515769836f1dc4f4d7ecbf138f0a230cdc1956bb74",
+    "runMode": "DEVELOPMENT"
+  }
+}

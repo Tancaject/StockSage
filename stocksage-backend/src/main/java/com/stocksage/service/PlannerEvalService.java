@@ -169,7 +169,11 @@ public class PlannerEvalService {
             boolean decisionSourceMatched = matchesOptional(evalCase.expectedDecisionSource(), decisionSource);
             boolean fallback = routing != null && routing.fallback();
             boolean executionGuarded = routing != null
-                    && routing.reasonCodes().contains(Coordinator.MULTI_TARGET_UNSUPPORTED);
+                    && (routing.reasonCodes().contains(Coordinator.MULTI_TARGET_UNSUPPORTED)
+                    || routing.reasonCodes().contains(Coordinator.TARGET_REWRITE_MISMATCH));
+            Boolean actualClarification = routing == null ? null : routing.needsClarification();
+            Boolean clarificationMatched = evalCase.expectedClarification() == null || actualClarification == null
+                    ? null : evalCase.expectedClarification().equals(actualClarification);
             boolean noFallbackMatched = !evalCase.requireNoFallback()
                     || routing != null && !fallback;
             String actualResolvedQuery = Objects.requireNonNullElse(plan.resolvedQuery(), "").trim();
@@ -186,7 +190,8 @@ public class PlannerEvalService {
                     && fineIntentMatched
                     && decisionSourceMatched
                     && noFallbackMatched
-                    && contextResolutionMatched;
+                    && contextResolutionMatched
+                    && (evalCase.expectedClarification() == null || Boolean.TRUE.equals(clarificationMatched));
             return new PlannerEvalResult(
                     evalCase.id(), evalCase.expectedRoute(), plan.route(), planned,
                     missing, forbidden, evalCase.critical(), passed, true,
@@ -212,7 +217,12 @@ public class PlannerEvalService {
                     rawRouteMatched,
                     evalCase.expectedResolvedQueryContains(),
                     actualResolvedQuery,
-                    contextResolutionMatched
+                    contextResolutionMatched,
+                    evalCase.expectedClarification(),
+                    actualClarification,
+                    clarificationMatched,
+                    routing == null ? List.of() : routing.signalDiagnostics(),
+                    routing == null ? List.of() : routing.reasonCodes()
             );
         } catch (Exception ignored) {
             return new PlannerEvalResult(
@@ -225,7 +235,8 @@ public class PlannerEvalService {
                     evalCase.requireNoFallback(), !evalCase.requireNoFallback(), false,
                     !evalCase.recentTurns().isEmpty(), false, false, false, false,
                     evalCase.expectedResolvedQueryContains(), "",
-                    evalCase.expectedResolvedQueryContains() == null
+                    evalCase.expectedResolvedQueryContains() == null,
+                    evalCase.expectedClarification(), null, null, List.of(), List.of()
             );
         }
     }

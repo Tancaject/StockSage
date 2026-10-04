@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-10-1-1",
+    "caseId": "tgt-fy2025q3-liquidity-cash-synthesis",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-validation-20261002\\raw-development-10",
+  "executionSha256": "4ac21b76fe9c26deab2102718e3be697d300f37a1a3e8a88a482d7d3dd7e0c50",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

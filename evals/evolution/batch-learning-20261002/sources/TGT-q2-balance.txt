@@ -1,0 +1,29 @@
+TARGET CORPORATION Consolidated Statements of Financial Position
+
+(millions, except footnotes) (unaudited) |  | August 2, 2025 |  | February 1, 2025 |  | August 3, 2024
+Assets |  |  |  |  |  | 
+Cash and cash equivalents |  | $ 4,341 |  | $ 4,762 |  | $ 3,497
+Inventory |  | 12,881 |  | 12,740 |  | 12,604
+Other current assets |  | 1,812 |  | 1,952 |  | 1,817
+Total current assets |  | 19,034 |  | 19,454 |  | 17,918
+Property and equipment, net |  | 33,568 |  | 33,022 |  | 33,075
+Operating lease assets |  | 3,694 |  | 3,763 |  | 3,545
+Other noncurrent assets |  | 1,555 |  | 1,530 |  | 1,457
+Total assets |  | $ 57,851 |  | $ 57,769 |  | $ 55,995
+Liabilities and shareholders' investment |  |  |  |  |  | 
+Accounts payable |  | $ 12,019 |  | $ 13,053 |  | $ 12,595
+Accrued and other current liabilities |  | 6,068 |  | 6,110 |  | 5,749
+Current portion of long-term debt and other borrowings |  | 1,136 |  | 1,636 |  | 1,640
+Total current liabilities |  | 19,223 |  | 20,799 |  | 19,984
+Long-term debt and other borrowings |  | 15,320 |  | 14,304 |  | 13,654
+Noncurrent operating lease liabilities |  | 3,514 |  | 3,582 |  | 3,444
+Deferred income taxes |  | 2,413 |  | 2,303 |  | 2,495
+Other noncurrent liabilities |  | 1,961 |  | 2,115 |  | 1,989
+Total noncurrent liabilities |  | 23,208 |  | 22,304 |  | 21,582
+Shareholders' investment |  |  |  |  |  | 
+Common stock |  | 38 |  | 38 |  | 38
+Additional paid-in capital |  | 7,084 |  | 6,996 |  | 6,831
+Retained earnings |  | 8,766 |  | 8,090 |  | 8,030
+Accumulated other comprehensive loss |  | (468) |  | (458) |  | (470)
+Total shareholders' investment |  | 15,420 |  | 14,666 |  | 14,429
+Total liabilities and shareholders' investment |  | $ 57,851 |  | $ 57,769 |  | $ 55,995

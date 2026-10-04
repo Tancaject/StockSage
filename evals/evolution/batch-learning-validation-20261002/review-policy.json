@@ -1,0 +1,27 @@
+{
+  "schema": "fundamentals_batch_validation_review_policy_v1",
+  "status": "FROZEN_BEFORE_CALLS",
+  "origin": "AI_SOURCE_REVIEW_NOT_HUMAN",
+  "releaseEligible": false,
+  "standard": "evals/evolution_rubric.py plus each frozen gold requiredPoint and requiredFact",
+  "scope": "Saved real two-stage business answers, independently scored per stage; fixed evidence component replay, not RAG or fullstack acceptance",
+  "rules": [
+    "Use only frozen visible source, periods, units and each question; do not add desirable but unrequested requirements.",
+    "Check every required numeric fact using Decimal and the frozen tolerance; cover all required points.",
+    "Check additional material numeric and factual claims, including arithmetic and accounting directions; correct required numbers alone do not pass an answer.",
+    "Bounded general explanations and explicitly identified possibilities are allowed; definite company causes, managerial intent, peer/history claims require source support.",
+    "Judge claim_support, numeric_period_correctness, counterevidence and unknowns separately with exact answer/source quotes; omissions are assessed against the task and visible evidence.",
+    "A stage passes only when required facts/points and all applicable dimensions pass. Record not-applicable or unjudgeable distinctly.",
+    "Preserve every missing/failed/timed-out/invalid run in the planned denominator; no relabeling or automatic retry.",
+    "Separate provider execution, draft/context completeness and semantic quality; only source-confirmed analysis METHOD_ERROR can feed learning.",
+    "Independent source review owns diagnostic learning feedback; native judge errors do not create business error labels.",
+    "Every proposed method failure gets a second independent source review before generation; trace, feedback and source hashes must bind.",
+    "No transfer case or response may enter the generator input or candidate selection. Freeze one candidate before paired transfer."
+  ],
+  "screening": "At most three mechanism groups. Each experience must correct at least one own-group analysis failure and introduce no material final-answer or numeric regression on its group cases plus two preselected passing control cases. Screen one experience at a time; preserve all attempts.",
+  "combination": "Compose only screened compatible members in a fixed recorded order. Compare the composite on the development set before selection. Preserve the baseline method verbatim.",
+  "transfer": "One fixed selected bundle, adjacent baseline/candidate pairs with alternating arm order on the 12 existing new-company VALIDATION tasks. No transfer-driven edits. Require positive net final-answer pass change and no new critical numeric/factual failures; report paired counts and descriptive uncertainty, not formal release acceptance.",
+  "stopRule": "If the fixed ten development tasks have no independently confirmed analysis method failures, stop with no candidate and leave transfer unused. Do not increase task difficulty, reduce model budget, or generate generic lessons to force a positive result.",
+  "controlSelection": "Before generator calls, choose the first two fully passing baseline cases from distinct issuers in this fixed priority order, excluding all confirmed failure-group cases: ibm-fy2025q3-quarter-control; tgt-fy2025q3-liquidity; pep-fy2025q3-liquidity; jnj-fy2025q3-quarter-reconstruction; pep-fy2025q3-cash-quality; tgt-fy2025q3-quarter-reconstruction; ibm-fy2025q3-oneoff-cash-comparability; jnj-fy2025q3-cash-deployment-bridge; pep-fy2025q3-quarter-cash-comparison; tgt-fy2025q3-liquidity-cash-synthesis. Stop candidate screening if two distinct-company controls are unavailable.",
+  "generationLimit": "One generator request per confirmed mechanism, at most three mechanisms in one batch. No automatic retry or further generator rounds in this campaign."
+}

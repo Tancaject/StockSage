@@ -1,0 +1,55 @@
+{
+  "scope": "Existing DEVELOPMENT traces only; zero new model calls; Decimal recomputation, no hidden-reasoning inference.",
+  "findings": [
+    {
+      "caseId": "msft-fy2025-growth",
+      "sourceRunId": "384b77a0-1506-4355-85b9-d383fb7e1efe",
+      "sourceResponseFile": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\raw-development\\responses.jsonl",
+      "sourceResponseSha256": "157043985d5262188acf70b67b4fe2d9e2252ac6a284ea27495f52f51526835e",
+      "wrongClaimFragment": "+1.85",
+      "allOperandsVisibleToAnalyst": true,
+      "formula": "(109433/245122 - 88523/211915)*100",
+      "recomputed": "2.871418937169618420133306990",
+      "incorrectFragmentPresentInFinalAnswer": true,
+      "analystExcerpts": [
+        "| **营业利润率** | 45.62% | 44.64% | +0.98 个百分点 | +1.85 个百分点 |"
+      ],
+      "finalExcerpts": [
+        "| **营业利润率** | **45.62%** | **44.64%** | **+0.98 个百分点** | +1.85 个百分点 |"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-cashflow",
+      "sourceRunId": "f6349610-b42d-41b7-861f-7f9ace91920e",
+      "sourceResponseFile": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\raw-development\\responses.jsonl",
+      "sourceResponseSha256": "157043985d5262188acf70b67b4fe2d9e2252ac6a284ea27495f52f51526835e",
+      "wrongClaimFragment": "41.4%",
+      "allOperandsVisibleToAnalyst": true,
+      "formula": "(23783/16857 - 1)*100",
+      "recomputed": "41.08678887109212789938897790",
+      "incorrectFragmentPresentInFinalAnswer": true,
+      "analystExcerpts": [
+        "   - 购建固定资产的现金支出从 FY2023 的 16,857 百万美元增至 FY2025 的 23,783 百万美元，两年累计增长 41.4%。若未来经营现金流增速无法匹配资本开支的扩张节奏，自由现金流可能面临进一步承压的风险。"
+      ],
+      "finalExcerpts": [
+        "| **购建固定资产支出(毛额)** | 23,783 | 20,606 | 16,857 | 两年累计大增41.4%，表明公司正大幅加码实体资产与基础设施投入。 |"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "sourceRunId": "b5f78dee-0e02-4235-b40b-812135651fcc",
+      "sourceResponseFile": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\ai-experiment-001\\raw-development\\responses.jsonl",
+      "sourceResponseSha256": "157043985d5262188acf70b67b4fe2d9e2252ac6a284ea27495f52f51526835e",
+      "wrongClaimFragment": "15,122",
+      "allOperandsVisibleToAnalyst": true,
+      "formula": "1499+800+12825+5923",
+      "recomputed": "21047",
+      "incorrectFragmentPresentInFinalAnswer": false,
+      "analystExcerpts": [
+        "- **长期债务与总负债结构**：FY2025非流动长期债务（33,401）占总负债（163,131）的比例约为20.5%。总负债中包含了大量的经营性负债（如应付账款58,666和各类租赁义务合计15,122），有息债务占比相对有限。"
+      ],
+      "finalExcerpts": []
+    }
+  ],
+  "conclusion": "Errors originated in analyst generation despite visible operands; two incorrect values were copied into final output. Missing retrieval or missing source operands do not explain these instances. This does not identify hidden model reasoning or establish a model capability ceiling."
+}

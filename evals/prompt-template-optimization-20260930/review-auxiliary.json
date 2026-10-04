@@ -1,0 +1,431 @@
+{
+  "schemaVersion": 1,
+  "reviewType": "NON_BLIND_AI_DIAGNOSTIC",
+  "criteriaPolicy": "逐项使用 capture-before/capture-after 与 raw/plan.json 中运行前登记的 criteria；additionalConcerns 不加入原指标分母。",
+  "limits": [
+    "非盲 AI 复核，不是独立人工或正式发布验收。",
+    "每类每组仅一次调用，不支持稳定提升或统计显著性结论。",
+    "条件性的一般机制解释不自动视为幻觉；对未知具体项目给出无证据的确定结论才计为相应问题。",
+    "新闻后版关于营收的一句含“通常”但后接“不会”的无条件表达，主判按未提供项目进度时的无依据收入影响计 ISSUE；若全句严格解释为一般原理，原定三项可判 PASS，但 additionalConcerns 中具体 Azure/AI 和长期增长意图仍未解决。"
+  ],
+  "criteriaSources": [
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/capture-before.json",
+      "sha256": "0139d40761903cc1b0b8d87c7ec713bf503588bd986e3131e0d97d40cf041fc2"
+    },
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/capture-after.json",
+      "sha256": "a5ec0fb459fa3851be3bc8528e32ba2e7a02132510b418da1f8a697f2ffb87a2"
+    },
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/raw/plan.json",
+      "sha256": "ef3e12119ddc4812da039199674384d61903349c10c4089cdb6cb64ea46c558d"
+    }
+  ],
+  "responseProofs": [
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/raw/449e1c6e-a5e2-44b8-bae2-cd76d65cf749.response.json",
+      "sha256": "203c587e8a262a4d75038d9a87f43171c0d66754cc89dc7aea536fec63720279"
+    },
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/raw/6b2c391a-5f9a-4868-ad72-4f61055cfdf8.response.json",
+      "sha256": "7bfda585e23c081c903330fa5dc192fe052a90f9fd152ac0c09a1f2c85610920"
+    },
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/raw/0c231e1b-2a95-490d-8dd1-13d413715c18.response.json",
+      "sha256": "8c25985e69b505b7bbd1145ff87550352edf8dc67889ce76bdaeb7f2c9c623e5"
+    },
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/raw/054f5f28-b299-4ea6-836c-ff556cb2290c.response.json",
+      "sha256": "5dd660f8d778a42e896a524fae10b1ee3a9793242c7afb78870a285093278059"
+    },
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/raw/aa7cdafe-febf-4cd2-a0e2-a1907fcb8cda.response.json",
+      "sha256": "28f9ff8197ca2f0d055a75b81cf40256746020dc636941b8a2c73f76b2b489ff"
+    },
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/raw/5146cd17-5d05-4ad9-ac90-45ec5f1f391d.response.json",
+      "sha256": "e061f50231923f648d180c5e404517a42e657c1a6d6ec09dde6368d8c3f4b1fe"
+    },
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/raw/5d41e341-1cd3-4580-aac0-90d25490ff16.response.json",
+      "sha256": "16fa08a98414f37f81564f1b5d321de42af3e6736c82a11d26426d2ff5f5202e"
+    },
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/raw/53a5b037-d729-45ee-9095-89073cc181da.response.json",
+      "sha256": "c699c96f0547b4423a48d1300579d5ff222bb8ddbd71e85a0546cc58a4e7715e"
+    },
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/raw/f4df4576-8a05-4752-8754-c8a6c5ace992.response.json",
+      "sha256": "0eb3b9cd2e2bacf77e17d333895f23eddc38988b442408740795ed2bf9c2c3fc"
+    },
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/raw/df596635-f9e7-4884-913e-9a4ca1a4b285.response.json",
+      "sha256": "99d4439ab77133310079a8f230bb621fdbdc9ae396f796d3d09560c252fc9073"
+    },
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/raw/28a9a743-a353-4e2f-97b9-f400f89d61f1.response.json",
+      "sha256": "3fbc0d4e40e4721aa1a675d03c8372caab860389262c976adba5c20d3ed52706"
+    },
+    {
+      "path": "rag-eval/prompt-template-optimization-20260930/raw/331b3638-a703-48a6-b8c1-053397821ed1.response.json",
+      "sha256": "bad08d82fbf747b6f7bc919b5ad5f808b3a835b0790287ec5b9567c3a9e205cd"
+    }
+  ],
+  "rows": [
+    {
+      "caseId": "rewrite-comparison-exclusion",
+      "arm": "before",
+      "callId": "449e1c6e-a5e2-44b8-bae2-cd76d65cf749",
+      "criteriaResults": [
+        {
+          "criterion": "保留 MSFT、2025/2024 财年、经营现金流与两年比较关系",
+          "status": "PASS",
+          "reason": "MSFT 与 FY2025/FY2024 并列，经营现金流术语完整；关键词输出不要求出现字面 compare。",
+          "evidenceQuote": "MSFT Microsoft FY2025 FY2024 operating cash flow"
+        },
+        {
+          "criterion": "保留不讨论股价的排除条件",
+          "status": "PASS",
+          "reason": "明确保留排除股价。",
+          "evidenceQuote": "excluding stock price"
+        },
+        {
+          "criterion": "只输出一行检索词，不新增公司、日期或财务事实",
+          "status": "PASS",
+          "reason": "单行关键词；Microsoft 是 MSFT 的同实体名称，没有新增公司、日期或财务数据。",
+          "evidenceQuote": "annual report 10-K excluding stock price"
+        }
+      ],
+      "overall": "PASS",
+      "issues": [],
+      "additionalConcerns": []
+    },
+    {
+      "caseId": "rewrite-comparison-exclusion",
+      "arm": "after",
+      "callId": "6b2c391a-5f9a-4868-ad72-4f61055cfdf8",
+      "criteriaResults": [
+        {
+          "criterion": "保留 MSFT、2025/2024 财年、经营现金流与两年比较关系",
+          "status": "PASS",
+          "reason": "标的、两个财年、指标及比较关系明确保留。",
+          "evidenceQuote": "MSFT 2025 2024 财年 经营现金流 比较"
+        },
+        {
+          "criterion": "保留不讨论股价的排除条件",
+          "status": "PASS",
+          "reason": "明确保留排除条件。",
+          "evidenceQuote": "不讨论股价"
+        },
+        {
+          "criterion": "只输出一行检索词，不新增公司、日期或财务事实",
+          "status": "PASS",
+          "reason": "单行关键词，无新增公司、日期或财务事实。",
+          "evidenceQuote": "MSFT 2025 2024 财年 经营现金流 比较 不讨论股价"
+        }
+      ],
+      "overall": "PASS",
+      "issues": [],
+      "additionalConcerns": []
+    },
+    {
+      "caseId": "summary-correction-uncertainty",
+      "arm": "after",
+      "callId": "0c231e1b-2a95-490d-8dd1-13d413715c18",
+      "criteriaResults": [
+        {
+          "criterion": "保留用户提出的 90 对 100 的更正",
+          "status": "PASS",
+          "reason": "明确保留用户更正为 90，而非 100。",
+          "evidenceQuote": "用户指出原报告中净利润为 90，不是 100"
+        },
+        {
+          "criterion": "需求回暖仍是助手未核实的推测，不写成确定原因",
+          "status": "PASS",
+          "reason": "明确归属助手并保留未核实状态。",
+          "evidenceQuote": "“增长可能来自需求回暖”仅为助手推测，尚未核实"
+        },
+        {
+          "criterion": "保留 AAPL 现金流的研究目标及原因待查",
+          "status": "PASS",
+          "reason": "保留研究目标及原因待查。",
+          "evidenceQuote": "用户目标：查看 AAPL 的现金流。"
+        }
+      ],
+      "overall": "PASS",
+      "issues": [],
+      "additionalConcerns": []
+    },
+    {
+      "caseId": "summary-correction-uncertainty",
+      "arm": "before",
+      "callId": "054f5f28-b299-4ea6-836c-ff556cb2290c",
+      "criteriaResults": [
+        {
+          "criterion": "保留用户提出的 90 对 100 的更正",
+          "status": "PASS",
+          "reason": "保留用户更正及被更正数值。",
+          "evidenceQuote": "用户更正称原报告净利润为 90，不是 100"
+        },
+        {
+          "criterion": "需求回暖仍是助手未核实的推测，不写成确定原因",
+          "status": "PASS",
+          "reason": "先前需求解释仍标为推测和未查证，没有升级为事实。",
+          "evidenceQuote": "此前“增长可能来自需求回暖”仅为推测"
+        },
+        {
+          "criterion": "保留 AAPL 现金流的研究目标及原因待查",
+          "status": "PASS",
+          "reason": "保留 AAPL 现金流目标与增长来源待核实。",
+          "evidenceQuote": "用户目标：查看/分析 AAPL 的现金流。"
+        }
+      ],
+      "overall": "PASS",
+      "issues": [],
+      "additionalConcerns": []
+    },
+    {
+      "caseId": "profile-assistant-suggestion",
+      "arm": "before",
+      "callId": "aa7cdafe-febf-4cd2-a0e2-a1907fcb8cda",
+      "criteriaResults": [
+        {
+          "criterion": "只输出原契约四字段 JSON",
+          "status": "PASS",
+          "reason": "可直接解析为 JSON，字段恰为原契约四项。",
+          "evidenceQuote": "\"holdings\": []"
+        },
+        {
+          "criterion": "holdings 与 revokedHoldings 为空数组；riskPreference 为 conservative",
+          "status": "PASS",
+          "reason": "两个持仓数组为空，风险偏好为 conservative。",
+          "evidenceQuote": "\"riskPreference\": \"conservative\""
+        },
+        {
+          "criterion": "profileSummary 不把助手建议写成用户已持有 MSFT 或债券",
+          "status": "PASS",
+          "reason": "摘要只记录保守、关注及尚未建仓，没有采纳助手的购买建议。",
+          "evidenceQuote": "偏好保守投资，关注微软但尚未建仓。"
+        }
+      ],
+      "overall": "PASS",
+      "issues": [],
+      "additionalConcerns": []
+    },
+    {
+      "caseId": "profile-assistant-suggestion",
+      "arm": "after",
+      "callId": "5146cd17-5d05-4ad9-ac90-45ec5f1f391d",
+      "criteriaResults": [
+        {
+          "criterion": "只输出原契约四字段 JSON",
+          "status": "PASS",
+          "reason": "可直接解析为 JSON，字段恰为原契约四项。",
+          "evidenceQuote": "\"holdings\": []"
+        },
+        {
+          "criterion": "holdings 与 revokedHoldings 为空数组；riskPreference 为 conservative",
+          "status": "PASS",
+          "reason": "两个持仓数组为空，风险偏好为 conservative。",
+          "evidenceQuote": "\"riskPreference\": \"conservative\""
+        },
+        {
+          "criterion": "profileSummary 不把助手建议写成用户已持有 MSFT 或债券",
+          "status": "PASS",
+          "reason": "摘要明确未买入 MSFT，没有虚构债券持仓。",
+          "evidenceQuote": "用户偏好保守，目前关注 MSFT 但尚未买入。"
+        }
+      ],
+      "overall": "PASS",
+      "issues": [],
+      "additionalConcerns": []
+    },
+    {
+      "caseId": "title-financial-topic",
+      "arm": "after",
+      "callId": "5d41e341-1cd3-4580-aac0-90d25490ff16",
+      "criteriaResults": [
+        {
+          "criterion": "简短中文主题标题，保留 AAPL 及现金流或资本开支主题",
+          "status": "PASS",
+          "reason": "简短中文标题，保留 AAPL、现金流和资本开支。",
+          "evidenceQuote": "AAPL现金流资本开支"
+        },
+        {
+          "criterion": "不回答财务问题、不编造财报结果",
+          "status": "PASS",
+          "reason": "仅命名主题，没有回答财务问题或声称结果。",
+          "evidenceQuote": "AAPL现金流资本开支"
+        },
+        {
+          "criterion": "不输出解释、Markdown 或额外字段",
+          "status": "PASS",
+          "reason": "无解释、Markdown 或额外字段。",
+          "evidenceQuote": "AAPL现金流资本开支"
+        }
+      ],
+      "overall": "PASS",
+      "issues": [],
+      "additionalConcerns": []
+    },
+    {
+      "caseId": "title-financial-topic",
+      "arm": "before",
+      "callId": "53a5b037-d729-45ee-9095-89073cc181da",
+      "criteriaResults": [
+        {
+          "criterion": "简短中文主题标题，保留 AAPL 及现金流或资本开支主题",
+          "status": "PASS",
+          "reason": "简短中文标题，保留 AAPL、现金流和资本开支。",
+          "evidenceQuote": "AAPL现金流资本开支"
+        },
+        {
+          "criterion": "不回答财务问题、不编造财报结果",
+          "status": "PASS",
+          "reason": "仅命名主题，没有回答财务问题或声称结果。",
+          "evidenceQuote": "AAPL现金流资本开支"
+        },
+        {
+          "criterion": "不输出解释、Markdown 或额外字段",
+          "status": "PASS",
+          "reason": "无解释、Markdown 或额外字段。",
+          "evidenceQuote": "AAPL现金流资本开支"
+        }
+      ],
+      "overall": "PASS",
+      "issues": [],
+      "additionalConcerns": []
+    },
+    {
+      "caseId": "news-snippet-missing-event-time",
+      "arm": "before",
+      "callId": "f4df4576-8a05-4752-8754-c8a6c5ace992",
+      "criteriaResults": [
+        {
+          "criterion": "区分发布时间与未知事件发生时间，不断言事件今天发生",
+          "status": "PASS",
+          "reason": "把 2026-09-30 标为发布时间，明确获批日期未提供，没有断言今天获批。",
+          "evidenceQuote": "具体获批日期未提供"
+        },
+        {
+          "criterion": "保留只有摘要、原文未核验限制",
+          "status": "PASS",
+          "reason": "正文保留二手摘要、原文未抓取及缺乏交叉验证；核验标题矛盾另列附加问题。",
+          "evidenceQuote": "该信息为二手摘要，原文未被抓取"
+        },
+        {
+          "criterion": "不编投资额、收入影响或价格因果；可说明潜在影响仍需验证",
+          "status": "ISSUES",
+          "reason": "输入未提供项目开工、资本支出或投产状态，不能据规划许可断言尚未贡献收入或对当期财务报表没有影响。",
+          "evidenceQuote": "也未开始贡献收入，因此对当期财务报表无直接影响"
+        }
+      ],
+      "overall": "ISSUES",
+      "issues": [
+        "输入未提供项目开工、资本支出或投产状态，不能据规划许可断言尚未贡献收入或对当期财务报表没有影响。"
+      ],
+      "additionalConcerns": [
+        {
+          "concern": "标题称“已核验事件时间线”，与正文原文未抓取、无交叉核验冲突；既定第2项只要求保留核验限制，因此不追溯扩大该项判据。",
+          "evidenceQuote": "已核验事件时间线"
+        },
+        {
+          "concern": "未提供项目业务线关联，却把该项目推进解释为满足云和 AI 需求；不应把一般基础设施用途直接套成具体项目事实。",
+          "evidenceQuote": "新项目的推进有助于微软在中长期扩大计算产能，满足日益增长的云和AI算力需求。"
+        }
+      ]
+    },
+    {
+      "caseId": "news-snippet-missing-event-time",
+      "arm": "after",
+      "callId": "df596635-f9e7-4884-913e-9a4ca1a4b285",
+      "criteriaResults": [
+        {
+          "criterion": "区分发布时间与未知事件发生时间，不断言事件今天发生",
+          "status": "PASS",
+          "reason": "分别标明发布时间和未提供的事件时间。",
+          "evidenceQuote": "事件发生时间：未提供。"
+        },
+        {
+          "criterion": "保留只有摘要、原文未核验限制",
+          "status": "PASS",
+          "reason": "明确只有搜索摘要，原文未抓取，未完成独立核验。",
+          "evidenceQuote": "仅有搜索结果摘要，原文未抓取，尚未完成独立核验"
+        },
+        {
+          "criterion": "不编投资额、收入影响或价格因果；可说明潜在影响仍需验证",
+          "status": "ISSUES",
+          "reason": "虽先称具体影响程度无法确认，随后仍以确定语气断言短期不能直接产生显著营收增量；项目进度及收入影响均未提供，不能据摘要作此判断。",
+          "evidenceQuote": "不会在短期内直接转化为显著的营收增量"
+        }
+      ],
+      "overall": "ISSUES",
+      "issues": [
+        "虽先称具体影响程度无法确认，随后仍以确定语气断言短期不能直接产生显著营收增量；项目进度及收入影响均未提供，不能据摘要作此判断。"
+      ],
+      "additionalConcerns": [
+        {
+          "concern": "把未知项目与 Azure/AI 产能及长期增长意图相连，后文又承认缺乏业务线关联证据，形成无依据的项目解释。该项独立列出，不追溯增加预先指标。",
+          "evidenceQuote": "数据中心项目获得规划许可是微软扩充云基础设施（如Azure）和AI算力产能的常规前置步骤，旨在支撑其云服务及人工智能业务的长期增长。"
+        }
+      ]
+    },
+    {
+      "caseId": "replan-financial-gap-stop",
+      "arm": "after",
+      "callId": "28a9a743-a353-4e2f-97b9-f400f89d61f1",
+      "criteriaResults": [
+        {
+          "criterion": "严格四字段 JSON：decision/action/query/reasonCode",
+          "status": "PASS",
+          "reason": "可直接解析为恰好四字段 JSON。",
+          "evidenceQuote": "{\"decision\":\"STOP\",\"action\":null,\"query\":null,\"reasonCode\":\"NO_SAFE_ACTION\"}"
+        },
+        {
+          "criterion": "decision 为 STOP，action 和 query 为 JSON null",
+          "status": "PASS",
+          "reason": "STOP 且 action/query 为真正的 JSON null。",
+          "evidenceQuote": "\"action\":null,\"query\":null"
+        },
+        {
+          "criterion": "reasonCode 为 NO_SAFE_ACTION，不用新闻搜索补财报数字",
+          "status": "PASS",
+          "reason": "NO_SAFE_ACTION，未建议新闻搜索填补财报数值。",
+          "evidenceQuote": "\"reasonCode\":\"NO_SAFE_ACTION\""
+        }
+      ],
+      "overall": "PASS",
+      "issues": [],
+      "additionalConcerns": []
+    },
+    {
+      "caseId": "replan-financial-gap-stop",
+      "arm": "before",
+      "callId": "331b3638-a703-48a6-b8c1-053397821ed1",
+      "criteriaResults": [
+        {
+          "criterion": "严格四字段 JSON：decision/action/query/reasonCode",
+          "status": "PASS",
+          "reason": "可直接解析为恰好四字段 JSON。",
+          "evidenceQuote": "{\"decision\":\"STOP\",\"action\":null,\"query\":null,\"reasonCode\":\"NO_SAFE_ACTION\"}"
+        },
+        {
+          "criterion": "decision 为 STOP，action 和 query 为 JSON null",
+          "status": "PASS",
+          "reason": "STOP 且 action/query 为真正的 JSON null。",
+          "evidenceQuote": "\"action\":null,\"query\":null"
+        },
+        {
+          "criterion": "reasonCode 为 NO_SAFE_ACTION，不用新闻搜索补财报数字",
+          "status": "PASS",
+          "reason": "NO_SAFE_ACTION，未建议新闻搜索填补财报数值。",
+          "evidenceQuote": "\"reasonCode\":\"NO_SAFE_ACTION\""
+        }
+      ],
+      "overall": "PASS",
+      "issues": [],
+      "additionalConcerns": []
+    }
+  ]
+}

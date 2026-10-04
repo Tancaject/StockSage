@@ -1,0 +1,43 @@
+ORACLE CORPORATION
+Q2 FISCAL 2025 FINANCIAL RESULTS
+CONDENSED CONSOLIDATED STATEMENTS OF CASH FLOWS
+($ in millions)
+Six Months Ended November 30,
+2024 2023
+Cash Flows From Operating Activities:
+Net income 6,080 $ 4,923 $
+Adjustments to reconcile net income to net cash provided by operating activities:
+Depreciation 1,712 1,510
+Amortization of intangible assets 1,215 1,518
+Deferred income taxes (601) (1,049)
+Stock-based compensation 2,176 1,878
+Other, net 298 331
+Changes in operating assets and liabilities:
+(Increase) decrease in trade receivables, net (451) 145
+Decrease in prepaid expenses and other assets 676 301
+Decrease in accounts payable and other liabilities (1,143) (1,048)
+Decrease in income taxes payable (1,685) (1,541)
+Increase in deferred revenues 454 149
+Net cash provided by operating activities 8,731 7,117
+Cash Flows From Investing Activities:
+Purchases of marketable securities and other investments (636) (515)
+Proceeds from sales and maturities of marketable securities and other investments 356 157
+Acquisitions, net of cash acquired - (59)
+Capital expenditures (6,273) (2,394)
+Net cash used for investing activities (6,553) (2,811)
+Cash Flows From Financing Activities:
+Payments for repurchases of common stock (300) (600)
+Proceeds from issuances of common stock 307 426
+Shares repurchased for tax withholdings upon vesting of restricted stock-based awards (898) (1,733)
+Payments of dividends to stockholders (2,221) (2,190)
+(Repayments of) proceeds from issuances of commercial paper, net (396) 1,749
+Proceeds from issuances of senior notes and term loan credit agreements, net of issuance costs11,837 -
+Repayments of senior notes and term loan credit agreements (9,700) (3,500)
+Other, net (276) 31
+Net cash used for financing activities (1,647) (5,817)
+Effect of exchange rate changes on cash and cash equivalents (44) (10)
+Net increase (decrease) in cash and cash equivalents 487 (1,521)
+Cash and cash equivalents at beginning of period 10,454 9,765
+Cash and cash equivalents at end of period 10,941$ 8,244 $
+2024 2023
+6

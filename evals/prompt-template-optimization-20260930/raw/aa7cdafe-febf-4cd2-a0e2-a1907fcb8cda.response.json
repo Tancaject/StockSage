@@ -1,0 +1,16 @@
+{
+  "usageSource" : "PROVIDER",
+  "usageSemantics" : "INVOCATION_SNAPSHOT",
+  "actualModel" : "qwen3.8-flash",
+  "providerResponseId" : "chatcmpl-536a9b59-ad93-99e2-bfa6-a6e78d427785",
+  "inputTokens" : 216,
+  "outputTokens" : 253,
+  "totalTokens" : 469,
+  "finishReason" : "STOP",
+  "text" : "{\n  \"holdings\": [],\n  \"revokedHoldings\": [],\n  \"riskPreference\": \"conservative\",\n  \"profileSummary\": \"偏好保守投资，关注微软但尚未建仓。\"\n}",
+  "callId" : "aa7cdafe-febf-4cd2-a0e2-a1907fcb8cda",
+  "caseId" : "profile-assistant-suggestion",
+  "arm" : "before",
+  "elapsedMs" : 3691,
+  "finishedAt" : "2026-09-30T14:09:40.250590500Z"
+}

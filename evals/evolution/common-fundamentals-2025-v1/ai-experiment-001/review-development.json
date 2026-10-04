@@ -1,0 +1,312 @@
+{
+  "reviewType": "AI_SOURCE_GROUNDED",
+  "humanReviewed": false,
+  "publicationAuthorized": false,
+  "reviews": [
+    {
+      "caseId": "msft-fy2025-cashflow",
+      "answerId": "answer-5e223e176d5942438cb0aaf56519f8b3",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「并购支出（5,978 百万美元）」将综合科目缩窄为纯并购。原表该行是收购公司（扣除取得现金和处置）以及无形资产和其他资产购买的合计，未分拆纯并购额；应保留综合科目口径。必答CFO136,162、毛额CapEx64,551、FCF71,611及47.4%均正确，其他年份FCF和已列增长率亦正确。"
+      ]
+    },
+    {
+      "caseId": "msft-fy2025-cashflow",
+      "answerId": "answer-a074b5e12c27474ebb4b0021c1e84f58",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「资金主要流向数据中心、服务器等 IT 基础设施」「说明微软当前的战略重心高度聚焦于底层基础设施的扩张（如 AI 算力中心）」把固定资产购建总额解释为已知具体投向和管理战略。所给现金流量表没有此分项，且回答结尾承认资本开支具体投向不明。必答与所列同比、FCF下降3.3%等额外计算正确。"
+      ]
+    },
+    {
+      "caseId": "msft-fy2025-cashflow",
+      "answerId": "answer-8c9cda8d42ef4ebca7531dab3194631a",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「以支撑云计算和AI业务的底层基础设施扩张」将购建固定资产支出确认为特定业务目的。E1只有总额，未披露云/AI资产分配；结尾承认投向缺失不能支持前述确定归因。必答金额/公式以及45.1%、14.9%、9.9个百分点和FCF下降3.3%的额外计算均匹配。"
+      ]
+    },
+    {
+      "caseId": "msft-fy2025-cashflow",
+      "answerId": "answer-75f4b05f1fd24d73bee14e13204700bd",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「从生存和偿债角度看，覆盖能力毫无问题」把当期CFO覆盖指定毛额CapEx扩大为整体偿债结论；71,611百万美元简化FCF尚不等于涵盖全部资金需求的偿债保证。",
+        "「深度转向了需要持续巨额资本投入的 AI 基础设施提供商」将固定资产总额趋势解释为已确认的业务转型；没有具体投向或分部证据。",
+        "「债务净偿还：32.2 亿美元」不符合表内全部债务净现金流：90天及以内债务净偿还5,746，加其他债务偿还3,216，减发行所得0，合计8,962百万美元，即89.62亿美元。3,216百万美元仅为Repayments of debt一行，不能称全体债务净偿还。必答FCF和比例计算正确。"
+      ]
+    },
+    {
+      "caseId": "msft-fy2025-growth",
+      "answerId": "answer-14d402d2dec445979af3865063254ddb",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「同比增速高达约 18.4%」计算不准确：(87,831−74,114)/74,114×100=18.5080%，一位小数应为18.5%；18.4%与精确值相差0.1080个百分点，超过既定0.1个百分点容差。必答收入/营业利润增速及利润率仍正确。",
+        "「高毛利业务结构的优化」「说明其核心业务（云与AI）的需求依然强劲」「暗示 AI 基础设施的巨额投入正在形成成本压力」均超出合并利润表证据。表内服务及其他毛利率约65.87%，低于产品约78.89%；服务收入占比上升不能直接证明高毛利业务结构优化。没有云/AI需求、成本构成或资本开支资料，结尾承认缺分部数据不能确认这些原因。"
+      ]
+    },
+    {
+      "caseId": "msft-fy2025-growth",
+      "answerId": "answer-db549521b16c42d68ad9e120a6191773",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "表中FY2024营业利润率变动「+1.85 个百分点」错误：FY2023营业利润率=88,523/211,915×100=41.7729%，FY2024为44.6443%，应提升2.8714个百分点，约2.87。FY2025相对FY2024的必答计算正确，此处按额外数值错误计入证据项。",
+        "「反映了公司业务持续向服务化/云化转型的既定事实」中的服务收入占比提升有表内支持，但“云化”缺乏具体收入类别或分部数据。",
+        "「反映了利息支出或投资减值等非经营性层面的现金流出压力增加」把Other income (expense), net的权责发生制净损失直接解释为现金流出压力；该表未分拆构成，减值等也不必然形成当期现金支出。"
+      ]
+    },
+    {
+      "caseId": "msft-fy2025-growth",
+      "answerId": "answer-d6f9d1fa51fd4e15976a968c17f9b626",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "FY2024营业利润率变动「+1.85 个百分点」错误：109,433/245,122×100−88,523/211,915×100=2.8714个百分点，应为约2.87。该额外计算不影响FY2025必答数值本身的正确性。",
+        "「反映出 AI 等重资产基础设施投入带来的成本上升压力」「印证了微软向云服务和 SaaS 模式转型的战略定力」无所给分部、成本明细或战略说明支持。合并利润表能支持服务及其他收入占比、费用率变化，不能确认AI投入归因、SaaS收入属性和管理战略。"
+      ]
+    },
+    {
+      "caseId": "msft-fy2025-growth",
+      "answerId": "answer-ea0c4271929244ccad6a2447c99c86f3",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "额外销售成本同比「同比增速约为 18.4%」应为(87,831−74,114)/74,114×100=18.5080%，约18.5%。与精确值相差0.1080个百分点，超过既定0.1个百分点容差；必答收入、营业利润、增速及利润率均正确。条件性的未来成本风险不另作无来源事实扣分。"
+      ]
+    },
+    {
+      "caseId": "msft-fy2025-liquidity",
+      "answerId": "answer-318ec5eab35a4d6d83fb380b197d86f5",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": false,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「根本不需要消耗现金去偿还」及把递延收入整体剔除的论证不成立：未实现收入通常通过履约结清，履约仍可能产生现金成本，E1未给出该义务的现金成本。",
+        "「负债结构极度健康」「实际面临的短期刚性现金兑付压力极低」由上述剔除推导出过度确定的偿债判断，违背题目要求保留有限度结论；结尾现金流缺口不能抵消。",
+        "「高信用等级的金融资产变现能力」「ToB 业务强大的信用销售回款能力」以及产业链话语权判断没有投资明细、信用评级、账龄/回款或合同资料支持。四项必答金额和流动比率1.35正确。"
+      ]
+    },
+    {
+      "caseId": "msft-fy2025-liquidity",
+      "answerId": "answer-9113e732b63e4b5998804eb0d2e972c1",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": false,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「短期有息债务已清零」「直接消除了短期刚性兑付压力」忽略了表内一年内到期长期债务2,999百万美元；Short-term debt为0不等于全部短期有息义务为0。",
+        "「履约过程主要发生成本而非直接支付现金」并据此剔除递延收入、确认压力远低于账面值，缺乏依据。履约成本可能支付现金，表内未披露其金额；“极其稳固/压力极小”的核心结论违反题目有限度判断要求。",
+        "「虽然微软客户多为大型企业或政府，坏账风险低」没有客户结构、账龄及信用证据。四项必答金额和1.35比率正确，现金增长65.1%、非流动长期债务下降5.9%也匹配。"
+      ]
+    },
+    {
+      "caseId": "msft-fy2025-liquidity",
+      "answerId": "answer-84cc7ea067034903bb65211074f3b767",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": true,
+      "verdict": "PASS",
+      "notes": [
+        "四项金额及1.3534≈1.35正确；现金/流动资产、非流动债务/总负债明确区分。其他科目金额与E1一致，指出递延收入履约仍可能产生现金成本，结论保留现金流、资金可用性及到期安排缺口，未断言安全或危机。"
+      ]
+    },
+    {
+      "caseId": "msft-fy2025-liquidity",
+      "answerId": "answer-0df12ab6bb3c4fd2ac363f0f4590bcd7",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": false,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「不需要消耗现金偿还」将递延收入履约错误等同于无现金成本，并通过全额剔除推导「其实际流动性安全垫高于比率表面数值」。E1未给履约现金成本，无法确认调整后的实际安全垫；这不满足题目对有限度流动性结论的要求。四项必答金额、1.35以及现金占比15.8%和非流动债务占比14.6%均正确。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-cashflow",
+      "answerId": "answer-2318a0c1ec614881a72814b80bcd4888",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「表明公司在供应链、门店或电商基础设施上进行了高强度的重资产投资」从PP&E支出总额确认具体公司投向，缺少分项支持；回答后文同样承认具体投向未知。",
+        "「不需要依赖外部融资来维持生存」「剩余的126.6亿美元自由现金流仍足以支撑其股东回报计划」超出当期CFO覆盖CapEx的可证结论。证据未给股东回报计划、现金余额及全部流动性需求，不能确认整体融资需求或计划覆盖。必答与同比/比例额外数字正确。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-cashflow",
+      "answerId": "answer-c984c861bcc84d4fa5ead170532b985d",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "额外两年资本开支增速「两年累计增长 41.4%」计算错误：(23,783−16,857)/16,857×100=41.0868%，应约41.1%，误差0.3132个百分点，超过0.1容差。必答FCF12,660和CapEx/CFO约65.3%正确；对覆盖范围和融资需求的限制说明恰当。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-cashflow",
+      "answerId": "answer-207603d21d4f417393574b1a7fa6172a",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": true,
+      "verdict": "PASS",
+      "notes": [
+        "毛额口径和非GAAP说明符合证据；CFO36,443−CapEx23,783=FCF12,660，比例65.2608%。额外FY2024比例57.6779%、CapEx增长15.4178%、CFO增长2.0069%、FCF下降16.2698%均正确；股东回报/偿债仅列一般用途，未确认具体计划一定得到覆盖。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-cashflow",
+      "answerId": "answer-8676ba2acb78497a88b735fffc5b7f42",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「两年累计大增41.4%」错误：(23,783−16,857)/16,857×100=41.0868%，应约41.1%，超过0.1个百分点容差。",
+        "「财务安全垫依然极厚」仅凭当期CFO减CapEx的剩余量作出整体流动性强判断。题包没有现金余额、完整偿债义务或其他资金需求，能确认的是指定当期支出被覆盖，不能确认整体安全垫极厚。必答金额与65.3%正确。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-growth",
+      "answerId": "answer-b5ec788bc9a64748badb2c664cdefeba",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": true,
+      "verdict": "PASS",
+      "notes": [
+        "全年金额、5.07%/8.65%增速和约14基点利润率提升均正确；额外销售成本增长4.4091%、费用增长6.8053%、费用增加8,913百万美元（约89亿美元）也匹配。表内成本费用结构支持解释，未来费用压力以条件性风险表述。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-growth",
+      "answerId": "answer-586b7aeafd90463cb2816ca70599cf59",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「在收入与利润绝对增速因基数或宏观因素回落的背景下」将公司增长放缓归因为基数或宏观因素。该利润表能够确认增速放缓及较大比较基数，但没有宏观因素或经营驱动拆解，不能把这组原因写成已证实背景；后文“可能包含一次性因素或低基数效应”则是保留不确定性的假设，不单独扣分。必答及所列额外增速/费用数字复算正确。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-growth",
+      "answerId": "answer-4ec9ce52291043ff8cd71eac2dfcdac0",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": true,
+      "verdict": "PASS",
+      "notes": [
+        "所列必答全年金额、增速及利润率正确；销售成本增长约4.41%、营业费用增长约6.8%的额外计算正确，支持毛利端改善抵消费用率上升的会计拆解。未把具体分部或未来回报当作已证实事实。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-growth",
+      "answerId": "answer-db5e5938030f418e87f552059b3e3ab9",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「其供应链优化、商品组合调整或费用管控取得了实质成效」确认了表外经营措施及其效果。利润表只显示成本/费用与收入比例的变化，没有供应链、商品组合或措施资料，不能据此确认具体原因。",
+        "「应将其视为一个盈利确定性高、现金流稳健的防御性底仓标的」超出证据。当前只有利润表，回答也承认缺现金流数据；不能确认现金流稳健、未来盈利确定性或投资组合定位。必答及其余已列数值计算正确。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "answerId": "answer-52ef97a3204c4b1e8b3a20bbb2ac9f64",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「各类租赁义务合计15,122」与表内四项不符：1,499+800+12,825+5,923=21,047百万美元；短期两项为2,299百万美元。",
+        "「沃尔玛具备强劲且稳定的日常经营活动现金流入」没有本题现金流证据；应付账款余额也不能单独确认具体供应商议价/占款能力。「公司主动缩减非流动长期债务」确认了管理意图，余额下降只能证明期末科目减少。回答仍说明不能单凭0.82断定危机并列现金流/授信缺口，故覆盖项保留true；必答金额和比率正确。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "answerId": "answer-ba1ddf29ca5c4d91bfbf8524b1335f2a",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": false,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「其流动性安全边际依然很高」「不存在银行抽贷或刚性违约的风险」将应付账款结构推导为确定安全；应付账款仍有到期支付义务，所给静态表并未证明资金覆盖或回款时点，违反题目有限度结论要求。",
+        "「利用充沛的经营现金流主动偿还长期有息债务」及「现金绝对值下降，但并未影响整体营运」无现金流或运营证据。期末非流动长期债务下降2,731百万美元不能独自证明资金来源、管理意图或经营影响。所列必答金额、比率、总负债合计和同比数值正确。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "answerId": "answer-8455747598f6473ca1e4c7a4a1ddeee1",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": false,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「长短期合计超1.5万亿美元级别，短期约15亿美元」存在严重金额/单位错误。全部经营及融资租赁义务=1,499+800+12,825+5,923=21,047百万美元=210.47亿美元=0.021047万亿美元；短期=1,499+800=2,299百万美元=22.99亿美元。",
+        "「并非流动性危机的信号，而是其作为零售巨头极强供应链议价能力的体现」及「公司无需囤积大量现金，资金利用效率高」把余额结构直接解释为已证实的经营优势和健康结论，缺少周转、合同、经营现金流及资金需求证据。末尾列缺口不能满足前文已违反的有限度结论要求；必答四金额及0.82本身正确。"
+      ]
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "answerId": "answer-1d3ba39b7b014006965e39a55f17c776",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「合计约15,124，其中短期1,499」遗漏租赁科目：全部经营及融资租赁义务=1,499+800+12,825+5,923=21,047百万美元，短期为2,299；15,124为遗漏长期融资租赁5,923后的合计，1,499则仅含短期经营租赁。",
+        "「沃尔玛的存货周转率通常较高，具备较强的快速变现能力」「这反映了公司对上游供应商具有较强的议价能力和资金占用能力」缺少本题周转/账期或合同证据，不能从期末金额确认这些公司经营能力。结论本身仍强调不能仅凭0.82断言危机、且依赖存货去化和现金流，因此覆盖项保留true。必答金额和比率正确。"
+      ]
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 package com.stocksage.service;
 
+import com.stocksage.research.InvestmentReportVersionService;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.model.dto.InvestmentReport;

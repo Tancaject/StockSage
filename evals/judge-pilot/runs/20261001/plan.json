@@ -1,0 +1,36 @@
+{
+  "schema": "judge_pilot_plan_v1",
+  "dataset_sha256": "aa968faee63dbb59748ba8df48e373312977d4fc7acb7343d7dc6f4b6ec3d9de",
+  "rubric": {
+    "schema": "ordinary_answer_rubric_v1",
+    "scope": "ordinary-final-answer",
+    "dimensions": {
+      "claim_support": "围绕用户的实际问题，核查最终回答的事实与推断是否由本轮可见证据支持；引用存在本身不代表内容成立，明确标为假设的一般解释不等同于已证实事实。",
+      "numeric_period_correctness": "核查最终回答中使用的数值、单位、期间和比较基准，以及自行计算的比例或变化；没有数值主张时可说明原因后标为不适用。",
+      "counterevidence": "核查回答是否遗漏本轮证据中与用户问题和结论有关的重要反向信息；不要求凭空增加负面观点或问题范围外的比较。",
+      "unknowns": "核查回答是否清楚区分已知、推断和仍缺少的信息，结论强度是否符合证据；不将缺失信息补成确定答案，也不要求无关免责声明。"
+    },
+    "sha256": "ee61a60cc802888cc1a9d051525891a4f88fc33a066bf655656e4b95d0b5384c"
+  },
+  "baseline_prompt_sha256": "eef030d26320426b8e0cf054e639e93bc9fc80d3ffea882dff4acf8f34d20d69",
+  "comparison_policy": {
+    "schema": "judge_comparison_policy_v1",
+    "requirements": [
+      "fewer_misclassifications",
+      "no_new_misclassification",
+      "no_correct_judgment_regression",
+      "no_known_label_item_coverage_loss"
+    ],
+    "release_eligible": false
+  },
+  "model": "qwen3.8-max",
+  "repeats": 2,
+  "dev_cases": 18,
+  "validation_cases": 12,
+  "max_candidate_prompts": 1,
+  "selection": "Compare one batch-informed candidate on DEV only if confirmed judge errors are found; then freeze one selected version before VALIDATION. No validation-based revisions.",
+  "labels": "AI_SOURCE_CHECKED",
+  "answer_origin": "AUTHORED_CALIBRATION",
+  "release_eligible": false,
+  "business_holdout": "UNTOUCHED"
+}

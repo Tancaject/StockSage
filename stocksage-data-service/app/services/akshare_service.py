@@ -5,9 +5,12 @@ AKShare 封装东方财富等公开数据页面，适合作为 A 股/港股日�
 但它只能按尽力而为处理，不应视为交易所授权的实时行情源。
 """
 
+from app.research_budget import check_budget, bounded_timeout, budget_call
+
 from datetime import datetime, timedelta
 from datetime import date as date_type
 from functools import lru_cache
+from contextvars import copy_context
 import concurrent.futures
 import importlib
 import re
@@ -20,24 +23,24 @@ from app.services.technical_indicators import calculate_technical_indicators
 
 # akshare 目录函数（stock_hk_spot / stock_info_*_name_code 等）内部用 requests 拉大表，
 # 且不带任何超时；上游网络异常时会无限期挂起，远超 Java 客户端 10s 预算。
-# 这里给目录加载套一个硬上限：超时即抛 TimeoutError，由调用方降级为“目录不可用”。
+# 这里限制调用方等待时长；底层 SDK 线程无法强制取消，不能保证其退出时间。
 _CATALOG_TIMEOUT_SECONDS = 12.0
 _catalog_executor = concurrent.futures.ThreadPoolExecutor(
     max_workers=4, thread_name_prefix="akshare-catalog")
 
 
 def _call_with_timeout(fn, timeout, label):
-    """在工作线程里运行阻塞调用并施加硬超时。
-
-    超时后底层线程仍会继续跑（无法强杀），但会在 OS socket 超时后自行结束；
-    目录调用很少（成功后 lru_cache 长期缓存），偶发的线程滞留可忽略。
-    """
-    future = _catalog_executor.submit(fn)
+    """Bound caller waiting; running SDK threads cannot be forcibly stopped."""
+    timeout = bounded_timeout(timeout)
+    future = _catalog_executor.submit(copy_context().run, budget_call, fn)
     try:
-        return future.result(timeout=timeout)
+        result = future.result(timeout=timeout)
+        check_budget()
+        return result
     except concurrent.futures.TimeoutError as exc:
-        raise TimeoutError(
-            f"{label} timed out after {timeout}s (akshare upstream unreachable)") from exc
+        future.cancel()
+        check_budget(exc)
+        raise TimeoutError(f"{label} timed out after {timeout}s (akshare upstream unreachable)") from exc
 
 
 class AkshareService:
@@ -58,7 +61,7 @@ class AkshareService:
 
         end = datetime.now()
         start = end - timedelta(days=days)
-        df = ak.stock_hk_hist(
+        df = budget_call(ak.stock_hk_hist,
             symbol=code,
             period=ak_period,
             start_date=start.strftime("%Y%m%d"),
@@ -100,7 +103,7 @@ class AkshareService:
 
         end = datetime.now()
         start = end - timedelta(days=request_days)
-        df = ak.stock_zh_a_hist(
+        df = budget_call(ak.stock_zh_a_hist,
             symbol=code,
             period=ak_period,
             start_date=start.strftime("%Y%m%d"),
@@ -201,6 +204,7 @@ class AkshareService:
         try:
             df = self._hk_search_catalog()
         except Exception as e:
+            check_budget(e)
             return {"query": query, "count": 0, "results": [], "error": str(e)}
 
         results: list[dict] = []
@@ -237,11 +241,13 @@ class AkshareService:
                     self.EASTMONEY_SEARCH_URL,
                     params={"input": term, "type": "14", "count": max_results},
                     headers={"User-Agent": "Mozilla/5.0"},
-                    timeout=4.0,
+                    timeout=bounded_timeout(4.0),
                 )
+                check_budget()
                 resp.raise_for_status()
                 payload = resp.json()
             except Exception as e:
+                check_budget(e)
                 errors.append(f"{term}: {e}")
                 continue
 
@@ -274,6 +280,7 @@ class AkshareService:
         try:
             df = self._a_share_catalog()
         except Exception as e:
+            check_budget(e)
             return {"query": query, "count": 0, "results": [], "error": str(e)}
 
         results: list[dict] = []
@@ -306,11 +313,12 @@ class AkshareService:
         return bool(self._query_terms(query))
 
     def get_hk_financial_reports(self, symbol: str, period: str = "annual", years: int = 5) -> dict:
-        """获取港股资产负债表、利润表、现金流和关键指标。"""
+        """获取港股财务表，按实际报告日期保留选中期间的全部项目。"""
         ak = self._ak()
         code = self._hk_code(symbol)
         indicator = "年度" if (period or "annual").lower() in {"annual", "year", "yearly", "年报", "年度"} else "报告期"
-        max_rows = max(1, min(int(years or 5) * (1 if indicator == "年度" else 4), 40))
+        # “报告期”包含上游披露的不同期间，不代表独立季度或单季数值。
+        max_periods = max(1, min(int(years or 5) * (1 if indicator == "年度" else 4), 40))
 
         report_types = {
             "balanceSheet": "资产负债表",
@@ -321,16 +329,18 @@ class AkshareService:
         errors = {}
         for key, report_type in report_types.items():
             try:
-                df = ak.stock_financial_hk_report_em(stock=code, symbol=report_type, indicator=indicator)
-                statements[key] = self._records_from_frame(df, max_rows)
+                df = budget_call(ak.stock_financial_hk_report_em, stock=code, symbol=report_type, indicator=indicator)
+                statements[key] = self._records_from_frame(df, max_periods)
             except Exception as e:
+                check_budget(e)
                 statements[key] = []
                 errors[key] = str(e)
 
         try:
-            indicators_df = ak.stock_financial_hk_analysis_indicator_em(symbol=code, indicator=indicator)
-            indicators = self._records_from_frame(indicators_df, max_rows)
+            indicators_df = budget_call(ak.stock_financial_hk_analysis_indicator_em, symbol=code, indicator=indicator)
+            indicators = self._records_from_frame(indicators_df, max_periods)
         except Exception as e:
+            check_budget(e)
             indicators = []
             errors["indicators"] = str(e)
 
@@ -411,7 +421,7 @@ class AkshareService:
             self._load_hk_search_catalog, _CATALOG_TIMEOUT_SECONDS, "HK stock catalog")
 
     def _load_hk_search_catalog(self):
-        df = self._ak().stock_hk_spot()
+        df = budget_call(self._ak().stock_hk_spot)
         if "中文名称" in df.columns:
             return df
         return df.rename(columns={"名称": "中文名称"})
@@ -425,7 +435,7 @@ class AkshareService:
         ak = self._ak()
         frames = []
 
-        sh = ak.stock_info_sh_name_code().rename(columns={
+        sh = budget_call(ak.stock_info_sh_name_code).rename(columns={
             "证券代码": "code",
             "证券简称": "shortName",
             "证券全称": "longName",
@@ -436,7 +446,7 @@ class AkshareService:
         sh["exchange"] = "SH"
         frames.append(sh)
 
-        sz = ak.stock_info_sz_name_code().rename(columns={
+        sz = budget_call(ak.stock_info_sz_name_code).rename(columns={
             "A股代码": "code",
             "A股简称": "shortName",
             "A股上市日期": "listDate",
@@ -445,7 +455,7 @@ class AkshareService:
         sz["exchange"] = "SZ"
         frames.append(sz)
 
-        bj = ak.stock_info_bj_name_code().rename(columns={
+        bj = budget_call(ak.stock_info_bj_name_code).rename(columns={
             "证券代码": "code",
             "证券简称": "shortName",
             "上市日期": "listDate",
@@ -614,14 +624,37 @@ class AkshareService:
                 best = max(best, 75)
         return best
 
-    def _records_from_frame(self, df, max_rows: int) -> list[dict]:
+    def _records_from_frame(self, df, max_periods: int) -> list[dict]:
         if df is None or getattr(df, "empty", True):
             return []
-        normalized = df.reset_index()
+        if "REPORT_DATE" not in df.columns:
+            raise ValueError("HK financial table is missing REPORT_DATE; cannot select reporting periods")
+        # 先验收整张表的期间，不能把窗口外的坏日期静默丢掉或按项目行截断。
+        dates = [self._financial_report_date(value) for value in df["REPORT_DATE"]]
+        selected = set(sorted(set(dates), reverse=True)[:max_periods])
+        positions = sorted((index for index, value in enumerate(dates) if value in selected),
+                           key=lambda index: dates[index], reverse=True)
         return [
-            {str(k): self._json_value(v) for k, v in row.items()}
-            for row in normalized.head(max_rows).to_dict(orient="records")
+            # 财务数值不再经过行情 helper 的六位舍入；上游已经是 float 的精度无法补回。
+            {str(k): v if isinstance(v, float) and not pd.isna(v) else self._json_value(v)
+             for k, v in row.items()}
+            for row in df.iloc[positions].to_dict(orient="records")
         ]
+
+    @staticmethod
+    def _financial_report_date(value) -> date_type:
+        if pd.isna(value):
+            raise ValueError("HK financial table contains an empty REPORT_DATE; cannot select reporting periods")
+        if isinstance(value, datetime):
+            return value.date()
+        if isinstance(value, date_type):
+            return value
+        if isinstance(value, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}(?:[ T].+)?", value):
+            try:
+                return datetime.fromisoformat(value).date()
+            except ValueError:
+                pass
+        raise ValueError("HK financial table contains an invalid REPORT_DATE; expected an ISO date or datetime")
 
     @staticmethod
     def _json_value(value):

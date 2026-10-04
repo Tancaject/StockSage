@@ -684,6 +684,15 @@ function appendTaskFinalChunk(chunk) {
   scrollToBottom()
 }
 
+function markStreamingError(traceId, errorText) {
+  const assistantMessage = getOrCreateStreamingAssistant(traceId)
+  assistantMessage.streamError = errorText
+  // 在正文中保留未完成标记，使复制和导出也包含该标记。
+  assistantMessage.content = assistantMessage.content.trim()
+    ? `**回答未完成**\n\n${errorText}\n\n可点击“重新生成”重试。以下为已接收的部分内容：\n\n---\n\n${assistantMessage.content}`
+    : errorText
+}
+
 function applyTaskErrorChunk(chunk, taskReplay) {
   const errorText = chunk.content || '服务暂时出错，请稍后重试。'
   if (taskReplay || activeTask) {
@@ -699,7 +708,7 @@ function applyTaskErrorChunk(chunk, taskReplay) {
       errorMessage: errorText,
     }
   } else {
-    getOrCreateStreamingAssistant(chunk.traceId).content = errorText
+    markStreamingError(chunk.traceId, errorText)
   }
   ElMessage.error(errorText)
   scrollToBottom()
@@ -1031,7 +1040,7 @@ async function handleOriginalStreamError(error) {
 
   isStreaming.value = false
   const errorText = error?.message || '网络连接失败，请检查网络后重试。'
-  getOrCreateStreamingAssistant(null).content = errorText
+  markStreamingError(null, errorText)
   ElMessage.error(errorText)
   loadConversations()
 }

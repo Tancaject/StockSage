@@ -1,0 +1,16 @@
+{
+  "usageSource" : "PROVIDER",
+  "usageSemantics" : "INVOCATION_SNAPSHOT",
+  "actualModel" : "qwen3.8-flash",
+  "providerResponseId" : "chatcmpl-120ff996-d383-90be-8fdf-892919dcf3dd",
+  "inputTokens" : 252,
+  "outputTokens" : 397,
+  "totalTokens" : 649,
+  "finishReason" : "STOP",
+  "text" : "短期记忆摘要：\n\n- 用户目标：查看 AAPL 的现金流。\n- 已确认事实/更正：用户指出原报告中净利润为 90，不是 100。\n- 助手陈述与不确定性：助手曾提出“净利润是 100，增长可能来自需求回暖”；其中“净利润是 100”已被用户更正，“增长可能来自需求回暖”仅为助手推测，尚未核实。\n- 尚未解决的问题：AAPL 现金流/净利润增长原因仍未查清，尤其是“需求回暖”是否成立未确认。\n- 用户偏好或确认选择：用户确认以原报告净利润 90 为准，并明确需求原因尚未核查。",
+  "callId" : "0c231e1b-2a95-490d-8dd1-13d413715c18",
+  "caseId" : "summary-correction-uncertainty",
+  "arm" : "after",
+  "elapsedMs" : 6875,
+  "finishedAt" : "2026-09-30T14:09:31.128637500Z"
+}

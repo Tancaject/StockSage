@@ -1,0 +1,234 @@
+{
+  "schema": "ordinary_judge_repair_verification_v2",
+  "diagnostic_only": true,
+  "release_eligible": false,
+  "status": "JUDGE_NOT_ACCEPTED",
+  "plan_sha256": "7c35b36673cc000089874fafc8e17b0c60ee76f6a7631547405241c7d511db16",
+  "rubric_sha256": "3396bd8f16f563fd04079836ed8280f58b2e37f39a508a2189fb82321068f870",
+  "dataset_sha256": "7d2b93ba4a53e3b6c6555161efd1d25b462e10c56024f02e181d2c5b7cd15bd8",
+  "source_identity_verified": true,
+  "historical_files_unchanged": 17,
+  "validation_consumed": true,
+  "business_holdout_used": false,
+  "offline_checks": {
+    "eval_unittest_count": 232,
+    "final_focused_unittest_count": 27,
+    "counts_overlap": true,
+    "fast_baseline": "PASS; backend 772 (1 live skip), frontend tests/build and data-service compile"
+  },
+  "splits": {
+    "DEV": {
+      "report": "dev.json",
+      "calibration": "dev-calibration.json",
+      "report_sha256": "8cc781f353ce9229fae260b350dcf585007b865dcfae2e4cb29507dcffff11bc",
+      "calibration_sha256": "61eb68f9e0c2bb305b741353aae6bea82590e67f0b8dc87267ec46fd303b898c",
+      "target_checks": {
+        "technical_validity": false,
+        "known_coverage": true,
+        "semantic_agreement": true,
+        "each_dimension_semantic_agreement": false,
+        "false_pass": false,
+        "correct_no_data": false,
+        "repeat_consistency": true
+      },
+      "target_met": false,
+      "dimensions": {
+        "count": 300,
+        "known_label_count": 292,
+        "expected_no_data_count": 8,
+        "technical_valid_count": 293,
+        "technical_invalid_count": 7,
+        "technical_valid_rate": 0.9766666666666667,
+        "known_judgment_count": 287,
+        "known_judgment_coverage": 0.9828767123287672,
+        "semantic_comparison_count": 287,
+        "semantic_agreement_count": 265,
+        "semantic_error_count": 22,
+        "semantic_agreement_rate": 0.9233449477351916,
+        "valid_no_data_count": 6,
+        "valid_abstention_on_known_count": 0,
+        "valid_correct_no_data_count": 6,
+        "correct_no_data_rate": 0.75,
+        "end_to_end_label_agreement_count": 271,
+        "end_to_end_label_agreement_rate": 0.9033333333333333,
+        "false_pass_count": 11,
+        "false_pass_denominator": 76,
+        "false_pass_rate": 0.14473684210526316,
+        "false_fail_count": 1,
+        "false_fail_denominator": 211,
+        "false_fail_rate": 0.004739336492890996,
+        "unsupported_certainty_count": 0,
+        "confusion_valid": {
+          "FAIL": {
+            "FAIL": 65,
+            "NOT_APPLICABLE": 5,
+            "NO_DATA": 0,
+            "PASS": 6
+          },
+          "NOT_APPLICABLE": {
+            "FAIL": 0,
+            "NOT_APPLICABLE": 24,
+            "NO_DATA": 0,
+            "PASS": 0
+          },
+          "NO_DATA": {
+            "FAIL": 0,
+            "NOT_APPLICABLE": 0,
+            "NO_DATA": 6,
+            "PASS": 0
+          },
+          "PASS": {
+            "FAIL": 1,
+            "NOT_APPLICABLE": 10,
+            "NO_DATA": 0,
+            "PASS": 176
+          }
+        }
+      },
+      "repeatability": {
+        "eligible_case_count": 26,
+        "consistent_case_count": 25,
+        "excluded_case_count": 4,
+        "consistency_rate": 0.9615384615384616,
+        "requires": "at least two technically valid repeats; legitimate NO_DATA judgments are included"
+      },
+      "cost": {
+        "prompt_tokens": 161304,
+        "known_prompt_tokens": 161304,
+        "prompt_tokens_reported_attempts": 60,
+        "completion_tokens": 38656,
+        "known_completion_tokens": 38656,
+        "completion_tokens_reported_attempts": 60,
+        "total_tokens": 199960,
+        "known_total_tokens": 199960,
+        "total_tokens_reported_attempts": 60,
+        "usage_complete": true,
+        "usage_scope": "recorded_attempts",
+        "call_count": 88,
+        "call_count_reported_attempts": 60,
+        "summed_attempt_latency_ms": 673984,
+        "latency_reported_attempts": 60,
+        "monetary_cost": null,
+        "pricing_status": "UNCONFIGURED"
+      },
+      "global_error_attempt_count": 0,
+      "local_error_counts": {
+        "EXCERPT_MISSING:evidence_quotes": 3,
+        "EXCERPT_INVALID:evidence_quotes": 2,
+        "SOURCE_UNAVAILABLE": 2
+      },
+      "observed_models": [
+        "qwen3.8-max"
+      ]
+    },
+    "VALIDATION": {
+      "report": "validation.json",
+      "calibration": "validation-calibration.json",
+      "report_sha256": "dcbc0a05b9c833f1a26a0f31dbd5fb245c88846a3cf8da39bcab0e2e7a6e760b",
+      "calibration_sha256": "c0252008192d261ed12cf6796d695e51d244595f8a6050a33c0d4cbbea792178",
+      "target_checks": {
+        "technical_validity": false,
+        "known_coverage": true,
+        "semantic_agreement": false,
+        "each_dimension_semantic_agreement": false,
+        "false_pass": false,
+        "correct_no_data": true,
+        "repeat_consistency": false
+      },
+      "target_met": false,
+      "dimensions": {
+        "count": 120,
+        "known_label_count": 120,
+        "expected_no_data_count": 0,
+        "technical_valid_count": 116,
+        "technical_invalid_count": 4,
+        "technical_valid_rate": 0.9666666666666667,
+        "known_judgment_count": 116,
+        "known_judgment_coverage": 0.9666666666666667,
+        "semantic_comparison_count": 116,
+        "semantic_agreement_count": 95,
+        "semantic_error_count": 21,
+        "semantic_agreement_rate": 0.8189655172413793,
+        "valid_no_data_count": 0,
+        "valid_abstention_on_known_count": 0,
+        "valid_correct_no_data_count": 0,
+        "correct_no_data_rate": null,
+        "end_to_end_label_agreement_count": 95,
+        "end_to_end_label_agreement_rate": 0.7916666666666666,
+        "false_pass_count": 4,
+        "false_pass_denominator": 33,
+        "false_pass_rate": 0.12121212121212122,
+        "false_fail_count": 4,
+        "false_fail_denominator": 83,
+        "false_fail_rate": 0.04819277108433735,
+        "unsupported_certainty_count": 0,
+        "confusion_valid": {
+          "FAIL": {
+            "FAIL": 29,
+            "NOT_APPLICABLE": 2,
+            "NO_DATA": 0,
+            "PASS": 2
+          },
+          "NOT_APPLICABLE": {
+            "FAIL": 0,
+            "NOT_APPLICABLE": 0,
+            "NO_DATA": 0,
+            "PASS": 0
+          },
+          "NO_DATA": {
+            "FAIL": 0,
+            "NOT_APPLICABLE": 0,
+            "NO_DATA": 0,
+            "PASS": 0
+          },
+          "PASS": {
+            "FAIL": 4,
+            "NOT_APPLICABLE": 13,
+            "NO_DATA": 0,
+            "PASS": 66
+          }
+        }
+      },
+      "repeatability": {
+        "eligible_case_count": 9,
+        "consistent_case_count": 8,
+        "excluded_case_count": 3,
+        "consistency_rate": 0.8888888888888888,
+        "requires": "at least two technically valid repeats; legitimate NO_DATA judgments are included"
+      },
+      "cost": {
+        "prompt_tokens": 51234,
+        "known_prompt_tokens": 51234,
+        "prompt_tokens_reported_attempts": 24,
+        "completion_tokens": 15521,
+        "known_completion_tokens": 15521,
+        "completion_tokens_reported_attempts": 24,
+        "total_tokens": 66755,
+        "known_total_tokens": 66755,
+        "total_tokens_reported_attempts": 24,
+        "usage_complete": true,
+        "usage_scope": "recorded_attempts",
+        "call_count": 28,
+        "call_count_reported_attempts": 24,
+        "summed_attempt_latency_ms": 193452,
+        "latency_reported_attempts": 24,
+        "monetary_cost": null,
+        "pricing_status": "UNCONFIGURED"
+      },
+      "global_error_attempt_count": 0,
+      "local_error_counts": {
+        "EXCERPT_MISSING:evidence_quotes": 3,
+        "EXCERPT_MISSING:answer_quotes": 3
+      },
+      "observed_models": [
+        "qwen3.8-max"
+      ]
+    }
+  },
+  "all_repair_run_usage": {
+    "review_attempt_count": 147,
+    "api_call_count": 221,
+    "total_tokens": 495810,
+    "monetary_cost": null
+  }
+}

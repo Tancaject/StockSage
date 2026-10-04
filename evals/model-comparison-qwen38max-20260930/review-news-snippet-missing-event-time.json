@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "reviewScope": "MODEL_LABELS_HIDDEN_AI_REVIEW_NOT_INDEPENDENT_FORMAL_ACCEPTANCE",
+  "inputSha256": "e7e8a3e9222199bbf84e2c07547dcdd14230458bbfcc59bfb938bbba3f0c359e",
+  "limitations": [
+    "仅阅读此新闻匿名评审包；未读取模型映射、raw响应或其他题目答案。此前已知实验比较两个模型，但不知道本包答案的模型/重复归属。",
+    "这是模型标签隐藏的AI复核，不是人工独立验收。",
+    "主判2 PASS/2 ISSUES；两条ISSUES涉及核验措辞和用途推断的解释边界。采用完整宽松解释时四条均可PASS，因此不能把本新闻样本作为无歧义的模型优劣证据。",
+    "additionalNumbersCorrect=true表示没有发现新增数值错误；本题未要求财务计算，不代表验证了该模型算术能力。"
+  ],
+  "reviews": [
+    {
+      "answerId": "answer-fd4fc4f2ecb64da48edd7a50e3f6c607",
+      "caseId": "news-snippet-missing-event-time",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": true,
+      "verdict": "PASS",
+      "notes": [
+        "必答信息完整：2026-09-30只作信息发布日期，事件发生日期未知；明确原文未抓取、只能确认存在一条摘要，不能视为充分核验的事实。",
+        "“如果该项目真实存在并持续推进”“若最终建成，可能增加微软数据中心容量，支持云计算、AI 基础设施或 Azure 相关业务的长期供给能力”明确是条件性路径，未把用途、进度、收入或需求增长说成项目已确认事实，符合预定允许项。",
+        "说明影响大小和财务影响不能确认，没有新增金额或价格因果；建设/成本风险以可能性提出，不是断言项目已经存在这些问题。"
+      ]
+    },
+    {
+      "answerId": "answer-c2d07c4825be4904b71a2531506a7523",
+      "caseId": "news-snippet-missing-event-time",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "必答的摘要内容、日期未知、原文未抓取及影响无法量化均保留，requiredFactsCorrect和coverageComplete为true；未新增金额或计算。",
+        "ISSUE（核验边界）：“已确认事实：微软的一项数据中心项目获得了规划许可，表明该项目在推进中。”输入只提供当地报道的搜索摘要，不能将报道内容升级为已确认事实。前文“尚未进行独立核验”仍在，但与这里的确认表述冲突；此项计evidenceGrounded=false，不把它误计成日期或金额错误。",
+        "ISSUE/歧义（用途与需求）：“数据中心项目的推进通常是为了满足其云计算（如Azure）和人工智能业务不断增长的基础设施与算力需求。”没有本轮证据说明该项目业务用途或微软此项需求增长；“通常”允许一般机制解释，但这里的“其…不断增长”也可读为对该公司实际需求及目的的判断。不能仅因Azure/AI关键词判错。",
+        "敏感性：若把“已确认事实”限定为对已提供摘要内容的转述，并把“通常…不断增长”完全当作一般行业假设，则可宽松判PASS。主判保留ISSUES，因为回答没有明确给这两处加上述限定；不能把本条当作无歧义的模型优劣证据。"
+      ]
+    },
+    {
+      "answerId": "answer-f956ba8177a045e5b738947492fb2cb1",
+      "caseId": "news-snippet-missing-event-time",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": true,
+      "verdict": "PASS",
+      "notes": [
+        "必答信息完整且来源归属清楚：“只能确认…有一条搜索结果摘要称当地报道…”，事件日未知；多处明确不能作为已核验事实。",
+        "“数据中心项目通常与以下业务方向相关”后的Azure、AI、Copilot清单处于“有限推断”段落，结尾也仅说“该消息可能指向微软云或 AI 基础设施建设的推进”。结合明确的用途和影响未知，这里主判为一般可能路径，不是已确认项目用途或战略动机。",
+        "明确许可不等于已经开工/收入/实质贡献；审批、电力、客户需求等仅为可能影响因素。没有新增金额、建设时点、规模、收入或价格因果。",
+        "敏感性：更严格要求每一用途举例都逐项写出“若该项目用于该业务”，可能将业务清单判为未充分条件化；但本次冻结标准允许有边界的一般机制与用途举例，故不据此降低主判。"
+      ]
+    },
+    {
+      "answerId": "answer-dc2ab24c6e61430ead66695630f0b81a",
+      "caseId": "news-snippet-missing-event-time",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "必答日期、原文缺失和无法量化业务影响均保留，requiredFactsCorrect和coverageComplete为true；没有新增财务金额或计算。",
+        "ISSUE（核验边界）：“该消息仅能证实微软在推进某数据中心项目”。输入只是未抓取原文的摘要，能说明报道如此声称，不能证实项目推进。回答虽保留核验限制，这一“证实”措辞仍升级了摘要的证明能力。",
+        "歧义（用途与未来过程）：“通常旨在扩大微软云（Azure）和人工智能相关计算的底层物理容量”以及后续云服务/AI需求的作用路径，可能是在讲一般用途，也可能把未知项目归入这些业务。主判不单凭品牌词扣分；“此类项目通常会增加未来的资本支出”及较长周期可作为一般机制，不视为已确认项目财务发生额。",
+        "敏感性：若将“仅能证实”宽松理解为“摘要声称”，并把全部云/AI解释理解为一般路径，则本条可判PASS。主判ISSUES主要来自核验层级提升，因此不是无歧义的算术或原始事实错误。"
+      ]
+    }
+  ]
+}

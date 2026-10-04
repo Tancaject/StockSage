@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-09-30T14:31:20.378787+00:00",
+  "purpose": "Predeclared source-grounded review criteria for a fresh same-prompt qwen3.7-plus versus qwen3.8-max diagnostic. No new model outputs were read by this reviewer before this file was written.",
+  "models": [
+    "qwen3.7-plus",
+    "qwen3.8-max"
+  ],
+  "sampleDesign": {
+    "cases": 4,
+    "repeatsPerModelPerCase": 2,
+    "plannedCalls": 16,
+    "interpretation": "Four purposively selected scenarios with two repeated realizations each; repeats are not independent task samples. No significance, population-performance or formal acceptance claim."
+  },
+  "sourceArtifacts": {
+    "rag-eval\\prompt-template-optimization-20260930\\capture-after.json": "a5ec0fb459fa3851be3bc8528e32ba2e7a02132510b418da1f8a697f2ffb87a2",
+    "rag-eval\\prompt-template-optimization-20260930\\criteria-clarification-fundamentals.json": "68afcbd030c4b94579f347a06bc41618e6e6367f4e453376486e990730e194b1",
+    "rag-eval\\evolution\\common-fundamentals-2025-v1\\diagnostics\\final-synthesis-20260930\\diagnosis.json": "6fedd66b8aa97e8d4489389431c30fc65cee652769bb82f94e225b671802739b"
+  },
+  "commonCriteria": [
+    "按实际用户问题核对事实、计算与任务完整性；不要求用户未问的历史年、额外科目或特定措辞。单纯拒答或删掉必答内容不能算改善。",
+    "逐项核对全部主动新增数值、科目范围、会计解释、公司能力、管理意图和业务原因。事实或已确认原因须有本轮输入支持；有明确边界的一般机制、假设、用途举例不等于公司已发生的事实。",
+    "不因文字更谨慎、篇幅更短或符合预期模型优劣而加分。相同句意对两个模型、两个重复采用相同口径；有争议的表述同时保留严格/宽松解释及对结果的影响。",
+    "原始金额需匹配单位与期间；合计须覆盖标题范围且不漏项/重复。派生值从原值复算。正常显示精度的舍入和明确概数允许；类似19.6%相对19.6558%的小于0.1个百分点舍入偏差单列轻微备注，不包装为实质失败。明显数量级、科目、合计、符号错误不豁免。",
+    "不读取模型标签来决定质量，能隐藏标签时隐藏；若已知标签则明确记录非盲AI复核。所有ISSUES引用原句与源依据，不声称人工独立验收。"
+  ],
+  "reviewFields": [
+    "answerId or callId",
+    "caseId",
+    "requiredFactsCorrect",
+    "additionalNumbersCorrect",
+    "coverageComplete",
+    "evidenceGrounded",
+    "verdict PASS|ISSUES",
+    "notes with exact quotes and source reasons"
+  ],
+  "cases": [
+    {
+      "caseId": "fundamentals-msft-fy2025-liquidity",
+      "role": "fundamentals",
+      "inputSource": "capture-after.json case with this ID; same actual user query for both models",
+      "criteria": [
+        "FY2025期末必答：现金及现金等价物30,242、非流动长期债务40,152、流动资产191,131、流动负债141,218（百万美元），流动比率191,131/141,218约1.35；区分现金/流动资产及非流动长期债务/总负债，并作有限度流动性简评。",
+        "未主动列FY2024、短期投资或一年内到期长期债务2,999不扣遗漏；若自行称全部短期有息义务为0或近期刚性兑付已消除，则与2,999到期债务矛盾。",
+        "递延收入通常以履约结清不等于履约没有现金成本；不得将64,555全额剔除来确认真实压力低或偿债安全。仅说明账面资产覆盖账面负债，并保留实际现金兑付未知，允许。",
+        "科目余额不能确认主动偿债/优化、业务或云/AI扩张、优质客户、低坏账、投资高流动性及资金效率。假设性风险和一般履约举例允许。",
+        "除非源证据支持，不从静态比率或余额结构保证真实安全/危机；综合上下文判断“账面安全”等边界措辞，不见强形容词就机械判错，也不以结尾免责声明撤销前文明确保证。"
+      ]
+    },
+    {
+      "caseId": "fundamentals-wmt-fy2025-cashflow",
+      "role": "fundamentals",
+      "inputSource": "capture-after.json case with this ID; same actual user query for both models",
+      "criteria": [
+        "FY2025必答：经营现金流36,443、现金购建固定资产毛额23,783、简化自由现金流36,443−23,783=12,660（百万美元），Capex/CFO约65.2608%，说明当期指定资本开支被覆盖；毛额不抵减资产出售回款，FCF不等于净利润。",
+        "FY2024和FY2023不是必答；若主动给出任何历史值/增速/合计，全部核算。",
+        "不能由Capex总额确认实际供应链/门店/AI等投向或管理层意图。通用固定资产用途的“如...”示例允许，但若语义是该公司已经把资金投向这些业务、证实战略转型/需求强劲，则需要本轮披露。",
+        "当年CFO覆盖指定Capex可以确认；剩余款可用于回报/偿债等一般用途允许。不得据此保证未来融资需求、所有回报计划或整体偿债安全。",
+        "“无需外部融资覆盖本年度净额所列支出”与“日常资金周转/未来融资无忧”分别评估；仅前者与CFO>Capex等价时允许。时间范围含糊则保留宽松解释，不能把歧义当最强修复证据。"
+      ]
+    },
+    {
+      "caseId": "news-snippet-missing-event-time",
+      "role": "news",
+      "inputSource": "capture-after.json case with this ID; synthetic snippet, not a verified real-world news event",
+      "criteria": [
+        "回答MSFT于研究日2026-09-30可见的消息：仅[N1]当地报道摘要称一个数据中心项目获规划许可；原文未取得，事件发生时间未知。发布日期/研究日不能写成确定事件发生日。",
+        "保留摘要层级及原文未核验限制；允许“今天发布的摘要称...”这样的来源归属，不得声称独立核验、查阅原公告或确证事件细节。",
+        "明确无法确认或量化业务影响：投资额、建设/投运时间、容量、客户需求、收入/利润贡献及股价影响均无输入。不得新增公司战略动机、项目地点/规模、客户或市场反应。",
+        "获得规划许可不能等同全部审批/供电/建设障碍消除、项目已实质落地或收入确定增长。",
+        "“若最终建成投运，可能增加服务容量”等明确条件性的一般路径允许；资金/供电/建设周期等可作为待核对风险，不能宣称该项目已经有这些问题或它们已解决。避免按关键词机械扣分。"
+      ]
+    },
+    {
+      "caseId": "final-msft-fy2025-liquidity",
+      "role": "final-answer",
+      "inputSource": "Previously frozen bounded_judgment MSFT final-only messages, containing the unchanged correct candidate analyst draft; do not rerun analyst stage",
+      "criteria": [
+        "FY2025期末必答：现金及现金等价物30,242、非流动长期债务40,152、流动资产191,131、流动负债141,218（百万美元），流动比率191,131/141,218约1.35；区分现金/流动资产及非流动长期债务/总负债，并作有限度流动性简评。",
+        "未主动列FY2024、短期投资或一年内到期长期债务2,999不扣遗漏；若自行称全部短期有息义务为0或近期刚性兑付已消除，则与2,999到期债务矛盾。",
+        "递延收入通常以履约结清不等于履约没有现金成本；不得将64,555全额剔除来确认真实压力低或偿债安全。仅说明账面资产覆盖账面负债，并保留实际现金兑付未知，允许。",
+        "科目余额不能确认主动偿债/优化、业务或云/AI扩张、优质客户、低坏账、投资高流动性及资金效率。假设性风险和一般履约举例允许。",
+        "除非源证据支持，不从静态比率或余额结构保证真实安全/危机；综合上下文判断“账面安全”等边界措辞，不见强形容词就机械判错，也不以结尾免责声明撤销前文明确保证。",
+        "最终稿应忠实保留原分析稿的实质边界：静态账面覆盖不等于真实偿债保证；经营现金流/可动用资金、变现能力及到期安排仍未知。可以压缩重复内容，不要求原稿每句话逐字出现。",
+        "不得把原稿中未知的现金流称为已知“强劲”、把仍可能有现金履约成本改成无现金义务，或新增原稿与原始证据都未支持的科目归类、公司能力及业务原因。由原表正确计算额外数值本身不自动失败，但新数字与推断全部核查。",
+        "原稿/原表中的2,999可以省略而不作相反结论；全额清零、遗漏后的全部合计、实际偿债安全保证均判错。"
+      ]
+    }
+  ],
+  "numericReference": {
+    "MSFT": {
+      "currentRatioFY2025": "1.353446444504241668909062584",
+      "currentRatioFY2024": "1.274954903181520680682598215",
+      "otherNoncurrentLiabilities": 94154,
+      "shortTermDebt": 0,
+      "currentLongTermDebt": 2999,
+      "shortAndLongUnearnedRevenueTotal": 67265,
+      "cashGrowthPercent": "65.12148512148512148512148510",
+      "currentAssetGrowthPercent": "19.65580277210863059836978980"
+    },
+    "WMT": {
+      "2025": {
+        "operatingCashflow": 36443,
+        "grossCashCapex": 23783,
+        "simplifiedFCF": 12660,
+        "capexToCFOPercent": "65.26081826413851768515215542"
+      },
+      "2024": {
+        "operatingCashflow": 35726,
+        "grossCashCapex": 20606,
+        "simplifiedFCF": 15120,
+        "capexToCFOPercent": "57.67788165481721995185579130"
+      },
+      "2023": {
+        "operatingCashflow": 28841,
+        "grossCashCapex": 16857,
+        "simplifiedFCF": 11984,
+        "capexToCFOPercent": "58.44804271696543115703338997"
+      }
+    },
+    "WMTGrowth": {
+      "capexFY2025Percent": "15.41783946423371833446568960",
+      "cfoFY2025Percent": "2.006941723114818339584616200",
+      "fcfFY2025Percent": "-16.26984126984126984126984127",
+      "capexTwoYearPercent": "41.08678887109212789938897790"
+    }
+  }
+}

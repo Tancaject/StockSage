@@ -1,11 +1,11 @@
 package com.stocksage.controller;
 
 import com.stocksage.agent.CoordinatorRegressionService;
-import com.stocksage.config.RequestIdentity;
+import com.stocksage.identity.RequestIdentity;
 import com.stocksage.model.dto.ChatRequest;
 import com.stocksage.model.entity.Conversation;
 import com.stocksage.model.entity.Message;
-import com.stocksage.service.ChatService;
+import com.stocksage.conversation.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;

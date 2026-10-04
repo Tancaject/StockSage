@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-04-1-1",
+    "caseId": "pep-fy2025q3-liquidity",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-validation-20261002\\raw-development-04",
+  "executionSha256": "18ae3de3cb383c71a2ce98bc5c5c1e6d7c28ffef81706930dfa55beb773a91df",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

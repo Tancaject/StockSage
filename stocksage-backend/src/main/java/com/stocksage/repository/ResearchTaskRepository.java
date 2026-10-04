@@ -20,13 +20,31 @@ import java.util.Optional;
  */
 public interface ResearchTaskRepository extends JpaRepository<ResearchTask, Long> {
 
+    @Query(value = "SELECT model_configuration_json FROM research_tasks WHERE id = :id", nativeQuery = true)
+    String readModelConfiguration(@Param("id") Long id);
+
+    @Query(value = "SELECT attempts FROM research_tasks WHERE id = :id", nativeQuery = true)
+    Integer readAttempts(@Param("id") Long id);
+
+    @Modifying
+    @Query(value = """
+            UPDATE research_tasks SET model_configuration_json = :configuration
+             WHERE id = :id AND status = 'RUNNING' AND lease_token = :leaseToken
+               AND model_configuration_json IS NULL AND attempts <= 1
+            """, nativeQuery = true)
+    int freezeModelConfigurationForOwner(@Param("id") Long id,
+            @Param("leaseToken") String leaseToken, @Param("configuration") String configuration);
+
     /**
      * 按全局唯一提交键查找任务，用于重复提交复用同一真相行。
      *
-     * @param idempotencyKey 由用户、会话、ticker 和问题生成的幂等键
+     * @param idempotencyKey 一次运行的用户限定提交键，或保留的历史请求键
      * @return 已存在任务；首次提交时为空
      */
     Optional<ResearchTask> findByIdempotencyKey(String idempotencyKey);
+
+    Optional<ResearchTask> findFirstByUserIdAndRequestFingerprintOrderByIdDesc(
+            String userId, String requestFingerprint);
 
     /**
      * 统计用户处于指定状态的任务数，主要用于 PENDING/RUNNING 配额。
@@ -319,44 +337,6 @@ public interface ResearchTaskRepository extends JpaRepository<ResearchTask, Long
             @Param("id") Long id,
             @Param("leaseToken") String leaseToken,
             @Param("errorMessage") String errorMessage,
-            @Param("resetAt") LocalDateTime resetAt
-    );
-
-    /**
-     * 将 SUCCEEDED 或 FAILED 的旧任务原子重置为一次全新提交。
-     *
-     * <p>重置会清除结果、错误、租约、时间和 attempts，并替换会话与 payload。
-     * 调用方应在同一事务中删除旧检查点，避免新尝试恢复上一轮快照。</p>
-     *
-     * @param id 终态任务主键
-     * @param conversationId 新提交关联会话；可为 null
-     * @param payloadJson 新提交参数 JSON
-     * @param resetAt 重置时间，同时作为新心跳和更新时间
-     * @return 1 表示成功重置；0 表示任务当前不是终态
-     */
-    @Modifying
-    @Query(value = """
-            UPDATE research_tasks
-               SET status = 'PENDING',
-                   stage = 'CREATED',
-                   attempts = 0,
-                   conversation_id = :conversationId,
-                   lease_token = NULL,
-                   payload_json = :payloadJson,
-                   error_message = NULL,
-                   result_report_version_id = NULL,
-                   result_kind = NULL,
-                   started_at = NULL,
-                   completed_at = NULL,
-                   heartbeat_at = :resetAt,
-                   updated_at = :resetAt
-             WHERE id = :id
-               AND status IN ('SUCCEEDED', 'FAILED')
-            """, nativeQuery = true)
-    int resetTerminalForResubmission(
-            @Param("id") Long id,
-            @Param("conversationId") Long conversationId,
-            @Param("payloadJson") String payloadJson,
             @Param("resetAt") LocalDateTime resetAt
     );
 

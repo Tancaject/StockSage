@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "reviewType": "AI_SOURCE_GROUNDED",
+  "humanReviewed": false,
+  "nonBlind": true,
+  "recordedAt": "2026-09-30T14:17:57.219401+00:00",
+  "criteriaClarification": "criteria-clarification-fundamentals.json",
+  "criteriaClarificationSha256": "68afcbd030c4b94579f347a06bc41618e6e6367f4e453376486e990730e194b1",
+  "fieldSemantics": {
+    "coverageComplete": "Actual user-requested facts, calculations and requested conceptual distinctions are present; unsupported interpretations are scored separately under evidenceGrounded.",
+    "additionalNumbersCorrect": "No material additional-number error; the 0.0558 percentage-point rounding difference is preserved in notes and not treated as a substantive failure."
+  },
+  "limits": [
+    "Two financial cases and one generated answer per arm; semantic smoke only, no statistical efficacy or formal acceptance claim.",
+    "Reviewer saw arm identities and historical project diagnostics.",
+    "Raw capture criteria preserved; task scope was clarified before this reviewer read these generated outputs."
+  ],
+  "reviews": [
+    {
+      "callId": "51dc2dd0-688c-4b34-bb01-9ae63cfb2d29",
+      "caseId": "fundamentals-msft-fy2025-liquidity",
+      "arm": "before",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "用户要求的FY2025现金30,242、非流动长期债务40,152、流动资产191,131、流动负债141,218（百万美元）及流动比率1.35完整且正确；也区分了现金与流动资产、长期债务与总负债。主动补充的FY2024各原值、1.27比率、2,999一年内到期长期债务均匹配来源，未把短期借款科目为零写成全部近端义务为零。",
+        "「公司主动优化了债务结构」从非流动长期债务余额下降确认管理层意图；本题没有现金流、债务变动或管理层说明，余额变化不能确定主动偿还/优化。",
+        "「无需动用现金偿还，而是通过交付服务来结转」「实际上，剔除未实现收入后，其真实金融偿债压力远小于账面流动比率所反映的水平」省略履约可能发生现金成本，并将递延收入全额剔除来确认真实压力更低。静态表未提供履约现金成本和兑付安排，结尾写缺口不能支持前述确定判断。",
+        "「属于业务扩张带来的经营性负债」确认了递延收入余额的经营增长原因；本题仅有期末余额，无合同、收入或收款时点等拆解。",
+        "轻微数值备注：流动资产增速写「+19.6%」，精确值(191,131/159,734−1)×100=19.6558028%，常规一位小数应19.7%。差0.0558个百分点，未将其计作实质数字失败。65.1%现金增长、12.7%流动负债增长、5.9%债务下降、22.8%应收增长及45.7%递延收入占比均匹配。"
+      ],
+      "responseSha256": "2a0b2a0ccd8d2ecae48fb3b8af0a9e1ea6928687265563f9dab6688d31d437f9"
+    },
+    {
+      "callId": "f6e1557f-7151-42ac-8a70-31fe76c03f5c",
+      "caseId": "fundamentals-msft-fy2025-liquidity",
+      "arm": "after",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "用户要求的FY2025四项金额和流动比率完整且正确；FY2024额外金额、1.27比率、15.8%现金占比、14.6%非流动债务占总负债、22.8%应收增长、19.7%流动资产增长及12.7%流动负债增长均匹配；亿美元换算正确。未主动列2,999，但未作全部短期有息义务清零推断，不因此扣分。",
+        "「这表明其流动资产结构具有较高的变现弹性，资金运用效率较高」从现金、短期投资和应收账款的静态构成确认变现能力与运用效率；缺资产限制、账龄、周转和收益资料。",
+        "「显示公司在主动优化债务结构或偿还到期债务，长期财务杠杆压力可控」将非流动长期债务余额下降解释为管理层行为及压力可控，缺债务变动、现金流和到期结构证据。",
+        "「不需要消耗现金偿还」「若剔除该非现金偿付项目，公司实际的短期刚性偿债压力远低于流动比率所呈现的水平」将递延收入全额作为非现金项目剔除并确认真实压力更低，没有保留履约现金成本，仍是实质财务推断错误。",
+        "「这反映出公司业务规模扩张（尤其是云服务和订阅业务）带来的营运资金占用增加」超出资产负债表证据，未提供业务分部增长、合同或周转变化，不能确认具体云/订阅原因。"
+      ],
+      "responseSha256": "c57fcd53487d0f94a8032532145514898c72b35a6b3d17966bb84d4664dc93f9"
+    },
+    {
+      "callId": "5343bef2-d56f-4852-ad80-b278e64dde12",
+      "caseId": "fundamentals-wmt-fy2025-cashflow",
+      "arm": "after",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": true,
+      "verdict": "PASS",
+      "notes": [
+        "FY2025 CFO36,443−毛额Capex23,783=FCF12,660，比例65.2608%约65.26%，单位与期间一致；明确不抵减资产出售回款、不等于净利润，并正确回答指定当期资本开支已被覆盖。",
+        "主动补充的FY2024资本开支20,606、比例57.68%、经营现金流35,726及FCF15,120匹配来源；FY2025资本开支增长15.4%、经营现金流增长2.0%、剩余占比约34.7%均正确。未提供FY2023不属于实际用户任务遗漏。",
+        "「固定资产购建（如门店网络升级、供应链优化及自动化设施投资等）」按固定资产用途的概念举例理解，未给出具体投入金额/占比或确定的业务归因，不单独判为已披露投向。该表述有公司化联想风险；同口径也不扣旧稿的类似“如门店、供应链物流、IT基础设施”例子。",
+        "覆盖结论限定于当期实体资产投资；「剩余约34.7%的经营现金流可灵活用于股东回报（分红、回购）、债务偿还或流动性储备」列一般可能用途，没有承诺全部计划获足额支持或未来无需外部融资。其“暂无相关核心数据缺口”只针对本题所问数值和比例，未据此确认所有财务风险已知。"
+      ],
+      "responseSha256": "b7204f23e7d21cfef05e9210198e87704caf2d8629cb027828427b0ffdb02241"
+    },
+    {
+      "callId": "87a3cd19-a4f8-43bd-afaa-b35776d7e85f",
+      "caseId": "fundamentals-wmt-fy2025-cashflow",
+      "arm": "before",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "FY2025必答CFO36,443、毛额Capex23,783、FCF12,660、约65.3%正确；三年主动补充的CFO/Capex原值及FY2024 FCF15,120均正确，FY2025 Capex增长15.4%、CFO增长2.0%、FCF下降16.3%和34.7%余量也匹配。完整满足用户要求的数值、计算和指标口径。",
+        "「无需依赖外部融资即可满足日常运营和固定资产投资的资金需求」将全年CFO减Capex为正延伸为实际运营资金无需外部融资；摘要未提供期内收支时点、资金可动用性或融资需求。可确认的是全年净额覆盖指定支出，不能直接保证日常资金需求。这一判断存在年度净额解释的边界，已单列宽松解释。",
+        "「整体资本开支强度仍处于健康且可控的范围内」没有披露的阈值、同行/历史健康标准或全部资金需求证据；资本开支低于全年CFO支持净额覆盖，不能单独确认整体强度健康可控。",
+        "固定资产用途的“如门店、供应链物流、IT基础设施”等按一般举例处理，不以这些关键词判错；剩余现金可用于分红、偿债等一般用途亦未单独扣分。"
+      ],
+      "boundaryInterpretation": {
+        "quote": "无需依赖外部融资即可满足日常运营和固定资产投资的资金需求",
+        "primaryInterpretation": "Actual daily funding assurance exceeds annual net-flow coverage; marked unsupported.",
+        "lenientInterpretation": "If understood only as the FY2025 annual aggregate net operating cash covering the specified annual gross capex, the sentence is supported. The healthy-and-controllable judgment remains a separate unsupported broad assessment.",
+        "implication": "Do not use this one response as strong causal proof that the new template fixes financial reasoning; this is a non-blind one-shot smoke comparison."
+      },
+      "responseSha256": "a8f2b4ab12e2df6ac7a25944eda083a800a8ce5a550b55b3b516d68506126b9c"
+    }
+  ]
+}

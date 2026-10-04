@@ -1,0 +1,43 @@
+Lowe's Companies, Inc. Consolidated Balance Sheets (Unaudited) In Millions, Except Par Value Data
+ |  |  |  | 
+ |  | August 1, 2025 |  | August 2, 2024
+Assets |  |  |  | 
+Current assets: |  |  |  | 
+Cash and cash equivalents |  | $ 4,860 |  | $ 4,360
+Short-term investments |  | 396 |  | 330
+Merchandise inventory - net |  | 16,342 |  | 16,841
+Other current assets |  | 1,041 |  | 806
+Total current assets |  | 22,639 |  | 22,337
+Property, less accumulated depreciation |  | 17,708 |  | 17,515
+Operating lease right-of-use assets |  | 3,887 |  | 3,819
+Long-term investments |  | 273 |  | 292
+Deferred income taxes - net |  | 140 |  | 184
+Intangibles - net |  | 976 |  | 284
+Goodwill |  | 691 |  | 311
+Other assets |  | 300 |  | 192
+Total assets |  | $ 46,614 |  | $ 44,934
+ |  |  |  | 
+Liabilities and shareholders' deficit |  |  |  | 
+Current liabilities: |  |  |  | 
+Current maturities of long-term debt |  | $ 4,175 |  | $ 1,290
+Current operating lease liabilities |  | 536 |  | 552
+Accounts payable |  | 9,513 |  | 10,336
+Accrued compensation and employee benefits |  | 1,098 |  | 1,055
+Deferred revenue |  | 1,558 |  | 1,417
+Other current liabilities |  | 4,742 |  | 3,596
+Total current liabilities |  | 21,622 |  | 18,246
+Long-term debt, excluding current maturities |  | 30,548 |  | 34,659
+Noncurrent operating lease liabilities |  | 3,801 |  | 3,738
+Deferred revenue - Lowe's protection plans |  | 1,283 |  | 1,256
+Other liabilities |  | 760 |  | 798
+Total liabilities |  | 58,014 |  | 58,697
+ |  |  |  | 
+Shareholders' deficit: |  |  |  | 
+Preferred stock, $5 par value: Authorized - 5.0 million shares; Issued and outstanding - none |  | — |  | —
+Common stock, $0.50 par value: Authorized - 5.6 billion shares; Issued and outstanding - 561 million, 568 million, and 560 million shares, respectively |  | 280 |  | 284
+Capital in excess of par value |  | 147 |  | —
+Accumulated deficit |  | (12,108) |  | (14,342)
+Accumulated other comprehensive income |  | 281 |  | 295
+Total shareholders' deficit |  | (11,400) |  | (13,763)
+Total liabilities and shareholders' deficit |  | $ 46,614 |  | $ 44,934
+ |  |  |  | 

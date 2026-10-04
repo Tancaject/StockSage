@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 2,
+  "cases": [
+    {
+      "caseId": "pep-fy2025q3-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "d02da0efa75bf1dfaec3c1fad540d08f342d02c5bb65c2d58ef2b7b2506754bd",
+      "query": "按百事（PEP）截至2025-09-06及2024-12-28的资产负债表，计算两个时点的流动比率、有息债务总额和净债务，比较变化后判断短期流动性缓冲。有息债务按短期债务义务加长期债务义务；净债务减去现金和现金等价物加短期投资。不加入其他负债或扣除其他投资。金额注明单位，比率和百分比保留两位小数。",
+      "resolvedQuery": "按百事（PEP）截至2025-09-06及2024-12-28的资产负债表，计算两个时点的流动比率、有息债务总额和净债务，比较变化后判断短期流动性缓冲。有息债务按短期债务义务加长期债务义务；净债务减去现金和现金等价物加短期投资。不加入其他负债或扣除其他投资。金额注明单位，比率和百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-02",
+      "context": "[E1] {\"availableAt\":\"2025-10-09T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-06\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2025-10-09T00:00:00Z\",\"rawSha256\":\"858ed03d62c2de4b927fa63c7f255879927b843dbfe0e9f633931bed3c5ae376\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf\",\"sourceVersion\":\"PEP-FY2025-Q3-balance\",\"target\":\"PEP\",\"unit\":\"million\",\"visibleSha256\":\"858ed03d62c2de4b927fa63c7f255879927b843dbfe0e9f633931bed3c5ae376\"}\nPepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Balance Sheet\n(in millions, except per share amounts)\n(unaudited)\n9/6/2025 12/28/2024\nASSETS\nCurrent Assets\nCash and cash equivalents $ 8,126 $ 8,505\nShort-term investments 535 761\nAccounts and notes receivable, net 12,634 10,333\nInventories:\nRaw materials and packaging 2,805 2,440\nWork-in-process 154 104\nFinished goods 3,134 2,762\n6,093 5,306\nPrepaid expenses and other current assets 1,334 921\nTotal Current Assets 28,722 25,826\nProperty, Plant and Equipment, net 29,053 28,008\nAmortizable Intangible Assets, net 1,241 1,102\nGoodwill 18,845 17,534\nOther Indefinite-Lived Intangible Assets 13,611 13,699\nInvestments in Noncontrolled Affiliates 2,084 1,985\nDeferred Income Taxes 4,341 4,362\nOther Assets 8,661 6,951\nTotal Assets $ 106,558 $ 99,467\n\nLIABILITIES AND EQUITY\nCurrent Liabilities\nShort-term debt obligations $ 6,736 $ 7,082\nAccounts payable and other current liabilities 24,763 24,454\nTotal Current Liabilities 31,499 31,536\nLong-Term Debt Obligations 44,113 37,224\nDeferred Income Taxes 3,474 3,484\nOther Liabilities 7,929 9,052\nTotal Liabilities 87,015 81,296\nCommitments and contingencies\nPepsiCo Common Shareholders’ Equity\nCommon stock, par value 1 2/3¢ per share (authorized 3,600 shares; issued, net of repurchased common\nstock at par value: 1,369 and 1,372 shares, respectively) 23 23\nCapital in excess of par value 4,374 4,385\nRetained earnings 72,197 72,266\nAccumulated other comprehensive loss (15,597) (17,612)\nRepurchased common stock, in excess of par value ( 498 and 495 shares, respectively) (41,609) (41,021)\nTotal PepsiCo Common Shareholders’ Equity 19,388 18,041\nNoncontrolling interests 155 130\nTotal Equity 19,543 18,171\nTotal Liabilities and Equity $ 106,558 $ 99,467\n\n\n\n\n\n\n\n\n\n\n\nA - 4\n",
+      "contextSha256": "363c51234fbd2c5f505280dd3a61145a204042fba22bec8cc66eecc0c92d16d8",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "PEP",
+      "requestAttributes": {
+        "reportPeriod": "quarterly",
+        "reportCount": 2
+      },
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：PEP\n请求参数：{reportPeriod=quarterly, reportCount=2}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2025-10-09T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-06\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2025-10-09T00:00:00Z\",\"rawSha256\":\"858ed03d62c2de4b927fa63c7f255879927b843dbfe0e9f633931bed3c5ae376\",\"retrievedAt\":\"2026-10-02T08:17:08.907227+00:00\",\"sourceRef\":\"https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf\",\"sourceVersion\":\"PEP-FY2025-Q3-balance\",\"target\":\"PEP\",\"unit\":\"million\",\"visibleSha256\":\"858ed03d62c2de4b927fa63c7f255879927b843dbfe0e9f633931bed3c5ae376\"}\nPepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Balance Sheet\n(in millions, except per share amounts)\n(unaudited)\n9/6/2025 12/28/2024\nASSETS\nCurrent Assets\nCash and cash equivalents $ 8,126 $ 8,505\nShort-term investments 535 761\nAccounts and notes receivable, net 12,634 10,333\nInventories:\nRaw materials and packaging 2,805 2,440\nWork-in-process 154 104\nFinished goods 3,134 2,762\n6,093 5,306\nPrepaid expenses and other current assets 1,334 921\nTotal Current Assets 28,722 25,826\nProperty, Plant and Equipment, net 29,053 28,008\nAmortizable Intangible Assets, net 1,241 1,102\nGoodwill 18,845 17,534\nOther Indefinite-Lived Intangible Assets 13,611 13,699\nInvestments in Noncontrolled Affiliates 2,084 1,985\nDeferred Income Taxes 4,341 4,362\nOther Assets 8,661 6,951\nTotal Assets $ 106,558 $ 99,467\n\nLIABILITIES AND EQUITY\nCurrent Liabilities\nShort-term debt obligations $ 6,736 $ 7,082\nAccounts payable and other current liabilities 24,763 24,454\nTotal Current Liabilities 31,499 31,536\nLong-Term Debt Obligations 44,113 37,224\nDeferred Income Taxes 3,474 3,484\nOther Liabilities 7,929 9,052\nTotal Liabilities 87,015 81,296\nCommitments and contingencies\nPepsiCo Common Shareholders’ Equity\nCommon stock, par value 1 2/3¢ per share (authorized 3,600 shares; issued, net of repurchased common\nstock at par value: 1,369 and 1,372 shares, respectively) 23 23\nCapital in excess of par value 4,374 4,385\nRetained earnings 72,197 72,266\nAccumulated other comprehensive loss (15,597) (17,612)\nRepurchased common stock, in excess of par value ( 498 and 495 shares, respectively) (41,609) (41,021)\nTotal PepsiCo Common Shareholders’ Equity 19,388 18,041\nNoncontrolling interests 155 130\nTotal Equity 19,543 18,171\nTotal Liabilities and Equity $ 106,558 $ 99,467\n\n\n\n\n\n\n\n\n\n\n\nA - 4\n",
+      "preAnalystContextSha256": "e5611f49a45139b8aa90ba41d6be341a650152634e1afa7cc6933c18b1b36e61",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261002-batch-learning",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-02T08:23:03.229467+00:00",
+        "asOfInstant": "2026-10-02T08:23:03.229467+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-02T08:23:03.229467+00:00",
+        "sourceManifestSha256": "0dacb5cabf217e2d0687141eaafc28c814e99ac3a54e14962f243650cc58c418"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2025-10-09T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-09-06",
+          "periodStart": "2024-12-29",
+          "publishedAt": "2025-10-09T00:00:00Z",
+          "rawSha256": "858ed03d62c2de4b927fa63c7f255879927b843dbfe0e9f633931bed3c5ae376",
+          "retrievedAt": "2026-10-02T08:17:08.907227+00:00",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "sourceVersion": "PEP-FY2025-Q3-balance",
+          "target": "PEP",
+          "unit": "million",
+          "visibleSha256": "858ed03d62c2de4b927fa63c7f255879927b843dbfe0e9f633931bed3c5ae376",
+          "visibleText": "PepsiCo, Inc. and Subsidiaries\nCondensed Consolidated Balance Sheet\n(in millions, except per share amounts)\n(unaudited)\n9/6/2025 12/28/2024\nASSETS\nCurrent Assets\nCash and cash equivalents $ 8,126 $ 8,505\nShort-term investments 535 761\nAccounts and notes receivable, net 12,634 10,333\nInventories:\nRaw materials and packaging 2,805 2,440\nWork-in-process 154 104\nFinished goods 3,134 2,762\n6,093 5,306\nPrepaid expenses and other current assets 1,334 921\nTotal Current Assets 28,722 25,826\nProperty, Plant and Equipment, net 29,053 28,008\nAmortizable Intangible Assets, net 1,241 1,102\nGoodwill 18,845 17,534\nOther Indefinite-Lived Intangible Assets 13,611 13,699\nInvestments in Noncontrolled Affiliates 2,084 1,985\nDeferred Income Taxes 4,341 4,362\nOther Assets 8,661 6,951\nTotal Assets $ 106,558 $ 99,467\n\nLIABILITIES AND EQUITY\nCurrent Liabilities\nShort-term debt obligations $ 6,736 $ 7,082\nAccounts payable and other current liabilities 24,763 24,454\nTotal Current Liabilities 31,499 31,536\nLong-Term Debt Obligations 44,113 37,224\nDeferred Income Taxes 3,474 3,484\nOther Liabilities 7,929 9,052\nTotal Liabilities 87,015 81,296\nCommitments and contingencies\nPepsiCo Common Shareholders’ Equity\nCommon stock, par value 1 2/3¢ per share (authorized 3,600 shares; issued, net of repurchased common\nstock at par value: 1,369 and 1,372 shares, respectively) 23 23\nCapital in excess of par value 4,374 4,385\nRetained earnings 72,197 72,266\nAccumulated other comprehensive loss (15,597) (17,612)\nRepurchased common stock, in excess of par value ( 498 and 495 shares, respectively) (41,609) (41,021)\nTotal PepsiCo Common Shareholders’ Equity 19,388 18,041\nNoncontrolling interests 155 130\nTotal Equity 19,543 18,171\nTotal Liabilities and Equity $ 106,558 $ 99,467\n\n\n\n\n\n\n\n\n\n\n\nA - 4\n"
+        }
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "runId": "candidate-dev-04-1-1",
+      "caseId": "pep-fy2025q3-liquidity",
+      "bundleId": "candidate-a7a92cfaac38c01535486362",
+      "repeatId": 1
+    }
+  ],
+  "context": {
+    "experimentId": "fundamentals-batch-learning-validation-20261002",
+    "evaluatorVersion": "9596583720838d6dca2a514788ecf9eaa00072401cf66d3df3b4f16a89bc006e",
+    "runMode": "DEVELOPMENT"
+  }
+}

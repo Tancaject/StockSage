@@ -1,6 +1,6 @@
 package com.stocksage.controller;
 
-import com.stocksage.config.RequestIdentity;
+import com.stocksage.identity.RequestIdentity;
 import com.stocksage.model.dto.UserProfileDTO;
 import com.stocksage.service.UserService;
 import jakarta.validation.Valid;

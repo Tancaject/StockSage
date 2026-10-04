@@ -1,0 +1,26 @@
+{
+  "httpReadTimeout" : "UNSET",
+  "startedAt" : "2026-09-30T14:35:29.741676800Z",
+  "scope" : "CAPTURED_MESSAGES_ONLY_NO_TOOLS_NO_STORAGE",
+  "buildAttestation" : "UNATTESTED_LOCAL_CLASSES",
+  "retryAttempts" : 1,
+  "provider" : {
+    "scope" : "API_CONSTRUCTION",
+    "excluded" : "USERINFO_QUERY_FRAGMENT_HEADERS_CREDENTIALS",
+    "protocol" : "OPENAI_COMPATIBLE",
+    "base" : {
+      "pathSha256" : "16435b6e8f369c4f10b359d0c6a29d735a79fdbfbb94d8bf97259f7522320110",
+      "scheme" : "https",
+      "host" : "dashscope.aliyuncs.com",
+      "port" : -1
+    },
+    "unknownProviderRevision" : true,
+    "completions" : {
+      "pathSha256" : "2e3b96fc129d494b171c50c85551ee22c27344965d3231728851ed232d91c898",
+      "scheme" : "",
+      "host" : "",
+      "port" : -1
+    }
+  },
+  "httpConnectTimeout" : "UNSET"
+}

@@ -1,0 +1,9 @@
+{
+  "schema": "fundamentals_evolution_build_v1",
+  "gitSha": "2f2faa7b58c5da379201ddd77bdd5883578d1ccb",
+  "sourceState": "WORKTREE_SNAPSHOT",
+  "sourceTreeSha256": "ab3bad1310ae37bc07abdc56f6c0b9503c2e853a81de41d4b6edda5c88310ee7",
+  "artifactSha256": "af9d6382ae73f11106eb7fef574b72e3a1de6ec2a359eb8c7b52504115532d2f",
+  "artifactFormat": "SPRING_BOOT_JAR",
+  "builtAt": "2026-09-30T02:00:33.240788+00:00"
+}

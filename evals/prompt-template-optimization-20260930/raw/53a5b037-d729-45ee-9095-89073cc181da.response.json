@@ -1,0 +1,16 @@
+{
+  "usageSource" : "PROVIDER",
+  "usageSemantics" : "INVOCATION_SNAPSHOT",
+  "actualModel" : "qwen3.8-flash",
+  "providerResponseId" : "chatcmpl-c4245f92-466a-9ed7-96ae-7ca857bb7293",
+  "inputTokens" : 181,
+  "outputTokens" : 209,
+  "totalTokens" : 390,
+  "finishReason" : "STOP",
+  "text" : "AAPL现金流资本开支",
+  "callId" : "53a5b037-d729-45ee-9095-89073cc181da",
+  "caseId" : "title-financial-topic",
+  "arm" : "before",
+  "elapsedMs" : 3908,
+  "finishedAt" : "2026-09-30T14:09:52.653424800Z"
+}

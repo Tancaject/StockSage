@@ -1,0 +1,439 @@
+{
+  "schema": "fundamentals_batch_secondary_review_v1",
+  "reviewStatus": "COMPLETE",
+  "reviewer": "independent-ai-batch-contract-audit",
+  "reviewType": "AI_SOURCE_GROUNDED",
+  "humanReviewed": false,
+  "blind": false,
+  "primaryJudgeRead": false,
+  "providerModelCalls": 0,
+  "goldFileSha256": "1b31f7cf00852cb0a4696385faac1954b344a0d50563cd5033ef71b5c106cbc1",
+  "planSha256": "d8947900c36f3334cf5fca2c8e2c8dc0c89b7ee54e61336414227bacf157cb3b",
+  "reviewedAt": "2026-10-02T08:44:20.104715+00:00",
+  "plannedCaseIds": [
+    "ibm-fy2025q3-quarter-control",
+    "ibm-fy2025q3-cash-quality",
+    "ibm-fy2025q3-liquidity",
+    "jnj-fy2025q3-quarter-reconstruction",
+    "jnj-fy2025q3-cash-quality",
+    "jnj-fy2025q3-liquidity"
+  ],
+  "cases": [
+    {
+      "caseId": "ibm-fy2025q3-quarter-control",
+      "runId": "development-ibm-1-1",
+      "responsePath": "raw-development-ibm\\development-ibm-1-1.response.json",
+      "responseSha256": "9e2e71a791c740bd70a672655922a194d40a531c5cfb99177fdf0bbe6a5006f1",
+      "goldSha256": "764ffa811949a9413bcbf81482d87d9c5f4f6e441bb9fc212197ddb4704ff8bb",
+      "executionStatus": "COMPLETED",
+      "stages": {
+        "analysis": {
+          "status": "PASS",
+          "requiredFactsCorrect": true,
+          "coreCoverageComplete": true,
+          "dimensionStatuses": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          },
+          "requiredPointChecks": {
+            "p1": "PASS",
+            "p2": "PASS",
+            "p3": "PASS"
+          },
+          "answerSha256": "ec87a6b95860b03342a8cdc42472cc5935707e82b344caaebd3b82111667fb89",
+          "supportingAnswerQuotes": [
+            "= **1,337 百万美元**",
+            "= **1.77**",
+            "IBM 2025年第三季度现金转化表现较强"
+          ],
+          "materialIssues": [],
+          "notes": [
+            "已答齐单季金额、差额、比率和简短判断；额外176.66%、折旧摊销1283、股权薪酬444、营运项目-688及融资应收298均与原表/计算一致。",
+            "GAAP是否单独标注及税项细分的保留偏谨慎；未造成核心漏答、计算改变或关键结论失真，记非实质性备注，不能因此生成方法错误。"
+          ],
+          "attribution": "NO_CONFIRMED_METHOD_ERROR"
+        },
+        "finalAnswer": {
+          "status": "PASS",
+          "requiredFactsCorrect": true,
+          "coreCoverageComplete": true,
+          "dimensionStatuses": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          },
+          "requiredPointChecks": {
+            "p1": "PASS",
+            "p2": "PASS",
+            "p3": "PASS"
+          },
+          "answerSha256": "9ddbe1746a84f3b10f8ddcf0430b7f99e51e0a474897947020918a668edab9ee",
+          "supportingAnswerQuotes": [
+            "**1,337 百万美元**",
+            "**1.77**",
+            "单季经营现金流显著高于当期净利润。"
+          ],
+          "materialIssues": [],
+          "notes": [
+            "四项要求及判断完整正确；保留GAAP口径的谨慎说明，未实际拒答。"
+          ],
+          "attribution": "NO_CONFIRMED_METHOD_ERROR"
+        }
+      }
+    },
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "runId": "development-ibm-2-1",
+      "responsePath": "raw-development-ibm\\development-ibm-2-1.response.json",
+      "responseSha256": "b20f9e023d08233bf8d17eac8344a862e3f21e262d3f1a433578ebf2e0ac775f",
+      "goldSha256": "125ddf366f130e5c5c9ad969372f05dc65f20addd4e942845c63411586af6db5",
+      "executionStatus": "FAILED",
+      "executionErrorCode": "TIMEOUT",
+      "stages": {
+        "analysis": {
+          "status": "NO_DATA",
+          "executionStatus": "FAILED",
+          "requiredFactsCorrect": null,
+          "coreCoverageComplete": null,
+          "dimensionStatuses": {
+            "claim_support": "NO_DATA",
+            "numeric_period_correctness": "NO_DATA",
+            "counterevidence": "NO_DATA",
+            "unknowns": "NO_DATA"
+          },
+          "requiredPointChecks": {
+            "p1": "NO_DATA",
+            "p2": "NO_DATA",
+            "p3": "NO_DATA",
+            "p4": "NO_DATA"
+          },
+          "answerSha256": null,
+          "supportingAnswerQuotes": [],
+          "materialIssues": [],
+          "notes": [
+            "分析阶段180秒超时且无输出，供应商完成状态和用量未知；最终阶段未执行。没有可评价业务答案，不作语义失败或方法错误判定。"
+          ],
+          "attribution": "EXECUTION_TIMEOUT_NOT_METHOD_ERROR",
+          "durationMs": 180008,
+          "timeoutSeconds": 180
+        },
+        "finalAnswer": {
+          "status": "NO_DATA",
+          "executionStatus": "NOT_EXECUTED",
+          "requiredFactsCorrect": null,
+          "coreCoverageComplete": null,
+          "dimensionStatuses": {
+            "claim_support": "NO_DATA",
+            "numeric_period_correctness": "NO_DATA",
+            "counterevidence": "NO_DATA",
+            "unknowns": "NO_DATA"
+          },
+          "requiredPointChecks": {
+            "p1": "NO_DATA",
+            "p2": "NO_DATA",
+            "p3": "NO_DATA",
+            "p4": "NO_DATA"
+          },
+          "answerSha256": null,
+          "supportingAnswerQuotes": [],
+          "materialIssues": [],
+          "notes": [
+            "分析阶段180秒超时且无输出，供应商完成状态和用量未知；最终阶段未执行。没有可评价业务答案，不作语义失败或方法错误判定。"
+          ],
+          "attribution": "EXECUTION_TIMEOUT_NOT_METHOD_ERROR",
+          "durationMs": null,
+          "timeoutSeconds": null
+        }
+      }
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "runId": "development-unsubmitted-ibm-1-1",
+      "responsePath": "raw-development-unsubmitted-ibm\\development-unsubmitted-ibm-1-1.response.json",
+      "responseSha256": "af0fb0021a53133ba01740f85f0f0e504c92e2ff7eb5713c63a8096093e80c9f",
+      "goldSha256": "36a494bf8f0e935f3f5fda1a63b4a1ca3f716f3ea182a96676f7e9b44aaa6ce9",
+      "executionStatus": "FAILED",
+      "executionErrorCode": "TIMEOUT",
+      "stages": {
+        "analysis": {
+          "status": "NO_DATA",
+          "executionStatus": "FAILED",
+          "requiredFactsCorrect": null,
+          "coreCoverageComplete": null,
+          "dimensionStatuses": {
+            "claim_support": "NO_DATA",
+            "numeric_period_correctness": "NO_DATA",
+            "counterevidence": "NO_DATA",
+            "unknowns": "NO_DATA"
+          },
+          "requiredPointChecks": {
+            "p1": "NO_DATA",
+            "p2": "NO_DATA",
+            "p3": "NO_DATA",
+            "p4": "NO_DATA"
+          },
+          "answerSha256": null,
+          "supportingAnswerQuotes": [],
+          "materialIssues": [],
+          "notes": [
+            "这是先前未提交liquidity题的首次执行，非重试原现金质量题；分析180秒超时且无输出，供应商完成状态和用量未知，最终未执行。没有业务正文可评，不作方法错误判定。"
+          ],
+          "attribution": "EXECUTION_TIMEOUT_NOT_METHOD_ERROR",
+          "durationMs": 180007,
+          "timeoutSeconds": 180
+        },
+        "finalAnswer": {
+          "status": "NO_DATA",
+          "executionStatus": "NOT_EXECUTED",
+          "requiredFactsCorrect": null,
+          "coreCoverageComplete": null,
+          "dimensionStatuses": {
+            "claim_support": "NO_DATA",
+            "numeric_period_correctness": "NO_DATA",
+            "counterevidence": "NO_DATA",
+            "unknowns": "NO_DATA"
+          },
+          "requiredPointChecks": {
+            "p1": "NO_DATA",
+            "p2": "NO_DATA",
+            "p3": "NO_DATA",
+            "p4": "NO_DATA"
+          },
+          "answerSha256": null,
+          "supportingAnswerQuotes": [],
+          "materialIssues": [],
+          "notes": [
+            "这是先前未提交liquidity题的首次执行，非重试原现金质量题；分析180秒超时且无输出，供应商完成状态和用量未知，最终未执行。没有业务正文可评，不作方法错误判定。"
+          ],
+          "attribution": "EXECUTION_TIMEOUT_NOT_METHOD_ERROR",
+          "durationMs": null,
+          "timeoutSeconds": null
+        }
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-quarter-reconstruction",
+      "runId": "development-jnj-1-1",
+      "responsePath": "raw-development-jnj\\development-jnj-1-1.response.json",
+      "responseSha256": "3bff51249020c94c944b28f09e8dfdf9bb6e0ea58267597a27973ad120aa5b70",
+      "goldSha256": "b246104ac47d921de6b9d828d81aa0ba4b4076bb4d72cc173cf6d39f7832027a",
+      "executionStatus": "COMPLETED",
+      "stages": {
+        "analysis": {
+          "status": "PASS",
+          "requiredFactsCorrect": true,
+          "coreCoverageComplete": true,
+          "dimensionStatuses": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          },
+          "requiredPointChecks": {
+            "p1": "PASS",
+            "p2": "PASS",
+            "p3": "PASS",
+            "p4": "PASS"
+          },
+          "answerSha256": "e7b8661c1be026aec9e48ef80b6ae1c6c937f633024a29c32592c9469826c589",
+          "supportingAnswerQuotes": [
+            "**9,169 百万美元**",
+            "**1,157 百万美元**",
+            "**8,012 百万美元**",
+            "**2025-06-30 至 2025-09-28**"
+          ],
+          "materialIssues": [],
+          "notes": [
+            "以同财年九个月减六个月正确还原2025-06-30至09-28：CFO9169、支出1157、FCF8012百万美元。额外7.92倍/792.48%由9169/1157复算正确。",
+            "限制说明略多，但未把数据充分的核心任务拒答；没有将处置回款抵扣购建支出。"
+          ],
+          "attribution": "NO_CONFIRMED_METHOD_ERROR"
+        },
+        "finalAnswer": {
+          "status": "PASS",
+          "requiredFactsCorrect": true,
+          "coreCoverageComplete": true,
+          "dimensionStatuses": {
+            "claim_support": "PASS",
+            "numeric_period_correctness": "PASS",
+            "counterevidence": "PASS",
+            "unknowns": "PASS"
+          },
+          "requiredPointChecks": {
+            "p1": "PASS",
+            "p2": "PASS",
+            "p3": "PASS",
+            "p4": "PASS"
+          },
+          "answerSha256": "eedd1df6e47815196b867de5598ec7f34a4142cecb139cf1e73db9ccc11062d8",
+          "supportingAnswerQuotes": [
+            "**经营现金流：9,169 百万美元**",
+            "**购建固定资产现金支出：1,157 百万美元**",
+            "**简化自由现金流：8,012 百万美元**",
+            "**2025-06-30 至 2025-09-28**"
+          ],
+          "materialIssues": [],
+          "notes": [
+            "正确传递单季期间、三项结果及覆盖结论；额外覆盖倍数和比率正确，未新增公司原因。"
+          ],
+          "attribution": "NO_CONFIRMED_METHOD_ERROR"
+        }
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "runId": "development-jnj-2-1",
+      "responsePath": "raw-development-jnj\\development-jnj-2-1.response.json",
+      "responseSha256": "97ad35deecbf9aa3bd03fe6e82407db2e386218d47d8dd79ea8fba8709c727d7",
+      "goldSha256": "0662cfc88073a81fa269d33de39d81bbbdc03fcc357c92d30ab3d357e2254217",
+      "executionStatus": "FAILED",
+      "executionErrorCode": "TIMEOUT",
+      "stages": {
+        "analysis": {
+          "status": "NO_DATA",
+          "executionStatus": "FAILED",
+          "requiredFactsCorrect": null,
+          "coreCoverageComplete": null,
+          "dimensionStatuses": {
+            "claim_support": "NO_DATA",
+            "numeric_period_correctness": "NO_DATA",
+            "counterevidence": "NO_DATA",
+            "unknowns": "NO_DATA"
+          },
+          "requiredPointChecks": {
+            "p1": "NO_DATA",
+            "p2": "NO_DATA",
+            "p3": "NO_DATA",
+            "p4": "NO_DATA"
+          },
+          "answerSha256": null,
+          "supportingAnswerQuotes": [],
+          "materialIssues": [],
+          "notes": [
+            "分析阶段180秒超时且无输出，供应商完成状态和用量未知；最终阶段未执行。没有可评价业务答案，不作语义失败或方法错误判定。"
+          ],
+          "attribution": "EXECUTION_TIMEOUT_NOT_METHOD_ERROR",
+          "durationMs": 180005,
+          "timeoutSeconds": 180
+        },
+        "finalAnswer": {
+          "status": "NO_DATA",
+          "executionStatus": "NOT_EXECUTED",
+          "requiredFactsCorrect": null,
+          "coreCoverageComplete": null,
+          "dimensionStatuses": {
+            "claim_support": "NO_DATA",
+            "numeric_period_correctness": "NO_DATA",
+            "counterevidence": "NO_DATA",
+            "unknowns": "NO_DATA"
+          },
+          "requiredPointChecks": {
+            "p1": "NO_DATA",
+            "p2": "NO_DATA",
+            "p3": "NO_DATA",
+            "p4": "NO_DATA"
+          },
+          "answerSha256": null,
+          "supportingAnswerQuotes": [],
+          "materialIssues": [],
+          "notes": [
+            "分析阶段180秒超时且无输出，供应商完成状态和用量未知；最终阶段未执行。没有可评价业务答案，不作语义失败或方法错误判定。"
+          ],
+          "attribution": "EXECUTION_TIMEOUT_NOT_METHOD_ERROR",
+          "durationMs": null,
+          "timeoutSeconds": null
+        }
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-liquidity",
+      "runId": "development-unsubmitted-jnj-1-1",
+      "responsePath": "raw-development-unsubmitted-jnj\\development-unsubmitted-jnj-1-1.response.json",
+      "responseSha256": "0ada9d17f95d7727e4d68d49a0ffd21eab6cc61b8592481f22be8e01b099c6ed",
+      "goldSha256": "e640761dd916c676e848980c754c845ea184ad131c26cb397257960b71a3bc3c",
+      "executionStatus": "FAILED",
+      "executionErrorCode": "TIMEOUT",
+      "stages": {
+        "analysis": {
+          "status": "NO_DATA",
+          "executionStatus": "FAILED",
+          "requiredFactsCorrect": null,
+          "coreCoverageComplete": null,
+          "dimensionStatuses": {
+            "claim_support": "NO_DATA",
+            "numeric_period_correctness": "NO_DATA",
+            "counterevidence": "NO_DATA",
+            "unknowns": "NO_DATA"
+          },
+          "requiredPointChecks": {
+            "p1": "NO_DATA",
+            "p2": "NO_DATA",
+            "p3": "NO_DATA",
+            "p4": "NO_DATA"
+          },
+          "answerSha256": null,
+          "supportingAnswerQuotes": [],
+          "materialIssues": [],
+          "notes": [
+            "这是先前未提交liquidity题的首次执行，非重试原现金质量题；分析180秒超时且无输出，供应商完成状态和用量未知，最终未执行。没有业务正文可评，不作方法错误判定。"
+          ],
+          "attribution": "EXECUTION_TIMEOUT_NOT_METHOD_ERROR",
+          "durationMs": 180006,
+          "timeoutSeconds": 180
+        },
+        "finalAnswer": {
+          "status": "NO_DATA",
+          "executionStatus": "NOT_EXECUTED",
+          "requiredFactsCorrect": null,
+          "coreCoverageComplete": null,
+          "dimensionStatuses": {
+            "claim_support": "NO_DATA",
+            "numeric_period_correctness": "NO_DATA",
+            "counterevidence": "NO_DATA",
+            "unknowns": "NO_DATA"
+          },
+          "requiredPointChecks": {
+            "p1": "NO_DATA",
+            "p2": "NO_DATA",
+            "p3": "NO_DATA",
+            "p4": "NO_DATA"
+          },
+          "answerSha256": null,
+          "supportingAnswerQuotes": [],
+          "materialIssues": [],
+          "notes": [
+            "这是先前未提交liquidity题的首次执行，非重试原现金质量题；分析180秒超时且无输出，供应商完成状态和用量未知，最终未执行。没有业务正文可评，不作方法错误判定。"
+          ],
+          "attribution": "EXECUTION_TIMEOUT_NOT_METHOD_ERROR",
+          "durationMs": null,
+          "timeoutSeconds": null
+        }
+      }
+    }
+  ],
+  "policy": "Fixed fundamentals stage rubric and question-specific gold; no invented task requirements; exact additional claims reviewed; omissions and errors attributed to their actual stage. Source rounding and equivalent units/sign conventions follow frozen reviewNotes.",
+  "reviewedCaseCount": 6,
+  "pendingCaseIds": [],
+  "summary": {
+    "plannedCases": 6,
+    "casesWithCompletedAnalysisAndFinal": 2,
+    "executionTimeoutCases": 4,
+    "analysis": {
+      "PASS": 2,
+      "FAIL": 0,
+      "NO_DATA": 4
+    },
+    "finalAnswer": {
+      "PASS": 2,
+      "FAIL": 0,
+      "NO_DATA": 4
+    },
+    "confirmedMethodFailures": 0,
+    "confirmedFinalSynthesisFailures": 0,
+    "interpretation": "The two evaluable tasks pass both stages. Four empty timeout cases cannot be graded semantically and remain in the six-case denominator; no method-learning trigger is established by these six attempts.",
+    "primaryJudgeComparison": "Not read; independent secondary review only, no evaluator-error attribution fabricated."
+  }
+}

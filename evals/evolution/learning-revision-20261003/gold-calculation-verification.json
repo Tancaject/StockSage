@@ -1,0 +1,111 @@
+{
+  "status": "PASS",
+  "helper": "evals/evolution_dataset.py:derived_value",
+  "rows": [
+    {
+      "case": 5,
+      "field": "quarterOperatingCashFlow",
+      "computed": "1127.0000",
+      "expected": "1127.0000",
+      "status": "PASS"
+    },
+    {
+      "case": 5,
+      "field": "quarterCapitalSpendingOutflowAmount",
+      "computed": "978.0000",
+      "expected": "978.0000",
+      "status": "PASS"
+    },
+    {
+      "case": 5,
+      "field": "quarterSimpleFreeCashFlow",
+      "computed": "149.0000",
+      "expected": "149.0000",
+      "status": "PASS"
+    },
+    {
+      "case": 9,
+      "field": "quarterConsolidatedNetIncome2025",
+      "computed": "2618.0000",
+      "expected": "2618.0000",
+      "status": "PASS"
+    },
+    {
+      "case": 9,
+      "field": "quarterOperatingCashFlow2025",
+      "computed": "4472.0000",
+      "expected": "4472.0000",
+      "status": "PASS"
+    },
+    {
+      "case": 9,
+      "field": "quarterSimpleFreeCashFlow2025",
+      "computed": "3480.0000",
+      "expected": "3480.0000",
+      "status": "PASS"
+    },
+    {
+      "case": 9,
+      "field": "quarterConsolidatedNetIncome2024",
+      "computed": "2945.0000",
+      "expected": "2945.0000",
+      "status": "PASS"
+    },
+    {
+      "case": 9,
+      "field": "quarterOperatingCashFlow2024",
+      "computed": "4905.0000",
+      "expected": "4905.0000",
+      "status": "PASS"
+    },
+    {
+      "case": 9,
+      "field": "quarterSimpleFreeCashFlow2024",
+      "computed": "3756.0000",
+      "expected": "3756.0000",
+      "status": "PASS"
+    },
+    {
+      "case": 6,
+      "field": "currentRatioCurrent",
+      "computed": "0.9746",
+      "expected": "0.9746",
+      "status": "PASS"
+    },
+    {
+      "case": 6,
+      "field": "totalDebtCurrent",
+      "computed": "16499.0000",
+      "expected": "16499.0000",
+      "status": "PASS"
+    },
+    {
+      "case": 6,
+      "field": "netDebtCurrent",
+      "computed": "12677.0000",
+      "expected": "12677.0000",
+      "status": "PASS"
+    },
+    {
+      "case": 6,
+      "field": "currentRatioPrior",
+      "computed": "0.9353",
+      "expected": "0.9353",
+      "status": "PASS"
+    },
+    {
+      "case": 6,
+      "field": "totalDebtPrior",
+      "computed": "15940.0000",
+      "expected": "15940.0000",
+      "status": "PASS"
+    },
+    {
+      "case": 6,
+      "field": "netDebtPrior",
+      "computed": "11178.0000",
+      "expected": "11178.0000",
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+Table of Contents
+
+Part I — Financial information
+Item 1 — Financial statements
+Johnson & Johnson and subsidiaries consolidated balance sheets
+(Unaudited; Dollars in Millions Except Share and Per Share Data)
+September 28, 2025 December 29, 2024
+Assets
+Current assets:
+Cash and cash equivalents (Note 4) $18,231 24,105
+Marketable securities 331 417
+Accounts receivable, trade, less allowances $176 (2 024, $167 ) 17,611 14,842
+Inventories (Note 2) 14,146 12,444
+Prepaid expenses and other 4,292 4,085
+Total current assets 54,611 55,893
+Property, plant and equipment at cost 53,375 48,768
+Less: accumulated depreciation (31,037) (28,250)
+Property, plant and equipment, net 22,338 20,518
+Intangible assets, net (Note 3) 48,737 37,618
+Goodwill (Note 3) 48,048 44,200
+Deferred taxes on income (Note 5) 6,666 10,461
+Other assets 12,416 11,414
+Total assets $192,816 180,104
+Liabilities and shareholders’ equity
+Current liabilities:
+Loans and notes payable $6,387 5,983
+Accounts payable 9,625 10,311
+Accrued liabilities 7,601 8,549
+Accrued rebates, returns and promotions 21,356 17,580
+Accrued compensation and employee related obligations 3,972 4,126
+Accrued taxes on income (Note 5) 1,928 3,772
+Total current liabilities 50,869 50,321
+Long-term debt (Note 4) 39,408 30,651
+Deferred taxes on income (Note 5) 5,988 2,448
+Employee related obligations (Note 6) 6,930 7,255
+Long-term taxes payable (Note 5) 418 390
+Other liabilities 9,926 17,549
+Total liabilities $113,539 108,614
+Commitments and Contingencies (Note 11)
+Shareholders’ equity:
+Common stock — par value $1.00 per share (authorized 4,320,000,000 shares; $3,120 3,120
+issued 3,119,843,000 shares)
+Accumulated other comprehensive income (loss) (Note 7) (15,237) (11,741)
+Retained earnings and Additional paid-in capital 167,281 155,791
+Less: common stock held in treasury, at cost ( 713,648,000 a nd 712,921,000 shares) 75,887 75,680
+Total shareholders’ equity $79,277 71,490
+Total liabilities and shareholders’ equity $192,816 180,104
+
+See Notes to Consolidated Financial Statements
+
+
+
+
+
+
+
+Form 10-Q 1

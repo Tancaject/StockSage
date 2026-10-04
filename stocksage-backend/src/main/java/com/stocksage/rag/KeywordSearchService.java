@@ -95,6 +95,10 @@ public class KeywordSearchService {
     private volatile boolean available;
     private volatile long nextRebuildAttemptNanos;
 
+    public Map<String, Object> runtimeConfiguration() {
+        return Map.of("enabled", enabled, "k1", k1, "b", b, "indexVersion", INDEX_VERSION);
+    }
+
     public KeywordSearchService(
             JdbcTemplate jdbcTemplate,
             ObjectMapper objectMapper,

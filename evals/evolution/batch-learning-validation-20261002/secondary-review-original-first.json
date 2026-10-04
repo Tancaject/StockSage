@@ -1,0 +1,4085 @@
+{
+  "schema": "batch_independent_source_review_v2",
+  "reviewType": "AI_INDEPENDENT_SOURCE_REVIEW_NOT_HUMAN",
+  "humanReviewStatus": "AI_ONLY",
+  "reviewer": "batch_dataset_design",
+  "status": "COMPLETE",
+  "createdAt": "2026-10-02T12:54:34.355154+00:00",
+  "scope": "Original development-01 through development-03 only. Parent reassigned development-04 through development-06 before any judgment was recorded for those cases. Authored new4 tasks excluded. No other evaluator judgments inspected.",
+  "reviewPolicyPath": "evals/evolution/batch-learning-validation-20261002/review-policy.json",
+  "reviewPolicySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+  "sourceCasesPath": "evals/evolution/batch-learning-validation-20261002/cases.jsonl",
+  "sourceCasesSha256": "1260c579bae043263d3c1ac88cdd2663186ccf6a34d38c7cffcd9dcffceeb145",
+  "goldFile": "evals/evolution/batch-learning-validation-20261002/gold.jsonl",
+  "goldFileSha256": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+  "rubricPath": "evals/evolution_rubric.py",
+  "rubricFileSha256": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea",
+  "summary": {
+    "plannedCases": 3,
+    "plannedStages": 6,
+    "reviewedStages": 6,
+    "requiredFactsPerStage": 15,
+    "requiredFactPasses": {
+      "analysis": 15,
+      "finalAnswer": 15
+    },
+    "semanticPassCases": {
+      "analysis": 3,
+      "finalAnswer": 3
+    },
+    "pendingCases": 0,
+    "confirmedMethodErrorCases": 0,
+    "finalOnlyErrorCases": 0
+  },
+  "cases": [
+    {
+      "name": "development-01",
+      "caseId": "ibm-fy2025q3-quarter-control",
+      "executionPath": "evals/evolution/batch-learning-validation-20261002/development-01.execution.json",
+      "executionSha256": "90b4d5798a67f15a7344e14d792e8b463d749254cae813bb67510de8e59aed07",
+      "caseSha256": "6ea62fbaecbeb03f9b29e3f5267955e24b877b135fb0f2d87336a3b2c594074a",
+      "goldLineSha256": "23b26327996e99b135bd3417ac2dde093b35085cc820bfc2f2ad7c0610936f49",
+      "expectedReportPath": "evals/evolution/batch-learning-validation-20261002/raw-development-01/baseline-v1.report.json",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "sourceVersion": "IBM-Q3-2025-official-IR-cashflow",
+          "visibleSha256": "625a8960093e36ee5c650ceefb219dcac3835279e2e0fb45f6f81a3c2fa7867b"
+        }
+      ],
+      "executionStatus": "COMPLETED",
+      "learningAttribution": "NONE",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "535a1e61108a75d10b292d5e090dfe5ec83a53b6b10bc7dd8af97257bad6a5ed",
+        "providerStageStatus": "COMPLETED",
+        "durationMs": 83801,
+        "dimensions": {
+          "claim_support": {
+            "status": "PASS",
+            "reason": "Uses actual quarter table values; voluntary mechanisms remain qualified, without unsupported company causes.",
+            "answerQuotes": [
+              "IBM 2025 年第三季度单季经营现金流显著高于 GAAP 净利润，经营现金流为净利润的 **1.77 倍**，差额为 **1,337 百万美元**。本季度利润的现金转化表现较强，经营现金流对净利润形成了明显超额覆盖。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "numeric_period_correctness": {
+            "status": "PASS",
+            "reason": "4required facts match actual quarter, unit and frozen Decimal tolerance; percentage and money conversions independently checked.",
+            "answerQuotes": [
+              "- **期间**：2025 年第三季度单季，即 **Three Months Ended September 30, 2025** [E1]",
+              "= **1.77**"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "counterevidence": {
+            "status": "PASS",
+            "reason": "Optional explanation retains negative operating-assets/other adjustment and does not convert the high ratio into guaranteed enduring quality.",
+            "answerQuotes": [
+              "- [E1] 显示 2025Q3 单季存在 **Operating assets and liabilities/Other, net** 为 **-688 百万美元**，说明部分经营性资产负债或其他项目对现金流为负向影响。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Operating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)"
+              }
+            ]
+          },
+          "unknowns": {
+            "status": "PASS",
+            "reason": "General noncash/timing mechanisms are expressly possible and single-quarter limits retained. Additional GAAP-attribution caution does not withhold the correct required calculation.",
+            "answerQuotes": [
+              "- 经营现金流高于净利润并不必然代表盈利质量持续改善，可能受折旧摊销、股权激励、营运资本变动等非现金或时点性项目影响 [E1]。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          }
+        },
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": {
+            "status": "PASS",
+            "observedText": "3,081",
+            "observedNormalizedValue": "3081",
+            "normalization": "Remove numeric grouping commas; same gold unit.",
+            "expectedValue": "3081",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2025-07-01/2025-09-30",
+            "periodStatus": "PASS",
+            "answerQuote": "- **经营现金流**：3,081 百万美元，约 **30.81 亿美元** [E1]",
+            "periodAnswerQuote": "- **期间**：2025 年第三季度单季，即 **Three Months Ended September 30, 2025** [E1]",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "quarterNetIncome": {
+            "status": "PASS",
+            "observedText": "1,744",
+            "observedNormalizedValue": "1744",
+            "normalization": "Remove numeric grouping commas; same gold unit.",
+            "expectedValue": "1744",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2025-07-01/2025-09-30",
+            "periodStatus": "PASS",
+            "answerQuote": "- **GAAP 净利润**：1,744 百万美元，约 **17.44 亿美元** [E1]",
+            "periodAnswerQuote": "- **期间**：2025 年第三季度单季，即 **Three Months Ended September 30, 2025** [E1]",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "cashIncomeGap": {
+            "status": "PASS",
+            "observedText": "1,337",
+            "observedNormalizedValue": "1337",
+            "normalization": "Remove numeric grouping commas; same gold unit.",
+            "expectedValue": "1337.0000",
+            "absoluteError": "0.0000",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2025-07-01/2025-09-30",
+            "periodStatus": "PASS",
+            "answerQuote": "= **1,337 百万美元**，约 **13.37 亿美元**",
+            "periodAnswerQuote": "- **期间**：2025 年第三季度单季，即 **Three Months Ended September 30, 2025** [E1]",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "cashConversionRatio": {
+            "status": "PASS",
+            "observedText": "1.77",
+            "observedNormalizedValue": "1.77",
+            "normalization": "Remove numeric grouping commas; same gold unit.",
+            "expectedValue": "1.7666",
+            "absoluteError": "0.0034",
+            "tolerance": "0.01",
+            "unit": "ratio",
+            "currency": "N/A",
+            "observedPeriod": "2025-07-01/2025-09-30",
+            "periodStatus": "PASS",
+            "answerQuote": "= **1.77**",
+            "periodAnswerQuote": "- **期间**：2025 年第三季度单季，即 **Three Months Ended September 30, 2025** [E1]",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          }
+        },
+        "requiredPointChecks": {
+          "p1": {
+            "status": "PASS",
+            "reason": "Reported quarter amounts and period correctly read.",
+            "answerQuotes": [
+              "- **期间**：2025 年第三季度单季，即 **Three Months Ended September 30, 2025** [E1]",
+              "- **经营现金流**：3,081 百万美元，约 **30.81 亿美元** [E1]",
+              "- **GAAP 净利润**：1,744 百万美元，约 **17.44 亿美元** [E1]"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "p2": {
+            "status": "PASS",
+            "reason": "Difference1337 and ratio1.77 are correct.",
+            "answerQuotes": [
+              "= **1,337 百万美元**，约 **13.37 亿美元**",
+              "= **1.77**"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "p3": {
+            "status": "PASS",
+            "reason": "Conclusion correctly treats CFO as greater than NI in this quarter.",
+            "answerQuotes": [
+              "IBM 2025 年第三季度单季经营现金流显著高于 GAAP 净利润，经营现金流为净利润的 **1.77 倍**，差额为 **1,337 百万美元**。本季度利润的现金转化表现较强，经营现金流对净利润形成了明显超额覆盖。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          }
+        },
+        "additionalNumericChecks": [
+          {
+            "status": "PASS",
+            "observedText": "176.66%",
+            "observedNormalizedValue": "1.7666",
+            "expectedValue": "1.766628440366972477064220183",
+            "absoluteError": "0.000028440366972477064220183",
+            "normalization": "percentage divided by100",
+            "answerQuote": "**176.66%**",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-688",
+            "observedNormalizedValue": "-688",
+            "expectedValue": "-688",
+            "absoluteError": "0",
+            "answerQuote": "- [E1] 显示 2025Q3 单季存在 **Operating assets and liabilities/Other, net** 为 **-688 百万美元**，说明部分经营性资产负债或其他项目对现金流为负向影响。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Operating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedValues": [
+              "30.81",
+              "17.44",
+              "13.37"
+            ],
+            "normalization": "USD100million multiplied by100 to USDmillion",
+            "normalizedValues": [
+              "3081",
+              "1744",
+              "1337"
+            ],
+            "answerQuotes": [
+              "- **经营现金流**：3,081 百万美元，约 **30.81 亿美元** [E1]",
+              "- **GAAP 净利润**：1,744 百万美元，约 **17.44 亿美元** [E1]",
+              "= **1,337 百万美元**，约 **13.37 亿美元**"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          }
+        ],
+        "issues": [],
+        "learningAttribution": "NONE"
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "ae834ef4cdae8a1794a61e859f3b3e1307131157b0b181c4b780c125b2b83694",
+        "providerStageStatus": "COMPLETED",
+        "durationMs": 32521,
+        "dimensions": {
+          "claim_support": {
+            "status": "PASS",
+            "reason": "Uses actual quarter table values; voluntary mechanisms remain qualified, without unsupported company causes.",
+            "answerQuotes": [
+              "本季度 IBM 的账面利润有较充分的现金支撑，经营现金流明显高于净利润。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "numeric_period_correctness": {
+            "status": "PASS",
+            "reason": "4required facts match actual quarter, unit and frozen Decimal tolerance; percentage and money conversions independently checked.",
+            "answerQuotes": [
+              "**结论：IBM 2025 年第三季度单季现金转化较强。**",
+              "| 经营现金流 / 净利润 | **1.77** | 换算为百分比为 **176.66%** [E1] |"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "counterevidence": {
+            "status": "PASS",
+            "reason": "Optional explanation retains negative operating-assets/other adjustment and does not convert the high ratio into guaranteed enduring quality.",
+            "answerQuotes": [
+              "证据中也显示 **Operating assets and liabilities/Other, net 为 -688 百万美元**，说明部分经营性项目对现金流有负向影响，因此不能仅凭单季比率断定盈利质量持续改善 [E1]。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Operating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)"
+              }
+            ]
+          },
+          "unknowns": {
+            "status": "PASS",
+            "reason": "General noncash/timing mechanisms are expressly possible and single-quarter limits retained. Additional GAAP-attribution caution does not withhold the correct required calculation.",
+            "answerQuotes": [
+              "不过，这一结果可能受折旧摊销、股权激励、营运资本变动等非现金或时点性项目影响；"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          }
+        },
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": {
+            "status": "PASS",
+            "observedText": "3,081",
+            "observedNormalizedValue": "3081",
+            "normalization": "Remove numeric grouping commas; same gold unit.",
+            "expectedValue": "3081",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2025-07-01/2025-09-30",
+            "periodStatus": "PASS",
+            "answerQuote": "| 经营现金流 | **3,081 百万美元** | 报表披露的 Net Cash Provided by Operating Activities [E1] |",
+            "periodAnswerQuote": "**结论：IBM 2025 年第三季度单季现金转化较强。**",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "quarterNetIncome": {
+            "status": "PASS",
+            "observedText": "1,744",
+            "observedNormalizedValue": "1744",
+            "normalization": "Remove numeric grouping commas; same gold unit.",
+            "expectedValue": "1744",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2025-07-01/2025-09-30",
+            "periodStatus": "PASS",
+            "answerQuote": "| GAAP 净利润口径 | **1,744 百万美元** | 本轮证据未提供利润表，采用现金流量表起点 Net Income/(Loss) from Operations 作为可验证净利润口径 [E1] |",
+            "periodAnswerQuote": "**结论：IBM 2025 年第三季度单季现金转化较强。**",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "cashIncomeGap": {
+            "status": "PASS",
+            "observedText": "1,337",
+            "observedNormalizedValue": "1337",
+            "normalization": "Remove numeric grouping commas; same gold unit.",
+            "expectedValue": "1337.0000",
+            "absoluteError": "0.0000",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2025-07-01/2025-09-30",
+            "periodStatus": "PASS",
+            "answerQuote": "| 差额：经营现金流 − 净利润 | **1,337 百万美元** | 经营现金流高于净利润，现金转化表现较强 [E1] |",
+            "periodAnswerQuote": "**结论：IBM 2025 年第三季度单季现金转化较强。**",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "cashConversionRatio": {
+            "status": "PASS",
+            "observedText": "1.77",
+            "observedNormalizedValue": "1.77",
+            "normalization": "Remove numeric grouping commas; same gold unit.",
+            "expectedValue": "1.7666",
+            "absoluteError": "0.0034",
+            "tolerance": "0.01",
+            "unit": "ratio",
+            "currency": "N/A",
+            "observedPeriod": "2025-07-01/2025-09-30",
+            "periodStatus": "PASS",
+            "answerQuote": "| 经营现金流 / 净利润 | **1.77** | 换算为百分比为 **176.66%** [E1] |",
+            "periodAnswerQuote": "**结论：IBM 2025 年第三季度单季现金转化较强。**",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          }
+        },
+        "requiredPointChecks": {
+          "p1": {
+            "status": "PASS",
+            "reason": "Reported quarter amounts and period correctly read.",
+            "answerQuotes": [
+              "**结论：IBM 2025 年第三季度单季现金转化较强。**",
+              "| 经营现金流 | **3,081 百万美元** | 报表披露的 Net Cash Provided by Operating Activities [E1] |",
+              "| GAAP 净利润口径 | **1,744 百万美元** | 本轮证据未提供利润表，采用现金流量表起点 Net Income/(Loss) from Operations 作为可验证净利润口径 [E1] |"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "p2": {
+            "status": "PASS",
+            "reason": "Difference1337 and ratio1.77 are correct.",
+            "answerQuotes": [
+              "| 差额：经营现金流 − 净利润 | **1,337 百万美元** | 经营现金流高于净利润，现金转化表现较强 [E1] |",
+              "| 经营现金流 / 净利润 | **1.77** | 换算为百分比为 **176.66%** [E1] |"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          "p3": {
+            "status": "PASS",
+            "reason": "Conclusion correctly treats CFO as greater than NI in this quarter.",
+            "answerQuotes": [
+              "本季度 IBM 的账面利润有较充分的现金支撑，经营现金流明显高于净利润。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          }
+        },
+        "additionalNumericChecks": [
+          {
+            "status": "PASS",
+            "observedText": "176.66%",
+            "observedNormalizedValue": "1.7666",
+            "expectedValue": "1.766628440366972477064220183",
+            "absoluteError": "0.000028440366972477064220183",
+            "normalization": "percentage divided by100",
+            "answerQuote": "**176.66%**",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": " |  | Three Months Ended September 30, |  | Nine Months Ended September 30,"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(Dollars in Millions) |  | 2025 |  | 2024 |  | 2025 |  | 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-688",
+            "observedNormalizedValue": "-688",
+            "expectedValue": "-688",
+            "absoluteError": "0",
+            "answerQuote": "证据中也显示 **Operating assets and liabilities/Other, net 为 -688 百万美元**，说明部分经营性项目对现金流有负向影响，因此不能仅凭单季比率断定盈利质量持续改善 [E1]。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Operating assets and liabilities/Other, net (2) |  | (688) |  | (1,984) |  | (1,755) |  | (3,063)"
+              }
+            ]
+          }
+        ],
+        "issues": [],
+        "learningAttribution": "NONE",
+        "observations": [
+          {
+            "classification": "NON_MATERIAL_WORDING",
+            "answerQuote": "利润对现金流的覆盖较充分。",
+            "reason": "This phrase reverses the coverage wording, but the immediately preceding ratio, table and explicit subsequent CFO-above-NI statement establish the correct relationship. No changed numeric result, decision or unsupported operational cause; do not elevate a wording slip into a METHOD_ERROR."
+          }
+        ]
+      },
+      "runId": "development-01-1-1",
+      "reportPath": "evals/evolution/batch-learning-validation-20261002/raw-development-01/baseline-v1.report.json",
+      "reportSha256": "ef3f6da022adb4f337085835cf9bf454a579f11809dbe8eef025dc653de89214",
+      "responsePath": "evals/evolution/batch-learning-validation-20261002/raw-development-01/development-01-1-1.response.json",
+      "responseSha256": "d00a600a708b3db361114f264b1bd9f9323f923f2e538d9d32e4d767d5504636",
+      "analystStatus": "COMPLETED",
+      "taskOutcome": "COMPLETED",
+      "bindingErrors": []
+    },
+    {
+      "name": "development-02",
+      "caseId": "jnj-fy2025q3-quarter-reconstruction",
+      "executionPath": "evals/evolution/batch-learning-validation-20261002/development-02.execution.json",
+      "executionSha256": "260111154adbaf1d041fa2695b1dd17e475526ee5a06e5b34424a2ff4aaaaab0",
+      "caseSha256": "9e73c4676722e11ee51de69f840bd390e6f233d63e010624b4a4255cb3f8f22b",
+      "goldLineSha256": "93d4dce4b90cfb1bdfab99352f54379069f952e9416b572da66e6fcd9e41353b",
+      "expectedReportPath": "evals/evolution/batch-learning-validation-20261002/raw-development-02/baseline-v1.report.json",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://s203.q4cdn.com/636242992/files/doc_financials/2025/q3/3Q-10Q-09-28-25-5.pdf",
+          "sourceVersion": "JNJ-FY2025-Q3-cashflow",
+          "visibleSha256": "443b95abac4f379c3a26a88d7f5c29e1580980d5a6f9b561942a3f97b791535d"
+        },
+        {
+          "evidenceId": "E2",
+          "sourceRef": "https://s203.q4cdn.com/636242992/files/doc_financials/2025/q2/2Q-10Q-06-29-25-Final.pdf",
+          "sourceVersion": "JNJ-FY2025-Q2-cashflow",
+          "visibleSha256": "e644ac3e04ceb2262474b384e18ee92c2377f1f675599c7a7b1a3e55cdec9be4"
+        }
+      ],
+      "executionStatus": "COMPLETED",
+      "learningAttribution": "NONE",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "6734e2c3f534f2d33c4759973fcf236e02a449e17174378e61c6a11776dbec3f",
+        "providerStageStatus": "COMPLETED",
+        "durationMs": 102853,
+        "dimensions": {
+          "claim_support": {
+            "status": "PASS",
+            "reason": "Disclosure-based cumulative subtraction, correct gross spending convention; no unsupported specific operating explanation.",
+            "answerQuotes": [
+              "| 经营现金流 | 17,221 − 8,052 | **9,169 百万美元** |",
+              "| 购建固定资产现金支出 | 2,995 − 1,838 | **1,157 百万美元** |"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          },
+          "numeric_period_correctness": {
+            "status": "PASS",
+            "reason": "All3required amounts and period correct; optional coverage and disposal amounts checked independently.",
+            "answerQuotes": [
+              "- **报告期**：本次还原的是 **FY2025 第三财季单季现金流**，即截至 **2025-09-28** 的季度；由以下两份累计现金流量表相减还原：",
+              "| 简化自由现金流 | 9,169 − 1,157 | **8,012 百万美元** |"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          },
+          "counterevidence": {
+            "status": "PASS",
+            "reason": "No adverse coverage signal is hidden; explicitly preserves limited simple-FCF definition and excludes disposal cash.",
+            "answerQuotes": [
+              "但该 **76 百万美元** 未纳入简化自由现金流计算。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 408 623"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 332 573"
+              }
+            ]
+          },
+          "unknowns": {
+            "status": "PASS",
+            "reason": "Limits conclusion to current-quarter capex coverage and does not turn it into earnings quality or persistent financing guarantee.",
+            "answerQuotes": [
+              "本结论只说明现金流覆盖情况，不延伸至盈利质量或可持续性判断。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          }
+        },
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": {
+            "status": "PASS",
+            "observedText": "9,169",
+            "observedNormalizedValue": "9169",
+            "normalization": "Grouping commas removed; capex explicitly stated as positive gross cash outflow.",
+            "expectedValue": "9169.0000",
+            "absoluteError": "0.0000",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2025-06-30/2025-09-28",
+            "periodStatus": "PASS",
+            "periodNormalization": "FY2025 nine-month cumulative ending09-28 minus six-month cumulative ending06-29 explicitly given; resulting start06-30 is unambiguous, literal ISO start date not separately required.",
+            "answerQuote": "| 经营现金流 | 17,221 − 8,052 | **9,169 百万美元** |",
+            "periodAnswerQuote": "- **报告期**：本次还原的是 **FY2025 第三财季单季现金流**，即截至 **2025-09-28** 的季度；由以下两份累计现金流量表相减还原：",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          },
+          "quarterCapitalSpendingOutflowAmount": {
+            "status": "PASS",
+            "observedText": "1,157",
+            "observedNormalizedValue": "1157",
+            "normalization": "Grouping commas removed; capex explicitly stated as positive gross cash outflow.",
+            "expectedValue": "1157.0000",
+            "absoluteError": "0.0000",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2025-06-30/2025-09-28",
+            "periodStatus": "PASS",
+            "periodNormalization": "FY2025 nine-month cumulative ending09-28 minus six-month cumulative ending06-29 explicitly given; resulting start06-30 is unambiguous, literal ISO start date not separately required.",
+            "answerQuote": "| 购建固定资产现金支出 | 2,995 − 1,838 | **1,157 百万美元** |",
+            "periodAnswerQuote": "- **报告期**：本次还原的是 **FY2025 第三财季单季现金流**，即截至 **2025-09-28** 的季度；由以下两份累计现金流量表相减还原：",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          },
+          "quarterSimpleFreeCashFlow": {
+            "status": "PASS",
+            "observedText": "8,012",
+            "observedNormalizedValue": "8012",
+            "normalization": "Grouping commas removed; capex explicitly stated as positive gross cash outflow.",
+            "expectedValue": "8012.0000",
+            "absoluteError": "0.0000",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2025-06-30/2025-09-28",
+            "periodStatus": "PASS",
+            "periodNormalization": "FY2025 nine-month cumulative ending09-28 minus six-month cumulative ending06-29 explicitly given; resulting start06-30 is unambiguous, literal ISO start date not separately required.",
+            "answerQuote": "| 简化自由现金流 | 9,169 − 1,157 | **8,012 百万美元** |",
+            "periodAnswerQuote": "- **报告期**：本次还原的是 **FY2025 第三财季单季现金流**，即截至 **2025-09-28** 的季度；由以下两份累计现金流量表相减还原：",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          }
+        },
+        "requiredPointChecks": {
+          "p1": {
+            "status": "PASS",
+            "reason": "Correct fiscal quarter identified by exact same-start cumulative periods; start follows06-29.",
+            "answerQuotes": [
+              "- **报告期**：本次还原的是 **FY2025 第三财季单季现金流**，即截至 **2025-09-28** 的季度；由以下两份累计现金流量表相减还原："
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              }
+            ]
+          },
+          "p2": {
+            "status": "PASS",
+            "reason": "9169,1157,8012 actual answer observations all match gold.",
+            "answerQuotes": [
+              "| 经营现金流 | 17,221 − 8,052 | **9,169 百万美元** |",
+              "| 购建固定资产现金支出 | 2,995 − 1,838 | **1,157 百万美元** |",
+              "| 简化自由现金流 | 9,169 − 1,157 | **8,012 百万美元** |"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          },
+          "p3": {
+            "status": "PASS",
+            "reason": "Same-year same-metric subtraction and gross outflow convention correct.",
+            "answerQuotes": [
+              "| 经营现金流 | 17,221 − 8,052 | **9,169 百万美元** |",
+              "| 购建固定资产现金支出 | 2,995 − 1,838 | **1,157 百万美元** |"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          },
+          "p4": {
+            "status": "PASS",
+            "reason": "Correct positive capital-spending coverage.",
+            "answerQuotes": [
+              "结论：**FY2025 第三季度经营现金流充分覆盖购建固定资产现金支出，并形成一个正的简化自由现金流 8,012 百万美元。**"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          }
+        },
+        "additionalNumericChecks": [
+          {
+            "status": "PASS",
+            "observedText": "7.92",
+            "observedNormalizedValue": "7.92",
+            "expectedValue": "7.924805531547104580812445981",
+            "absoluteError": "0.004805531547104580812445981",
+            "tolerance": "0.01",
+            "normalization": "Ratio as presented",
+            "answerQuote": "7.92",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 408 623"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 332 573"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "792.48",
+            "observedNormalizedValue": "792.48",
+            "expectedValue": "792.4805531547104580812445981",
+            "absoluteError": "0.0005531547104580812445981",
+            "tolerance": "0.01",
+            "normalization": "Percent-number as presented",
+            "answerQuote": "792.48",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 408 623"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 332 573"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "12.62",
+            "observedNormalizedValue": "12.62",
+            "expectedValue": "12.61860617297415203402770204",
+            "absoluteError": "0.00139382702584796597229796",
+            "tolerance": "0.01",
+            "normalization": "Percent-number as presented",
+            "answerQuote": "12.62",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 408 623"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 332 573"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "76",
+            "observedNormalizedValue": "76",
+            "expectedValue": "76",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Million USD disposal receipts, explicitly excluded",
+            "answerQuote": "但该 **76 百万美元** 未纳入简化自由现金流计算。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 408 623"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 332 573"
+              }
+            ]
+          }
+        ],
+        "issues": [],
+        "learningAttribution": "NONE"
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "41ada7e3e7ca716f9c26e227c8ff67161bd5dffbe4d8531e953fa7ab009cacc1",
+        "providerStageStatus": "COMPLETED",
+        "durationMs": 86023,
+        "dimensions": {
+          "claim_support": {
+            "status": "PASS",
+            "reason": "Disclosure-based cumulative subtraction, correct gross spending convention; no unsupported specific operating explanation.",
+            "answerQuotes": [
+              "- 经营现金流：17,221 − 8,052 = **9,169 百万美元**",
+              "- 购建固定资产现金支出：2,995 − 1,838 = **1,157 百万美元**"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          },
+          "numeric_period_correctness": {
+            "status": "PASS",
+            "reason": "All3required amounts and period correct; optional coverage and disposal amounts checked independently.",
+            "answerQuotes": [
+              "- **还原财报期间**：FY2025 第三财季单季，截至 **2025-09-28**；由以下两个累计期间相减还原：",
+              "- 简化自由现金流：9,169 − 1,157 = **8,012 百万美元**"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          },
+          "counterevidence": {
+            "status": "PASS",
+            "reason": "No adverse coverage signal is hidden; explicitly preserves limited simple-FCF definition and excludes disposal cash.",
+            "answerQuotes": [
+              "证据中可还原的第三季资产处置回款约为 **76 百万美元**，但未纳入计算。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 408 623"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 332 573"
+              }
+            ]
+          },
+          "unknowns": {
+            "status": "PASS",
+            "reason": "Limits conclusion to current-quarter capex coverage and does not turn it into earnings quality or persistent financing guarantee.",
+            "answerQuotes": [
+              "因此不延伸至盈利质量或可持续性的判断。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          }
+        },
+        "requiredFactChecks": {
+          "quarterOperatingCashFlow": {
+            "status": "PASS",
+            "observedText": "9,169",
+            "observedNormalizedValue": "9169",
+            "normalization": "Grouping commas removed; capex explicitly stated as positive gross cash outflow.",
+            "expectedValue": "9169.0000",
+            "absoluteError": "0.0000",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2025-06-30/2025-09-28",
+            "periodStatus": "PASS",
+            "periodNormalization": "FY2025 nine-month cumulative ending09-28 minus six-month cumulative ending06-29 explicitly given; resulting start06-30 is unambiguous, literal ISO start date not separately required.",
+            "answerQuote": "- 经营现金流：17,221 − 8,052 = **9,169 百万美元**",
+            "periodAnswerQuote": "- **还原财报期间**：FY2025 第三财季单季，截至 **2025-09-28**；由以下两个累计期间相减还原：",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          },
+          "quarterCapitalSpendingOutflowAmount": {
+            "status": "PASS",
+            "observedText": "1,157",
+            "observedNormalizedValue": "1157",
+            "normalization": "Grouping commas removed; capex explicitly stated as positive gross cash outflow.",
+            "expectedValue": "1157.0000",
+            "absoluteError": "0.0000",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2025-06-30/2025-09-28",
+            "periodStatus": "PASS",
+            "periodNormalization": "FY2025 nine-month cumulative ending09-28 minus six-month cumulative ending06-29 explicitly given; resulting start06-30 is unambiguous, literal ISO start date not separately required.",
+            "answerQuote": "- 购建固定资产现金支出：2,995 − 1,838 = **1,157 百万美元**",
+            "periodAnswerQuote": "- **还原财报期间**：FY2025 第三财季单季，截至 **2025-09-28**；由以下两个累计期间相减还原：",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          },
+          "quarterSimpleFreeCashFlow": {
+            "status": "PASS",
+            "observedText": "8,012",
+            "observedNormalizedValue": "8012",
+            "normalization": "Grouping commas removed; capex explicitly stated as positive gross cash outflow.",
+            "expectedValue": "8012.0000",
+            "absoluteError": "0.0000",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2025-06-30/2025-09-28",
+            "periodStatus": "PASS",
+            "periodNormalization": "FY2025 nine-month cumulative ending09-28 minus six-month cumulative ending06-29 explicitly given; resulting start06-30 is unambiguous, literal ISO start date not separately required.",
+            "answerQuote": "- 简化自由现金流：9,169 − 1,157 = **8,012 百万美元**",
+            "periodAnswerQuote": "- **还原财报期间**：FY2025 第三财季单季，截至 **2025-09-28**；由以下两个累计期间相减还原：",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          }
+        },
+        "requiredPointChecks": {
+          "p1": {
+            "status": "PASS",
+            "reason": "Correct fiscal quarter identified by exact same-start cumulative periods; start follows06-29.",
+            "answerQuotes": [
+              "- **还原财报期间**：FY2025 第三财季单季，截至 **2025-09-28**；由以下两个累计期间相减还原："
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              }
+            ]
+          },
+          "p2": {
+            "status": "PASS",
+            "reason": "9169,1157,8012 actual answer observations all match gold.",
+            "answerQuotes": [
+              "- 经营现金流：17,221 − 8,052 = **9,169 百万美元**",
+              "- 购建固定资产现金支出：2,995 − 1,838 = **1,157 百万美元**",
+              "- 简化自由现金流：9,169 − 1,157 = **8,012 百万美元**"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          },
+          "p3": {
+            "status": "PASS",
+            "reason": "Same-year same-metric subtraction and gross outflow convention correct.",
+            "answerQuotes": [
+              "- 经营现金流：17,221 − 8,052 = **9,169 百万美元**",
+              "- 购建固定资产现金支出：2,995 − 1,838 = **1,157 百万美元**"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          },
+          "p4": {
+            "status": "PASS",
+            "reason": "Correct positive capital-spending coverage.",
+            "answerQuotes": [
+              "**判断**：本季经营现金流明显高于购建固定资产现金支出，资本开支对经营现金流的消耗较低，单季简化自由现金流为正，现金生成能力对资本支出形成充分覆盖。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              }
+            ]
+          }
+        },
+        "additionalNumericChecks": [
+          {
+            "status": "PASS",
+            "observedText": "7.92",
+            "observedNormalizedValue": "7.92",
+            "expectedValue": "7.924805531547104580812445981",
+            "absoluteError": "0.004805531547104580812445981",
+            "tolerance": "0.01",
+            "normalization": "Ratio as presented",
+            "answerQuote": "7.92",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 408 623"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 332 573"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "792.48",
+            "observedNormalizedValue": "792.48",
+            "expectedValue": "792.4805531547104580812445981",
+            "absoluteError": "0.0005531547104580812445981",
+            "tolerance": "0.01",
+            "normalization": "Percent-number as presented",
+            "answerQuote": "792.48",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 408 623"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 332 573"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "12.62",
+            "observedNormalizedValue": "12.62",
+            "expectedValue": "12.61860617297415203402770204",
+            "absoluteError": "0.00139382702584796597229796",
+            "tolerance": "0.01",
+            "normalization": "Percent-number as presented",
+            "answerQuote": "12.62",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 408 623"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 332 573"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "76",
+            "observedNormalizedValue": "76",
+            "expectedValue": "76",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Million USD disposal receipts, explicitly excluded",
+            "answerQuote": "证据中可还原的第三季资产处置回款约为 **76 百万美元**，但未纳入计算。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Fiscal Nine Months Ended\nSeptember 28, September 29,\n2025 2024"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Fiscal Six Months Ended\nJune 29, June 30,\n2025 2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net cash flows from operating activities 17,221 17,283"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Net cash flows from operating activities 8,052 9,290"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Additions to property, plant and equipment (2,995) (2,812)"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Additions to property, plant and equipment (1,838) (1,783)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 408 623"
+              },
+              {
+                "evidenceId": "E2",
+                "quote": "Proceeds from the disposal of assets/businesses, net (Note 10) 332 573"
+              }
+            ]
+          }
+        ],
+        "issues": [],
+        "learningAttribution": "NONE"
+      },
+      "runId": "development-02-1-1",
+      "reportPath": "evals/evolution/batch-learning-validation-20261002/raw-development-02/baseline-v1.report.json",
+      "reportSha256": "5c3092277cfd14f50e17a907ac302c1fcd8a5eb90d4d7178181a1e1f9739b3fe",
+      "responsePath": "evals/evolution/batch-learning-validation-20261002/raw-development-02/development-02-1-1.response.json",
+      "responseSha256": "b693853ae317ea36dac75b5e62407e9d155a68d0d8f77f41a325e546aef18adb",
+      "analystStatus": "COMPLETED",
+      "taskOutcome": "COMPLETED",
+      "bindingErrors": []
+    },
+    {
+      "name": "development-03",
+      "caseId": "pep-fy2025q3-cash-quality",
+      "executionPath": "evals/evolution/batch-learning-validation-20261002/development-03.execution.json",
+      "executionSha256": "f3ffb2e94cff80e5efd5de172e1fd3402652bdf129e79e121a8129ab88687076",
+      "caseSha256": "fdb5771080e0ca118de4888cd0ab83aa23e41ea77ab82a03855f009191ada19d",
+      "goldLineSha256": "672410fac98e6c08d0600db3615741d446148d1a86fbe4530acefc952259a841",
+      "expectedReportPath": "evals/evolution/batch-learning-validation-20261002/raw-development-03/baseline-v1.report.json",
+      "sourceBindings": [
+        {
+          "evidenceId": "E1",
+          "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf",
+          "sourceVersion": "PEP-FY2025-Q3-cashflow",
+          "visibleSha256": "1c1d382aa5093c76e48c0e338acef1168edea1d47a79dcaf21fb54d462a46928"
+        }
+      ],
+      "executionStatus": "COMPLETED",
+      "learningAttribution": "NONE",
+      "analysis": {
+        "status": "PASS",
+        "answerSha256": "97674e4880d48b0123fd29e71dec60f26a96405057320d81e6f5610c42db8546",
+        "providerStageStatus": "COMPLETED",
+        "durationMs": 272300,
+        "dimensions": {
+          "claim_support": {
+            "status": "PASS",
+            "reason": "Reported amounts and noncash/operating-asset-liability directions are supported. No firm unprovided management, business or peer claim is adopted as fact.",
+            "answerQuotes": [
+              "   - 该项目属于净利润到经营现金流调节中的非现金加回项，倾向于使经营现金流高于净利润。",
+              "   - “Accounts payable and other current liabilities”本期变动为 **-1,647百万美元**，上年同期为 **-2,312百万美元**，表示该项现金拖累同比减少 **665百万美元**。",
+              "   本期“**Impairment and other charges**”为 **1,960百万美元**，远高于上年同期的 **10百万美元**。若其中包含较大比例非现金减值，它会压低净利润但不相应减少经营现金流，从而提高经营现金流/净利润。该改善可能不完全代表经常性现金创造能力增强。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization 2,315 2,118"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Impairment and other charges 1,960 10"
+              }
+            ]
+          },
+          "numeric_period_correctness": {
+            "status": "PASS",
+            "reason": "All eight required observations match frozen periods, unit, sign and Decimal tolerance; every additional material number was checked independently. The final 18.39 percentage-point change uses displayed rounded percentages and remains within 0.01 of exact 18.3952835.",
+            "answerQuotes": [
+              "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变动 |",
+              "| 经营现金流 / 净利润 | **0.95倍**，即 **95.26%** | **0.77倍**，即 **76.87%** | 比率提升约0.18倍；百分比提升约18.40个百分点 |"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "counterevidence": {
+            "status": "PASS",
+            "reason": "Preserves both absolute net-income/CFO declines, CFO below net income, and negative receivable/payable adjustments; ratio improvement is not equated with greater absolute CFO.",
+            "answerQuotes": [
+              "不过需要注意，本期净利润同比下降 **29.07%**，经营现金流同比下降 **12.09%**。因此，转化率改善并不意味着经营现金创造能力全面增强；它部分发生在净利润明显下降的背景下。",
+              "   - “Accounts payable and other current liabilities”本期变动为 **-1,647百万美元**，上年同期为 **-2,312百万美元**，表示该项现金拖累同比减少 **665百万美元**。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          "unknowns": {
+            "status": "PASS",
+            "reason": "Keeps period limits and uncertainty of company-specific cash-flow causes. Optional impairment discussion states its sign and amount, then limits conclusions about composition and recurrence; it does not withhold required arithmetic.",
+            "answerQuotes": [
+              "- **不可过度外推**：转化改善部分可能受到非现金调增项目和营运资本时点变化影响，证据不足以判断该改善是否可持续至全年。",
+              "   本期“**Impairment and other charges**”为 **1,960百万美元**，远高于上年同期的 **10百万美元**。若其中包含较大比例非现金减值，它会压低净利润但不相应减少经营现金流，从而提高经营现金流/净利润。该改善可能不完全代表经常性现金创造能力增强。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Impairment and other charges 1,960 10"
+              }
+            ]
+          }
+        },
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": {
+            "status": "PASS",
+            "observedText": "5,468",
+            "observedNormalizedValue": "5468",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "5468",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2024-12-29/2025-09-06",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 经营活动现金流净额（Net Cash Provided by Operating Activities） | 5,468百万美元 | 6,220百万美元 | -752百万美元，-12.09% |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变动 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "ytdConsolidatedNetIncome": {
+            "status": "PASS",
+            "observedText": "5,740",
+            "observedNormalizedValue": "5740",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "5740",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2024-12-29/2025-09-06",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 现金流表起点合并净利润（Net income） | 5,740百万美元 | 8,092百万美元 | -2,352百万美元，-29.07% |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变动 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "priorOperatingCashFlow": {
+            "status": "PASS",
+            "observedText": "6,220",
+            "observedNormalizedValue": "6220",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "6220",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2023-12-31/2024-09-07",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 经营活动现金流净额（Net Cash Provided by Operating Activities） | 5,468百万美元 | 6,220百万美元 | -752百万美元，-12.09% |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变动 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "priorConsolidatedNetIncome": {
+            "status": "PASS",
+            "observedText": "8,092",
+            "observedNormalizedValue": "8092",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "8092",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2023-12-31/2024-09-07",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 现金流表起点合并净利润（Net income） | 5,740百万美元 | 8,092百万美元 | -2,352百万美元，-29.07% |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变动 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "ytdCashIncomeGap": {
+            "status": "PASS",
+            "observedText": "-272",
+            "observedNormalizedValue": "-272",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "-272.0000",
+            "absoluteError": "0.0000",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2024-12-29/2025-09-06",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 差额：经营现金流 - 净利润 | -272百万美元 | -1,872百万美元 | 缺口收窄1,600百万美元 |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变动 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "priorCashIncomeGap": {
+            "status": "PASS",
+            "observedText": "-1,872",
+            "observedNormalizedValue": "-1872",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "-1872.0000",
+            "absoluteError": "0.0000",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2023-12-31/2024-09-07",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 差额：经营现金流 - 净利润 | -272百万美元 | -1,872百万美元 | 缺口收窄1,600百万美元 |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变动 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "ytdCashConversion": {
+            "status": "PASS",
+            "observedText": "0.95",
+            "observedNormalizedValue": "0.95",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "0.9526",
+            "absoluteError": "0.0026",
+            "tolerance": "0.01",
+            "unit": "ratio",
+            "currency": "N/A",
+            "observedPeriod": "2024-12-29/2025-09-06",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 经营现金流 / 净利润 | **0.95倍**，即 **95.26%** | **0.77倍**，即 **76.87%** | 比率提升约0.18倍；百分比提升约18.40个百分点 |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变动 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "priorCashConversion": {
+            "status": "PASS",
+            "observedText": "0.77",
+            "observedNormalizedValue": "0.77",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "0.7687",
+            "absoluteError": "0.0013",
+            "tolerance": "0.01",
+            "unit": "ratio",
+            "currency": "N/A",
+            "observedPeriod": "2023-12-31/2024-09-07",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 经营现金流 / 净利润 | **0.95倍**，即 **95.26%** | **0.77倍**，即 **76.87%** | 比率提升约0.18倍；百分比提升约18.40个百分点 |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变动 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          }
+        },
+        "requiredPointChecks": {
+          "p1": {
+            "status": "PASS",
+            "reason": "Uses the cash-flow starting consolidated net income and matching 36-week periods.",
+            "answerQuotes": [
+              "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变动 |",
+              "| 现金流表起点合并净利润（Net income） | 5,740百万美元 | 8,092百万美元 | -2,352百万美元，-29.07% |",
+              "| 经营活动现金流净额（Net Cash Provided by Operating Activities） | 5,468百万美元 | 6,220百万美元 | -752百万美元，-12.09% |"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "p2": {
+            "status": "PASS",
+            "reason": "CFO minus income and CFO divided by income both computed correctly.",
+            "answerQuotes": [
+              "| 差额：经营现金流 - 净利润 | -272百万美元 | -1,872百万美元 | 缺口收窄1,600百万美元 |",
+              "| 经营现金流 / 净利润 | **0.95倍**，即 **95.26%** | **0.77倍**，即 **76.87%** | 比率提升约0.18倍；百分比提升约18.40个百分点 |"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "p3": {
+            "status": "PASS",
+            "reason": "D&A noncash addback and receivable/payable cash-use directions explained correctly.",
+            "answerQuotes": [
+              "   - 该项目属于净利润到经营现金流调节中的非现金加回项，倾向于使经营现金流高于净利润。",
+              "   - “Accounts payable and other current liabilities”本期变动为 **-1,647百万美元**，上年同期为 **-2,312百万美元**，表示该项现金拖累同比减少 **665百万美元**。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization 2,315 2,118"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          "p4": {
+            "status": "PASS",
+            "reason": "Judgment distinguishes improved conversion ratio from declining CFO and net income.",
+            "answerQuotes": [
+              "不过需要注意，本期净利润同比下降 **29.07%**，经营现金流同比下降 **12.09%**。因此，转化率改善并不意味着经营现金创造能力全面增强；它部分发生在净利润明显下降的背景下。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          }
+        },
+        "additionalNumericChecks": [
+          {
+            "status": "PASS",
+            "observedText": "-2,352",
+            "observedNormalizedValue": "-2352",
+            "expectedValue": "-2352",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "| 现金流表起点合并净利润（Net income） | 5,740百万美元 | 8,092百万美元 | -2,352百万美元，-29.07% |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-29.07%",
+            "observedNormalizedValue": "-29.07",
+            "expectedValue": "-29.06574394463667820069204152",
+            "absoluteError": "0.00425605536332179930795848",
+            "tolerance": "0.01",
+            "normalization": "Percent units, not ratio units.",
+            "answerQuote": "| 现金流表起点合并净利润（Net income） | 5,740百万美元 | 8,092百万美元 | -2,352百万美元，-29.07% |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-752",
+            "observedNormalizedValue": "-752",
+            "expectedValue": "-752",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "| 经营活动现金流净额（Net Cash Provided by Operating Activities） | 5,468百万美元 | 6,220百万美元 | -752百万美元，-12.09% |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-12.09%",
+            "observedNormalizedValue": "-12.09",
+            "expectedValue": "-12.09003215434083601286173633",
+            "absoluteError": "0.00003215434083601286173633",
+            "tolerance": "0.01",
+            "normalization": "Percent units, not ratio units.",
+            "answerQuote": "| 经营活动现金流净额（Net Cash Provided by Operating Activities） | 5,468百万美元 | 6,220百万美元 | -752百万美元，-12.09% |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "1,600",
+            "observedNormalizedValue": "1600",
+            "expectedValue": "1600",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "| 差额：经营现金流 - 净利润 | -272百万美元 | -1,872百万美元 | 缺口收窄1,600百万美元 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "95.26%",
+            "observedNormalizedValue": "95.26",
+            "expectedValue": "95.26132404181184668989547038",
+            "absoluteError": "0.00132404181184668989547038",
+            "tolerance": "0.01",
+            "normalization": "Percent units, not ratio units.",
+            "answerQuote": "| 经营现金流 / 净利润 | **0.95倍**，即 **95.26%** | **0.77倍**，即 **76.87%** | 比率提升约0.18倍；百分比提升约18.40个百分点 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "76.87%",
+            "observedNormalizedValue": "76.87",
+            "expectedValue": "76.86604053386060306475531389",
+            "absoluteError": "0.00395946613939693524468611",
+            "tolerance": "0.01",
+            "normalization": "Percent units, not ratio units.",
+            "answerQuote": "| 经营现金流 / 净利润 | **0.95倍**，即 **95.26%** | **0.77倍**，即 **76.87%** | 比率提升约0.18倍；百分比提升约18.40个百分点 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "0.18",
+            "observedNormalizedValue": "0.18",
+            "expectedValue": "0.1839528350795124362514015649",
+            "absoluteError": "0.0039528350795124362514015649",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "| 经营现金流 / 净利润 | **0.95倍**，即 **95.26%** | **0.77倍**，即 **76.87%** | 比率提升约0.18倍；百分比提升约18.40个百分点 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "18.40",
+            "observedNormalizedValue": "18.40",
+            "expectedValue": "18.39528350795124362514015649",
+            "absoluteError": "0.00471649204875637485984351",
+            "tolerance": "0.01",
+            "normalization": "Percentage points; final uses subtraction of displayed rounded percentages.",
+            "answerQuote": "| 经营现金流 / 净利润 | **0.95倍**，即 **95.26%** | **0.77倍**，即 **76.87%** | 比率提升约0.18倍；百分比提升约18.40个百分点 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "2,315",
+            "observedNormalizedValue": "2315",
+            "expectedValue": "2315",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "   - 本期折旧与摊销为 **2,315百万美元**，上年同期为 **2,118百万美元**，同比增加 **197百万美元**，增幅 **9.30%**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization 2,315 2,118"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "2,118",
+            "observedNormalizedValue": "2118",
+            "expectedValue": "2118",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "   - 本期折旧与摊销为 **2,315百万美元**，上年同期为 **2,118百万美元**，同比增加 **197百万美元**，增幅 **9.30%**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization 2,315 2,118"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "197",
+            "observedNormalizedValue": "197",
+            "expectedValue": "197",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "   - 本期折旧与摊销为 **2,315百万美元**，上年同期为 **2,118百万美元**，同比增加 **197百万美元**，增幅 **9.30%**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization 2,315 2,118"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "9.30%",
+            "observedNormalizedValue": "9.30",
+            "expectedValue": "9.301227573182247403210576015",
+            "absoluteError": "0.001227573182247403210576015",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "   - 本期折旧与摊销为 **2,315百万美元**，上年同期为 **2,118百万美元**，同比增加 **197百万美元**，增幅 **9.30%**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization 2,315 2,118"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-1,747",
+            "observedNormalizedValue": "-1747",
+            "expectedValue": "-1747",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "   - “Accounts and notes receivable”本期变动为 **-1,747百万美元**，上年同期为 **-1,521百万美元**，表示应收款项占用现金同比增加 **226百万美元**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-1,521",
+            "observedNormalizedValue": "-1521",
+            "expectedValue": "-1521",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "   - “Accounts and notes receivable”本期变动为 **-1,747百万美元**，上年同期为 **-1,521百万美元**，表示应收款项占用现金同比增加 **226百万美元**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "226",
+            "observedNormalizedValue": "226",
+            "expectedValue": "226",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "   - “Accounts and notes receivable”本期变动为 **-1,747百万美元**，上年同期为 **-1,521百万美元**，表示应收款项占用现金同比增加 **226百万美元**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-1,647",
+            "observedNormalizedValue": "-1647",
+            "expectedValue": "-1647",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "   - “Accounts payable and other current liabilities”本期变动为 **-1,647百万美元**，上年同期为 **-2,312百万美元**，表示该项现金拖累同比减少 **665百万美元**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-2,312",
+            "observedNormalizedValue": "-2312",
+            "expectedValue": "-2312",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "   - “Accounts payable and other current liabilities”本期变动为 **-1,647百万美元**，上年同期为 **-2,312百万美元**，表示该项现金拖累同比减少 **665百万美元**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "665",
+            "observedNormalizedValue": "665",
+            "expectedValue": "665",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "   - “Accounts payable and other current liabilities”本期变动为 **-1,647百万美元**，上年同期为 **-2,312百万美元**，表示该项现金拖累同比减少 **665百万美元**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "1,960",
+            "observedNormalizedValue": "1960",
+            "expectedValue": "1960",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "此外，表内还列示了较大规模的调增项目，例如“**Impairment and other charges**”本期为 **1,960百万美元**，上年同期仅为 **10百万美元**。该项目在现金流量表中作为调增项列示，方向上会提高经营现金流相对净利润的表观转化率；但本证据未拆分其现金/非现金构成，因此不能单独据此判断其经营含义。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Impairment and other charges 1,960 10"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "10",
+            "observedNormalizedValue": "10",
+            "expectedValue": "10",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "此外，表内还列示了较大规模的调增项目，例如“**Impairment and other charges**”本期为 **1,960百万美元**，上年同期仅为 **10百万美元**。该项目在现金流量表中作为调增项列示，方向上会提高经营现金流相对净利润的表观转化率；但本证据未拆分其现金/非现金构成，因此不能单独据此判断其经营含义。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Impairment and other charges 1,960 10"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-554",
+            "observedNormalizedValue": "-554",
+            "expectedValue": "-554",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "   - 重组现金支付 **-554百万美元**；  ",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Cash payments for restructuring charges (554) (284)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-400",
+            "observedNormalizedValue": "-400",
+            "expectedValue": "-400",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "   - 养老金及退休后医疗计划缴款 **-400百万美元**；  ",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Pension and retiree medical plan contributions (400) (300)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-772",
+            "observedNormalizedValue": "-772",
+            "expectedValue": "-772",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "   - 与税改相关的税款支付 **-772百万美元**。  ",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Tax payments related to the Tax Cuts and Jobs Act (772) (579)"
+              }
+            ]
+          }
+        ],
+        "issues": [],
+        "learningAttribution": "NONE"
+      },
+      "finalAnswer": {
+        "status": "PASS",
+        "answerSha256": "062a5e5671bf5475dbd805545f8019c96fe2fe785958b638882f71a2a076782d",
+        "providerStageStatus": "COMPLETED",
+        "durationMs": 89473,
+        "dimensions": {
+          "claim_support": {
+            "status": "PASS",
+            "reason": "Reported amounts and noncash/operating-asset-liability directions are supported. No firm unprovided management, business or peer claim is adopted as fact.",
+            "answerQuotes": [
+              "折旧与摊销属于典型的非现金费用：它会减少净利润，但不直接消耗现金，因此在现金流量表中需要加回。本期该项目规模较大，对经营现金流形成支撑，是经营现金流没有随净利润同步大幅下滑的重要原因之一。",
+              "同时，“Accounts payable and other current liabilities”变动为 **-1,647百万美元**，上年同期为 **-2,312百万美元**。虽然该项对现金的拖累较上年同期减少 **665百万美元**，但本期仍表现为现金消耗。",
+              "但本轮证据未披露其现金/非现金构成，因此不能仅凭该项目判断其属于一次性减值、现金支出还是其他性质。若其中包含较大比例非现金减值，它会压低净利润但不减少经营现金流，从而使转化率看起来更高；这并不必然代表经常性经营现金创造能力增强。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization 2,315 2,118"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Impairment and other charges 1,960 10"
+              }
+            ]
+          },
+          "numeric_period_correctness": {
+            "status": "PASS",
+            "reason": "All eight required observations match frozen periods, unit, sign and Decimal tolerance; every additional material number was checked independently. The final 18.39 percentage-point change uses displayed rounded percentages and remains within 0.01 of exact 18.3952835.",
+            "answerQuotes": [
+              "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变化 |",
+              "| 经营现金流 / 净利润 | 0.95倍，即95.26% | 0.77倍，即76.87% | 提升0.18倍，约18.39个百分点 |"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "counterevidence": {
+            "status": "PASS",
+            "reason": "Preserves both absolute net-income/CFO declines, CFO below net income, and negative receivable/payable adjustments; ratio improvement is not equated with greater absolute CFO.",
+            "answerQuotes": [
+              "按本轮证据，PEP 截至 **2025-09-06 的 2025 财年 36 周累计**利润现金转化**较上年同期明显改善**：经营现金流/净利润从 **0.77倍（76.87%）** 提升至 **0.95倍（95.26%）**。但本期经营现金流仍低于净利润 **272百万美元**，且净利润和经营现金流均同比下降，因此更准确的判断是：**现金转化缺口显著收窄、接近完全覆盖，但尚不能据此判断经营现金创造能力全面增强。**",
+              "同时，“Accounts payable and other current liabilities”变动为 **-1,647百万美元**，上年同期为 **-2,312百万美元**。虽然该项对现金的拖累较上年同期减少 **665百万美元**，但本期仍表现为现金消耗。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          "unknowns": {
+            "status": "PASS",
+            "reason": "Keeps period limits and uncertainty of company-specific cash-flow causes. Optional impairment discussion states its sign and amount, then limits conclusions about composition and recurrence; it does not withhold required arithmetic.",
+            "answerQuotes": [
+              "- 36周累计数据不能直接外推至 2025 财年全年。",
+              "但本轮证据未披露其现金/非现金构成，因此不能仅凭该项目判断其属于一次性减值、现金支出还是其他性质。若其中包含较大比例非现金减值，它会压低净利润但不减少经营现金流，从而使转化率看起来更高；这并不必然代表经常性经营现金创造能力增强。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Impairment and other charges 1,960 10"
+              }
+            ]
+          }
+        },
+        "requiredFactChecks": {
+          "ytdOperatingCashFlow": {
+            "status": "PASS",
+            "observedText": "5,468",
+            "observedNormalizedValue": "5468",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "5468",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2024-12-29/2025-09-06",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 经营活动现金流净额 | 5,468百万美元 | 6,220百万美元 | -752百万美元，-12.09% |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变化 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "ytdConsolidatedNetIncome": {
+            "status": "PASS",
+            "observedText": "5,740",
+            "observedNormalizedValue": "5740",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "5740",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2024-12-29/2025-09-06",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 现金流表起点合并净利润（Net income） | 5,740百万美元 | 8,092百万美元 | -2,352百万美元，-29.07% |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变化 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "priorOperatingCashFlow": {
+            "status": "PASS",
+            "observedText": "6,220",
+            "observedNormalizedValue": "6220",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "6220",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2023-12-31/2024-09-07",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 经营活动现金流净额 | 5,468百万美元 | 6,220百万美元 | -752百万美元，-12.09% |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变化 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "priorConsolidatedNetIncome": {
+            "status": "PASS",
+            "observedText": "8,092",
+            "observedNormalizedValue": "8092",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "8092",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2023-12-31/2024-09-07",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 现金流表起点合并净利润（Net income） | 5,740百万美元 | 8,092百万美元 | -2,352百万美元，-29.07% |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变化 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "ytdCashIncomeGap": {
+            "status": "PASS",
+            "observedText": "-272",
+            "observedNormalizedValue": "-272",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "-272.0000",
+            "absoluteError": "0.0000",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2024-12-29/2025-09-06",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 差额：经营现金流 - 净利润 | -272百万美元 | -1,872百万美元 | 缺口收窄1,600百万美元 |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变化 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "priorCashIncomeGap": {
+            "status": "PASS",
+            "observedText": "-1,872",
+            "observedNormalizedValue": "-1872",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "-1872.0000",
+            "absoluteError": "0.0000",
+            "tolerance": "0.01",
+            "unit": "million",
+            "currency": "USD",
+            "observedPeriod": "2023-12-31/2024-09-07",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 差额：经营现金流 - 净利润 | -272百万美元 | -1,872百万美元 | 缺口收窄1,600百万美元 |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变化 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "ytdCashConversion": {
+            "status": "PASS",
+            "observedText": "0.95",
+            "observedNormalizedValue": "0.95",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "0.9526",
+            "absoluteError": "0.0026",
+            "tolerance": "0.01",
+            "unit": "ratio",
+            "currency": "N/A",
+            "observedPeriod": "2024-12-29/2025-09-06",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 经营现金流 / 净利润 | 0.95倍，即95.26% | 0.77倍，即76.87% | 提升0.18倍，约18.39个百分点 |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变化 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "priorCashConversion": {
+            "status": "PASS",
+            "observedText": "0.77",
+            "observedNormalizedValue": "0.77",
+            "normalization": "Remove grouping commas; use explicitly stated USD million or ratio units.",
+            "expectedValue": "0.7687",
+            "absoluteError": "0.0013",
+            "tolerance": "0.01",
+            "unit": "ratio",
+            "currency": "N/A",
+            "observedPeriod": "2023-12-31/2024-09-07",
+            "periodStatus": "PASS",
+            "periodNormalization": "Answer identifies matching 36-week fiscal year-to-date periods ending 2025-09-06 and 2024-09-07. Start dates follow those same-length periods; no calendar-quarter substitution.",
+            "answerQuote": "| 经营现金流 / 净利润 | 0.95倍，即95.26% | 0.77倍，即76.87% | 提升0.18倍，约18.39个百分点 |",
+            "periodAnswerQuote": "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变化 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          }
+        },
+        "requiredPointChecks": {
+          "p1": {
+            "status": "PASS",
+            "reason": "Uses the cash-flow starting consolidated net income and matching 36-week periods.",
+            "answerQuotes": [
+              "| 指标 | 本期：36周截至2025-09-06 | 上年同期：36周截至2024-09-07 | 同比变化 |",
+              "| 现金流表起点合并净利润（Net income） | 5,740百万美元 | 8,092百万美元 | -2,352百万美元，-29.07% |",
+              "| 经营活动现金流净额 | 5,468百万美元 | 6,220百万美元 | -752百万美元，-12.09% |"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "p2": {
+            "status": "PASS",
+            "reason": "CFO minus income and CFO divided by income both computed correctly.",
+            "answerQuotes": [
+              "| 差额：经营现金流 - 净利润 | -272百万美元 | -1,872百万美元 | 缺口收窄1,600百万美元 |",
+              "| 经营现金流 / 净利润 | 0.95倍，即95.26% | 0.77倍，即76.87% | 提升0.18倍，约18.39个百分点 |"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          "p3": {
+            "status": "PASS",
+            "reason": "D&A noncash addback and receivable/payable cash-use directions explained correctly.",
+            "answerQuotes": [
+              "折旧与摊销属于典型的非现金费用：它会减少净利润，但不直接消耗现金，因此在现金流量表中需要加回。本期该项目规模较大，对经营现金流形成支撑，是经营现金流没有随净利润同步大幅下滑的重要原因之一。",
+              "同时，“Accounts payable and other current liabilities”变动为 **-1,647百万美元**，上年同期为 **-2,312百万美元**。虽然该项对现金的拖累较上年同期减少 **665百万美元**，但本期仍表现为现金消耗。"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization 2,315 2,118"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          "p4": {
+            "status": "PASS",
+            "reason": "Judgment distinguishes improved conversion ratio from declining CFO and net income.",
+            "answerQuotes": [
+              "按本轮证据，PEP 截至 **2025-09-06 的 2025 财年 36 周累计**利润现金转化**较上年同期明显改善**：经营现金流/净利润从 **0.77倍（76.87%）** 提升至 **0.95倍（95.26%）**。但本期经营现金流仍低于净利润 **272百万美元**，且净利润和经营现金流均同比下降，因此更准确的判断是：**现金转化缺口显著收窄、接近完全覆盖，但尚不能据此判断经营现金创造能力全面增强。**"
+            ],
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          }
+        },
+        "additionalNumericChecks": [
+          {
+            "status": "PASS",
+            "observedText": "-2,352",
+            "observedNormalizedValue": "-2352",
+            "expectedValue": "-2352",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "| 现金流表起点合并净利润（Net income） | 5,740百万美元 | 8,092百万美元 | -2,352百万美元，-29.07% |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-29.07%",
+            "observedNormalizedValue": "-29.07",
+            "expectedValue": "-29.06574394463667820069204152",
+            "absoluteError": "0.00425605536332179930795848",
+            "tolerance": "0.01",
+            "normalization": "Percent units, not ratio units.",
+            "answerQuote": "| 现金流表起点合并净利润（Net income） | 5,740百万美元 | 8,092百万美元 | -2,352百万美元，-29.07% |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-752",
+            "observedNormalizedValue": "-752",
+            "expectedValue": "-752",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "| 经营活动现金流净额 | 5,468百万美元 | 6,220百万美元 | -752百万美元，-12.09% |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-12.09%",
+            "observedNormalizedValue": "-12.09",
+            "expectedValue": "-12.09003215434083601286173633",
+            "absoluteError": "0.00003215434083601286173633",
+            "tolerance": "0.01",
+            "normalization": "Percent units, not ratio units.",
+            "answerQuote": "| 经营活动现金流净额 | 5,468百万美元 | 6,220百万美元 | -752百万美元，-12.09% |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "1,600",
+            "observedNormalizedValue": "1600",
+            "expectedValue": "1600",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "| 差额：经营现金流 - 净利润 | -272百万美元 | -1,872百万美元 | 缺口收窄1,600百万美元 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "95.26%",
+            "observedNormalizedValue": "95.26",
+            "expectedValue": "95.26132404181184668989547038",
+            "absoluteError": "0.00132404181184668989547038",
+            "tolerance": "0.01",
+            "normalization": "Percent units, not ratio units.",
+            "answerQuote": "| 经营现金流 / 净利润 | 0.95倍，即95.26% | 0.77倍，即76.87% | 提升0.18倍，约18.39个百分点 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "76.87%",
+            "observedNormalizedValue": "76.87",
+            "expectedValue": "76.86604053386060306475531389",
+            "absoluteError": "0.00395946613939693524468611",
+            "tolerance": "0.01",
+            "normalization": "Percent units, not ratio units.",
+            "answerQuote": "| 经营现金流 / 净利润 | 0.95倍，即95.26% | 0.77倍，即76.87% | 提升0.18倍，约18.39个百分点 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "0.18",
+            "observedNormalizedValue": "0.18",
+            "expectedValue": "0.1839528350795124362514015649",
+            "absoluteError": "0.0039528350795124362514015649",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "| 经营现金流 / 净利润 | 0.95倍，即95.26% | 0.77倍，即76.87% | 提升0.18倍，约18.39个百分点 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "18.39",
+            "observedNormalizedValue": "18.39",
+            "expectedValue": "18.39528350795124362514015649",
+            "absoluteError": "0.00528350795124362514015649",
+            "tolerance": "0.01",
+            "normalization": "Percentage points; final uses subtraction of displayed rounded percentages.",
+            "answerQuote": "| 经营现金流 / 净利润 | 0.95倍，即95.26% | 0.77倍，即76.87% | 提升0.18倍，约18.39个百分点 |",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "36 Weeks Ended\n9/6/2025 9/7/2024"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "(in millions, un audited)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net income $ 5,740 $ 8,092"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Net Cash Provided by Operating Activities 5,468 6,220"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "2,315",
+            "observedNormalizedValue": "2315",
+            "expectedValue": "2315",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "本期折旧与摊销为 **2,315百万美元**，上年同期为 **2,118百万美元**，同比增加 **197百万美元**，增幅 **9.30%**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization 2,315 2,118"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "2,118",
+            "observedNormalizedValue": "2118",
+            "expectedValue": "2118",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "本期折旧与摊销为 **2,315百万美元**，上年同期为 **2,118百万美元**，同比增加 **197百万美元**，增幅 **9.30%**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization 2,315 2,118"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "197",
+            "observedNormalizedValue": "197",
+            "expectedValue": "197",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "本期折旧与摊销为 **2,315百万美元**，上年同期为 **2,118百万美元**，同比增加 **197百万美元**，增幅 **9.30%**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization 2,315 2,118"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "9.30%",
+            "observedNormalizedValue": "9.30",
+            "expectedValue": "9.301227573182247403210576015",
+            "absoluteError": "0.001227573182247403210576015",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "本期折旧与摊销为 **2,315百万美元**，上年同期为 **2,118百万美元**，同比增加 **197百万美元**，增幅 **9.30%**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Depreciation and amortization 2,315 2,118"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-1,747",
+            "observedNormalizedValue": "-1747",
+            "expectedValue": "-1747",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "本期“Accounts and notes receivable”变动为 **-1,747百万美元**，上年同期为 **-1,521百万美元**，说明应收款项本期继续占用现金，且占用规模同比增加 **226百万美元**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-1,521",
+            "observedNormalizedValue": "-1521",
+            "expectedValue": "-1521",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "本期“Accounts and notes receivable”变动为 **-1,747百万美元**，上年同期为 **-1,521百万美元**，说明应收款项本期继续占用现金，且占用规模同比增加 **226百万美元**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "226",
+            "observedNormalizedValue": "226",
+            "expectedValue": "226",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "本期“Accounts and notes receivable”变动为 **-1,747百万美元**，上年同期为 **-1,521百万美元**，说明应收款项本期继续占用现金，且占用规模同比增加 **226百万美元**。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-1,647",
+            "observedNormalizedValue": "-1647",
+            "expectedValue": "-1647",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "同时，“Accounts payable and other current liabilities”变动为 **-1,647百万美元**，上年同期为 **-2,312百万美元**。虽然该项对现金的拖累较上年同期减少 **665百万美元**，但本期仍表现为现金消耗。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "-2,312",
+            "observedNormalizedValue": "-2312",
+            "expectedValue": "-2312",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "同时，“Accounts payable and other current liabilities”变动为 **-1,647百万美元**，上年同期为 **-2,312百万美元**。虽然该项对现金的拖累较上年同期减少 **665百万美元**，但本期仍表现为现金消耗。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "665",
+            "observedNormalizedValue": "665",
+            "expectedValue": "665",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "同时，“Accounts payable and other current liabilities”变动为 **-1,647百万美元**，上年同期为 **-2,312百万美元**。虽然该项对现金的拖累较上年同期减少 **665百万美元**，但本期仍表现为现金消耗。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "1,960",
+            "observedNormalizedValue": "1960",
+            "expectedValue": "1960",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "本期调节表中“**Impairment and other charges**”为 **1,960百万美元**，上年同期仅为 **10百万美元**。该项目在现金流量表调节中通常会加回净利润，方向上会提高经营现金流/净利润的表观转化率。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Impairment and other charges 1,960 10"
+              }
+            ]
+          },
+          {
+            "status": "PASS",
+            "observedText": "10",
+            "observedNormalizedValue": "10",
+            "expectedValue": "10",
+            "absoluteError": "0",
+            "tolerance": "0.01",
+            "normalization": "Same stated unit; grouping commas removed.",
+            "answerQuote": "本期调节表中“**Impairment and other charges**”为 **1,960百万美元**，上年同期仅为 **10百万美元**。该项目在现金流量表调节中通常会加回净利润，方向上会提高经营现金流/净利润的表观转化率。",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Impairment and other charges 1,960 10"
+              }
+            ]
+          }
+        ],
+        "issues": [],
+        "learningAttribution": "NONE",
+        "observations": [
+          {
+            "classification": "BOUNDED_TENTATIVE_INTERPRETATION_NOT_CONFIRMED_FACT",
+            "answerQuote": "因此，本期转化改善更像是**净利润下降背景下现金流出压力相对缓和**，而不是可以外推至全年的强劲现金创造能力改善。",
+            "reason": "The phrase 更像 marks a tentative interpretation rather than a verified company cause. Read with its explicit caveats, absolute CFO decline, and adverse working-capital discussion, it does not satisfy the frozen threshold for a definite unsupported cause or material contradictory conclusion. It should not be promoted into learning evidence or an established fact: aggregate visible working-capital/other change is -4501 vs -4237, and named cash-payment lines total -1811 vs -1305; neither establishes broadly eased outflow pressure. No extra bridge calculation was required from the business answer.",
+            "sourceEvidence": [
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts and notes receivable (1,747) (1,521)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Inventories (449) (492)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Prepaid expenses and other current assets (223) (200)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Accounts payable and other current liabilities (1,647) (2,312)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Income taxes payable 6 426"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Other, net (441) (138)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Cash payments for product recall-related impact (5) (138)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Cash payments for restructuring charges (554) (284)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Cash payments for acquisition and divestiture-related charges (80) (4)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Pension and retiree medical plan contributions (400) (300)"
+              },
+              {
+                "evidenceId": "E1",
+                "quote": "Tax payments related to the Tax Cuts and Jobs Act (772) (579)"
+              }
+            ]
+          }
+        ]
+      },
+      "runId": "development-03-1-1",
+      "reportPath": "evals/evolution/batch-learning-validation-20261002/raw-development-03/baseline-v1.report.json",
+      "reportSha256": "afdebbcc9877edae8f01b60fef2b76b2cf07614b25a75654d0650251c4a590fe",
+      "responsePath": "evals/evolution/batch-learning-validation-20261002/raw-development-03/development-03-1-1.response.json",
+      "responseSha256": "29a3d5c793db1459ef80a990ad2fa47cc0db8aba2ab1410b4226697147bada08",
+      "analystStatus": "COMPLETED",
+      "taskOutcome": "COMPLETED",
+      "bindingErrors": []
+    }
+  ],
+  "updatedAt": "2026-10-02T13:07:59.148635+00:00"
+}

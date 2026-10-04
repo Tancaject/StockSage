@@ -1,0 +1,114 @@
+我们需要回答用户中文问题。必须使用本轮证据 [E1][E2]。用户要求：塔吉特（TGT）FY2025第三季度单季经营现金流、购建固定资产现金支出和简化自由现金流各是多少？根据累计现金流表还原，简化自由现金流=经营现金流-购建固定资产现金支出毛额，不抵扣资产出售回款。说明本季经营现金流是否覆盖该支出，并注明所还原财报期间。金额注明单位，比率和百分比保留两位小数。
+
+需要给判断，不只罗列。证据已提供：九个月截至2025-11-01 [E1]，六个月截至2025-08-02 [E2]。还原单季：经营现金流=3485-2358=1127百万美元；capex=2842-1864=978百万美元；简化FCF=149百万美元。覆盖：是，覆盖金额149百万美元，比率1127/978=1.1523517，保留两位小数：1.15倍，115.24%。期间：FY2025第三财季，约2025-08-03至2025-11-01，截至2025-11-01的季度。注意当前日期2026-10-02，但财报期间是历史。需要标注来源与时间说明。可以提同比上年同期还原：用户没有要求，但上下文给了，可以简要作为趋势判断。需要谨慎：同比数据由累计相减，非直接披露。可以包含关键依据。需要结构化 Markdown。结论一句话。风险与未知：单季还原值、简化口径非GAAP、未考虑其他投资/融资/股息等。来源：E1 E2。不要编造。不要说工具。不要提 COMPLETED。需要保留“仅供参考，不构成投资建议”。
+
+检查计算：
+E1 Nine months ended Nov 1 2025: operating 3,485; capex (2,842); other investing 52; investing required (2,790). E2 Six months ended Aug 2 2025: operating 2,358; capex (1,864); other 11; investing required (1,853). Q3 operating 1127; capex 978; other investing 41; investing required 937? Actually -2790 - (-1853)= -937, capex 978 minus other 41 = 937 net investing outflow. But simplified FCF excludes other. Good.
+Coverage ratio: 1127/978 = 1.152351738... -> 1.15. Percentage: 115.24% if multiply exact 115.235... -> 115.24. User asks 比率和百分比保留两位小数. Could present both.
+Need maybe include table:
+项目 | 九个月累计(E1) | 六个月累计(E2) | 单季还原
+经营现金流 3,485 2,358 1,127
+购建固定资产现金支出毛额 2,842 1,864 978
+简化自由现金流 149 (maybe no cumulative simplified? But can compute cumulative simplified: nine months 643, six months 494, Q3 149. But user asks single quarter. Could show calculation.
+Need ensure units: 百万美元. Could also write $1,127 million. Chinese: 1,127百万美元.
+Need mention “不抵扣资产出售回款” and “其他投资流入本季还原为41百万美元，但未纳入”。
+Need mention coverage: 经营现金流高于支出，覆盖。超出149百万美元，覆盖比率1.15倍/115.24%。
+Need note period: FY2025 Q3: 约2025-08-03至2025-11-01（九个月减六个月）。Target fiscal quarter maybe 13 weeks? We can say“约”。
+Need maybe mention “财报期间为截至2025年11月1日的第三财季”。
+
+Need final answer in Chinese. Ensure no hidden chain. Use citations [E1][E2]. At end 数据来源与时间说明. Include source refs and availableAt? Evidence availableAt: E1 2025-11-19, E2 2025-08-20, retrieved 2026-10-02. User asked 注明所还原财报期间. Data source time: mention press release dates. Could say 数据来自Target财报新闻稿：Q3 2025-11-19，Q2 2025-08-20；本轮检索时间2026-10-02。 Good.
+
+Need maybe not overdo. But desired oververbosity 9. We can provide detailed but concise enough.
+
+Potential issue: The context says 当前日期 2026-10-02, but evidence availableAt 2025-11-19. We can say as of current date, latest provided is FY2025 Q3. No need.
+
+Need ensure not giving investment advice. End with 仅供参考，不构成投资建议.
+
+Let's craft:
+
+标题：结论
+TGT FY2025 Q3单季经营现金流1,127百万美元，购建固定资产现金支出毛额978百万美元，简化自由现金流149百万美元；经营现金流覆盖资本支出，覆盖比率1.15倍（115.24%）。
+
+还原口径与期间：
+- 期间：FY2025第三财季，约2025-08-03至2025-11-01，即截至2025-11-01的季度。
+- 方法：九个月累计 [E1] 减六个月累计 [E2]。
+- 简化自由现金流=经营现金流-购建固定资产现金支出毛额；不抵扣资产出售/其他投资回款。
+
+表格：
+项目 | 九个月累计 | 六个月累计 | 单季还原 | 说明
+经营现金流 | 3,485 | 2,358 | 1,127 | 本季经营造血
+购建固定资产现金支出毛额 | 2,842 | 1,864 | 978 | 本季资本投入
+简化自由现金流 | 643? | 494? | 149 | 覆盖后剩余
+Should we include cumulative simplified? It is derived. Could include but not necessary. If include, ensure calculations: 3,485-2,842=643; 2,358-1,864=494. Those are derived from same evidence. Fine. But user only asks single quarter. Maybe table with single quarter and calculation.
+
+覆盖判断：
+- 覆盖金额=1127-978=149百万美元。
+- 比率=1127/978=1.15倍；百分比=115.24%。
+- 含义：本季经营现金流入足以支撑当季资本支出，但剩余规模不大；若考虑股息、回购、债务等融资现金需求，不能等同可分配现金。 Evidence financing: dividends etc maybe Q3? We can derive dividends paid Q3=1537-1019=518; repurchase=408-258=150; debt additions etc. But user didn't ask. Could mention as risk: not cover all financing. Need not compute. But can say 本季还有股息回购等，未纳入简化口径. Evidence supports financing items in E1/E2. Could mention but not necessary.
+
+Trend optional:
+- 上年同期还原：经营现金流739，capex655，简化FCF84；本季同比改善。 Need be careful: user didn't ask, but “财务趋势与经营质量” maybe helpful. Include under “趋势解读” with note inferred. Calculations: 1127 vs 739 +52.50%; capex 978 vs 655 +49.31%; FCF 149 vs 84 +77.38%. These are derived from E1/E2 prior-year cumulative. It may enhance. But ensure not overstate. Could include as supplementary. User asked only specific. But desired answer with judgment. Include short: 同比看，经营现金流和资本支出均上升，简化自由现金流也改善；但证据没有管理层解释资本支出上升原因，无法判断具体投向。 Good.
+
+Risks:
+- 单季为还原值，非公司直接披露单季现金流量表。
+- 简化自由现金流非GAAP，不考虑其他投资流入（本季还原41百万美元）、融资、债务、股息、回购。
+- 缺少资本支出明细与解释。
+
+Data sources:
+[E1] Target Corporation Q3 FY2025 consolidated cash flows, nine months ended 2025-11-01, published/available 2025-11-19, unit millions USD.
+[E2] Target Corporation Q2 FY2025 consolidated cash flows, six months ended 2025-08-02, published/available 2025-08-20, unit millions USD.
+Maybe include retrieval date 2026-10-02. Good.
+
+Need ensure citations in text [E1][E2]. No RAG. No unresolved.
+
+Double-check period: E1 periodStart 2025-02-02 to 2025-11-01 nine months. E2 periodStart 2025-02-02 to 2025-08-02 six months. Difference Q3 starts 2025-08-03? Since six months ended Aug 2, next day Aug 3. Yes.
+
+Need maybe say “FY2025第三季度单季” not calendar Q3. Target fiscal. Good.
+
+Let's produce final. Ensure final has no analysis. Use Markdown.
+
+Potential subtlety: User says “金额注明单位，比率和百分比保留两位小数。” So if we show “1.15倍” and “115.24%” ok. If we show “超出149百万美元” ok.
+
+Need maybe not say “本季经营现金生成对资本支出形成覆盖” repeated. Fine.
+
+Let's draft final:
+
+**结论**：TGT FY2025第三财季单季经营现金流为1,127百万美元，购建固定资产现金支出毛额为978百万美元，简化自由现金流为149百万美元；经营现金流覆盖当季资本支出，覆盖比率1.15倍（115.24%）。
+
+**还原财报期间**：FY2025第三财季，约2025-08-03至2025-11-01（截至2025-11-01的季度）。由九个月累计减六个月累计。[E1][E2]
+
+Table:
+| 指标 | 计算 | 单季金额 |
+经营现金流 = 3,485-2,358=1,127 百万美元
+购建...=2,842-1,864=978 百万美元
+简化自由现金流=1,127-978=149 百万美元
+
+Maybe include cumulative source table:
+| 项目 | 九个月截至2025-11-01[E1] | 六个月截至2025-08-02[E2] | 单季还原 |
+... Good.
+
+**覆盖判断**：
+覆盖，因为... 覆盖比率 = 1,127/978=1.15倍=115.24%。说明经营现金流超过资本支出149百万美元。该口径不抵扣其他投资流入；本季其他投资流入还原为41百万美元，若纳入会更高，但用户指定不纳入。 [E1][E2]
+
+**趋势与含义**：
+上年同期还原... optional. Use numbers. Need ratio? Could include: 上年单季经营现金流739百万美元、资本支出655百万美元、简化自由现金流84百万美元。本季经营现金流+52.50%，资本支出+49.31%，简化自由现金流+77.38%。说明本季覆盖能力同比改善，但资本开支亦明显上升；由于缺少资本支出明细和管理层解释，无法确认具体投向。 This uses derived prior year. Good. Need ensure percentages two decimals. Yes.
+
+**风险与数据缺口**：
+- 单季为还原值。
+- 简化口径非GAAP，未考虑其他投资、融资、股息、回购、债务。 Could mention Q3 financing items exist but not compute. 
+- 缺少 capex breakdown.
+
+**数据来源与时间说明**：
+- E1 ... published 2025-11-19, retrieved 2026-10-02.
+- E2 ... published 2025-08-20, retrieved 2026-10-02.
+- 金额单位百万美元，币种美元。
+
+End: 仅供参考，不构成投资建议。
+
+Need avoid “最新/当前” maybe okay. Could say “本轮证据所能支持的期间”。
+
+Let's ensure no overclaim: “覆盖能力同比改善” supported by derived numbers. Good.
+
+One nuance: The user asks “说明本季经营现金流是否覆盖该支出，并注明所还原的财报期间。” So answer directly. Good.
+
+Let's final.

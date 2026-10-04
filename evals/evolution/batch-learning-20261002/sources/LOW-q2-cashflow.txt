@@ -1,0 +1,41 @@
+Lowe's Companies, Inc. Consolidated Statements of Cash Flows (Unaudited) In Millions
+ | Six Months Ended
+ | August 1, 2025 |  | August 2, 2024
+Cash flows from operating activities: |  |  | 
+Net earnings | $ 4,038 |  | $ 4,137
+Adjustments to reconcile net earnings to net cash provided by operating activities: |  |  | 
+Depreciation and amortization | 1,022 |  | 967
+Noncash lease expense | 267 |  | 260
+Deferred income taxes | 70 |  | 66
+Loss/(gain) on property and other assets – net | 30 |  | (4)
+Gain on sale of business | — |  | (43)
+Share-based payment expense | 117 |  | 110
+Changes in operating assets and liabilities: |  |  | 
+Merchandise inventory – net | 1,173 |  | 53
+Other operating assets | (2) |  | 129
+Accounts payable | 150 |  | 1,679
+Other operating liabilities | 745 |  | 61
+Net cash provided by operating activities | 7,610 |  | 7,415
+ |  |  | 
+Cash flows from investing activities: |  |  | 
+Purchases of investments | (845) |  | (628)
+Proceeds from sale/maturity of investments | 827 |  | 571
+Capital expenditures | (1,013) |  | (808)
+Proceeds from sale of property and other long-term assets | 7 |  | 22
+Proceeds from sale of business | — |  | 43
+Acquisition of business - net | (1,314) |  | —
+Other – net | (5) |  | —
+Net cash used in investing activities | (2,343) |  | (800)
+ |  |  | 
+Cash flows from financing activities: |  |  | 
+Repayment of debt | (796) |  | (47)
+Proceeds from issuance of common stock under share-based payment plans | 70 |  | 84
+Cash dividend payments | (1,290) |  | (1,262)
+Repurchases of common stock | (113) |  | (1,930)
+Other – net | (39) |  | (21)
+Net cash used in financing activities | (2,168) |  | (3,176)
+ |  |  | 
+Net increase in cash and cash equivalents | 3,099 |  | 3,439
+Cash and cash equivalents, beginning of period | 1,761 |  | 921
+Cash and cash equivalents, end of period | $ 4,860 |  | $ 4,360
+ |  |  | 

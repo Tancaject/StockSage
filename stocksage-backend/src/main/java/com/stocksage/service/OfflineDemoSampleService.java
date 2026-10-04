@@ -1,5 +1,7 @@
 package com.stocksage.service;
 
+import com.stocksage.research.DeepResearchPipeline;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.model.dto.AnalysisState;

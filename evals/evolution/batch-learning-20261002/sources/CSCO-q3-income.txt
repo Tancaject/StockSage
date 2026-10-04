@@ -1,0 +1,35 @@
+CISCO SYSTEMS, INC. CONSOLIDATED STATEMENTS OF OPERATIONS (In millions, except per-share amounts) (Unaudited)
+
+ | Three Months Ended |  | Nine Months Ended
+ | April 26, 2025 |  | April 27, 2024 |  | April 26, 2025 |  | April 27, 2024
+REVENUE: |  |  |  |  |  |  | 
+Product | $ 10,374 |  | $ 9,024 |  | $ 30,722 |  | $ 29,395
+Services | 3,775 |  | 3,678 |  | 11,259 |  | 10,766
+Total revenue | 14,149 |  | 12,702 |  | 41,981 |  | 40,161
+COST OF SALES: |  |  |  |  |  |  | 
+Product | 3,688 |  | 3,295 |  | 10,927 |  | 10,695
+Services | 1,183 |  | 1,134 |  | 3,544 |  | 3,419
+Total cost of sales | 4,871 |  | 4,429 |  | 14,471 |  | 14,114
+GROSS MARGIN | 9,278 |  | 8,273 |  | 27,510 |  | 26,047
+OPERATING EXPENSES: |  |  |  |  |  |  | 
+Research and development | 2,335 |  | 1,948 |  | 6,920 |  | 5,804
+Sales and marketing | 2,724 |  | 2,559 |  | 8,148 |  | 7,523
+General and administrative | 739 |  | 736 |  | 2,286 |  | 2,050
+Amortization of purchased intangible assets | 244 |  | 297 |  | 774 |  | 430
+Restructuring and other charges | 34 |  | 542 |  | 709 |  | 677
+Total operating expenses | 6,076 |  | 6,082 |  | 18,837 |  | 16,484
+OPERATING INCOME | 3,202 |  | 2,191 |  | 8,673 |  | 9,563
+Interest income | 250 |  | 411 |  | 774 |  | 1,095
+Interest expense | (403) |  | (357) |  | (1,225) |  | (588)
+Other income (loss), net | (102) |  | (10) |  | (121) |  | (232)
+Interest and other income (loss), net | (255) |  | 44 |  | (572) |  | 275
+INCOME BEFORE PROVISION FOR INCOME TAXES | 2,947 |  | 2,235 |  | 8,101 |  | 9,838
+Provision for income taxes | 456 |  | 349 |  | 471 |  | 1,680
+NET INCOME | $ 2,491 |  | $ 1,886 |  | $ 7,630 |  | $ 8,158
+ |  |  |  |  |  |  | 
+Net income per share: |  |  |  |  |  |  | 
+Basic | $ 0.63 |  | $ 0.47 |  | $ 1.92 |  | $ 2.01
+Diluted | $ 0.62 |  | $ 0.46 |  | $ 1.91 |  | $ 2.00
+Shares used in per-share calculation: |  |  |  |  |  |  | 
+Basic | 3,972 |  | 4,042 |  | 3,981 |  | 4,051
+Diluted | 4,002 |  | 4,060 |  | 4,004 |  | 4,071

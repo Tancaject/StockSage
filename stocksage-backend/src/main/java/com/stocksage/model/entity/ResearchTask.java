@@ -36,7 +36,8 @@ import java.time.LocalDateTime;
                 @Index(name = "idx_research_task_user_created", columnList = "user_id, created_at"),
                 @Index(name = "idx_research_task_status_stage", columnList = "status, stage"),
                 @Index(name = "idx_research_task_heartbeat", columnList = "status, heartbeat_at"),
-                @Index(name = "idx_research_task_ticker_created", columnList = "ticker, created_at")
+                @Index(name = "idx_research_task_ticker_created", columnList = "ticker, created_at"),
+                @Index(name = "idx_research_task_request", columnList = "user_id, request_fingerprint, id")
         }
 )
 public class ResearchTask {
@@ -114,9 +115,17 @@ public class ResearchTask {
     @Column(name = "conversation_id")
     private Long conversationId;
 
-    /** 提交幂等键，由用户、会话、ticker 和规范化问题生成；唯一约束防止重复任务。 */
-    @Column(name = "idempotency_key", length = 191, nullable = false)
+    /** 一次主动运行的提交键；重复投递沿用，旧客户端仍使用历史请求指纹键。 */
+    @Column(name = "idempotency_key", length = 191, nullable = false, updatable = false)
     private String idempotencyKey;
+
+    /** 相同用户、标的及问题的跨会话分组指纹，不作为新运行的唯一约束。 */
+    @Column(name = "request_fingerprint", length = 191, nullable = false, updatable = false)
+    private String requestFingerprint;
+
+    /** 创建时已存在的上一条同组运行；不重置或覆盖它的状态、结果和快照。 */
+    @Column(name = "previous_task_id", updatable = false)
+    private Long previousTaskId;
 
     /** 已归一化的研究标的代码。 */
     @Column(length = 32, nullable = false)
@@ -136,6 +145,18 @@ public class ResearchTask {
     @Column(nullable = false)
     private Integer attempts = 0;
 
+    /** 提交时冻结的总截止时间，包含排队与所有重试；历史未记录值保持 null。 */
+    @Column(name = "budget_deadline_epoch_ms", updatable = false)
+    private Long budgetDeadlineEpochMs;
+
+    /** 本次运行所有尝试共享的模型调用上限。 */
+    @Column(name = "max_model_calls", updatable = false)
+    private Integer maxModelCalls;
+
+    /** 提交时冻结额度合同；历史未知值不能视作显式禁用。 */
+    @Column(name = "token_budget_json", columnDefinition = "JSON", updatable = false)
+    private String tokenBudgetJson;
+
     /** 当前 worker 的租约令牌；非 RUNNING 状态通常为 null。 */
     @Column(name = "lease_token", length = 64)
     private String leaseToken;
@@ -143,6 +164,14 @@ public class ResearchTask {
     /** 提交参数 JSON，包含 ticker、问题、traceId 和 conversationId。 */
     @Column(name = "payload_json", columnDefinition = "JSON", nullable = false)
     private String payloadJson = "{}";
+
+    /** 首次执行冻结的模型客户端默认值；仅通过持有者围栏写入，重试不可覆盖。 */
+    @Column(name = "model_configuration_json", columnDefinition = "LONGTEXT", insertable = false, updatable = false)
+    private String modelConfigurationJson;
+
+    /** 运行中指向最近证据快照，终态后保留；仅通过持有者围栏更新。 */
+    @Column(name = "final_evidence_snapshot_id", length = 36, insertable = false, updatable = false)
+    private String finalEvidenceSnapshotId;
 
     /** 最近失败或重试原因；正常运行和成功终态为 null。 */
     @Column(name = "error_message", columnDefinition = "TEXT")
@@ -205,6 +234,9 @@ public class ResearchTask {
         }
         if (payloadJson == null || payloadJson.isBlank()) {
             payloadJson = "{}";
+        }
+        if (requestFingerprint == null) {
+            requestFingerprint = idempotencyKey;
         }
     }
 

@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-ibm-2-1",
+    "caseId": "ibm-fy2025q3-cash-quality",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-20261002\\raw-development-ibm",
+  "executionSha256": "af6f5d6b295dd4561a96f078d2b83021d4a835819c8a57697a0d29972bb7921e",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-unsubmitted-ibm-1-1",
+    "caseId": "ibm-fy2025q3-liquidity",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-20261002\\raw-development-unsubmitted-ibm",
+  "executionSha256": "22f815f6d05a98c0d316ae8d64c5fab3ac9e3fc9fc8f6feef291ec6a4b5c383a",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

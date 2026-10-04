@@ -1,0 +1,14 @@
+{
+  "schema": "provider_stream_diagnostic_v1",
+  "registeredAt": "2026-10-02T14:25:04.184716+00:00",
+  "source": "evals\\evolution\\batch-learning-validation-20261002\\raw-candidate-dev-02\\candidate-dev-02-1-1.response.json",
+  "sourceSha256": "e2eddf1d75409722d6ae10758bc25f017317168afbafe772369507e067da6c40",
+  "stage": "finalAnswer",
+  "requestSha256": "6d530663edc6e8e1c15c722d4bf9cbc0d6ae020d3ad6402fe248a1209c708b09",
+  "transport": "PYTHON_STDLIB_HTTPS_DIRECT_NO_PROXY",
+  "maxCalls": 1,
+  "retries": 0,
+  "deadlineSeconds": 300,
+  "qualityAssessed": false,
+  "limits": "Transport diagnostic; sampling and execution time differ from the original Java call."
+}

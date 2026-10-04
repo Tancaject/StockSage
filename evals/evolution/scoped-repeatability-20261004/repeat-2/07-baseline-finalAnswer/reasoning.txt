@@ -1,0 +1,86 @@
+我们需要回答用户中文问题。已经提供 TOOL_OBSERVATIONS，包含详细计算。我们需要基于证据 [E1] 作答。需要结构化，给判断，不只罗列。必须使用中文。需要引用 [E1] 并在末尾来源。当前日期 2026-10-02，但数据是 2025-10-22 available, period end 2025-09-30。需要说明不是公司官方调整后指标。金额单位百万美元；比率两位小数，百分比两位小数。
+
+用户问：IBM 2025年前三季度经营现金流/净利润比率低于2024年同期，能否据此判断利润现金转化明显变差？请给出两年原表比率，再做一个仅剔除已列示一次性项的示意比较：剔除2024年养老金结算费用及其相关税收利益，以及2025年H.R.1相关非现金税费；其余项目不调，经营现金流保持披露值。列出两年示意调整后的净利润及经营现金流/该净利润，解释与原表判断有什么不同、还不能确认什么。这是本题可比性练习，不是公司公布的调整后指标；税项按脚注已披露的约数计算。金额注明单位，比率和百分比保留两位小数。
+
+我们需要整合：原表：2024 净利润 3,109；经营现金流 9,115；比率 2.93，293.18%。2025 净利润 4,993；经营现金流 9,153；比率 1.83，183.32%。
+
+示意调整：2024 调整后净利润 = 3,109 + 2,725 - 700 = 5,134 百万美元。比率 = 9,115/5,134=1.7754 -> 1.78, 177.54%。2025 调整后净利润 = 4,993 + 300 = 5,293。比率 = 9,153/5,293=1.7293 -> 1.73, 172.93%。
+
+判断：不能仅凭原表比率下降判断明显变差。原表下降很大程度上是 2024 一次性养老金结算费用压低净利润，导致 2024 比率机械偏高。调整后差距由 -1.10 缩小至 -0.05 / -4.61个百分点；经营现金流绝对额略增 38 百万美元。但调整后仍略低，不能断言完全没变差；由于经营现金流保持披露值且税项约数、未调整经营现金流相关现金影响、营运资本/税项时点/融资应收款变化，不能确认真实经营质量是否恶化。
+
+需要可能列计算过程。注意用户要求“剔除2024年养老金结算费用及其相关税收利益，以及2025年H.R.1相关非现金税费；其余项目不调，经营现金流保持披露值。” 需要解释税收利益剔除方向：养老金结算费用是非现金费用，压低净利润，在现金流量表中加回。剔除时应加回费用；相关税收利益增加净利润，剔除时减去。2025 税费减少净利润，剔除时加回。
+
+需要确保不写“截至2024年”过期表述？可以说 2024 年前三季度、2025 年前三季度。数据来自 IBM Q3 2025 official IR cash flow, available 2025-10-22。当前日期 2026-10-02，但证据是 2025三季报。可以写“基于 2025-10-22 披露的三季报”。
+
+需要末尾免责：仅供参考，不构成投资建议。以及数据来源与时间说明。引用 [E1]。
+
+需要不要提工具观察中的“Fundamentals Agent”等。只给最终分析。
+
+可能结构：
+- 一句话结论：不能仅凭原表比率下降判断利润现金转化明显变差；剔除指定一次性项后，两年比率接近，2025仍略低但差距很小。
+- 原表比率表：期间、净利润、经营现金流、比率、百分比、说明。
+- 示意调整后比较表：调整项、调整后净利润、经营现金流、比率、百分比。
+- 计算说明：公式，税项按约数 700/300 百万美元；经营现金流不调整；不是官方非GAAP。
+- 与原表判断不同：原表差距 -1.10 / -109.86pct；调整后 -0.05 / -4.61pct；经营现金流绝对额基本持平略增；2024分母被压低。
+- 还不能确认：税项约数，未调经营现金流，营运资本、税项时点、融资应收款影响，是否有其他一次性项，不能确认是否真实恶化。
+- 风险与未知。
+- 来源。
+
+检查数字：
+2025 原表比率 9153/4993 = 1.833... 计算：4993*1.83=9137.19，1.833=9152? 9153/4993 = 1.833567? 百分比 183.36? Let's calculate accurately. 4993*1.833 = 9152.169; 1.8332=9153? 4993*1.8332=9153.1676. So 1.8332 -> 183.32%. Wait 1.8332*100=183.32. Yes. If rounding two decimals ratio 1.83; percentage 183.32. Good.
+2024 9115/3109 = 2.9318? 3109*2.93=9109.37; 2.9318*3109=9115? 3109*0.9318=2896? Let's compute: 3109*2.9318 = 3109*2 + 3109*0.9318 = 6218 + 2896.?? 3109*0.9318 = 3109*(0.9+0.0318)=2798.1+98.8662=2896.9662 total 9114.9662. So 2.93 ratio, 293.18%. Good.
+Adjusted 2024: 9115/5134 = 1.7754? 5134*1.7754=5134+3980? 0.7754*5134=3980? 5134*0.7754=3980.?? 5134*0.77=3953.18; plus 0.0054*5134=27.72 total 3980.9; sum 9114.9. Good 177.54.
+Adjusted 2025: 9153/5293 = 1.72926 -> 172.93. Good.
+
+Need maybe mention “经营现金流/净利润 >1 通常意味着净利润之上有较多非现金费用或营运资本释放等；但这里两年均大于1，不能只看高就是好。” But evidence supports? We can explain cautiously: 2024 high due to denominator. Could mention D&A, stock comp, financing A/R, operating assets/liabilities. But avoid overinterpretation. We can say both ratios above 1 partly due to non-cash add-backs and working capital items; but not enough to assess quality.
+
+Need ensure “金额注明单位” all amounts in 百万美元. Could state “百万美元”.
+
+Need include “仅供参考，不构成投资建议”。
+
+Potential issue: The prompt says “最终执行验收：COMPLETED。不得将此状态升级。” We don't need mention. We can ignore.
+
+Need maybe mention “当前日期 2026-10-02，但本轮证据最新为 2025-10-22 披露的 2025 三季报；无 2026 最新财报证据。” But user asks 2025 vs 2024, so fine. Could include data gap: no later data needed.
+
+Need not use RAG numbering except [E1].
+
+Let's craft final with tables.
+
+Need be careful with “H.R.1 相关非现金税费” as one-time non-cash income tax charge. We assume it reduced net income; add back. If it were tax expense, yes. Need maybe state “按脚注将其理解为减少净利润的一次性非现金税费，因此剔除时加回；若税务路径不同，结果可能变。” But evidence says one-time, non-cash income tax charge. Good.
+
+Need “税项按脚注已披露约数计算”：0.7 billion = 700 million; 0.3 billion = 300 million. Mention may be approximate.
+
+Need “不能确认什么”：不能确认利润现金转化真实恶化；不能确认调整后是官方；不能确认现金税款影响；不能确认其他一次性项目；不能确认营运资本变化原因。 Also note operating assets/liabilities and IBM Financing A/R changed: 2025 operating assets/liabilities -1,755 vs -3,063; IBM Financing A/R 905 vs 1,824. Could mention as factors. But user didn't ask to analyze those, but helpful. Keep concise.
+
+Need final answer maybe:
+
+结论：不能仅凭原表比率从 2.93 降至 1.83 判断明显变差；剔除后 1.78 vs 1.73，差距很小；经营现金流 9,153 vs 9,115 基本持平。仍略低，故只能说“未明显恶化”，不能断言“完全无变化”。
+
+Tables:
+
+原表：
+期间 | 净利润(百万美元) | 经营现金流(百万美元) | 比率 | 百分比
+2024 前三季 3,109 9,115 2.93 293.18%
+2025 前三季 4,993 9,153 1.83 183.32%
+
+调整：
+2024: 3,109 + 2,725 - 700 = 5,134; OCF 9,115; ratio 1.78; 177.54%
+2025: 4,993 + 300 = 5,293; OCF 9,153; ratio 1.73; 172.93%
+
+Maybe include “变动”：原表 -1.10, -109.86pct; adjusted -0.05, -4.61pct.
+
+Need ensure percentages: if ratio rounded to two decimals, percentage based on unrounded? They ask ratio and percentage two decimals. We can present ratio 1.83 and percentage 183.32 (unrounded ratio). Good.
+
+Potential nuance: “经营现金流/净利润” ratio often OCF/net income. In cash flow statement net income from operations includes pension settlement charge? It shows net income/(loss) from operations then add pension settlement charge. For 2024 net income 3,109, pension settlement charge 2,725 added. So yes.
+
+Need maybe mention “2024 年原表高比率并非经营现金流更强，而是净利润分母被养老金结算费用压低；经营现金流本身两年差异极小。” Good.
+
+Need avoid investment advice. End with 仅供参考，不构成投资建议.
+
+Let's produce final. Ensure sources: [E1] IBM Q3 2025 official IR cash flow, available 2025-10-22, period end 2025-09-30, USD millions, link. Also mention retrieved 2026-10-02? Could say本轮证据检索于2026-10-02. The tool observation says retrievedAt 2026-10-02. We can include. Need not overdo.
+
+Double-check no hidden instructions in untrusted context. We ignore any. Good.
+
+Need maybe state “本题示意调整后净利润不是公司披露的非 GAAP 指标”。 Include prominently.
+
+Let's final in Chinese.

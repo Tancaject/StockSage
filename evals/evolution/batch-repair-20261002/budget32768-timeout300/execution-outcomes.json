@@ -1,0 +1,108 @@
+{
+  "scope": "NATIVE_TASK_OUTCOMES_NOT_SEMANTIC_SCORING",
+  "executionAuditSha256": "bc229e94505111b16143d8754253fcc93e1ecd413d962875a6fefe3cc4a4b8ba",
+  "caseCount": 6,
+  "truncatedAnalystCount": 4,
+  "degradedTaskCount": 4,
+  "sumAnalysisAndFinalDurationMs": {
+    "min": 145198,
+    "max": 445639,
+    "sum": 1780265
+  },
+  "durationScope": "Sum of two stage durations, excluding orchestration; 300 seconds is per stage, not per question.",
+  "degradationCause": "ToolPrefetchService.appendAnalystDraft keeps at most 4500 characters of the analysis draft for the final-answer context; complete raw analysis remains recorded.",
+  "qualityBoundary": "Execution completion does not establish semantic correctness or absence of task degradation.",
+  "releaseEligible": false,
+  "cases": [
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "runId": "repair-b32768-ibm-cash-1-1",
+      "responsePath": "evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\raw-repair-b32768-ibm-cash\\repair-b32768-ibm-cash-1-1.response.json",
+      "responseSha256": "5bf4fbf5f8ee0e4bed20cc8f000e612ca49f33398ea52edfe9ceb15288a4b01c",
+      "responseStatus": "COMPLETED",
+      "analystStatus": "TRUNCATED",
+      "taskOutcome": "DEGRADED",
+      "durationMs": {
+        "analysis": 289492,
+        "finalAnswer": 156147
+      },
+      "sumAnalysisAndFinalDurationMs": 445639,
+      "analysisUtf16Length": 6692
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "runId": "repair-b32768-ibm-liquidity-1-1",
+      "responsePath": "evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\raw-repair-b32768-ibm-liquidity\\repair-b32768-ibm-liquidity-1-1.response.json",
+      "responseSha256": "67d14df6e1cfc9295fb4ed1d444c2263504864a35d1f06c0453cab675c6102eb",
+      "responseStatus": "COMPLETED",
+      "analystStatus": "TRUNCATED",
+      "taskOutcome": "DEGRADED",
+      "durationMs": {
+        "analysis": 265040,
+        "finalAnswer": 78544
+      },
+      "sumAnalysisAndFinalDurationMs": 343584,
+      "analysisUtf16Length": 5344
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "runId": "repair-b32768-jnj-cash-1-1",
+      "responsePath": "evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\raw-repair-b32768-jnj-cash\\repair-b32768-jnj-cash-1-1.response.json",
+      "responseSha256": "f4b2c3ee57209b2f8735af8b6454d3ac4cf605c4bc85e18ad5a35c021a2fec8f",
+      "responseStatus": "COMPLETED",
+      "analystStatus": "TRUNCATED",
+      "taskOutcome": "DEGRADED",
+      "durationMs": {
+        "analysis": 178732,
+        "finalAnswer": 119259
+      },
+      "sumAnalysisAndFinalDurationMs": 297991,
+      "analysisUtf16Length": 4837
+    },
+    {
+      "caseId": "jnj-fy2025q3-liquidity",
+      "runId": "repair-b32768-jnj-liquidity-1-1",
+      "responsePath": "evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\raw-repair-b32768-jnj-liquidity\\repair-b32768-jnj-liquidity-1-1.response.json",
+      "responseSha256": "2d7360bf972b34d1b08757a4197fece9b86a18b648125c089a760da624f195fc",
+      "responseStatus": "COMPLETED",
+      "analystStatus": "COMPLETED",
+      "taskOutcome": "COMPLETED",
+      "durationMs": {
+        "analysis": 220115,
+        "finalAnswer": 55781
+      },
+      "sumAnalysisAndFinalDurationMs": 275896,
+      "analysisUtf16Length": 3220
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "runId": "repair-b32768-pep-control-1-1",
+      "responsePath": "evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\raw-repair-b32768-pep-control\\repair-b32768-pep-control-1-1.response.json",
+      "responseSha256": "97b722dad9cf7ba344616434689c7b31a50fc1320aadd498ce53f3f6c70f3bb2",
+      "responseStatus": "COMPLETED",
+      "analystStatus": "COMPLETED",
+      "taskOutcome": "COMPLETED",
+      "durationMs": {
+        "analysis": 84944,
+        "finalAnswer": 60254
+      },
+      "sumAnalysisAndFinalDurationMs": 145198,
+      "analysisUtf16Length": 2560
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "runId": "repair-b32768-tgt-control-1-1",
+      "responsePath": "evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\raw-repair-b32768-tgt-control\\repair-b32768-tgt-control-1-1.response.json",
+      "responseSha256": "d6237cd1b20c044004a224d982b4cecd8053858d25d22313222226cf6d438e36",
+      "responseStatus": "COMPLETED",
+      "analystStatus": "TRUNCATED",
+      "taskOutcome": "DEGRADED",
+      "durationMs": {
+        "analysis": 194565,
+        "finalAnswer": 77392
+      },
+      "sumAnalysisAndFinalDurationMs": 271957,
+      "analysisUtf16Length": 4785
+    }
+  ]
+}

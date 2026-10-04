@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "reviewType": "AI_SOURCE_GROUNDED",
+  "humanReviewed": false,
+  "modelLabelsHidden": true,
+  "reviewScope": "MODEL_LABELS_HIDDEN_AI_REVIEW_NOT_INDEPENDENT_FORMAL_ACCEPTANCE",
+  "reviewedAt": "2026-09-30T14:54:02.389112+00:00",
+  "sourcePacketSha256": "5b59e498f18922bcd3276ead305e6c6f5c2f39db1768c9f097aa3f89b675a745",
+  "accessBoundary": "For this review, only the final-MSFT packet was opened. No model mapping, raw output or other current answers were opened. Reviewer had previously reviewed the fundamentals-MSFT packet and designed the rubric; this is not independent formal human acceptance.",
+  "coverageSemantics": "coverageComplete records whether requested facts, calculation, conceptual distinctions and liquidity commentary were supplied. Evidence limits and faithful preservation of the source draft are judged under evidenceGrounded; complete coverage does not validate unsupported conclusions.",
+  "numericSemantics": "additionalNumbersCorrect excludes recorded immaterial rounding. Two answers display FY2024 ratio1.28 rather than the conventional1.27; notes and strict precision sensitivity preserve that fact.",
+  "reviews": [
+    {
+      "answerId": "answer-a4a5596451ae406ea59b6c9eb90790ee",
+      "caseId": "final-msft-fy2025-liquidity",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": true,
+      "verdict": "PASS",
+      "notes": [
+        "FY2025必答30,242现金、40,152非流动长期债务、191,131流动资产、141,218流动负债（百万美元）及1.35流动比率正确。补充总负债275,524、现金加短投94,565、到期长期债务2,999、短期债务0、递延收入64,555匹配来源；15.8%、49.5%、14.6%与亿美元换算正确。",
+        "轻微舍入备注：「较 FY2024 的约 **1.28** 有所改善」中FY2024原值159,734/125,286=1.274954903，常规两位小数应1.27；写约1.28偏差约0.0050451，极接近两位舍入分界，三位再舍入也会产生1.28。按预声明对合理概数/轻微舍入的处理，不将该差异计作实质数字失败；不能在汇总时称所有额外数字严格精确。",
+        "明确区分现金/流动资产和非流动长期债务/总负债，说明流动资产不能当随时可用现金。对递延收入保留「履约过程仍可能发生成本，因此不能简单将其从流动负债中全额剔除」，没有将其当无现金成本来保证安全。",
+        "保留正确草稿的实质边界：经营现金流、资金受限、短期投资/应收变现、到期安排与授信均未知；结论限于「账面流动性指标较健康」，明确不能排除真实流动性压力。未新增无来源业务原因、主动融资行为或确定偿债保证。"
+      ],
+      "sensitivity": {
+        "topic": "FY2024 current-ratio rounding",
+        "primary": "PASS with a recorded minor rounding issue; FY2025 required ratio and all material conclusions remain correct.",
+        "strictNumericalReading": "If every extra ratio must round exactly to its displayed precision with no tolerance, FY2024 should be1.27 and additionalNumbersCorrect would be false, changing this answer to ISSUES. This is numerical precision sensitivity, not a financial-boundary failure.",
+        "exactRatio": "1.274954903181520680682598215"
+      }
+    },
+    {
+      "answerId": "answer-6b15e292c39a431d9ca34f4c8d74fd5f",
+      "caseId": "final-msft-fy2025-liquidity",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "必答FY2025四项金额、1.35比率、两组科目区别完整，附加总负债275,524、短投64,323、应收69,905、存货938、其他流动资产25,723、应付27,724、递延收入64,555、薪酬13,709、到期长期债务2,999和14.6%均正确。",
+        "「这部分递延收入主要来自于客户预收的云服务（Azure）或软件订阅费」把余额主要来源确认为具体业务类别。原表和正确分析稿没有合同负债的Azure/软件构成；这是公司具体来源断言，不只是一般履约机制举例。",
+        "「这部分负债在履约过程中消耗的主要是营业成本，**不会形成刚性的短期现金兑付压力**。如果剔除这部分非金融性负债，微软实际面临的短期流动性压力远小于账面数据所呈现的状态」把营业成本与现金支出对立，并剔除递延收入确认实际压力较小。原稿明确履约可能有现金成本且禁止全额剔除后确认风险降低；最终汇总实质逆转该限制。",
+        "末尾列出现金流、受限资金、授信与到期数据缺口，不能支持或撤销上文已作出的确定性实际压力判断。「短期投资通常具备较好的流动性」是一般机制且后文保留该组合的具体限制未知，不单独扣分。"
+      ]
+    },
+    {
+      "answerId": "answer-af5c86dff75e47f78dbc1425433fd561",
+      "caseId": "final-msft-fy2025-liquidity",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": true,
+      "verdict": "PASS",
+      "notes": [
+        "FY2025必答四项金额、流动比率1.35、总负债275,524以及现金/流动资产、非流动长期债务/总负债的区别完整正确；现金30,242/141,218约0.21或约21%、现金加短投94,565/141,218约0.67符合展示精度。所有附加科目金额与来源一致，45,186是单项Other long-term liabilities，不是其他非流动负债合计。",
+        "保留现金不覆盖全部流动负债、短投不能等同可动用现金，以及经营现金流、资金/投资限制、应收回收、到期和授信未知。对递延收入说明不一定直接消耗等额现金，但「履约过程仍可能产生人工、算力、运营成本等现金支出」，并禁止直接剔除后确认无风险。",
+        "人工/算力/运营成本出现在可能的履约支出机制中，未确认公司具体投入金额、业务用途或增长原因，按冻结口径允许。未逐字列出2,999到期长期债务，但表述保留一年内到期长期债务类别，且没有全部短期义务清零推断，不构成遗漏。",
+        "最终判断明确限定账面覆盖，不把原稿未知的现金流改称强劲，没有新增实际偿债安全保证或错误会计合计。"
+      ]
+    },
+    {
+      "answerId": "answer-01412b7e6b6848369e2b3c7992dea928",
+      "caseId": "final-msft-fy2025-liquidity",
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "必答FY2025四项金额及1.35比率、FY2024额外原值、总负债与亿美元概数、15.8%现金占比和14.6%债务占比均匹配。FY2024比率写1.28而精确值1.274954903（常规两位应1.27），与a4a559答案同口径记录轻微舍入，不单独作为实质数字失败。",
+        "「因此，微软实际面临的刚性短期现金兑付压力，远低于账面流动负债所呈现的水平」从递延收入通常通过服务结清直接确认实际压力低，遗漏原稿明确保留的履约现金成本。没有实际成本与到期信息支持这种判断。",
+        "「若将其从分子分母中剔除，其真实的“现金类”流动比率会更高，短期刚性债务违约风险极低」没有对应可归属现金资产或现金义务的依据，就同时从资产、负债扣除递延收入余额，创造未经证据支持的现金类指标，并从中保证极低违约风险。这是会计/风险解释错误，不是一个需要靠补充合计算式即可解决的问题。",
+        "「长期资本结构稳健，长期债务本息偿付对其不构成实质性压力」仅凭长期债务相对总资产和权益的规模确认本息压力，缺经营现金流、可动用资产与到期付息安排；超出原稿静态账面分析边界。",
+        "结尾虽写现金流、备用融资、到期及变现缺口，但不能支持前文的真实现金压力、极低违约风险和无实质本息压力保证。未主动列2,999不是本次判错理由。"
+      ],
+      "sensitivity": {
+        "topic": "FY2024 current-ratio rounding",
+        "primary": "Minor rounding note, same standard as answer-a4a5596451ae406ea59b6c9eb90790ee.",
+        "strictNumericalReading": "Strict displayed-precision grading would additionally flag1.28, but the whole-answer ISSUES result remains unchanged because of substantive unsupported financial conclusions.",
+        "exactRatio": "1.274954903181520680682598215"
+      }
+    }
+  ]
+}

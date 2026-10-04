@@ -1,9 +1,9 @@
 package com.stocksage.controller;
 
-import com.stocksage.config.RequestIdentity;
+import com.stocksage.identity.RequestIdentity;
 import com.stocksage.model.dto.InvestmentReportReviewRequest;
 import com.stocksage.model.dto.InvestmentReportVersionSummary;
-import com.stocksage.service.InvestmentReportVersionService;
+import com.stocksage.research.InvestmentReportVersionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

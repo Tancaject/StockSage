@@ -1,0 +1,153 @@
+{
+  "schema": "fundamentals_generation_source_audit_v1",
+  "createdAt": "2026-10-02T13:25:17.967459+00:00",
+  "origin": "AI_SOURCE_AUDIT_NOT_HUMAN",
+  "releaseEligible": false,
+  "scope": "Generation artifacts and source/parent identities only; no screening answers read and no provider calls.",
+  "status": "ONE_SCREENABLE_PROPOSAL_ONE_GENERATION_FAILURE",
+  "planSha256": "fa948d7e1ffc12ec4e3509990f214d25a4cf005fabba9289bf62273be1b12663",
+  "generationRegistrationSha256": "d29fd83e78c35e06e59d0150ec65eee99848f8c555da377dabadaf0626c18104",
+  "groupsSha256": "d598ed938d8d465fe410a00e0aa9efb1fba2aebf3a60a5035f908fb10f7db0d4",
+  "summarySha256": "f7dc0abd9c66c3582136931038521356f352cb282cfd22551a2d8debe2c3b28b",
+  "registrationInputHashes": "PASS",
+  "summary": {
+    "registeredGroups": 2,
+    "observedGeneratorCalls": 2,
+    "proposed": 1,
+    "notGenerated": 1,
+    "screenableProposals": 1,
+    "retries": 0,
+    "newAuditProviderCalls": 0,
+    "usage": {
+      "prompt_tokens": 51330,
+      "completion_tokens": 4112,
+      "total_tokens": 55442
+    },
+    "reasoningTokens": 1425
+  },
+  "groups": [
+    {
+      "group": "FALSE_MISSING_DERIVABLE_PERIOD_DETAIL",
+      "groupIndex": 1,
+      "recordedStatus": "PROPOSED",
+      "artifacts": {
+        "bundle.json": "f6f1729a9360af217e4e435a5fd6a457bb3390e27cfdb47b92f81cebb770793c",
+        "candidate.json": "18376e5f28f01f27f8c762f79ff5945edcb3cf255fa01f776c1020cf18ae67d0",
+        "experience.json": "7dc718273cc8c5b7815e68a3ec362925281ca6e6d2da54ad0fb33ee41f28f2b4",
+        "request.json": "cde4bacbd737b5b3f8b34e2c99cc03edfdb1c6d3b75ccf7c39d5919878f26e7a",
+        "response.json": "add9fb285da5fa130843f05d5357543b1ed58a7f9114534ae60cd415972e55b3",
+        "result.json": "89025abf11991b35a4d3b4a5a6b18238c873725b00c6f5a974ef3cfb23b1198c",
+        "source-artifacts.json": "81abca227fb253b3d691cf0efb8a78f9d49b9967a884c96be6b48ab256b3ddde"
+      },
+      "sourceBindings": "PASS",
+      "generatorInputScope": "EXACT_CONFIRMED_DEVELOPMENT_MEMBERS_ONLY",
+      "generatorModel": "qwen3.8-max",
+      "requestOptions": {
+        "model": "qwen3.8-max",
+        "temperature": 0,
+        "max_tokens": 2400,
+        "enable_thinking": true,
+        "thinking_budget": 4096,
+        "response_format": {
+          "type": "json_object"
+        }
+      },
+      "finishReason": "stop",
+      "usage": {
+        "completion_tokens": 862,
+        "completion_tokens_details": {
+          "reasoning_tokens": 578,
+          "text_tokens": 862
+        },
+        "prompt_tokens": 25932,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 25932
+        },
+        "total_tokens": 26794
+      },
+      "contentCharacterCount": 705,
+      "strippedContentCharacterCount": 705,
+      "trailingWhitespaceCharacterCount": 0,
+      "releaseEligible": false,
+      "auditStatus": "PASS_FOR_REGISTERED_SCREENING",
+      "candidateId": "candidate-a7a92cfaac38c01535486362",
+      "experienceId": "exp-af3ac31b4ade4be35e439c18",
+      "experienceRecordSha256": "af3ac31b4ade4be35e439c185b0673b18e8147f17a809d29a0ae6022b36e5f92",
+      "candidateRecordSha256": "a7a92cfaac38c015354863620b305b66193f69daa5f239ada5abe87b25c8a44b",
+      "bundleContentSha256": "959c7d820bd43eb29bfe0494fb480f53830ba316bfa5e8dbb2c42c12d764644d",
+      "parentBundleId": "baseline-v1",
+      "parentMethodSha256": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8",
+      "parentPreservedVerbatim": true,
+      "candidateMethodUtf16Length": 712,
+      "experienceMethodLength": 159,
+      "identityChecks": "PASS_EXPERIENCE_REBUILT_CANDIDATE_RECOMPILED_BUNDLE_REEXPORTED_EXACTLY",
+      "operationReview": {
+        "status": "SPECIFIC_CONDITIONAL_OPERATION",
+        "reason": "Same-start cumulative differencing for derivable cash-flow details, followed by checking any proposed missing-data claim; separates calculable accounting movements from undisclosed commercial causes.",
+        "sourceFailureMechanism": "FALSE_MISSING_DERIVABLE_PERIOD_DETAIL"
+      },
+      "companyAnswerLeakage": {
+        "status": "NOT_FOUND",
+        "reason": "Procedural text contains no company/ticker, date, numerical answer, citation ID or URL. TGT and case/run identities remain only in provenance metadata."
+      },
+      "screeningCaution": {
+        "status": "OBSERVE_DURING_FROZEN_SCREEN",
+        "quote": "所有可还原的明细行",
+        "reason": "Requiring every derivable line to be calculated and reported is broader than checking a proposed gap. It may add irrelevant output, arithmetic opportunities or length pressure. This is a candidate risk, not measured failure; no manual candidate rewrite or extra criterion has been introduced."
+      },
+      "formalAcceptance": "NOT_REVIEWED_NOT_VALIDATED_NOT_RELEASE_ELIGIBLE"
+    },
+    {
+      "group": "INCONSISTENT_UNIT_AND_DERIVED_NUMERIC_REPRESENTATIONS",
+      "groupIndex": 2,
+      "recordedStatus": "NOT_GENERATED",
+      "artifacts": {
+        "request.json": "032ef0609b7d19d11469e547e2b728aee2ef9b1e961444db6fa6bcd307c5fdc2",
+        "response.json": "db7597b9589724f76be5e44af22b85ab33747082083a347cde7bb7fab661da7c",
+        "result.json": "fae40abde6860231e7824278496156f6ce6c8dfc4b04ed983698c7cf8b100d7e"
+      },
+      "sourceBindings": "PASS",
+      "generatorInputScope": "EXACT_CONFIRMED_DEVELOPMENT_MEMBERS_ONLY",
+      "generatorModel": "qwen3.8-max",
+      "requestOptions": {
+        "model": "qwen3.8-max",
+        "temperature": 0,
+        "max_tokens": 2400,
+        "enable_thinking": true,
+        "thinking_budget": 4096,
+        "response_format": {
+          "type": "json_object"
+        }
+      },
+      "finishReason": "length",
+      "usage": {
+        "completion_tokens": 3250,
+        "completion_tokens_details": {
+          "reasoning_tokens": 847,
+          "text_tokens": 3250
+        },
+        "prompt_tokens": 25398,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 25398
+        },
+        "total_tokens": 28648
+      },
+      "contentCharacterCount": 11023,
+      "strippedContentCharacterCount": 351,
+      "trailingWhitespaceCharacterCount": 10672,
+      "releaseEligible": false,
+      "auditStatus": "GENERATION_FAILED_CORRECTLY_REJECTED",
+      "attribution": "GENERATOR_INCOMPLETE_JSON_WITH_EXCESS_TRAILING_WHITESPACE",
+      "jsonComplete": false,
+      "jsonParseError": "Expecting ',' delimiter: line 9909 column 2 (char 11023)",
+      "explanation": "Provider returned the requested model, but finish_reason=length and incomplete JSON. The combined local error message mentions model mismatch as an alternative; that alternative did not occur. Most returned content is trailing whitespace, so this is not evidence that the business unit-normalization lesson is ineffective or that ordinary meaningful text merely needs more budget.",
+      "experienceProduced": false,
+      "candidateProduced": false,
+      "screenEligible": false,
+      "retryAuthorized": false,
+      "manuallyCompleted": false
+    }
+  ]
+}

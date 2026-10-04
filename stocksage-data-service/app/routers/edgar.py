@@ -7,7 +7,10 @@ SEC EDGAR API 路由。
 - 获取结构化 XBRL 财务数据
 """
 
+from app.research_budget import check_budget
+
 from fastapi import APIRouter, Query
+from app.sec_financials import SecFinancialsResponse, normalize_sec_financials
 from app.services.edgar_service import EdgarService
 
 router = APIRouter()
@@ -24,6 +27,7 @@ def get_filings(
     try:
         return edgar.get_filings(ticker, filing_type=type, count=count)
     except Exception as e:
+        check_budget(e)
         return {"error": True, "message": str(e)}
 
 
@@ -36,15 +40,18 @@ def get_filing_content(
     try:
         return edgar.get_filing_content(url, filing_type=type)
     except Exception as e:
+        check_budget(e)
         return {"error": True, "message": str(e)}
 
 
-@router.get("/xbrl")
+@router.get("/xbrl", response_model=SecFinancialsResponse)
 def get_xbrl(
-    ticker: str = Query(..., description="股票代码，例如 AAPL"),
+    ticker: str = Query(..., min_length=1, description="美股代码，例如 AAPL；当前仅提供年度 XBRL 事实"),
 ):
-    """获取结构化 XBRL 财务数据，如营收、净利润等。"""
+    """获取具有期间、单位和公告来源的年度 XBRL 财务事实。"""
     try:
-        return edgar.get_xbrl(ticker)
+        payload = edgar.get_xbrl(ticker)
     except Exception as e:
-        return {"error": True, "message": str(e)}
+        check_budget(e)
+        return normalize_sec_financials(None, ticker, error=e)
+    return normalize_sec_financials(payload, ticker)

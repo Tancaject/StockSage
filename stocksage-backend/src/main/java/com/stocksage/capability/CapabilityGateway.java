@@ -3,6 +3,7 @@ package com.stocksage.capability;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.tool.ToolCallContext;
 import com.stocksage.tool.ToolResultInspector;
+import com.stocksage.exception.ResearchBudgetExceededException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -18,9 +19,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * 所有 Skill 能力调用的统一执行网关。
+ * 普通编排、研究补证和 Skill 能力调用的统一执行网关。
  *
- * <p>上游 {@code SkillExecutionService} 只提交能力 ID 和参数；本类依次完成注册表解析、策略授权、
+ * <p>上游应用编排只提交能力 ID、参数和授权上下文；本类依次完成注册表解析、策略授权、
  * 异步限时执行、UTF-8 结果限长以及 Trace/指标记录，再把本地工具或 MCP 的差异隐藏在适配器后。
  * 任何未知、越权或超时调用都会以 {@link CapabilityException} 失败关闭。</p>
  */
@@ -42,9 +43,9 @@ public class CapabilityGateway {
     /**
      * 执行一项已注册能力，并返回限长后的统一结果。
      *
-     * @param capabilityId Skill 清单中的稳定能力 ID
+     * @param capabilityId 后端计划或 Skill 清单中的稳定能力 ID
      * @param arguments 能力参数；{@code null} 按空参数处理
-     * @param context 用户、Skill allowlist、Trace 和总截止时间
+     * @param context 用户、后端 allowlist、Trace 和执行截止时间
      * @return 统一结果；内容过长时状态为 {@link CapabilityResult.Status#TRUNCATED}
      * @throws CapabilityException 未授权、不可用、超时或提供方失败
      */
@@ -54,17 +55,22 @@ public class CapabilityGateway {
         // 先解析本地清单并授权；远端 MCP 元数据永远不能绕过这两道服务器侧边界。
         CapabilityRegistry.RegisteredCapability registered = registry.require(capabilityId);
         CapabilityDescriptor descriptor = registered.descriptor();
+        if (context.runDeadline() != null) context.runDeadline().remainingMillis();
         policy.authorize(descriptor, context);
 
         Map<String, Object> safeArguments = arguments == null ? Map.of() : Map.copyOf(arguments);
         observer.started(descriptor, context);
         long startNanos = System.nanoTime();
-        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<String> future;
+        try {
+            future = CompletableFuture.supplyAsync(() -> ToolCallContext.withRunExecution(context.runExecution(),
+                    () -> ToolCallContext.withRunDeadline(context.runDeadline(), () -> {
             // 异步线程没有原请求的 ThreadLocal，因此显式补齐 Tool AOP 所需的最小链路上下文。
             ToolCallContext.set(
                     context.traceId(),
                     context.conversationId(),
-                    String.valueOf(safeArguments.getOrDefault("query", ""))
+                    context.userQuery() == null
+                            ? String.valueOf(safeArguments.getOrDefault("query", "")) : context.userQuery()
             );
             try {
                 return ToolCallContext.withoutObservation(() -> {
@@ -78,11 +84,18 @@ public class CapabilityGateway {
             } finally {
                 ToolCallContext.clear();
             }
-        }, agentTaskExecutor);
+        })), agentTaskExecutor);
+        } catch (java.util.concurrent.RejectedExecutionException error) {
+            CapabilityException rejected = new CapabilityException(CapabilityException.Reason.CAPACITY_EXCEEDED,
+                    "Capability execution capacity is full: " + capabilityId, error);
+            observer.failed(descriptor, context, safeArguments, rejected, elapsedMs(startNanos));
+            throw rejected;
+        }
 
         try {
             long timeoutMs = effectiveTimeoutMs(descriptor, context);
             String raw = future.get(timeoutMs, TimeUnit.MILLISECONDS);
+            if (context.runDeadline() != null) context.runDeadline().remainingMillis();
             long durationMs = elapsedMs(startNanos);
             if (ToolResultInspector.isErrorPayload(raw, objectMapper)) {
                 CapabilityException capabilityError = new CapabilityException(
@@ -106,6 +119,7 @@ public class CapabilityGateway {
             return result;
         } catch (TimeoutException error) {
             future.cancel(true);
+            if (context.runDeadline() != null) context.runDeadline().remainingMillis();
             CapabilityException capabilityError = new CapabilityException(
                     CapabilityException.Reason.TIMEOUT,
                     "Capability timed out: " + capabilityId,
@@ -123,6 +137,7 @@ public class CapabilityGateway {
             observer.failed(descriptor, context, safeArguments, capabilityError, elapsedMs(startNanos));
             throw capabilityError;
         } catch (ExecutionException error) {
+            ResearchBudgetExceededException.rethrowIfPresent(error);
             Throwable cause = error.getCause() == null ? error : error.getCause();
             CapabilityException capabilityError = cause instanceof CapabilityException existing
                     ? existing
@@ -142,6 +157,7 @@ public class CapabilityGateway {
         } catch (CapabilityException error) {
             throw error;
         } catch (Exception error) {
+            ResearchBudgetExceededException.rethrowIfPresent(error);
             throw new CapabilityException(CapabilityException.Reason.FAILED,
                     "Provider call failed: " + safeMessage(error), error);
         }
@@ -150,6 +166,7 @@ public class CapabilityGateway {
     /** 取能力自身超时与 Skill 总截止时间中更早者。 */
     private long effectiveTimeoutMs(CapabilityDescriptor descriptor, CapabilityInvocationContext context) {
         long remainingMs = Math.max(1, Duration.between(Instant.now(), context.deadline()).toMillis());
+        if (context.runDeadline() != null) remainingMs = Math.min(remainingMs, context.runDeadline().remainingMillis());
         return Math.max(1, Math.min(descriptor.timeoutMs(), remainingMs));
     }
 

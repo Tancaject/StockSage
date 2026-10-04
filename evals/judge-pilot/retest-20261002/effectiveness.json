@@ -1,0 +1,2077 @@
+{
+  "schema": "ordinary_judge_controlled_retest_effectiveness_v1",
+  "diagnostic_only": true,
+  "release_eligible": false,
+  "status": "RETEST_TARGETS_NOT_MET",
+  "test_design_sha256": "76813f7348294875c9ab0a0ff7975e4e7f0116aa503779b9e61d0831b72563ed",
+  "run_plan_sha256": "103578d7267280fe25471d4758c41b5dc6538847746d2eccb814fa5eed0d8b3b",
+  "dataset_sha256": "1fbd3baa823297e3ea71d6e5c7685187e2a44a7f53d10372db68793334bd2049",
+  "report_sha256": "94e2bad6e8f77de14374104db007339afb9243605e617f1bac53e8eeae26a24b",
+  "calibration_sha256": "79de4b9313092b3790cce702deaa18be6434d66b61727e308f10f5a58f40ec6e",
+  "unchanged_evaluator_verified": true,
+  "prior_artifacts_unchanged": 39,
+  "observed_models": [
+    "qwen3.8-max"
+  ],
+  "practical": {
+    "correct_control_attempts": 16,
+    "correct_retained_count": 11,
+    "correct_answer_retention": 0.6875,
+    "correct_control_outcomes": {
+      "RETAINED": 11,
+      "INCONCLUSIVE": 5
+    },
+    "corrupt_attempts": 24,
+    "target_detected_count": 23,
+    "targeted_error_detection": 0.9583333333333334,
+    "corrupt_outcomes": {
+      "DETECTED_TARGET": 23,
+      "MISSED_TARGET": 1
+    },
+    "paired_separation_count": 17,
+    "paired_separation": 0.7083333333333334,
+    "by_error_type": {
+      "NUMERIC_ERROR": {
+        "attempts": 8,
+        "detected": 7,
+        "outcomes": {
+          "DETECTED_TARGET": 7,
+          "MISSED_TARGET": 1
+        }
+      },
+      "OMISSION": {
+        "attempts": 8,
+        "detected": 8,
+        "outcomes": {
+          "DETECTED_TARGET": 8
+        }
+      },
+      "UNSUPPORTED_CERTAINTY": {
+        "attempts": 8,
+        "detected": 8,
+        "outcomes": {
+          "DETECTED_TARGET": 8
+        }
+      }
+    }
+  },
+  "target_checks": {
+    "technical_validity": false,
+    "known_coverage": true,
+    "semantic_agreement": false,
+    "each_dimension_agreement": false,
+    "zero_reference_false_pass": false,
+    "correct_no_data": null,
+    "repeat_consistency": false,
+    "correct_answer_retention": false,
+    "targeted_error_detection": true,
+    "paired_separation": false
+  },
+  "global_error_counts": {},
+  "local_error_counts": {
+    "EXCERPT_INVALID:evidence_quotes": 9
+  },
+  "dimension_total": {
+    "count": 200,
+    "known_label_count": 200,
+    "expected_no_data_count": 0,
+    "technical_valid_count": 191,
+    "technical_invalid_count": 9,
+    "technical_valid_rate": 0.955,
+    "known_judgment_count": 191,
+    "known_judgment_coverage": 0.955,
+    "semantic_comparison_count": 191,
+    "semantic_agreement_count": 166,
+    "semantic_error_count": 25,
+    "semantic_agreement_rate": 0.8691099476439791,
+    "valid_no_data_count": 0,
+    "valid_abstention_on_known_count": 0,
+    "valid_correct_no_data_count": 0,
+    "correct_no_data_rate": null,
+    "end_to_end_label_agreement_count": 166,
+    "end_to_end_label_agreement_rate": 0.83,
+    "false_pass_count": 5,
+    "false_pass_denominator": 44,
+    "false_pass_rate": 0.11363636363636363,
+    "false_fail_count": 14,
+    "false_fail_denominator": 147,
+    "false_fail_rate": 0.09523809523809523,
+    "unsupported_certainty_count": 0,
+    "confusion_valid": {
+      "FAIL": {
+        "FAIL": 39,
+        "NOT_APPLICABLE": 2,
+        "NO_DATA": 0,
+        "PASS": 3
+      },
+      "NOT_APPLICABLE": {
+        "FAIL": 3,
+        "NOT_APPLICABLE": 17,
+        "NO_DATA": 0,
+        "PASS": 0
+      },
+      "NO_DATA": {
+        "FAIL": 0,
+        "NOT_APPLICABLE": 0,
+        "NO_DATA": 0,
+        "PASS": 0
+      },
+      "PASS": {
+        "FAIL": 11,
+        "NOT_APPLICABLE": 6,
+        "NO_DATA": 0,
+        "PASS": 110
+      }
+    }
+  },
+  "repeatability": {
+    "eligible_case_count": 17,
+    "consistent_case_count": 13,
+    "excluded_case_count": 3,
+    "consistency_rate": 0.7647058823529411,
+    "requires": "at least two technically valid repeats; legitimate NO_DATA judgments are included"
+  },
+  "cost": {
+    "prompt_tokens": 84251,
+    "known_prompt_tokens": 84251,
+    "prompt_tokens_reported_attempts": 40,
+    "completion_tokens": 30457,
+    "known_completion_tokens": 30457,
+    "completion_tokens_reported_attempts": 40,
+    "total_tokens": 114708,
+    "known_total_tokens": 114708,
+    "total_tokens_reported_attempts": 40,
+    "usage_complete": true,
+    "usage_scope": "recorded_attempts",
+    "call_count": 43,
+    "call_count_reported_attempts": 40,
+    "summed_attempt_latency_ms": 619860,
+    "latency_reported_attempts": 40,
+    "monetary_cost": null,
+    "pricing_status": "UNCONFIGURED"
+  },
+  "observations": [
+    {
+      "id": "hd-fy2025-q1-01",
+      "repeat": 1,
+      "group_id": "hd-fy2025-q1",
+      "variant": "CORRECT_FACTUAL",
+      "target_dimension": null,
+      "outcome": "RETAINED",
+      "correct_retained": true,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "hd-fy2025-q1-01",
+      "repeat": 2,
+      "group_id": "hd-fy2025-q1",
+      "variant": "CORRECT_FACTUAL",
+      "target_dimension": null,
+      "outcome": "RETAINED",
+      "correct_retained": true,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "hd-fy2025-q1-02",
+      "repeat": 1,
+      "group_id": "hd-fy2025-q1",
+      "variant": "CORRECT_BOUNDED",
+      "target_dimension": null,
+      "outcome": "INCONCLUSIVE",
+      "correct_retained": false,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "reported_status": "PASS",
+          "errors": [
+            "EXCERPT_INVALID:evidence_quotes"
+          ],
+          "valid": false
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "hd-fy2025-q1-02",
+      "repeat": 2,
+      "group_id": "hd-fy2025-q1",
+      "variant": "CORRECT_BOUNDED",
+      "target_dimension": null,
+      "outcome": "RETAINED",
+      "correct_retained": true,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "hd-fy2025-q1-03",
+      "repeat": 1,
+      "group_id": "hd-fy2025-q1",
+      "variant": "NUMERIC_ERROR",
+      "target_dimension": "numeric_period_correctness",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "hd-fy2025-q1-03",
+      "repeat": 2,
+      "group_id": "hd-fy2025-q1",
+      "variant": "NUMERIC_ERROR",
+      "target_dimension": "numeric_period_correctness",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "hd-fy2025-q1-04",
+      "repeat": 1,
+      "group_id": "hd-fy2025-q1",
+      "variant": "OMISSION",
+      "target_dimension": "task_completion",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "FAIL",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "hd-fy2025-q1-04",
+      "repeat": 2,
+      "group_id": "hd-fy2025-q1",
+      "variant": "OMISSION",
+      "target_dimension": "task_completion",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "FAIL",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "hd-fy2025-q1-05",
+      "repeat": 1,
+      "group_id": "hd-fy2025-q1",
+      "variant": "UNSUPPORTED_CERTAINTY",
+      "target_dimension": "unknowns",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "hd-fy2025-q1-05",
+      "repeat": 2,
+      "group_id": "hd-fy2025-q1",
+      "variant": "UNSUPPORTED_CERTAINTY",
+      "target_dimension": "unknowns",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "ups-cy2025-q1-01",
+      "repeat": 1,
+      "group_id": "ups-cy2025-q1",
+      "variant": "CORRECT_FACTUAL",
+      "target_dimension": null,
+      "outcome": "RETAINED",
+      "correct_retained": true,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "ups-cy2025-q1-01",
+      "repeat": 2,
+      "group_id": "ups-cy2025-q1",
+      "variant": "CORRECT_FACTUAL",
+      "target_dimension": null,
+      "outcome": "RETAINED",
+      "correct_retained": true,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "ups-cy2025-q1-02",
+      "repeat": 1,
+      "group_id": "ups-cy2025-q1",
+      "variant": "CORRECT_BOUNDED",
+      "target_dimension": null,
+      "outcome": "RETAINED",
+      "correct_retained": true,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "ups-cy2025-q1-02",
+      "repeat": 2,
+      "group_id": "ups-cy2025-q1",
+      "variant": "CORRECT_BOUNDED",
+      "target_dimension": null,
+      "outcome": "RETAINED",
+      "correct_retained": true,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "ups-cy2025-q1-03",
+      "repeat": 1,
+      "group_id": "ups-cy2025-q1",
+      "variant": "NUMERIC_ERROR",
+      "target_dimension": "numeric_period_correctness",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "ups-cy2025-q1-03",
+      "repeat": 2,
+      "group_id": "ups-cy2025-q1",
+      "variant": "NUMERIC_ERROR",
+      "target_dimension": "numeric_period_correctness",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "ups-cy2025-q1-04",
+      "repeat": 1,
+      "group_id": "ups-cy2025-q1",
+      "variant": "OMISSION",
+      "target_dimension": "task_completion",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "ups-cy2025-q1-04",
+      "repeat": 2,
+      "group_id": "ups-cy2025-q1",
+      "variant": "OMISSION",
+      "target_dimension": "task_completion",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "ups-cy2025-q1-05",
+      "repeat": 1,
+      "group_id": "ups-cy2025-q1",
+      "variant": "UNSUPPORTED_CERTAINTY",
+      "target_dimension": "unknowns",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "ups-cy2025-q1-05",
+      "repeat": 2,
+      "group_id": "ups-cy2025-q1",
+      "variant": "UNSUPPORTED_CERTAINTY",
+      "target_dimension": "unknowns",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "fedex-fy2025-q4-01",
+      "repeat": 1,
+      "group_id": "fedex-fy2025-q4",
+      "variant": "CORRECT_FACTUAL",
+      "target_dimension": null,
+      "outcome": "INCONCLUSIVE",
+      "correct_retained": false,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "reported_status": "PASS",
+          "errors": [
+            "EXCERPT_INVALID:evidence_quotes"
+          ],
+          "valid": false
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "reported_status": "PASS",
+          "errors": [
+            "EXCERPT_INVALID:evidence_quotes"
+          ],
+          "valid": false
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "fedex-fy2025-q4-01",
+      "repeat": 2,
+      "group_id": "fedex-fy2025-q4",
+      "variant": "CORRECT_FACTUAL",
+      "target_dimension": null,
+      "outcome": "INCONCLUSIVE",
+      "correct_retained": false,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "reported_status": "PASS",
+          "errors": [
+            "EXCERPT_INVALID:evidence_quotes"
+          ],
+          "valid": false
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "reported_status": "PASS",
+          "errors": [
+            "EXCERPT_INVALID:evidence_quotes"
+          ],
+          "valid": false
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "fedex-fy2025-q4-02",
+      "repeat": 1,
+      "group_id": "fedex-fy2025-q4",
+      "variant": "CORRECT_BOUNDED",
+      "target_dimension": null,
+      "outcome": "INCONCLUSIVE",
+      "correct_retained": false,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "reported_status": "PASS",
+          "errors": [
+            "EXCERPT_INVALID:evidence_quotes"
+          ],
+          "valid": false
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "reported_status": "PASS",
+          "errors": [
+            "EXCERPT_INVALID:evidence_quotes"
+          ],
+          "valid": false
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "fedex-fy2025-q4-02",
+      "repeat": 2,
+      "group_id": "fedex-fy2025-q4",
+      "variant": "CORRECT_BOUNDED",
+      "target_dimension": null,
+      "outcome": "INCONCLUSIVE",
+      "correct_retained": false,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "reported_status": "PASS",
+          "errors": [
+            "EXCERPT_INVALID:evidence_quotes"
+          ],
+          "valid": false
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "NO_DATA",
+          "reported_status": "PASS",
+          "errors": [
+            "EXCERPT_INVALID:evidence_quotes"
+          ],
+          "valid": false
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "fedex-fy2025-q4-03",
+      "repeat": 1,
+      "group_id": "fedex-fy2025-q4",
+      "variant": "NUMERIC_ERROR",
+      "target_dimension": "numeric_period_correctness",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": false
+    },
+    {
+      "id": "fedex-fy2025-q4-03",
+      "repeat": 2,
+      "group_id": "fedex-fy2025-q4",
+      "variant": "NUMERIC_ERROR",
+      "target_dimension": "numeric_period_correctness",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": false
+    },
+    {
+      "id": "fedex-fy2025-q4-04",
+      "repeat": 1,
+      "group_id": "fedex-fy2025-q4",
+      "variant": "OMISSION",
+      "target_dimension": "task_completion",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": false
+    },
+    {
+      "id": "fedex-fy2025-q4-04",
+      "repeat": 2,
+      "group_id": "fedex-fy2025-q4",
+      "variant": "OMISSION",
+      "target_dimension": "task_completion",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": false
+    },
+    {
+      "id": "fedex-fy2025-q4-05",
+      "repeat": 1,
+      "group_id": "fedex-fy2025-q4",
+      "variant": "UNSUPPORTED_CERTAINTY",
+      "target_dimension": "unknowns",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": false
+    },
+    {
+      "id": "fedex-fy2025-q4-05",
+      "repeat": 2,
+      "group_id": "fedex-fy2025-q4",
+      "variant": "UNSUPPORTED_CERTAINTY",
+      "target_dimension": "unknowns",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": false
+    },
+    {
+      "id": "nike-fy2025-q4-01",
+      "repeat": 1,
+      "group_id": "nike-fy2025-q4",
+      "variant": "CORRECT_FACTUAL",
+      "target_dimension": null,
+      "outcome": "RETAINED",
+      "correct_retained": true,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "nike-fy2025-q4-01",
+      "repeat": 2,
+      "group_id": "nike-fy2025-q4",
+      "variant": "CORRECT_FACTUAL",
+      "target_dimension": null,
+      "outcome": "RETAINED",
+      "correct_retained": true,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "nike-fy2025-q4-02",
+      "repeat": 1,
+      "group_id": "nike-fy2025-q4",
+      "variant": "CORRECT_BOUNDED",
+      "target_dimension": null,
+      "outcome": "RETAINED",
+      "correct_retained": true,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "nike-fy2025-q4-02",
+      "repeat": 2,
+      "group_id": "nike-fy2025-q4",
+      "variant": "CORRECT_BOUNDED",
+      "target_dimension": null,
+      "outcome": "RETAINED",
+      "correct_retained": true,
+      "target_detected": null,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      }
+    },
+    {
+      "id": "nike-fy2025-q4-03",
+      "repeat": 1,
+      "group_id": "nike-fy2025-q4",
+      "variant": "NUMERIC_ERROR",
+      "target_dimension": "numeric_period_correctness",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "nike-fy2025-q4-03",
+      "repeat": 2,
+      "group_id": "nike-fy2025-q4",
+      "variant": "NUMERIC_ERROR",
+      "target_dimension": "numeric_period_correctness",
+      "outcome": "MISSED_TARGET",
+      "correct_retained": null,
+      "target_detected": false,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "FAIL",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": false
+    },
+    {
+      "id": "nike-fy2025-q4-04",
+      "repeat": 1,
+      "group_id": "nike-fy2025-q4",
+      "variant": "OMISSION",
+      "target_dimension": "task_completion",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "nike-fy2025-q4-04",
+      "repeat": 2,
+      "group_id": "nike-fy2025-q4",
+      "variant": "OMISSION",
+      "target_dimension": "task_completion",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "PASS",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "nike-fy2025-q4-05",
+      "repeat": 1,
+      "group_id": "nike-fy2025-q4",
+      "variant": "UNSUPPORTED_CERTAINTY",
+      "target_dimension": "unknowns",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    },
+    {
+      "id": "nike-fy2025-q4-05",
+      "repeat": 2,
+      "group_id": "nike-fy2025-q4",
+      "variant": "UNSUPPORTED_CERTAINTY",
+      "target_dimension": "unknowns",
+      "outcome": "DETECTED_TARGET",
+      "correct_retained": null,
+      "target_detected": true,
+      "dimensions": {
+        "claim_support": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "numeric_period_correctness": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        },
+        "counterevidence": {
+          "expected": "NOT_APPLICABLE",
+          "actual": "NOT_APPLICABLE",
+          "reported_status": "NOT_APPLICABLE",
+          "errors": [],
+          "valid": true
+        },
+        "unknowns": {
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "reported_status": "FAIL",
+          "errors": [],
+          "valid": true
+        },
+        "task_completion": {
+          "expected": "PASS",
+          "actual": "PASS",
+          "reported_status": "PASS",
+          "errors": [],
+          "valid": true
+        }
+      },
+      "paired_separation": true
+    }
+  ]
+}

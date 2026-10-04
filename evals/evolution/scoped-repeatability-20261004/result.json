@@ -1,0 +1,289 @@
+{
+  "schema": "scoped_repeatability_result_v1",
+  "status": "COMPLETED",
+  "qualityDecision": "NO_NET_QUALITY_GAIN",
+  "releaseEligible": false,
+  "selectedCandidate": null,
+  "reviewOrigin": "CODEX_NONBLIND_SOURCE_REVIEW_NOT_CALIBRATED_EVALUATOR",
+  "realBusinessCalls": 16,
+  "technicalCompleted": 16,
+  "generatorCalls": 0,
+  "automaticRetries": 0,
+  "transferConsumed": 0,
+  "completedWithinHistorical300Seconds": 14,
+  "knownTotalTokens": 167880,
+  "staticNoninterferenceControls": 2,
+  "staticControlsAreSemanticPasses": false,
+  "arms": {
+    "baseline": {
+      "denominatorPerStage": 4,
+      "stages": {
+        "analysis": {
+          "PASS": 4,
+          "FAIL": 0,
+          "NO_DATA": 0
+        },
+        "finalAnswer": {
+          "PASS": 4,
+          "FAIL": 0,
+          "NO_DATA": 0
+        }
+      },
+      "historicalSourceErrorAnalysisCount": 0,
+      "knownTokens": 87292,
+      "unknownUsageCalls": 0,
+      "meanCompleteChainSeconds": 320.5,
+      "completeChains": 4
+    },
+    "scoped": {
+      "denominatorPerStage": 4,
+      "stages": {
+        "analysis": {
+          "PASS": 4,
+          "FAIL": 0,
+          "NO_DATA": 0
+        },
+        "finalAnswer": {
+          "PASS": 4,
+          "FAIL": 0,
+          "NO_DATA": 0
+        }
+      },
+      "historicalSourceErrorAnalysisCount": 0,
+      "knownTokens": 80588,
+      "unknownUsageCalls": 0,
+      "meanCompleteChainSeconds": 279.04325,
+      "completeChains": 4
+    }
+  },
+  "finalPairs": [
+    {
+      "case": 5,
+      "repeat": 1,
+      "baseline": "PASS",
+      "scoped": "PASS",
+      "outcome": "UNCHANGED"
+    },
+    {
+      "case": 7,
+      "repeat": 1,
+      "baseline": "PASS",
+      "scoped": "PASS",
+      "outcome": "UNCHANGED"
+    },
+    {
+      "case": 5,
+      "repeat": 2,
+      "baseline": "PASS",
+      "scoped": "PASS",
+      "outcome": "UNCHANGED"
+    },
+    {
+      "case": 7,
+      "repeat": 2,
+      "baseline": "PASS",
+      "scoped": "PASS",
+      "outcome": "UNCHANGED"
+    }
+  ],
+  "calls": [
+    {
+      "case": 5,
+      "repeat": 1,
+      "arm": "baseline",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 10429,
+      "durationSeconds": 179.657,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-1/reviews/05-baseline-analysis.json"
+    },
+    {
+      "case": 5,
+      "repeat": 1,
+      "arm": "baseline",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 9194,
+      "durationSeconds": 102.781,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-1/reviews/05-baseline-finalAnswer.json"
+    },
+    {
+      "case": 5,
+      "repeat": 1,
+      "arm": "scoped",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 11352,
+      "durationSeconds": 187.156,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-1/reviews/05-scoped-analysis.json"
+    },
+    {
+      "case": 5,
+      "repeat": 1,
+      "arm": "scoped",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 5973,
+      "durationSeconds": 28.797,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-1/reviews/05-scoped-finalAnswer.json"
+    },
+    {
+      "case": 7,
+      "repeat": 1,
+      "arm": "scoped",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 15458,
+      "durationSeconds": 306.907,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-1/reviews/07-scoped-analysis.json"
+    },
+    {
+      "case": 7,
+      "repeat": 1,
+      "arm": "scoped",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 9241,
+      "durationSeconds": 86.0,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-1/reviews/07-scoped-finalAnswer.json"
+    },
+    {
+      "case": 7,
+      "repeat": 1,
+      "arm": "baseline",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 17334,
+      "durationSeconds": 332.141,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-1/reviews/07-baseline-analysis.json"
+    },
+    {
+      "case": 7,
+      "repeat": 1,
+      "arm": "baseline",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 10373,
+      "durationSeconds": 99.109,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-1/reviews/07-baseline-finalAnswer.json"
+    },
+    {
+      "case": 5,
+      "repeat": 2,
+      "arm": "scoped",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 6677,
+      "durationSeconds": 82.219,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-2/reviews/05-scoped-analysis.json"
+    },
+    {
+      "case": 5,
+      "repeat": 2,
+      "arm": "scoped",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 7725,
+      "durationSeconds": 61.312,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-2/reviews/05-scoped-finalAnswer.json"
+    },
+    {
+      "case": 5,
+      "repeat": 2,
+      "arm": "baseline",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 7101,
+      "durationSeconds": 99.594,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-2/reviews/05-baseline-analysis.json"
+    },
+    {
+      "case": 5,
+      "repeat": 2,
+      "arm": "baseline",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 7485,
+      "durationSeconds": 68.172,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-2/reviews/05-baseline-finalAnswer.json"
+    },
+    {
+      "case": 7,
+      "repeat": 2,
+      "arm": "baseline",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 14658,
+      "durationSeconds": 282.234,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-2/reviews/07-baseline-analysis.json"
+    },
+    {
+      "case": 7,
+      "repeat": 2,
+      "arm": "baseline",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 10718,
+      "durationSeconds": 118.312,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-2/reviews/07-baseline-finalAnswer.json"
+    },
+    {
+      "case": 7,
+      "repeat": 2,
+      "arm": "scoped",
+      "stage": "analysis",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 14237,
+      "durationSeconds": 272.532,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-2/reviews/07-scoped-analysis.json"
+    },
+    {
+      "case": 7,
+      "repeat": 2,
+      "arm": "scoped",
+      "stage": "finalAnswer",
+      "technicalStatus": "COMPLETED",
+      "semanticStatus": "PASS",
+      "totalTokens": 9925,
+      "durationSeconds": 91.25,
+      "historicalSourceErrorObserved": false,
+      "review": "repeat-2/reviews/07-scoped-finalAnswer.json"
+    }
+  ],
+  "limits": [
+    "Engineer-corrected scope metadata, not autonomous operation learning.",
+    "Two repetitions of two DEV cases do not estimate general accuracy or statistical significance.",
+    "Fixed-source annotations do not implement runtime extraction or production selection.",
+    "Historical source-error recurrence is distinct from all-dimension semantic quality."
+  ]
+}

@@ -159,7 +159,7 @@ stopReason
 | `DeepResearchPipeline.java` | 在 evidence PASS 后、`prepareHashes` 前调用共享服务 |
 | `ToolPrefetchService.java` | Redis-down inline 路径在相同边界调用同一共享服务 |
 | `application.properties` | 只增加一个默认关闭的 `stocksage.agent.deep-replan.enabled` kill switch；动作数、轮数和 timeout 不做配置平台 |
-| `CapabilityInvocationObserver.java` / `rag-eval/run_harness_live_eval.py` | 复用 `AgentStep.attributes` 区分 decision、execution 和 capability；只把带 effect key 的 execution 计为补证动作 |
+| `CapabilityInvocationObserver.java` / `evals/run_harness_live_eval.py` | 复用 `AgentStep.attributes` 区分 decision、execution 和 capability；只把带 effect key 的 execution 计为补证动作 |
 
 不应改 `RoutePlanCatalog`、Redis Stream schema、ResearchTask stage、Bull/Bear/Manager 工具绑定或数据库迁移。
 

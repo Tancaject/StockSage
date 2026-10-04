@@ -1,0 +1,45 @@
+ |  |  |  |  |  |  |  |  |  |  | 
+THE COCA-COLA COMPANY AND SUBSIDIARIES
+Consolidated Statements of Cash Flows
+(In millions)
+ | 
+ | Six Months Ended
+ | June 27,2025 |  | June 28,2024
+Operating Activities |  |  | 
+Consolidated net income | $ | 7,138 |  |  | $ | 5,586 | 
+Adjustments to reconcile consolidated net income to net cash provided by operating activities: |  |  | 
+Depreciation and amortization | 546 |  |  | 531 | 
+Stock-based compensation expense | 130 |  |  | 140 | 
+Deferred income taxes | 459 |  |  | (202) | 
+Equity (income) loss — net of dividends | (387) |  |  | (274) | 
+Foreign currency adjustments | 111 |  |  | (87) | 
+Significant (gains) losses — net | (433) |  |  | (1,398) | 
+Other operating charges | 38 |  |  | 2,867 | 
+Other items | 238 |  |  | (66) | 
+Net change in operating assets and liabilities | (9,231) |  |  | (2,984) | 
+Net Cash Provided by (Used in) Operating Activities | (1,391) |  |  | 4,113 | 
+Investing Activities |  |  | 
+Purchases of investments | (2,865) |  |  | (3,827) | 
+Proceeds from disposals of investments | 2,201 |  |  | 2,662 | 
+Acquisitions of businesses, equity method investments and nonmarketable securities | (179) |  |  | (25) | 
+Proceeds from disposals of businesses, equity method investments and nonmarketable securities | 973 |  |  | 2,907 | 
+Purchases of property, plant and equipment | (751) |  |  | (792) | 
+Proceeds from disposals of property, plant and equipment | 13 |  |  | 21 | 
+Collateral (paid) received associated with hedging activities — net | 206 |  |  | (76) | 
+Other investing activities | 124 |  |  | 127 | 
+Net Cash Provided by (Used in) Investing Activities | (278) |  |  | 997 | 
+Financing Activities |  |  | 
+Issuances of loans, notes payable and long-term debt | 5,320 |  |  | 6,832 | 
+Payments of loans, notes payable and long-term debt | (2,630) |  |  | (4,734) | 
+Issuances of stock | 223 |  |  | 437 | 
+Purchases of stock for treasury | (472) |  |  | (874) | 
+Dividends | (2,283) |  |  | (2,184) | 
+Other financing activities | (106) |  |  | (9) | 
+Net Cash Provided by (Used in) Financing Activities | 52 |  |  | (532) | 
+Effect of Exchange Rate Changes on Cash, Cash Equivalents, Restricted Cash and Restricted Cash Equivalents | 332 |  |  | (357) | 
+Cash, Cash Equivalents, Restricted Cash and Restricted Cash Equivalents |  |  | 
+Net increase (decrease) in cash, cash equivalents, restricted cash and restricted cash equivalents during the period | (1,285) |  |  | 4,221 | 
+Cash, cash equivalents, restricted cash and restricted cash equivalents at beginning of period | 11,488 |  |  | 9,692 | 
+Cash, Cash Equivalents, Restricted Cash and Restricted Cash Equivalents at End of Period | 10,203 |  |  | 13,913 | 
+Less: Restricted cash and restricted cash equivalents at end of period | 613 |  |  | 205 | 
+Cash and Cash Equivalents at End of Period | $ | 9,590 |  |  | $ | 13,708 | 

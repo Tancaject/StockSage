@@ -1,0 +1,59 @@
+PepsiCo, Inc. and Subsid iaries
+Condensed Consolidated Balance Sheet
+(in millions, except per share amounts)
+(unaudited)
+6/14/2025 12/28/2024
+ASSETS
+Current Assets
+Cash and cash equivalents $ 7,631 $ 8,505
+Short-term investments 342 761
+Accounts and notes receivable, net 12,390 10,333
+Inventories:
+Raw materials and packaging 2,940 2,440
+Work-in-process 135 104
+Finished goods 3,412 2,762
+6,487 5,306
+Prepaid expenses and other current assets 1,360 921
+Total Current Assets 28,210 25,826
+Property, Plant and Equipment, net 28,797 28,008
+Amortizable Intangible Assets, net 1,311 1,102
+Goodwill 18,952 17,534
+Other Indefinite-Lived Intangible Assets 14,212 13,699
+Investments in Noncontrolled Affiliates 2,061 1,985
+Deferred Income Taxes 4,293 4,362
+Other Assets 7,509 6,951
+Total Assets $ 105,345 $ 99,467
+
+LIABILITIES AND EQUITY
+Current Liabilities
+Short-term debt obligations $ 12,056 $ 7,082
+Accounts payable and other current liabilities 24,340 24,454
+Total Current Liabilities 36,396 31,536
+Long-Term Debt Obligations 39,328 37,224
+Deferred Income Taxes 3,102 3,484
+Other Liabilities 7,960 9,052
+Total Liabilities 86,786 81,296
+Commitments and contingencies
+PepsiCo Common Shareholders’ Equity
+Common stock, par value 1 2/3¢ per share (authorized 3,600 shares; issued, net of repurchased common
+stock at par value: 1,370 and 1,372 shares, respectively) 23 23
+Capital in excess of par value 4,299 4,385
+Retained earnings 71,547 72,266
+Accumulated other comprehensive loss (16,090) (17,612)
+Repurchased common stock, in excess of par value ( 496 and 495 shares, respectively) (41,361) (41,021)
+Total PepsiCo Common Shareholders’ Equity 18,418 18,041
+Noncontrolling interests 141 130
+Total Equity 18,559 18,171
+Total Liabilities and Equity $ 105,345 $ 99,467
+
+
+
+
+
+
+
+
+
+
+
+A - 4

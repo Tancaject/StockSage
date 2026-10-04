@@ -1,0 +1,28 @@
+{
+  "callId" : "054f5f28-b299-4ea6-836c-ff556cb2290c",
+  "caseId" : "summary-correction-uncertainty",
+  "arm" : "before",
+  "role" : "memory-summary",
+  "dataKind" : "SYNTHETIC",
+  "criteria" : [ "保留用户提出的 90 对 100 的更正", "需求回暖仍是助手未核实的推测，不写成确定原因", "保留 AAPL 现金流的研究目标及原因待查" ],
+  "input" : {
+    "history" : [ "user: 帮我看 AAPL 的现金流。", "assistant: 净利润是 100，增长可能来自需求回暖。", "user: 原报告是 90，不是 100；需求原因还没查。" ]
+  },
+  "messages" : [ {
+    "role" : "system",
+    "text" : "你是 StockSage 的记忆摘要器，只负责压缩对话和提取用户画像。\n输出必须简洁、事实化，不要添加用户没有表达过的信息。\n"
+  }, {
+    "role" : "user",
+    "text" : "请将以下较早对话压缩为短期记忆摘要，保留：\n1. 用户目标和约束\n2. 已经给出的关键事实\n3. 尚未解决的问题\n4. 用户偏好或已确认的选择\n\n对话：\nuser: 帮我看 AAPL 的现金流。\nassistant: 净利润是 100，增长可能来自需求回暖。\nuser: 原报告是 90，不是 100；需求原因还没查。\n"
+  } ],
+  "options" : {
+    "model" : "qwen3.8-flash",
+    "temperature" : 0.7,
+    "maxTokens" : 4096,
+    "topP" : null,
+    "frequencyPenalty" : null,
+    "presencePenalty" : null,
+    "stopSequences" : null
+  },
+  "promptSha256" : "5400d5c914913193017c9b7b1da80d91c945f50b2aca4075020e12634a50e6c8"
+}

@@ -5,6 +5,8 @@ import com.alibaba.cloud.ai.dashscope.rerank.DashScopeRerankOptions;
 import com.alibaba.cloud.ai.document.DocumentWithScore;
 import com.alibaba.cloud.ai.model.RerankRequest;
 import com.alibaba.cloud.ai.model.RerankResponse;
+import com.stocksage.exception.ResearchBudgetExceededException;
+import com.stocksage.tool.ToolCallContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.ObjectProvider;
@@ -12,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 /**
  * RAG 检索中可选的 DashScope 重排阶段。
@@ -24,6 +28,8 @@ public class DashScopeReranker {
 
     /** 延迟提供重排模型，使未配置 DashScope 时应用仍可启动。 */
     private final ObjectProvider<DashScopeRerankModel> rerankModelProvider;
+    private final int maxConcurrentCalls;
+    private final Semaphore permits;
 
     /** 是否启用语义重排阶段。 */
     @Value("${stocksage.rag.rerank.enabled:true}")
@@ -39,9 +45,14 @@ public class DashScopeReranker {
      * <p>使用 ObjectProvider 是为了让缺少 DashScope 配置时服务仍能启动，并在重排阶段自动降级。</p>
      *
      * @param rerankModelProvider 可选重排模型提供器
+     * @param maxConcurrentCalls 本进程同时执行的同步重排调用上限
      */
-    public DashScopeReranker(ObjectProvider<DashScopeRerankModel> rerankModelProvider) {
+    public DashScopeReranker(ObjectProvider<DashScopeRerankModel> rerankModelProvider,
+                            @Value("${stocksage.rag.rerank.max-concurrent-calls:2}") int maxConcurrentCalls) {
+        if (maxConcurrentCalls <= 0) throw new IllegalArgumentException("Rerank concurrency must be positive");
         this.rerankModelProvider = rerankModelProvider;
+        this.maxConcurrentCalls = maxConcurrentCalls;
+        this.permits = new Semaphore(maxConcurrentCalls);
     }
 
     /**
@@ -51,6 +62,12 @@ public class DashScopeReranker {
      */
     public boolean isEnabled() {
         return enabled;
+    }
+
+    /** Provider availability and per-query fallback are execution facts, not configuration. */
+    public Map<String, Object> runtimeConfiguration() {
+        return Map.of("enabled", enabled, "model", modelName, "returnDocuments", true,
+                "maxConcurrentCalls", maxConcurrentCalls);
     }
 
     /**
@@ -63,6 +80,8 @@ public class DashScopeReranker {
      * @return 重排结果；关闭、失败或无模型时按原顺序截断
      */
     public List<Document> rerank(String query, List<Document> candidates, int topN) {
+        var run = ToolCallContext.currentRunDeadline();
+        if (run != null) run.remainingMillis();
         if (!enabled || query == null || query.isBlank() || candidates == null || candidates.isEmpty()) {
             return limit(candidates, topN);
         }
@@ -80,7 +99,21 @@ public class DashScopeReranker {
                     .topN(topN)
                     .returnDocuments(true)
                     .build();
-            RerankResponse response = rerankModel.call(new RerankRequest(query, candidates, options));
+            if (run != null) run.remainingMillis();
+            if (!permits.tryAcquire()) {
+                log.warn("DashScope rerank CAPACITY_REJECTED: concurrent call limit {} reached; using fused retrieval order.",
+                        maxConcurrentCalls);
+                return limit(candidates, topN);
+            }
+            RerankResponse response;
+            try {
+                // SDK 未暴露逐请求超时；期限检查不能中断正在执行的同步 HTTP。
+                if (run != null) run.remainingMillis();
+                response = rerankModel.call(new RerankRequest(query, candidates, options));
+                if (run != null) run.remainingMillis();
+            } finally {
+                permits.release();
+            }
             List<Document> reranked = response.getResults().stream()
                     .map(this::toDocument)
                     .filter(document -> document != null)
@@ -92,6 +125,8 @@ public class DashScopeReranker {
             }
             return reranked;
         } catch (Exception e) {
+            ResearchBudgetExceededException.rethrowIfPresent(e);
+            if (run != null) run.remainingMillis();
             log.warn("DashScope rerank failed, using vector search order: {}", e.getMessage());
             return limit(candidates, topN);
         }

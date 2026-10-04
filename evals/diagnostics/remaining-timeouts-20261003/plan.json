@@ -1,0 +1,48 @@
+{
+  "schema": "remaining_analysis_timeouts_plan_v1",
+  "registeredAt": "2026-10-03T03:02:59.003939+00:00",
+  "status": "FROZEN_BEFORE_CALLS",
+  "scope": "REPRODUCE_REMAINING_TWO_HISTORICAL_ANALYSIS_TIMEOUT_INPUTS",
+  "providerCallsLimit": 2,
+  "automaticRetries": 0,
+  "maxConcurrency": 1,
+  "model": "qwen3.8-max",
+  "temperature": 0.7,
+  "maxTokens": 4096,
+  "enableThinking": true,
+  "thinkingBudget": 32768,
+  "deadlineSeconds": 600,
+  "sleepControl": "EXISTING_THREAD_SCOPED_WAKE_REQUEST_RESTORED_ON_EXIT",
+  "probe": "evals/diagnostics/model-root-cause-20261002/probe.py",
+  "arms": [
+    {
+      "id": "candidate-dev-08",
+      "source": "evals/evolution/batch-learning-validation-20261002/raw-candidate-dev-08/candidate-dev-08-1-1.response.json",
+      "stage": "analysis"
+    },
+    {
+      "id": "candidate-dev-10",
+      "source": "evals/evolution/batch-learning-validation-20261002/raw-candidate-dev-10/candidate-dev-10-1-1.response.json",
+      "stage": "analysis"
+    }
+  ],
+  "frozenFiles": {
+    "evals/evolution/batch-learning-validation-20261002/raw-candidate-dev-08/candidate-dev-08-1-1.response.json": "528ab56d8e31b47f3014a12c737d1e45c3aace0a2f9ef238516246560c0cea29",
+    "evals/evolution/batch-learning-validation-20261002/raw-candidate-dev-10/candidate-dev-10-1-1.response.json": "1057fb22f0058c6c1e8f3dbfc3fc06a0e67212c3c6bd1f19a13187ae7fb58033",
+    "evals/diagnostics/model-root-cause-20261002/probe.py": "ccf4be4c439fa8dbe302a6d5bb488f5ee075b03920b04a097c6af9291ce6e23f"
+  },
+  "predeclaredReadout": {
+    "longReasoning": "First reasoning arrives promptly; events continue and first answer or full completion exceeds original 300-second deadline.",
+    "transportOrQueue": "Record response-header/first-event delays, event gaps and error; no inference that a long gap alone proves network responsibility.",
+    "repetition": "Inspect full local reasoning for repeated calculations/planning; describe at high level without quoting raw reasoning.",
+    "nonReproduction": "If completion within 300 seconds, retain as non-reproduction rather than proof the original failure is fixed."
+  },
+  "qualityScope": "Execution diagnosis only; no evaluator accuracy, candidate selection or quality improvement claim. Any answer observations are source-checked diagnostic notes.",
+  "limits": [
+    "Historical nonstream provider activity cannot be recovered by a new sample.",
+    "Python streaming 600-second execution differs from historical Java nonstream 300-second execution.",
+    "One sample per case; same model name does not guarantee immutable provider revision."
+  ],
+  "productionSettingsChanged": false,
+  "releaseEligible": false
+}

@@ -33,7 +33,7 @@ Agent 解决“如何分析服务器已经取得的证据”
 - Spring AI 只创建 transport；StockSage 使用 `McpSyncClient` 延迟执行 initialize、tools/list 和 tools/call，连接失败时不阻止应用启动。
 - `capabilities/*.yml` 与代码 adapter 双重注册，`CapabilityPolicy` 默认拒绝未知、未授权、敏感读取和写能力。
 - `skills/*.yml` 启动加载并校验，已提供 `latest-news-mcp` 与 `local-latest-news`。
-- NEWS 路由在现有 `ToolPrefetchService` 内先执行 Skill；MCP 不可用时降级到 `NewsTools.searchNews`。本地能力也失败时记录失败和证据缺口，不再重复调用；只有未选中 Skill 时才使用原直接 NEWS 路径。
+- NEWS 路由在现有 `ToolPrefetchService` 内先执行 Skill；MCP 不可用时降级到 `NewsTools.searchNews`。本地能力也失败时记录失败和证据缺口，不再重复调用；未选中 Skill 时仍通过 CapabilityGateway 调用已注册的本地新闻能力；普通网页搜索同样通过本地网页能力。授权拒绝和未知能力不会回到直接工具调用，截断结果不进入完整证据或搜索入库。
 - Skill 清单只接受 `INLINE_DETERMINISTIC` 与 `CAPABILITY` 步骤；未知字段启动即失败，不再保留未执行的 Agent/Final 装饰步骤。
 - Agent 和最终回答 ChatClient 均无工具；`ToolPrefetchService` 先取证，再让对应领域 Agent 归纳，最后生成回答。
 - MCP capability 经过统一 timeout、结果大小限制、SSE/Trace/Micrometer observer；没有加入任何 Agent 的全局 `defaultTools`。
@@ -84,7 +84,7 @@ ChatController
 DEEP 路径已经进一步拆为：
 
 ```text
-ToolPrefetchService.submitDeepResearch()
+ToolPrefetchService.prefetch() -> ResearchSubmissionService.submit()
   -> MySQL ResearchTask
   -> Redis Stream ResearchTaskQueue
   -> ResearchTaskWorker
@@ -569,7 +569,7 @@ MCP tool 通常以 `ToolCallback` 形式执行，不会经过本地 `@Tool` 方�
 
 ```text
 1. Coordinator 输出 route=DEEP
-2. ToolPrefetchService 调用现有 submitDeepResearch
+2. ToolPrefetchService 委托 ResearchSubmissionService.submit
 3. MySQL ResearchTask 为任务事实源，Redis Stream 负责投递
 4. Worker 恢复 checkpoint，并在 owner fencing 下继续执行
 5. DeepEvidenceCollector 通过服务器受控工具收集证据
@@ -892,7 +892,7 @@ stocksage-backend/src/main/resources/skills/latest-news-mcp.yml
 stocksage-backend/src/main/java/com/stocksage/capability/*
 stocksage-backend/src/main/java/com/stocksage/mcp/*
 stocksage-backend/src/main/java/com/stocksage/skill/*
-stocksage-backend/src/main/java/com/stocksage/service/ChatService.java
+stocksage-backend/src/main/java/com/stocksage/conversation/ChatService.java
 stocksage-backend/src/main/java/com/stocksage/service/ToolPrefetchService.java
 stocksage-backend/src/main/java/com/stocksage/tool/ToolCallAspect.java
 stocksage-backend/src/test/java/com/stocksage/capability/*
@@ -953,7 +953,7 @@ Phase 0–2 的 `CapabilityGateway`、fail-closed policy、统一 observer 和 `
 
 1. 配置一个可信、只读的 Streamable HTTP MCP server。
 2. 现场验证 initialize、tools/list、tools/call 和 exact allowlist。
-3. 验证 MCP 成功、MCP → 本地 fallback、双失败记录缺口三条路径的脱敏 Trace、指标和前端状态；未选中 Skill 时原直接 NEWS 路径仍可用。
+3. 验证 MCP 成功、MCP → 本地 fallback、双失败记录缺口三条路径的脱敏 Trace、指标和前端状态；未选中 Skill 时仍由 CapabilityGateway 执行本地新闻能力。
 4. 通过真实验收后，再决定是否迁移其他 route 或调整 Spring AI 版本；不得把框架升级与 route 重构混在同一切片。
 
 ## 22. 官方参考

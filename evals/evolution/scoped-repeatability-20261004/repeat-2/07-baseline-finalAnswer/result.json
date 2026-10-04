@@ -1,0 +1,39 @@
+{
+  "status": "COMPLETED",
+  "startedAt": "2026-10-04T08:35:58.726468+00:00",
+  "headersSeconds": 1.016,
+  "firstEventSeconds": 1.016,
+  "firstReasoningSeconds": 1.016,
+  "firstAnswerSeconds": 72.016,
+  "lastEventSeconds": 118.312,
+  "maxEventGapSeconds": 1.0630000000000024,
+  "events": 1440,
+  "reasoningChars": 5570,
+  "answerChars": 3633,
+  "usage": {
+    "completion_tokens": 5152,
+    "completion_tokens_details": {
+      "reasoning_tokens": 2937,
+      "text_tokens": 5152
+    },
+    "prompt_tokens": 5566,
+    "prompt_tokens_details": {
+      "cached_tokens": 2048,
+      "text_tokens": 5566
+    },
+    "total_tokens": 10718
+  },
+  "finishReason": "stop",
+  "doneMarker": true,
+  "httpStatus": 200,
+  "responseHeaders": {
+    "content-type": "text/event-stream;charset=utf-8",
+    "x-request-id": "56dc9929-1e0c-9e18-969b-e98fbdd34b65",
+    "server": "istio-envoy",
+    "transfer-encoding": "chunked"
+  },
+  "responseId": "chatcmpl-56dc9929-1e0c-9e18-969b-e98fbdd34b65",
+  "powerStateRestored": true,
+  "automaticSleepInhibited": true,
+  "durationSeconds": 118.312
+}

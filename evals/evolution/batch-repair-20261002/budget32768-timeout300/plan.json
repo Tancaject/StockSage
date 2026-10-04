@@ -1,0 +1,69 @@
+{
+  "schema": "fundamentals_batch_phased_budget_comparison_plan_v1",
+  "experimentId": "fundamentals-batch-repair-budget32768-timeout300-20261002",
+  "createdAt": "2026-10-02T10:07:03.086482+00:00",
+  "releaseEligible": false,
+  "caseCounts": {
+    "DEVELOPMENT": 6,
+    "VALIDATION": 0
+  },
+  "maxBusinessCalls": 12,
+  "maxConcurrentBusinessRuns": 3,
+  "businessSettings": {
+    "model": "qwen3.8-max",
+    "temperature": 0.7,
+    "maxTokens": 4096,
+    "thinkingBudget": 32768,
+    "enableThinking": true,
+    "stageTimeoutSeconds": 300,
+    "httpReadTimeoutSeconds": 300,
+    "retryAttempts": 1
+  },
+  "comparison": "Same six source cases, gold, JAR, driver and baseline method as prior repair arms. Thinking budget32768 retains xhigh effort; stage/read deadlines are explicitly300 seconds. This two-variable diagnostic is not evidence of a sole causal mechanism.",
+  "acceptance": "Run the two previously passing controls first. Only after both independently pass source-based quality review may the four former-timeout cases start. Require actual32768 budget, unchanged model/temperature/answer allowance, bound evidence and no material quality regression; preserve every failed call and never retry silently.",
+  "evaluatorSha256": "28b754f495003bc8267ce3515769836f1dc4f4d7ecbf138f0a230cdc1956bb74",
+  "frozenFiles": {
+    "evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\cases.jsonl": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a",
+    "evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\gold.jsonl": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336",
+    "evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\build.json": "9ba5b190b4a07aa41711877df6bc5b083c373d195a8774cdc707bee8c1301180",
+    "evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\runtime-dependencies.json": "cb944fcbf75fe9e4b73b62671d9ef27be66c8847446b19e9df9bc71d0f081fff",
+    "evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\baseline-method.txt": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8",
+    "evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\business_replay.py": "e1397596dc88b526f7b14e504c531cd4874072b924b1967554508645c80e2e14",
+    "evals\\evolution\\batch-repair-20261002\\business_replay.py": "c283a3ce96bbc344d0e261c565c7928b58ed34905f463ba6ed4cde94c79e1955",
+    "evals\\evolution\\batch-learning-20261002\\experiment.py": "e31ea5664bf73403e6a3fae00fc8f46672a188bc8393c64b56595278b0329a72",
+    "evals\\eval_common.py": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c",
+    "evals\\evolution_dataset.py": "12df23500bf7ee45a2ee0ab955924bf7368e30c1a7e2bb2e20a5f993fa24ee65",
+    "evals\\evolution_quality.py": "d01b12f5fd0b0ba020ed33301b95e4780a86c527462badd462a82d50647f754e",
+    "evals\\evolution_rubric.py": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea",
+    "evals\\run_evolution_replay.py": "90777b3f0eb6e6932a9da762591bb5bceb2acc16994949d964d5012d156a786d"
+  },
+  "phases": [
+    {
+      "phase": 1,
+      "caseIds": [
+        "pep-fy2025q3-quarter-reconstruction",
+        "tgt-fy2025q3-cash-quality"
+      ],
+      "maxModelCalls": 4,
+      "authorization": "RUN_AFTER_BUDGET8192_COMPLETES"
+    },
+    {
+      "phase": 2,
+      "caseIds": [
+        "ibm-fy2025q3-cash-quality",
+        "ibm-fy2025q3-liquidity",
+        "jnj-fy2025q3-cash-quality",
+        "jnj-fy2025q3-liquidity"
+      ],
+      "maxModelCalls": 8,
+      "authorization": "REQUIRES_BOTH_CONTROLS_INDEPENDENT_QUALITY_PASS_AND_EXPLICIT_COORDINATOR_CONTINUATION",
+      "automaticLaunch": false
+    }
+  ],
+  "parentPlanSha256": "a48760e67360d6510dff4a21a4e68df698381784ef3d18d7d976a1aa8ba6eebb",
+  "reviewCodeReference": {
+    "path": "evals\\evolution\\batch-repair-20261002\\evolution_ai_review.v3.py",
+    "sha256": "28b754f495003bc8267ce3515769836f1dc4f4d7ecbf138f0a230cdc1956bb74",
+    "scope": "REFERENCE_SNAPSHOT_NOT_A_BUSINESS_RUNTIME_DEPENDENCY"
+  }
+}

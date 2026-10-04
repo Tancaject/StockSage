@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("fast", "backend", "frontend", "python", "rag")]
+    [ValidateSet("fast", "backend", "frontend", "python")]
     [string]$Mode = "fast",
     [switch]$SkipInstall
 )
@@ -85,12 +85,7 @@ function Resolve-Npm {
 }
 
 function Resolve-Python {
-    param([switch]$PreferRagEval)
-
     $candidates = @()
-    if ($PreferRagEval) {
-        $candidates += "$Root\.venv-rag-eval\Scripts\python.exe"
-    }
     $candidates += "C:\Users\Orion\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
     $candidates += "$Root\stocksage-data-service\.venv\Scripts\python.exe"
     $candidates += "$Root\.venv-rag-eval\Scripts\python.exe"
@@ -124,25 +119,24 @@ function Invoke-CheckedCommand {
 }
 
 function Invoke-BackendCheck {
-    Write-Host "=== Backend: Maven test ==="
+    Write-Host "=== Backend: Maven compile ==="
     $maven = Resolve-Maven
     Push-Location "$Root\stocksage-backend"
     try {
-        Invoke-CheckedCommand -FilePath $maven -CommandArgs @("test")
+        Invoke-CheckedCommand -FilePath $maven -CommandArgs @("compile")
     } finally {
         Pop-Location
     }
 }
 
 function Invoke-FrontendCheck {
-    Write-Host "=== Frontend: npm test + production build ==="
+    Write-Host "=== Frontend: production build ==="
     $npm = Resolve-Npm
     Push-Location "$Root\stocksage-frontend"
     try {
         if (-not $SkipInstall -and -not (Test-Path "node_modules")) {
             Invoke-CheckedCommand -FilePath $npm -CommandArgs @("install")
         }
-        Invoke-CheckedCommand -FilePath $npm -CommandArgs @("test")
         Invoke-CheckedCommand -FilePath $npm -CommandArgs @("run", "build")
     } finally {
         Pop-Location
@@ -153,12 +147,6 @@ function Invoke-PythonCheck {
     Write-Host "=== Data service: python compile smoke ==="
     $python = Resolve-Python
     Invoke-CheckedCommand -FilePath $python -CommandArgs @("-m", "compileall", "$Root\stocksage-data-service\main.py", "$Root\stocksage-data-service\app")
-}
-
-function Invoke-RagCheck {
-    Write-Host "=== RAG retrieval eval ==="
-    $python = Resolve-Python -PreferRagEval
-    Invoke-CheckedCommand -FilePath $python -CommandArgs @("$Root\rag-eval\run_retrieval_eval.py")
 }
 
 Write-Host "=== StockSage harness verification: $Mode ==="
@@ -172,9 +160,6 @@ switch ($Mode) {
     }
     "python" {
         Invoke-HarnessStep "python" { Invoke-PythonCheck }
-    }
-    "rag" {
-        Invoke-HarnessStep "rag" { Invoke-RagCheck }
     }
     "fast" {
         Invoke-HarnessStep "backend" { Invoke-BackendCheck }

@@ -1,0 +1,44 @@
+CONDENSED CONSOLIDATED STATEMENTS OF OPERATIONS (Unaudited)
+(In millions, except number of shares, which are reflected in thousands, and per-share amounts)
+Three Months Ended Twelve Months Ended
+September 27, September 28, September 27, September 28,
+2025 2024 2025 2024
+Net sales:
+Products $ 73,716 $ 69,958 $ 307,003 $ 294,866
+Services 28,750 24,972 109,158 96,169
+Total net sales (1) 102,466 94,930 416,161 391,035
+Cost of sales:
+Products 47,019 44,566 194,116 185,233
+Services 7,106 6,485 26,844 25,119
+Total cost of sales 54,125 51,051 220,960 210,352
+Gross margin 48,341 43,879 195,201 180,683
+Operating expenses:
+Research and development 8,866 7,765 34,550 31,370
+Selling, general and administrative 7,048 6,523 27,601 26,097
+Total operating expenses 15,914 14,288 62,151 57,467
+Operating income 32,427 29,591 133,050 123,216
+Other income/(expense), net 377 19 (321) 269
+Income before provision for income taxes 32,804 29,610 132,729 123,485
+Provision for income taxes 5,338 14,874 20,719 29,749
+Net income $ 27,466 $ 14,736 $ 112,010 $ 93,736
+Earnings per share:
+Basic $ 1.85 $ 0.97 $ 7.49 $ 6.11
+Diluted $ 1.85 $ 0.97 $ 7.46 $ 6.08
+Shares used in computing earnings per share:
+Basic 14,815,307 15,171,990 14,948,500 15,343,783
+Diluted 14,863,609 15,242,853 15,004,697 15,408,095
+(1) Net sales by reportable segment:
+Americas $ 44,192 $ 41,664 $ 178,353 $ 167,045
+Europe 28,703 24,924 111,032 101,328
+Greater China 14,493 15,033 64,377 66,952
+Japan 6,636 5,926 28,703 25,052
+Rest of Asia Pacific 8,442 7,383 33,696 30,658
+Total net sales $ 102,466 $ 94,930 $ 416,161 $ 391,035
+(1) Net sales by category:
+iPhone $ 49,025 $ 46,222 $ 209,586 $ 201,183
+Mac 8,726 7,744 33,708 29,984
+iPad 6,952 6,950 28,023 26,694
+Wearables, Home and Accessories 9,013 9,042 35,686 37,005
+Services 28,750 24,972 109,158 96,169
+Total net sales $ 102,466 $ 94,930 $ 416,161 $ 391,035
+

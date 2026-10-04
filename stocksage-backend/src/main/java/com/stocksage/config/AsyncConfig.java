@@ -2,6 +2,7 @@ package com.stocksage.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
@@ -11,11 +12,23 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 /**
  * 后台执行器统一定义。
  *
- * <p>此前这些线程池是 ChatService 里的静态字段，脱离 Spring 生命周期、无法优雅停机，
- * 也难以在测试里替换。收敛到这里后由容器管理创建与关闭，行为参数（线程数、daemon）保持不变。</p>
+ * <p>由容器管理生命周期，隔离响应写出、在线执行、后台更新和持久化研究 worker。</p>
  */
 @Configuration
 public class AsyncConfig {
+
+    /** Offline evaluation must never borrow an online worker or execute on the caller when full. */
+    @Bean
+    @Profile("evolution-eval")
+    public ThreadPoolTaskExecutor evolutionReplayExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setMaxPoolSize(1);
+        executor.setQueueCapacity(0);
+        executor.setThreadNamePrefix("evolution-replay-");
+        executor.setWaitForTasksToCompleteOnShutdown(false);
+        return executor;
+    }
 
     /**
      * 为 Spring MVC 的异步响应和 SSE 写出提供有界线程池。
@@ -44,16 +57,34 @@ public class AsyncConfig {
     }
 
     /**
-     * 分析师/工具预取与后台记忆更新共用的工作线程池，对应原静态 AGENT_EXECUTOR（6 线程）。
+     * 在线分析师、工具预取与补证共享有限容量；满队拒绝由提交方按业务语义处理。
      *
      * @return 固定并发度的 Agent 异步执行器
      */
     @Bean
-    public AsyncTaskExecutor agentTaskExecutor() {
+    public AsyncTaskExecutor agentTaskExecutor(
+            @Value("${stocksage.agent.queue-capacity:32}") int queueCapacity) {
+        if (queueCapacity < 0) throw new IllegalArgumentException("Agent queue capacity must be non-negative");
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(6);
         executor.setMaxPoolSize(6);
+        executor.setQueueCapacity(queueCapacity);
         executor.setThreadNamePrefix("agent-worker-");
+        executor.setDaemon(true);
+        executor.setWaitForTasksToCompleteOnShutdown(false);
+        return executor;
+    }
+
+    /** Background model/embedding work cannot occupy the online pool's slots. */
+    @Bean
+    public AsyncTaskExecutor backgroundTaskExecutor(
+            @Value("${stocksage.background.queue-capacity:16}") int queueCapacity) {
+        if (queueCapacity < 0) throw new IllegalArgumentException("Background queue capacity must be non-negative");
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(2);
+        executor.setQueueCapacity(queueCapacity);
+        executor.setThreadNamePrefix("background-worker-");
         executor.setDaemon(true);
         executor.setWaitForTasksToCompleteOnShutdown(false);
         return executor;

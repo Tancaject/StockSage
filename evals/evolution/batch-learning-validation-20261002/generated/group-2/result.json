@@ -1,0 +1,20 @@
+{
+  "group": "INCONSISTENT_UNIT_AND_DERIVED_NUMERIC_REPRESENTATIONS",
+  "status": "NOT_GENERATED",
+  "releaseEligible": false,
+  "observedModel": "qwen3.8-max",
+  "usage": {
+    "completion_tokens": 3250,
+    "completion_tokens_details": {
+      "reasoning_tokens": 847,
+      "text_tokens": 3250
+    },
+    "prompt_tokens": 25398,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 25398
+    },
+    "total_tokens": 28648
+  },
+  "error": "Generation incomplete or actual model differs"
+}

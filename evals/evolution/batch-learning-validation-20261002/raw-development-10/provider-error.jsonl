@@ -1,0 +1,1 @@
+{"at":"2026-10-02T13:09:15.165811200Z","operation":"CALL","causes":[{"type":"org.springframework.web.client.ResourceAccessException"},{"type":"java.io.IOException"},{"type":"java.lang.InterruptedException"}]}

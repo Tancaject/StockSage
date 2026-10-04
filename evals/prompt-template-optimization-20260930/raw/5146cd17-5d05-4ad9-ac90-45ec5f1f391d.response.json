@@ -1,0 +1,16 @@
+{
+  "usageSource" : "PROVIDER",
+  "usageSemantics" : "INVOCATION_SNAPSHOT",
+  "actualModel" : "qwen3.8-flash",
+  "providerResponseId" : "chatcmpl-271857e5-e799-9b09-922f-e398239ece0c",
+  "inputTokens" : 295,
+  "outputTokens" : 246,
+  "totalTokens" : 541,
+  "finishReason" : "STOP",
+  "text" : "{\n  \"holdings\": [],\n  \"revokedHoldings\": [],\n  \"riskPreference\": \"conservative\",\n  \"profileSummary\": \"用户偏好保守，目前关注 MSFT 但尚未买入。\"\n}",
+  "callId" : "5146cd17-5d05-4ad9-ac90-45ec5f1f391d",
+  "caseId" : "profile-assistant-suggestion",
+  "arm" : "after",
+  "elapsedMs" : 3759,
+  "finishedAt" : "2026-09-30T14:09:44.011249900Z"
+}

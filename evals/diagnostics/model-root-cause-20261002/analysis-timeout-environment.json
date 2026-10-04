@@ -1,0 +1,92 @@
+{
+  "schema": "analysis_timeout_environment_v1",
+  "scope": "READ_ONLY_WINDOWS_EVENTS_AND_ORIGINAL_CANDIDATE_ARTIFACTS",
+  "incidentDate": "2026-10-02",
+  "timezone": "Asia/Singapore",
+  "status": "NO_RECORDED_SLEEP_OR_ADAPTER_INTERRUPTION_DURING_THE_THREE_ANALYSES",
+  "priorSleepEvidence": "network-findings.json",
+  "priorSleepWakeAtUtc": "2026-10-02T13:44:25.9270745Z",
+  "conclusion": "All three timed-out analyses began after the sleep/wake event that interrupted the two final-answer streams. Their own windows contain no recorded power transition, WLAN event or network-profile transition. Their original provider errors were InterruptedException chains at the local 300-second deadline, not PrematureCloseException. The historical artifacts do not establish whether the server was reasoning, queued, waiting for network transport or blocked elsewhere during that interval.",
+  "windowCaution": "The first application log line timestamps construction of a non-streaming model call, not confirmed provider receipt. provider-error timestamps record interruption after the local deadline. Original request/response file modification times provide an additional local bracket; they are not provider timestamps.",
+  "requests": [
+    {
+      "runId": "candidate-dev-08-1-1",
+      "caseId": "jnj-fy2025q3-cash-deployment-bridge",
+      "requestFileWrittenAtLocal": "2026-10-02T21:44:40.9722117+08:00",
+      "modelCallLogAtLocal": "2026-10-02T21:44:41.045+08:00",
+      "providerErrorAtUtc": "2026-10-02T13:49:40.9890944Z",
+      "responseFileWrittenAtLocal": "2026-10-02T21:49:40.9923958+08:00",
+      "analysisDurationMs": 300005,
+      "timeoutSeconds": 300,
+      "resultErrorCode": "TIMEOUT",
+      "originalSleepOverlap": false,
+      "log": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-08.log",
+      "providerError": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-08/provider-error.jsonl",
+      "response": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-08/candidate-dev-08-1-1.response.json"
+    },
+    {
+      "runId": "candidate-dev-09-1-1",
+      "caseId": "pep-fy2025q3-quarter-cash-comparison",
+      "requestFileWrittenAtLocal": "2026-10-02T21:44:54.0812201+08:00",
+      "modelCallLogAtLocal": "2026-10-02T21:44:54.148+08:00",
+      "providerErrorAtUtc": "2026-10-02T13:49:54.1016687Z",
+      "responseFileWrittenAtLocal": "2026-10-02T21:49:54.1041183+08:00",
+      "analysisDurationMs": 300010,
+      "timeoutSeconds": 300,
+      "resultErrorCode": "TIMEOUT",
+      "originalSleepOverlap": false,
+      "log": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-09.log",
+      "providerError": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-09/provider-error.jsonl",
+      "response": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-09/candidate-dev-09-1-1.response.json"
+    },
+    {
+      "runId": "candidate-dev-10-1-1",
+      "caseId": "tgt-fy2025q3-liquidity-cash-synthesis",
+      "requestFileWrittenAtLocal": "2026-10-02T21:48:04.0257467+08:00",
+      "modelCallLogAtLocal": "2026-10-02T21:48:04.115+08:00",
+      "providerErrorAtUtc": "2026-10-02T13:53:04.0397843Z",
+      "responseFileWrittenAtLocal": "2026-10-02T21:53:04.0437788+08:00",
+      "analysisDurationMs": 300005,
+      "timeoutSeconds": 300,
+      "resultErrorCode": "TIMEOUT",
+      "originalSleepOverlap": false,
+      "log": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-10.log",
+      "providerError": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-10/provider-error.jsonl",
+      "response": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-10/candidate-dev-10-1-1.response.json"
+    }
+  ],
+  "sharedOriginalProviderError": {
+    "operation": "CALL",
+    "causes": ["org.springframework.web.client.ResourceAccessException", "java.io.IOException", "java.lang.InterruptedException"],
+    "httpStatus": null,
+    "usage": "NO_DATA",
+    "reasoningOrContentStream": "NO_DATA"
+  },
+  "windowsEventCheck": {
+    "windowStartLocal": "2026-10-02T21:44:39+08:00",
+    "windowEndLocal": "2026-10-02T21:53:06+08:00",
+    "system": {
+      "read": "SUCCESS",
+      "eventCount": 4,
+      "powerTransitionEventCount": 0,
+      "events": [
+        {"atLocal": "2026-10-02T21:47:30.2205585+08:00", "provider": "Tcpip", "eventId": 4266, "recordId": 224513, "summary": "Request to allocate an ephemeral port from the global UDP port space failed because all such ports were in use."},
+        {"atLocal": "2026-10-02T21:48:03.5928714+08:00", "provider": "Microsoft-Windows-DistributedCOM", "eventId": 10016, "recordId": 224514, "summary": "Local COM activation permission warning."},
+        {"atLocal": "2026-10-02T21:48:24.0846267+08:00", "provider": "Service Control Manager", "eventId": 7040, "recordId": 224515, "summary": "BITS startup type changed from demand to automatic."},
+        {"atLocal": "2026-10-02T21:51:01.0762618+08:00", "provider": "Service Control Manager", "eventId": 7040, "recordId": 224516, "summary": "BITS startup type changed from automatic to demand."}
+      ]
+    },
+    "networkProfile": {"log": "Microsoft-Windows-NetworkProfile/Operational", "read": "NO_MATCHING_EVENTS", "eventCount": 0},
+    "wlan": {"log": "Microsoft-Windows-WLAN-AutoConfig/Operational", "read": "NO_MATCHING_EVENTS", "eventCount": 0},
+    "dnsClientOperational": {"log": "Microsoft-Windows-DNS-Client/Operational", "enabled": false, "recordsAvailable": false},
+    "udpWarningBoundary": "The UDP exhaustion event falls inside analyses 08 and 09 and before analysis 10. These HTTPS calls use TCP, but DNS can use UDP. No historical DNS or HTTP connection-phase trace exists here, so the warning alone neither proves a cause nor proves DNS was unaffected. It is not a recorded Wi-Fi interruption and cannot be conflated with the earlier sleep-triggered stream failures."
+  },
+  "limitations": [
+    "Absence of recorded power/WLAN/network-profile transitions does not prove an uninterrupted path to the provider.",
+    "A local InterruptedException at timeout does not prove the provider spent all 300 seconds reasoning.",
+    "No packet capture or proxy connection trace was available for these original requests.",
+    "No frozen original response, log or experiment artifact was modified."
+  ],
+  "modelApiCalls": 0,
+  "settingsChanged": false
+}

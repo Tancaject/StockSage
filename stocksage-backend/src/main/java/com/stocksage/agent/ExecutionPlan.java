@@ -1,5 +1,7 @@
 package com.stocksage.agent;
 
+import com.stocksage.agent.intent.TimeSensitivity;
+
 import java.util.List;
 
 /**
@@ -73,6 +75,18 @@ public record ExecutionPlan(
      */
     public List<String> actionLabels() {
         return actions == null ? List.of() : actions.stream().map(PlanAction::label).toList();
+    }
+
+    /** 历史计划和未知诊断值保留未知时间要求，不从问题或模型报告重新推断。 */
+    public TimeSensitivity timeSensitivity() {
+        if (routingDecision == null || routingDecision.timeSensitivity() == null) {
+            return TimeSensitivity.UNSPECIFIED;
+        }
+        try {
+            return TimeSensitivity.valueOf(routingDecision.timeSensitivity());
+        } catch (IllegalArgumentException ignored) {
+            return TimeSensitivity.UNSPECIFIED;
+        }
     }
 
     /** 主角色完全由既有动作目录派生；DEEP 以 Research Manager 为主。 */

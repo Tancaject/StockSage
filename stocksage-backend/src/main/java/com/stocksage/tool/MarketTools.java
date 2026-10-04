@@ -1,5 +1,6 @@
 package com.stocksage.tool;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.client.DataServiceClient;
 import com.stocksage.ibkr.IbkrReadOnlyService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class MarketTools {
     private final DataServiceClient dataServiceClient;
     /** 美股和具备权限的港股只读账户/行情入口，明确不提供交易方法。 */
     private final IbkrReadOnlyService ibkrReadOnlyService;
+    private final ObjectMapper objectMapper;
 
     /**
      * 搜索并解析股票候选。
@@ -52,13 +54,13 @@ public class MarketTools {
      *
      * <p>美股历史行情优先走 IBKR 工具；这里委托 Python 数据服务处理 BaoStock/AKShare 来源。</p>
      */
-    @Tool(description = "获取指定 A 股/港股的 K 线数据，包含开盘、收盘、最高、最低价和成交量。A 股走 BaoStock，港股走 AKShare；美股不要调用此工具，使用 IBKR 历史 K 线工具")
+    @Tool(description = "获取指定 A 股/港股的 K 线数据，包含开盘、收盘、最高、最低价和成交量。A 股优先 AKShare、失败后使用 BaoStock，港股走 AKShare；美股不要调用此工具，使用 IBKR 历史 K 线工具")
     public String getStockKLine(
             @ToolParam(description = "股票代码或名称。A股可用 sh.600519/600519/贵州茅台；港股可用 0700.HK/00700/腾讯；美股请使用 IBKR 工具") String code,
             @ToolParam(description = "K线周期：daily/weekly/monthly") String period,
             @ToolParam(description = "获取最近多少天的数据") int days) {
         // Python 服务负责市场识别与 AKShare/BaoStock fallback，本层不猜测供应商。
-        return dataServiceClient.getKLine(code, period, days);
+        return objectMapper.valueToTree(dataServiceClient.getKLine(code, period, days)).toString();
     }
 
     /**
@@ -121,6 +123,6 @@ public class MarketTools {
             @ToolParam(description = "美股代码，如 AAPL、TSLA、NVDA；港股如 0700.HK/00700 也可尝试，但免费港股优先用普通股票数据工具；A股继续使用普通股票数据工具") String code,
             @ToolParam(description = "历史长度，如 1d、1w、1m、6m、1y") String period,
             @ToolParam(description = "K线粒度，如 1min、5min、1h、1d") String bar) {
-        return ibkrReadOnlyService.getHistoricalBars(code, period, bar);
+        return objectMapper.valueToTree(ibkrReadOnlyService.getHistoricalBars(code, period, bar)).toString();
     }
 }

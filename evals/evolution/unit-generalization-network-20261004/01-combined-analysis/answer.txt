@@ -1,0 +1,56 @@
+## 标的与数据范围
+
+- **标的**：IBM（International Business Machines Corporation）
+- **期间**：2025年第三季度单季，即 **Three Months Ended 2025-09-30**
+- **币种与单位**：美元，单位为 **百万美元（USD millions）**；证据表格注明 “Dollars in Millions” [E1]
+- **口径说明**：使用证据中已披露的 **单季列**，不是九个月累计列 [E1]
+
+## 已验证事实
+
+- **2025Q3 单季经营现金流**：  
+  **Net Cash Provided by Operating Activities = $3,081 million** [E1]
+
+- **2025Q3 单季 GAAP 净利润**：  
+  本轮证据中可用于单季净利润的已披露项目为现金流量表起始行 **“Net Income/(Loss) from Operations” = $1,744 million**；本答复以此作为用户要求的单季 GAAP 净利润计算口径 [E1]
+
+- **两者差额**：  
+  \[
+  经营现金流 - 净利润 = 3,081 - 1,744 = 1,337
+  \]  
+  即 **$1,337 million** [E1]
+
+- **经营现金流 / 净利润**：  
+  \[
+  3,081 \div 1,744 = 1.7666...
+  \]  
+  保留两位小数：**1.77**  
+  对应百分比：**176.66%**
+
+## 财务趋势与经营质量
+
+- IBM 2025Q3 经营现金流 **高于** 单季净利润，现金转化较强：每 **1美元** 净利润对应约 **1.77美元** 经营现金流 [E1]
+- 从现金流量表调节项目看，净利润到经营现金流的正向加回包括：  
+  - 折旧/摊销：**$1,283 million** [E1]  
+  - 股权激励：**$444 million** [E1]  
+  - IBM Financing A/R：**$298 million** [E1]  
+  负向项目为：  
+  - Operating assets and liabilities/Other, net：**$(688) million** [E1]
+
+## 风险与反向证据
+
+- 本轮证据未提供利润表原文，因此“GAAP净利润”仅能基于现金流量表起始行 **“Net Income/(Loss) from Operations”** 计算；若严格需要利润表归母净利润或存在重述/口径差异，需进一步验证 [E1]
+- 经营现金流/净利润较高主要受非现金加回和营运资本项目影响，不能单独证明盈利质量持续改善；本轮未提供多季度趋势或管理层对商业原因的说明 [E1]
+- 证据脚注提到 2025 年 “Operating assets and liabilities/Other, net” 中包含一次性非现金所得税费用，原文为 **$0.3 billion**；换算为百万美元：  
+  \[
+  0.3\ \text{billion} \times 1,000 = 300\ \text{million}
+  \]  
+  即 **$300 million** [E1]
+
+## 数据缺口
+
+- 缺少 2025Q3 利润表或 10-Q 原文，无法独立交叉验证现金流量表起始行是否完全等同于用户所指“GAAP净利润”
+- 缺少管理层对 2025Q3 现金转化驱动因素的商业解释；本答复仅基于报表项目列示，不推断经营原因
+
+## 来源
+
+- **[E1]** IBM Q3 2025 official IR cash flow, “INTERNATIONAL BUSINESS MACHINES CORPORATION CASH FLOW (Unaudited)”, Three Months Ended September 30, 2025, USD millions, published 2025-10-22. 来源：https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS

@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "reviewType": "NON_BLIND_AI_DIAGNOSTIC",
+  "armMeaning": {
+    "before": "首轮修订模板",
+    "after": "追加一条新闻边界要求的实验模板"
+  },
+  "criteriaPolicy": "逐项使用本补充实验调用前冻结的 criteria；新增第四项仅属于本补充实验，不追溯改变首轮12条评审。",
+  "limits": [
+    "每例每组仅一次真实调用，无法证明稳定改善或统计收益。",
+    "非盲 AI 复核，不是独立正式验收。",
+    "有条件的一般原理不自动计为幻觉；摘要组主要失败为未获证据支持的具体项目业务用途，不依赖对通常建设周期的严格解释。",
+    "追加模板没有在这两个配对样本上取得原定指标改善：两臂均摘要 ISSUES、完整公告 PASS。"
+  ],
+  "planSha256": "56b38912172fd99bb8cbe8757654ab594ecf93067414b56dafb57509fba63e30",
+  "rows": [
+    {
+      "caseId": "news-snippet-missing-event-time",
+      "arm": "before",
+      "callId": "a7e6df37-a814-48fd-ae0e-8162126f509c",
+      "criteriaResults": [
+        {
+          "criterion": "区分发布时间与未知事件发生时间，不断言事件今天发生",
+          "status": "PASS",
+          "reason": "分别给出信息发布时间和未提供的事件发生时间，没有断言今日获批。",
+          "evidenceQuote": "事件发生时间**：未提供"
+        },
+        {
+          "criterion": "保留只有摘要、原文未核验限制",
+          "status": "PASS",
+          "reason": "明确摘要未抓取原文，缺少交叉验证，仅能作线索。",
+          "evidenceQuote": "目前仅有搜索结果摘要，原文未抓取"
+        },
+        {
+          "criterion": "不编投资额、收入影响或价格因果；可说明潜在影响仍需验证",
+          "status": "PASS",
+          "reason": "未编造投资金额、收入或价格因果，明确无法量化贡献；假设项目规模较小则影响有限是条件性解释，不据此扣分。",
+          "evidenceQuote": "无法量化该项目对微软整体营收、利润或资本开支的具体贡献"
+        },
+        {
+          "criterion": "不把通用行业解释套用为本项目已确认的用途、进度、资本支出或收入事实；一般解释需说明假设条件",
+          "status": "ISSUES",
+          "reason": "输入未披露项目用途，回答却直接把该项目推进关联 Azure/AI 扩张，未写清这是尚未核实的用途假设。",
+          "evidenceQuote": "长期来看，这有助于增加算力供给，支撑其 Azure 云计算和人工智能（AI）业务的持续扩张。"
+        }
+      ],
+      "overall": "ISSUES",
+      "issues": [
+        "输入未披露项目用途，回答却直接把该项目推进关联 Azure/AI 扩张，未写清这是尚未核实的用途假设。"
+      ],
+      "responseSha256": "297722e0c4bf583070b161b036c547cfed415574271288f7ad0f34a2fdd01eb9"
+    },
+    {
+      "caseId": "news-snippet-missing-event-time",
+      "arm": "after",
+      "callId": "063a44f6-4896-4a4d-961b-3ff809a16843",
+      "criteriaResults": [
+        {
+          "criterion": "区分发布时间与未知事件发生时间，不断言事件今天发生",
+          "status": "PASS",
+          "reason": "区分发布时间与未知获批日期。",
+          "evidenceQuote": "事件发生时间：未提供。"
+        },
+        {
+          "criterion": "保留只有摘要、原文未核验限制",
+          "status": "PASS",
+          "reason": "明确只有摘要、原文未抓取，细节尚未核验。",
+          "evidenceQuote": "目前仅有搜索结果摘要，原文未抓取。"
+        },
+        {
+          "criterion": "不编投资额、收入影响或价格因果；可说明潜在影响仍需验证",
+          "status": "PASS",
+          "reason": "明确无法量化资本支出或未来收入；“不意味着立即产生收入”否定不成立的推论，未断言该项目当前无收入；后面的通常建设周期视为一般机制。",
+          "evidenceQuote": "无法量化其对资本支出（CapEx）或未来收入的实际影响"
+        },
+        {
+          "criterion": "不把通用行业解释套用为本项目已确认的用途、进度、资本支出或收入事实；一般解释需说明假设条件",
+          "status": "ISSUES",
+          "reason": "把未知业务用途当作微软云业务/Azure扩充，只对体量表示未知；还以“事实层面”断言具备后续建设条件。用途假设没有条件化，仍未达到该项边界。",
+          "evidenceQuote": "目前无法确认该项目对微软云计算业务（如 Azure）基础设施扩充的具体体量"
+        }
+      ],
+      "overall": "ISSUES",
+      "issues": [
+        "把未知业务用途当作微软云业务/Azure扩充，只对体量表示未知；还以“事实层面”断言具备后续建设条件。用途假设没有条件化，仍未达到该项边界。"
+      ],
+      "responseSha256": "46c09e8c520a27675f627142a79e455b29e0cce5c117b837649629121785c888"
+    },
+    {
+      "caseId": "news-complete-announcement-control",
+      "arm": "after",
+      "callId": "29a205a6-67e1-4d4c-b325-b1b90033014b",
+      "criteriaResults": [
+        {
+          "criterion": "回答素材给出的20亿美元预算、Azure用途和2029年计划投产，不以证据不足整体拒答",
+          "status": "PASS",
+          "reason": "完整回答20亿美元、Azure及2029年计划投产，没有整体拒答。",
+          "evidenceQuote": "项目总投资预算为20亿美元，明确用于支持Azure云服务。"
+        },
+        {
+          "criterion": "区分2026-09-28批准日期与2026-09-30公告日期；2029年只是计划，不声称已经投产",
+          "status": "PASS",
+          "reason": "批准日期2026-09-28、公告日期2026-09-30区分清楚，投产明确仅为计划。",
+          "evidenceQuote": "计划投产时间：2029年（注：公告明确此为计划安排，尚未给出具体开工日期）。"
+        },
+        {
+          "criterion": "预计收入、利润和投资回报未披露，不声称已经或尚未发生支出/收入，不给确定财务影响",
+          "status": "PASS",
+          "reason": "保留收入、利润、回报未披露，不给具体或确定财务收益；投产后释放产能是一般条件性过程，不视为已发生收入断言。",
+          "evidenceQuote": "目前尚不能确认其具体的财务收益。"
+        }
+      ],
+      "overall": "PASS",
+      "issues": [],
+      "responseSha256": "f83757e92bad38e842a2fbaabbd7939c2c7f0120de150059a84c9b2cd94bc2f9"
+    },
+    {
+      "caseId": "news-complete-announcement-control",
+      "arm": "before",
+      "callId": "5ac48aed-68c9-401c-87a4-fbc3ec0de8c7",
+      "criteriaResults": [
+        {
+          "criterion": "回答素材给出的20亿美元预算、Azure用途和2029年计划投产，不以证据不足整体拒答",
+          "status": "PASS",
+          "reason": "完整回答20亿美元预算、Azure用途和2029年计划投产，没有因限制整体拒答。",
+          "evidenceQuote": "投资规模**：总投资预算为20亿美元。"
+        },
+        {
+          "criterion": "区分2026-09-28批准日期与2026-09-30公告日期；2029年只是计划，不声称已经投产",
+          "status": "PASS",
+          "reason": "分别保留批准/公告日期，明确2029年仅为计划且开工日期未提供。",
+          "evidenceQuote": "计划投产时间**：2029年（目前仅为计划安排）。"
+        },
+        {
+          "criterion": "预计收入、利润和投资回报未披露，不声称已经或尚未发生支出/收入，不给确定财务影响",
+          "status": "PASS",
+          "reason": "明确收入、利润、投资回报未披露，未断言已经或尚未发生支出/收入；理论性扩容说明不是确定财务收益。",
+          "evidenceQuote": "公告原文明确指出“公司未披露预计收入、利润或投资回报”。"
+        }
+      ],
+      "overall": "PASS",
+      "issues": [],
+      "responseSha256": "aac2014948316f7ea131add81da7fb7b4fcfadf7a838291630d19491ae3524a9"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "repair-ibm-liquidity-1-1",
+    "caseId": "ibm-fy2025q3-liquidity",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-repair-20261002\\raw-repair-ibm-liquidity",
+  "executionSha256": "28ba7591039c782600fe36675a9ecba839b7c1a1be00d2a63f0562a6ea387b9c",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

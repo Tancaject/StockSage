@@ -1,0 +1,36 @@
+{
+  "scope": "EXTERNAL_TEST_DRIVER_ONLY",
+  "driverDependencyManifestSha256": "48389f77b928050b8859b11b7e671b06d7f0caf8438574fb431d02dbd455d16e",
+  "files": [
+    {
+      "originalPath": "D:\\programming\\StockSage\\stocksage-backend\\src\\test\\java\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest.java",
+      "retainedPath": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\diagnostics\\final-synthesis-20260930\\driver\\EvolutionLiveBaselineTest.java",
+      "sha256": "dcc6e660141aa2f7f1d325e62291b6a4a9db4d8c4ca2a90243dc561c63de8b68"
+    },
+    {
+      "originalPath": "D:\\programming\\StockSage\\stocksage-backend\\target\\test-classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$1.class",
+      "retainedPath": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\diagnostics\\final-synthesis-20260930\\driver\\EvolutionLiveBaselineTest$1.class",
+      "sha256": "2f287337b290b1f7c41b1e65a3206b35979844fb41a9c2dcc24d724e24309ee5"
+    },
+    {
+      "originalPath": "D:\\programming\\StockSage\\stocksage-backend\\target\\test-classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$DiagnosisFile.class",
+      "retainedPath": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\diagnostics\\final-synthesis-20260930\\driver\\EvolutionLiveBaselineTest$DiagnosisFile.class",
+      "sha256": "96c58aad7e94217dbdde210afda92b1a4f6f47b3e0fb4498c387870f77c748e7"
+    },
+    {
+      "originalPath": "D:\\programming\\StockSage\\stocksage-backend\\target\\test-classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$DiagnosisRun.class",
+      "retainedPath": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\diagnostics\\final-synthesis-20260930\\driver\\EvolutionLiveBaselineTest$DiagnosisRun.class",
+      "sha256": "4484d693ab535452d6a28d1da6032bb7f1bcb7cfb0622eac8186e4e0a77276b0"
+    },
+    {
+      "originalPath": "D:\\programming\\StockSage\\stocksage-backend\\target\\test-classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$HttpTransportConfiguration.class",
+      "retainedPath": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\diagnostics\\final-synthesis-20260930\\driver\\EvolutionLiveBaselineTest$HttpTransportConfiguration.class",
+      "sha256": "e552d6707ce5e2efbb5b38614fa31e7a4b2c3da9de5a1b02fcffed380afea3ed"
+    },
+    {
+      "originalPath": "D:\\programming\\StockSage\\stocksage-backend\\target\\test-classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest.class",
+      "retainedPath": "D:\\programming\\StockSage\\rag-eval\\evolution\\common-fundamentals-2025-v1\\diagnostics\\final-synthesis-20260930\\driver\\EvolutionLiveBaselineTest.class",
+      "sha256": "8944862a1dafbf341849d20923ba595087299aab1b677b3c1903c8149c9c6a2e"
+    }
+  ]
+}

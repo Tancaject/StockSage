@@ -1,0 +1,42 @@
+{
+  "schema": "fundamentals_batch_repair_plan_v1",
+  "experimentId": "fundamentals-batch-repair-20261002",
+  "createdAt": "2026-10-02T09:43:17.709539+00:00",
+  "releaseEligible": false,
+  "caseCounts": {
+    "DEVELOPMENT": 6,
+    "VALIDATION": 0
+  },
+  "maxBusinessCalls": 12,
+  "maxConcurrentBusinessRuns": 3,
+  "businessSettings": {
+    "model": "qwen3.8-max",
+    "temperature": 0.7,
+    "maxTokens": 4096,
+    "thinkingBudget": 4096,
+    "enableThinking": true,
+    "stageTimeoutSeconds": 180,
+    "httpReadTimeoutSeconds": 180,
+    "retryAttempts": 1
+  },
+  "comparison": "Four former timeout tasks plus two previously successful controls. Same source cases and method, new build with explicit thinking budget. Historical comparison is diagnostic, not randomized proof of a sole cause.",
+  "acceptance": "All six tasks finish within existing stage deadlines; runtime identities contain the explicit thinking budget; independent source review finds no material regression. Preserve failed attempts; no silent retry.",
+  "evaluatorSha256": "28b754f495003bc8267ce3515769836f1dc4f4d7ecbf138f0a230cdc1956bb74",
+  "frozenFiles": {
+    "evals\\evolution\\batch-repair-20261002\\business_replay.py": "c283a3ce96bbc344d0e261c565c7928b58ed34905f463ba6ed4cde94c79e1955",
+    "evals\\evolution\\batch-repair-20261002\\cases.jsonl": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a",
+    "evals\\evolution\\batch-repair-20261002\\gold.jsonl": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336",
+    "evals\\evolution\\batch-repair-20261002\\build.json": "9ba5b190b4a07aa41711877df6bc5b083c373d195a8774cdc707bee8c1301180",
+    "evals\\evolution\\batch-repair-20261002\\runtime-dependencies.json": "cb944fcbf75fe9e4b73b62671d9ef27be66c8847446b19e9df9bc71d0f081fff",
+    "evals\\evolution\\batch-repair-20261002\\baseline-method.txt": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8",
+    "evals\\evolution\\batch-learning-20261002\\experiment.py": "e31ea5664bf73403e6a3fae00fc8f46672a188bc8393c64b56595278b0329a72",
+    "evals\\evolution\\batch-learning-20261002\\result.json": "408f25cc1f2b20d22155bb898785b1eec0b624ffe99a2b89147003da542ff4a4",
+    "evals\\evolution\\batch-learning-20261002\\campaign\\baseline-execution-audit.json": "b74d2df69c976867b805febb51c2f8dc46c15c5c5579ee574856c14eccc91ea9",
+    "evals\\evolution_ai_review.py": "28b754f495003bc8267ce3515769836f1dc4f4d7ecbf138f0a230cdc1956bb74",
+    "evals\\evolution_rubric.py": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea",
+    "evals\\evolution_quality.py": "d01b12f5fd0b0ba020ed33301b95e4780a86c527462badd462a82d50647f754e",
+    "evals\\evolution_dataset.py": "12df23500bf7ee45a2ee0ab955924bf7368e30c1a7e2bb2e20a5f993fa24ee65",
+    "evals\\eval_common.py": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c",
+    "evals\\run_evolution_replay.py": "90777b3f0eb6e6932a9da762591bb5bceb2acc16994949d964d5012d156a786d"
+  }
+}

@@ -1,0 +1,2153 @@
+{
+  "schema": "fundamentals_batch_execution_audit_v1",
+  "scope": "EXECUTION_AND_USAGE_ONLY",
+  "generatedAt": "2026-10-02T10:07:33.787118+00:00",
+  "releaseEligible": false,
+  "businessQuality": "NOT_ASSESSED",
+  "planSha256": "5a4dbe365bff911834e242f241a45ded3a6f39602a1d2f56e507e77ccdfa5b64",
+  "auditScriptSha256": "552243363e923e0322b58356c4761dc5c9b17af5b1d8f3c658ef371bf6cde1d5",
+  "split": "DEVELOPMENT",
+  "bundleId": "baseline-v1",
+  "lineage": {
+    "replacements": []
+  },
+  "lineageSha256": null,
+  "status": "PASS",
+  "errors": [],
+  "plannedCaseCount": 6,
+  "registeredAttemptCount": 6,
+  "primaryCaseCount": 6,
+  "supersededUnsubmittedReservationCount": 0,
+  "submittedRunCount": 6,
+  "receivedCaseCount": 6,
+  "passedExecutionCount": 6,
+  "failedExecutionCount": 0,
+  "missingResponseCount": 0,
+  "notStartedCaseCount": 0,
+  "plannedStageCount": 12,
+  "observedInvocationCount": 12,
+  "providerUsageStageCount": 12,
+  "unreportedPlannedStageCount": 0,
+  "unknownUsageInvocationCount": 0,
+  "providerTokens": {
+    "inputTokens": 41755,
+    "outputTokens": 34720,
+    "totalTokens": 76475
+  },
+  "sumRecordedStageDurationMs": 706397,
+  "frozenFileChecks": [
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\business_replay.py",
+      "expectedSha256": "c283a3ce96bbc344d0e261c565c7928b58ed34905f463ba6ed4cde94c79e1955",
+      "actualSha256": "c283a3ce96bbc344d0e261c565c7928b58ed34905f463ba6ed4cde94c79e1955"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\cases.jsonl",
+      "expectedSha256": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a",
+      "actualSha256": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\gold.jsonl",
+      "expectedSha256": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336",
+      "actualSha256": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\build.json",
+      "expectedSha256": "9ba5b190b4a07aa41711877df6bc5b083c373d195a8774cdc707bee8c1301180",
+      "actualSha256": "9ba5b190b4a07aa41711877df6bc5b083c373d195a8774cdc707bee8c1301180"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\runtime-dependencies.json",
+      "expectedSha256": "cb944fcbf75fe9e4b73b62671d9ef27be66c8847446b19e9df9bc71d0f081fff",
+      "actualSha256": "cb944fcbf75fe9e4b73b62671d9ef27be66c8847446b19e9df9bc71d0f081fff"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\baseline-method.txt",
+      "expectedSha256": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8",
+      "actualSha256": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\experiment.py",
+      "expectedSha256": "e31ea5664bf73403e6a3fae00fc8f46672a188bc8393c64b56595278b0329a72",
+      "actualSha256": "e31ea5664bf73403e6a3fae00fc8f46672a188bc8393c64b56595278b0329a72"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\result.json",
+      "expectedSha256": "408f25cc1f2b20d22155bb898785b1eec0b624ffe99a2b89147003da542ff4a4",
+      "actualSha256": "408f25cc1f2b20d22155bb898785b1eec0b624ffe99a2b89147003da542ff4a4"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\campaign\\baseline-execution-audit.json",
+      "expectedSha256": "b74d2df69c976867b805febb51c2f8dc46c15c5c5579ee574856c14eccc91ea9",
+      "actualSha256": "b74d2df69c976867b805febb51c2f8dc46c15c5c5579ee574856c14eccc91ea9"
+    },
+    {
+      "path": "evals\\evolution_ai_review.py",
+      "expectedSha256": "28b754f495003bc8267ce3515769836f1dc4f4d7ecbf138f0a230cdc1956bb74",
+      "actualSha256": "28b754f495003bc8267ce3515769836f1dc4f4d7ecbf138f0a230cdc1956bb74"
+    },
+    {
+      "path": "evals\\evolution_rubric.py",
+      "expectedSha256": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea",
+      "actualSha256": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea"
+    },
+    {
+      "path": "evals\\evolution_quality.py",
+      "expectedSha256": "d01b12f5fd0b0ba020ed33301b95e4780a86c527462badd462a82d50647f754e",
+      "actualSha256": "d01b12f5fd0b0ba020ed33301b95e4780a86c527462badd462a82d50647f754e"
+    },
+    {
+      "path": "evals\\evolution_dataset.py",
+      "expectedSha256": "12df23500bf7ee45a2ee0ab955924bf7368e30c1a7e2bb2e20a5f993fa24ee65",
+      "actualSha256": "12df23500bf7ee45a2ee0ab955924bf7368e30c1a7e2bb2e20a5f993fa24ee65"
+    },
+    {
+      "path": "evals\\eval_common.py",
+      "expectedSha256": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c",
+      "actualSha256": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c"
+    },
+    {
+      "path": "evals\\run_evolution_replay.py",
+      "expectedSha256": "90777b3f0eb6e6932a9da762591bb5bceb2acc16994949d964d5012d156a786d",
+      "actualSha256": "90777b3f0eb6e6932a9da762591bb5bceb2acc16994949d964d5012d156a786d"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\cases.jsonl",
+      "expectedSha256": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a",
+      "actualSha256": "ea6d3aee4b291d9f6b744a74abd9d4dea1735ac3383ad9143818b2df8e33941a"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\gold.jsonl",
+      "expectedSha256": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336",
+      "actualSha256": "f95be0a49663f9202932692f3ea859fb45581d57cd5b6906aa19080e12b0c336"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\build.json",
+      "expectedSha256": "9ba5b190b4a07aa41711877df6bc5b083c373d195a8774cdc707bee8c1301180",
+      "actualSha256": "9ba5b190b4a07aa41711877df6bc5b083c373d195a8774cdc707bee8c1301180"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\runtime-dependencies.json",
+      "expectedSha256": "cb944fcbf75fe9e4b73b62671d9ef27be66c8847446b19e9df9bc71d0f081fff",
+      "actualSha256": "cb944fcbf75fe9e4b73b62671d9ef27be66c8847446b19e9df9bc71d0f081fff"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\baseline-method.txt",
+      "expectedSha256": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8",
+      "actualSha256": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\business_replay.py",
+      "expectedSha256": "81aa11f80c985baea349e4c7c55b770de982ad57854d2c38d1d1cb509d8c29b5",
+      "actualSha256": "81aa11f80c985baea349e4c7c55b770de982ad57854d2c38d1d1cb509d8c29b5"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\audit_execution.py",
+      "expectedSha256": "aa4591f6aad6dde14e76ba2faa9dffd66c4c19aad8771d95dc027752f0cbcc4a",
+      "actualSha256": "aa4591f6aad6dde14e76ba2faa9dffd66c4c19aad8771d95dc027752f0cbcc4a"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\plan.json",
+      "expectedSha256": "a48760e67360d6510dff4a21a4e68df698381784ef3d18d7d976a1aa8ba6eebb",
+      "actualSha256": "a48760e67360d6510dff4a21a4e68df698381784ef3d18d7d976a1aa8ba6eebb"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\audit_execution.py",
+      "expectedSha256": "dc61ec266161e2c322482881fe3c72a597a12dc2e62a505c47ff1e56305106bb",
+      "actualSha256": "dc61ec266161e2c322482881fe3c72a597a12dc2e62a505c47ff1e56305106bb"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\execution-audit.json",
+      "expectedSha256": "0dbf5c2705a17fd018241af4267fe2a52778090a53fa2a327090e1b5dcd17710",
+      "actualSha256": "0dbf5c2705a17fd018241af4267fe2a52778090a53fa2a327090e1b5dcd17710"
+    },
+    {
+      "path": "evals\\evolution\\batch-learning-20261002\\campaign\\audit_execution.py",
+      "expectedSha256": "552243363e923e0322b58356c4761dc5c9b17af5b1d8f3c658ef371bf6cde1d5",
+      "actualSha256": "552243363e923e0322b58356c4761dc5c9b17af5b1d8f3c658ef371bf6cde1d5"
+    }
+  ],
+  "runtimeFileChecks": [
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-build-batch-repair-20261002\\stocksage-backend.jar",
+      "sha256": "0e27ea2adf37db3a3f24eb9b31512dfe6d1fa36f81b53f43122472e657eceb5f",
+      "actualSha256": "0e27ea2adf37db3a3f24eb9b31512dfe6d1fa36f81b53f43122472e657eceb5f"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\EvolutionLiveBaselineTest.java",
+      "sha256": "dcc6e660141aa2f7f1d325e62291b6a4a9db4d8c4ca2a90243dc561c63de8b68",
+      "actualSha256": "dcc6e660141aa2f7f1d325e62291b6a4a9db4d8c4ca2a90243dc561c63de8b68"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$1.class",
+      "sha256": "2f287337b290b1f7c41b1e65a3206b35979844fb41a9c2dcc24d724e24309ee5",
+      "actualSha256": "2f287337b290b1f7c41b1e65a3206b35979844fb41a9c2dcc24d724e24309ee5"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$DiagnosisFile.class",
+      "sha256": "96c58aad7e94217dbdde210afda92b1a4f6f47b3e0fb4498c387870f77c748e7",
+      "actualSha256": "96c58aad7e94217dbdde210afda92b1a4f6f47b3e0fb4498c387870f77c748e7"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$DiagnosisRun.class",
+      "sha256": "4484d693ab535452d6a28d1da6032bb7f1bcb7cfb0622eac8186e4e0a77276b0",
+      "actualSha256": "4484d693ab535452d6a28d1da6032bb7f1bcb7cfb0622eac8186e4e0a77276b0"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest$HttpTransportConfiguration.class",
+      "sha256": "e552d6707ce5e2efbb5b38614fa31e7a4b2c3da9de5a1b02fcffed380afea3ed",
+      "actualSha256": "e552d6707ce5e2efbb5b38614fa31e7a4b2c3da9de5a1b02fcffed380afea3ed"
+    },
+    {
+      "path": "D:\\programming\\StockSage\\stocksage-backend\\target\\evolution-batch-repair-20261002-driver\\classes\\com\\stocksage\\evolution\\EvolutionLiveBaselineTest.class",
+      "sha256": "8944862a1dafbf341849d20923ba595087299aab1b677b3c1903c8149c9c6a2e",
+      "actualSha256": "8944862a1dafbf341849d20923ba595087299aab1b677b3c1903c8149c9c6a2e"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\junit\\jupiter\\junit-jupiter-api\\5.11.4\\junit-jupiter-api-5.11.4.jar",
+      "sha256": "ab83ef9e51ac4597d59d26b4b58812129550e2f579a404c8af7d09f5ce5b4293",
+      "actualSha256": "ab83ef9e51ac4597d59d26b4b58812129550e2f579a404c8af7d09f5ce5b4293"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\opentest4j\\opentest4j\\1.3.0\\opentest4j-1.3.0.jar",
+      "sha256": "48e2df636cab6563ced64dcdff8abb2355627cb236ef0bf37598682ddf742f1b",
+      "actualSha256": "48e2df636cab6563ced64dcdff8abb2355627cb236ef0bf37598682ddf742f1b"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\junit\\platform\\junit-platform-commons\\1.11.4\\junit-platform-commons-1.11.4.jar",
+      "sha256": "9edd969b0d0670c54105bc91ae79bd1c6f503e12115faba82073b84c86bbc334",
+      "actualSha256": "9edd969b0d0670c54105bc91ae79bd1c6f503e12115faba82073b84c86bbc334"
+    },
+    {
+      "path": "C:\\Users\\CodexSandboxOffline\\.m2\\repository\\org\\apiguardian\\apiguardian-api\\1.1.2\\apiguardian-api-1.1.2.jar",
+      "sha256": "b509448ac506d607319f182537f0b35d71007582ec741832a1f111e5b5b70b38",
+      "actualSha256": "b509448ac506d607319f182537f0b35d71007582ec741832a1f111e5b5b70b38"
+    }
+  ],
+  "captureArtifacts": [
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-ibm-cash\\runtime.json",
+      "sha256": "bd5f5a4f6bb622a02f09e86942714290ad4f879e1cf329cef080e8fc12d652c9"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-ibm-cash\\responses.jsonl",
+      "sha256": "74c9c2726b670567bc7794d696c4ccd7cac637826cb232073545bf3f7d350d92"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-ibm-liquidity\\runtime.json",
+      "sha256": "01b3a34919700d29819d4ce353961a6a7983fb7a87023b804982c623bccc8bef"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-ibm-liquidity\\responses.jsonl",
+      "sha256": "b018a597c1a30e2d1552d675e168cb52e613267bb1a1b3c3710e8db08c8ae9eb"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-jnj-cash\\runtime.json",
+      "sha256": "fa48d3cd216fcf2c53e358afcb95691f8d7ad9f4c6f652cb3c2020ae72e68703"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-jnj-cash\\responses.jsonl",
+      "sha256": "021d6ab71c841aa32cc42a2c937bc79158c79c031c20582ae732a5982b350926"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-jnj-liquidity\\runtime.json",
+      "sha256": "8de683cd634cdc61687cf7ed1f6c3d1ddc27afb5c95c5eb8bf1308a7d37a1c7d"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-jnj-liquidity\\responses.jsonl",
+      "sha256": "a1811d09f263479970b0e3ebd7917dfd3ebe03585cc5b926c6ddddfb6a9d63ea"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-pep-control\\runtime.json",
+      "sha256": "05649385faabf58126b69ebc337f05fb382bc0fe4ba524891d67390d5ddb5ae6"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-pep-control\\responses.jsonl",
+      "sha256": "0f4d3dd76ace6c39861d4a986fc81bd733d6ba8d8514efd3a19ccf3645aea4b2"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-tgt-control\\runtime.json",
+      "sha256": "9f23e88abe9c940f8af2adff565f72dce5961d59e1fc610cb54ca12e8b782631"
+    },
+    {
+      "path": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-tgt-control\\responses.jsonl",
+      "sha256": "c8e25047a0582c27e92fd6a1e2e132feca555321645ee9f92ced5210c83d23c9"
+    }
+  ],
+  "cases": [
+    {
+      "runId": "repair-b8192-ibm-cash-1-1",
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "bundleId": "baseline-v1",
+      "repeatId": 1,
+      "shard": "repair-b8192-ibm-cash",
+      "status": "PASS",
+      "errors": [],
+      "responsePresent": true,
+      "stages": {
+        "analysis": {
+          "status": "PASS",
+          "errors": [],
+          "executionStatus": "COMPLETED",
+          "errorCode": null,
+          "answerSha256": "7d63a28dff7177e7d0c1cdf986b58c38fcd6f46fc8dbdedf5f9e58b4ab6a7aa5",
+          "modelIdentity": {
+            "request": {
+              "clientDefaults": {
+                "enableThinking": true,
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "temperature": 0.7,
+                "thinkingBudget": 8192,
+                "unknownProviderRevision": true
+              },
+              "scope": "fundamentals-analysis",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "modelName": "qwen3.8-max",
+              "kind": "model-invocation",
+              "modelTier": "STANDARD"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "invocationCount": 1,
+          "invocations": [
+            {
+              "clientDefaults": {
+                "enableThinking": true,
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "systemPromptHash": "d67bcfd6c689ed7abaf67f0b700cebd401d72f03a166783ec2e8dec0f7b64d38",
+                "temperature": 0.7,
+                "thinkingBudget": 8192,
+                "unknownProviderRevision": true
+              },
+              "actualSystemPromptSha256": "d67bcfd6c689ed7abaf67f0b700cebd401d72f03a166783ec2e8dec0f7b64d38",
+              "scope": "fundamentals-analysis",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "modelName": "qwen3.8-max",
+              "kind": "model-invocation",
+              "modelTier": "STANDARD"
+            }
+          ],
+          "providerUsage": [
+            {
+              "inputTokens": 2065,
+              "usageSource": "PROVIDER",
+              "totalTokens": 5456,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "actualModel": "qwen3.8-max",
+              "outputTokens": 3391,
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage"
+            }
+          ],
+          "durationMs": 72826,
+          "inputTokens": 2065,
+          "outputTokens": 3391,
+          "totalTokens": 5456,
+          "thinkingOptions": [
+            {
+              "enableThinking": true,
+              "thinkingBudget": 8192
+            }
+          ],
+          "thinkingOptionsVerified": true
+        },
+        "finalAnswer": {
+          "status": "PASS",
+          "errors": [],
+          "executionStatus": "COMPLETED",
+          "errorCode": null,
+          "answerSha256": "c324d9ef73c657eed3594a4bde1b9044205eb13d447ccd9dca233281165f5268",
+          "modelIdentity": {
+            "request": {
+              "configurationSource": "REQUEST_OPTIONS",
+              "maxOutputTokens": 4096,
+              "temperature": 0.7,
+              "modelName": "qwen3.8-max",
+              "modelTier": "STANDARD",
+              "enableThinking": true,
+              "kind": "model-invocation",
+              "schemaVersion": 1,
+              "thinkingBudget": 8192,
+              "scope": "final-answer"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "invocationCount": 1,
+          "invocations": [
+            {
+              "configurationSource": "REQUEST_OPTIONS",
+              "maxOutputTokens": 4096,
+              "temperature": 0.7,
+              "modelName": "qwen3.8-max",
+              "modelTier": "STANDARD",
+              "enableThinking": true,
+              "kind": "model-invocation",
+              "schemaVersion": 1,
+              "thinkingBudget": 8192,
+              "scope": "final-answer"
+            }
+          ],
+          "providerUsage": [
+            {
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 4587,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 2366,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 6953
+            }
+          ],
+          "durationMs": 46800,
+          "inputTokens": 4587,
+          "outputTokens": 2366,
+          "totalTokens": 6953,
+          "thinkingOptions": [
+            {
+              "enableThinking": true,
+              "thinkingBudget": 8192
+            }
+          ],
+          "thinkingOptionsVerified": true
+        }
+      },
+      "requestPresent": true,
+      "failurePresent": false,
+      "responsePath": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-ibm-cash\\repair-b8192-ibm-cash-1-1.response.json",
+      "responseSha256": "7a674c4e2ab739c938004a2d22aae3253d68fa47aa28850fec879984d397ec69",
+      "runtimeThinkingOptions": {
+        "enableThinking": true,
+        "thinkingBudget": 8192
+      }
+    },
+    {
+      "runId": "repair-b8192-ibm-liquidity-1-1",
+      "caseId": "ibm-fy2025q3-liquidity",
+      "bundleId": "baseline-v1",
+      "repeatId": 1,
+      "shard": "repair-b8192-ibm-liquidity",
+      "status": "PASS",
+      "errors": [],
+      "responsePresent": true,
+      "stages": {
+        "analysis": {
+          "status": "PASS",
+          "errors": [],
+          "executionStatus": "COMPLETED",
+          "errorCode": null,
+          "answerSha256": "8c671f24277d959bf83f100b0a9c1df8cf280fdbf5fe5647f19ae2e0207dbbaa",
+          "modelIdentity": {
+            "request": {
+              "scope": "fundamentals-analysis",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "modelName": "qwen3.8-max",
+              "kind": "model-invocation",
+              "modelTier": "STANDARD",
+              "clientDefaults": {
+                "enableThinking": true,
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "temperature": 0.7,
+                "thinkingBudget": 8192,
+                "unknownProviderRevision": true
+              }
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "invocationCount": 1,
+          "invocations": [
+            {
+              "scope": "fundamentals-analysis",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "modelName": "qwen3.8-max",
+              "kind": "model-invocation",
+              "modelTier": "STANDARD",
+              "clientDefaults": {
+                "enableThinking": true,
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "systemPromptHash": "d67bcfd6c689ed7abaf67f0b700cebd401d72f03a166783ec2e8dec0f7b64d38",
+                "temperature": 0.7,
+                "thinkingBudget": 8192,
+                "unknownProviderRevision": true
+              },
+              "actualSystemPromptSha256": "d67bcfd6c689ed7abaf67f0b700cebd401d72f03a166783ec2e8dec0f7b64d38"
+            }
+          ],
+          "providerUsage": [
+            {
+              "usageSource": "PROVIDER",
+              "totalTokens": 6172,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "actualModel": "qwen3.8-max",
+              "outputTokens": 3905,
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage",
+              "inputTokens": 2267
+            }
+          ],
+          "durationMs": 77419,
+          "inputTokens": 2267,
+          "outputTokens": 3905,
+          "totalTokens": 6172,
+          "thinkingOptions": [
+            {
+              "enableThinking": true,
+              "thinkingBudget": 8192
+            }
+          ],
+          "thinkingOptionsVerified": true
+        },
+        "finalAnswer": {
+          "status": "PASS",
+          "errors": [],
+          "executionStatus": "COMPLETED",
+          "errorCode": null,
+          "answerSha256": "4b1cf89398a25ef618c53546f9182986f57406a6df6778628924c3e8567a851c",
+          "modelIdentity": {
+            "request": {
+              "configurationSource": "REQUEST_OPTIONS",
+              "maxOutputTokens": 4096,
+              "temperature": 0.7,
+              "modelName": "qwen3.8-max",
+              "modelTier": "STANDARD",
+              "enableThinking": true,
+              "kind": "model-invocation",
+              "schemaVersion": 1,
+              "thinkingBudget": 8192,
+              "scope": "final-answer"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "invocationCount": 1,
+          "invocations": [
+            {
+              "configurationSource": "REQUEST_OPTIONS",
+              "maxOutputTokens": 4096,
+              "temperature": 0.7,
+              "modelName": "qwen3.8-max",
+              "modelTier": "STANDARD",
+              "enableThinking": true,
+              "kind": "model-invocation",
+              "schemaVersion": 1,
+              "thinkingBudget": 8192,
+              "scope": "final-answer"
+            }
+          ],
+          "providerUsage": [
+            {
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 2559,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 7767,
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 5208
+            }
+          ],
+          "durationMs": 50307,
+          "inputTokens": 5208,
+          "outputTokens": 2559,
+          "totalTokens": 7767,
+          "thinkingOptions": [
+            {
+              "enableThinking": true,
+              "thinkingBudget": 8192
+            }
+          ],
+          "thinkingOptionsVerified": true
+        }
+      },
+      "requestPresent": true,
+      "failurePresent": false,
+      "responsePath": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-ibm-liquidity\\repair-b8192-ibm-liquidity-1-1.response.json",
+      "responseSha256": "bc1a2fa15be25a00914891001d3c64af8dd6ca42a84191035ab15e588349bbd1",
+      "runtimeThinkingOptions": {
+        "enableThinking": true,
+        "thinkingBudget": 8192
+      }
+    },
+    {
+      "runId": "repair-b8192-jnj-cash-1-1",
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "bundleId": "baseline-v1",
+      "repeatId": 1,
+      "shard": "repair-b8192-jnj-cash",
+      "status": "PASS",
+      "errors": [],
+      "responsePresent": true,
+      "stages": {
+        "analysis": {
+          "status": "PASS",
+          "errors": [],
+          "executionStatus": "COMPLETED",
+          "errorCode": null,
+          "answerSha256": "1e2790c0cc7d7745cb562de1e7be01eae586deac4c4adcdd7f30e6f06ec8251a",
+          "modelIdentity": {
+            "request": {
+              "scope": "fundamentals-analysis",
+              "clientDefaults": {
+                "enableThinking": true,
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "temperature": 0.7,
+                "thinkingBudget": 8192,
+                "unknownProviderRevision": true
+              },
+              "modelTier": "STANDARD",
+              "kind": "model-invocation",
+              "modelName": "qwen3.8-max",
+              "configurationSource": "CLIENT_DEFAULTS"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "invocationCount": 1,
+          "invocations": [
+            {
+              "scope": "fundamentals-analysis",
+              "actualSystemPromptSha256": "d67bcfd6c689ed7abaf67f0b700cebd401d72f03a166783ec2e8dec0f7b64d38",
+              "clientDefaults": {
+                "enableThinking": true,
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "systemPromptHash": "d67bcfd6c689ed7abaf67f0b700cebd401d72f03a166783ec2e8dec0f7b64d38",
+                "temperature": 0.7,
+                "thinkingBudget": 8192,
+                "unknownProviderRevision": true
+              },
+              "modelTier": "STANDARD",
+              "kind": "model-invocation",
+              "modelName": "qwen3.8-max",
+              "configurationSource": "CLIENT_DEFAULTS"
+            }
+          ],
+          "providerUsage": [
+            {
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "totalTokens": 6259,
+              "outputTokens": 4263,
+              "inputTokens": 1996,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER"
+            }
+          ],
+          "durationMs": 93356,
+          "inputTokens": 1996,
+          "outputTokens": 4263,
+          "totalTokens": 6259,
+          "thinkingOptions": [
+            {
+              "enableThinking": true,
+              "thinkingBudget": 8192
+            }
+          ],
+          "thinkingOptionsVerified": true
+        },
+        "finalAnswer": {
+          "status": "PASS",
+          "errors": [],
+          "executionStatus": "COMPLETED",
+          "errorCode": null,
+          "answerSha256": "d899f5503fd7b1c31181c19c4b1cf25109aabaed18c9cc855f6e81a4eccb8974",
+          "modelIdentity": {
+            "request": {
+              "modelName": "qwen3.8-max",
+              "temperature": 0.7,
+              "maxOutputTokens": 4096,
+              "configurationSource": "REQUEST_OPTIONS",
+              "scope": "final-answer",
+              "thinkingBudget": 8192,
+              "schemaVersion": 1,
+              "kind": "model-invocation",
+              "enableThinking": true,
+              "modelTier": "STANDARD"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "invocationCount": 1,
+          "invocations": [
+            {
+              "modelName": "qwen3.8-max",
+              "temperature": 0.7,
+              "maxOutputTokens": 4096,
+              "configurationSource": "REQUEST_OPTIONS",
+              "scope": "final-answer",
+              "thinkingBudget": 8192,
+              "schemaVersion": 1,
+              "kind": "model-invocation",
+              "enableThinking": true,
+              "modelTier": "STANDARD"
+            }
+          ],
+          "providerUsage": [
+            {
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 5010,
+              "scope": "final-answer",
+              "usageSource": "PROVIDER",
+              "totalTokens": 7186,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 2176,
+              "kind": "model-usage"
+            }
+          ],
+          "durationMs": 43140,
+          "inputTokens": 5010,
+          "outputTokens": 2176,
+          "totalTokens": 7186,
+          "thinkingOptions": [
+            {
+              "enableThinking": true,
+              "thinkingBudget": 8192
+            }
+          ],
+          "thinkingOptionsVerified": true
+        }
+      },
+      "requestPresent": true,
+      "failurePresent": false,
+      "responsePath": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-jnj-cash\\repair-b8192-jnj-cash-1-1.response.json",
+      "responseSha256": "5450f29c508fba200ed1f438aff42753079acde06d10fafa6d86f59bae87d506",
+      "runtimeThinkingOptions": {
+        "enableThinking": true,
+        "thinkingBudget": 8192
+      }
+    },
+    {
+      "runId": "repair-b8192-jnj-liquidity-1-1",
+      "caseId": "jnj-fy2025q3-liquidity",
+      "bundleId": "baseline-v1",
+      "repeatId": 1,
+      "shard": "repair-b8192-jnj-liquidity",
+      "status": "PASS",
+      "errors": [],
+      "responsePresent": true,
+      "stages": {
+        "analysis": {
+          "status": "PASS",
+          "errors": [],
+          "executionStatus": "COMPLETED",
+          "errorCode": null,
+          "answerSha256": "4b2725db0e4cac783296c1a65a39e74008aec86a9e3ca6df87757742a265a4a4",
+          "modelIdentity": {
+            "request": {
+              "configurationSource": "CLIENT_DEFAULTS",
+              "scope": "fundamentals-analysis",
+              "clientDefaults": {
+                "enableThinking": true,
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "temperature": 0.7,
+                "thinkingBudget": 8192,
+                "unknownProviderRevision": true
+              },
+              "modelTier": "STANDARD",
+              "kind": "model-invocation",
+              "modelName": "qwen3.8-max"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "invocationCount": 1,
+          "invocations": [
+            {
+              "configurationSource": "CLIENT_DEFAULTS",
+              "scope": "fundamentals-analysis",
+              "actualSystemPromptSha256": "d67bcfd6c689ed7abaf67f0b700cebd401d72f03a166783ec2e8dec0f7b64d38",
+              "clientDefaults": {
+                "enableThinking": true,
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "systemPromptHash": "d67bcfd6c689ed7abaf67f0b700cebd401d72f03a166783ec2e8dec0f7b64d38",
+                "temperature": 0.7,
+                "thinkingBudget": 8192,
+                "unknownProviderRevision": true
+              },
+              "modelTier": "STANDARD",
+              "kind": "model-invocation",
+              "modelName": "qwen3.8-max"
+            }
+          ],
+          "providerUsage": [
+            {
+              "outputTokens": 4460,
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "totalTokens": 6457,
+              "actualModel": "qwen3.8-max",
+              "inputTokens": 1997,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis"
+            }
+          ],
+          "durationMs": 82848,
+          "inputTokens": 1997,
+          "outputTokens": 4460,
+          "totalTokens": 6457,
+          "thinkingOptions": [
+            {
+              "enableThinking": true,
+              "thinkingBudget": 8192
+            }
+          ],
+          "thinkingOptionsVerified": true
+        },
+        "finalAnswer": {
+          "status": "PASS",
+          "errors": [],
+          "executionStatus": "COMPLETED",
+          "errorCode": null,
+          "answerSha256": "93d018d5be464ffa0d7e66246ccfcb48a48605ef68820c963a7f30650b9154cb",
+          "modelIdentity": {
+            "request": {
+              "modelTier": "STANDARD",
+              "modelName": "qwen3.8-max",
+              "temperature": 0.7,
+              "maxOutputTokens": 4096,
+              "configurationSource": "REQUEST_OPTIONS",
+              "scope": "final-answer",
+              "thinkingBudget": 8192,
+              "schemaVersion": 1,
+              "kind": "model-invocation",
+              "enableThinking": true
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "invocationCount": 1,
+          "invocations": [
+            {
+              "modelTier": "STANDARD",
+              "modelName": "qwen3.8-max",
+              "temperature": 0.7,
+              "maxOutputTokens": 4096,
+              "configurationSource": "REQUEST_OPTIONS",
+              "scope": "final-answer",
+              "thinkingBudget": 8192,
+              "schemaVersion": 1,
+              "kind": "model-invocation",
+              "enableThinking": true
+            }
+          ],
+          "providerUsage": [
+            {
+              "outputTokens": 1937,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4843,
+              "scope": "final-answer",
+              "usageSource": "PROVIDER",
+              "totalTokens": 6780,
+              "providerModelName": "qwen3.8-max"
+            }
+          ],
+          "durationMs": 38934,
+          "inputTokens": 4843,
+          "outputTokens": 1937,
+          "totalTokens": 6780,
+          "thinkingOptions": [
+            {
+              "enableThinking": true,
+              "thinkingBudget": 8192
+            }
+          ],
+          "thinkingOptionsVerified": true
+        }
+      },
+      "requestPresent": true,
+      "failurePresent": false,
+      "responsePath": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-jnj-liquidity\\repair-b8192-jnj-liquidity-1-1.response.json",
+      "responseSha256": "0d7dcfea9f0b7df263887907b5e93b832353275dbedd269949b210b257326fcb",
+      "runtimeThinkingOptions": {
+        "enableThinking": true,
+        "thinkingBudget": 8192
+      }
+    },
+    {
+      "runId": "repair-b8192-pep-control-1-1",
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "bundleId": "baseline-v1",
+      "repeatId": 1,
+      "shard": "repair-b8192-pep-control",
+      "status": "PASS",
+      "errors": [],
+      "responsePresent": true,
+      "stages": {
+        "analysis": {
+          "status": "PASS",
+          "errors": [],
+          "executionStatus": "COMPLETED",
+          "errorCode": null,
+          "answerSha256": "2d0ff5725fbb8f7bd3979c2336a1cbc9a19eca9c82e1be34a676aac1277f0bb5",
+          "modelIdentity": {
+            "request": {
+              "modelTier": "STANDARD",
+              "kind": "model-invocation",
+              "modelName": "qwen3.8-max",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "scope": "fundamentals-analysis",
+              "clientDefaults": {
+                "enableThinking": true,
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "temperature": 0.7,
+                "thinkingBudget": 8192,
+                "unknownProviderRevision": true
+              }
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "invocationCount": 1,
+          "invocations": [
+            {
+              "modelTier": "STANDARD",
+              "kind": "model-invocation",
+              "modelName": "qwen3.8-max",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "scope": "fundamentals-analysis",
+              "actualSystemPromptSha256": "d67bcfd6c689ed7abaf67f0b700cebd401d72f03a166783ec2e8dec0f7b64d38",
+              "clientDefaults": {
+                "enableThinking": true,
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "systemPromptHash": "d67bcfd6c689ed7abaf67f0b700cebd401d72f03a166783ec2e8dec0f7b64d38",
+                "temperature": 0.7,
+                "thinkingBudget": 8192,
+                "unknownProviderRevision": true
+              }
+            }
+          ],
+          "providerUsage": [
+            {
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "outputTokens": 2440,
+              "totalTokens": 5026,
+              "inputTokens": 2586
+            }
+          ],
+          "durationMs": 55266,
+          "inputTokens": 2586,
+          "outputTokens": 2440,
+          "totalTokens": 5026,
+          "thinkingOptions": [
+            {
+              "enableThinking": true,
+              "thinkingBudget": 8192
+            }
+          ],
+          "thinkingOptionsVerified": true
+        },
+        "finalAnswer": {
+          "status": "PASS",
+          "errors": [],
+          "executionStatus": "COMPLETED",
+          "errorCode": null,
+          "answerSha256": "05dd3b90e68a25216ba44fb9b2bc90494f9188deb3920fa33332682f4bccf88e",
+          "modelIdentity": {
+            "request": {
+              "scope": "final-answer",
+              "thinkingBudget": 8192,
+              "schemaVersion": 1,
+              "kind": "model-invocation",
+              "enableThinking": true,
+              "modelTier": "STANDARD",
+              "modelName": "qwen3.8-max",
+              "temperature": 0.7,
+              "maxOutputTokens": 4096,
+              "configurationSource": "REQUEST_OPTIONS"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "invocationCount": 1,
+          "invocations": [
+            {
+              "scope": "final-answer",
+              "thinkingBudget": 8192,
+              "schemaVersion": 1,
+              "kind": "model-invocation",
+              "enableThinking": true,
+              "modelTier": "STANDARD",
+              "modelName": "qwen3.8-max",
+              "temperature": 0.7,
+              "maxOutputTokens": 4096,
+              "configurationSource": "REQUEST_OPTIONS"
+            }
+          ],
+          "providerUsage": [
+            {
+              "usageSource": "PROVIDER",
+              "totalTokens": 6256,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 1436,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4820,
+              "scope": "final-answer"
+            }
+          ],
+          "durationMs": 27994,
+          "inputTokens": 4820,
+          "outputTokens": 1436,
+          "totalTokens": 6256,
+          "thinkingOptions": [
+            {
+              "enableThinking": true,
+              "thinkingBudget": 8192
+            }
+          ],
+          "thinkingOptionsVerified": true
+        }
+      },
+      "requestPresent": true,
+      "failurePresent": false,
+      "responsePath": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-pep-control\\repair-b8192-pep-control-1-1.response.json",
+      "responseSha256": "a5803046f10596cef6e8ebc3fd35db394ff9e1a541cd8987466002b9daa8192b",
+      "runtimeThinkingOptions": {
+        "enableThinking": true,
+        "thinkingBudget": 8192
+      }
+    },
+    {
+      "runId": "repair-b8192-tgt-control-1-1",
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "bundleId": "baseline-v1",
+      "repeatId": 1,
+      "shard": "repair-b8192-tgt-control",
+      "status": "PASS",
+      "errors": [],
+      "responsePresent": true,
+      "stages": {
+        "analysis": {
+          "status": "PASS",
+          "errors": [],
+          "executionStatus": "COMPLETED",
+          "errorCode": null,
+          "answerSha256": "2d8f6ba153180473c9f3055c1e87208c5aae06a1041bfc9e013feb7cab6d2b7d",
+          "modelIdentity": {
+            "request": {
+              "clientDefaults": {
+                "enableThinking": true,
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "temperature": 0.7,
+                "thinkingBudget": 8192,
+                "unknownProviderRevision": true
+              },
+              "modelTier": "STANDARD",
+              "kind": "model-invocation",
+              "modelName": "qwen3.8-max",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "scope": "fundamentals-analysis"
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "invocationCount": 1,
+          "invocations": [
+            {
+              "actualSystemPromptSha256": "d67bcfd6c689ed7abaf67f0b700cebd401d72f03a166783ec2e8dec0f7b64d38",
+              "clientDefaults": {
+                "enableThinking": true,
+                "maxTokens": 4096,
+                "model": "qwen3.8-max",
+                "scope": "CLIENT_DEFAULTS",
+                "systemPromptHash": "d67bcfd6c689ed7abaf67f0b700cebd401d72f03a166783ec2e8dec0f7b64d38",
+                "temperature": 0.7,
+                "thinkingBudget": 8192,
+                "unknownProviderRevision": true
+              },
+              "modelTier": "STANDARD",
+              "kind": "model-invocation",
+              "modelName": "qwen3.8-max",
+              "configurationSource": "CLIENT_DEFAULTS",
+              "scope": "fundamentals-analysis"
+            }
+          ],
+          "providerUsage": [
+            {
+              "outputTokens": 3455,
+              "totalTokens": 5155,
+              "inputTokens": 1700,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT"
+            }
+          ],
+          "durationMs": 72420,
+          "inputTokens": 1700,
+          "outputTokens": 3455,
+          "totalTokens": 5155,
+          "thinkingOptions": [
+            {
+              "enableThinking": true,
+              "thinkingBudget": 8192
+            }
+          ],
+          "thinkingOptionsVerified": true
+        },
+        "finalAnswer": {
+          "status": "PASS",
+          "errors": [],
+          "executionStatus": "COMPLETED",
+          "errorCode": null,
+          "answerSha256": "323035a36f5a538f6c76e5682031213b5b1970daa288772d4ef31985f955575e",
+          "modelIdentity": {
+            "request": {
+              "maxOutputTokens": 4096,
+              "configurationSource": "REQUEST_OPTIONS",
+              "scope": "final-answer",
+              "thinkingBudget": 8192,
+              "schemaVersion": 1,
+              "kind": "model-invocation",
+              "enableThinking": true,
+              "modelTier": "STANDARD",
+              "modelName": "qwen3.8-max",
+              "temperature": 0.7
+            },
+            "actualModel": "qwen3.8-max",
+            "timeoutSeconds": 180
+          },
+          "invocationCount": 1,
+          "invocations": [
+            {
+              "maxOutputTokens": 4096,
+              "configurationSource": "REQUEST_OPTIONS",
+              "scope": "final-answer",
+              "thinkingBudget": 8192,
+              "schemaVersion": 1,
+              "kind": "model-invocation",
+              "enableThinking": true,
+              "modelTier": "STANDARD",
+              "modelName": "qwen3.8-max",
+              "temperature": 0.7
+            }
+          ],
+          "providerUsage": [
+            {
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4676,
+              "scope": "final-answer",
+              "usageSource": "PROVIDER",
+              "totalTokens": 7008,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 2332,
+              "kind": "model-usage",
+              "schemaVersion": 1
+            }
+          ],
+          "durationMs": 45087,
+          "inputTokens": 4676,
+          "outputTokens": 2332,
+          "totalTokens": 7008,
+          "thinkingOptions": [
+            {
+              "enableThinking": true,
+              "thinkingBudget": 8192
+            }
+          ],
+          "thinkingOptionsVerified": true
+        }
+      },
+      "requestPresent": true,
+      "failurePresent": false,
+      "responsePath": "evals\\evolution\\batch-repair-20261002\\budget8192\\raw-repair-b8192-tgt-control\\repair-b8192-tgt-control-1-1.response.json",
+      "responseSha256": "696daad3e7cc92bc16c6a31fae1643b098f9a1a5af310e6f0f7f81510d5795fd",
+      "runtimeThinkingOptions": {
+        "enableThinking": true,
+        "thinkingBudget": 8192
+      }
+    }
+  ],
+  "auditAdapterSha256": "dc61ec266161e2c322482881fe3c72a597a12dc2e62a505c47ff1e56305106bb",
+  "baselineAuditSha256": "b74d2df69c976867b805febb51c2f8dc46c15c5c5579ee574856c14eccc91ea9",
+  "requestObservationScope": "NATIVE_CLIENT_DEFAULTS_AND_FINAL_REQUEST_OPTIONS; HTTP serialization is covered by StandardThinkingBudgetHttpTest",
+  "reasoningTokenBreakdown": "NO_DATA: native business response records retain aggregate provider usage only",
+  "comparisonScope": "HISTORICAL_DIAGNOSTIC_NOT_RANDOMIZED; failed baseline durations are censored and missing usage remains unknown",
+  "comparisons": [
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "baselineRunId": "development-ibm-2-1",
+      "repairRunId": "repair-b8192-ibm-cash-1-1",
+      "baselineResponseSha256": "b20f9e023d08233bf8d17eac8344a862e3f21e262d3f1a433578ebf2e0ac775f",
+      "repairResponseSha256": "7a674c4e2ab739c938004a2d22aae3253d68fa47aa28850fec879984d397ec69",
+      "sourceCaseMatchesBaseline": true,
+      "group": "FORMER_TIMEOUT",
+      "baselineExecutionStatus": "FAIL",
+      "repairExecutionStatus": "PASS",
+      "stages": {
+        "analysis": {
+          "baselineExecutionStatus": "FAILED",
+          "repairExecutionStatus": "COMPLETED",
+          "baselineDurationMs": 180008,
+          "repairDurationMs": 72826,
+          "baselineDurationCensoredByTimeout": true,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [
+            {
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "usageSource": "NO_DATA",
+              "providerCompletionUnknown": true
+            }
+          ],
+          "repairProviderUsage": [
+            {
+              "inputTokens": 2065,
+              "usageSource": "PROVIDER",
+              "totalTokens": 5456,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "actualModel": "qwen3.8-max",
+              "outputTokens": 3391,
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage"
+            }
+          ]
+        },
+        "finalAnswer": {
+          "baselineExecutionStatus": "NOT_EXECUTED",
+          "repairExecutionStatus": "COMPLETED",
+          "baselineDurationMs": null,
+          "repairDurationMs": 46800,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [],
+          "repairProviderUsage": [
+            {
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 4587,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 2366,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 6953
+            }
+          ]
+        }
+      },
+      "analysisPromptMatchesBaseline": true
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "baselineRunId": "development-unsubmitted-ibm-1-1",
+      "repairRunId": "repair-b8192-ibm-liquidity-1-1",
+      "baselineResponseSha256": "af0fb0021a53133ba01740f85f0f0e504c92e2ff7eb5713c63a8096093e80c9f",
+      "repairResponseSha256": "bc1a2fa15be25a00914891001d3c64af8dd6ca42a84191035ab15e588349bbd1",
+      "sourceCaseMatchesBaseline": true,
+      "group": "FORMER_TIMEOUT",
+      "baselineExecutionStatus": "FAIL",
+      "repairExecutionStatus": "PASS",
+      "stages": {
+        "analysis": {
+          "baselineExecutionStatus": "FAILED",
+          "repairExecutionStatus": "COMPLETED",
+          "baselineDurationMs": 180007,
+          "repairDurationMs": 77419,
+          "baselineDurationCensoredByTimeout": true,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [
+            {
+              "usageSource": "NO_DATA",
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage",
+              "providerCompletionUnknown": true
+            }
+          ],
+          "repairProviderUsage": [
+            {
+              "usageSource": "PROVIDER",
+              "totalTokens": 6172,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "actualModel": "qwen3.8-max",
+              "outputTokens": 3905,
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage",
+              "inputTokens": 2267
+            }
+          ]
+        },
+        "finalAnswer": {
+          "baselineExecutionStatus": "NOT_EXECUTED",
+          "repairExecutionStatus": "COMPLETED",
+          "baselineDurationMs": null,
+          "repairDurationMs": 50307,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [],
+          "repairProviderUsage": [
+            {
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 2559,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 7767,
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 5208
+            }
+          ]
+        }
+      },
+      "analysisPromptMatchesBaseline": true
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "baselineRunId": "development-jnj-2-1",
+      "repairRunId": "repair-b8192-jnj-cash-1-1",
+      "baselineResponseSha256": "97ad35deecbf9aa3bd03fe6e82407db2e386218d47d8dd79ea8fba8709c727d7",
+      "repairResponseSha256": "5450f29c508fba200ed1f438aff42753079acde06d10fafa6d86f59bae87d506",
+      "sourceCaseMatchesBaseline": true,
+      "group": "FORMER_TIMEOUT",
+      "baselineExecutionStatus": "FAIL",
+      "repairExecutionStatus": "PASS",
+      "stages": {
+        "analysis": {
+          "baselineExecutionStatus": "FAILED",
+          "repairExecutionStatus": "COMPLETED",
+          "baselineDurationMs": 180005,
+          "repairDurationMs": 93356,
+          "baselineDurationCensoredByTimeout": true,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [
+            {
+              "providerCompletionUnknown": true,
+              "usageSource": "NO_DATA",
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage"
+            }
+          ],
+          "repairProviderUsage": [
+            {
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "totalTokens": 6259,
+              "outputTokens": 4263,
+              "inputTokens": 1996,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER"
+            }
+          ]
+        },
+        "finalAnswer": {
+          "baselineExecutionStatus": "NOT_EXECUTED",
+          "repairExecutionStatus": "COMPLETED",
+          "baselineDurationMs": null,
+          "repairDurationMs": 43140,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [],
+          "repairProviderUsage": [
+            {
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 5010,
+              "scope": "final-answer",
+              "usageSource": "PROVIDER",
+              "totalTokens": 7186,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 2176,
+              "kind": "model-usage"
+            }
+          ]
+        }
+      },
+      "analysisPromptMatchesBaseline": true
+    },
+    {
+      "caseId": "jnj-fy2025q3-liquidity",
+      "baselineRunId": "development-unsubmitted-jnj-1-1",
+      "repairRunId": "repair-b8192-jnj-liquidity-1-1",
+      "baselineResponseSha256": "0ada9d17f95d7727e4d68d49a0ffd21eab6cc61b8592481f22be8e01b099c6ed",
+      "repairResponseSha256": "0d7dcfea9f0b7df263887907b5e93b832353275dbedd269949b210b257326fcb",
+      "sourceCaseMatchesBaseline": true,
+      "group": "FORMER_TIMEOUT",
+      "baselineExecutionStatus": "FAIL",
+      "repairExecutionStatus": "PASS",
+      "stages": {
+        "analysis": {
+          "baselineExecutionStatus": "FAILED",
+          "repairExecutionStatus": "COMPLETED",
+          "baselineDurationMs": 180006,
+          "repairDurationMs": 82848,
+          "baselineDurationCensoredByTimeout": true,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [
+            {
+              "kind": "model-usage",
+              "providerCompletionUnknown": true,
+              "usageSource": "NO_DATA",
+              "scope": "fundamentals-analysis"
+            }
+          ],
+          "repairProviderUsage": [
+            {
+              "outputTokens": 4460,
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "totalTokens": 6457,
+              "actualModel": "qwen3.8-max",
+              "inputTokens": 1997,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis"
+            }
+          ]
+        },
+        "finalAnswer": {
+          "baselineExecutionStatus": "NOT_EXECUTED",
+          "repairExecutionStatus": "COMPLETED",
+          "baselineDurationMs": null,
+          "repairDurationMs": 38934,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": null,
+          "baselineProviderUsage": [],
+          "repairProviderUsage": [
+            {
+              "outputTokens": 1937,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4843,
+              "scope": "final-answer",
+              "usageSource": "PROVIDER",
+              "totalTokens": 6780,
+              "providerModelName": "qwen3.8-max"
+            }
+          ]
+        }
+      },
+      "analysisPromptMatchesBaseline": true
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "baselineRunId": "development-pep-1-1",
+      "repairRunId": "repair-b8192-pep-control-1-1",
+      "baselineResponseSha256": "122c9ab6e5947dc997e45629169e36afc199dfdb88bf39966bac144b728ebb72",
+      "repairResponseSha256": "a5803046f10596cef6e8ebc3fd35db394ff9e1a541cd8987466002b9daa8192b",
+      "sourceCaseMatchesBaseline": true,
+      "group": "SUCCESSFUL_CONTROL",
+      "baselineExecutionStatus": "PASS",
+      "repairExecutionStatus": "PASS",
+      "stages": {
+        "analysis": {
+          "baselineExecutionStatus": "COMPLETED",
+          "repairExecutionStatus": "COMPLETED",
+          "baselineDurationMs": 93895,
+          "repairDurationMs": 55266,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": -38629,
+          "baselineProviderUsage": [
+            {
+              "usageSource": "PROVIDER",
+              "totalTokens": 7234,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "actualModel": "qwen3.8-max",
+              "outputTokens": 4610,
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage",
+              "inputTokens": 2624
+            }
+          ],
+          "repairProviderUsage": [
+            {
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "outputTokens": 2440,
+              "totalTokens": 5026,
+              "inputTokens": 2586
+            }
+          ]
+        },
+        "finalAnswer": {
+          "baselineExecutionStatus": "COMPLETED",
+          "repairExecutionStatus": "COMPLETED",
+          "baselineDurationMs": 42091,
+          "repairDurationMs": 27994,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": -14097,
+          "baselineProviderUsage": [
+            {
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 2031,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 6746,
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 4715
+            }
+          ],
+          "repairProviderUsage": [
+            {
+              "usageSource": "PROVIDER",
+              "totalTokens": 6256,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 1436,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4820,
+              "scope": "final-answer"
+            }
+          ]
+        }
+      },
+      "analysisPromptMatchesBaseline": true
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "baselineRunId": "development-tgt-2-1",
+      "repairRunId": "repair-b8192-tgt-control-1-1",
+      "baselineResponseSha256": "453e344871b626552cf5343b788c9d1266c623b877a1f08e1dc5c478372423d5",
+      "repairResponseSha256": "696daad3e7cc92bc16c6a31fae1643b098f9a1a5af310e6f0f7f81510d5795fd",
+      "sourceCaseMatchesBaseline": true,
+      "group": "SUCCESSFUL_CONTROL",
+      "baselineExecutionStatus": "PASS",
+      "repairExecutionStatus": "PASS",
+      "stages": {
+        "analysis": {
+          "baselineExecutionStatus": "COMPLETED",
+          "repairExecutionStatus": "COMPLETED",
+          "baselineDurationMs": 156611,
+          "repairDurationMs": 72420,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": -84191,
+          "baselineProviderUsage": [
+            {
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "outputTokens": 6935,
+              "totalTokens": 8673,
+              "inputTokens": 1738
+            }
+          ],
+          "repairProviderUsage": [
+            {
+              "outputTokens": 3455,
+              "totalTokens": 5155,
+              "inputTokens": 1700,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT"
+            }
+          ]
+        },
+        "finalAnswer": {
+          "baselineExecutionStatus": "COMPLETED",
+          "repairExecutionStatus": "COMPLETED",
+          "baselineDurationMs": 93366,
+          "repairDurationMs": 45087,
+          "baselineDurationCensoredByTimeout": false,
+          "completedPairDurationDeltaMs": -48279,
+          "baselineProviderUsage": [
+            {
+              "usageSource": "PROVIDER",
+              "totalTokens": 9300,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 4518,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4782,
+              "scope": "final-answer"
+            }
+          ],
+          "repairProviderUsage": [
+            {
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4676,
+              "scope": "final-answer",
+              "usageSource": "PROVIDER",
+              "totalTokens": 7008,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 2332,
+              "kind": "model-usage",
+              "schemaVersion": 1
+            }
+          ]
+        }
+      },
+      "analysisPromptMatchesBaseline": true
+    }
+  ],
+  "successfulControlPairs": [
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "stage": "analysis",
+      "baselineDurationMs": 93895,
+      "repairDurationMs": 55266,
+      "inputTokens": {
+        "baseline": 2624,
+        "repair": 2586
+      },
+      "outputTokens": {
+        "baseline": 4610,
+        "repair": 2440
+      },
+      "totalTokens": {
+        "baseline": 7234,
+        "repair": 5026
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "stage": "finalAnswer",
+      "baselineDurationMs": 42091,
+      "repairDurationMs": 27994,
+      "inputTokens": {
+        "baseline": 4715,
+        "repair": 4820
+      },
+      "outputTokens": {
+        "baseline": 2031,
+        "repair": 1436
+      },
+      "totalTokens": {
+        "baseline": 6746,
+        "repair": 6256
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "stage": "analysis",
+      "baselineDurationMs": 156611,
+      "repairDurationMs": 72420,
+      "inputTokens": {
+        "baseline": 1738,
+        "repair": 1700
+      },
+      "outputTokens": {
+        "baseline": 6935,
+        "repair": 3455
+      },
+      "totalTokens": {
+        "baseline": 8673,
+        "repair": 5155
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "stage": "finalAnswer",
+      "baselineDurationMs": 93366,
+      "repairDurationMs": 45087,
+      "inputTokens": {
+        "baseline": 4782,
+        "repair": 4676
+      },
+      "outputTokens": {
+        "baseline": 4518,
+        "repair": 2332
+      },
+      "totalTokens": {
+        "baseline": 9300,
+        "repair": 7008
+      }
+    }
+  ],
+  "successfulControlPairTotals": {
+    "stageCount": 4,
+    "baselineDurationMs": 385963,
+    "repairDurationMs": 200767,
+    "inputTokens": {
+      "baseline": 13859,
+      "repair": 13782
+    },
+    "outputTokens": {
+      "baseline": 18094,
+      "repair": 9663
+    },
+    "totalTokens": {
+      "baseline": 31953,
+      "repair": 23445
+    }
+  },
+  "budget4096AuditSha256": "0dbf5c2705a17fd018241af4267fe2a52778090a53fa2a327090e1b5dcd17710",
+  "budget8192AuditAdapterSha256": "aa4591f6aad6dde14e76ba2faa9dffd66c4c19aad8771d95dc027752f0cbcc4a",
+  "budget4096Comparisons": [
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "budget4096RunId": "repair-ibm-cash-1-1",
+      "budget8192RunId": "repair-b8192-ibm-cash-1-1",
+      "budget4096ResponseSha256": "4b02031f907cae9bbc6bf725f85be593d15f2e45b9dc38b74ec444af9a7cf8dd",
+      "budget8192ResponseSha256": "7a674c4e2ab739c938004a2d22aae3253d68fa47aa28850fec879984d397ec69",
+      "stages": {
+        "analysis": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": "COMPLETED",
+          "budget4096DurationMs": 58111,
+          "budget8192DurationMs": 72826,
+          "completedPairDurationDeltaMs": 14715,
+          "budget4096Usage": [
+            {
+              "usageSource": "PROVIDER",
+              "totalTokens": 4830,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "actualModel": "qwen3.8-max",
+              "outputTokens": 2739,
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage",
+              "inputTokens": 2091
+            }
+          ],
+          "budget8192Usage": [
+            {
+              "inputTokens": 2065,
+              "usageSource": "PROVIDER",
+              "totalTokens": 5456,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "actualModel": "qwen3.8-max",
+              "outputTokens": 3391,
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage"
+            }
+          ]
+        },
+        "finalAnswer": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": "COMPLETED",
+          "budget4096DurationMs": 33098,
+          "budget8192DurationMs": 46800,
+          "completedPairDurationDeltaMs": 13702,
+          "budget4096Usage": [
+            {
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 1629,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 6041,
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 4412
+            }
+          ],
+          "budget8192Usage": [
+            {
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 4587,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 2366,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 6953
+            }
+          ]
+        }
+      }
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "budget4096RunId": "repair-ibm-liquidity-1-1",
+      "budget8192RunId": "repair-b8192-ibm-liquidity-1-1",
+      "budget4096ResponseSha256": "0a502dfa83dcdbcee15595d9d11ac0e1c6c2372c4dcfd2b662a0ba1b83f9fc5d",
+      "budget8192ResponseSha256": "bc1a2fa15be25a00914891001d3c64af8dd6ca42a84191035ab15e588349bbd1",
+      "stages": {
+        "analysis": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": "COMPLETED",
+          "budget4096DurationMs": 50167,
+          "budget8192DurationMs": 77419,
+          "completedPairDurationDeltaMs": 27252,
+          "budget4096Usage": [
+            {
+              "actualModel": "qwen3.8-max",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "outputTokens": 2623,
+              "totalTokens": 4916,
+              "usageSource": "PROVIDER",
+              "inputTokens": 2293,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis"
+            }
+          ],
+          "budget8192Usage": [
+            {
+              "usageSource": "PROVIDER",
+              "totalTokens": 6172,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "actualModel": "qwen3.8-max",
+              "outputTokens": 3905,
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage",
+              "inputTokens": 2267
+            }
+          ]
+        },
+        "finalAnswer": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": "COMPLETED",
+          "budget4096DurationMs": 35540,
+          "budget8192DurationMs": 50307,
+          "completedPairDurationDeltaMs": 14767,
+          "budget4096Usage": [
+            {
+              "totalTokens": 6408,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 1925,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4483,
+              "scope": "final-answer",
+              "usageSource": "PROVIDER"
+            }
+          ],
+          "budget8192Usage": [
+            {
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 2559,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 7767,
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 5208
+            }
+          ]
+        }
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "budget4096RunId": "repair-jnj-cash-1-1",
+      "budget8192RunId": "repair-b8192-jnj-cash-1-1",
+      "budget4096ResponseSha256": "9318b1ac2b43a14a785bc0e091aea9a4ef0a1e1c3b36c064ed79378d615c0dd9",
+      "budget8192ResponseSha256": "5450f29c508fba200ed1f438aff42753079acde06d10fafa6d86f59bae87d506",
+      "stages": {
+        "analysis": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": "COMPLETED",
+          "budget4096DurationMs": 83547,
+          "budget8192DurationMs": 93356,
+          "completedPairDurationDeltaMs": 9809,
+          "budget4096Usage": [
+            {
+              "inputTokens": 2022,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "outputTokens": 3896,
+              "totalTokens": 5918
+            }
+          ],
+          "budget8192Usage": [
+            {
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "totalTokens": 6259,
+              "outputTokens": 4263,
+              "inputTokens": 1996,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER"
+            }
+          ]
+        },
+        "finalAnswer": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": "COMPLETED",
+          "budget4096DurationMs": 36615,
+          "budget8192DurationMs": 43140,
+          "completedPairDurationDeltaMs": 6525,
+          "budget4096Usage": [
+            {
+              "inputTokens": 4655,
+              "scope": "final-answer",
+              "usageSource": "PROVIDER",
+              "totalTokens": 6460,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 1805,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT"
+            }
+          ],
+          "budget8192Usage": [
+            {
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 5010,
+              "scope": "final-answer",
+              "usageSource": "PROVIDER",
+              "totalTokens": 7186,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 2176,
+              "kind": "model-usage"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "caseId": "jnj-fy2025q3-liquidity",
+      "budget4096RunId": "repair-jnj-liquidity-1-1",
+      "budget8192RunId": "repair-b8192-jnj-liquidity-1-1",
+      "budget4096ResponseSha256": "7db48c180c98589ca44259b18159f4a8bc2f37a2b1b324f959da4473de1bff0f",
+      "budget8192ResponseSha256": "0d7dcfea9f0b7df263887907b5e93b832353275dbedd269949b210b257326fcb",
+      "stages": {
+        "analysis": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": "COMPLETED",
+          "budget4096DurationMs": 46913,
+          "budget8192DurationMs": 82848,
+          "completedPairDurationDeltaMs": 35935,
+          "budget4096Usage": [
+            {
+              "inputTokens": 2023,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "outputTokens": 2336,
+              "totalTokens": 4359
+            }
+          ],
+          "budget8192Usage": [
+            {
+              "outputTokens": 4460,
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "totalTokens": 6457,
+              "actualModel": "qwen3.8-max",
+              "inputTokens": 1997,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis"
+            }
+          ]
+        },
+        "finalAnswer": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": "COMPLETED",
+          "budget4096DurationMs": 31240,
+          "budget8192DurationMs": 38934,
+          "completedPairDurationDeltaMs": 7694,
+          "budget4096Usage": [
+            {
+              "scope": "final-answer",
+              "usageSource": "PROVIDER",
+              "totalTokens": 5803,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 1738,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4065
+            }
+          ],
+          "budget8192Usage": [
+            {
+              "outputTokens": 1937,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4843,
+              "scope": "final-answer",
+              "usageSource": "PROVIDER",
+              "totalTokens": 6780,
+              "providerModelName": "qwen3.8-max"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "budget4096RunId": "repair-pep-control-1-1",
+      "budget8192RunId": "repair-b8192-pep-control-1-1",
+      "budget4096ResponseSha256": "a98735edc2a80c559dd84b450ef834bf04dc4d55cc54fac87e979adc623e5e34",
+      "budget8192ResponseSha256": "a5803046f10596cef6e8ebc3fd35db394ff9e1a541cd8987466002b9daa8192b",
+      "stages": {
+        "analysis": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": "COMPLETED",
+          "budget4096DurationMs": 46925,
+          "budget8192DurationMs": 55266,
+          "completedPairDurationDeltaMs": 8341,
+          "budget4096Usage": [
+            {
+              "kind": "model-usage",
+              "inputTokens": 2612,
+              "usageSource": "PROVIDER",
+              "totalTokens": 4851,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "actualModel": "qwen3.8-max",
+              "outputTokens": 2239,
+              "scope": "fundamentals-analysis"
+            }
+          ],
+          "budget8192Usage": [
+            {
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "outputTokens": 2440,
+              "totalTokens": 5026,
+              "inputTokens": 2586
+            }
+          ]
+        },
+        "finalAnswer": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": "COMPLETED",
+          "budget4096DurationMs": 30835,
+          "budget8192DurationMs": 27994,
+          "completedPairDurationDeltaMs": -2841,
+          "budget4096Usage": [
+            {
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 4671,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 1645,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 6316
+            }
+          ],
+          "budget8192Usage": [
+            {
+              "usageSource": "PROVIDER",
+              "totalTokens": 6256,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 1436,
+              "kind": "model-usage",
+              "schemaVersion": 1,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4820,
+              "scope": "final-answer"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "budget4096RunId": "repair-tgt-control-1-1",
+      "budget8192RunId": "repair-b8192-tgt-control-1-1",
+      "budget4096ResponseSha256": "7c410209a3ac7f8b139cf14ab50de978e3fefacd1a0ef473696e68391d0ba918",
+      "budget8192ResponseSha256": "696daad3e7cc92bc16c6a31fae1643b098f9a1a5af310e6f0f7f81510d5795fd",
+      "stages": {
+        "analysis": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": "COMPLETED",
+          "budget4096DurationMs": 44325,
+          "budget8192DurationMs": 72420,
+          "completedPairDurationDeltaMs": 28095,
+          "budget4096Usage": [
+            {
+              "scope": "fundamentals-analysis",
+              "kind": "model-usage",
+              "inputTokens": 1726,
+              "actualModel": "qwen3.8-max",
+              "totalTokens": 3906,
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "outputTokens": 2180
+            }
+          ],
+          "budget8192Usage": [
+            {
+              "outputTokens": 3455,
+              "totalTokens": 5155,
+              "inputTokens": 1700,
+              "kind": "model-usage",
+              "scope": "fundamentals-analysis",
+              "actualModel": "qwen3.8-max",
+              "usageSource": "PROVIDER",
+              "usageSemantics": "INVOCATION_SNAPSHOT"
+            }
+          ]
+        },
+        "finalAnswer": {
+          "budget4096Status": "COMPLETED",
+          "budget8192Status": "COMPLETED",
+          "budget4096DurationMs": 28102,
+          "budget8192DurationMs": 45087,
+          "completedPairDurationDeltaMs": 16985,
+          "budget4096Usage": [
+            {
+              "usageSource": "PROVIDER",
+              "scope": "final-answer",
+              "inputTokens": 3700,
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "schemaVersion": 1,
+              "kind": "model-usage",
+              "outputTokens": 1510,
+              "providerModelName": "qwen3.8-max",
+              "totalTokens": 5210
+            }
+          ],
+          "budget8192Usage": [
+            {
+              "usageSemantics": "INVOCATION_SNAPSHOT",
+              "inputTokens": 4676,
+              "scope": "final-answer",
+              "usageSource": "PROVIDER",
+              "totalTokens": 7008,
+              "providerModelName": "qwen3.8-max",
+              "outputTokens": 2332,
+              "kind": "model-usage",
+              "schemaVersion": 1
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

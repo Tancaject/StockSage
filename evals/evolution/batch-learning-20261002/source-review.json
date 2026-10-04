@@ -1,0 +1,4202 @@
+{
+  "schema": "batch_learning_source_review_v1",
+  "status": "PASS",
+  "reviewer": "independent-ai-batch-contract-audit",
+  "reviewedAt": "2026-10-02T08:24:31.612151+00:00",
+  "humanReviewed": false,
+  "reviewAuthority": "AI_OFFLINE_TRIAL_NOT_HUMAN_GOLD",
+  "businessOutputsRead": false,
+  "candidateGenerationParticipated": false,
+  "providerModelCalls": 0,
+  "datasetSnapshotSha256": "ffd274827ef3e4a097d4066f6e7f3bf3cf03c137780e1dce0871166a9c4f3fbc",
+  "reviewScope": "All 24 pre-run task definitions, 160 raw facts, 106 derivations and query-specific required points; official source snapshots and original filing SEC XBRL cross-checks.",
+  "methods": [
+    "Read official HTML rows and PDF statement pages independently of proposed gold.",
+    "Match raw amounts, semantic XBRL tags and exact fiscal periods to FY2025 Q2/Q3 original 10-Q facts.",
+    "Recalculate all derivations using Decimal and check gross-capex sign conventions.",
+    "Review required points against each actual question, not against extra desirable analysis.",
+    "Bind downloaded source bytes, extracted source text and visible evidence; check issuer split separation."
+  ],
+  "summary": {
+    "caseCount": 24,
+    "developmentCases": 12,
+    "validationCases": 12,
+    "rawFactCount": 160,
+    "secExactPeriodAmountMatches": 159,
+    "officialDirectTableOnlyFacts": 1,
+    "derivationCount": 106,
+    "sourceReferenceCount": 30,
+    "unresolvedIssueCount": 0
+  },
+  "gradingBoundaries": {
+    "equivalentUnits": "Equivalent USD, million USD, billion USD and Chinese financial-unit expressions pass after scaling. Numeric text alone does not establish the field or period.",
+    "capexSign": "Gold stores the positive magnitude of cash outflow. An explicitly negative capital-spending cash flow is equivalent when CFO plus that negative outflow gives the same free cash flow; the sign convention alone must not fail the answer.",
+    "sourceRounding": "Use reported statement totals. IBM 2024 nine-month displayed net-income bridge sums to 9116 million while reported CFO is 9115 million; this one-million reconciliation difference is source rounding, not a method error. Never invent a component to close it.",
+    "inputFactsNotMandatoryOutput": "Cumulative/H1 inputs, raw balance inputs and intermediate cash-plus-investment totals do not automatically become required answer output. Only question-specific requiredFactFields/requiredPoints define coverage.",
+    "stockFlow": "Balance-sheet values are snapshots. Subtracting snapshots may describe their change, but does not reconstruct a quarterly closing balance.",
+    "scope": "Optional explanation and forbidden-claim checks do not require mechanical disclaimers. Judge actual claims and requested conclusions.",
+    "netIncome": "PEP and KO use the consolidated net-income starting line of cash flow, represented by us-gaap:ProfitLoss; do not silently substitute attributable-parent NetIncomeLoss.",
+    "release": "PASS here means independently AI-checked source/gold preparation only. It is not human gold, formal E07 authorization, live model accuracy or business improvement."
+  },
+  "resolvedPreparationIssues": [
+    {
+      "id": "IBM-OPTIONAL-COVERAGE",
+      "resolution": "Optional cash-flow attribution, long-term disclaimer, balance-versus-flow warning and separate cash subtotal were removed from mandatory coverage or clarified in reviewNotes before any business output."
+    },
+    {
+      "id": "CAPEX-SIGN-EQUIVALENCE",
+      "resolution": "Six quarter reconstruction cases explicitly accept economically equivalent negative-outflow presentation before freeze."
+    }
+  ],
+  "sourceBindings": [
+    {
+      "path": "sources/IBM-q3.html",
+      "sha256": "d8cf8a56bede8648b604fcc1743f7a6e95d62dd326bb3b3963e6c0d7ff9765b1",
+      "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS"
+    },
+    {
+      "path": "sources/IBM-q3-cashflow.txt",
+      "sha256": "4614d71e335318f3114538927971bba4a50a153c5c4339f9b52f90277687aba9",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/IBM-q3-balance.txt",
+      "sha256": "ac1376db1946d0cea7193a2b1f9b546b17f3f885ff7b7446ee2697bb4f233ebd",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/JNJ-q3.pdf",
+      "sha256": "dd51bc444555abdbe9eeede2d6af29b2a758e1e6433959fbbfe280fb356216d9",
+      "sourceRef": "https://s203.q4cdn.com/636242992/files/doc_financials/2025/q3/3Q-10Q-09-28-25-5.pdf"
+    },
+    {
+      "path": "sources/JNJ-q3-cashflow.txt",
+      "sha256": "c4705b15619ba8b26534561748067e37d793a231ebd55c26b29755397b26e80b",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/JNJ-q2.pdf",
+      "sha256": "223edd524734bfd51986a279b7e3774f0fe1a8b1beff85aa4aa004ff0e644bf8",
+      "sourceRef": "https://s203.q4cdn.com/636242992/files/doc_financials/2025/q2/2Q-10Q-06-29-25-Final.pdf"
+    },
+    {
+      "path": "sources/JNJ-q2-cashflow.txt",
+      "sha256": "240d568ca16d16863ca4fe46bca12f6f51f0164aa8c152b680daef942424d551",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/JNJ-q3-balance.txt",
+      "sha256": "42a62e6f4057f49d2eb5372a636beb2491bc709acac837ed1cb58977cb07813d",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/PEP-q3.pdf",
+      "sha256": "f07cdaef174bdee10577dcd17eb1f5dcb7b6281715e0404fb9a8cdd7f38c751a",
+      "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf"
+    },
+    {
+      "path": "sources/PEP-q3-cashflow.txt",
+      "sha256": "721c1b408c6c1124ce1332a5d509363a1a1f0ea8d06e02b4fd338026f75f545e",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/PEP-q2.pdf",
+      "sha256": "ad4d81ab1e7adc04a8dfb21c2985085df16a314d912e90df7b2f3ad3d20e605b",
+      "sourceRef": "https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf"
+    },
+    {
+      "path": "sources/PEP-q2-cashflow.txt",
+      "sha256": "3dac47a3f054a12bfc3c999454a7eab8604dfb7e2da8a32e261632b4fe296e7d",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/PEP-q3-balance.txt",
+      "sha256": "13fbc4cf0df8c1540e37d9849e675133ab8dadcd70d1f5078e1d7d0afe9fde5d",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/TGT-q3.html",
+      "sha256": "8eb92504937bde3cee8346346a782a8b603210532e61ff53ab76da905abaab00",
+      "sourceRef": "https://corporate.target.com/press/release/2025/11/target-corporation-reports-third-quarter-earnings"
+    },
+    {
+      "path": "sources/TGT-q3-cashflow.txt",
+      "sha256": "77d74bea7b2dde1c295d0203243a3832f433d9ce1c9f72c45685e1b4d6532914",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/TGT-q2.html",
+      "sha256": "b01759d965299386c92b75a5f6844a94fb20202559260be2026ec7a4178b2ee3",
+      "sourceRef": "https://corporate.target.com/press/release/2025/08/target-corporation-reports-second-quarter-earnings"
+    },
+    {
+      "path": "sources/TGT-q2-cashflow.txt",
+      "sha256": "8c92d1cb667f3efb0ce24c152596385189b1e1a8b64c9ba4a0f0ad9ea2d75d1a",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/TGT-q3-balance.txt",
+      "sha256": "84cf9a93d9bfb60e757d6a72b909918acdec68fc2f0248575350881d7f03a438",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/CSCO-q3.html",
+      "sha256": "24d8ab81b83eb84eec045f6fd8bf0e63209c80f28c19e67145a6af2e6fe74322",
+      "sourceRef": "https://investor.cisco.com/news/news-details/2025/CISCO-REPORTS-THIRD-QUARTER-EARNINGS/default.aspx"
+    },
+    {
+      "path": "sources/CSCO-q3-income.txt",
+      "sha256": "f0064da852e770796374bb07120b4c3c719ee29f8aed4f35da5e9ff815eb6b5a",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/CSCO-q3-cashflow.txt",
+      "sha256": "3d18aa4b96fb10c0b5d03905c219c3deaca5e932738ec301419093d86287a847",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/CSCO-q3-balance.txt",
+      "sha256": "53f41949553629e13d60d27178a3f2fcf473053470f3751d5bf6cfd4ba004cb6",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/ORCL-q3.html",
+      "sha256": "275c32cafbce2b5537cb762495e0753ce22680040f7956fcfa99cc09074ec645",
+      "sourceRef": "https://investor.oracle.com/investor-news/news-details/2025/Oracle-Announces-Fiscal-2025-Third-Quarter-Financial-Results/default.aspx"
+    },
+    {
+      "path": "sources/ORCL-q3-cashflow.txt",
+      "sha256": "cd81e96b315c375ba0ef896019327dbbb89ffe948830864eb91d896d662d22b6",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/ORCL-q2.pdf",
+      "sha256": "25a9a5884cce0cbffbec5627f5d31ddd608913d9827bc9caa821435b361d5a8b",
+      "sourceRef": "https://s23.q4cdn.com/440135859/files/doc_financials/2025/q2/2q25-pressrelease-December-final.pdf"
+    },
+    {
+      "path": "sources/ORCL-q2-cashflow.txt",
+      "sha256": "5ef27eebf7a8baeb1d96c68b5e183935b8b9cc4f9d2e3f7c6a19258305ff2db5",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/ORCL-q3-balance.txt",
+      "sha256": "bf75171ae5e5cdd3eac035221c633c74a0b3cdca82d5fbf67e6e8765236630a4",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/KO-q3-filing.html",
+      "sha256": "4569af03a78bb1822f7b6339f38b2677895fd409da5987433170a69600828905",
+      "sourceRef": "https://investors.coca-colacompany.com/filings-reports/all-sec-filings/content/0001628280-25-045577/a2025q3earningsreleaseex-9.htm"
+    },
+    {
+      "path": "sources/KO-q3-cashflow.txt",
+      "sha256": "7e28bbcdb92583f8666c37eaeef95fa269a8eccec6264888164319d75b1217cd",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/KO-q2.html",
+      "sha256": "3a6d9cfcfbc56cc69ead3119aa4009c68df30e12537c521d074d7c75f3dee06c",
+      "sourceRef": "https://investors.coca-colacompany.com/filings-reports/all-sec-filings/content/0000021344-25-000054/a2025q2earningsreleaseex-9.htm"
+    },
+    {
+      "path": "sources/KO-q2-cashflow.txt",
+      "sha256": "bcc9d06256d8884216815b38e45fdc07cf3462f334f59952ac5c4302bd474561",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/KO-q3-cashflow-with-fairlife-note.txt",
+      "sha256": "73e6ab69eb348be8ff4c111745b4238f953111688e2b6459f81193b9b1fa8811",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/KO-q3-balance.txt",
+      "sha256": "6b26e294bfe2b6966833796abd59b2870a8fc2948da3bdfd0377610004f6afd1",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/LOW-q3.html",
+      "sha256": "566ac87167c550b07f18d4445bb43b23a09c4af94631fa5274b7d36cc245f8c1",
+      "sourceRef": "https://corporate.lowes.com/newsroom/press-releases/lowes-reports-third-quarter-2025-sales-and-earnings-results-11-19-25"
+    },
+    {
+      "path": "sources/LOW-q3-cashflow.txt",
+      "sha256": "e9a35fc98ccbc52da73c0da2d615c0173755f9bd5e6d49e6efd4c1b10a2fcddc",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/LOW-q2.html",
+      "sha256": "1f77952bf9443e1f105dbd2bec2e42d80cc255d759f59b376cbbebeb83a88de6",
+      "sourceRef": "https://corporate.lowes.com/newsroom/press-releases/lowes-reports-second-quarter-2025-sales-and-earnings-results-08-20-25"
+    },
+    {
+      "path": "sources/LOW-q2-cashflow.txt",
+      "sha256": "e8918035188212dc069466d3f8e184def3ff8a607e30c72bbc55da2367d2e68b",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "sources/LOW-q3-balance.txt",
+      "sha256": "fb70da4f3cf9eae9a15289e1001ea6bd873e44dc8b08939adcc9951617f4e1b9",
+      "kind": "EXTRACTED_STATEMENT"
+    },
+    {
+      "path": "target\\batch-source-facts\\JNJ.json",
+      "sha256": "7141c0c988fa1d30f779687b4c78ab561e19aa5990a58ad86a66467d0a783980",
+      "sourceRef": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000200406.json",
+      "kind": "INDEPENDENT_SEC_COMPANYFACTS_CROSSCHECK"
+    },
+    {
+      "path": "target\\batch-source-facts\\ORCL.json",
+      "sha256": "65523545f040abaea1dfcf321da2a5aec85e7f34387244b0ffcb26e4c8707f7d",
+      "sourceRef": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001341439.json",
+      "kind": "INDEPENDENT_SEC_COMPANYFACTS_CROSSCHECK"
+    },
+    {
+      "path": "target\\batch-source-facts\\PEP.json",
+      "sha256": "7694c322779ef273d15b3791729e5f2d261ce6ed1839be8ff014a33f537375be",
+      "sourceRef": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000077476.json",
+      "kind": "INDEPENDENT_SEC_COMPANYFACTS_CROSSCHECK"
+    },
+    {
+      "path": "target\\batch-source-facts\\KO.json",
+      "sha256": "53d363a9aa3071406cda9857654358f4dca42e174a1defb8cc1ce9ad2a4c9e40",
+      "sourceRef": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000021344.json",
+      "kind": "INDEPENDENT_SEC_COMPANYFACTS_CROSSCHECK"
+    },
+    {
+      "path": "target\\batch-source-facts\\CSCO.json",
+      "sha256": "f9f6cfb3c04bb8102552f121868831471a474165074ccc7c539f6f80f19d1b99",
+      "sourceRef": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000858877.json",
+      "kind": "INDEPENDENT_SEC_COMPANYFACTS_CROSSCHECK"
+    },
+    {
+      "path": "target\\batch-source-facts\\LOW.json",
+      "sha256": "7912551d61433f5e7e863ac602ebf24ee1484699e10aa556534f0055fff2ea7d",
+      "sourceRef": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000060667.json",
+      "kind": "INDEPENDENT_SEC_COMPANYFACTS_CROSSCHECK"
+    },
+    {
+      "path": "target\\batch-source-facts\\TGT.json",
+      "sha256": "eb15a2cd524e99ff27675db78840d039ec4a68b9cc2dcb10accbcb299933a487",
+      "sourceRef": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000027419.json",
+      "kind": "INDEPENDENT_SEC_COMPANYFACTS_CROSSCHECK"
+    },
+    {
+      "path": "target\\batch-source-facts\\IBM.json",
+      "sha256": "1660477fa5713e5749c3038cf22b3c776414acfc6e1e721d1772c91101dc5e5c",
+      "sourceRef": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000051143.json",
+      "kind": "INDEPENDENT_SEC_COMPANYFACTS_CROSSCHECK"
+    }
+  ],
+  "cases": [
+    {
+      "caseId": "ibm-fy2025q3-quarter-control",
+      "caseSha256": "6e35204233190dad2ee55617b8289555f2657892d2aead5fcfe52b43a1f9639a",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "quarterOperatingCashFlow",
+          "valueMillionsUsd": "3081",
+          "period": "2025-07-01/2025-09-30",
+          "status": "PASS",
+          "secMatches": [],
+          "sourceBasis": "IBM_OFFICIAL_IR_EXPLICIT_THREE_MONTH_CFO_LINE"
+        },
+        {
+          "field": "quarterNetIncome",
+          "valueMillionsUsd": "1744",
+          "period": "2025-07-01/2025-09-30",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:IncomeLossFromContinuingOperations",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            },
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            },
+            {
+              "tag": "us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            },
+            {
+              "tag": "us-gaap:NetIncomeLossAvailableToCommonStockholdersDiluted",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "cashIncomeGap",
+          "calculated": "1337",
+          "draftValue": "1337",
+          "period": "2025-07-01/2025-09-30",
+          "status": "PASS"
+        },
+        {
+          "output": "cashConversionRatio",
+          "calculated": "1.766628440366972477064220183",
+          "draftValue": "1.7666284403669725",
+          "period": "2025-07-01/2025-09-30",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "ibm-fy2025q3-cash-quality",
+      "caseSha256": "dcd24d9b9588ff7003c133c0ac062d77fe3b621c09861b58570fd95d118ee301",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ocf2025",
+          "valueMillionsUsd": "9153",
+          "period": "2025-01-01/2025-09-30",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "netIncome2025",
+          "valueMillionsUsd": "4993",
+          "period": "2025-01-01/2025-09-30",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            },
+            {
+              "tag": "us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            },
+            {
+              "tag": "us-gaap:NetIncomeLossAvailableToCommonStockholdersDiluted",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ocf2024",
+          "valueMillionsUsd": "9115",
+          "period": "2024-01-01/2024-09-30",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "netIncome2024",
+          "valueMillionsUsd": "3109",
+          "period": "2024-01-01/2024-09-30",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            },
+            {
+              "tag": "us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            },
+            {
+              "tag": "us-gaap:NetIncomeLossAvailableToCommonStockholdersDiluted",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "gap2025",
+          "calculated": "4160",
+          "draftValue": "4160",
+          "period": "2025-01-01/2025-09-30",
+          "status": "PASS"
+        },
+        {
+          "output": "gap2024",
+          "calculated": "6006",
+          "draftValue": "6006",
+          "period": "2024-01-01/2024-09-30",
+          "status": "PASS"
+        },
+        {
+          "output": "conversion2025",
+          "calculated": "1.833166433006208692169036651",
+          "draftValue": "1.8331664330062087",
+          "period": "2025-01-01/2025-09-30",
+          "status": "PASS"
+        },
+        {
+          "output": "conversion2024",
+          "calculated": "2.931810871662914120295915085",
+          "draftValue": "2.9318108716629143",
+          "period": "2024-01-01/2024-09-30",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "caseSha256": "764307ea2c473b2f622790da47172a0bdbca24459ebadf744525c6be16128b8e",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "currentAssets2025",
+          "valueMillionsUsd": "32740",
+          "period": "2025-09-30",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilities2025",
+          "valueMillionsUsd": "35142",
+          "period": "2025-09-30",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cash2025",
+          "valueMillionsUsd": "11569",
+          "period": "2025-09-30",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "securities2025",
+          "valueMillionsUsd": "3286",
+          "period": "2025-09-30",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:DebtSecuritiesAvailableForSaleExcludingAccruedInterestCurrent",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebt2025",
+          "valueMillionsUsd": "7942",
+          "period": "2025-09-30",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:ShortTermBorrowings",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebt2025",
+          "valueMillionsUsd": "55174",
+          "period": "2025-09-30",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtNoncurrent",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentAssets2024",
+          "valueMillionsUsd": "34482",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000051143-25-000032",
+              "filed": "2025-04-24"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000051143-25-000052",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilities2024",
+          "valueMillionsUsd": "33142",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000051143-25-000032",
+              "filed": "2025-04-24"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000051143-25-000052",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cash2024",
+          "valueMillionsUsd": "13947",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000051143-25-000032",
+              "filed": "2025-04-24"
+            },
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000051143-25-000052",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "securities2024",
+          "valueMillionsUsd": "644",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:DebtSecuritiesAvailableForSaleExcludingAccruedInterestCurrent",
+              "accession": "0000051143-25-000032",
+              "filed": "2025-04-24"
+            },
+            {
+              "tag": "us-gaap:DebtSecuritiesAvailableForSaleExcludingAccruedInterestCurrent",
+              "accession": "0000051143-25-000052",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:DebtSecuritiesAvailableForSaleExcludingAccruedInterestCurrent",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebt2024",
+          "valueMillionsUsd": "5089",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:ShortTermBorrowings",
+              "accession": "0000051143-25-000032",
+              "filed": "2025-04-24"
+            },
+            {
+              "tag": "us-gaap:ShortTermBorrowings",
+              "accession": "0000051143-25-000052",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:ShortTermBorrowings",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebt2024",
+          "valueMillionsUsd": "49884",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000051143-25-000032",
+              "filed": "2025-04-24"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000051143-25-000052",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtNoncurrent",
+              "accession": "0000051143-25-000032",
+              "filed": "2025-04-24"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtNoncurrent",
+              "accession": "0000051143-25-000052",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtNoncurrent",
+              "accession": "0000051143-25-000064",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "currentRatio2025",
+          "calculated": "0.9316487394001479710887257413",
+          "draftValue": "0.9316487394001479",
+          "period": "2025-09-30",
+          "status": "PASS"
+        },
+        {
+          "output": "currentRatio2024",
+          "calculated": "1.040432080140003620783296120",
+          "draftValue": "1.0404320801400035",
+          "period": "2024-12-31",
+          "status": "PASS"
+        },
+        {
+          "output": "debt2025",
+          "calculated": "63116",
+          "draftValue": "63116",
+          "period": "2025-09-30",
+          "status": "PASS"
+        },
+        {
+          "output": "debt2024",
+          "calculated": "54973",
+          "draftValue": "54973",
+          "period": "2024-12-31",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebt2025",
+          "calculated": "48261",
+          "draftValue": "48261",
+          "period": "2025-09-30",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebt2024",
+          "calculated": "40382",
+          "draftValue": "40382",
+          "period": "2024-12-31",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "jnj-fy2025q3-quarter-reconstruction",
+      "caseSha256": "b0974c023a6e11f6dbff37ce52a9193ac905693bf4dd3fe04bfabb52c6d231f5",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ytdOperatingCashFlow",
+          "valueMillionsUsd": "17221",
+          "period": "2024-12-30/2025-09-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "halfOperatingCashFlow",
+          "valueMillionsUsd": "8052",
+          "period": "2024-12-30/2025-06-29",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000200406-25-000178",
+              "filed": "2025-07-24"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ytdCapitalSpendingOutflowAmount",
+          "valueMillionsUsd": "2995",
+          "period": "2024-12-30/2025-09-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            },
+            {
+              "tag": "us-gaap:SegmentExpenditureAdditionToLongLivedAssets",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "halfCapitalSpendingOutflowAmount",
+          "valueMillionsUsd": "1838",
+          "period": "2024-12-30/2025-06-29",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+              "accession": "0000200406-25-000178",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:SegmentExpenditureAdditionToLongLivedAssets",
+              "accession": "0000200406-25-000178",
+              "filed": "2025-07-24"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "quarterOperatingCashFlow",
+          "calculated": "9169",
+          "draftValue": "9169",
+          "period": "2025-06-30/2025-09-28",
+          "status": "PASS"
+        },
+        {
+          "output": "quarterCapitalSpendingOutflowAmount",
+          "calculated": "1157",
+          "draftValue": "1157",
+          "period": "2025-06-30/2025-09-28",
+          "status": "PASS"
+        },
+        {
+          "output": "quarterSimpleFreeCashFlow",
+          "calculated": "8012",
+          "draftValue": "8012",
+          "period": "2025-06-30/2025-09-28",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "jnj-fy2025q3-cash-quality",
+      "caseSha256": "e6f164f70a020c5d55d9846455802c4d188fd41e1530a151fe7713ad46498be3",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ytdOperatingCashFlow",
+          "valueMillionsUsd": "17221",
+          "period": "2024-12-30/2025-09-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ytdConsolidatedNetIncome",
+          "valueMillionsUsd": "21688",
+          "period": "2024-12-30/2025-09-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorOperatingCashFlow",
+          "valueMillionsUsd": "17283",
+          "period": "2024-01-01/2024-09-29",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorConsolidatedNetIncome",
+          "valueMillionsUsd": "10635",
+          "period": "2024-01-01/2024-09-29",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "ytdCashIncomeGap",
+          "calculated": "-4467",
+          "draftValue": "-4467",
+          "period": "2024-12-30/2025-09-28",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashIncomeGap",
+          "calculated": "6648",
+          "draftValue": "6648",
+          "period": "2024-01-01/2024-09-29",
+          "status": "PASS"
+        },
+        {
+          "output": "ytdCashConversion",
+          "calculated": "0.7940335669494651420140169679",
+          "draftValue": "0.7940335669494651420140169679",
+          "period": "2024-12-30/2025-09-28",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashConversion",
+          "calculated": "1.625105782792665726375176305",
+          "draftValue": "1.625105782792665726375176305",
+          "period": "2024-01-01/2024-09-29",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "jnj-fy2025q3-liquidity",
+      "caseSha256": "30f773dde1b7bb9184b5af37e77345423f0ad01ea0cb4e8c9db2ae2474356ada",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "currentAssetsCurrent",
+          "valueMillionsUsd": "54611",
+          "period": "2025-09-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesCurrent",
+          "valueMillionsUsd": "50869",
+          "period": "2025-09-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashCurrent",
+          "valueMillionsUsd": "18231",
+          "period": "2025-09-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebtCurrent",
+          "valueMillionsUsd": "6387",
+          "period": "2025-09-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:ShortTermBorrowings",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtCurrent",
+          "valueMillionsUsd": "39408",
+          "period": "2025-09-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtNoncurrent",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "investmentsCurrent",
+          "valueMillionsUsd": "331",
+          "period": "2025-09-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:MarketableSecuritiesCurrent",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentAssetsPrior",
+          "valueMillionsUsd": "55893",
+          "period": "2024-12-29",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000200406-25-000119",
+              "filed": "2025-04-23"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000200406-25-000178",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesPrior",
+          "valueMillionsUsd": "50321",
+          "period": "2024-12-29",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000200406-25-000119",
+              "filed": "2025-04-23"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000200406-25-000178",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashPrior",
+          "valueMillionsUsd": "24105",
+          "period": "2024-12-29",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000200406-25-000119",
+              "filed": "2025-04-23"
+            },
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000200406-25-000178",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+              "accession": "0000200406-25-000119",
+              "filed": "2025-04-23"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+              "accession": "0000200406-25-000178",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebtPrior",
+          "valueMillionsUsd": "5983",
+          "period": "2024-12-29",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:ShortTermBorrowings",
+              "accession": "0000200406-25-000119",
+              "filed": "2025-04-23"
+            },
+            {
+              "tag": "us-gaap:ShortTermBorrowings",
+              "accession": "0000200406-25-000178",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:ShortTermBorrowings",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtPrior",
+          "valueMillionsUsd": "30651",
+          "period": "2024-12-29",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtNoncurrent",
+              "accession": "0000200406-25-000119",
+              "filed": "2025-04-23"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtNoncurrent",
+              "accession": "0000200406-25-000178",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtNoncurrent",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "investmentsPrior",
+          "valueMillionsUsd": "417",
+          "period": "2024-12-29",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:MarketableSecuritiesCurrent",
+              "accession": "0000200406-25-000119",
+              "filed": "2025-04-23"
+            },
+            {
+              "tag": "us-gaap:MarketableSecuritiesCurrent",
+              "accession": "0000200406-25-000178",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:MarketableSecuritiesCurrent",
+              "accession": "0000200406-25-000209",
+              "filed": "2025-10-22"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "currentRatioCurrent",
+          "calculated": "1.073561501110696101751557923",
+          "draftValue": "1.073561501110696101751557923",
+          "period": "2025-09-28",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtCurrent",
+          "calculated": "45795",
+          "draftValue": "45795",
+          "period": "2025-09-28",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtCurrent",
+          "calculated": "27233",
+          "draftValue": "27233",
+          "period": "2025-09-28",
+          "status": "PASS"
+        },
+        {
+          "output": "currentRatioPrior",
+          "calculated": "1.110729119055662645813874923",
+          "draftValue": "1.110729119055662645813874923",
+          "period": "2024-12-29",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtPrior",
+          "calculated": "36634",
+          "draftValue": "36634",
+          "period": "2024-12-29",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtPrior",
+          "calculated": "12112",
+          "draftValue": "12112",
+          "period": "2024-12-29",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "caseSha256": "6a0a62e7a04bdac310ec0b9c01a72ea2e7bad1635f6a4f48bc156d79111224c7",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ytdOperatingCashFlow",
+          "valueMillionsUsd": "5468",
+          "period": "2024-12-29/2025-09-06",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "halfOperatingCashFlow",
+          "valueMillionsUsd": "996",
+          "period": "2024-12-29/2025-06-14",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000077476-25-000044",
+              "filed": "2025-07-17"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ytdCapitalSpendingOutflowAmount",
+          "valueMillionsUsd": "2499",
+          "period": "2024-12-29/2025-09-06",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "halfCapitalSpendingOutflowAmount",
+          "valueMillionsUsd": "1507",
+          "period": "2024-12-29/2025-06-14",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:PaymentsToAcquireProductiveAssets",
+              "accession": "0000077476-25-000044",
+              "filed": "2025-07-17"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "quarterOperatingCashFlow",
+          "calculated": "4472",
+          "draftValue": "4472",
+          "period": "2025-06-15/2025-09-06",
+          "status": "PASS"
+        },
+        {
+          "output": "quarterCapitalSpendingOutflowAmount",
+          "calculated": "992",
+          "draftValue": "992",
+          "period": "2025-06-15/2025-09-06",
+          "status": "PASS"
+        },
+        {
+          "output": "quarterSimpleFreeCashFlow",
+          "calculated": "3480",
+          "draftValue": "3480",
+          "period": "2025-06-15/2025-09-06",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "pep-fy2025q3-cash-quality",
+      "caseSha256": "31d88c336d91e15995320878ef470a48827169e1591a6abe70601b9e1b04ef8d",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ytdOperatingCashFlow",
+          "valueMillionsUsd": "5468",
+          "period": "2024-12-29/2025-09-06",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ytdConsolidatedNetIncome",
+          "valueMillionsUsd": "5740",
+          "period": "2024-12-29/2025-09-06",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:ProfitLoss",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorOperatingCashFlow",
+          "valueMillionsUsd": "6220",
+          "period": "2023-12-31/2024-09-07",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorConsolidatedNetIncome",
+          "valueMillionsUsd": "8092",
+          "period": "2023-12-31/2024-09-07",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:ProfitLoss",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "ytdCashIncomeGap",
+          "calculated": "-272",
+          "draftValue": "-272",
+          "period": "2024-12-29/2025-09-06",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashIncomeGap",
+          "calculated": "-1872",
+          "draftValue": "-1872",
+          "period": "2023-12-31/2024-09-07",
+          "status": "PASS"
+        },
+        {
+          "output": "ytdCashConversion",
+          "calculated": "0.9526132404181184668989547038",
+          "draftValue": "0.9526132404181184668989547038",
+          "period": "2024-12-29/2025-09-06",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashConversion",
+          "calculated": "0.7686604053386060306475531389",
+          "draftValue": "0.7686604053386060306475531389",
+          "period": "2023-12-31/2024-09-07",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "pep-fy2025q3-liquidity",
+      "caseSha256": "014eea382e511dfbbd9895b0a18a30e7dfd4ed784d5f2ce1e98dcb3de7e0a346",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "currentAssetsCurrent",
+          "valueMillionsUsd": "28722",
+          "period": "2025-09-06",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesCurrent",
+          "valueMillionsUsd": "31499",
+          "period": "2025-09-06",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashCurrent",
+          "valueMillionsUsd": "8126",
+          "period": "2025-09-06",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebtCurrent",
+          "valueMillionsUsd": "6736",
+          "period": "2025-09-06",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:ShortTermBorrowings",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtCurrent",
+          "valueMillionsUsd": "44113",
+          "period": "2025-09-06",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "investmentsCurrent",
+          "valueMillionsUsd": "535",
+          "period": "2025-09-06",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:ShortTermInvestments",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentAssetsPrior",
+          "valueMillionsUsd": "25826",
+          "period": "2024-12-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000077476-25-000019",
+              "filed": "2025-04-24"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000077476-25-000044",
+              "filed": "2025-07-17"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesPrior",
+          "valueMillionsUsd": "31536",
+          "period": "2024-12-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000077476-25-000019",
+              "filed": "2025-04-24"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000077476-25-000044",
+              "filed": "2025-07-17"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashPrior",
+          "valueMillionsUsd": "8505",
+          "period": "2024-12-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000077476-25-000019",
+              "filed": "2025-04-24"
+            },
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000077476-25-000044",
+              "filed": "2025-07-17"
+            },
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebtPrior",
+          "valueMillionsUsd": "7082",
+          "period": "2024-12-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:ShortTermBorrowings",
+              "accession": "0000077476-25-000019",
+              "filed": "2025-04-24"
+            },
+            {
+              "tag": "us-gaap:ShortTermBorrowings",
+              "accession": "0000077476-25-000044",
+              "filed": "2025-07-17"
+            },
+            {
+              "tag": "us-gaap:ShortTermBorrowings",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtPrior",
+          "valueMillionsUsd": "37224",
+          "period": "2024-12-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000077476-25-000019",
+              "filed": "2025-04-24"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000077476-25-000044",
+              "filed": "2025-07-17"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "investmentsPrior",
+          "valueMillionsUsd": "761",
+          "period": "2024-12-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:ShortTermInvestments",
+              "accession": "0000077476-25-000019",
+              "filed": "2025-04-24"
+            },
+            {
+              "tag": "us-gaap:ShortTermInvestments",
+              "accession": "0000077476-25-000044",
+              "filed": "2025-07-17"
+            },
+            {
+              "tag": "us-gaap:ShortTermInvestments",
+              "accession": "0000077476-25-000053",
+              "filed": "2025-10-09"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "currentRatioCurrent",
+          "calculated": "0.9118384710625734150290485412",
+          "draftValue": "0.9118384710625734150290485412",
+          "period": "2025-09-06",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtCurrent",
+          "calculated": "50849",
+          "draftValue": "50849",
+          "period": "2025-09-06",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtCurrent",
+          "calculated": "42188",
+          "draftValue": "42188",
+          "period": "2025-09-06",
+          "status": "PASS"
+        },
+        {
+          "output": "currentRatioPrior",
+          "calculated": "0.8189370877727042110603754439",
+          "draftValue": "0.8189370877727042110603754439",
+          "period": "2024-12-28",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtPrior",
+          "calculated": "44306",
+          "draftValue": "44306",
+          "period": "2024-12-28",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtPrior",
+          "calculated": "35040",
+          "draftValue": "35040",
+          "period": "2024-12-28",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "tgt-fy2025q3-quarter-reconstruction",
+      "caseSha256": "165b8d851309bf65cebaf4a67cc4040c463c56e33c3c1d10a56dc5bc7cb7cb68",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ytdOperatingCashFlow",
+          "valueMillionsUsd": "3485",
+          "period": "2025-02-02/2025-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "halfOperatingCashFlow",
+          "valueMillionsUsd": "2358",
+          "period": "2025-02-02/2025-08-02",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000027419-25-000118",
+              "filed": "2025-08-29"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ytdCapitalSpendingOutflowAmount",
+          "valueMillionsUsd": "2842",
+          "period": "2025-02-02/2025-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "halfCapitalSpendingOutflowAmount",
+          "valueMillionsUsd": "1864",
+          "period": "2025-02-02/2025-08-02",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+              "accession": "0000027419-25-000118",
+              "filed": "2025-08-29"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "quarterOperatingCashFlow",
+          "calculated": "1127",
+          "draftValue": "1127",
+          "period": "2025-08-03/2025-11-01",
+          "status": "PASS"
+        },
+        {
+          "output": "quarterCapitalSpendingOutflowAmount",
+          "calculated": "978",
+          "draftValue": "978",
+          "period": "2025-08-03/2025-11-01",
+          "status": "PASS"
+        },
+        {
+          "output": "quarterSimpleFreeCashFlow",
+          "calculated": "149",
+          "draftValue": "149",
+          "period": "2025-08-03/2025-11-01",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "caseSha256": "8db1a08533f3c16c0725f66e7f0e0bb0dfb8b1a871e80a619fa70b93484563f9",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ytdOperatingCashFlow",
+          "valueMillionsUsd": "3485",
+          "period": "2025-02-02/2025-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ytdConsolidatedNetIncome",
+          "valueMillionsUsd": "2660",
+          "period": "2025-02-02/2025-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorOperatingCashFlow",
+          "valueMillionsUsd": "4078",
+          "period": "2024-02-04/2024-11-02",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorConsolidatedNetIncome",
+          "valueMillionsUsd": "2988",
+          "period": "2024-02-04/2024-11-02",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "ytdCashIncomeGap",
+          "calculated": "825",
+          "draftValue": "825",
+          "period": "2025-02-02/2025-11-01",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashIncomeGap",
+          "calculated": "1090",
+          "draftValue": "1090",
+          "period": "2024-02-04/2024-11-02",
+          "status": "PASS"
+        },
+        {
+          "output": "ytdCashConversion",
+          "calculated": "1.310150375939849624060150376",
+          "draftValue": "1.310150375939849624060150376",
+          "period": "2025-02-02/2025-11-01",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashConversion",
+          "calculated": "1.364792503346720214190093708",
+          "draftValue": "1.364792503346720214190093708",
+          "period": "2024-02-04/2024-11-02",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "tgt-fy2025q3-liquidity",
+      "caseSha256": "f12069ab0995fdc4a6bbea4a5a2b7644c5435bd658858da2e16daa56d8311e0d",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "currentAssetsCurrent",
+          "valueMillionsUsd": "20702",
+          "period": "2025-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesCurrent",
+          "valueMillionsUsd": "21242",
+          "period": "2025-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashCurrent",
+          "valueMillionsUsd": "3822",
+          "period": "2025-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashCashEquivalentsAndShortTermInvestments",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebtCurrent",
+          "valueMillionsUsd": "1133",
+          "period": "2025-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtCurrent",
+          "valueMillionsUsd": "15366",
+          "period": "2025-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentAssetsPrior",
+          "valueMillionsUsd": "19454",
+          "period": "2025-02-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000027419-25-000101",
+              "filed": "2025-05-30"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000027419-25-000118",
+              "filed": "2025-08-29"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesPrior",
+          "valueMillionsUsd": "20799",
+          "period": "2025-02-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000027419-25-000101",
+              "filed": "2025-05-30"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000027419-25-000118",
+              "filed": "2025-08-29"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashPrior",
+          "valueMillionsUsd": "4762",
+          "period": "2025-02-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashCashEquivalentsAndShortTermInvestments",
+              "accession": "0000027419-25-000101",
+              "filed": "2025-05-30"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsAndShortTermInvestments",
+              "accession": "0000027419-25-000118",
+              "filed": "2025-08-29"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsAndShortTermInvestments",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+              "accession": "0000027419-25-000101",
+              "filed": "2025-05-30"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+              "accession": "0000027419-25-000118",
+              "filed": "2025-08-29"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebtPrior",
+          "valueMillionsUsd": "1636",
+          "period": "2025-02-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent",
+              "accession": "0000027419-25-000101",
+              "filed": "2025-05-30"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent",
+              "accession": "0000027419-25-000118",
+              "filed": "2025-08-29"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtPrior",
+          "valueMillionsUsd": "14304",
+          "period": "2025-02-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000027419-25-000101",
+              "filed": "2025-05-30"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000027419-25-000118",
+              "filed": "2025-08-29"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000027419-25-000126",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "currentRatioCurrent",
+          "calculated": "0.9745786649091422653234158742",
+          "draftValue": "0.9745786649091422653234158742",
+          "period": "2025-11-01",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtCurrent",
+          "calculated": "16499",
+          "draftValue": "16499",
+          "period": "2025-11-01",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtCurrent",
+          "calculated": "12677",
+          "draftValue": "12677",
+          "period": "2025-11-01",
+          "status": "PASS"
+        },
+        {
+          "output": "currentRatioPrior",
+          "calculated": "0.9353334294918024905043511707",
+          "draftValue": "0.9353334294918024905043511707",
+          "period": "2025-02-01",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtPrior",
+          "calculated": "15940",
+          "draftValue": "15940",
+          "period": "2025-02-01",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtPrior",
+          "calculated": "11178",
+          "draftValue": "11178",
+          "period": "2025-02-01",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "csco-fy2025q3-quarter-control",
+      "caseSha256": "a82139812d8d0c42c1d2ab58129f0de3aa0294aeee913755204167e26cc449fa",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "quarterRevenue",
+          "valueMillionsUsd": "14149",
+          "period": "2025-01-26/2025-04-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "quarterOperatingIncome",
+          "valueMillionsUsd": "3202",
+          "period": "2025-01-26/2025-04-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:OperatingIncomeLoss",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorQuarterRevenue",
+          "valueMillionsUsd": "12702",
+          "period": "2024-01-28/2024-04-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorQuarterOperatingIncome",
+          "valueMillionsUsd": "2191",
+          "period": "2024-01-28/2024-04-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:OperatingIncomeLoss",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "quarterOperatingMarginPct",
+          "calculated": "22.63057459891158385751643226",
+          "draftValue": "22.63057459891158385751643226",
+          "period": "2025-01-26/2025-04-26",
+          "status": "PASS"
+        },
+        {
+          "output": "priorQuarterOperatingMarginPct",
+          "calculated": "17.24925208628562431113210518",
+          "draftValue": "17.24925208628562431113210518",
+          "period": "2024-01-28/2024-04-27",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "csco-fy2025q3-cash-quality",
+      "caseSha256": "349831bb46c56922ca52c580559874b3fa70dad71c10699c4a0741c3b3a90631",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ytdOperatingCashFlow",
+          "valueMillionsUsd": "9959",
+          "period": "2024-07-28/2025-04-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ytdConsolidatedNetIncome",
+          "valueMillionsUsd": "7630",
+          "period": "2024-07-28/2025-04-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorOperatingCashFlow",
+          "valueMillionsUsd": "7150",
+          "period": "2023-07-30/2024-04-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:IncomeTaxesPaidNet",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            },
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorConsolidatedNetIncome",
+          "valueMillionsUsd": "8158",
+          "period": "2023-07-30/2024-04-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "ytdCashIncomeGap",
+          "calculated": "2329",
+          "draftValue": "2329",
+          "period": "2024-07-28/2025-04-26",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashIncomeGap",
+          "calculated": "-1008",
+          "draftValue": "-1008",
+          "period": "2023-07-30/2024-04-27",
+          "status": "PASS"
+        },
+        {
+          "output": "ytdCashConversion",
+          "calculated": "1.305242463958060288335517693",
+          "draftValue": "1.305242463958060288335517693",
+          "period": "2024-07-28/2025-04-26",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashConversion",
+          "calculated": "0.8764403039960774699681294435",
+          "draftValue": "0.8764403039960774699681294435",
+          "period": "2023-07-30/2024-04-27",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "csco-fy2025q3-liquidity",
+      "caseSha256": "20274f8b269f87441f53d7d22a07bc1b54fcb55949343d83636776ff8c5aa798",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "currentAssetsCurrent",
+          "valueMillionsUsd": "32816",
+          "period": "2025-04-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesCurrent",
+          "valueMillionsUsd": "34495",
+          "period": "2025-04-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashCurrent",
+          "valueMillionsUsd": "8161",
+          "period": "2025-04-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebtCurrent",
+          "valueMillionsUsd": "6422",
+          "period": "2025-04-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:DebtCurrent",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtCurrent",
+          "valueMillionsUsd": "22857",
+          "period": "2025-04-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtNoncurrent",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "investmentsCurrent",
+          "valueMillionsUsd": "7481",
+          "period": "2025-04-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:ShortTermInvestments",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentAssetsPrior",
+          "valueMillionsUsd": "36862",
+          "period": "2024-07-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000858877-24-000030",
+              "filed": "2024-11-19"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000858877-25-000007",
+              "filed": "2025-02-18"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesPrior",
+          "valueMillionsUsd": "40584",
+          "period": "2024-07-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000858877-24-000030",
+              "filed": "2024-11-19"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000858877-25-000007",
+              "filed": "2025-02-18"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashPrior",
+          "valueMillionsUsd": "7508",
+          "period": "2024-07-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000858877-24-000030",
+              "filed": "2024-11-19"
+            },
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000858877-25-000007",
+              "filed": "2025-02-18"
+            },
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebtPrior",
+          "valueMillionsUsd": "11341",
+          "period": "2024-07-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:DebtCurrent",
+              "accession": "0000858877-24-000030",
+              "filed": "2024-11-19"
+            },
+            {
+              "tag": "us-gaap:DebtCurrent",
+              "accession": "0000858877-25-000007",
+              "filed": "2025-02-18"
+            },
+            {
+              "tag": "us-gaap:DebtCurrent",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtPrior",
+          "valueMillionsUsd": "19621",
+          "period": "2024-07-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtNoncurrent",
+              "accession": "0000858877-24-000030",
+              "filed": "2024-11-19"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtNoncurrent",
+              "accession": "0000858877-25-000007",
+              "filed": "2025-02-18"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtNoncurrent",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "investmentsPrior",
+          "valueMillionsUsd": "10346",
+          "period": "2024-07-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:ShortTermInvestments",
+              "accession": "0000858877-24-000030",
+              "filed": "2024-11-19"
+            },
+            {
+              "tag": "us-gaap:ShortTermInvestments",
+              "accession": "0000858877-25-000007",
+              "filed": "2025-02-18"
+            },
+            {
+              "tag": "us-gaap:ShortTermInvestments",
+              "accession": "0000858877-25-000033",
+              "filed": "2025-05-20"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "currentRatioCurrent",
+          "calculated": "0.9513262791708943325119582548",
+          "draftValue": "0.9513262791708943325119582548",
+          "period": "2025-04-26",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtCurrent",
+          "calculated": "29279",
+          "draftValue": "29279",
+          "period": "2025-04-26",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtCurrent",
+          "calculated": "13637",
+          "draftValue": "13637",
+          "period": "2025-04-26",
+          "status": "PASS"
+        },
+        {
+          "output": "currentRatioPrior",
+          "calculated": "0.9082889808791642026414350483",
+          "draftValue": "0.9082889808791642026414350483",
+          "period": "2024-07-27",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtPrior",
+          "calculated": "30962",
+          "draftValue": "30962",
+          "period": "2024-07-27",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtPrior",
+          "calculated": "13108",
+          "draftValue": "13108",
+          "period": "2024-07-27",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "orcl-fy2025q3-quarter-reconstruction",
+      "caseSha256": "186e6a7c83100a1ca04c3339cf0fc56f35c9f600e6484350d2da8d7f5b9b6e3b",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ytdOperatingCashFlow",
+          "valueMillionsUsd": "14664",
+          "period": "2024-06-01/2025-02-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "halfOperatingCashFlow",
+          "valueMillionsUsd": "8731",
+          "period": "2024-06-01/2024-11-30",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000950170-24-134973",
+              "filed": "2024-12-10"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ytdCapitalSpendingOutflowAmount",
+          "valueMillionsUsd": "12135",
+          "period": "2024-06-01/2025-02-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "halfCapitalSpendingOutflowAmount",
+          "valueMillionsUsd": "6273",
+          "period": "2024-06-01/2024-11-30",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+              "accession": "0000950170-24-134973",
+              "filed": "2024-12-10"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "quarterOperatingCashFlow",
+          "calculated": "5933",
+          "draftValue": "5933",
+          "period": "2024-12-01/2025-02-28",
+          "status": "PASS"
+        },
+        {
+          "output": "quarterCapitalSpendingOutflowAmount",
+          "calculated": "5862",
+          "draftValue": "5862",
+          "period": "2024-12-01/2025-02-28",
+          "status": "PASS"
+        },
+        {
+          "output": "quarterSimpleFreeCashFlow",
+          "calculated": "71",
+          "draftValue": "71",
+          "period": "2024-12-01/2025-02-28",
+          "status": "PASS"
+        }
+      ],
+      "extractionNote": "Q2 PDF physical page 9 (printed page 6) default-text extraction preserves numeric column order; 2024/2023 year labels are placed beside the six-month header for readability. Values and fiscal periods independently match the original 10-Q XBRL."
+    },
+    {
+      "caseId": "orcl-fy2025q3-cash-quality",
+      "caseSha256": "4b5bbda824102a818288166ff6aae7972ddfd032d40955767e5c05f45305fcb1",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ytdOperatingCashFlow",
+          "valueMillionsUsd": "14664",
+          "period": "2024-06-01/2025-02-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ytdConsolidatedNetIncome",
+          "valueMillionsUsd": "9016",
+          "period": "2024-06-01/2025-02-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorOperatingCashFlow",
+          "valueMillionsUsd": "12592",
+          "period": "2023-06-01/2024-02-29",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorConsolidatedNetIncome",
+          "valueMillionsUsd": "7323",
+          "period": "2023-06-01/2024-02-29",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "ytdCashIncomeGap",
+          "calculated": "5648",
+          "draftValue": "5648",
+          "period": "2024-06-01/2025-02-28",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashIncomeGap",
+          "calculated": "5269",
+          "draftValue": "5269",
+          "period": "2023-06-01/2024-02-29",
+          "status": "PASS"
+        },
+        {
+          "output": "ytdCashConversion",
+          "calculated": "1.626441881100266193433895297",
+          "draftValue": "1.626441881100266193433895297",
+          "period": "2024-06-01/2025-02-28",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashConversion",
+          "calculated": "1.719513860439710501160726478",
+          "draftValue": "1.719513860439710501160726478",
+          "period": "2023-06-01/2024-02-29",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "orcl-fy2025q3-liquidity",
+      "caseSha256": "9c94cc65c1b1809036b635671ae77401b1c77a672a1b2ad9fca70dbdcf043ca2",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "currentAssetsCurrent",
+          "valueMillionsUsd": "30116",
+          "period": "2025-02-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesCurrent",
+          "valueMillionsUsd": "29623",
+          "period": "2025-02-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashCurrent",
+          "valueMillionsUsd": "17406",
+          "period": "2025-02-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebtCurrent",
+          "valueMillionsUsd": "8167",
+          "period": "2025-02-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NotesPayableCurrent",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtCurrent",
+          "valueMillionsUsd": "88109",
+          "period": "2025-02-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermNotesAndLoans",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "investmentsCurrent",
+          "valueMillionsUsd": "417",
+          "period": "2025-02-28",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentAssetsPrior",
+          "valueMillionsUsd": "22554",
+          "period": "2024-05-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000950170-24-104905",
+              "filed": "2024-09-10"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000950170-24-134973",
+              "filed": "2024-12-10"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesPrior",
+          "valueMillionsUsd": "31544",
+          "period": "2024-05-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000950170-24-104905",
+              "filed": "2024-09-10"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000950170-24-134973",
+              "filed": "2024-12-10"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashPrior",
+          "valueMillionsUsd": "10454",
+          "period": "2024-05-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000950170-24-104905",
+              "filed": "2024-09-10"
+            },
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000950170-24-134973",
+              "filed": "2024-12-10"
+            },
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+              "accession": "0000950170-24-104905",
+              "filed": "2024-09-10"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+              "accession": "0000950170-24-134973",
+              "filed": "2024-12-10"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebtPrior",
+          "valueMillionsUsd": "10605",
+          "period": "2024-05-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NotesPayableCurrent",
+              "accession": "0000950170-24-104905",
+              "filed": "2024-09-10"
+            },
+            {
+              "tag": "us-gaap:NotesPayableCurrent",
+              "accession": "0000950170-24-134973",
+              "filed": "2024-12-10"
+            },
+            {
+              "tag": "us-gaap:NotesPayableCurrent",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtPrior",
+          "valueMillionsUsd": "76264",
+          "period": "2024-05-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermNotesAndLoans",
+              "accession": "0000950170-24-104905",
+              "filed": "2024-09-10"
+            },
+            {
+              "tag": "us-gaap:LongTermNotesAndLoans",
+              "accession": "0000950170-24-134973",
+              "filed": "2024-12-10"
+            },
+            {
+              "tag": "us-gaap:LongTermNotesAndLoans",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "investmentsPrior",
+          "valueMillionsUsd": "207",
+          "period": "2024-05-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent",
+              "accession": "0000950170-24-104905",
+              "filed": "2024-09-10"
+            },
+            {
+              "tag": "us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent",
+              "accession": "0000950170-24-134973",
+              "filed": "2024-12-10"
+            },
+            {
+              "tag": "us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent",
+              "accession": "0000950170-25-037143",
+              "filed": "2025-03-11"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "currentRatioCurrent",
+          "calculated": "1.016642473753502346149951052",
+          "draftValue": "1.016642473753502346149951052",
+          "period": "2025-02-28",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtCurrent",
+          "calculated": "96276",
+          "draftValue": "96276",
+          "period": "2025-02-28",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtCurrent",
+          "calculated": "78453",
+          "draftValue": "78453",
+          "period": "2025-02-28",
+          "status": "PASS"
+        },
+        {
+          "output": "currentRatioPrior",
+          "calculated": "0.7150012680699974638600050723",
+          "draftValue": "0.7150012680699974638600050723",
+          "period": "2024-05-31",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtPrior",
+          "calculated": "86869",
+          "draftValue": "86869",
+          "period": "2024-05-31",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtPrior",
+          "calculated": "76208",
+          "draftValue": "76208",
+          "period": "2024-05-31",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "ko-fy2025q3-quarter-reconstruction",
+      "caseSha256": "638a7ea02131b43192b52a5508cc4dfe19fe6dc50e558a1389daf11032a3fae6",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ytdOperatingCashFlow",
+          "valueMillionsUsd": "3652",
+          "period": "2025-01-01/2025-09-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "halfOperatingCashFlow",
+          "valueMillionsUsd": "-1391",
+          "period": "2025-01-01/2025-06-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000021344-25-000061",
+              "filed": "2025-07-24"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ytdCapitalSpendingOutflowAmount",
+          "valueMillionsUsd": "1230",
+          "period": "2025-01-01/2025-09-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            },
+            {
+              "tag": "us-gaap:SegmentExpenditureAdditionToLongLivedAssets",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "halfCapitalSpendingOutflowAmount",
+          "valueMillionsUsd": "751",
+          "period": "2025-01-01/2025-06-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+              "accession": "0000021344-25-000061",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:SegmentExpenditureAdditionToLongLivedAssets",
+              "accession": "0000021344-25-000061",
+              "filed": "2025-07-24"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "quarterOperatingCashFlow",
+          "calculated": "5043",
+          "draftValue": "5043",
+          "period": "2025-06-28/2025-09-26",
+          "status": "PASS"
+        },
+        {
+          "output": "quarterCapitalSpendingOutflowAmount",
+          "calculated": "479",
+          "draftValue": "479",
+          "period": "2025-06-28/2025-09-26",
+          "status": "PASS"
+        },
+        {
+          "output": "quarterSimpleFreeCashFlow",
+          "calculated": "4564",
+          "draftValue": "4564",
+          "period": "2025-06-28/2025-09-26",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "ko-fy2025q3-cash-quality",
+      "caseSha256": "70255a5fe0c97b9f842364d2ffbb2c6d7219a89cd698b144834c95ccdb0f7a82",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ytdOperatingCashFlow",
+          "valueMillionsUsd": "3652",
+          "period": "2025-01-01/2025-09-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ytdConsolidatedNetIncome",
+          "valueMillionsUsd": "10821",
+          "period": "2025-01-01/2025-09-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:ProfitLoss",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorOperatingCashFlow",
+          "valueMillionsUsd": "2854",
+          "period": "2024-01-01/2024-09-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorConsolidatedNetIncome",
+          "valueMillionsUsd": "8436",
+          "period": "2024-01-01/2024-09-27",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            },
+            {
+              "tag": "us-gaap:ProfitLoss",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "ytdCashIncomeGap",
+          "calculated": "-7169",
+          "draftValue": "-7169",
+          "period": "2025-01-01/2025-09-26",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashIncomeGap",
+          "calculated": "-5582",
+          "draftValue": "-5582",
+          "period": "2024-01-01/2024-09-27",
+          "status": "PASS"
+        },
+        {
+          "output": "ytdCashConversion",
+          "calculated": "0.3374919138711764162277053877",
+          "draftValue": "0.3374919138711764162277053877",
+          "period": "2025-01-01/2025-09-26",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashConversion",
+          "calculated": "0.3383119962067330488383119962",
+          "draftValue": "0.3383119962067330488383119962",
+          "period": "2024-01-01/2024-09-27",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "ko-fy2025q3-liquidity",
+      "caseSha256": "b0ea30227e9f90e195c2dd55af7b434135bd39d370d30a4c4ab9ae5ead7abe0c",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "currentAssetsCurrent",
+          "valueMillionsUsd": "27247",
+          "period": "2025-09-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesCurrent",
+          "valueMillionsUsd": "22499",
+          "period": "2025-09-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashCurrent",
+          "valueMillionsUsd": "12732",
+          "period": "2025-09-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtCurrent",
+          "valueMillionsUsd": "43177",
+          "period": "2025-09-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "loansNotesCurrent",
+          "valueMillionsUsd": "2319",
+          "period": "2025-09-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NotesAndLoansPayable",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentDebtMaturitiesCurrent",
+          "valueMillionsUsd": "1920",
+          "period": "2025-09-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortInvestmentsCurrent",
+          "valueMillionsUsd": "1142",
+          "period": "2025-09-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:OtherShortTermInvestments",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "marketableSecuritiesCurrent",
+          "valueMillionsUsd": "1907",
+          "period": "2025-09-26",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:MarketableSecurities",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentAssetsPrior",
+          "valueMillionsUsd": "25997",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000021344-25-000029",
+              "filed": "2025-05-01"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000021344-25-000061",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesPrior",
+          "valueMillionsUsd": "25249",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000021344-25-000029",
+              "filed": "2025-05-01"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000021344-25-000061",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashPrior",
+          "valueMillionsUsd": "10828",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000021344-25-000029",
+              "filed": "2025-05-01"
+            },
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000021344-25-000061",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtPrior",
+          "valueMillionsUsd": "42375",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000021344-25-000029",
+              "filed": "2025-05-01"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000021344-25-000061",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "loansNotesPrior",
+          "valueMillionsUsd": "1499",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NotesAndLoansPayable",
+              "accession": "0000021344-25-000029",
+              "filed": "2025-05-01"
+            },
+            {
+              "tag": "us-gaap:NotesAndLoansPayable",
+              "accession": "0000021344-25-000061",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:NotesAndLoansPayable",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentDebtMaturitiesPrior",
+          "valueMillionsUsd": "648",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent",
+              "accession": "0000021344-25-000029",
+              "filed": "2025-05-01"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent",
+              "accession": "0000021344-25-000061",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortInvestmentsPrior",
+          "valueMillionsUsd": "2020",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:OtherShortTermInvestments",
+              "accession": "0000021344-25-000029",
+              "filed": "2025-05-01"
+            },
+            {
+              "tag": "us-gaap:OtherShortTermInvestments",
+              "accession": "0000021344-25-000061",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:OtherShortTermInvestments",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "marketableSecuritiesPrior",
+          "valueMillionsUsd": "1723",
+          "period": "2024-12-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:MarketableSecurities",
+              "accession": "0000021344-25-000029",
+              "filed": "2025-05-01"
+            },
+            {
+              "tag": "us-gaap:MarketableSecurities",
+              "accession": "0000021344-25-000061",
+              "filed": "2025-07-24"
+            },
+            {
+              "tag": "us-gaap:MarketableSecurities",
+              "accession": "0001628280-25-046054",
+              "filed": "2025-10-23"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "shortDebtCurrent",
+          "calculated": "4239",
+          "draftValue": "4239",
+          "period": "2025-09-26",
+          "status": "PASS"
+        },
+        {
+          "output": "investmentsCurrent",
+          "calculated": "3049",
+          "draftValue": "3049",
+          "period": "2025-09-26",
+          "status": "PASS"
+        },
+        {
+          "output": "currentRatioCurrent",
+          "calculated": "1.211031601404506866971865416",
+          "draftValue": "1.211031601404506866971865416",
+          "period": "2025-09-26",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtCurrent",
+          "calculated": "47416",
+          "draftValue": "47416",
+          "period": "2025-09-26",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtCurrent",
+          "calculated": "31635",
+          "draftValue": "31635",
+          "period": "2025-09-26",
+          "status": "PASS"
+        },
+        {
+          "output": "shortDebtPrior",
+          "calculated": "2147",
+          "draftValue": "2147",
+          "period": "2024-12-31",
+          "status": "PASS"
+        },
+        {
+          "output": "investmentsPrior",
+          "calculated": "3743",
+          "draftValue": "3743",
+          "period": "2024-12-31",
+          "status": "PASS"
+        },
+        {
+          "output": "currentRatioPrior",
+          "calculated": "1.029624935641015485761812349",
+          "draftValue": "1.029624935641015485761812349",
+          "period": "2024-12-31",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtPrior",
+          "calculated": "44522",
+          "draftValue": "44522",
+          "period": "2024-12-31",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtPrior",
+          "calculated": "29951",
+          "draftValue": "29951",
+          "period": "2024-12-31",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "low-fy2025q3-quarter-reconstruction",
+      "caseSha256": "62492cf82028ecefb4d3663a3c04beb80f9e4c270bdcb628975ef57957bbc5a2",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ytdOperatingCashFlow",
+          "valueMillionsUsd": "8297",
+          "period": "2025-02-01/2025-10-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "halfOperatingCashFlow",
+          "valueMillionsUsd": "7610",
+          "period": "2025-02-01/2025-08-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000060667-25-000174",
+              "filed": "2025-08-28"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ytdCapitalSpendingOutflowAmount",
+          "valueMillionsUsd": "1610",
+          "period": "2025-02-01/2025-10-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "halfCapitalSpendingOutflowAmount",
+          "valueMillionsUsd": "1013",
+          "period": "2025-02-01/2025-08-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+              "accession": "0000060667-25-000174",
+              "filed": "2025-08-28"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "quarterOperatingCashFlow",
+          "calculated": "687",
+          "draftValue": "687",
+          "period": "2025-08-02/2025-10-31",
+          "status": "PASS"
+        },
+        {
+          "output": "quarterCapitalSpendingOutflowAmount",
+          "calculated": "597",
+          "draftValue": "597",
+          "period": "2025-08-02/2025-10-31",
+          "status": "PASS"
+        },
+        {
+          "output": "quarterSimpleFreeCashFlow",
+          "calculated": "90",
+          "draftValue": "90",
+          "period": "2025-08-02/2025-10-31",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "low-fy2025q3-cash-quality",
+      "caseSha256": "98e8792f38550740c1da5e656094a8fc501f393f1e2ec20b2d169d75f56642fa",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "ytdOperatingCashFlow",
+          "valueMillionsUsd": "8297",
+          "period": "2025-02-01/2025-10-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "ytdConsolidatedNetIncome",
+          "valueMillionsUsd": "5654",
+          "period": "2025-02-01/2025-10-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorOperatingCashFlow",
+          "valueMillionsUsd": "8714",
+          "period": "2024-02-03/2024-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "priorConsolidatedNetIncome",
+          "valueMillionsUsd": "5833",
+          "period": "2024-02-03/2024-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:NetIncomeLoss",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "ytdCashIncomeGap",
+          "calculated": "2643",
+          "draftValue": "2643",
+          "period": "2025-02-01/2025-10-31",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashIncomeGap",
+          "calculated": "2881",
+          "draftValue": "2881",
+          "period": "2024-02-03/2024-11-01",
+          "status": "PASS"
+        },
+        {
+          "output": "ytdCashConversion",
+          "calculated": "1.467456667845772904138662894",
+          "draftValue": "1.467456667845772904138662894",
+          "period": "2025-02-01/2025-10-31",
+          "status": "PASS"
+        },
+        {
+          "output": "priorCashConversion",
+          "calculated": "1.493913937939310817761014915",
+          "draftValue": "1.493913937939310817761014915",
+          "period": "2024-02-03/2024-11-01",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "caseId": "low-fy2025q3-liquidity",
+      "caseSha256": "5f5c115350792d83ca76a1b4f59a01fc194b6d51fbd5fd344055acd1eba03d5c",
+      "status": "PASS",
+      "factsStatus": "PASS",
+      "periodsStatus": "PASS",
+      "formulasStatus": "PASS",
+      "queryCoverageStatus": "PASS",
+      "issues": [],
+      "facts": [
+        {
+          "field": "currentAssetsCurrent",
+          "valueMillionsUsd": "20220",
+          "period": "2025-10-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesCurrent",
+          "valueMillionsUsd": "19451",
+          "period": "2025-10-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashCurrent",
+          "valueMillionsUsd": "621",
+          "period": "2025-10-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebtCurrent",
+          "valueMillionsUsd": "2437",
+          "period": "2025-10-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtCurrent",
+          "valueMillionsUsd": "37498",
+          "period": "2025-10-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "investmentsCurrent",
+          "valueMillionsUsd": "412",
+          "period": "2025-10-31",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:RestrictedCashAndInvestmentsCurrent",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            },
+            {
+              "tag": "us-gaap:ShortTermInvestments",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentAssetsPrior",
+          "valueMillionsUsd": "21977",
+          "period": "2024-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:AssetsCurrent",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "currentLiabilitiesPrior",
+          "valueMillionsUsd": "19447",
+          "period": "2024-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LiabilitiesCurrent",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "cashPrior",
+          "valueMillionsUsd": "3271",
+          "period": "2024-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            },
+            {
+              "tag": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "shortDebtPrior",
+          "valueMillionsUsd": "2576",
+          "period": "2024-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "longDebtPrior",
+          "valueMillionsUsd": "32906",
+          "period": "2024-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        },
+        {
+          "field": "investmentsPrior",
+          "valueMillionsUsd": "335",
+          "period": "2024-11-01",
+          "status": "PASS",
+          "secMatches": [
+            {
+              "tag": "us-gaap:RestrictedCashAndInvestmentsCurrent",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            },
+            {
+              "tag": "us-gaap:ShortTermInvestments",
+              "accession": "0000060667-25-000210",
+              "filed": "2025-11-26"
+            }
+          ],
+          "sourceBasis": "SEC_AND_OFFICIAL_STATEMENT"
+        }
+      ],
+      "calculations": [
+        {
+          "output": "currentRatioCurrent",
+          "calculated": "1.039535242403989512107346666",
+          "draftValue": "1.039535242403989512107346666",
+          "period": "2025-10-31",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtCurrent",
+          "calculated": "39935",
+          "draftValue": "39935",
+          "period": "2025-10-31",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtCurrent",
+          "calculated": "38902",
+          "draftValue": "38902",
+          "period": "2025-10-31",
+          "status": "PASS"
+        },
+        {
+          "output": "currentRatioPrior",
+          "calculated": "1.130097187226821617730241168",
+          "draftValue": "1.130097187226821617730241168",
+          "period": "2024-11-01",
+          "status": "PASS"
+        },
+        {
+          "output": "totalDebtPrior",
+          "calculated": "35482",
+          "draftValue": "35482",
+          "period": "2024-11-01",
+          "status": "PASS"
+        },
+        {
+          "output": "netDebtPrior",
+          "calculated": "31876",
+          "draftValue": "31876",
+          "period": "2024-11-01",
+          "status": "PASS"
+        }
+      ],
+      "periodNote": "Prior comparator is 2024-11-01, the previous fiscal third-quarter date, not fiscal year-end."
+    }
+  ]
+}

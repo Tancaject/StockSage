@@ -1,0 +1,1587 @@
+{
+  "schema": "ordinary_judge_2x2_diagnostic_v1",
+  "diagnostic_only": true,
+  "release_eligible": false,
+  "plan_sha256": "aeb171ac99389d302b70d838e06565ac0fbe1bb3396277ccd96266109cbf1fe2",
+  "arms": {
+    "A_base_off": {
+      "report_sha256": "710724df04093ba691c11d1f0b7fd36c0fbef028101b330fce2019300f91bcb3",
+      "dimension_total": {
+        "count": 200,
+        "known_label_count": 200,
+        "expected_no_data_count": 0,
+        "technical_valid_count": 191,
+        "technical_invalid_count": 9,
+        "technical_valid_rate": 0.955,
+        "known_judgment_count": 191,
+        "known_judgment_coverage": 0.955,
+        "semantic_comparison_count": 191,
+        "semantic_agreement_count": 170,
+        "semantic_error_count": 21,
+        "semantic_agreement_rate": 0.8900523560209425,
+        "valid_no_data_count": 0,
+        "valid_abstention_on_known_count": 0,
+        "valid_correct_no_data_count": 0,
+        "correct_no_data_rate": null,
+        "end_to_end_label_agreement_count": 170,
+        "end_to_end_label_agreement_rate": 0.85,
+        "false_pass_count": 3,
+        "false_pass_denominator": 42,
+        "false_pass_rate": 0.07142857142857142,
+        "false_fail_count": 12,
+        "false_fail_denominator": 149,
+        "false_fail_rate": 0.08053691275167785,
+        "unsupported_certainty_count": 0,
+        "confusion_valid": {
+          "FAIL": {
+            "FAIL": 39,
+            "NOT_APPLICABLE": 1,
+            "NO_DATA": 0,
+            "PASS": 2
+          },
+          "NOT_APPLICABLE": {
+            "FAIL": 3,
+            "NOT_APPLICABLE": 17,
+            "NO_DATA": 0,
+            "PASS": 0
+          },
+          "NO_DATA": {
+            "FAIL": 0,
+            "NOT_APPLICABLE": 0,
+            "NO_DATA": 0,
+            "PASS": 0
+          },
+          "PASS": {
+            "FAIL": 9,
+            "NOT_APPLICABLE": 6,
+            "NO_DATA": 0,
+            "PASS": 114
+          }
+        }
+      },
+      "dimensions": {
+        "claim_support": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 36,
+          "technical_invalid_count": 4,
+          "technical_valid_rate": 0.9,
+          "known_judgment_count": 36,
+          "known_judgment_coverage": 0.9,
+          "semantic_comparison_count": 36,
+          "semantic_agreement_count": 27,
+          "semantic_error_count": 9,
+          "semantic_agreement_rate": 0.75,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 27,
+          "end_to_end_label_agreement_rate": 0.675,
+          "false_pass_count": 1,
+          "false_pass_denominator": 16,
+          "false_pass_rate": 0.0625,
+          "false_fail_count": 8,
+          "false_fail_denominator": 20,
+          "false_fail_rate": 0.4,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 15,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 1
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 8,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 12
+            }
+          }
+        },
+        "numeric_period_correctness": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 40,
+          "technical_invalid_count": 0,
+          "technical_valid_rate": 1.0,
+          "known_judgment_count": 40,
+          "known_judgment_coverage": 1.0,
+          "semantic_comparison_count": 40,
+          "semantic_agreement_count": 39,
+          "semantic_error_count": 1,
+          "semantic_agreement_rate": 0.975,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 39,
+          "end_to_end_label_agreement_rate": 0.975,
+          "false_pass_count": 1,
+          "false_pass_denominator": 8,
+          "false_pass_rate": 0.125,
+          "false_fail_count": 0,
+          "false_fail_denominator": 32,
+          "false_fail_rate": 0.0,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 7,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 1
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 32
+            }
+          }
+        },
+        "counterevidence": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 39,
+          "technical_invalid_count": 1,
+          "technical_valid_rate": 0.975,
+          "known_judgment_count": 39,
+          "known_judgment_coverage": 0.975,
+          "semantic_comparison_count": 39,
+          "semantic_agreement_count": 29,
+          "semantic_error_count": 10,
+          "semantic_agreement_rate": 0.7435897435897436,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 29,
+          "end_to_end_label_agreement_rate": 0.725,
+          "false_pass_count": 1,
+          "false_pass_denominator": 4,
+          "false_pass_rate": 0.25,
+          "false_fail_count": 3,
+          "false_fail_denominator": 35,
+          "false_fail_rate": 0.08571428571428572,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 3,
+              "NOT_APPLICABLE": 1,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 3,
+              "NOT_APPLICABLE": 17,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 6,
+              "NO_DATA": 0,
+              "PASS": 9
+            }
+          }
+        },
+        "unknowns": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 38,
+          "technical_invalid_count": 2,
+          "technical_valid_rate": 0.95,
+          "known_judgment_count": 38,
+          "known_judgment_coverage": 0.95,
+          "semantic_comparison_count": 38,
+          "semantic_agreement_count": 37,
+          "semantic_error_count": 1,
+          "semantic_agreement_rate": 0.9736842105263158,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 37,
+          "end_to_end_label_agreement_rate": 0.925,
+          "false_pass_count": 0,
+          "false_pass_denominator": 8,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 1,
+          "false_fail_denominator": 30,
+          "false_fail_rate": 0.03333333333333333,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 8,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 1,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 29
+            }
+          }
+        },
+        "task_completion": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 38,
+          "technical_invalid_count": 2,
+          "technical_valid_rate": 0.95,
+          "known_judgment_count": 38,
+          "known_judgment_coverage": 0.95,
+          "semantic_comparison_count": 38,
+          "semantic_agreement_count": 38,
+          "semantic_error_count": 0,
+          "semantic_agreement_rate": 1.0,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 38,
+          "end_to_end_label_agreement_rate": 0.95,
+          "false_pass_count": 0,
+          "false_pass_denominator": 6,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 0,
+          "false_fail_denominator": 32,
+          "false_fail_rate": 0.0,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 6,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 32
+            }
+          }
+        }
+      },
+      "repeatability": {
+        "eligible_case_count": 16,
+        "consistent_case_count": 12,
+        "excluded_case_count": 4,
+        "consistency_rate": 0.75,
+        "requires": "at least two technically valid repeats; legitimate NO_DATA judgments are included"
+      },
+      "cost": {
+        "prompt_tokens": 84099,
+        "known_prompt_tokens": 84099,
+        "prompt_tokens_reported_attempts": 40,
+        "completion_tokens": 30738,
+        "known_completion_tokens": 30738,
+        "completion_tokens_reported_attempts": 40,
+        "total_tokens": 114837,
+        "known_total_tokens": 114837,
+        "total_tokens_reported_attempts": 40,
+        "usage_complete": true,
+        "usage_scope": "recorded_attempts",
+        "call_count": 43,
+        "call_count_reported_attempts": 40,
+        "summed_attempt_latency_ms": 379126,
+        "latency_reported_attempts": 40,
+        "monetary_cost": null,
+        "pricing_status": "UNCONFIGURED"
+      },
+      "correct_retained": 12,
+      "correct_total": 16,
+      "correct_false_rejected": 0,
+      "correct_inconclusive": 4,
+      "target_detected": 21,
+      "corrupt_total": 24,
+      "paired_separation": 16,
+      "by_error_type": {
+        "NUMERIC_ERROR": {
+          "detected": 7,
+          "total": 8
+        },
+        "OMISSION": {
+          "detected": 6,
+          "total": 8
+        },
+        "UNSUPPORTED_CERTAINTY": {
+          "detected": 8,
+          "total": 8
+        }
+      },
+      "local_error_counts": {
+        "EXCERPT_INVALID:evidence_quotes": 8,
+        "EXCERPT_MISSING:answer_quotes": 1
+      },
+      "global_error_counts": {},
+      "observed_models": [
+        "qwen3.8-max"
+      ],
+      "reasoning_content_calls": 0,
+      "reasoning_tokens_reported_calls": 0,
+      "known_reasoning_tokens": 0,
+      "median_attempt_latency_ms": 9562.5,
+      "calculator_calls": 3
+    },
+    "B_prompt_off": {
+      "report_sha256": "d8a65a2fb150f91ef1e3a308912f8b0f8567db5bc1472bff13a833961302e33e",
+      "dimension_total": {
+        "count": 200,
+        "known_label_count": 200,
+        "expected_no_data_count": 0,
+        "technical_valid_count": 195,
+        "technical_invalid_count": 5,
+        "technical_valid_rate": 0.975,
+        "known_judgment_count": 195,
+        "known_judgment_coverage": 0.975,
+        "semantic_comparison_count": 195,
+        "semantic_agreement_count": 174,
+        "semantic_error_count": 21,
+        "semantic_agreement_rate": 0.8923076923076924,
+        "valid_no_data_count": 0,
+        "valid_abstention_on_known_count": 0,
+        "valid_correct_no_data_count": 0,
+        "correct_no_data_rate": null,
+        "end_to_end_label_agreement_count": 174,
+        "end_to_end_label_agreement_rate": 0.87,
+        "false_pass_count": 1,
+        "false_pass_denominator": 44,
+        "false_pass_rate": 0.022727272727272728,
+        "false_fail_count": 12,
+        "false_fail_denominator": 151,
+        "false_fail_rate": 0.07947019867549669,
+        "unsupported_certainty_count": 0,
+        "confusion_valid": {
+          "FAIL": {
+            "FAIL": 43,
+            "NOT_APPLICABLE": 0,
+            "NO_DATA": 0,
+            "PASS": 1
+          },
+          "NOT_APPLICABLE": {
+            "FAIL": 2,
+            "NOT_APPLICABLE": 18,
+            "NO_DATA": 0,
+            "PASS": 0
+          },
+          "NO_DATA": {
+            "FAIL": 0,
+            "NOT_APPLICABLE": 0,
+            "NO_DATA": 0,
+            "PASS": 0
+          },
+          "PASS": {
+            "FAIL": 10,
+            "NOT_APPLICABLE": 8,
+            "NO_DATA": 0,
+            "PASS": 113
+          }
+        }
+      },
+      "dimensions": {
+        "claim_support": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 36,
+          "technical_invalid_count": 4,
+          "technical_valid_rate": 0.9,
+          "known_judgment_count": 36,
+          "known_judgment_coverage": 0.9,
+          "semantic_comparison_count": 36,
+          "semantic_agreement_count": 28,
+          "semantic_error_count": 8,
+          "semantic_agreement_rate": 0.7777777777777778,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 28,
+          "end_to_end_label_agreement_rate": 0.7,
+          "false_pass_count": 0,
+          "false_pass_denominator": 16,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 8,
+          "false_fail_denominator": 20,
+          "false_fail_rate": 0.4,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 16,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 8,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 12
+            }
+          }
+        },
+        "numeric_period_correctness": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 40,
+          "technical_invalid_count": 0,
+          "technical_valid_rate": 1.0,
+          "known_judgment_count": 40,
+          "known_judgment_coverage": 1.0,
+          "semantic_comparison_count": 40,
+          "semantic_agreement_count": 40,
+          "semantic_error_count": 0,
+          "semantic_agreement_rate": 1.0,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 40,
+          "end_to_end_label_agreement_rate": 1.0,
+          "false_pass_count": 0,
+          "false_pass_denominator": 8,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 0,
+          "false_fail_denominator": 32,
+          "false_fail_rate": 0.0,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 8,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 32
+            }
+          }
+        },
+        "counterevidence": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 40,
+          "technical_invalid_count": 0,
+          "technical_valid_rate": 1.0,
+          "known_judgment_count": 40,
+          "known_judgment_coverage": 1.0,
+          "semantic_comparison_count": 40,
+          "semantic_agreement_count": 30,
+          "semantic_error_count": 10,
+          "semantic_agreement_rate": 0.75,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 30,
+          "end_to_end_label_agreement_rate": 0.75,
+          "false_pass_count": 0,
+          "false_pass_denominator": 4,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 2,
+          "false_fail_denominator": 36,
+          "false_fail_rate": 0.05555555555555555,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 4,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 2,
+              "NOT_APPLICABLE": 18,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 8,
+              "NO_DATA": 0,
+              "PASS": 8
+            }
+          }
+        },
+        "unknowns": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 39,
+          "technical_invalid_count": 1,
+          "technical_valid_rate": 0.975,
+          "known_judgment_count": 39,
+          "known_judgment_coverage": 0.975,
+          "semantic_comparison_count": 39,
+          "semantic_agreement_count": 36,
+          "semantic_error_count": 3,
+          "semantic_agreement_rate": 0.9230769230769231,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 36,
+          "end_to_end_label_agreement_rate": 0.9,
+          "false_pass_count": 1,
+          "false_pass_denominator": 8,
+          "false_pass_rate": 0.125,
+          "false_fail_count": 2,
+          "false_fail_denominator": 31,
+          "false_fail_rate": 0.06451612903225806,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 7,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 1
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 2,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 29
+            }
+          }
+        },
+        "task_completion": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 40,
+          "technical_invalid_count": 0,
+          "technical_valid_rate": 1.0,
+          "known_judgment_count": 40,
+          "known_judgment_coverage": 1.0,
+          "semantic_comparison_count": 40,
+          "semantic_agreement_count": 40,
+          "semantic_error_count": 0,
+          "semantic_agreement_rate": 1.0,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 40,
+          "end_to_end_label_agreement_rate": 1.0,
+          "false_pass_count": 0,
+          "false_pass_denominator": 8,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 0,
+          "false_fail_denominator": 32,
+          "false_fail_rate": 0.0,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 8,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 32
+            }
+          }
+        }
+      },
+      "repeatability": {
+        "eligible_case_count": 18,
+        "consistent_case_count": 17,
+        "excluded_case_count": 2,
+        "consistency_rate": 0.9444444444444444,
+        "requires": "at least two technically valid repeats; legitimate NO_DATA judgments are included"
+      },
+      "cost": {
+        "prompt_tokens": 165543,
+        "known_prompt_tokens": 165543,
+        "prompt_tokens_reported_attempts": 40,
+        "completion_tokens": 33185,
+        "known_completion_tokens": 33185,
+        "completion_tokens_reported_attempts": 40,
+        "total_tokens": 198728,
+        "known_total_tokens": 198728,
+        "total_tokens_reported_attempts": 40,
+        "usage_complete": true,
+        "usage_scope": "recorded_attempts",
+        "call_count": 76,
+        "call_count_reported_attempts": 40,
+        "summed_attempt_latency_ms": 430309,
+        "latency_reported_attempts": 40,
+        "monetary_cost": null,
+        "pricing_status": "UNCONFIGURED"
+      },
+      "correct_retained": 12,
+      "correct_total": 16,
+      "correct_false_rejected": 0,
+      "correct_inconclusive": 4,
+      "target_detected": 23,
+      "corrupt_total": 24,
+      "paired_separation": 17,
+      "by_error_type": {
+        "NUMERIC_ERROR": {
+          "detected": 8,
+          "total": 8
+        },
+        "OMISSION": {
+          "detected": 8,
+          "total": 8
+        },
+        "UNSUPPORTED_CERTAINTY": {
+          "detected": 7,
+          "total": 8
+        }
+      },
+      "local_error_counts": {
+        "EXCERPT_INVALID:evidence_quotes": 5
+      },
+      "global_error_counts": {},
+      "observed_models": [
+        "qwen3.8-max"
+      ],
+      "reasoning_content_calls": 0,
+      "reasoning_tokens_reported_calls": 0,
+      "known_reasoning_tokens": 0,
+      "median_attempt_latency_ms": 10539.5,
+      "calculator_calls": 39
+    },
+    "C_base_on": {
+      "report_sha256": "053f49dcc0e949879813acef9214ea883bc11e2f7abfe43d7af5ef6c3a93fb15",
+      "dimension_total": {
+        "count": 200,
+        "known_label_count": 200,
+        "expected_no_data_count": 0,
+        "technical_valid_count": 198,
+        "technical_invalid_count": 2,
+        "technical_valid_rate": 0.99,
+        "known_judgment_count": 198,
+        "known_judgment_coverage": 0.99,
+        "semantic_comparison_count": 198,
+        "semantic_agreement_count": 181,
+        "semantic_error_count": 17,
+        "semantic_agreement_rate": 0.9141414141414141,
+        "valid_no_data_count": 0,
+        "valid_abstention_on_known_count": 0,
+        "valid_correct_no_data_count": 0,
+        "correct_no_data_rate": null,
+        "end_to_end_label_agreement_count": 181,
+        "end_to_end_label_agreement_rate": 0.905,
+        "false_pass_count": 0,
+        "false_pass_denominator": 44,
+        "false_pass_rate": 0.0,
+        "false_fail_count": 7,
+        "false_fail_denominator": 154,
+        "false_fail_rate": 0.045454545454545456,
+        "unsupported_certainty_count": 0,
+        "confusion_valid": {
+          "FAIL": {
+            "FAIL": 44,
+            "NOT_APPLICABLE": 0,
+            "NO_DATA": 0,
+            "PASS": 0
+          },
+          "NOT_APPLICABLE": {
+            "FAIL": 7,
+            "NOT_APPLICABLE": 3,
+            "NO_DATA": 0,
+            "PASS": 10
+          },
+          "NO_DATA": {
+            "FAIL": 0,
+            "NOT_APPLICABLE": 0,
+            "NO_DATA": 0,
+            "PASS": 0
+          },
+          "PASS": {
+            "FAIL": 0,
+            "NOT_APPLICABLE": 0,
+            "NO_DATA": 0,
+            "PASS": 134
+          }
+        }
+      },
+      "dimensions": {
+        "claim_support": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 40,
+          "technical_invalid_count": 0,
+          "technical_valid_rate": 1.0,
+          "known_judgment_count": 40,
+          "known_judgment_coverage": 1.0,
+          "semantic_comparison_count": 40,
+          "semantic_agreement_count": 40,
+          "semantic_error_count": 0,
+          "semantic_agreement_rate": 1.0,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 40,
+          "end_to_end_label_agreement_rate": 1.0,
+          "false_pass_count": 0,
+          "false_pass_denominator": 16,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 0,
+          "false_fail_denominator": 24,
+          "false_fail_rate": 0.0,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 16,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 24
+            }
+          }
+        },
+        "numeric_period_correctness": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 40,
+          "technical_invalid_count": 0,
+          "technical_valid_rate": 1.0,
+          "known_judgment_count": 40,
+          "known_judgment_coverage": 1.0,
+          "semantic_comparison_count": 40,
+          "semantic_agreement_count": 40,
+          "semantic_error_count": 0,
+          "semantic_agreement_rate": 1.0,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 40,
+          "end_to_end_label_agreement_rate": 1.0,
+          "false_pass_count": 0,
+          "false_pass_denominator": 8,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 0,
+          "false_fail_denominator": 32,
+          "false_fail_rate": 0.0,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 8,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 32
+            }
+          }
+        },
+        "counterevidence": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 40,
+          "technical_invalid_count": 0,
+          "technical_valid_rate": 1.0,
+          "known_judgment_count": 40,
+          "known_judgment_coverage": 1.0,
+          "semantic_comparison_count": 40,
+          "semantic_agreement_count": 23,
+          "semantic_error_count": 17,
+          "semantic_agreement_rate": 0.575,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 23,
+          "end_to_end_label_agreement_rate": 0.575,
+          "false_pass_count": 0,
+          "false_pass_denominator": 4,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 7,
+          "false_fail_denominator": 36,
+          "false_fail_rate": 0.19444444444444445,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 4,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 7,
+              "NOT_APPLICABLE": 3,
+              "NO_DATA": 0,
+              "PASS": 10
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 16
+            }
+          }
+        },
+        "unknowns": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 40,
+          "technical_invalid_count": 0,
+          "technical_valid_rate": 1.0,
+          "known_judgment_count": 40,
+          "known_judgment_coverage": 1.0,
+          "semantic_comparison_count": 40,
+          "semantic_agreement_count": 40,
+          "semantic_error_count": 0,
+          "semantic_agreement_rate": 1.0,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 40,
+          "end_to_end_label_agreement_rate": 1.0,
+          "false_pass_count": 0,
+          "false_pass_denominator": 8,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 0,
+          "false_fail_denominator": 32,
+          "false_fail_rate": 0.0,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 8,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 32
+            }
+          }
+        },
+        "task_completion": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 38,
+          "technical_invalid_count": 2,
+          "technical_valid_rate": 0.95,
+          "known_judgment_count": 38,
+          "known_judgment_coverage": 0.95,
+          "semantic_comparison_count": 38,
+          "semantic_agreement_count": 38,
+          "semantic_error_count": 0,
+          "semantic_agreement_rate": 1.0,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 38,
+          "end_to_end_label_agreement_rate": 0.95,
+          "false_pass_count": 0,
+          "false_pass_denominator": 8,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 0,
+          "false_fail_denominator": 30,
+          "false_fail_rate": 0.0,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 8,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 30
+            }
+          }
+        }
+      },
+      "repeatability": {
+        "eligible_case_count": 18,
+        "consistent_case_count": 16,
+        "excluded_case_count": 2,
+        "consistency_rate": 0.8888888888888888,
+        "requires": "at least two technically valid repeats; legitimate NO_DATA judgments are included"
+      },
+      "cost": {
+        "prompt_tokens": 163235,
+        "known_prompt_tokens": 163235,
+        "prompt_tokens_reported_attempts": 40,
+        "completion_tokens": 45261,
+        "known_completion_tokens": 45261,
+        "completion_tokens_reported_attempts": 40,
+        "total_tokens": 208496,
+        "known_total_tokens": 208496,
+        "total_tokens_reported_attempts": 40,
+        "usage_complete": true,
+        "usage_scope": "recorded_attempts",
+        "call_count": 76,
+        "call_count_reported_attempts": 40,
+        "summed_attempt_latency_ms": 876970,
+        "latency_reported_attempts": 40,
+        "monetary_cost": null,
+        "pricing_status": "UNCONFIGURED"
+      },
+      "correct_retained": 15,
+      "correct_total": 16,
+      "correct_false_rejected": 0,
+      "correct_inconclusive": 1,
+      "target_detected": 24,
+      "corrupt_total": 24,
+      "paired_separation": 24,
+      "by_error_type": {
+        "NUMERIC_ERROR": {
+          "detected": 8,
+          "total": 8
+        },
+        "OMISSION": {
+          "detected": 8,
+          "total": 8
+        },
+        "UNSUPPORTED_CERTAINTY": {
+          "detected": 8,
+          "total": 8
+        }
+      },
+      "local_error_counts": {
+        "EXCERPT_INVALID:answer_quotes": 2
+      },
+      "global_error_counts": {},
+      "observed_models": [
+        "qwen3.8-max"
+      ],
+      "reasoning_content_calls": 76,
+      "reasoning_tokens_reported_calls": 76,
+      "known_reasoning_tokens": 9405,
+      "median_attempt_latency_ms": 21164.0,
+      "calculator_calls": 53
+    },
+    "D_prompt_on": {
+      "report_sha256": "5a194b744d44f3a60121403a706421ade09cecf7f96c2fb04bc6edc32e04756e",
+      "dimension_total": {
+        "count": 200,
+        "known_label_count": 200,
+        "expected_no_data_count": 0,
+        "technical_valid_count": 200,
+        "technical_invalid_count": 0,
+        "technical_valid_rate": 1.0,
+        "known_judgment_count": 200,
+        "known_judgment_coverage": 1.0,
+        "semantic_comparison_count": 200,
+        "semantic_agreement_count": 182,
+        "semantic_error_count": 18,
+        "semantic_agreement_rate": 0.91,
+        "valid_no_data_count": 0,
+        "valid_abstention_on_known_count": 0,
+        "valid_correct_no_data_count": 0,
+        "correct_no_data_rate": null,
+        "end_to_end_label_agreement_count": 182,
+        "end_to_end_label_agreement_rate": 0.91,
+        "false_pass_count": 1,
+        "false_pass_denominator": 44,
+        "false_pass_rate": 0.022727272727272728,
+        "false_fail_count": 5,
+        "false_fail_denominator": 156,
+        "false_fail_rate": 0.03205128205128205,
+        "unsupported_certainty_count": 0,
+        "confusion_valid": {
+          "FAIL": {
+            "FAIL": 43,
+            "NOT_APPLICABLE": 0,
+            "NO_DATA": 0,
+            "PASS": 1
+          },
+          "NOT_APPLICABLE": {
+            "FAIL": 5,
+            "NOT_APPLICABLE": 3,
+            "NO_DATA": 0,
+            "PASS": 12
+          },
+          "NO_DATA": {
+            "FAIL": 0,
+            "NOT_APPLICABLE": 0,
+            "NO_DATA": 0,
+            "PASS": 0
+          },
+          "PASS": {
+            "FAIL": 0,
+            "NOT_APPLICABLE": 0,
+            "NO_DATA": 0,
+            "PASS": 136
+          }
+        }
+      },
+      "dimensions": {
+        "claim_support": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 40,
+          "technical_invalid_count": 0,
+          "technical_valid_rate": 1.0,
+          "known_judgment_count": 40,
+          "known_judgment_coverage": 1.0,
+          "semantic_comparison_count": 40,
+          "semantic_agreement_count": 39,
+          "semantic_error_count": 1,
+          "semantic_agreement_rate": 0.975,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 39,
+          "end_to_end_label_agreement_rate": 0.975,
+          "false_pass_count": 1,
+          "false_pass_denominator": 16,
+          "false_pass_rate": 0.0625,
+          "false_fail_count": 0,
+          "false_fail_denominator": 24,
+          "false_fail_rate": 0.0,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 15,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 1
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 24
+            }
+          }
+        },
+        "numeric_period_correctness": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 40,
+          "technical_invalid_count": 0,
+          "technical_valid_rate": 1.0,
+          "known_judgment_count": 40,
+          "known_judgment_coverage": 1.0,
+          "semantic_comparison_count": 40,
+          "semantic_agreement_count": 40,
+          "semantic_error_count": 0,
+          "semantic_agreement_rate": 1.0,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 40,
+          "end_to_end_label_agreement_rate": 1.0,
+          "false_pass_count": 0,
+          "false_pass_denominator": 8,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 0,
+          "false_fail_denominator": 32,
+          "false_fail_rate": 0.0,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 8,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 32
+            }
+          }
+        },
+        "counterevidence": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 40,
+          "technical_invalid_count": 0,
+          "technical_valid_rate": 1.0,
+          "known_judgment_count": 40,
+          "known_judgment_coverage": 1.0,
+          "semantic_comparison_count": 40,
+          "semantic_agreement_count": 23,
+          "semantic_error_count": 17,
+          "semantic_agreement_rate": 0.575,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 23,
+          "end_to_end_label_agreement_rate": 0.575,
+          "false_pass_count": 0,
+          "false_pass_denominator": 4,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 5,
+          "false_fail_denominator": 36,
+          "false_fail_rate": 0.1388888888888889,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 4,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 5,
+              "NOT_APPLICABLE": 3,
+              "NO_DATA": 0,
+              "PASS": 12
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 16
+            }
+          }
+        },
+        "unknowns": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 40,
+          "technical_invalid_count": 0,
+          "technical_valid_rate": 1.0,
+          "known_judgment_count": 40,
+          "known_judgment_coverage": 1.0,
+          "semantic_comparison_count": 40,
+          "semantic_agreement_count": 40,
+          "semantic_error_count": 0,
+          "semantic_agreement_rate": 1.0,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 40,
+          "end_to_end_label_agreement_rate": 1.0,
+          "false_pass_count": 0,
+          "false_pass_denominator": 8,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 0,
+          "false_fail_denominator": 32,
+          "false_fail_rate": 0.0,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 8,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 32
+            }
+          }
+        },
+        "task_completion": {
+          "count": 40,
+          "known_label_count": 40,
+          "expected_no_data_count": 0,
+          "technical_valid_count": 40,
+          "technical_invalid_count": 0,
+          "technical_valid_rate": 1.0,
+          "known_judgment_count": 40,
+          "known_judgment_coverage": 1.0,
+          "semantic_comparison_count": 40,
+          "semantic_agreement_count": 40,
+          "semantic_error_count": 0,
+          "semantic_agreement_rate": 1.0,
+          "valid_no_data_count": 0,
+          "valid_abstention_on_known_count": 0,
+          "valid_correct_no_data_count": 0,
+          "correct_no_data_rate": null,
+          "end_to_end_label_agreement_count": 40,
+          "end_to_end_label_agreement_rate": 1.0,
+          "false_pass_count": 0,
+          "false_pass_denominator": 8,
+          "false_pass_rate": 0.0,
+          "false_fail_count": 0,
+          "false_fail_denominator": 32,
+          "false_fail_rate": 0.0,
+          "unsupported_certainty_count": 0,
+          "confusion_valid": {
+            "FAIL": {
+              "FAIL": 8,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NOT_APPLICABLE": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "NO_DATA": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 0
+            },
+            "PASS": {
+              "FAIL": 0,
+              "NOT_APPLICABLE": 0,
+              "NO_DATA": 0,
+              "PASS": 32
+            }
+          }
+        }
+      },
+      "repeatability": {
+        "eligible_case_count": 20,
+        "consistent_case_count": 16,
+        "excluded_case_count": 0,
+        "consistency_rate": 0.8,
+        "requires": "at least two technically valid repeats; legitimate NO_DATA judgments are included"
+      },
+      "cost": {
+        "prompt_tokens": 183003,
+        "known_prompt_tokens": 183003,
+        "prompt_tokens_reported_attempts": 40,
+        "completion_tokens": 45634,
+        "known_completion_tokens": 45634,
+        "completion_tokens_reported_attempts": 40,
+        "total_tokens": 228637,
+        "known_total_tokens": 228637,
+        "total_tokens_reported_attempts": 40,
+        "usage_complete": true,
+        "usage_scope": "recorded_attempts",
+        "call_count": 79,
+        "call_count_reported_attempts": 40,
+        "summed_attempt_latency_ms": 902359,
+        "latency_reported_attempts": 40,
+        "monetary_cost": null,
+        "pricing_status": "UNCONFIGURED"
+      },
+      "correct_retained": 16,
+      "correct_total": 16,
+      "correct_false_rejected": 0,
+      "correct_inconclusive": 0,
+      "target_detected": 24,
+      "corrupt_total": 24,
+      "paired_separation": 24,
+      "by_error_type": {
+        "NUMERIC_ERROR": {
+          "detected": 8,
+          "total": 8
+        },
+        "OMISSION": {
+          "detected": 8,
+          "total": 8
+        },
+        "UNSUPPORTED_CERTAINTY": {
+          "detected": 8,
+          "total": 8
+        }
+      },
+      "local_error_counts": {},
+      "global_error_counts": {},
+      "observed_models": [
+        "qwen3.8-max"
+      ],
+      "reasoning_content_calls": 79,
+      "reasoning_tokens_reported_calls": 79,
+      "known_reasoning_tokens": 10467,
+      "median_attempt_latency_ms": 21921.5,
+      "calculator_calls": 67
+    }
+  },
+  "comparisons": {
+    "prompt_off": {
+      "left": "A_base_off",
+      "right": "B_prompt_off",
+      "common_count": 190,
+      "corrected": 4,
+      "regressed": 3,
+      "new_false_pass": 1,
+      "technical_coverage_gained": 5,
+      "technical_coverage_lost": 1
+    },
+    "prompt_on": {
+      "left": "C_base_on",
+      "right": "D_prompt_on",
+      "common_count": 198,
+      "corrected": 3,
+      "regressed": 4,
+      "new_false_pass": 1,
+      "technical_coverage_gained": 2,
+      "technical_coverage_lost": 0
+    },
+    "thinking_base": {
+      "left": "A_base_off",
+      "right": "C_base_on",
+      "common_count": 189,
+      "corrected": 18,
+      "regressed": 14,
+      "new_false_pass": 0,
+      "technical_coverage_gained": 9,
+      "technical_coverage_lost": 2
+    },
+    "thinking_prompt": {
+      "left": "B_prompt_off",
+      "right": "D_prompt_on",
+      "common_count": 195,
+      "corrected": 19,
+      "regressed": 16,
+      "new_false_pass": 1,
+      "technical_coverage_gained": 5,
+      "technical_coverage_lost": 0
+    }
+  },
+  "common_four_arm_semantics": {
+    "count": 188,
+    "agreement_counts": {
+      "A_base_off": 167,
+      "B_prompt_off": 168,
+      "C_base_on": 171,
+      "D_prompt_on": 170
+    },
+    "interaction_agreement_count": -2
+  }
+}

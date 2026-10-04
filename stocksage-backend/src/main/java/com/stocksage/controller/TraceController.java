@@ -1,6 +1,6 @@
 package com.stocksage.controller;
 
-import com.stocksage.config.RequestIdentity;
+import com.stocksage.identity.RequestIdentity;
 import com.stocksage.model.entity.AgentTrace;
 import com.stocksage.trace.TraceService;
 import lombok.RequiredArgsConstructor;

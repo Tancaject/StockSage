@@ -1,0 +1,87 @@
+{
+  "schema": "fundamentals_learning_revision_diagnostic_v1",
+  "registeredAt": "2026-10-03T14:01:59.803329+00:00",
+  "frozenFiles": {
+    "evals/evolution/batch-learning-validation-20261002/cases.jsonl": "1260c579bae043263d3c1ac88cdd2663186ccf6a34d38c7cffcd9dcffceeb145",
+    "evals/evolution/batch-learning-validation-20261002/gold.jsonl": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+    "evals/evolution/batch-learning-validation-20261002/draft-cases.jsonl": "74a724ca6369f74c5469bf003f81ed114dfad4bee682011a8197417948c511c9",
+    "evals/evolution/batch-learning-validation-20261002/draft-gold.jsonl": "e0d53597a5d84c648747d1189253f966f4c7b4a31f846b45e61ee5b83cc15fa0",
+    "evals/evolution/batch-learning-validation-20261002/dataset-notes.md": "b5ab05f13372bc9a8f62a0dcec13f41e6e93a38832b03a8dc330c4f8935b1f96",
+    "evals/evolution/batch-learning-validation-20261002/source-review.json": "66afbd69a3582609e95a8f43fafd23a99c3936f1ee72bfa4407a792719d7b814",
+    "evals/evolution/batch-learning-validation-20261002/review-policy.json": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+    "evals/evolution/batch-learning-validation-20261002/business_replay.py": "809522cb47cf26bc5ff9bc78ba175cec08cc38557e1afdfd78efee01cc7c4ebf",
+    "evals/evolution/batch-learning-validation-20261002/audit_execution.py": "d9d6e158545f871cb789c388b17b9f12d4ec57dadf43e1c0c59deae13c050cb1",
+    "evals/evolution/batch-learning-validation-20261002/runtime-dependencies.json": "2a67bb147ceacdc85b73e0026f9c088c6cf94b738b08570f6b962785a18c8b8f",
+    "evals/evolution/batch-learning-validation-20261002/build.json": "12307fab45bf0a227f6cfb6498fa02b591c8691b8bb4c20e3818c819b8d91c5c",
+    "evals/evolution/batch-learning-validation-20261002/baseline-method.txt": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8",
+    "evals/eval_common.py": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c",
+    "evals/evolution_dataset.py": "12df23500bf7ee45a2ee0ab955924bf7368e30c1a7e2bb2e20a5f993fa24ee65",
+    "evals/evolution_quality.py": "e0d1f17d52003287a1010ce58b34880e07f1df1004d9252e69eb1c24c8bfb35b",
+    "evals/evolution_rubric.py": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea",
+    "evals/evolution_ai_review.py": "b471b41a303222f6b9dd526fccc00f607a885dd5457935a557c764fb94a46411",
+    "evals/evolution_batch.py": "e8d9f7c359486f0243a4643c3fafe05143712f548ebebd3d460737fa53b86533",
+    "evals/evolution_candidates.py": "3b90d673cbfbd79aa000160943fddedbdad2aa8730d72d4b61617ba747f2e975",
+    "evals/run_evolution_replay.py": "90777b3f0eb6e6932a9da762591bb5bceb2acc16994949d964d5012d156a786d",
+    "evals/run_evaluation_agent.py": "4c7843a9269262fe6398be1f3c95fbf916dfc0c0eb83019626c7f7c15471abdf",
+    "evals/run_ragas_eval.py": "d024ccd42015c560b978c873c4bfccc4cd6c70c72753f003c5c521018f2517f3",
+    "evals/evolution/batch-learning-20261002/experiment.py": "e31ea5664bf73403e6a3fae00fc8f46672a188bc8393c64b56595278b0329a72",
+    "evals/evolution/batch-learning-20261002/campaign/audit_execution.py": "552243363e923e0322b58356c4761dc5c9b17af5b1d8f3c658ef371bf6cde1d5",
+    "evals/evolution/batch-learning-20261002/cases.jsonl": "79dc78e1c056f0c37855875383df2850cea155d14304c218ee294e88bbd213f4",
+    "evals/evolution/batch-learning-20261002/gold.jsonl": "1b31f7cf00852cb0a4696385faac1954b344a0d50563cd5033ef71b5c106cbc1",
+    "evals/evolution/batch-learning-20261002/source-review.json": "888f1a642ee243600a8608c8fb835c4e65f18c5882402aa6c4b1fafe6edcc47e",
+    "evals/evolution/batch-repair-20261002/audit_execution.py": "dc61ec266161e2c322482881fe3c72a597a12dc2e62a505c47ff1e56305106bb",
+    "evals/evolution/batch-learning-validation-20261002/raw-development-05/development-05-1-1.response.json": "1c560e86597ba69e46457760117e21af7b314d2f43d468da38845fc770ebfaf3",
+    "evals/evolution/batch-learning-validation-20261002/feedback/tgt-fy2025q3-quarter-reconstruction.json": "4b815eb27ac9089b788ca7a84bcda1c1cff26c2e810f612c1e99f2c0571d32e4",
+    "evals/evolution/batch-learning-validation-20261002/generated/group-1/request.json": "cde4bacbd737b5b3f8b34e2c99cc03edfdb1c6d3b75ccf7c39d5919878f26e7a",
+    "evals/evolution/batch-learning-validation-20261002/raw-development-07/development-07-1-1.response.json": "74949e92611d42b76ef426b4207daaccbe73e08ae022aae5f464574a63fe3567",
+    "evals/evolution/batch-learning-validation-20261002/feedback/ibm-fy2025q3-oneoff-cash-comparability.json": "dae5f764ba949879e29a46f82f489e75aa4ff8db2de20ba6d3bfcd2aaad8354a",
+    "evals/evolution/batch-learning-validation-20261002/generated/group-2/request.json": "032ef0609b7d19d11469e547e2b728aee2ef9b1e961444db6fa6bcd307c5fdc2",
+    "evals/evolution/learning-revision-20261003/run.py": "7e13b358419a5006f1c66139813f091c65e3d71e1f2d7f51623072131c0429a0",
+    "evals/evolution_learning_input.py": "3b1726e6365b91c526208b936af049263f58ccc8343f17b59f57167de2a598d8",
+    "evals/diagnostics/model-root-cause-20261002/probe.py": "ccf4be4c439fa8dbe302a6d5bb488f5ee075b03920b04a097c6af9291ce6e23f",
+    "evals/evolution/batch-learning-validation-20261002/groups.json": "d598ed938d8d465fe410a00e0aa9efb1fba2aebf3a60a5035f908fb10f7db0d4",
+    "evals/evolution/batch-learning-validation-20261002/generated/group-1/experience.json": "7dc718273cc8c5b7815e68a3ec362925281ca6e6d2da54ad0fb33ee41f28f2b4",
+    "evals/evolution/batch-learning-validation-20261002/generated/group-1/bundle.json": "f6f1729a9360af217e4e435a5fd6a457bb3390e27cfdb47b92f81cebb770793c",
+    "evals/evolution/learning-revision-20261003/group-1/request.json": "414a519e2d0776d7e689ce92a00d3ed392b1885b247876500edc7ca70e058195",
+    "evals/evolution/learning-revision-20261003/group-2/request.json": "84a2851b2e5e7cbbcd19561b3c7e0739a3a4b4ab12e91d5237de99ea84be82f5"
+  },
+  "authority": "USER_AUTHORIZED_AI_DIAGNOSTIC_ONLY",
+  "releaseEligible": false,
+  "scope": "Two parallel generator calls; group 1 old versus revised analysis method on DEV 05,09,06. No final synthesis, transfer or activation.",
+  "maxGeneratorCalls": 2,
+  "maxBusinessCalls": 6,
+  "retries": 0,
+  "cases": [
+    5,
+    9,
+    6
+  ],
+  "armOrder": [
+    [
+      "old",
+      "revised"
+    ],
+    [
+      "revised",
+      "old"
+    ],
+    [
+      "old",
+      "revised"
+    ]
+  ],
+  "selection": "05 is source failure; 09 is observed expansion case; 06 is preselected non-applicable passing control. Not the full original screening set.",
+  "settings": {
+    "model": "qwen3.8-max",
+    "temperature": 0.7,
+    "max_tokens": 4096,
+    "thinking_budget": 32768,
+    "enable_thinking": true,
+    "stream": true,
+    "deadlineSeconds": 600,
+    "productionDeadlineSeconds": 300
+  },
+  "quality": "Existing fundamentals analysis rubric plus frozen gold/policy; source-bound AI review of required facts/points and extra claims. Truncation or transport failure is NO_DATA, never PASS. Complete answers over 300s retain semantic review but fail production timeliness.",
+  "decision": "No selection or transfer in this diagnostic. Report 3-case paired semantic and completeness counts, original-failure correction, unrelated calculations, latency and usage. Any regression prevents claiming improvement. Single samples do not establish stable benefit.",
+  "limits": "Direct provider analysis replay, not Java/full-chain acceptance. Both arms use identical transport and fixed evidence. Generator input and instruction changes are a joint intervention, not isolated causal effects. New group 2 is generation-only, not behavior-validated."
+}

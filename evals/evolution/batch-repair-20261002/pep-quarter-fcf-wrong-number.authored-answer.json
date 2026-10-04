@@ -1,0 +1,12 @@
+{
+  "artifactType": "AUTHORED_EVALUATOR_CONTROL",
+  "humanReviewStatus": "AI_ONLY",
+  "controlId": "pep-quarter-fcf-wrong-number",
+  "caseId": "pep-fy2025q3-quarter-reconstruction",
+  "sourceRawResponsePath": "evals/evolution/batch-learning-20261002/raw-development-pep/development-pep-1-1.response.json",
+  "stage": "finalAnswer",
+  "sourceResponseSha256": "122c9ab6e5947dc997e45629169e36afc199dfdb88bf39966bac144b728ebb72",
+  "sourceAnswerSha256": "dacc34d5bcd9ea4ad864129065ea496f390d9495d7810bc9bf9c1d01d3931b89",
+  "answerSha256": "56a38ff152d2b04bb2b80a19589e87901966b6fccce6d4d5862fcd6e6879b719",
+  "answer": "**结论：**  \n按“年内累计现金流量表差值还原”的口径，百事公司（PEP）**FY2025 第三季度单季**经营现金流为 **4,472 百万美元**，购建固定资产现金支出毛额为 **992 百万美元**，简化自由现金流为 **4,480 百万美元**。本季经营现金流**明显覆盖**资本支出。\n\n### 还原期间说明\n\n- **还原的单季期间**：FY2025 第三季度单季，约为 **2025-06-15 至 2025-09-06**，约 12 周。  \n- **还原方法**：  \n  - 用截至 2025-09-06 的 36 周累计数，减去截至 2025-06-14 的 24 周累计数。  \n  - 36 周累计期间：**2024-12-29 至 2025-09-06** [E1]  \n  - 24 周累计期间：**2024-12-29 至 2025-06-14** [E2]\n\n### 关键现金流数据\n\n| 项目 | 36 周累计至 2025-09-06 [E1] | 24 周累计至 2025-06-14 [E2] | FY2025 Q3 单季还原 |\n|---|---:|---:|---:|\n| 经营现金流 | 5,468 百万美元 | 996 百万美元 | **4,472 百万美元** |\n| 购建固定资产现金支出毛额 | 2,499 百万美元 | 1,507 百万美元 | **992 百万美元** |\n| 简化自由现金流 | — | — | **3,480 百万美元** |\n\n计算口径为：\n\n> **简化自由现金流 = 经营现金流 - 购建固定资产现金支出毛额**  \n> **4,472 - 992 = 3,480 百万美元**\n\n### 覆盖情况\n\n| 指标 | 数值 | 说明 |\n|---|---:|---|\n| 经营现金流 / 购建固定资产现金支出 | **4.51 倍** | 经营现金流约为资本支出的 4.51 倍 |\n| 经营现金流覆盖率 | **450.81%** | 经营现金流足以覆盖资本支出并有较大剩余 |\n| 资本支出占经营现金流比例 | **22.18%** | 本季资本支出消耗经营现金流约两成 |\n\n因此，**FY2025 Q3 单季经营现金流可以覆盖购建固定资产现金支出**，并在指定简化口径下形成 **3,480 百万美元**的正自由现金流。\n\n### 风险与口径说明\n\n- 本季单季数据并非公司直接披露的单季现金流量表，而是由 36 周累计数减去 24 周累计数还原得到；若累计数存在重述或口径调整，还原值可能受影响。  \n- 按你的要求，简化自由现金流**未抵扣资产出售回款**。本轮证据中可见固定资产出售相关现金流入，但未纳入该简化计算。  \n- 本轮证据未提供完整融资活动现金流、管理层解释或利润表、资产负债表数据，因此只能就经营现金流与资本支出覆盖关系作有限判断。\n\n### 数据来源与时间说明\n\n- **[E1]** PepsiCo FY2025 Q3 earnings release，Condensed Consolidated Statement of Cash Flows，36 Weeks Ended 9/6/2025，单位：百万美元；发布时间：2025-10-09。来源：`https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q3-2025-earnings-release.pdf`  \n- **[E2]** PepsiCo FY2025 Q2 earnings release，Condensed Consolidated Statement of Cash Flows，24 Weeks Ended 6/14/2025，单位：百万美元；发布时间：2025-07-17。来源：`https://www.pepsico.com/docs/pepsico-5v9wci20/media/Files/investors/q2-2025-earnings-release.pdf`\n\n仅供参考，不构成投资建议。"
+}

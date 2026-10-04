@@ -1,0 +1,16 @@
+{
+  "usageSource" : "PROVIDER",
+  "usageSemantics" : "INVOCATION_SNAPSHOT",
+  "actualModel" : "qwen3.8-flash",
+  "providerResponseId" : "chatcmpl-1c5ac759-9180-9a41-ac3e-997be80bd771",
+  "inputTokens" : 464,
+  "outputTokens" : 326,
+  "totalTokens" : 790,
+  "finishReason" : "STOP",
+  "text" : "{\"decision\":\"STOP\",\"action\":null,\"query\":null,\"reasonCode\":\"NO_SAFE_ACTION\"}",
+  "callId" : "28a9a743-a353-4e2f-97b9-f400f89d61f1",
+  "caseId" : "replan-financial-gap-stop",
+  "arm" : "after",
+  "elapsedMs" : 4780,
+  "finishedAt" : "2026-09-30T14:10:55.412845600Z"
+}

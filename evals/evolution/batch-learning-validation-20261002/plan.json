@@ -1,0 +1,121 @@
+{
+  "schema": "fundamentals_batch_learning_validation_plan_v1",
+  "experimentId": "fundamentals-batch-learning-validation-20261002",
+  "createdAt": "2026-10-02T12:49:38.399372+00:00",
+  "status": "FROZEN_BEFORE_CALLS",
+  "authority": "USER_AUTHORIZED_AI_DIAGNOSTIC_ONLY",
+  "releaseEligible": false,
+  "humanReviewed": false,
+  "caseCounts": {
+    "DEVELOPMENT": 10,
+    "VALIDATION": 12
+  },
+  "maxBusinessCalls": 120,
+  "maxLearnedGroups": 3,
+  "maxGeneratorCalls": 3,
+  "maxConcurrentBusinessRuns": 3,
+  "automaticRetries": 0,
+  "businessSettings": {
+    "model": "qwen3.8-max",
+    "temperature": 0.7,
+    "maxTokens": 4096,
+    "thinkingBudget": 32768,
+    "enableThinking": true,
+    "stageTimeoutSeconds": 300,
+    "httpReadTimeoutSeconds": 300,
+    "retryAttempts": 1
+  },
+  "settingsSource": "NEW_JAR_PRODUCTION_DEFAULTS_WITHOUT_MODEL_BUDGET_OR_TIMEOUT_OVERRIDES",
+  "rubricSha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+  "evaluatorSha256": "9596583720838d6dca2a514788ecf9eaa00072401cf66d3df3b4f16a89bc006e",
+  "reviewPolicy": "review-policy.json",
+  "reviewPolicySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+  "frozenFiles": {
+    "evals/evolution/batch-learning-validation-20261002/cases.jsonl": "1260c579bae043263d3c1ac88cdd2663186ccf6a34d38c7cffcd9dcffceeb145",
+    "evals/evolution/batch-learning-validation-20261002/gold.jsonl": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+    "evals/evolution/batch-learning-validation-20261002/draft-cases.jsonl": "74a724ca6369f74c5469bf003f81ed114dfad4bee682011a8197417948c511c9",
+    "evals/evolution/batch-learning-validation-20261002/draft-gold.jsonl": "e0d53597a5d84c648747d1189253f966f4c7b4a31f846b45e61ee5b83cc15fa0",
+    "evals/evolution/batch-learning-validation-20261002/dataset-notes.md": "b5ab05f13372bc9a8f62a0dcec13f41e6e93a38832b03a8dc330c4f8935b1f96",
+    "evals/evolution/batch-learning-validation-20261002/source-review.json": "66afbd69a3582609e95a8f43fafd23a99c3936f1ee72bfa4407a792719d7b814",
+    "evals/evolution/batch-learning-validation-20261002/review-policy.json": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+    "evals/evolution/batch-learning-validation-20261002/business_replay.py": "809522cb47cf26bc5ff9bc78ba175cec08cc38557e1afdfd78efee01cc7c4ebf",
+    "evals/evolution/batch-learning-validation-20261002/audit_execution.py": "d9d6e158545f871cb789c388b17b9f12d4ec57dadf43e1c0c59deae13c050cb1",
+    "evals/evolution/batch-learning-validation-20261002/runtime-dependencies.json": "2a67bb147ceacdc85b73e0026f9c088c6cf94b738b08570f6b962785a18c8b8f",
+    "evals/evolution/batch-learning-validation-20261002/build.json": "12307fab45bf0a227f6cfb6498fa02b591c8691b8bb4c20e3818c819b8d91c5c",
+    "evals/evolution/batch-learning-validation-20261002/baseline-method.txt": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8",
+    "evals/eval_common.py": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c",
+    "evals/evolution_dataset.py": "12df23500bf7ee45a2ee0ab955924bf7368e30c1a7e2bb2e20a5f993fa24ee65",
+    "evals/evolution_quality.py": "e0d1f17d52003287a1010ce58b34880e07f1df1004d9252e69eb1c24c8bfb35b",
+    "evals/evolution_rubric.py": "da5534916c9f41d175e3c01205836d79dca5da398f5f532a0a1850b5fcf592ea",
+    "evals/evolution_ai_review.py": "b471b41a303222f6b9dd526fccc00f607a885dd5457935a557c764fb94a46411",
+    "evals/evolution_batch.py": "e8d9f7c359486f0243a4643c3fafe05143712f548ebebd3d460737fa53b86533",
+    "evals/evolution_candidates.py": "3b90d673cbfbd79aa000160943fddedbdad2aa8730d72d4b61617ba747f2e975",
+    "evals/run_evolution_replay.py": "90777b3f0eb6e6932a9da762591bb5bceb2acc16994949d964d5012d156a786d",
+    "evals/run_evaluation_agent.py": "4c7843a9269262fe6398be1f3c95fbf916dfc0c0eb83019626c7f7c15471abdf",
+    "evals/run_ragas_eval.py": "d024ccd42015c560b978c873c4bfccc4cd6c70c72753f003c5c521018f2517f3",
+    "evals/evolution/batch-learning-20261002/experiment.py": "e31ea5664bf73403e6a3fae00fc8f46672a188bc8393c64b56595278b0329a72",
+    "evals/evolution/batch-learning-20261002/campaign/audit_execution.py": "552243363e923e0322b58356c4761dc5c9b17af5b1d8f3c658ef371bf6cde1d5",
+    "evals/evolution/batch-learning-20261002/cases.jsonl": "79dc78e1c056f0c37855875383df2850cea155d14304c218ee294e88bbd213f4",
+    "evals/evolution/batch-learning-20261002/gold.jsonl": "1b31f7cf00852cb0a4696385faac1954b344a0d50563cd5033ef71b5c106cbc1",
+    "evals/evolution/batch-learning-20261002/source-review.json": "888f1a642ee243600a8608c8fb835c4e65f18c5882402aa6c4b1fafe6edcc47e",
+    "evals/evolution/batch-repair-20261002/audit_execution.py": "dc61ec266161e2c322482881fe3c72a597a12dc2e62a505c47ff1e56305106bb"
+  },
+  "developmentCases": [
+    "ibm-fy2025q3-quarter-control",
+    "jnj-fy2025q3-quarter-reconstruction",
+    "pep-fy2025q3-cash-quality",
+    "pep-fy2025q3-liquidity",
+    "tgt-fy2025q3-quarter-reconstruction",
+    "tgt-fy2025q3-liquidity",
+    "ibm-fy2025q3-oneoff-cash-comparability",
+    "jnj-fy2025q3-cash-deployment-bridge",
+    "pep-fy2025q3-quarter-cash-comparison",
+    "tgt-fy2025q3-liquidity-cash-synthesis"
+  ],
+  "transferCases": [
+    "csco-fy2025q3-quarter-control",
+    "csco-fy2025q3-cash-quality",
+    "csco-fy2025q3-liquidity",
+    "orcl-fy2025q3-quarter-reconstruction",
+    "orcl-fy2025q3-cash-quality",
+    "orcl-fy2025q3-liquidity",
+    "ko-fy2025q3-quarter-reconstruction",
+    "ko-fy2025q3-cash-quality",
+    "ko-fy2025q3-liquidity",
+    "low-fy2025q3-quarter-reconstruction",
+    "low-fy2025q3-cash-quality",
+    "low-fy2025q3-liquidity"
+  ],
+  "phases": [
+    {
+      "phase": "development-baseline",
+      "cases": 10,
+      "maxBusinessCalls": 20
+    },
+    {
+      "phase": "individual-screening",
+      "maxMechanismGroups": 3,
+      "maxBusinessCalls": 32,
+      "requires": "Independent source-confirmed METHOD_ERROR and two frozen passing controls before one-shot generation"
+    },
+    {
+      "phase": "combined-development",
+      "maxBusinessCalls": 20,
+      "requires": "Compatible independently screened members; freeze composition and order"
+    },
+    {
+      "phase": "paired-transfer",
+      "cases": 12,
+      "arms": 2,
+      "maxBusinessCalls": 48,
+      "requires": "Freeze one passing development candidate; no validation-driven edits"
+    }
+  ],
+  "stopRule": "If the fixed ten development tasks have no independently confirmed analysis method failures, stop with no candidate and leave transfer unused. Do not increase task difficulty, reduce model budget, or generate generic lessons to force a positive result.",
+  "scopeLimits": [
+    "Fixed-source component replay, not retrieval or fullstack acceptance.",
+    "DEVELOPMENT reused issuers/report families are not heldout; the twelve VALIDATION companies/tasks stay separate.",
+    "No experience activation or formal publishing authority.",
+    "Provider unknown usage and failures stay visible; calls above are upper limits, not a promise to use them."
+  ]
+}

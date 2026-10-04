@@ -1,0 +1,157 @@
+[
+  {
+    "answerId": "answer-14d402d2dec445979af3865063254ddb",
+    "original": {
+      "caseId": "msft-fy2025-growth",
+      "answerId": "answer-14d402d2dec445979af3865063254ddb",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「同比增速高达约 18.4%」计算不准确：(87,831−74,114)/74,114×100=18.5080%，一位小数应为18.5%；18.4%与精确值相差0.1080个百分点，超过既定0.1个百分点容差。必答收入/营业利润增速及利润率仍正确。",
+        "「高毛利业务结构的优化」「说明其核心业务（云与AI）的需求依然强劲」「暗示 AI 基础设施的巨额投入正在形成成本压力」均超出合并利润表证据。表内服务及其他毛利率约65.87%，低于产品约78.89%；服务收入占比上升不能直接证明高毛利业务结构优化。没有云/AI需求、成本构成或资本开支资料，结尾承认缺分部数据不能确认这些原因。"
+      ]
+    },
+    "replacement": {
+      "caseId": "msft-fy2025-growth",
+      "answerId": "answer-14d402d2dec445979af3865063254ddb",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": false,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「同比增速高达约 18.4%」计算不准确：(87,831−74,114)/74,114×100=18.5080%，一位小数应为18.5%；18.4%与精确值相差0.1080个百分点，超过既定0.1个百分点容差。必答收入/营业利润增速及利润率仍正确。",
+        "「高毛利业务结构的优化」「说明其核心业务（云与AI）的需求依然强劲」「暗示 AI 基础设施的巨额投入正在形成成本压力」均超出合并利润表证据。表内服务及其他毛利率约65.87%，低于产品约78.89%；服务收入占比上升不能直接证明高毛利业务结构优化。没有云/AI需求、成本构成或资本开支资料，结尾承认缺分部数据不能确认这些原因。",
+        "覆盖口径校准：本题明确要求“不编造未给出的业务原因”；原文“高毛利业务结构的优化”“说明其核心业务（云与AI）的需求依然强劲”等确定性业务解释缺少所给证据，因此 coverageComplete 改为 false。额外成本增速的计算错误本身不用于判定覆盖缺失。"
+      ]
+    },
+    "reason": "该题 requiredPoints 明确要求“结论与指标方向一致，不编造未给出的业务原因”。根据 review-instructions，coverageComplete 包括明确要求的有限度结论；既有核查已确认的确定性业务归因违反这一要求，故同步更正覆盖项。仅更正 coverageComplete 并补充说明，必答事实、必答派生计算、证据支持和总体 verdict 保持原判。"
+  },
+  {
+    "answerId": "answer-db549521b16c42d68ad9e120a6191773",
+    "original": {
+      "caseId": "msft-fy2025-growth",
+      "answerId": "answer-db549521b16c42d68ad9e120a6191773",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "表中FY2024营业利润率变动「+1.85 个百分点」错误：FY2023营业利润率=88,523/211,915×100=41.7729%，FY2024为44.6443%，应提升2.8714个百分点，约2.87。FY2025相对FY2024的必答计算正确，此处按额外数值错误计入证据项。",
+        "「反映了公司业务持续向服务化/云化转型的既定事实」中的服务收入占比提升有表内支持，但“云化”缺乏具体收入类别或分部数据。",
+        "「反映了利息支出或投资减值等非经营性层面的现金流出压力增加」把Other income (expense), net的权责发生制净损失直接解释为现金流出压力；该表未分拆构成，减值等也不必然形成当期现金支出。"
+      ]
+    },
+    "replacement": {
+      "caseId": "msft-fy2025-growth",
+      "answerId": "answer-db549521b16c42d68ad9e120a6191773",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": false,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "表中FY2024营业利润率变动「+1.85 个百分点」错误：FY2023营业利润率=88,523/211,915×100=41.7729%，FY2024为44.6443%，应提升2.8714个百分点，约2.87。FY2025相对FY2024的必答计算正确，此处按额外数值错误计入证据项。",
+        "「反映了公司业务持续向服务化/云化转型的既定事实」中的服务收入占比提升有表内支持，但“云化”缺乏具体收入类别或分部数据。",
+        "「反映了利息支出或投资减值等非经营性层面的现金流出压力增加」把Other income (expense), net的权责发生制净损失直接解释为现金流出压力；该表未分拆构成，减值等也不必然形成当期现金支出。",
+        "覆盖口径校准：本题明确要求“不编造未给出的业务原因”；原文“反映了公司业务持续向服务化/云化转型的既定事实”把证据未分拆的“云化”确认为事实，因此 coverageComplete 改为 false。服务收入占比提升本身仍有依据，额外利润率变动错误本身不用于判定覆盖缺失。"
+      ]
+    },
+    "reason": "该题 requiredPoints 明确要求“结论与指标方向一致，不编造未给出的业务原因”。根据 review-instructions，coverageComplete 包括明确要求的有限度结论；既有核查已确认的确定性业务归因违反这一要求，故同步更正覆盖项。仅更正 coverageComplete 并补充说明，必答事实、必答派生计算、证据支持和总体 verdict 保持原判。"
+  },
+  {
+    "answerId": "answer-d6f9d1fa51fd4e15976a968c17f9b626",
+    "original": {
+      "caseId": "msft-fy2025-growth",
+      "answerId": "answer-d6f9d1fa51fd4e15976a968c17f9b626",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "FY2024营业利润率变动「+1.85 个百分点」错误：109,433/245,122×100−88,523/211,915×100=2.8714个百分点，应为约2.87。该额外计算不影响FY2025必答数值本身的正确性。",
+        "「反映出 AI 等重资产基础设施投入带来的成本上升压力」「印证了微软向云服务和 SaaS 模式转型的战略定力」无所给分部、成本明细或战略说明支持。合并利润表能支持服务及其他收入占比、费用率变化，不能确认AI投入归因、SaaS收入属性和管理战略。"
+      ]
+    },
+    "replacement": {
+      "caseId": "msft-fy2025-growth",
+      "answerId": "answer-d6f9d1fa51fd4e15976a968c17f9b626",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": false,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "FY2024营业利润率变动「+1.85 个百分点」错误：109,433/245,122×100−88,523/211,915×100=2.8714个百分点，应为约2.87。该额外计算不影响FY2025必答数值本身的正确性。",
+        "「反映出 AI 等重资产基础设施投入带来的成本上升压力」「印证了微软向云服务和 SaaS 模式转型的战略定力」无所给分部、成本明细或战略说明支持。合并利润表能支持服务及其他收入占比、费用率变化，不能确认AI投入归因、SaaS收入属性和管理战略。",
+        "覆盖口径校准：本题明确要求“不编造未给出的业务原因”；原文“反映出 AI 等重资产基础设施投入带来的成本上升压力”“印证了微软向云服务和 SaaS 模式转型的战略定力”确认了证据未提供的成本原因和战略，因此 coverageComplete 改为 false。额外利润率变动错误本身不用于判定覆盖缺失。"
+      ]
+    },
+    "reason": "该题 requiredPoints 明确要求“结论与指标方向一致，不编造未给出的业务原因”。根据 review-instructions，coverageComplete 包括明确要求的有限度结论；既有核查已确认的确定性业务归因违反这一要求，故同步更正覆盖项。仅更正 coverageComplete 并补充说明，必答事实、必答派生计算、证据支持和总体 verdict 保持原判。"
+  },
+  {
+    "answerId": "answer-586b7aeafd90463cb2816ca70599cf59",
+    "original": {
+      "caseId": "wmt-fy2025-growth",
+      "answerId": "answer-586b7aeafd90463cb2816ca70599cf59",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「在收入与利润绝对增速因基数或宏观因素回落的背景下」将公司增长放缓归因为基数或宏观因素。该利润表能够确认增速放缓及较大比较基数，但没有宏观因素或经营驱动拆解，不能把这组原因写成已证实背景；后文“可能包含一次性因素或低基数效应”则是保留不确定性的假设，不单独扣分。必答及所列额外增速/费用数字复算正确。"
+      ]
+    },
+    "replacement": {
+      "caseId": "wmt-fy2025-growth",
+      "answerId": "answer-586b7aeafd90463cb2816ca70599cf59",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": false,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「在收入与利润绝对增速因基数或宏观因素回落的背景下」将公司增长放缓归因为基数或宏观因素。该利润表能够确认增速放缓及较大比较基数，但没有宏观因素或经营驱动拆解，不能把这组原因写成已证实背景；后文“可能包含一次性因素或低基数效应”则是保留不确定性的假设，不单独扣分。必答及所列额外增速/费用数字复算正确。",
+        "覆盖口径校准：本题明确要求“不编造未给出的业务原因”；原文“在收入与利润绝对增速因基数或宏观因素回落的背景下”把未有证据的宏观归因与基数原因列为已证实背景，因此 coverageComplete 改为 false。该判断仅针对这句确定性归因，不针对后文明确使用“可能”的一次性因素或低基数假设。"
+      ]
+    },
+    "reason": "该题 requiredPoints 明确要求“结论与指标方向一致，不编造未给出的业务原因”。根据 review-instructions，coverageComplete 包括明确要求的有限度结论；既有核查已确认的确定性业务归因违反这一要求，故同步更正覆盖项。仅更正 coverageComplete 并补充说明，必答事实、必答派生计算、证据支持和总体 verdict 保持原判。"
+  },
+  {
+    "answerId": "answer-db5e5938030f418e87f552059b3e3ab9",
+    "original": {
+      "caseId": "wmt-fy2025-growth",
+      "answerId": "answer-db5e5938030f418e87f552059b3e3ab9",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": true,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「其供应链优化、商品组合调整或费用管控取得了实质成效」确认了表外经营措施及其效果。利润表只显示成本/费用与收入比例的变化，没有供应链、商品组合或措施资料，不能据此确认具体原因。",
+        "「应将其视为一个盈利确定性高、现金流稳健的防御性底仓标的」超出证据。当前只有利润表，回答也承认缺现金流数据；不能确认现金流稳健、未来盈利确定性或投资组合定位。必答及其余已列数值计算正确。"
+      ]
+    },
+    "replacement": {
+      "caseId": "wmt-fy2025-growth",
+      "answerId": "answer-db5e5938030f418e87f552059b3e3ab9",
+      "requiredFactsCorrect": true,
+      "derivedCorrect": true,
+      "coverageComplete": false,
+      "evidenceGrounded": false,
+      "verdict": "ISSUES",
+      "notes": [
+        "「其供应链优化、商品组合调整或费用管控取得了实质成效」确认了表外经营措施及其效果。利润表只显示成本/费用与收入比例的变化，没有供应链、商品组合或措施资料，不能据此确认具体原因。",
+        "「应将其视为一个盈利确定性高、现金流稳健的防御性底仓标的」超出证据。当前只有利润表，回答也承认缺现金流数据；不能确认现金流稳健、未来盈利确定性或投资组合定位。必答及其余已列数值计算正确。",
+        "覆盖口径校准：本题明确要求“不编造未给出的业务原因”；原文“其供应链优化、商品组合调整或费用管控取得了实质成效”把指标变化归因为证据未提供的具体措施，因此 coverageComplete 改为 false。合理的成本费用率会计拆解不在此更正范围内。"
+      ]
+    },
+    "reason": "该题 requiredPoints 明确要求“结论与指标方向一致，不编造未给出的业务原因”。根据 review-instructions，coverageComplete 包括明确要求的有限度结论；既有核查已确认的确定性业务归因违反这一要求，故同步更正覆盖项。仅更正 coverageComplete 并补充说明，必答事实、必答派生计算、证据支持和总体 verdict 保持原判。"
+  }
+]

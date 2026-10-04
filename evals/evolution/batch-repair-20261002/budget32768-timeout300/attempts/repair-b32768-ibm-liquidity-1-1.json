@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "repair-b32768-ibm-liquidity-1-1",
+    "caseId": "ibm-fy2025q3-liquidity",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-repair-20261002\\budget32768-timeout300\\raw-repair-b32768-ibm-liquidity",
+  "executionSha256": "3315a33fca05861c6ceed7bf14e7266fd899f0bf5e5c6c9f2bf6bcc06afaa204",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

@@ -1,0 +1,94 @@
+我们需要回答中文用户。任务：基于给定工具观察 [E1]，分析 IBM 2025年前三季度经营现金流/净利润比率低于2024年同期，能否据此判断利润现金转化明显变差。需要给出两年原表比率；做仅剔除已列示一次性项的示意比较：剔除2024养老金结算费用及相关税收利益、2025 H.R.1相关非现金税费；其余不调，经营现金流保持披露值。列出两年示意调整后净利润及经营现金流/该净利润，解释与原表判断有什么不同、还不能确认什么。强调这是可比性练习，不是公司公布调整后指标；税项按脚注约数。金额注明单位，比率和百分比保留两位小数。
+
+需要结构化 Markdown。需要引用 [E1]。当前日期 2026-10-02，但数据是 2025-10-22 可用。需要末尾数据来源与时间说明/参考来源。需要免责声明。
+
+我们需要精确计算。数据：
+9M2024 net income 3,109; OCF 9,115. Ratio = 9,115/3,109 = let's calculate precisely: 3109*2.93=9109.37; residual 5.63 => .00181, so 2.9318 => 293.18%. Need two decimals for ratio and percentage? User says 比率和百分比保留两位小数. We can present ratio 2.93 and 293.18%. For adjusted: 2024 adjusted NI = 3,109 + 2,725 - 700 = 5,134. Ratio 9,115/5,134. Compute: 5134*1.775 = 9112.85? 5134*1.775 = 5134*(1 + .775)=5134+3978.85=9112.85. Need 9,115, ratio 1.77542. 1.78 and 177.54%. Let's compute exact: 9115/5134 =? 5134*1.7754 = 5134 + 0.7754*5134. 0.7754*5134 = 3980.? 5134*0.775 =3978.85; plus 0.0004*5134=2.0536 =>3980.9036; sum 9114.9036. So 1.77542 => 177.54%. Good.
+2025 net income 4,993; OCF 9,153. Ratio = 9153/4993. 4993*1.833 = 9152.? 4993*1.833 = 4993 + .833*4993 = 4993 + 4159.169 = 9152.169. Ratio 1.83317 => 183.32%. Adjusted NI = 4,993 + 300 = 5,293. Ratio = 9153/5293. 5293*1.729 = 9151.? 5293*1.729 = 5293 + .729*5293 = 5293 + 3858.597 = 9151.597. ratio 1.72927 => 172.93%. Good.
+
+Need maybe mention OCF change +38 million, 0.42%. Need ensure percentages two decimals. Could mention difference: original gap 293.18%-183.32%=109.86 pp; adjusted gap 177.54%-172.93%=4.61 pp.
+
+Need be careful: The Fundamentals Agent text in observation already includes calculations; we can use but must not claim beyond. We need cite [E1]. We can use table.
+
+Need answer: 不能据此简单判断明显变差。原表比率大幅下降主要因 2024 一次性养老金结算费用压低净利润，导致分母偏低、比率异常高。剔除后两年接近，2025略低，且经营现金流基本持平。因此证据范围内更像一次性项目造成的基数效应，而非现金转化能力明显恶化。但仍不能确认完整现金转化质量，因为只调整分母、税项约数、营运资本/融资应收等变化未解析、缺少附注和更长序列。
+
+Need maybe include formulas. Need specify units: million USD. Table columns: 项目, 9M2024, 9M2025. Use [E1] after each maybe.
+
+Need include “这是本题可比性练习，不是公司公布的调整后指标”。
+
+Need final sources: [E1] IBM Q3 2025 official IR cash flow, available 2025-10-22, retrieved 2026-10-02? The observation says retrievedAt 2026-10-02. We can include source ref. Need not overdo.
+
+Need no hidden chain. Final in Chinese.
+
+Double-check if user asks “IBM 2025年前三季度经营现金流/净利润比率低于2024年同期，能否据此判断利润现金转化明显变差？” We answer: 不能仅据此判断明显变差。 Need maybe “证据范围内，不能”。
+
+Need mention “经营现金流保持披露值，不调整现金流侧可能对应的税项或结算影响” perhaps.
+
+Need ensure all ratios two decimals: original ratio 2.93 / 293.18%, adjusted ratio 1.78 / 177.54%, 2025 original 1.83 / 183.32%, adjusted 1.73 / 172.93%. Difference pp: 109.86 and 4.61, two decimals. OCF increase 0.42%. Adjusted net income increase: 5,293 - 5,134 = 159; 159/5,134 = 3.0966% -> 3.10%. Could mention.
+
+Need maybe include 2024 pension settlement charge in cash flow table as add-back? In statement it's a noncash adjustment to net income. The user's adjustment: “剔除2024年养老金结算费用及其相关税收利益” means from net income: add back charge, subtract tax benefit. We do. Need mention tax benefit approx 700 million from footnote. 2025 tax charge approx 300 million add back.
+
+Need maybe note “H.R.1 相关一次性非现金所得税费用约 $0.3 billion” = 300 million. “相关税收利益约 $0.7 billion” = 700 million.
+
+Need avoid using memory. All from [E1].
+
+Need maybe mention “净利润行为 Net Income/(Loss) from Operations” and “经营现金流行为 Net Cash Provided by Operating Activities”. Good.
+
+Potential issue: The observation includes “Pension Settlement Charge - 2024 2,725” in cash flow from operations reconciliation. It also says 2024 includes $0.7b tax benefit associated with pension settlement charge in third quarter in Operating assets and liabilities/Other net. The adjustment subtracts 700. Good.
+
+Need maybe discuss “经营现金流/净利润 >1 不一定越好? It can be driven by noncash charges, working capital timing. But we can mention in interpretation: high 2024 ratio due to large noncash pension settlement charge added back, not necessarily superior cash conversion. Good.
+
+Need ensure not giving investment advice. End with 仅供参考，不构成投资建议.
+
+Need include “风险与未知/不能确认” section.
+
+Need final “数据来源与时间说明” with [E1]. Maybe:
+- [E1] IBM Q3 2025 official IR cash flow (unaudited), nine months ended Sep 30 2025 and 2024; availableAt 2025-10-22; retrievedAt 2026-10-02; currency USD, unit million. Link.
+
+Need maybe mention current date? Not necessary but can say “以 2026-10-02 为本轮时间锚点，所依据财报数据截至 2025-09-30”。 Good.
+
+Let's craft final with tables.
+
+Potential nuance: “比率和百分比保留两位小数” If we present ratio as 2.93 and percentage as 293.18%, okay. For pp differences maybe 109.86个百分点 and 4.61个百分点 (two decimals). Good.
+
+Need maybe “经营现金流/调整后净利润” ratio: 1.78 and 1.73; percentage 177.54% and 172.93%. Good.
+
+Let's draft:
+
+结论：不能仅凭原表比率从293.18%降至183.32%判断明显变差；剔除一次性后 177.54% vs 172.93%，差距约4.61pp，且OCF基本持平。
+
+1 原表：
+表：期间、净利润、经营现金流、比率。
+9M2024 3,109 / 9,115 = 2.93 (293.18%)
+9M2025 4,993 / 9,153 = 1.83 (183.32%)
+解读: OCF only +38m (+0.42%) [E1]. Ratio drop mainly denominator.
+
+2 示意调整：
+调整项表:
+2024: 披露净利润3,109 +养老金结算费用2,725 -相关税收利益约700 = 5,134
+2025: 披露净利润4,993 + H.R.1非现金税费约300 = 5,293
+Then adjusted ratio table.
+Need maybe “经营现金流披露值不变：9,115, 9,153”.
+
+3 与原表判断不同:
+- 原表看起来大幅恶化 109.86pp.
+- 调整后仅小幅下降 4.61pp.
+- 2024比率异常高是因为养老金结算费用是非现金一次性费用，在现金流表中加回，压低净利润但不减少经营现金流（至少本证据未显示对应现金支付细节）. Need careful: The charge is noncash? It is added back in operating section; yes. But could have cash effects? We can't confirm. Say “在现金流量表调节中作为加回项列示，本轮证据未提供其现金支付细节”。
+- 2025税费影响相对小，且是非现金。
+
+4 不能确认:
+- 不是公司调整后指标; only numerator adjusted.
+- Tax approximations and cash tax effects unknown.
+- Pension settlement cash/liability details unknown.
+- Working capital and financing A/R changes: Operating assets/liabilities other net -1,755 vs -3,063; IBM Financing A/R 905 vs 1,824; cannot judge sustainability.
+- No longer time series or official adjusted OCF/FCF definitions.
+
+Need maybe “风险与反向证据” but okay.
+
+Need final disclaimer.
+
+Ensure all citations: Use [E1] after data. Since RAG not used, only [E1]. At end list actual source. In tables maybe source column not necessary but mention all from [E1].
+
+Need avoid saying “截至2024年”. Use “9M2024/9M2025”.
+
+Let's produce final. Ensure no analysis in final.

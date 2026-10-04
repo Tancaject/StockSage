@@ -1,0 +1,22 @@
+# Keep checksummed experiment artifacts byte-identical across checkouts.
+/evals/judge-pilot/** -text whitespace=cr-at-eol,-blank-at-eof
+/evals/evolution/batch-learning-20261002/** -text whitespace=cr-at-eol,-blank-at-eof
+/evals/evolution/batch-repair-20261002/** -text whitespace=cr-at-eol,-blank-at-eof
+/evals/evolution/batch-learning-validation-20261002/** -text whitespace=cr-at-eol,-blank-at-eof
+/evals/evolution/learning-revision-20261003/** -text whitespace=cr-at-eol,-blank-at-eof
+/evals/evolution/unit-generalization-20261004/** -text whitespace=cr-at-eol,-blank-at-eof
+/evals/evolution/unit-generalization-network-20261004/** -text whitespace=cr-at-eol,-blank-at-eof
+/evals/evolution/scoped-repeatability-20261004/** -text whitespace=cr-at-eol,-blank-at-eof
+/evals/diagnostics/model-stream-20261002/** -text whitespace=cr-at-eol,-blank-at-eof
+/evals/diagnostics/model-root-cause-20261002/** -text whitespace=cr-at-eol,-blank-at-eof
+/evals/diagnostics/remaining-timeouts-20261003/** -text whitespace=cr-at-eol,-blank-at-eof
+/evals/evolution_ai_review.py -text whitespace=cr-at-eol,-blank-at-eof
+/evals/evolution_quality.py -text whitespace=cr-at-eol,-blank-at-eof
+/evals/run_evaluation_agent.py text eol=lf
+/evals/ordinary_answer_quality.py text eol=lf
+/evals/judge_calibration.py text eol=lf
+/evals/propose_judge_prompt.py text eol=lf
+/evals/eval_common.py text eol=lf
+/evals/run_ragas_eval.py text eol=lf
+/evals/evolution_generator.py text eol=lf
+/evals/prompts/ordinary_judge.txt text eol=lf

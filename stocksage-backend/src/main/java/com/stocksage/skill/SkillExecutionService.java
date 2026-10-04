@@ -103,6 +103,12 @@ public class SkillExecutionService {
                     evidence.add(result);
                     markHandled(step.capability(), handledActions);
                 } catch (CapabilityException primaryError) {
+                    if (primaryError.reason() == CapabilityException.Reason.CAPACITY_EXCEEDED) {
+                        if (step.required()) throw primaryError;
+                        emit(traceId, conversationId,
+                                "执行容量不足，可选能力 " + step.capability() + " 未启动；请稍后重试。");
+                        continue;
+                    }
                     // 策略或注册表错误不能降级绕过；只有提供方故障才允许走声明式 fallback。
                     if (primaryError.reason() == CapabilityException.Reason.DENIED
                             || primaryError.reason() == CapabilityException.Reason.UNKNOWN) {
@@ -125,6 +131,11 @@ public class SkillExecutionService {
                                     || fallbackError.reason() == CapabilityException.Reason.UNKNOWN
                                     || step.required()) {
                                 throw fallbackError;
+                            }
+                            if (fallbackError.reason() == CapabilityException.Reason.CAPACITY_EXCEEDED) {
+                                emit(traceId, conversationId,
+                                        "执行容量不足，本地备用能力未启动；请稍后重试。");
+                                continue;
                             }
                             emit(traceId, conversationId,
                                     "新闻检索失败：本地降级能力也不可用。本轮使用其他已取得的证据，请稍后重试新闻查询。");

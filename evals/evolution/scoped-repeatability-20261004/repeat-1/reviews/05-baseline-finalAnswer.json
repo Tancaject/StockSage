@@ -1,0 +1,186 @@
+{
+  "schema": "fundamentals_two_stage_ai_source_review_v1",
+  "origin": "CODEX_NONBLIND_AI_SOURCE_REVIEW_NOT_HUMAN_OR_CALIBRATED_JUDGE",
+  "case": 5,
+  "caseId": "tgt-fy2025q3-quarter-reconstruction",
+  "arm": "baseline",
+  "stage": "finalAnswer",
+  "releaseEligible": false,
+  "rubric": {
+    "schema": "fundamentals_evolution_rubric_v1",
+    "sha256": "4c3c56e75c6dd6a7aa9f19bb98fd86c669e2c415ba04133ca156d69281434250",
+    "scope": "FINAL_ANSWER",
+    "invocationScope": "final-answer",
+    "dimensions": {
+      "claim_support": "核查最终回答是否有实际可见证据支持，包括整合时新增的事实和因果；不能仅因分析稿曾这样表述就判为有据，也不能把分析中的可能性写成确定事实。",
+      "numeric_period_correctness": "核查最终呈现的金额、科目、单位、期间与公式是否正确，是否在汇总时遗漏、误归类或改写；以最终答案和本题 gold 复核，不沿用分析稿分数。",
+      "counterevidence": "核查最终判断是否保留与用户问题有关、足以改变结论的反向证据；允许压缩分析稿，但不能只留下有利部分，不要求照搬所有段落。",
+      "unknowns": "核查最终答案是否保留实际影响判断的证据局限，避免把账面关系扩大为经营原因、未来结果或偿付保证；不以机械复述限制词或额外免责声明作为通过条件。"
+    }
+  },
+  "binding": {
+    "answerSha256": "24bee8fd808bc96dd74dd46fcec264af3e795107aab27b0b5771d3166a46eebc",
+    "resultSha256": "aebf7779df2c4b1af4e2cfcabe84051173b8bb8050ea25c00d4fa5a15320c585",
+    "requestSha256": "f9d76027fe0c4b426f491fe455c61e2164df937e2eacb1ccded5fbd2f4a45929",
+    "sourceTraceSha256": "1c560e86597ba69e46457760117e21af7b314d2f43d468da38845fc770ebfaf3",
+    "goldSha256": "5e044bac787ced348f0d6b5bbabaeea2675a9e07a027f2cad1ecedb529d234f7",
+    "policySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad"
+  },
+  "requiredFacts": [
+    {
+      "field": "quarterOperatingCashFlow",
+      "period": "2025-08-03/2025-11-01",
+      "unit": "million",
+      "observed": "1127",
+      "expected": "1127.0000",
+      "answerQuote": "- **经营现金流：1,127 百万美元**",
+      "status": "PASS"
+    },
+    {
+      "field": "quarterCapitalSpendingOutflowAmount",
+      "period": "2025-08-03/2025-11-01",
+      "unit": "million",
+      "observed": "978",
+      "expected": "978.0000",
+      "answerQuote": "- **购建固定资产现金支出毛额：978 百万美元**",
+      "status": "PASS"
+    },
+    {
+      "field": "quarterSimpleFreeCashFlow",
+      "period": "2025-08-03/2025-11-01",
+      "unit": "million",
+      "observed": "149",
+      "expected": "149.0000",
+      "answerQuote": "- **简化自由现金流：149 百万美元**",
+      "status": "PASS"
+    }
+  ],
+  "additionalNumericChecks": [
+    {
+      "observed": "115.24",
+      "expected": "115.2351738241308793456032720",
+      "formula": "1127/978*100",
+      "answerQuote": "本季经营现金流**能够覆盖**购建固定资产现金支出，覆盖金额超出 **149 百万美元**；覆盖比率为 **1.15 倍**，即 **115.24%**。",
+      "status": "PASS"
+    },
+    {
+      "observed": "643",
+      "expected": "643",
+      "formula": "3485-2842",
+      "answerQuote": "| 简化自由现金流 | 643 百万美元 | 494 百万美元 | **149 百万美元** | 经营现金流覆盖资本支出后的剩余 |",
+      "status": "PASS"
+    },
+    {
+      "observed": "494",
+      "expected": "494",
+      "formula": "2358-1864",
+      "answerQuote": "| 简化自由现金流 | 643 百万美元 | 494 百万美元 | **149 百万美元** | 经营现金流覆盖资本支出后的剩余 |",
+      "status": "PASS"
+    },
+    {
+      "observed": "739",
+      "expected": "739",
+      "formula": "4078-3339",
+      "answerQuote": "| 经营现金流 | 1,127 百万美元 | 739 百万美元 | **+52.50%** |",
+      "status": "PASS"
+    },
+    {
+      "observed": "655",
+      "expected": "655",
+      "formula": "1968-1313",
+      "answerQuote": "| 购建固定资产现金支出 | 978 百万美元 | 655 百万美元 | **+49.31%** |",
+      "status": "PASS"
+    },
+    {
+      "observed": "84",
+      "expected": "84",
+      "formula": "739-655",
+      "answerQuote": "| 购建固定资产现金支出毛额 | 2,842 百万美元 | 1,864 百万美元 | **978 百万美元** | 本季资本性投入支出 |",
+      "status": "PASS"
+    },
+    {
+      "observed": "52.50",
+      "expected": "52.50338294993234100135317997",
+      "formula": "388/739*100",
+      "answerQuote": "| 经营现金流 | 1,127 百万美元 | 739 百万美元 | **+52.50%** |",
+      "status": "PASS"
+    },
+    {
+      "observed": "49.31",
+      "expected": "49.31297709923664122137404580",
+      "formula": "323/655*100",
+      "answerQuote": "| 购建固定资产现金支出 | 978 百万美元 | 655 百万美元 | **+49.31%** |",
+      "status": "PASS"
+    },
+    {
+      "observed": "77.38",
+      "expected": "77.38095238095238095238095238",
+      "formula": "65/84*100",
+      "answerQuote": "| 简化自由现金流 | 149 百万美元 | 84 百万美元 | **+77.38%** |",
+      "status": "PASS"
+    },
+    {
+      "observed": "41",
+      "expected": "41",
+      "formula": "52-11",
+      "answerQuote": "不过，该口径较为保守且简化：本季还存在其他投资现金流入，还原金额约为 **41 百万美元**，但按题目要求未纳入简化自由现金流计算。[E1][E2]",
+      "status": "PASS"
+    }
+  ],
+  "dimensions": {
+    "claim_support": {
+      "status": "PASS",
+      "answerQuote": "本季经营现金流**能够覆盖**购建固定资产现金支出，覆盖金额超出 **149 百万美元**；覆盖比率为 **1.15 倍**，即 **115.24%**。",
+      "reason": "Read against original evidence, not the analyst draft as independent authority."
+    },
+    "counterevidence": {
+      "status": "PASS",
+      "answerQuote": "- 简化自由现金流不是 GAAP 指标，未考虑其他投资活动、债务偿还、股息支付、股票回购等现金需求。",
+      "reason": "Relevant opposing signals and comparison boundaries retained."
+    },
+    "unknowns": {
+      "status": "PASS",
+      "answerQuote": "- 缺少资本支出明细和管理层说明，无法判断资本支出增加的具体原因。",
+      "reason": "Unavailable commercial causes or disclosure details remain bounded."
+    },
+    "numeric_period_correctness": {
+      "status": "PASS",
+      "answerQuote": "- **经营现金流：1,127 百万美元**",
+      "reason": "Required facts, source units and fiscal periods reviewed; additional calculations use the frozen absolute tolerance 0.01."
+    }
+  },
+  "requiredPoints": [
+    {
+      "id": "p1",
+      "requirement": "正确还原财报第三季度2025-08-03/2025-11-01，不把累计金额或自然年季度当作所求单季",
+      "status": "PASS"
+    },
+    {
+      "id": "p2",
+      "requirement": "经营现金流1127、购建支出毛额978、简化自由现金流149百万美元",
+      "status": "PASS"
+    },
+    {
+      "id": "p3",
+      "requirement": "两个同财政年度、同科目的累计期间作差；支出按现金流出正金额表述",
+      "status": "PASS"
+    },
+    {
+      "id": "p4",
+      "requirement": "覆盖判断与单季经营现金流和购建支出大小一致",
+      "status": "PASS"
+    }
+  ],
+  "sourceQuotes": [
+    "Cash provided by operating activities |  | 3,485 |  | 4,078",
+    "Cash provided by operating activities |  | 2,358 |  | 3,339",
+    "Expenditures for property and equipment |  | (2,842) |  | (1,968)",
+    "Expenditures for property and equipment |  | (1,864) |  | (1,313)"
+  ],
+  "notes": [
+    "Extra prior-year comparisons use matching reconstructed quarters, not current quarter versus half-year cumulative. Original missing-data error does not recur."
+  ],
+  "semanticStatus": "PASS",
+  "historicalSourceErrorObserved": false,
+  "repetition": 1
+}

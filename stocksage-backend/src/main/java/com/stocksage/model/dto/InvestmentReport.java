@@ -1,5 +1,7 @@
 package com.stocksage.model.dto;
 
+import com.stocksage.evidence.EvidenceLedger;
+
 import com.stocksage.model.dto.DebateModels.DebateVerdict;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,0 +1,30 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "{\"triggerTags\":[\"cumulative-to-single-quarter-reconstruction\",\"false-missing-data-claim\"],\"requiredEvidence\":[\"two-cumulative-periods-same-start-date\",\"cash-flow-statement-line-items\"],\"requiredCapabilities\":[\"evidence-reading\",\"period-comparison\",\"arithmetic\"],\"method\":\"当用两期同起点累计现金流量表还原单季数据时，在声明某类数据缺失前，必须先检查该明细是否已通过两期累计数差值还原得出；若已得出，不得将其列入缺口，而应报告还原值并注明商业原因尚无法确认。仅对用户要求的项目，或准备断言其缺失的具体项目，执行必要核查；不要求遍历、计算或展示整张表。\",\"applicabilityBoundary\":\"仅适用于同一公司、同一财年、期初日期相同的两期累计现金流量表之间的单季还原场景；两期期初不同或存在重述、合并范围变化时不适用。\",\"counterexamples\":[\"两期累计报表期初日期不同\",\"公司发生重述或合并范围变更导致累计数不可直接相减\",\"仅有一期累计报表无法做差\"],\"forbiddenInferences\":[\"不得将还原出的会计变动直接推断为商业原因\",\"不得将明细还原值等同于管理层披露的单季数据\",\"不得因明细可还原就声称已掌握经营驱动因素\"]}",
+        "reasoning_content": "Let me analyze this carefully.\n\nThe failure mechanism is FALSE_MISSING_DERIVABLE_PERIOD_DETAIL - the analysis incorrectly claimed that working capital sub-item changes (inventory, payables, accrued liabilities) were missing from the data, when in fact they could be derived by subtracting the two cumulative period cash flow statements.\n\nThe previous experience (version 1) required computing ALL derivable line items from the full table, which was flagged as a side effect - it went beyond what was needed and beyond the user's question.\n\nThe observed side effect says: \"旧经验要求全表还原，超出原错误反馈与用户问题。保留缺失声明核查，去掉无关全表计算及主动展示要求。\"\n\nSo the fix should:\n1. Keep the mechanism that prevents falsely claiming data is missing when it's derivable\n2. Remove the requirement to compute and display ALL line items proactively\n3. Only check whether items claimed as \"missing\" are actually derivable from available evidence\n\nThe key insight: Before declaring any data point as \"missing\" or \"unavailable\" in a data gaps section, verify whether it can be derived from evidence already in hand. This is a narrower, more targeted fix than \"compute everything.\"\n\nThe method should focus on: when you're about to claim something is missing, check if it's derivable from the evidence you already have. Don't require computing the entire table proactively.\n\nLet me draft the experience:\n\n- triggerTags: cumulative-to-single-quarter-reconstruction, false-missing-claim-check\n- requiredEvidence: two-cumulative-periods-same-start-date, cash-flow-statement-line-items\n- requiredCapabilities: evidence-reading, period-comparison, arithmetic\n- method: Before listing any item as \"missing\" or \"unavailable\" in a data gaps section, check whether that item can be arithmetically derived from evidence already loaded. Specifically, when two cumulative-period statements share the same start date, any line item present in both can be differenced to obtain the single-period value. If derivable, do not list it as missing; instead report the derived value and note that commercial causes remain unconfirmed. This check applies only to items the analyst is about to declare missing, not to a full-table sweep.\n- applicabilityBoundary: Applies when the analyst is about to assert data absence for items that exist in already-loaded cumulative statements with matching start dates.\n- counterexamples: When only one cumulative period is available; when start dates differ; when the item genuinely does not appear in any loaded evidence.\n- forbiddenInferences: Do not infer commercial causes from derived accounting movements; do not treat derived values as management-disclosed single-quarter figures; do not expand scope to compute items not relevant to the user's question or the analyst's own claims.\n\nLet me make sure the method is under 350 Chinese characters and is specific enough.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1791036131,
+  "id": "chatcmpl-70113d69-64b9-9c33-80d1-79397e520e4c",
+  "model": "qwen3.8-max",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 866,
+    "completion_tokens_details": {
+      "reasoning_tokens": 597,
+      "text_tokens": 866
+    },
+    "prompt_tokens": 6330,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 6330
+    },
+    "total_tokens": 7196
+  }
+}

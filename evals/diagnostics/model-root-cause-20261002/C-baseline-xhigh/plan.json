@@ -1,0 +1,14 @@
+{
+  "schema": "provider_reasoning_cause_diagnostic_v1",
+  "registeredAt": "2026-10-02T15:12:45.180085+00:00",
+  "source": "evals\\evolution\\batch-learning-validation-20261002\\raw-development-09\\development-09-1-1.response.json",
+  "sourceSha256": "160ad47ae9007c0e2f375d0577170c4101f3bb19dc6f3d17ca2f4e727fa2b303",
+  "stage": "analysis",
+  "requestSha256": "ef30a2d9ca34d41bfaf35681f64fc35529e36850c9f6ff2f94640dacfc729799",
+  "transport": "PYTHON_STDLIB_HTTPS_DIRECT_NO_PROXY",
+  "maxCalls": 1,
+  "retries": 0,
+  "deadlineSeconds": 600,
+  "qualityAssessed": false,
+  "limits": "Transport diagnostic; sampling and execution time differ from the original Java call."
+}

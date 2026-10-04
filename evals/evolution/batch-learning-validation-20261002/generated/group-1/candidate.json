@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "METHOD_CANDIDATE",
+  "status": "PROPOSED",
+  "reviewStatus": "UNREVIEWED",
+  "validationStatus": "NOT_RUN",
+  "parentBundleId": "baseline-v1",
+  "parentMethodSha256": "c2229fec548ed0de51cf337467ac69bbf5a5b1eacba8532bd44f23af49875ac8",
+  "changes": {
+    "fundamentals.method": "围绕收入与利润质量、现金流、资产负债、盈利能力、增长持续性、资本配置和关键风险展开。指标只在数据口径可比时比较；仅在本轮证据支持时解释变化原因，否则说明原因尚无法确认。不要输出隐藏思维过程，只给出证据、结论及其边界。\n\n以下补充步骤仅在各自适用条件满足时采用；条件不满足时保留原有分析方法。\n\n任务条件：cumulative-to-single-quarter-reconstruction、working-capital-sub-item-derivation\n证据条件：two-cumulative-periods-same-start-date、cash-flow-statement-line-items\n所需能力：evidence-reading、period-comparison、arithmetic\n适用边界：仅适用于同一公司、同一财年、期初日期相同的两期累计现金流量表之间的单季还原场景；两期期初不同或存在重述、合并范围变化时不适用。\n操作：当用两期同起点累计现金流量表还原单季数据时，除用户指定的汇总行外，还应对同一张表内所有可还原的明细行（如存货变动、应付账款变动、应计负债变动等）逐一做差值计算。还原完成后，在数据缺口部分声明某类数据缺失前，必须先检查该明细是否已通过上述差值还原得出；若已得出，不得将其列入缺口，而应报告还原值并注明商业原因尚无法确认。\n反例：两期累计报表期初日期不同；公司发生重述或合并范围变更导致累计数不可直接相减；仅有一期累计报表无法做差\n禁止推断：不得将还原出的会计变动直接推断为商业原因；不得将明细还原值等同于管理层披露的单季数据；不得因明细可还原就声称已掌握经营驱动因素"
+  },
+  "methodSha256": "665c13fe964c829c11769b819b75b62bd51a562399da3f3345f518b878ac621a",
+  "experienceRecordSha256": "af3ac31b4ade4be35e439c185b0673b18e8147f17a809d29a0ae6022b36e5f92",
+  "applicabilityBoundary": "仅适用于同一公司、同一财年、期初日期相同的两期累计现金流量表之间的单季还原场景；两期期初不同或存在重述、合并范围变化时不适用。",
+  "counterexamples": [
+    "两期累计报表期初日期不同",
+    "公司发生重述或合并范围变更导致累计数不可直接相减",
+    "仅有一期累计报表无法做差"
+  ],
+  "sourceExplanation": "依据已核查的开发任务方法错误增加条件步骤。",
+  "sources": [
+    {
+      "caseId": "tgt-fy2025q3-quarter-reconstruction",
+      "split": "DEVELOPMENT",
+      "origin": "PUBLIC_AUTHORIZED",
+      "issuerId": "TGT",
+      "issuerName": "TGT",
+      "traceSha256": "054a147e1c14894d819c5de11706ea5a8ad2e40f529fdbe868bedf30f54e3b33",
+      "externalFeedbackSha256": "4b815eb27ac9089b788ca7a84bcda1c1cff26c2e810f612c1e99f2c0571d32e4",
+      "feedbackKind": "VERIFIED_CORRECTION",
+      "issueType": "METHOD_ERROR"
+    }
+  ],
+  "generationMode": "EXTERNAL_PROPOSAL",
+  "candidateId": "candidate-a7a92cfaac38c01535486362",
+  "recordSha256": "a7a92cfaac38c015354863620b305b66193f69daa5f239ada5abe87b25c8a44b"
+}

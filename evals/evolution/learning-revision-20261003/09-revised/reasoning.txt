@@ -1,0 +1,284 @@
+我们需要回答中文用户问题。任务：基于E1和E2两份累计现金流量表还原PEP FY2025 Q3单季和FY2024 Q3单季的合并净利润、经营现金流、简化自由现金流，并比较。说明2025本单季应收、存货、应付及其他流动负债三个经营项目分别贡献还是占用现金，结合方向审慎判断，不把累计半年和单季当作环比。注明两年单季起止期间，金额单位，比率和百分比两位小数。
+
+关键证据：
+E1: 36 Weeks Ended 9/6/2025 and 9/7/2024. periodStart 2024-12-29? It says periodStart 2024-12-29 for E1, but 36 weeks ended 9/6/2025 and 9/7/2024. PepsiCo fiscal 2025 begins likely Dec 29, 2024? For 2024, 36 weeks ended 9/7/2024 would start Dec 31, 2023? But evidence metadata periodStart is 2024-12-29 maybe only for current fiscal? Need be careful. User asks注明两年单季起止期间. We can derive single quarter Q3 as 25th to 36th weeks? Need exact dates: FY2025 Q3 ended 9/6/2025; Q2 ended 6/14/2025. Therefore Q3 FY2025 is 12 weeks from 6/15/2025 to 9/6/2025 (assuming 24 weeks ended 6/14/2025, 36 weeks ended 9/6/2025). FY2024 Q3 ended 9/7/2024; Q2 FY2024 ended 6/15/2024 from E2 24 weeks ended 6/15/2024. Therefore FY2024 Q3 is 12 weeks from 6/16/2024 to 9/7/2024. Need maybe fiscal year start: FY2025 36 weeks start 2024-12-29? 36 weeks = 252 days. From Dec 29 2024 to Sep 6 2025 inclusive? Let's check: Dec 29, 2024 to Sep 6, 2025 is 251 days difference? If period includes start? Fiscal periods often start Sunday. 36 weeks ending Sep 6, 2025 starts Dec 29, 2024. For 2024 36 weeks ending Sep 7, 2024 starts Dec 31, 2023? But E1 metadata says periodStart 2024-12-29 maybe incorrect for both? Actually E1 sourceRef Q3 2025 earnings release includes 36 weeks ended 9/6/2025 and 9/7/2024. The comparative 2024 period likely 36 weeks ended 9/7/2024, starting 12/31/2023? PepsiCo FY2024 began Dec 31, 2023? Let's reason: PEP fiscal year is 52/53 weeks ending around early Sep? Wait PepsiCo fiscal year? Historically fiscal year ends in early September? For 2024 10-K fiscal year ended December 28, 2024? Hmm PepsiCo changed? Let's inspect evidence: E1 periodStart 2024-12-29 for 36 weeks ended 9/6/2025. That implies FY2025 starts Dec 29 2024. E2 periodStart 2024-12-29 for 24 weeks ended 6/14/2025. So FY2025 starts Dec 29 2024. For FY2024, if fiscal year ended Dec 28, 2024? Then Q3 2024 ended 9/7/2024, start of fiscal 2024 would Dec 31, 2023. But the evidence doesn't explicitly give FY2024 start. We can state single quarter periods derived from 24 and 36 week end dates: FY2025 Q3 = 2025-06-15 to 2025-09-06; FY2024 Q3 = 2024-06-16 to 2024-09-07. Avoid fiscal year start. But user asks两年的单季起止期间; these are enough.
+
+Need reconstruct Q3 single-quarter values by subtracting 24-week cumulative (E2) from 36-week cumulative (E1), for same company and same fiscal year start? For FY2025: E1 36w 9/6/2025 minus E2 24w 6/14/2025. For FY2024: E1 comparative 36w 9/7/2024 minus E2 comparative 24w 6/15/2024. Need ensure same start date: For FY2025, both start 2024-12-29 per metadata. For FY2024, E1 and E2 comparatives likely same start? E2 24 weeks ended 6/15/2024 and E1 36 weeks ended 9/7/2024. They should have same fiscal start (likely 2023-12-31), though not explicitly in metadata. We can say based on consecutive 24/36-week periods in same earnings releases; no indication of restatement/merge change. Condition says two cumulative periods same start date. We have evidence for FY2025 same start via metadata. For FY2024 not explicit but same company same fiscal reporting; we can assume? Need cautious: The 2024 comparative in E1 and E2 are from same releases; no restatement indicated. We can state we treat as same-start cumulative; if start differs or restated, subtraction invalid, but no evidence of that.
+
+Need calculate:
+FY2025 Q3:
+Net income 36w 5,740 - 24w 3,122 = 2,618 million USD.
+Operating cash flow 5,468 - 996 = 4,472 million.
+Capital spending 2,499 - 1,507 = 992 million (cash outflow). Simplified FCF = OCF - capex gross = 4,472 - 992 = 3,480 million.
+Need maybe capex line is negative (2,499), but gross outflow positive 2,499. For Q3 992 outflow.
+
+FY2024 Q3:
+Net income 8,092 - 5,147 = 2,945 million.
+Operating cash flow 6,220 - 1,315 = 4,905 million.
+Capex 2,850 - 1,701 = 1,149 million. Simplified FCF = 4,905 - 1,149 = 3,756 million.
+
+Comparison:
+Net income Q3 2025 2,618 vs 2,945, change -327, -11.10%? Calculate 327/2945 = 0.1110356 = -11.10%.
+OCF 4,472 vs 4,905, change -433, -8.83%? 433/4905 = 0.088277 = -8.83%.
+FCF 3,480 vs 3,756, change -276, -7.35%? 276/3756=0.07348 = -7.35%.
+Thus cash creation not enhanced vs same fiscal quarter; declined. Need maybe ratios: FCF margin relative net income? User asks compare. Could include OCF/net income? Maybe not necessary but ratios two decimals. Could mention OCF/NI: 2025 Q3 4,472/2,618=1.7086 -> 1.71; 2024 4,905/2,945=1.6655 -> 1.67. FCF/OCF: 3,480/4,472=0.7782 -> 0.78; 3,756/4,905=0.7658 -> 0.77. But only if useful. Need ratios/percentages two decimals.
+
+Working capital for 2025 Q3: Need subtract 24w from 36w changes in assets/liabilities:
+Accounts and notes receivable change line: 36w -1,747; 24w -1,582; Q3 = -165 million. Negative means increase in receivables use of cash (占用). Need phrase: 应收项目现金影响 -165百万美元，占用现金。
+Inventories: 36w -449; 24w -800; Q3 = +351 million. Positive means decrease in inventories? In cash flow statement change in inventories negative = increase inventories cash use; positive = decrease inventories cash source. Q3 +351 means inventories decreased relative? It contributes cash. Need cautious: The line item is already cash flow effect; positive 351 is contribution. Commercial reason cannot confirm.
+Accounts payable and other current liabilities: 36w -1,647; 24w -2,083; Q3 = +436 million. Positive means AP and other current liabilities increased (or cash provided), contributes cash. Need check sign: In cash flow, change in accounts payable and other current liabilities negative cumulative means reduction in liabilities cash use? But Q3 positive 436 means liability balance increased or cash provided. So contribution.
+
+Need maybe mention other working capital components? User only asks three:应收、存货、应付及其他流动负债. Need combine directions to judge: Q3 OCF 4,472 despite net income 2,618, supported by positive working capital from inventory +351 and AP/other current liabilities +436, partially offset by receivables -165. Net of these three = +622 million (351+436-165). This suggests operating cash flow was bolstered by working capital release/payables etc., but cannot infer sustainability or commercial reasons. Cash creation declined YoY despite positive WC contribution? Need compare 2024 Q3 working capital maybe to understand? User asks说明2025本单季三个项目分别贡献还是占用现金，结合这些方向作审慎判断. Could also calculate 2024 Q3 for context? They didn't ask but maybe useful: AR 2024 Q3 = -1,521 - (-1,138) = -383 (use); Inventories = -492 - (-696)=+204 (source); AP & other current liabilities = -2,312 - (-2,968)=+656 (source). Net three = +477. In 2025 net three +622, more positive by 145. But OCF still down due to other items/net income. Need maybe include to support judgment. But user specifically asks 2025; can include 2024 comparison as context. Need not overdo.
+
+Need also note that cumulative half-year vs single quarter not treated as quarter-over-quarter. We compare single quarter YoY only. Need avoid saying Q3 vs Q2. Could mention not using 24w as previous quarter.
+
+Need check if net income from cash flow statement is consolidated net income? Condensed consolidated statement cash flows operating activities net income likely includes noncontrolling interest? It says Net income, not net income attributable to PepsiCo. User asks合并净利润. In cash flow statement line "Net income" is consolidated net income before NCI? Usually cash flow starts with net income including NCI? In PEP maybe net income attributable? Need not overcomplicate; use line as reported "Net income". Could label as合并现金流量表中的“Net income”（未特别标注归属于母公司）. If precise 合并净利润 may be net income including noncontrolling interest; evidence line is Net income. We can state based on cash flow statement line item, not separate income statement; if user needs attributable-to-shareholders, not provided. Data gap? We can mention no income statement evidence to verify attribution. But probably okay. Need be careful: PEP earnings release cash flow says Net income $5,740 vs $8,092. In income statement maybe net income attributable to PepsiCo? PEP usually consolidated net income, then net income attributable to noncontrolling interests? Let's not claim beyond. Use "合并口径净利润（现金流量表起始项 Net income）".
+
+Need check units: millions USD. Maybe convert to billions? User says金额注明单位. We can present in百万美元 and maybe亿美元? Keep million USD. Ratios two decimals. Need ensure percentages two decimals: -11.10%, -8.83%, -7.35%. Maybe working capital contributions in millions.
+
+Need output fixed sections:
+标的与数据范围 / 已验证事实 / 财务趋势与经营质量 / 风险与反向证据 / 数据缺口 / 来源.
+
+Need include evidence IDs [E1], [E2].
+
+Need mention condition: cumulative-to-single-quarter reconstruction. We should explicitly say we used 36周累计减24周累计; same fiscal start? For FY2025 start 2024-12-29 per E1/E2 metadata. For FY2024, reports show 24周止6/15/2024与36周止9/7/2024; no restatement indicated. Need maybe note FY2024 period start not explicitly shown in provided excerpts; but because they are corresponding cumulative periods in same company's quarterly releases, we reconstruct. Is that a gap? Could list data gap: FY2024年初始日期未在证据文本中直接显示；但两期累计期末连续且同公司，若起始日不同将影响可减性. However system says when conditions not met? We have two cumulative periods same start? For FY2024 not explicit. But likely okay. Need not overstate gap. Could say“基于同一公司同一财年累计报表的常规口径，未见重述/合并范围变化提示；若存在未披露重述，还原无效。”
+
+Need check arithmetic precisely:
+FY2025 Q3 net income: 5740 - 3122 = 2618.
+OCF: 5468 - 996 = 4472.
+Capex: 2499 - 1507 = 992. FCF: 4472 - 992 = 3480.
+FY2024 Q3 net income: 8092 - 5147 = 2945.
+OCF: 6220 - 1315 = 4905.
+Capex: 2850 - 1701 = 1149. FCF: 4905 - 1149 = 3756.
+
+Check percentages:
+NI change = 2618/2945 -1 = -0.11103565 => -11.10%.
+OCF change = 4472/4905 -1 = -0.08827727 => -8.83%.
+FCF change = 3480/3756 -1 = -0.07348243 => -7.35%.
+Capex change = 992/1149 -1 = -0.13664 => -13.66% decrease (capex down). Could mention lower capex softened FCF decline. If capex had same? Not necessary but useful.
+
+Working cap 2025 Q3:
+AR: -1747 - (-1582) = -165. Use: negative cash flow, receivables increased, 占用.
+Inventory: -449 - (-800) = +351. Positive cash flow, inventories decreased or cash released, 贡献.
+AP & other current liabilities: -1647 - (-2083) = +436. Positive cash flow, liabilities increased/payables timing, 贡献.
+Net = 622.
+2024 Q3:
+AR: -1521 - (-1138) = -383.
+Inventory: -492 - (-696)=+204.
+AP & other current liabilities: -2312 - (-2968)=+656.
+Net = 477.
+Could mention 2025 Q3 these three net contribution +622 vs 2024 +477, but OCF still lower due to lower net income and other operating cash items. Need maybe calculate "other operating items"? Could say excluding these three, residual OCF? For 2025 Q3 OCF 4472 - 622 = 3850; 2024 Q3 OCF 4905 - 477 = 4428. Residual lower by 578. But not necessary; could support judgment: cash generation decline not explained by these three; they actually positive.
+
+Need maybe mention impairment and other charges etc. For 2025 Q3: impairment 1960-1860=100; restructuring etc. But not asked. Could mention as risk: Q3 2025 OCF supported by noncash addbacks? Let's see: Net income lower but OCF high due to D&A, impairments, restructuring etc. Need maybe not compute all. But could mention net income includes charges? The cash flow has noncash addbacks. But user asked cash creation. Need maybe prudent judgment: Despite positive working capital contributions, overall single-quarter cash creation weakened YoY; cannot conclude enhanced. The working capital directions in Q3 2025 (inventory and payables provide cash, receivables use) are favorable for cash conversion in that quarter, but may reflect timing and cannot be extrapolated. Also FCF declined less than OCF because capex lower. Need mention simplified FCF excludes asset sale proceeds; per user.
+
+Need ensure no hidden chain-of-thought. Final should be concise but detailed.
+
+Potential issue: The evidence periods: E1 periodEnd 2025-09-06, periodStart 2024-12-29; E2 periodEnd 2025-06-14, periodStart 2024-12-29. Good. For FY2024 comparatives, E1 shows 9/7/2024, E2 6/15/2024; start not in metadata but likely same fiscal year start. We can state single-quarter periods as 12-week intervals between these cumulative period ends. Need maybe "起止期间按相邻累计期末推算：FY2024 Q3为2024-06-16至2024-09-07；FY2025 Q3为2025-06-15至2025-09-06。" Is this exact? If 24 weeks ended Saturday June 14, 2025, next day Sunday June 15 start Q3. For 2024, 24 weeks ended Saturday June 15, next day Sunday June 16 start Q3. Yes.
+
+Need maybe mention "36周 - 24周 = 12周单季". Good.
+
+Need maybe include table:
+指标 | FY2024 Q3 | FY2025 Q3 | 变动 | 变动%
+净利润 | 2,945 | 2,618 | -327 | -11.10%
+经营现金流 | 4,905 | 4,472 | -433 | -8.83%
+资本支出毛额 | 1,149 | 992 | -157 | -13.66% (capex outflow decreased)
+简化自由现金流 | 3,756 | 3,480 | -276 | -7.35%
+Need maybe capital spending change as outflow lower: -13.66% means spending decreased; be clear.
+
+Working capital table:
+项目 | 2025 Q3现金影响(百万美元) | 方向
+应收账款及票据 | -165 | 占用现金
+存货 | +351 | 贡献现金
+应付账款及其他流动负债 | +436 | 贡献现金
+三项合计 | +622 | 净贡献
+Need maybe include 2024 Q3 comparison:
+AR -383, inventory +204, AP +656, net +477. Could include as context in text or table. But user asked 2025. Maybe include small context: 2024同季三项合计+477百万美元，因此2025三项合计更高，但仍不足以抵消净利润/其他项导致的OCF下降.
+
+Need mention "应付及其他流动负债" line includes accounts payable and other current liabilities; we don't separate. Good.
+
+Need mention "经营现金流 = Net Cash Provided by Operating Activities". "简化自由现金流 = 经营现金流 - Capital spending（毛额，负数取绝对值作为支出）；不抵扣 Sales of PP&E." Good.
+
+Potential nuance: In E1/E2, Capital spending line is negative. To compute gross cash outflow, use absolute positive. For Q3 2025: 2,499 - 1,507 = 992. Since both negative, outflow = 992. Good.
+
+Need maybe mention "合并净利润" derived from cash flow statement may include noncontrolling interest? Data gap: We have no income statement to confirm attribution. But user likely accepts. We can say "现金流量表起始项 Net income，作为合并口径净利润的可用代理；未获得损益表验证归属于母公司/非控股权益拆分." In data gaps.
+
+Need maybe mention "未审计". Both unaudited. Good.
+
+Need mention source URLs? In 来源 section with E1/E2 sourceRef. Also rawSha? Not necessary but can cite.
+
+Need ensure no external data.
+
+Need think if any false missing data claim: We must not claim working capital missing; we reconstructed. Need not list as gap. But we can list gaps: FY2024 cumulative start date not explicit; no management discussion for commercial reasons; no income statement to verify net income attribution; no detailed breakdown of other current liabilities; no segment data. That's fine.
+
+Need maybe include "不把累计半年和单季当作环比": We can explicitly say本报告仅做单季同比比较；未将36周累计与24周累计直接比较当作环比，也未将Q3与Q2比较。
+
+Need maybe mention "现金创造增强了吗？" Answer: 没有。FY2025 Q3单季经营现金流和简化自由现金流均低于FY2024 Q3；净利润也下降。尽管存货和应付/其他流动负债贡献现金，且资本支出下降，仍未能使现金创造同比增强。
+
+Need maybe include ratio OCF/NI and FCF/OCF? Could be helpful. Need two decimals. Let's compute precisely:
+OCF/NI 2025 = 4472 / 2618 = 1.708173... Actually 2618*1.708 = 4471.744. So 1.71.
+2024 = 4905/2945 = 1.665535 = 1.67.
+FCF/OCF 2025 = 3480/4472 = 0.778175 = 0.78.
+2024 = 3756/4905 = 0.765749 = 0.77.
+Capex/OCF 2025 = 992/4472=0.2218=0.22; 2024=1149/4905=0.2342=0.23.
+Could include but not necessary. User asks比率和百分比保留两位小数. If include ratios ensure two decimals. Maybe include "经营现金流/净利润" to show conversion. But careful: Net income has noncash charges; high ratio due to addbacks. Could mention.
+
+Need maybe discuss "impairment and other charges" in 2025? Q3 single quarter: 100 million (1960-1860). Restructuring and impairment charges Q3: 567-426=141; cash payments for restructuring Q3: -554 - (-387) = -167. Acquisition/divestiture charges Q3: 308-7=301; cash payments -80 - (-4)= -76. Product recall impact Q3: 0? Product recall-related impact 0-0? 36w 0, 24w 0? Actually E1 2025 product recall impact —, E2 —, so Q3 0; cash payments -5 - (-2) = -3. Pension expense etc. But not needed. Could mention that net income lower but OCF supported by noncash items and working capital. However if we mention noncash items need compute? Maybe not.
+
+Need maybe check if 2025 Q3 net income 2,618 and OCF 4,472: difference 1,854. This includes D&A 824 (2315-1491), impairment 100, lease amortization 174, share comp 76, restructuring charges 141, acquisition/div charges 301, pension expense 65, deferred taxes 290? Let's compute deferred income taxes: 30 - (-260)=290. Tax payments TCJA: -772 - (-772)=0. Other net etc. Working capital +622. But not necessary.
+
+Could include a sentence: "从现金流量表补充项看，2025年Q3经营现金流高于净利润，部分来自非现金/重组等加回及营运资本净贡献；具体商业原因未在本轮证据中披露." But if we mention noncash addbacks, need not calculate all. Could be okay.
+
+Need maybe ensure "已验证事实" includes raw values? Could include cumulative values? Maybe table of reconstruction formulas. Need enough.
+
+Potential issue: "FY2025第三季度单季的现金创造，较上年同一个财季增强了吗？" Could interpret "现金创造" as free cash flow or operating cash flow. We'll answer both and say no.
+
+Need maybe mention "合并净利润" is lower due to maybe impairments? But no income statement. We can say net income decline is fact from cash flow statement; reasons not confirmed. Actually cash flow shows impairment charges etc. But net income after charges; we can't attribute.
+
+Need maybe mention "两个累计期间期初相同" for reconstruction. For FY2025: E1/E2 metadata periodStart 2024-12-29. For FY2024: not explicit but consecutive. Need maybe phrase:
+“FY2025：E1的36周期间与E2的24周期间元数据均标注 periodStart=2024-12-29，满足同起点相减。FY2024：E1列示36周止2024-09-07，E2列示24周止2024-06-15；两者为同一公司同一财季累计比较，未见重述或合并范围变化提示，按同起点累计数相减。若后续发现期初不同或重述，应重算。” Good.
+
+Need maybe mention "36 Weeks Ended 9/6/2025 9/7/2024" and "24 Weeks Ended 6/14/2025 6/15/2024".
+
+Need maybe mention currency USD, unit millions, unaudited. Good.
+
+Let's structure final:
+
+# 标的与数据范围
+- 标的: PepsiCo, Inc. (PEP), consolidated, USD millions, unaudited.
+- 证据: E1 Q3 2025 earnings release cash flow 36周止 2025-09-06/2024-09-07; E2 Q2 2025 release cash flow 24周止 2025-06-14/2024-06-15.
+- 单季起止: FY2025 Q3 2025-06-15 to 2025-09-06; FY2024 Q3 2024-06-16 to 2024-09-07. Derived from 36w-24w.
+- Method: Q3 = 36w cumulative - 24w cumulative. Simplified FCF = OCF - capex gross; no asset sale offset.
+
+# 已验证事实
+Maybe table cumulative and reconstructed? Could present reconstructed table. Need include evidence IDs.
+
+Table:
+项目（百万美元） | FY2024 Q3 | FY2025 Q3 | 同比变动 | 同比%
+合并净利润（CF Net income） | 2,945 [E1-E2] | 2,618 | -327 | -11.10%
+经营现金流 | 4,905 | 4,472 | -433 | -8.83%
+购建固定资产现金支出毛额 | 1,149 | 992 | -157 | -13.66% (支出下降)
+简化自由现金流 | 3,756 | 3,480 | -276 | -7.35%
+Need maybe show formulas:
+FY2025 Q3 net income = 5,740[E1] - 3,122[E2] = 2,618.
+FY2024 Q3 = 8,092[E1] - 5,147[E2] = 2,945.
+OCF similarly.
+Capex: 2,499-1,507 etc.
+
+Maybe include working capital table in 已验证事实 or 财务趋势. Let's put in 财务趋势.
+
+# 财务趋势与经营质量
+- Answer: No, cash creation weakened. OCF down 8.83%, simplified FCF down 7.35%, net income down 11.10%. Capex lower softened FCF decline.
+- Ratios: OCF/NI 1.71 vs 1.67; FCF/OCF 0.78 vs 0.77. Maybe include.
+- Working capital 2025 Q3: table. Explain signs.
+- Combined three items net +622m, favorable; AR use -165, inventory source +351, AP/other current liabilities source +436. 2024 Q3 net +477 (optional). Therefore working capital direction in 2025 Q3 was net positive and slightly better than 2024 Q3, but not enough to offset lower net income/other items; overall cash creation not enhanced.
+- Prudent judgment: positive WC contribution may reflect timing; cannot infer sustainable improvement. Do not treat cumulative half-year as QoQ.
+
+# 风险与反向证据
+- Reverse evidence: capex decreased 13.66%, FCF decline smaller than OCF; working capital net contribution positive and higher than prior year Q3; OCF/NI slightly higher. These mitigate but don't reverse conclusion.
+- Risk: working capital boost from payables/other current liabilities may be timing/reversal; receivables use indicates collection not a source; inventory source could be destocking, may not repeat. Commercial reasons not confirmed.
+- If restatement/merge scope changes discovered, reconstruction invalid; no such evidence currently.
+- Net income from CF statement may not equal attributable-to-parent; no income statement provided.
+
+# 数据缺口
+- FY2024 cumulative start date not explicitly displayed in excerpts; reconstruction assumes same-start consecutive cumulative periods. If not, invalid.
+- No MD&A/management explanation for working capital movements or cash flow drivers.
+- No income statement/balance sheet to validate net income attribution or working capital balance changes.
+- No detailed breakdown of "other current liabilities".
+- No restatement/merge scope confirmation beyond provided releases.
+Need ensure not list missing working capital details as missing because we reconstructed cash effects; we can say detailed商业原因缺失, not data missing? Fine.
+
+# 来源
+[E1] sourceRef etc.
+[E2] sourceRef etc.
+
+Need maybe not overdo data gaps. But required.
+
+Need ensure all percentages two decimals. In table, -13.66% for capex: because capex outflow decreased from 1,149 to 992. Could label "支出变动" -13.66% (negative means支出减少). Good.
+
+Need maybe include "金额单位：百万美元". Good.
+
+Need maybe mention "比率和百分比保留两位小数": We'll ensure all numeric ratios/percents have two decimals. For amounts no need decimals. If we include 1.71 etc. Good.
+
+Need maybe avoid using "环比". We'll say同比.
+
+Need think if there is any possibility that Q3 single quarter should be 13 weeks? PepsiCo quarters sometimes 12 weeks; 36-24 = 12. Good.
+
+Need maybe check FY2024 Q3 start date: If 24 weeks ended 6/15/2024, Q3 starts 6/16/2024 and ends 9/7/2024 (12 weeks). Good.
+
+Need maybe mention "36周累计与24周累计相减得到的单季值，是会计口径单季值，不等同于管理层可能单独披露的季度指标；本轮未见管理层单季现金流披露." Good as boundary.
+
+Need maybe include "已披露事实/基于数据推断/尚缺信息" distinction? The sections cover. Could label within.
+
+Need ensure no hidden chain-of-thought. Final only report.
+
+Let's draft final in Chinese. Need be precise.
+
+Potential issue: In E2, line "Pension and retiree medical plan expense" vs E1 "expenses" minor. Not relevant.
+
+Potential issue: "应付及其他流动负债" in cash flow line is "Accounts payable and other current liabilities". Q3 2025 = (-1,647) - (-2,083) = 436. In cash flow statement, a negative cumulative number means liability decreased? But Q3 positive means liability increased. We can just state "现金影响为正，贡献现金；通常对应应付/其他流动负债余额增加或付款节奏延后，但商业原因未确认." Good.
+
+Need maybe mention "存货 +351" positive cash effect; could be inventory decline. But because cumulative inventory cash effect became less negative from -800 to -449, Q3 positive. That implies inventory decreased or cash released. Good.
+
+Need maybe mention "应收 -165" negative; receivables increase. Good.
+
+Need maybe include formula for working capital:
+2025 Q3 AR = (-1,747) - (-1,582) = -165.
+Inventory = (-449) - (-800) = +351.
+AP & other current liabilities = (-1,647) - (-2,083) = +436.
+2024 Q3 if included: AR = -383, inventory +204, AP +656.
+
+Need maybe mention "三项合计 2025 +622; 2024 +477". Good.
+
+Need maybe include "经营现金流扣除三项营运资本后的残差"? Could mention: Even with +622m from these three, OCF still down; residual other items lower. Let's compute residual: OCF minus three = 2025 3,850; 2024 4,428; down 578 (-13.05%?). 578/4428=13.05%. Could include but maybe too much. It supports judgment. But if include percentage ensure two decimals. Maybe not necessary.
+
+Need maybe include "简化自由现金流下降幅度小于经营现金流，主要因资本支出毛额下降157百万美元（-13.66%）". Good.
+
+Need maybe mention "不抵扣出售资产回款": We did not use Sales of PP&E. Could explicitly say "未使用 Sales of property, plant and equipment 272/177等回款". Good.
+
+Need maybe check if "capital spending" 2025 Q3 outflow 992; 2024 Q3 1,149. Yes.
+
+Need maybe include "现金创造是否增强" final: "结论：没有增强；同比减弱." Bold maybe.
+
+Need ensure all evidence references: For reconstructed numbers, cite [E1][E2]. For working capital, [E1][E2]. For period dates, [E1][E2].
+
+Need maybe mention availableAt/retrievedAt? Not necessary.
+
+Let's consider if any risk about periodStart metadata E1 says periodStart 2024-12-29 but 36 weeks ended 9/7/2024? It might be metadata for current period only; not for comparative. We won't claim FY2024 start from metadata. Good.
+
+Need maybe mention "FY2025 Q3: 12 weeks; FY2024 Q3: 12 weeks". Good.
+
+Need maybe mention "单位百万美元；所有比率两位小数". Good.
+
+Let's draft final with tables. Ensure no markdown too heavy? Fine.
+
+Potential issue: The user requested "从两份累计现金流表还原2025和2024各第三季度的合并净利润、经营现金流、简化自由现金流，并比较。" We should show the reconstruction maybe with formulas. We'll include.
+
+Need maybe include "已验证事实" with cumulative inputs? Could include short:
+- E1 36周: 2025 Net income 5,740; OCF 5,468; capex 2,499. 2024: 8,092; 6,220; 2,850.
+- E2 24周: 2025 Net income 3,122; OCF 996; capex 1,507. 2024: 5,147; 1,315; 1,701.
+Then reconstructed. This is transparent. But maybe too long. We can include formulas in table footnotes.
+
+Need maybe mention "Net Cash Provided by Operating Activities". Good.
+
+Need maybe include "简化自由现金流 = 经营现金流 - 购建固定资产现金支出毛额". Good.
+
+Let's ensure no arithmetic mistakes:
+2025 Q3 working capital net: -165 + 351 + 436 = 622. Yes.
+2024 Q3 working capital net: -383 + 204 + 656 = 477. Yes.
+OCF residual: 4472 - 622 = 3850; 4905 - 477 = 4428. Difference -578. Percent -13.05 (578/4428=0.13053). Could mention if needed.
+
+Need maybe mention "应付及其他流动负债 +436" could include other current liabilities not only trade payables; direction positive. Good.
+
+Need maybe mention "产品召回、重组、并购等现金付款" not asked. But risk maybe: There were acquisition/divestiture charges etc. But not needed.
+
+Need maybe consider if "合并净利润" should be reconstructed from cash flow net income but net income might include NCI. If user expects PEP net income attributable? Could note gap. In final: "本报告将现金流量表起始项‘Net income’作为合并净利润口径；证据未提供损益表，无法确认是否为归属于PepsiCo的净利润。" This is important. But if we call it合并净利润, maybe okay. We can label "合并口径净利润（现金流量表 Net income）".
+
+Need maybe mention "数据缺口" not too defensive. Good.
+
+Let's produce final. Ensure Chinese. Use sections exactly.
+
+Double-check system: Output structure: 标的与数据范围 / 已验证事实 / 财务趋势与经营质量 / 风险与反向证据 / 数据缺口 / 来源. We'll use these headings.
+
+Need not mention "思维过程". Good.
+
+Let's final.

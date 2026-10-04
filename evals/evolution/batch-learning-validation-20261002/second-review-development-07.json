@@ -1,0 +1,49 @@
+{
+  "schema": "fundamentals_batch_independent_failure_confirmation_v1",
+  "origin": "AI_SOURCE_REVIEW_NOT_HUMAN",
+  "reviewer": "root-independent-source-and-Decimal-check",
+  "releaseEligible": false,
+  "caseId": "ibm-fy2025q3-oneoff-cash-comparability",
+  "runId": "development-07-1-1",
+  "stage": "analysis",
+  "status": "CONFIRMED",
+  "attribution": "METHOD_ERROR",
+  "reviewPolicySha256": "86b4134f7bcdebf31dcb5b38417bd3a168051b9fea8b8a061ae5cc9f29affbad",
+  "tracePath": "raw-development-07/development-07-1-1.response.json",
+  "traceFileSha256": "74949e92611d42b76ef426b4207daaccbe73e08ae022aae5f464574a63fe3567",
+  "binding": {
+    "caseSha256": "f2837a7340885004b8fb8f125c86a42dc5706079aa253ebb1739921e00e2dcc8",
+    "answerSha256": "edca021d873167b09638ca0a0921661260afb910527c887a2687f04377a12931",
+    "evidenceSha256": "6970093ee7dafa33fe6949b7400f077104b529d8e91b68740a163a12980f6874"
+  },
+  "findings": [
+    {
+      "dimension": "numeric_period_correctness",
+      "answerQuote": "脚注称相关税收利益约 **0.7亿美元**，即约 **700百万美元**。",
+      "sourceQuote": "(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter.",
+      "reason": "0.7 billion USD equals 7 yi USD or 700 million USD. The printed 0.7 yi is 70 million, a factor-ten mismatch. The correct later million amount does not erase the earlier false amount.",
+      "expected": "7亿美元 / 700百万美元"
+    },
+    {
+      "dimension": "numeric_period_correctness",
+      "answerQuote": "一次性非现金所得税费用约 **0.3亿美元**，即约 **300百万美元**。",
+      "sourceQuote": "(2) 2025 includes a one-time, non-cash income tax charge of $0.3 billion associated with the enactment of H.R. 1 in July of 2025, and 2024 includes a $0.7 billion tax benefit associated with the pension settlement charge in the third quarter.",
+      "reason": "0.3 billion USD equals 3 yi USD or 300 million USD. The printed 0.3 yi is 30 million.",
+      "expected": "3亿美元 / 300百万美元"
+    },
+    {
+      "dimension": "numeric_period_correctness",
+      "answerQuote": "经营现金流 / 净利润 = 9,153 / 4,993 = **1.83**，即 **183.34%**。",
+      "sourceQuote": "Net Cash Provided by Operating Activities |  | $ 3,081 |  | $ 2,881 |  | $ 9,153 |  | $ 9,115",
+      "additionalSourceQuote": "Net Income/(Loss) from Operations |  | $ 1,744 |  | $ (330) |  | $ 4,993 |  | $ 3,109",
+      "reason": "Decimal 9153 / 4993 * 100 = 183.3166433006208692169036651; rounded 183.32. The 183.34 claim exceeds frozen 0.01 tolerance.",
+      "expected": "183.32%"
+    }
+  ],
+  "additionalNumericChecks": {
+    "reportedChangePercentagePoints": "-109.86",
+    "reportedRelativePercent": "-37.47",
+    "adjustedChangePercentagePoints": "-4.62; displayed -4.61 is within the frozen 0.01 absolute tolerance"
+  },
+  "finalOnlyExcludedFromLearning": "The final corrected the unit translations and reported 2025 ratio, but retained the wrong -109.84 percentage-point difference; expected -109.86. This final-stage finding is not supplied as an analysis correction."
+}

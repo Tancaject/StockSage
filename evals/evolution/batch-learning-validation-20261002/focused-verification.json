@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "tests": 43,
+  "modelCalls": 0,
+  "reports": [
+    {
+      "path": "stocksage-backend/target/surefire-reports/TEST-com.stocksage.service.OrdinaryAnalystDraftTest.xml",
+      "sha256": "c87ffad204ca7be45af292a7e3c729215da173c49092c5fee70cd9f0afd4c8d7",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "stocksage-backend/target/surefire-reports/TEST-com.stocksage.service.ToolPrefetchServiceSubmitTest.xml",
+      "sha256": "7ed92cd648e09598653b446642d1f917d99eb16f2ae5edc3876d1d0699171571",
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "stocksage-backend/target/surefire-reports/TEST-com.stocksage.conversation.ChatPromptAssemblerTest.xml",
+      "sha256": "52ceb4a340b35254140427293f8da68d89f8cda2b8b65632ed8b4c08d6e524ca",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "stocksage-backend/target/surefire-reports/TEST-com.stocksage.evolution.EvolutionReplayServiceTest.xml",
+      "sha256": "149c69a7e518071bd3de28151146a4a02fb3a2f01fd0a8474b9088fe1fb81ec9",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "offlineDraftAssemblyEvidence": "draft-budget-verification/verification.json",
+  "liveDraftEvidence": "live-draft-integrity.json"
+}

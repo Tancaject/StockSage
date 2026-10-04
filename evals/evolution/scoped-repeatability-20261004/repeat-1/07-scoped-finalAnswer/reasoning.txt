@@ -1,0 +1,81 @@
+我们需要回答用户中文问题。任务已经提供了 TOOL_OBSERVATIONS，里面包含完整计算。我们需要以 StockSage 助手身份，基于证据 [E1] 给出判断，不能编造。用户要求：IBM 2025年前三季度经营现金流/净利润比率低于2024年同期，能否据此判断利润现金转化明显变差？给出两年原表比率，再做仅剔除已列示一次性项的示意比较：剔除2024养老金结算费用及相关税收利益，2025 H.R.1相关非现金税费；其余不调，经营现金流保持披露值。列出两年示意调整后净利润及经营现金流/该净利润，解释与原表判断不同、还不能确认什么。这是可比性练习，不是公司公布调整后指标；税项按脚注约数。金额注明单位，比率和百分比保留两位小数。
+
+我们需要输出结构化 Markdown。需要引用 [E1]。当前日期 2026-10-02，但数据是 2025-10-22 available? 实际 retrieved 2026-10-02。需要末尾数据来源与时间说明。要强调不构成投资建议。
+
+需要仔细计算：
+E1: Nine months ended Sep 30 2025: Net income 4,993; operating cash flow 9,153; pension settlement charge 0. 2024: net income 3,109; OCF 9,115; pension settlement charge 2,725. Footnote: 2025 includes one-time non-cash income tax charge $0.3 billion associated H.R.1 in July 2025. 2024 includes $0.7 billion tax benefit associated with pension settlement charge in Q3.
+
+原表比率:
+2025: 9153/4993 = ? Let's calculate precisely: 4993*1.833 = 9152.?? 4993*1.833 = 4993*(1 + .833)=4993+4159.169=9152.169. 1.8332 gives 9153? 4993*0.8332=4160.1676; +4993=9153.1676. So 1.83316. Percentage 183.32% if 1.8332*100. User wants ratio and percentage two decimals. 1.83 and 183.32%. Note ratio two decimals 1.83. Could also present 1.83倍 (183.32%).
+2024: 9115/3109 = 2.93181. 293.18%.
+
+调整后:
+2025 adjusted net income = 4993 + 300 = 5293. Ratio = 9153/5293. Calculate: 5293*1.729 = 9151.?? 5293*0.729=3858.?? compute: 5293*0.7=3705.1; *0.029=153.497; total 3858.597; +5293=9151.597. Need 9153, diff 1.403 /5293=0.000265. so 1.729265. Percentage 172.93%. ratio two decimals 1.73.
+2024 adjusted net income = 3109 + 2725 - 700 = 5134. Ratio 9115/5134 =? 5134*1.775 = 9112.85? 5134*0.775=3978.85; +5134=9112.85. diff 2.15/5134=0.000419. so 1.7754 -> 177.54%. ratio two decimals 1.78.
+
+变化：原表下降幅度: (1.83316-2.93181)/2.93181 = -37.47%. Adjusted: (1.72927-1.77542)/1.77542=-2.60%. Could mention. But user didn't ask percentage change, but can include. Ensure not overstate.
+
+判断：不能仅凭原表比率下降就判断明显变差，因为2024年养老金结算费用大幅压低净利润但经营现金流调节中加回，机械抬高2024比率；2025非现金税费也压低净利润但不影响经营现金流（作为非现金税项可能调节？我们只调整净利润）。剔除后两年接近，2025略低。经营现金流本身几乎持平：9153 vs 9115，增38百万美元，0.42%。因此证据不支持“明显变差”；但原表口径下降明显，且调整后仍略低，不能说完全无变化。
+
+需要说明这是可比性练习，不是公司披露调整后指标。税项约数 0.3b = 300m; 0.7b=700m. 金额单位百万美元。注意脚注税项是约数，存在误差。
+
+还需要“还不能确认什么”：缺少利润表完整口径、现金税支付/递延税路径、官方调整口径、全年数据、其他项目未调整，不能判断经常性现金转化全部变化。也不能确认2024税收利益在净利润与现金流调节中的精确列示路径。本轮只有现金流量表补充资料。
+
+需要可能使用表格：原表、示意调整。每个数据点带说明？ 可以表格加说明。
+
+需要避免提及工具内部。引用 [E1]。末尾参考来源：[E1] IBM Q3 2025 official IR cash flow statement, retrieved 2026-10-02, published 2025-10-22, period 2025-01-01 to 2025-09-30 and comparable 2024. Maybe include source URL. Need “数据来源与时间说明”。
+
+Need ensure no hidden chain. Final in Chinese.
+
+Potential nuance: Net Income/(Loss) from Operations in cash flow might be net income from continuing operations? But we can just call 净利润（现金流量表补充资料口径）. User says 净利润. We should note it's cash flow statement line.
+
+Potential issue: Adjusting net income for 2024 tax benefit: If pension settlement charge is expense, tax benefit reduces expense/increases net income. To exclude both, add back charge and subtract tax benefit. Correct. For 2025 H.R.1 non-cash tax charge: It's tax expense, reduces net income; add back. OCF stays disclosed; but if tax charge non-cash, in actual cash flow may be added back within operating assets/liabilities/other? But user says keep OCF disclosed. Good.
+
+Need maybe state “经营现金流/净利润” ratio can be >1 due to D&A, SBC, add-backs. IBM OCF > net income due to non-cash charges and working capital etc. But not necessary. Could mention key drivers: depreciation/amortization 3,725m 2025 vs 3,555m, SBC 1,285m vs 966m, operating assets/liabilities drag (1,755m vs 3,063m), financing A/R 905 vs 1,824. But user only asks ratio and adjustment. However “关键依据” could include OCF almost flat. We can mention from [E1].
+
+Need be careful with “明显变差” conclusion: We can say “不能据此确认明显变差”。 More precise: 原表比率下降主要被一次性项目扭曲；剔除指定项目后比率仅小幅下降，且经营现金流几乎持平，因此本轮证据不支持“明显变差”的判断。但仍保留原表 GAAP 下降事实和略低。
+
+Need maybe include formulas.
+
+Let's craft final:
+
+标题：结论
+- 一句话：不能仅凭原表比率从2.93降至1.83判断IBM利润现金转化明显变差；剔除指定一次性项目后，2025年前三季度比率1.73略低于2024年1.78，降幅明显缩小，经营现金流也基本持平。但这是示意调整，不是公司口径。
+
+1. 原表比率
+表格：期间、净利润、经营现金流、比率。说明：2024净利润被养老金结算费用压低，导致比率被抬高。
+
+2. 示意调整
+说明调整：
+- 2025净利润加回300百万美元 H.R.1非现金税费 -> 5,293
+- 2024净利润加回2,725养老金结算费用，减去700相关税收利益 -> 5,134
+- OCF不变
+表格：调整后净利润、OCF、比率。
+
+3. 与原表不同
+- 原表下降37.47% (可选) -> 看起来明显变差
+- 调整后仅下降2.60% -> 接近
+- OCF增加38百万美元，0.42% -> 现金创造没有恶化
+- 但调整后仍略低，不能说完全无变化。
+
+4. 不能确认
+- 不是公司 non-GAAP
+- 约数误差
+- 缺少利润表、现金税、递延税路径
+- 其他项目未调整
+- 缺全年数据
+
+免责。
+
+数据来源与时间说明：
+- [E1] IBM Q3 2025 official IR cash flow statement, published 2025-10-22, retrieved 2026-10-02; nine months ended 2025-09-30 and 2024-09-30; USD millions. URL.
+
+Need ensure ratios two decimals and percentages two decimals. Use 1.83倍 and 183.32%. For adjusted 1.73倍, 172.93%; 1.78倍, 177.54%.
+
+Potential issue: If ratio as percentage = OCF / Net income *100, 183.32% etc. Good.
+
+Need maybe include “金额单位：百万美元”。
+
+Need not mention “后端”。
+
+Let's produce final. Ensure no analysis. Also maybe include “仅供参考，不构成投资建议”。

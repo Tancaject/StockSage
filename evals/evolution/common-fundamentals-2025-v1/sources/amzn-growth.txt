@@ -1,0 +1,33 @@
+Consolidated Statements of Operations
+(in millions, except per share data)
+(unaudited)
+Three Months Ended Twelve Months Ended
+December 31, December 31,
+2024 2025 2024 2025
+Net product sales $ 82,226 $ 89,992 $ 272,311 $ 296,266
+Net service sales 105,566 123,394 365,648 420,658
+Total net sales 187,792 213,386 637,959 716,924
+Operating expenses:
+Cost of sales 98,893 109,959 326,288 356,414
+Fulfillment 27,962 30,826 98,505 109,074
+Technology and infrastructure 23,571 29,399 88,544 108,521
+Sales and marketing 13,124 14,264 43,907 47,129
+General and administrative 2,863 2,704 11,359 11,172
+Other operating expense (income), net 176 1,257 763 4,639
+Total operating expenses 166,589 188,409 569,366 636,949
+Operating income 21,203 24,977 68,593 79,975
+Interest income 1,248 1,130 4,677 4,381
+Interest expense (570) (679) (2,406) (2,274)
+Other income (expense), net 468 1,177 (2,250) 15,229
+Total non-operating income 1,146 1,628 21 17,336
+Income before income taxes 22,349 26,605 68,614 97,311
+Provision for income taxes (2,325) (4,946) (9,265) (19,087)
+Equity-method investment activity, net of tax (20) (467) (101) (554)
+Net income $ 20,004 $ 21,192 $ 59,248 $ 77,670
+Basic earnings per share $ 1.90 $ 1.98 $ 5.66 $ 7.29
+Diluted earnings per share $ 1.86 $ 1.95 $ 5.53 $ 7.17
+Weighted-average shares used in computation of earnings per
+share:
+Basic 10,552 10,709 10,473 10,656
+Diluted 10,771 10,863 10,721 10,827
+

@@ -6,11 +6,20 @@
 - 参数简单（股票代码 + 少量选项），方便 LLM 通过 Tool Calling 传参
 - 返回完整数据，由 LLM 自行从中提取需要的信息
 - 错误返回 message 字段，不抛 500（LLM 需要读到错误信息来决定下一步）
+- K 线由类型化响应明确 SUCCESS/EMPTY/UNSUPPORTED/ERROR，供后端确定性验收。
 """
+
+from app.research_budget import check_budget
 
 from dataclasses import dataclass, field
 
 from fastapi import APIRouter, Query
+from app.kline import KLinePeriod, KLineResponse, normalize_kline
+from app.a_share_financials import normalize_a_share_financials
+from app.hk_financials import normalize_hk_financials
+from app.search_results import SearchResponse
+from datetime import datetime, timezone
+from app.sec_financials import FinancialReportPeriod, normalize_sec_financials
 from app.services.akshare_service import AkshareService
 from app.services.baostock_service import BaostockService
 from app.services.edgar_service import EdgarService
@@ -90,6 +99,7 @@ def _financial_by_route(route) -> dict:
         try:
             return ak_svc.get_hk_stock_info(route.api_code)
         except Exception as e:
+            check_budget(e)
             return _provider_error("akshare", "financial metrics", e)
     return _unsupported_us_payload("financial metrics")
 
@@ -138,6 +148,7 @@ def _a_share_with_baostock_fallback(feature: str, primary_call, fallback_call) -
             return payload
         raise RuntimeError(payload.get("message") or f"akshare {feature} returned no usable data")
     except Exception as e:
+        check_budget(e)
         fallback = fallback_call()
         result = dict(fallback) if isinstance(fallback, dict) else {"data": fallback}
         result.setdefault("provider", "baostock")
@@ -296,30 +307,39 @@ def _search_prefers_hk(query: str, candidates: list[dict]) -> bool:
     return any(item.get("market") == HK for item in candidates)
 
 
-@router.get("/kline")
+@router.get("/kline", response_model=KLineResponse, response_model_exclude_unset=True)
 def get_kline(
-    code: str = Query(..., description="Stock code/name, e.g. AAPL, TSLA, NVDA"),
-    period: str = Query("daily", description="daily/weekly/monthly"),
-    days: int = Query(30, description="Number of days"),
+    code: str = Query(..., description="A/H-share code/name, e.g. sh.600519 or 0700.HK; use IBKR for US bars"),
+    period: KLinePeriod = Query("daily", description="daily/weekly/monthly"),
+    days: int = Query(30, ge=1, description="Calendar days to look back; not a guaranteed bar count"),
 ):
     """通过自动市场路由获取 K 线（OHLCV）数据。"""
     route = _resolve_with_search(code)
     if not route.is_supported:
-        return route.error_payload()
+        return normalize_kline(route.error_payload(), route, period, unsupported=True)
     if route.market == A_SHARE:
-        payload = _a_share_with_baostock_fallback(
-            "kline",
-            lambda: ak_svc.get_a_share_kline(route.api_code, period, days),
-            lambda: bao.get_kline(route.api_code, period, days),
-        )
+        try:
+            payload = _a_share_with_baostock_fallback(
+                "kline",
+                lambda: ak_svc.get_a_share_kline(route.api_code, period, days),
+                lambda: bao.get_kline(route.api_code, period, days),
+            )
+        except Exception as error:
+            check_budget(error)
+            payload = _provider_error("baostock", "kline", error)
+            payload["retryable"] = True if isinstance(error, TimeoutError) else None
+        return normalize_kline(payload, route, period, "akshare")
     elif route.market == HK:
         try:
             payload = ak_svc.get_hk_kline(route.api_code, period, days)
         except Exception as e:
+            check_budget(e)
             payload = _provider_error("akshare", "kline", e)
+            payload["retryable"] = True if isinstance(e, TimeoutError) else None
+        return normalize_kline(payload, route, period, "akshare")
     else:
         payload = _unsupported_us_payload("kline")
-    return _with_route(payload, route)
+        return normalize_kline(payload, route, period, unsupported=True)
 
 
 @router.get("/resolve")
@@ -442,31 +462,39 @@ def get_financial(
 @router.get("/financial-report")
 def get_financial_report(
     code: str = Query(..., description="Stock code/name, e.g. sh.600519, 0700.HK, AAPL"),
-    period: str = Query("annual", description="annual or quarterly"),
-    years: int = Query(5, ge=1, le=10, description="Number of annual periods or years of quarters"),
+    period: FinancialReportPeriod = Query("annual", description="annual or quarterly; SEC supports annual only; HK quarterly selects reported periods, not standalone quarters"),
+    years: int = Query(5, ge=1, le=10, description="Annual period limit; for quarterly, up to years * 4 reported periods, without guaranteed calendar-year coverage"),
 ):
     """通过自动市场路由获取结构化财务报表。"""
     route = _resolve_with_search(code)
     if not route.is_supported:
         return route.error_payload()
     if route.market == A_SHARE:
-        payload = bao.get_financial_reports(route.api_code, period, years)
+        try:
+            payload = bao.get_financial_reports(route.api_code, period, years)
+        except Exception as e:
+            check_budget(e)
+            return normalize_a_share_financials(None, route, period, years, error=e)
+        return normalize_a_share_financials(payload, route, period, years)
     elif route.market == US:
+        if period == "quarterly":
+            return normalize_sec_financials(None, route.api_code, requested_period=period,
+                                           requested_years=years, route=route)
         try:
             payload = edgar.get_xbrl(route.api_code)
-            payload["period"] = "annual"
-            payload["message"] = (
-                "US structured financials are sourced from SEC EDGAR XBRL. "
-                "Quarterly support should use SEC 10-Q ingestion/search when needed."
-            )
         except Exception as e:
-            payload = {"error": True, "message": str(e)}
+            check_budget(e)
+            return normalize_sec_financials(None, route.api_code, error=e, requested_period=period,
+                                           requested_years=years, route=route)
+        return normalize_sec_financials(payload, route.api_code, requested_period=period,
+                                       requested_years=years, route=route)
     else:
         try:
             payload = ak_svc.get_hk_financial_reports(route.api_code, period, years)
         except Exception as e:
-            payload = _provider_error("akshare", "financial report", e)
-    return _with_route(payload, route)
+            check_budget(e)
+            return normalize_hk_financials(None, route, period, years, error=e)
+        return normalize_hk_financials(payload, route, period, years)
 
 
 @router.get("/technical")
@@ -489,16 +517,17 @@ def get_technical(
         try:
             payload = ak_svc.get_hk_technical_indicators(route.api_code, indicator_list)
         except Exception as e:
+            check_budget(e)
             payload = _provider_error("akshare", "technical indicators", e)
     else:
         payload = _unsupported_us_payload("technical indicators")
     return _with_route(payload, route)
 
 
-@router.get("/news")
+@router.get("/news", response_model=SearchResponse)
 def get_news(
     code: str = Query(..., description="Stock code/name"),
-    days: int = Query(7, description="Number of days"),
+    days: int = Query(7, ge=1, description="Requested days, mapped to provider day/week/month filter; not exact coverage"),
 ):
     """
     获取某只股票的近期新闻。
@@ -506,20 +535,26 @@ def get_news(
     通过 Tavily（DDG 兜底）按股票代码/名称做新闻检索，days 映射为时间窗：
     ``days<=1`` → 24 小时；``days<=7`` → 一周；其它 → 一月。
 
-    历史上该端点曾抛 501 占位，导致 Java 侧 buildNewsSnapshot 每次都打一次 retry+ERROR；
-    现在改为委托给 search_service.search_news，复用与 /api/search/news 完全一致的返回结构，
-    Java 端无需改动即可拿到真实新闻数据。
+    抓取时间与供应商逐条报告的日期分开；时间窗不是逐条发布时间已验证的保证。
     """
     route = _resolve_with_search(code)
-    if not route.is_supported:
-        return route.error_payload()
-
     if days <= 1:
         timelimit = "d"
     elif days <= 7:
         timelimit = "w"
     else:
         timelimit = "m"
+
+    if not route.is_supported:
+        return SearchResponse.model_validate({
+            **route_metadata(route), "requestedDays": days, "query": code.strip(), "provider": None,
+            "searchType": "news", "requestedMaxResults": 8, "requestedTimelimit": timelimit,
+            "effectiveTimelimit": None, "timelimit": None, "requestedDepth": "basic",
+            "effectiveDepth": None, "depth": None, "topic": None, "status": "ERROR", "count": 0,
+            "fetchedAt": datetime.now(timezone.utc), "results": [], "fallbackFrom": None, "fallbackReason": None,
+            "error": True, "errorCode": "UNSUPPORTED_MARKET", "retryable": False,
+            "message": "Unable to identify the stock market; use a stock code such as sh.600519, 0700.HK or AAPL.",
+        }).model_dump(mode="json")
 
     # 用原始输入作为查询词：Java 侧通常传 ticker（如 NVDA）或公司名，Tavily 能直接处理。
     query = code.strip()
@@ -529,7 +564,7 @@ def get_news(
         timelimit=timelimit,
         depth="basic",
     )
-    return _with_route(result, route)
+    return SearchResponse.model_validate({**result, **route_metadata(route), "requestedDays": days}).model_dump(mode="json")
 
 
 @router.get("/sector")

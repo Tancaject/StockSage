@@ -1,6 +1,7 @@
 package com.stocksage.config;
 
 import com.stocksage.rag.LocalEmbeddingModel;
+import com.stocksage.research.ModelInvocationStore;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -14,11 +15,19 @@ import java.time.Duration;
  * 向量模型配置。
  *
  * 通过 stocksage.embedding.provider 切换：
- * - ollama（默认）：本地 Ollama + bge-m3，零成本
+ * - ollama（默认）：本地 Ollama + bge-m3，消耗本地计算资源
  * - dashscope：使用 DashScope text-embedding-v4（自动配置，无需额外 bean）
  */
 @Configuration
 public class EmbeddingConfig {
+
+    public EmbeddingConfig(@Value("${stocksage.embedding.provider:ollama}") String provider,
+                           ModelTokenBudgetProperties tokenBudget) {
+        if (tokenBudget.maxTokens() != null && !"ollama".equals(provider)) {
+            throw new IllegalArgumentException("研究 token 预算尚未覆盖 embedding provider=" + provider
+                    + "；请使用已接入账本的 ollama，或在接入该供应商后启用预算。");
+        }
+    }
 
     /**
      * 创建本地 Ollama 向量模型 Bean。
@@ -31,6 +40,7 @@ public class EmbeddingConfig {
      * @param model Ollama 中已安装的向量模型名
      * @param timeoutMs 单次 HTTP 调用超时，单位毫秒
      * @param dimension 与向量库保持一致、用于校验响应的向量维度
+     * @param maxConcurrentCalls 本进程允许同时执行的 Ollama HTTP 请求数
      * @return 对接 Ollama {@code /api/embed} 的向量模型实现
      */
     @Bean
@@ -40,7 +50,10 @@ public class EmbeddingConfig {
             @Value("${stocksage.embedding.ollama.base-url:http://localhost:11434}") String baseUrl,
             @Value("${stocksage.embedding.ollama.model:bge-m3}") String model,
             @Value("${stocksage.embedding.ollama.timeout-ms:120000}") long timeoutMs,
-            @Value("${spring.ai.vectorstore.milvus.embedding-dimension:1024}") int dimension) {
-        return new LocalEmbeddingModel(baseUrl, model, Duration.ofMillis(timeoutMs), dimension);
+            @Value("${spring.ai.vectorstore.milvus.embedding-dimension:1024}") int dimension,
+            @Value("${stocksage.embedding.ollama.max-concurrent-calls:2}") int maxConcurrentCalls,
+            ModelInvocationStore invocations, ModelTokenBudgetProperties tokenBudget) {
+        return new LocalEmbeddingModel(baseUrl, model, Duration.ofMillis(timeoutMs), dimension, maxConcurrentCalls,
+                invocations, tokenBudget);
     }
 }

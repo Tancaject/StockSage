@@ -1,0 +1,57 @@
+{
+  "schema": "ordinary_judge_label_review_v2",
+  "status": "AI_CROSS_CHECKED",
+  "rubric_sha256": "3396bd8f16f563fd04079836ed8280f58b2e37f39a508a2189fb82321068f870",
+  "dataset_sha256": "7d2b93ba4a53e3b6c6555161efd1d25b462e10c56024f02e181d2c5b7cd15bd8",
+  "cases_file_sha256": "cd8f5ef865d48248ba0b64dd8a2396fe14cb43c90984b76a56900e5c1811c39c",
+  "reviewers": [
+    "AI_AUTHOR:/root/judge_pilot_data",
+    "AI_INDEPENDENT_REVIEWER:/root/eval_agent_plan_check"
+  ],
+  "reviewed_at": "2026-10-01",
+  "independent_review": {
+    "status": "CONFIRMED",
+    "cases_reviewed": 42,
+    "dimensions_reviewed": 210,
+    "method": "Independent AI semantic review of every expected label and reason under frozen v2, including metric attribution, counterevidence applicability, uncertainty and task coverage; source facts and arithmetic checked separately.",
+    "unresolved_disputes": 0
+  },
+  "case_count": 42,
+  "split_counts": {
+    "DEV": 30,
+    "VALIDATION": 12
+  },
+  "source_group_counts": {
+    "DEV": 10,
+    "VALIDATION": 4
+  },
+  "old_source_cases_sha256": "9566bdf4067ac4670a430838bab5e52088057c78a11a593bb6aa68d83e914739",
+  "old_case_material_unchanged": true,
+  "old_validation_policy": "All 30 legacy cases are DEV; original_split is provenance only because the earlier validation split was exposed.",
+  "disputed_case_ids": [],
+  "resolved_disagreements": [
+    {
+      "case_id": "cost-fy2025-q2-03",
+      "dimension": "numeric_period_correctness",
+      "author_initial": "PASS",
+      "agreed": "FAIL",
+      "reason": "净利润原值及2.6%的中间计算正确，但答案又把2.6%明确标成主营业务增速；该指标口径没有依据，不能将净利增速直接转用。",
+      "raised_by": "AI_INDEPENDENT:/root/eval_agent_plan_check"
+    },
+    {
+      "case_id": "orcl-fy2025-q3-03",
+      "dimension": "task_completion",
+      "author_initial": "FAIL",
+      "agreed": "PASS",
+      "reason": "题目要求判断是否均衡并作美元口径比较，没有要求穷举所有分部；IaaS49%快于整体6%已回应不均衡这一核心问题。许可证反向信息遗漏另由counterevidence评价。",
+      "raised_by": "AI_AUTHOR:/root/judge_pilot_data",
+      "confirmed_by": "AI_INDEPENDENT:/root/eval_agent_plan_check"
+    }
+  ],
+  "source_checks": {
+    "new_official_report_count": 4,
+    "independent_source_review": "CONFIRMED",
+    "fresh_decimal_growth_checks": 2
+  },
+  "scope": "AI label review only; not human gold, release approval, or evidence of live model performance."
+}

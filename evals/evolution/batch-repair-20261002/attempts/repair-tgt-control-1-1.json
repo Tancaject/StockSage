@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "repair-tgt-control-1-1",
+    "caseId": "tgt-fy2025q3-cash-quality",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-repair-20261002\\raw-repair-tgt-control",
+  "executionSha256": "9015866802bd271b196b705e2ad9b2febddebc64c7199cd4125e198b229c9ded",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

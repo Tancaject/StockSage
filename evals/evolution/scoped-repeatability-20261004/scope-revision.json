@@ -1,0 +1,42 @@
+{
+  "origin": "ENGINEER_SCOPE_METADATA_REVISION_NOT_AUTONOMOUS_LEARNING",
+  "operationTextUnchanged": true,
+  "catalog": {
+    "triggerTags": [
+      "cumulative-to-single-quarter-reconstruction",
+      "unit-conversion-billion-to-million"
+    ],
+    "requiredEvidence": [
+      "two-cumulative-periods-same-start-date",
+      "cash-flow-statement-line-items",
+      "source-footnote-unit",
+      "source-table-unit"
+    ],
+    "requiredCapabilities": [
+      "evidence-reading",
+      "period-comparison",
+      "unit-comparison",
+      "arithmetic"
+    ]
+  },
+  "parentScopeIssues": [
+    {
+      "triggerTags": [
+        "false-missing-data-claim"
+      ]
+    },
+    {
+      "triggerTags": [
+        "derived-ratio-percentage-rounding"
+      ]
+    }
+  ],
+  "corrections": [
+    "Remove post-answer error label from pre-answer group-1 trigger.",
+    "Narrow group-2 dispatch to required unit conversion, rather than an unexecutable OR condition; optional rounding stays in the unchanged operation."
+  ],
+  "observationProducer": "CODEX_PREANSWER_SOURCE_REVIEW_OF_FIXED_DEV_INPUTS_NOT_RUNTIME_EXTRACTOR",
+  "productionCompatible": false,
+  "runtimeGap": "OrdinaryEvidence produces only fundamentals/reportPeriod/period-comparison task tags and financial-evidence/dated-values/structured-financials evidence tags.",
+  "capabilityLimit": "arithmetic denotes declared reasoning ability; FundamentalsAgent has no calculator tool."
+}

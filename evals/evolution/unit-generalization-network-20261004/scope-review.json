@@ -1,0 +1,23 @@
+{
+  "schema": "combined_learning_scope_review_v1",
+  "origin": "AI_ENGINEERING_SOURCE_REVIEW_NOT_HUMAN",
+  "approvedForDiagnostic": true,
+  "releaseEligible": false,
+  "memberHashes": [
+    "da9c860244a29c0cfb451540b0aeef58c7fd9238ccac9c62838825fd2b448912",
+    "9d07d57b5ae81e1ab10723bd92e7be8a7f090fa87fe14af19541c599ded43b6c"
+  ],
+  "checks": [
+    "Unit lesson contains no source-case amount, issuer, evidence ID, code, URL or scope escape",
+    "Unit conversion requires equivalent representations and rounding follows the current question",
+    "Period-reconstruction lesson retains applicable-period checks and limits work to requested or claimed-missing items",
+    "No contradiction between the two procedural methods for the four registered tasks",
+    "Original baseline procedure remains verbatim; evaluation standards and model settings unchanged"
+  ],
+  "caveats": [
+    "Conditional text injection is diagnostic; generated tags have no demonstrated online matcher binding",
+    "Unit lesson counterexample about unspecified precision may over-exclude unit conversion outside these tasks; all four registered questions specify precision",
+    "This is exploratory combination screening, not inherited individual release approval"
+  ],
+  "authorization": "User explicitly allowed sending the reviewed materials to DashScope and then requested continuation."
+}

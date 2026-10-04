@@ -1,0 +1,61 @@
+{
+  "schema": "stream_diagnostic_verification_v1",
+  "baseline": "target/verification-stream-diagnosis-baseline-20261002.log",
+  "baselineStatus": "PASS",
+  "backendTests": [
+    {
+      "name": "com.stocksage.service.ToolPrefetchServiceSubmitTest",
+      "tests": "27",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "xml": "stocksage-backend\\target\\surefire-reports\\TEST-com.stocksage.service.ToolPrefetchServiceSubmitTest.xml",
+      "xmlSha256": "9a89aea5685d1f70f2cc6f2ca3c40edb2a0df763db982e512e64d65b99ac1e00"
+    },
+    {
+      "name": "com.stocksage.config.StandardThinkingBudgetHttpTest",
+      "tests": "2",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "xml": "stocksage-backend\\target\\surefire-reports\\TEST-com.stocksage.config.StandardThinkingBudgetHttpTest.xml",
+      "xmlSha256": "50e3c32428f71d3722ac8ab3937976656aed8f4f4b68db73a862f46eed4a3e5f"
+    },
+    {
+      "name": "com.stocksage.config.ChatConcurrencyConfigurationTest",
+      "tests": "3",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "xml": "stocksage-backend\\target\\surefire-reports\\TEST-com.stocksage.config.ChatConcurrencyConfigurationTest.xml",
+      "xmlSha256": "9118e6258c4cd22686eb08d8042d3959d6f8893ab330ebbd547dac482dad940d"
+    }
+  ],
+  "backendPassed": 32,
+  "frontend": {
+    "targetedCommand": "node --test src/lib/chat-recovery.test.mjs",
+    "passed": 2,
+    "buildCommand": "npm run build",
+    "buildStatus": "PASS",
+    "evidence": "Executed by partial_answer_fix subagent; existing bundle-size warning only."
+  },
+  "sourceHashes": {
+    "stocksage-backend/src/main/java/com/stocksage/config/AiConfig.java": "674f1ee6af224f3bc25fb3f20730ccf59473564e429b4b9a69fa0e24958775d1",
+    "stocksage-backend/src/main/java/com/stocksage/service/ToolPrefetchService.java": "1be47e7387363c42f5e487e57873e2e2ed9e3be89159125bc2b9f91dd3eda7af",
+    "stocksage-backend/src/test/java/com/stocksage/config/StandardThinkingBudgetHttpTest.java": "4f6a96f10aee0ab11b345fc486c99780d83371c1f41277f195ce87782133ab9b",
+    "stocksage-backend/src/test/java/com/stocksage/service/ToolPrefetchServiceSubmitTest.java": "7701bbfafb186279014f008d14423c92714c0d3aa839497be4a8f4ac13f650e9",
+    "stocksage-frontend/src/views/ChatView.vue": "01bd84c086430e39c7f2b651431ee51dc09efa1a0b0ce378bc583e88946c86b5",
+    "stocksage-frontend/src/components/ChatMessage.vue": "0da77b86adceecdb5d2cba61d21ab9b0b8c35ef13227528bd68485acf00a36bb",
+    "stocksage-frontend/src/lib/chat-recovery.test.mjs": "bf0d2c89980d9a22e9251cfd9c7b166ec059e4dff6be5645c87d58aa2e5a2b77"
+  },
+  "build": {
+    "schema": "fundamentals_evolution_build_v1",
+    "gitSha": "1abd3c197ee8543a3ab5c3f796d3beb656b70f4c",
+    "sourceState": "WORKTREE_SNAPSHOT",
+    "sourceTreeSha256": "fc75c538f2f971928555cd12a913893c4c8720810af9809bd2a5b82eb284a7f2",
+    "artifactSha256": "8e841c402234fd62dd64e113b6b8dce93885552f155892cdf5659f89b535fa51",
+    "artifactFormat": "SPRING_BOOT_JAR",
+    "builtAt": "2026-10-02T14:36:21.886569+00:00"
+  },
+  "verificationScope": "Focused local execution/cancellation/HTTP-body/UI-handler checks, not production deployment or business-quality acceptance."
+}

@@ -1,0 +1,43 @@
+Consolidated Statements of Cash Flows.
+Although other companies report their free cash flow, numerous methods may exist for calculating a company's free cash flow.
+As a result, the method used by management to calculate our free cash flow may differ from the methods used by other
+companies to calculate their free cash flow.
+The following table sets forth a reconciliation of free cash flow, a non-GAAP financial measure, to net cash provided by
+operating activities, which we believe to be the GAAP financial measure most directly comparable to free cash flow, as well as
+information regarding net cash used in investing activities and net cash used in financing activities.
+
+                                                                                                                                                                                      Fiscal Years Ended January 31,
+(Amounts in millions)                                                                                                                                           2025                       2024                       2023
+Net cash provided by operating activities                                                                                                  $            36,443     $            35,726     $            28,841
+Payments for property and equipment                                                                                                                     (23,783)                 (20,606)                 (16,857)
+Free cash flow                                                                                                                                           $            12,660     $            15,120     $            11,984
+
+Net cash used in investing activities(1)                                                                                                        $           (21,379)    $           (21,287)    $           (17,722)
+Net cash used in financing activities                                                                                                                       (14,822)                 (13,414)                 (17,039)
+
+(1)  "Net cash used in investing activities" includes payments for property and equipment, which is also included in our computation of free cash flow.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                          38

@@ -1,0 +1,33 @@
+{
+  "schema": "ordinary_judge_independent_retest_run_v1",
+  "frozen_at": "2026-10-02T04:06:35.490712+00:00",
+  "design_sha256": "76813f7348294875c9ab0a0ff7975e4e7f0116aa503779b9e61d0831b72563ed",
+  "dataset_sha256": "1fbd3baa823297e3ea71d6e5c7685187e2a44a7f53d10372db68793334bd2049",
+  "cases_file_sha256": "9f891cf829207a116d8315e90380bd2e834bc1bd9229880701493f77390bfac3",
+  "label_review_file_sha256": "1b327b3b43af8f6d952c0df382630c2b14204f65f67530dd8d79a512b3d766fe",
+  "sample_count": 20,
+  "repeats": 2,
+  "attempt_count": 40,
+  "split": "VALIDATION",
+  "config": {
+    "model": "qwen3.8-max",
+    "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+    "temperature": 0,
+    "enable_thinking": false,
+    "timeout_seconds": 180,
+    "max_tokens": 2400,
+    "max_calls": 4
+  },
+  "rubric_sha256": "3396bd8f16f563fd04079836ed8280f58b2e37f39a508a2189fb82321068f870",
+  "prompt_sha256": "7f3f12300b022238e7e8d609a08ac40141811606b5b77a6cb45a47df0a7db615",
+  "source_sha256": {
+    "evals\\run_evaluation_agent.py": "a400bf529fd6fe3416878b57a59ef2fa0ded13051c519975bfa92b9e07413151",
+    "evals\\ordinary_answer_quality.py": "c548836d902170f2cb895158917d96e55ff84bac0e04036f1f7ed4ea0d0b0e14",
+    "evals\\judge_calibration.py": "ff4d983f3ced91a2cbb70a8843a3ec2e9722b44ad7760c0698008741f7a7c41e",
+    "evals\\propose_judge_prompt.py": "e27f4e1e95453a3f1cc549f1d7dd79bc6ce0b12a4ddecfe8ba291a42c7b2948a",
+    "evals\\prompts\\ordinary_judge.txt": "5c62ba3e36bdcef71ce68df2c3b88337a24b7fbd2067f4734ebce25c37324376"
+  },
+  "conclusion_scope": "Fresh-case diagnostic retest only; does not erase previous failures or establish a pure optimization effect. No tuning after this freeze.",
+  "diagnostic_only": true,
+  "release_eligible": false
+}

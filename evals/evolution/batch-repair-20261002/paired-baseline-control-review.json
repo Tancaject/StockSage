@@ -1,0 +1,57 @@
+{
+  "schema": "paired_baseline_control_recheck_v1",
+  "reviewType": "AI_INDEPENDENT_TEXT_REVIEW_NOT_HUMAN",
+  "humanReviewStatus": "AI_ONLY",
+  "standard": "Same frozen source-only standard as secondary-business-review.json; bounded general mechanisms and clearly conditional hypotheses are allowed. No automatic judgments read.",
+  "cases": [
+    {
+      "caseId": "pep-fy2025q3-quarter-reconstruction",
+      "baselineResponsePath": "evals/evolution/batch-learning-20261002/raw-development-pep/development-pep-1-1.response.json",
+      "baselineResponseSha256": "122c9ab6e5947dc997e45629169e36afc199dfdb88bf39966bac144b728ebb72",
+      "repairResponsePath": "evals/evolution/batch-repair-20261002/raw-repair-pep-control/repair-pep-control-1-1.response.json",
+      "repairResponseSha256": "a98735edc2a80c559dd84b450ef834bf04dc4d55cc54fac87e979adc623e5e34",
+      "goldLineSha256": "1b7ba36debac76f43f38375fdcd04b73287e6a6cf470f48bcbe0e7b2ed5d0579",
+      "analysis": {
+        "baselineRecheck": "PASS",
+        "repairRecheck": "FAIL",
+        "baselineAnswerSha256": "7288131cc8e7575a2103b2962c16fce0629740d26a22cdb4b7fdf11cfd44458b"
+      },
+      "finalAnswer": {
+        "baselineRecheck": "PASS",
+        "repairRecheck": "FAIL",
+        "baselineAnswerSha256": "dacc34d5bcd9ea4ad864129065ea496f390d9495d7810bc9bf9c1d01d3931b89"
+      },
+      "boundaryEvidence": {
+        "analysisQuote": "本轮证据未提供管理层解释或更完整财报附注，因此只能确认现金流数值本身，不能确认经营现金流改善或资本支出变化的具体经营原因。",
+        "finalAnswerQuote": "本轮证据未提供完整融资活动现金流、管理层解释或利润表、资产负债表数据，因此只能就经营现金流与资本支出覆盖关系作有限判断。"
+      },
+      "recheckConclusion": "Original answer stays with correctly reconstructed requested quarter, covers capex, and limits specific operating causes to unknown. No Q3-vs-H1 quarter-on-quarter claim, acquisition-integration intent, or definite seasonal/payment-cycle cause. No newly discovered material defect under the same rule."
+    },
+    {
+      "caseId": "tgt-fy2025q3-cash-quality",
+      "baselineResponsePath": "evals/evolution/batch-learning-20261002/raw-development-tgt/development-tgt-2-1.response.json",
+      "baselineResponseSha256": "453e344871b626552cf5343b788c9d1266c623b877a1f08e1dc5c478372423d5",
+      "repairResponsePath": "evals/evolution/batch-repair-20261002/raw-repair-tgt-control/repair-tgt-control-1-1.response.json",
+      "repairResponseSha256": "7c410209a3ac7f8b139cf14ab50de978e3fefacd1a0ef473696e68391d0ba918",
+      "goldLineSha256": "f1926e39ecc4a4f20c9b2d6a3475d9c989f7b03500cf9481e9e1b5a36c3337f6",
+      "analysis": {
+        "baselineRecheck": "PASS",
+        "repairRecheck": "FAIL",
+        "baselineAnswerSha256": "734b6d7925bb16d66c0db128fa38b553700ede3949bf12a614c5f247a7e91218"
+      },
+      "finalAnswer": {
+        "baselineRecheck": "PASS",
+        "repairRecheck": "FAIL",
+        "baselineAnswerSha256": "9e021c55db4e774af5f85d8fb76bb033cc5e1188218ac430ec2f9c8a49705a64"
+      },
+      "boundaryEvidence": {
+        "analysisQuote": "这可能反映供应商付款节奏、采购节奏或营运资本管理变化，但仅凭当前现金流量表无法确认具体原因。",
+        "finalAnswerQuote": "存货现金占用减少可能反映库存管理改善，但也可能与采购节奏或销售预期变化有关，仅凭现金流量表无法确认具体经营含义。"
+      },
+      "recheckConclusion": "Original numerical bridge and D&A/AP/inventory directions correct. Specific business causes are explicitly unconfirmed. It does not assert a retail industry benchmark, store/supply-chain capital-use allocation, or categorical absence of paper-profit issues. Generic “较强/较好” is tied to observed ratio and weakening comparison, not treated as an external fact.",
+      "retainedNonMaterialObservation": "Analysis closing wording places net-income decline alongside weaker conversion efficiency; preceding numerator/denominator comparison and exact bridge establish the decline correctly, so retain prior non-material wording note."
+    }
+  ],
+  "conclusion": "Both actual paired baseline controls retain PASS on recheck; both 4096 reruns contain new material errors/unsupported claims. This is an observed paired output deterioration, not causal proof that thinking budget caused it; generation variability and other runtime differences must be controlled before causal attribution.",
+  "updatedAt": "2026-10-02T10:00:57.195494+00:00"
+}

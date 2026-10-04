@@ -1,0 +1,108 @@
+{
+  "status": "PASS",
+  "helper": "evals/evolution_dataset.py:derived_value",
+  "rows": [
+    {
+      "case": 7,
+      "field": "illustrativeAdjustedNetIncome2025",
+      "expected": "5293.0000",
+      "computed": "5293.0000"
+    },
+    {
+      "case": 7,
+      "field": "illustrativeAdjustedNetIncome2024",
+      "expected": "5134.0000",
+      "computed": "5134.0000"
+    },
+    {
+      "case": 7,
+      "field": "illustrativeAdjustedCashConversion2025",
+      "expected": "1.7293",
+      "computed": "1.7293"
+    },
+    {
+      "case": 7,
+      "field": "illustrativeAdjustedCashConversion2024",
+      "expected": "1.7754",
+      "computed": "1.7754"
+    },
+    {
+      "case": 7,
+      "field": "reportedCashConversion2025",
+      "expected": "1.8332",
+      "computed": "1.8332"
+    },
+    {
+      "case": 7,
+      "field": "reportedCashConversion2024",
+      "expected": "2.9318",
+      "computed": "2.9318"
+    },
+    {
+      "case": 5,
+      "field": "quarterOperatingCashFlow",
+      "expected": "1127.0000",
+      "computed": "1127.0000"
+    },
+    {
+      "case": 5,
+      "field": "quarterCapitalSpendingOutflowAmount",
+      "expected": "978.0000",
+      "computed": "978.0000"
+    },
+    {
+      "case": 5,
+      "field": "quarterSimpleFreeCashFlow",
+      "expected": "149.0000",
+      "computed": "149.0000"
+    },
+    {
+      "case": 1,
+      "field": "cashIncomeGap",
+      "expected": "1337.0000",
+      "computed": "1337.0000"
+    },
+    {
+      "case": 1,
+      "field": "cashConversionRatio",
+      "expected": "1.7666",
+      "computed": "1.7666"
+    },
+    {
+      "case": 6,
+      "field": "currentRatioCurrent",
+      "expected": "0.9746",
+      "computed": "0.9746"
+    },
+    {
+      "case": 6,
+      "field": "totalDebtCurrent",
+      "expected": "16499.0000",
+      "computed": "16499.0000"
+    },
+    {
+      "case": 6,
+      "field": "netDebtCurrent",
+      "expected": "12677.0000",
+      "computed": "12677.0000"
+    },
+    {
+      "case": 6,
+      "field": "currentRatioPrior",
+      "expected": "0.9353",
+      "computed": "0.9353"
+    },
+    {
+      "case": 6,
+      "field": "totalDebtPrior",
+      "expected": "15940.0000",
+      "computed": "15940.0000"
+    },
+    {
+      "case": 6,
+      "field": "netDebtPrior",
+      "expected": "11178.0000",
+      "computed": "11178.0000"
+    }
+  ]
+}

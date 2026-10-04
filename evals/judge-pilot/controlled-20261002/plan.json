@@ -1,0 +1,939 @@
+{
+  "schema": "ordinary_judge_controlled_factorial_plan_v1",
+  "frozen_at": "2026-10-02T05:22:47.584743+00:00",
+  "diagnostic_only": true,
+  "release_eligible": false,
+  "purpose": "Disentangle one prewritten prompt treatment from bounded thinking mode on the same consumed cases; no latent-chain or production-quality causal claim.",
+  "dataset": "evals/judge-pilot/retest-20261002/cases.jsonl",
+  "dataset_sha256": "1fbd3baa823297e3ea71d6e5c7685187e2a44a7f53d10372db68793334bd2049",
+  "sample_count": 20,
+  "source_groups": 4,
+  "dataset_usage": "PREVIOUSLY_CONSUMED_DIAGNOSTIC_REPLAY_NOT_NEW_VALIDATION",
+  "repeats": 2,
+  "workers": 4,
+  "seed": 20261002,
+  "arms": {
+    "A_base_off": {
+      "prompt": "prompt-baseline.txt",
+      "config": {
+        "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+        "model": "qwen3.8-max",
+        "temperature": 0,
+        "timeout_seconds": 180,
+        "max_tokens": 2400,
+        "max_calls": 4,
+        "thinking_budget": 4096,
+        "enable_thinking": false
+      }
+    },
+    "B_prompt_off": {
+      "prompt": "prompt-candidate.txt",
+      "config": {
+        "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+        "model": "qwen3.8-max",
+        "temperature": 0,
+        "timeout_seconds": 180,
+        "max_tokens": 2400,
+        "max_calls": 4,
+        "thinking_budget": 4096,
+        "enable_thinking": false
+      }
+    },
+    "C_base_on": {
+      "prompt": "prompt-baseline.txt",
+      "config": {
+        "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+        "model": "qwen3.8-max",
+        "temperature": 0,
+        "timeout_seconds": 180,
+        "max_tokens": 2400,
+        "max_calls": 4,
+        "thinking_budget": 4096,
+        "enable_thinking": true
+      }
+    },
+    "D_prompt_on": {
+      "prompt": "prompt-candidate.txt",
+      "config": {
+        "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+        "model": "qwen3.8-max",
+        "temperature": 0,
+        "timeout_seconds": 180,
+        "max_tokens": 2400,
+        "max_calls": 4,
+        "thinking_budget": 4096,
+        "enable_thinking": true
+      }
+    }
+  },
+  "schedule": [
+    {
+      "arm": "D_prompt_on",
+      "id": "nike-fy2025-q4-02",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "nike-fy2025-q4-02",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "nike-fy2025-q4-02",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "nike-fy2025-q4-02",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "fedex-fy2025-q4-04",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "fedex-fy2025-q4-04",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "fedex-fy2025-q4-04",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "fedex-fy2025-q4-04",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "hd-fy2025-q1-03",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "hd-fy2025-q1-03",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "hd-fy2025-q1-03",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "hd-fy2025-q1-03",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "ups-cy2025-q1-02",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "ups-cy2025-q1-02",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "ups-cy2025-q1-02",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "ups-cy2025-q1-02",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "hd-fy2025-q1-04",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "hd-fy2025-q1-04",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "hd-fy2025-q1-04",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "hd-fy2025-q1-04",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "nike-fy2025-q4-04",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "nike-fy2025-q4-04",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "nike-fy2025-q4-04",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "nike-fy2025-q4-04",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "nike-fy2025-q4-03",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "nike-fy2025-q4-03",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "nike-fy2025-q4-03",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "nike-fy2025-q4-03",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "ups-cy2025-q1-01",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "ups-cy2025-q1-01",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "ups-cy2025-q1-01",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "ups-cy2025-q1-01",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "nike-fy2025-q4-02",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "nike-fy2025-q4-02",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "nike-fy2025-q4-02",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "nike-fy2025-q4-02",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "ups-cy2025-q1-04",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "ups-cy2025-q1-04",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "ups-cy2025-q1-04",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "ups-cy2025-q1-04",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "hd-fy2025-q1-01",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "hd-fy2025-q1-01",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "hd-fy2025-q1-01",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "hd-fy2025-q1-01",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "nike-fy2025-q4-05",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "nike-fy2025-q4-05",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "nike-fy2025-q4-05",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "nike-fy2025-q4-05",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "fedex-fy2025-q4-05",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "fedex-fy2025-q4-05",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "fedex-fy2025-q4-05",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "fedex-fy2025-q4-05",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "ups-cy2025-q1-05",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "ups-cy2025-q1-05",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "ups-cy2025-q1-05",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "ups-cy2025-q1-05",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "fedex-fy2025-q4-04",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "fedex-fy2025-q4-04",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "fedex-fy2025-q4-04",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "fedex-fy2025-q4-04",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "hd-fy2025-q1-02",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "hd-fy2025-q1-02",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "hd-fy2025-q1-02",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "hd-fy2025-q1-02",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "hd-fy2025-q1-02",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "hd-fy2025-q1-02",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "hd-fy2025-q1-02",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "hd-fy2025-q1-02",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "ups-cy2025-q1-04",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "ups-cy2025-q1-04",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "ups-cy2025-q1-04",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "ups-cy2025-q1-04",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "ups-cy2025-q1-02",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "ups-cy2025-q1-02",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "ups-cy2025-q1-02",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "ups-cy2025-q1-02",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "nike-fy2025-q4-05",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "nike-fy2025-q4-05",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "nike-fy2025-q4-05",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "nike-fy2025-q4-05",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "hd-fy2025-q1-04",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "hd-fy2025-q1-04",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "hd-fy2025-q1-04",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "hd-fy2025-q1-04",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "ups-cy2025-q1-03",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "ups-cy2025-q1-03",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "ups-cy2025-q1-03",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "ups-cy2025-q1-03",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "fedex-fy2025-q4-01",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "fedex-fy2025-q4-01",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "fedex-fy2025-q4-01",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "fedex-fy2025-q4-01",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "hd-fy2025-q1-01",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "hd-fy2025-q1-01",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "hd-fy2025-q1-01",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "hd-fy2025-q1-01",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "nike-fy2025-q4-01",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "nike-fy2025-q4-01",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "nike-fy2025-q4-01",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "nike-fy2025-q4-01",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "fedex-fy2025-q4-03",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "fedex-fy2025-q4-03",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "fedex-fy2025-q4-03",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "fedex-fy2025-q4-03",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "fedex-fy2025-q4-05",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "fedex-fy2025-q4-05",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "fedex-fy2025-q4-05",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "fedex-fy2025-q4-05",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "nike-fy2025-q4-04",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "nike-fy2025-q4-04",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "nike-fy2025-q4-04",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "nike-fy2025-q4-04",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "ups-cy2025-q1-05",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "ups-cy2025-q1-05",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "ups-cy2025-q1-05",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "ups-cy2025-q1-05",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "ups-cy2025-q1-03",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "ups-cy2025-q1-03",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "ups-cy2025-q1-03",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "ups-cy2025-q1-03",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "hd-fy2025-q1-05",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "hd-fy2025-q1-05",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "hd-fy2025-q1-05",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "hd-fy2025-q1-05",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "fedex-fy2025-q4-01",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "fedex-fy2025-q4-01",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "fedex-fy2025-q4-01",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "fedex-fy2025-q4-01",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "nike-fy2025-q4-01",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "nike-fy2025-q4-01",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "nike-fy2025-q4-01",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "nike-fy2025-q4-01",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "hd-fy2025-q1-03",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "hd-fy2025-q1-03",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "hd-fy2025-q1-03",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "hd-fy2025-q1-03",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "fedex-fy2025-q4-02",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "fedex-fy2025-q4-02",
+      "repeat": 1
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "fedex-fy2025-q4-02",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "fedex-fy2025-q4-02",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "fedex-fy2025-q4-03",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "fedex-fy2025-q4-03",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "fedex-fy2025-q4-03",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "fedex-fy2025-q4-03",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "fedex-fy2025-q4-02",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "fedex-fy2025-q4-02",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "fedex-fy2025-q4-02",
+      "repeat": 2
+    },
+    {
+      "arm": "C_base_on",
+      "id": "fedex-fy2025-q4-02",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "nike-fy2025-q4-03",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "nike-fy2025-q4-03",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "nike-fy2025-q4-03",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "nike-fy2025-q4-03",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "hd-fy2025-q1-05",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "hd-fy2025-q1-05",
+      "repeat": 2
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "hd-fy2025-q1-05",
+      "repeat": 2
+    },
+    {
+      "arm": "A_base_off",
+      "id": "hd-fy2025-q1-05",
+      "repeat": 2
+    },
+    {
+      "arm": "B_prompt_off",
+      "id": "ups-cy2025-q1-01",
+      "repeat": 1
+    },
+    {
+      "arm": "A_base_off",
+      "id": "ups-cy2025-q1-01",
+      "repeat": 1
+    },
+    {
+      "arm": "D_prompt_on",
+      "id": "ups-cy2025-q1-01",
+      "repeat": 1
+    },
+    {
+      "arm": "C_base_on",
+      "id": "ups-cy2025-q1-01",
+      "repeat": 1
+    }
+  ],
+  "rubric_sha256": "3396bd8f16f563fd04079836ed8280f58b2e37f39a508a2189fb82321068f870",
+  "frozen_files": {
+    "evals/run_evaluation_agent.py": "4c7843a9269262fe6398be1f3c95fbf916dfc0c0eb83019626c7f7c15471abdf",
+    "evals/ordinary_answer_quality.py": "c548836d902170f2cb895158917d96e55ff84bac0e04036f1f7ed4ea0d0b0e14",
+    "evals/judge_calibration.py": "ff4d983f3ced91a2cbb70a8843a3ec2e9722b44ad7760c0698008741f7a7c41e",
+    "evals/eval_common.py": "9737d1f0e3ecb53f0f2478cef8fadb19b0ee2352a642791d0240e72214e8e45c",
+    "evals/run_ragas_eval.py": "d024ccd42015c560b978c873c4bfccc4cd6c70c72753f003c5c521018f2517f3",
+    "evals/evolution_generator.py": "a4f4bb5813b9878ae0e05102903b202ded89e7a4423d0851052c7fd4dce0f894",
+    "evals/judge-pilot/retest-20261002/cases.jsonl": "9f891cf829207a116d8315e90380bd2e834bc1bd9229880701493f77390bfac3",
+    "evals/judge-pilot/retest-20261002/label-review.json": "1b327b3b43af8f6d952c0df382630c2b14204f65f67530dd8d79a512b3d766fe",
+    "evals\\judge-pilot\\controlled-20261002\\experiment.py": "8061c7ccca7c8b908160331d58ef65fd3ca6ae401a0ccf01bf03b34a7187c1f6",
+    "evals\\judge-pilot\\controlled-20261002\\prompt-baseline.txt": "5c62ba3e36bdcef71ce68df2c3b88337a24b7fbd2067f4734ebce25c37324376",
+    "evals\\judge-pilot\\controlled-20261002\\prompt-candidate.txt": "d7c959c66d24eca36430508be848d7b55e6c3089288ee68a2e50becaf4c21101"
+  },
+  "contrasts": [
+    [
+      "prompt_off",
+      "A_base_off",
+      "B_prompt_off"
+    ],
+    [
+      "prompt_on",
+      "C_base_on",
+      "D_prompt_on"
+    ],
+    [
+      "thinking_base",
+      "A_base_off",
+      "C_base_on"
+    ],
+    [
+      "thinking_prompt",
+      "B_prompt_off",
+      "D_prompt_on"
+    ]
+  ],
+  "target_dimensions": {
+    "NUMERIC_ERROR": "numeric_period_correctness",
+    "OMISSION": "task_completion",
+    "UNSUPPORTED_CERTAINTY": "unknowns"
+  },
+  "metrics": {
+    "technical": "All 200 dimension judgments per arm; excerpt failures, global errors and truncation separately.",
+    "semantic": "Unchanged calibrate() definitions and labels. Conditional agreement and coverage separately; pairwise and common-four-arm valid-known sets for semantic contrasts.",
+    "practical": "Same definitions as retest-20261002: correct retained when all dimensions valid PASS/NA; target detection valid FAIL at predefined dimension; denominators all16correct/all24corrupt; pair anchors CORRECT_FACTUAL same group/repeat.",
+    "repeatability": "Two repeats; report eligible and excluded case counts, no independent-sample assumption.",
+    "cost": "Actual calls/tokens/tool calls, median latency; reasoning output presence and provider reasoning-token coverage; no fabricated currency cost.",
+    "effect": "Report paired corrected/regressed/common new-false-pass and coverage changes. Shared-four-arm agreement-count difference-in-differences descriptive only."
+  },
+  "interpretation_limits": [
+    "One prompt package changes three procedural clauses, so their individual effects are not identified.",
+    "Twenty authored AI-cross-checked cases from four source groups, no human gold or actual business outputs.",
+    "Two repeats and grouped cases do not support population significance or universal model-capability conclusions.",
+    "Thinking treatment is enable_thinking=true under4096budget (officially low), not an inspection of internal reasoning quality.",
+    "No post-outcome prompt/label/rubric/config tuning; no auto-activation or release authorization.",
+    "All arms use fresh concurrent requests; the old historical baseline is not the control.",
+    "Default prompt and business Agent settings remain unchanged."
+  ],
+  "compatibility": {
+    "probe": "compatibility-probe.json",
+    "observed": "Both flags accepted with4096budget, final JSON and calculator continuation; true returned nonempty reasoning_content, false did not.",
+    "sources": [
+      "https://help.aliyun.com/en/model-studio/qwen3-8-max",
+      "https://help.aliyun.com/zh/model-studio/qwen-structured-output",
+      "https://help.aliyun.com/zh/model-studio/deep-thinking",
+      "https://help.aliyun.com/zh/model-studio/qwen-api-via-openai-chat-completions"
+    ]
+  }
+}

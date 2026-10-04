@@ -1,0 +1,5 @@
+{
+  "origin": "OFFLINE_REVALIDATION_NO_MODEL_CALL",
+  "finishReason": "stop",
+  "error": "fundamentals.method: explicit scope escape, evidence reference, code, or company value"
+}

@@ -1,5 +1,6 @@
 package com.stocksage.rag;
 
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,6 +38,10 @@ public class QueryRewriter {
      */
     public QueryRewriter(@Qualifier("queryRewriteChatClient") ChatClient chatClient) {
         this.chatClient = chatClient;
+    }
+
+    public Map<String, Object> runtimeConfiguration() {
+        return Map.of("enabled", enabled, "maxLength", maxLength);
     }
 
     /**

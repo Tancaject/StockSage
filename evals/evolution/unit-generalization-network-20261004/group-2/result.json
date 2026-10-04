@@ -1,0 +1,17 @@
+{
+  "status": "PROPOSED",
+  "releaseEligible": false,
+  "usage": {
+    "completion_tokens": 1424,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1219,
+      "text_tokens": 1424
+    },
+    "prompt_tokens": 5887,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 5887
+    },
+    "total_tokens": 7311
+  }
+}

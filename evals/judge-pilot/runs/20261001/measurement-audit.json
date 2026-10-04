@@ -1,0 +1,248 @@
+{
+  "schema": "judge_measurement_audit_v1",
+  "scope": "DEV_ONLY_EXISTING_OUTPUTS",
+  "new_model_calls": 0,
+  "label_status": "DISPUTED_NOT_GROUND_TRUTH",
+  "inputs": {
+    "baseline_report_sha256": "65b7ae908f3b972ffccd14831135c82a087d3b9a89b392ad0189e3e3e853593e",
+    "candidate_report_sha256": "335258412b3941719fa84a3cc7ed4543a767e815b5b48c38d7c16ee46cba2d77"
+  },
+  "conditions": "Agreement with existing AI labels only; not accuracy against established truth. No raw report or label modified.",
+  "baseline": {
+    "all_dimension_count": 144,
+    "technically_valid_dimensions": 72,
+    "matching_labels": 58,
+    "all_item_agreement": 0.4027777777777778,
+    "valid_only_label_agreement": 0.8055555555555556,
+    "otherwise_valid_dimensions_discarded_by_sibling_quote_error": 27,
+    "discarded_dimensions_matching_label": 26,
+    "discarded_dimensions": [
+      {
+        "id": "meta-cy2024-q4-01",
+        "repeat": 1,
+        "dimension": "claim_support",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "meta-cy2024-q4-01",
+        "repeat": 1,
+        "dimension": "numeric_period_correctness",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "meta-cy2024-q4-01",
+        "repeat": 2,
+        "dimension": "claim_support",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "meta-cy2024-q4-01",
+        "repeat": 2,
+        "dimension": "numeric_period_correctness",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "meta-cy2024-q4-03",
+        "repeat": 2,
+        "dimension": "claim_support",
+        "judged": "FAIL",
+        "expected": "FAIL"
+      },
+      {
+        "id": "meta-cy2024-q4-03",
+        "repeat": 2,
+        "dimension": "numeric_period_correctness",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "msft-fy2025-q4-01",
+        "repeat": 1,
+        "dimension": "claim_support",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "msft-fy2025-q4-01",
+        "repeat": 1,
+        "dimension": "numeric_period_correctness",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "msft-fy2025-q4-01",
+        "repeat": 1,
+        "dimension": "unknowns",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "msft-fy2025-q4-01",
+        "repeat": 2,
+        "dimension": "claim_support",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "msft-fy2025-q4-01",
+        "repeat": 2,
+        "dimension": "numeric_period_correctness",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "msft-fy2025-q4-01",
+        "repeat": 2,
+        "dimension": "unknowns",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "msft-fy2025-q4-02",
+        "repeat": 1,
+        "dimension": "claim_support",
+        "judged": "FAIL",
+        "expected": "FAIL"
+      },
+      {
+        "id": "msft-fy2025-q4-02",
+        "repeat": 1,
+        "dimension": "numeric_period_correctness",
+        "judged": "FAIL",
+        "expected": "FAIL"
+      },
+      {
+        "id": "msft-fy2025-q4-02",
+        "repeat": 1,
+        "dimension": "unknowns",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "msft-fy2025-q4-02",
+        "repeat": 2,
+        "dimension": "claim_support",
+        "judged": "FAIL",
+        "expected": "FAIL"
+      },
+      {
+        "id": "msft-fy2025-q4-02",
+        "repeat": 2,
+        "dimension": "numeric_period_correctness",
+        "judged": "FAIL",
+        "expected": "FAIL"
+      },
+      {
+        "id": "msft-fy2025-q4-02",
+        "repeat": 2,
+        "dimension": "unknowns",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "nvda-fy2025-q4-01",
+        "repeat": 2,
+        "dimension": "claim_support",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "nvda-fy2025-q4-01",
+        "repeat": 2,
+        "dimension": "numeric_period_correctness",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "nvda-fy2025-q4-01",
+        "repeat": 2,
+        "dimension": "unknowns",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "nvda-fy2025-q4-02",
+        "repeat": 1,
+        "dimension": "claim_support",
+        "judged": "FAIL",
+        "expected": "FAIL"
+      },
+      {
+        "id": "nvda-fy2025-q4-02",
+        "repeat": 2,
+        "dimension": "claim_support",
+        "judged": "FAIL",
+        "expected": "FAIL"
+      },
+      {
+        "id": "nvda-fy2025-q4-02",
+        "repeat": 2,
+        "dimension": "counterevidence",
+        "judged": "NOT_APPLICABLE",
+        "expected": "PASS"
+      },
+      {
+        "id": "wmt-fy2025-01",
+        "repeat": 2,
+        "dimension": "claim_support",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "wmt-fy2025-01",
+        "repeat": 2,
+        "dimension": "numeric_period_correctness",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "wmt-fy2025-01",
+        "repeat": 2,
+        "dimension": "unknowns",
+        "judged": "PASS",
+        "expected": "PASS"
+      }
+    ]
+  },
+  "candidate": {
+    "all_dimension_count": 144,
+    "technically_valid_dimensions": 92,
+    "matching_labels": 71,
+    "all_item_agreement": 0.4930555555555556,
+    "valid_only_label_agreement": 0.7717391304347826,
+    "otherwise_valid_dimensions_discarded_by_sibling_quote_error": 3,
+    "discarded_dimensions_matching_label": 3,
+    "discarded_dimensions": [
+      {
+        "id": "meta-cy2024-q4-01",
+        "repeat": 1,
+        "dimension": "claim_support",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "meta-cy2024-q4-01",
+        "repeat": 2,
+        "dimension": "claim_support",
+        "judged": "PASS",
+        "expected": "PASS"
+      },
+      {
+        "id": "meta-cy2024-q4-01",
+        "repeat": 2,
+        "dimension": "unknowns",
+        "judged": "PASS",
+        "expected": "PASS"
+      }
+    ]
+  },
+  "common_valid": {
+    "count": 52,
+    "baseline_label_disagreements": 12,
+    "candidate_label_disagreements": 16
+  }
+}

@@ -1,0 +1,349 @@
+{
+  "schemaVersion": 1,
+  "reviewType": "AI_SOURCE_GROUNDED",
+  "humanReviewed": false,
+  "independentHumanAcceptance": false,
+  "reviewBlinding": "NON_BLINDED_AI_REVIEW; baseline label and prior project context known; reviewer did not generate a candidate.",
+  "criteriaPath": "criteria.json",
+  "criteriaSha256": "04e9cf2e463509810672b92bef5f129407e6877e8f0179396c3e25de0526138a",
+  "reviewedScope": [
+    "wmt-fy2025-growth",
+    "wmt-fy2025-cashflow",
+    "wmt-fy2025-liquidity"
+  ],
+  "reviews": [
+    {
+      "caseId": "wmt-fy2025-growth",
+      "answerId": "44ef3403-6c2c-49e3-9069-e5884bb4422a:ANALYSIS",
+      "stage": "ANALYSIS",
+      "reviewType": "AI_SOURCE_GROUNDED",
+      "humanReviewed": false,
+      "runComplete": true,
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coreCoverageComplete": true,
+      "coreCoverageChecks": [
+        {
+          "criterion": "列出 FY2025/FY2024 总收入与营业利润，金额单位及全年口径可识别",
+          "covered": true,
+          "exactQuote": "| FY2025，截至2025-01-31 | 680,985 百万美元 | 29,348 百万美元 | **+5.07%** | **+8.65%** | **4.31%** |"
+        },
+        {
+          "criterion": "分别给出 FY2025 收入、营业利润相对 FY2024 的同比增速",
+          "covered": true,
+          "exactQuote": "| FY2025，截至2025-01-31 | 680,985 百万美元 | 29,348 百万美元 | **+5.07%** | **+8.65%** | **4.31%** |"
+        },
+        {
+          "criterion": "给出两个年度营业利润率，并比较方向",
+          "covered": true,
+          "exactQuote": "- 同比提升：约 **+0.14 个百分点**，即约 **14 个基点**。"
+        },
+        {
+          "criterion": "给出与上述收入、营业利润、利润率方向一致的简短增长质量评价",
+          "covered": true,
+          "exactQuote": "**沃尔玛 FY2025 的增长质量总体偏正面，但不是显著加速型增长。**  "
+        }
+      ],
+      "evidenceGrounded": true,
+      "substantiveIssue": false,
+      "substantiveIssues": [],
+      "ambiguityNotes": [],
+      "numericNotes": [],
+      "verdict": "PASS",
+      "notes": [
+        "必答四项金额、FY2025 对 FY2024 同比、两年利润率及单位/全年期间正确。",
+        "新增 FY2023 余额/利润率、FY2024 同比、净销售与会员收入增长及会员收入占比均复算吻合。销售成本率为 FY2024 75.62460945%、FY2025 75.14893867%；费用率为 20.20767599%、20.54142162%；成本率下降约 0.48 个百分点、费用率上升约 0.33 个百分点和营业利润率提升约 0.14 个百分点均正确。",
+        "利润率原因限定为表内成本率/费用率算术分解，属于可支持推断；没有确证特定业务投向或管理动作。额外提到 FY2024 同比不扣分。"
+      ],
+      "responseFile": "raw-baseline-2/44ef3403-6c2c-49e3-9069-e5884bb4422a.response.json",
+      "responseSha256": "b86a669489a18e28bb9121d87d6cfd64586195c85ca275d47c532d97817187fc"
+    },
+    {
+      "caseId": "wmt-fy2025-growth",
+      "answerId": "44ef3403-6c2c-49e3-9069-e5884bb4422a:FINAL",
+      "stage": "FINAL",
+      "reviewType": "AI_SOURCE_GROUNDED",
+      "humanReviewed": false,
+      "runComplete": true,
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coreCoverageComplete": true,
+      "coreCoverageChecks": [
+        {
+          "criterion": "列出 FY2025/FY2024 总收入与营业利润，金额单位及全年口径可识别",
+          "covered": true,
+          "exactQuote": "| **FY2025**，截至 2025-01-31 | 680,985 百万美元 | **+5.07%** | 29,348 百万美元 | **+8.65%** | **4.31%** |"
+        },
+        {
+          "criterion": "分别给出 FY2025 收入、营业利润相对 FY2024 的同比增速",
+          "covered": true,
+          "exactQuote": "| **FY2025**，截至 2025-01-31 | 680,985 百万美元 | **+5.07%** | 29,348 百万美元 | **+8.65%** | **4.31%** |"
+        },
+        {
+          "criterion": "给出两个年度营业利润率，并比较方向",
+          "covered": true,
+          "exactQuote": "沃尔玛营业利润率从 FY2024 的 **4.17%** 提升至 FY2025 的 **4.31%**，同比提升约 **0.14 个百分点**，即约 **14 个基点**。"
+        },
+        {
+          "criterion": "给出与上述收入、营业利润、利润率方向一致的简短增长质量评价",
+          "covered": true,
+          "exactQuote": "**沃尔玛 FY2025 的增长质量较好，但不是显著加速型增长。**"
+        }
+      ],
+      "evidenceGrounded": true,
+      "substantiveIssue": false,
+      "substantiveIssues": [],
+      "ambiguityNotes": [],
+      "numericNotes": [],
+      "verdict": "PASS",
+      "notes": [
+        "必答四项金额、FY2025 对 FY2024 同比、两年利润率及单位/全年期间正确。",
+        "新增 FY2023 余额/利润率、FY2024 同比、净销售与会员收入增长及会员收入占比均复算吻合。销售成本率为 FY2024 75.62460945%、FY2025 75.14893867%；费用率为 20.20767599%、20.54142162%；成本率下降约 0.48 个百分点、费用率上升约 0.33 个百分点和营业利润率提升约 0.14 个百分点均正确。",
+        "利润率原因限定为表内成本率/费用率算术分解，属于可支持推断；没有确证特定业务投向或管理动作。额外提到 FY2024 同比不扣分。"
+      ],
+      "responseFile": "raw-baseline-2/44ef3403-6c2c-49e3-9069-e5884bb4422a.response.json",
+      "responseSha256": "b86a669489a18e28bb9121d87d6cfd64586195c85ca275d47c532d97817187fc"
+    },
+    {
+      "caseId": "wmt-fy2025-cashflow",
+      "answerId": "78232810-3821-46c1-805e-59aa260e2089:ANALYSIS",
+      "stage": "ANALYSIS",
+      "reviewType": "AI_SOURCE_GROUNDED",
+      "humanReviewed": false,
+      "runComplete": true,
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coreCoverageComplete": true,
+      "coreCoverageChecks": [
+        {
+          "criterion": "列出 FY2025 经营现金流与现金购建固定资产毛额，单位及年度可识别",
+          "covered": true,
+          "exactQuote": "| 经营活动现金流净额 | 36,443 |"
+        },
+        {
+          "criterion": "按经营现金流减现金购建毛额计算简化自由现金流",
+          "covered": true,
+          "exactQuote": "36,443 - 23,783 = 12,660"
+        },
+        {
+          "criterion": "给出现金购建毛额占经营现金流比例",
+          "covered": true,
+          "exactQuote": "23,783 \\div 36,443 \\approx 65.3\\%"
+        },
+        {
+          "criterion": "解释当年经营现金流覆盖该项资本开支情况和比例含义，保留题定简化口径且不混同净利润",
+          "covered": true,
+          "exactQuote": "**结论：沃尔玛 FY2025 经营现金流可以覆盖资本开支。**"
+        }
+      ],
+      "evidenceGrounded": true,
+      "substantiveIssue": false,
+      "substantiveIssues": [],
+      "ambiguityNotes": [
+        {
+          "exactQuote": "它只反映经营现金流减去购买固定资产和设备的现金支出，未考虑债务偿还、租赁义务、收购、股息回购等其他现金需求。",
+          "supportedReading": "尚未逐项分析全部或后续现金义务，不等于可全部分配给股东；没有再次扣减本期项目。",
+          "strongerReading": "若理解为本期 CFO 一概不含经营租赁等已发生付款，则过强；不同租赁类别不能一概排除。",
+          "mainVerdictEffect": "NONE; PASS",
+          "strictSensitivity": "全部排除本期租赁付款的字面读取可记会计范围问题；主分析按完整语境只作歧义备注。"
+        }
+      ],
+      "numericNotes": [],
+      "verdict": "PASS",
+      "notes": [
+        "CFO 36,443、现金 PPE 毛额 23,783、简化 FCF 12,660 百万美元和 65.3% 正确；支出符号、亿美元换算、1.53 覆盖倍数以及 FY2024/2023 额外金额也核对通过。",
+        "仅看 CFO/现金购建支出的年度覆盖判断成立，不将当期投资融资句扩读为全部义务或未来投资保证。",
+        "门店/供应链等用途描述结合具体投向仍需披露的完整语境，按一般举例及待核实推断处理。"
+      ],
+      "responseFile": "raw-baseline-2/78232810-3821-46c1-805e-59aa260e2089.response.json",
+      "responseSha256": "50a613ad8875a282354db4a9244847a091f7b702ebd20d63550c4c3b604eb031"
+    },
+    {
+      "caseId": "wmt-fy2025-cashflow",
+      "answerId": "78232810-3821-46c1-805e-59aa260e2089:FINAL",
+      "stage": "FINAL",
+      "reviewType": "AI_SOURCE_GROUNDED",
+      "humanReviewed": false,
+      "runComplete": true,
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coreCoverageComplete": true,
+      "coreCoverageChecks": [
+        {
+          "criterion": "列出 FY2025 经营现金流与现金购建固定资产毛额，单位及年度可识别",
+          "covered": true,
+          "exactQuote": "| 经营活动现金流净额 | 36,443 | 沃尔玛当期经营产生的现金流入 [E1] |"
+        },
+        {
+          "criterion": "按经营现金流减现金购建毛额计算简化自由现金流",
+          "covered": true,
+          "exactQuote": "36,443 - 23,783 = 12,660"
+        },
+        {
+          "criterion": "给出现金购建毛额占经营现金流比例",
+          "covered": true,
+          "exactQuote": "23,783 \\div 36,443 \\approx 65.3\\%"
+        },
+        {
+          "criterion": "解释当年经营现金流覆盖该项资本开支情况和比例含义，保留题定简化口径且不混同净利润",
+          "covered": true,
+          "exactQuote": "**结论：沃尔玛（WMT）FY2025 的经营现金流可以覆盖资本开支。**按公司披露口径，FY2025 经营活动现金流为 **36,443 百万美元**，购建固定资产和设备现金支出为 **23,783 百万美元**，两者相减后的简化自由现金流为 **12,660 百万美元**；资本开支约占经营现金流的 **65.3%**，说明经营现金流入在覆盖当期现金资本支出后仍有剩余。[E1]"
+        }
+      ],
+      "evidenceGrounded": false,
+      "substantiveIssue": true,
+      "substantiveIssues": [
+        {
+          "category": "SUBSTANTIVE_ISSUE",
+          "exactQuote": "简化自由现金流只反映经营现金流减现金购建固定资产支出，不考虑折旧摊销、资产处置回款、债务偿还、租赁、收购、股息和回购等其他现金项目。",
+          "sourceReference": "本题 E1 的 CFO / Payments for property and equipment / FCF 三行；criteria.json cashflow.interpretationBoundary 非现金调整边界。",
+          "reason": "原审严格按“折旧摊销……等其他现金项目”读取为经济分类错误：折旧摊销是非现金费用/调整，不能统称其他现金项目。仅指自行扩写的会计范围说明，不代表必答 CFO-PPE 算错；此严格原判随后被主代理裁决为歧义，见 adjudication。"
+        }
+      ],
+      "ambiguityNotes": [
+        {
+          "exactQuote": "简化自由现金流只反映经营现金流减现金购建固定资产支出，不考虑折旧摊销、资产处置回款、债务偿还、租赁、收购、股息和回购等其他现金项目。",
+          "supportedReading": "全文始终按已披露 CFO 减现金 PPE 计算，没有另加回/扣除折旧；可合理读为简化公式不再单独调整这些项目，且不能当作全部可分配现金。",
+          "strongerReading": "字面把折旧摊销归为现金项目，或断言所给 CFO 没有包含相关非现金调整及所有租赁付款。",
+          "mainVerdictEffect": "主代理经第三 AI 复核后裁决 AMBIGUITY_NOTE；主分析 PASS。",
+          "strictSensitivity": "保留原审 ISSUES（ACCOUNTING_SCOPE）；不把原审严格分支报告为共识确认的实质错误。"
+        }
+      ],
+      "numericNotes": [],
+      "verdict": "ISSUES",
+      "notes": [
+        "CFO 36,443、现金 PPE 毛额 23,783、简化 FCF 12,660 百万美元和 65.3% 正确；支出符号、亿美元换算、1.53 覆盖倍数以及 FY2024/2023 额外金额也核对通过。",
+        "仅看 CFO/现金购建支出的年度覆盖判断成立，不将当期投资融资句扩读为全部义务或未来投资保证。",
+        "门店/供应链等用途描述结合具体投向仍需披露的完整语境，按一般举例及待核实推断处理。",
+        "汇总应采用 adjudication 主判并披露严格敏感性，保留原审分歧，不冒充 CFO/FCF 核心错误。"
+      ],
+      "responseFile": "raw-baseline-2/78232810-3821-46c1-805e-59aa260e2089.response.json",
+      "responseSha256": "50a613ad8875a282354db4a9244847a091f7b702ebd20d63550c4c3b604eb031",
+      "adjudication": {
+        "authority": "Parent agent /root explicit adjudication following third AI review; not human acceptance.",
+        "classification": "AMBIGUITY_NOTE",
+        "mainVerdict": "PASS",
+        "mainEvidenceGrounded": true,
+        "mainSubstantiveIssue": false,
+        "mainSubstantiveIssues": [],
+        "reason": "冻结标准要求按整段语义判断。差额计算没有另调折旧，也未明确声称折旧带来现金流；合理解释为公式不单独调整，分类措辞易误读。",
+        "strictSensitivity": {
+          "verdict": "ISSUES",
+          "evidenceGrounded": false,
+          "substantiveIssue": true,
+          "issue": "原审对现金项目分类的严格字面判断。"
+        },
+        "methodCandidateTrigger": false
+      }
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "answerId": "92817109-7a3d-4f10-8606-b4a5202d093d:ANALYSIS",
+      "stage": "ANALYSIS",
+      "reviewType": "AI_SOURCE_GROUNDED",
+      "humanReviewed": false,
+      "runComplete": true,
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coreCoverageComplete": true,
+      "coreCoverageChecks": [
+        {
+          "criterion": "列出 FY2025 期末现金及现金等价物、非流动长期债务、流动资产和流动负债，单位及时点可识别",
+          "covered": true,
+          "exactQuote": "| **现金及现金等价物** | **9,037** | 9,867 | 流动资产中的现金项目 [E1] |"
+        },
+        {
+          "criterion": "给出流动资产除以流动负债的流动比率",
+          "covered": true,
+          "exactQuote": "= \\frac{79,458}{96,584}"
+        },
+        {
+          "criterion": "通过科目标签或解释区分现金与流动资产、非流动长期债务与总负债",
+          "covered": true,
+          "exactQuote": "- 它**不等于总负债**。总负债还包括流动负债、长期经营租赁负债、长期融资租赁负债、递延所得税及其他负债等 [E1]。"
+        },
+        {
+          "criterion": "给出有边界的流动性简评，表明单一时点比率不足以证明实际偿债安全或危机",
+          "covered": true,
+          "exactQuote": "因此，**不能仅凭该比率断定沃尔玛短期偿债安全，也不能据此断定存在流动性危机**。需要结合经营现金流、自由现金流、存货周转、应付账款周期、授信额度、债务到期结构等进一步判断。"
+        }
+      ],
+      "evidenceGrounded": true,
+      "substantiveIssue": false,
+      "substantiveIssues": [],
+      "ambiguityNotes": [],
+      "numericNotes": [],
+      "verdict": "PASS",
+      "notes": [
+        "必答四项余额、0.82 比率、日期与美元单位正确，现金/流动资产和非流动债务/总负债区分完整。",
+        "新增 FY2024 余额/0.83、存货 71%、现金占流动资产 11%、应收 13%、预付 5%、应付账款占流动负债 61%、现金覆盖 9.4%、营运资本 -17,126、总负债 163,131 和借款余额增减均核对通过；整数百分比为正常显示精度舍入。",
+        "低流动比率只被用于账面覆盖判断，零售机制明确为通常/可能/条件说明，没有确证本期高周转或强 CFO；结论保留实际偿债能力未知边界。"
+      ],
+      "responseFile": "raw-baseline-2/92817109-7a3d-4f10-8606-b4a5202d093d.response.json",
+      "responseSha256": "d82e51cff0abb91573f9d9a10f060612af0e62243be1c1a71752e8fa8a632517"
+    },
+    {
+      "caseId": "wmt-fy2025-liquidity",
+      "answerId": "92817109-7a3d-4f10-8606-b4a5202d093d:FINAL",
+      "stage": "FINAL",
+      "reviewType": "AI_SOURCE_GROUNDED",
+      "humanReviewed": false,
+      "runComplete": true,
+      "requiredFactsCorrect": true,
+      "additionalNumbersCorrect": true,
+      "coreCoverageComplete": true,
+      "coreCoverageChecks": [
+        {
+          "criterion": "列出 FY2025 期末现金及现金等价物、非流动长期债务、流动资产和流动负债，单位及时点可识别",
+          "covered": true,
+          "exactQuote": "| 现金及现金等价物 | **9,037** | 9,867 | 只是流动资产的一部分，不等于全部流动资产 [E1] |"
+        },
+        {
+          "criterion": "给出流动资产除以流动负债的流动比率",
+          "covered": true,
+          "exactQuote": "=\\frac{79,458}{96,584}"
+        },
+        {
+          "criterion": "通过科目标签或解释区分现金与流动资产、非流动长期债务与总负债",
+          "covered": true,
+          "exactQuote": "| 非流动长期债务 | **33,401** | 36,132 | 仅为长期债务项目，不等于总负债 [E1] |"
+        },
+        {
+          "criterion": "给出有边界的流动性简评，表明单一时点比率不足以证明实际偿债安全或危机",
+          "covered": true,
+          "exactQuote": "**结论：** 基于沃尔玛 FY2025 期末资产负债表，其流动比率约 **0.82**，账面流动资产低于流动负债，现金对流动负债的直接覆盖也较低；但考虑其零售业务中高存货、高应付账款的营运资本结构，**不能仅凭这一个比率断定短期偿债出现危机，也不能据此认定绝对安全**。完整判断还需经营现金流、存货周转、授信额度和债务到期结构等证据。[E1]"
+        }
+      ],
+      "evidenceGrounded": true,
+      "substantiveIssue": false,
+      "substantiveIssues": [],
+      "ambiguityNotes": [],
+      "numericNotes": [],
+      "verdict": "PASS",
+      "notes": [
+        "必答四项余额、0.82 比率、日期与美元单位正确，现金/流动资产和非流动债务/总负债区分完整。",
+        "新增 FY2024 余额/0.83、存货 71%、现金占流动资产 11%、应收 13%、预付 5%、应付账款占流动负债 61%、现金覆盖 9.4%、营运资本 -17,126、总负债 163,131 和借款余额增减均核对通过；整数百分比为正常显示精度舍入。",
+        "低流动比率只被用于账面覆盖判断，零售机制明确为通常/可能/条件说明，没有确证本期高周转或强 CFO；结论保留实际偿债能力未知边界。"
+      ],
+      "responseFile": "raw-baseline-2/92817109-7a3d-4f10-8606-b4a5202d093d.response.json",
+      "responseSha256": "d82e51cff0abb91573f9d9a10f060612af0e62243be1c1a71752e8fa8a632517"
+    }
+  ],
+  "summary": {
+    "answerCount": 6,
+    "originalReviewerVerdicts": {
+      "PASS": 5,
+      "ISSUES": 1,
+      "INCONCLUSIVE": 0
+    },
+    "adjudicatedMainVerdicts": {
+      "PASS": 6,
+      "ISSUES": 0,
+      "INCONCLUSIVE": 0
+    },
+    "allRequiredFactsCorrect": true,
+    "allAdditionalNumbersCorrect": true,
+    "allCoreCoverageComplete": true,
+    "confirmedSubstantiveMethodDefectsAfterAdjudication": 0
+  }
+}

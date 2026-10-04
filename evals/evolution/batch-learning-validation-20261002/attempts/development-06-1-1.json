@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-06-1-1",
+    "caseId": "tgt-fy2025q3-liquidity",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-validation-20261002\\raw-development-06",
+  "executionSha256": "b936b1e42efd82fa61d56f749533c7fee43b3c0f2d15daf91763a3227ca90351",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

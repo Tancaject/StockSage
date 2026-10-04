@@ -1,0 +1,103 @@
+{
+  "schema": "historical_network_cause_v1",
+  "scope": "READ_ONLY_WINDOWS_EVENTS_AND_EXISTING_REPLAY_ARTIFACTS",
+  "incidentDate": "2026-10-02",
+  "timezone": "Asia/Singapore",
+  "status": "COMMON_LOCAL_SLEEP_NETWORK_INTERRUPTION_IDENTIFIED",
+  "conclusion": "Both original final-answer streams crossed a recorded local System Idle sleep interval. Windows stopped WLAN security during sleep, restored Wi-Fi and reconnected the Mihomo network during wake; both PrematureClose errors followed this same wake. This identifies a concrete local environment interruption capable of breaking both active streams, rather than evidence of a model-quality or 300-second application-timeout failure.",
+  "transportBoundary": "Historical logs do not retain packets or a proxy connection trace, so they do not identify the sender of an individual TCP FIN/RST or exclude an additional remote condition. No provider-fault claim is made.",
+  "queryWindowLocal": {
+    "start": "2026-10-02T21:39:00+08:00",
+    "end": "2026-10-02T21:49:00+08:00"
+  },
+  "systemSleep": {
+    "sleepAtUtc": "2026-10-02T13:43:36.0293998Z",
+    "wakeAtUtc": "2026-10-02T13:44:25.9270745Z",
+    "wallIntervalSeconds": 49.8976747,
+    "reason": "System Idle",
+    "reasonCode": 7,
+    "targetState": 4,
+    "effectiveState": 4,
+    "intervalSource": {
+      "log": "System",
+      "provider": "Microsoft-Windows-Power-Troubleshooter",
+      "eventId": 1,
+      "recordId": 224511,
+      "recordedAtUtc": "2026-10-02T13:44:26.9463224Z",
+      "fields": ["SleepTime", "WakeTime"]
+    },
+    "idleReasonSource": {
+      "log": "System",
+      "provider": "Microsoft-Windows-Kernel-Power",
+      "eventId": 42,
+      "recordId": 224489,
+      "recordedAtUtc": "2026-10-02T13:43:37.9368611Z",
+      "messageExcerpt": "系统正在进入睡眠状态。睡眠原因: System Idle"
+    },
+    "clockCaution": "Kernel-General event 1, record 224495, records hardware-clock synchronization by 42759 ms during wake. Use Power-Troubleshooter SleepTime/WakeTime fields for the sleep window; do not interpret the earlier stale wall-clock timestamp of Kernel-Power 107 as the actual wake time."
+  },
+  "networkTimeline": [
+    {"atUtc": "2026-10-02T13:43:38.0308578Z", "log": "Microsoft-Windows-WLAN-AutoConfig/Operational", "eventId": 11004, "recordId": 11374, "event": "Wi-Fi security stopped"},
+    {"atUtc": "2026-10-02T13:44:24.6921655Z", "log": "Microsoft-Windows-NetworkProfile/Operational", "eventId": 10001, "recordId": 36822, "event": "Wi-Fi network disconnected"},
+    {"atUtc": "2026-10-02T13:44:24.8982236Z", "log": "Microsoft-Windows-WLAN-AutoConfig/Operational", "eventId": 11010, "recordId": 11375, "event": "Wi-Fi security started"},
+    {"atUtc": "2026-10-02T13:44:25.0000598Z", "log": "Microsoft-Windows-WLAN-AutoConfig/Operational", "eventId": 11005, "recordId": 11376, "event": "Wi-Fi security succeeded"},
+    {"atUtc": "2026-10-02T13:44:25.0170955Z", "log": "Microsoft-Windows-NetworkProfile/Operational", "eventId": 10000, "recordId": 36825, "event": "Wi-Fi network connected"},
+    {"atUtc": "2026-10-02T13:44:25.8047418Z", "log": "Microsoft-Windows-NetworkProfile/Operational", "eventId": 10001, "recordId": 36827, "event": "Mihomo network disconnected"},
+    {"atUtc": "2026-10-02T13:44:25.8538153Z", "log": "Microsoft-Windows-NetworkProfile/Operational", "eventId": 10000, "recordId": 36830, "event": "Mihomo network connected"}
+  ],
+  "affectedRequests": [
+    {
+      "runId": "candidate-dev-02-1-1",
+      "caseId": "jnj-fy2025q3-quarter-reconstruction",
+      "finalModelSelectionAtLocal": "2026-10-02T21:42:54.034+08:00",
+      "firstAggregationErrorAtLocal": "2026-10-02T21:44:26.294+08:00",
+      "providerErrorAtUtc": "2026-10-02T13:44:26.2978796Z",
+      "secondsAfterRecordedWake": 0.3708051,
+      "finalDurationMs": 92446,
+      "applicationTimeoutSeconds": 300,
+      "httpStatus": 200,
+      "cause": "reactor.netty.http.client.PrematureCloseException: Connection prematurely closed DURING response",
+      "crossesSleepWindow": true,
+      "log": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-02.log",
+      "providerError": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-02/provider-error.jsonl",
+      "response": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-02/candidate-dev-02-1-1.response.json"
+    },
+    {
+      "runId": "candidate-dev-04-1-1",
+      "caseId": "pep-fy2025q3-liquidity",
+      "finalModelSelectionAtLocal": "2026-10-02T21:43:17.121+08:00",
+      "firstAggregationErrorAtLocal": "2026-10-02T21:44:38.754+08:00",
+      "providerErrorAtUtc": "2026-10-02T13:44:38.7576508Z",
+      "secondsAfterRecordedWake": 12.8305763,
+      "finalDurationMs": 81817,
+      "applicationTimeoutSeconds": 300,
+      "httpStatus": 200,
+      "cause": "reactor.netty.http.client.PrematureCloseException: Connection prematurely closed DURING response",
+      "crossesSleepWindow": true,
+      "log": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-04.log",
+      "providerError": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-04/provider-error.jsonl",
+      "response": "../../evolution/batch-learning-validation-20261002/raw-candidate-dev-04/candidate-dev-04-1-1.response.json"
+    }
+  ],
+  "checks": {
+    "systemLogEnabled": true,
+    "networkProfileLogEnabled": true,
+    "wlanLogEnabled": true,
+    "currentClashServiceRunning": true,
+    "currentStatusUsedForHistoricalAttribution": false,
+    "clashLogDirectoryExists": true,
+    "clashLogRead": "ACCESS_DENIED; no escalation attempted",
+    "netAdapterRead": "ACCESS_DENIED; no escalation attempted",
+    "modelApiCalls": 0,
+    "settingsChanged": false,
+    "packetCaptureStarted": false,
+    "privateIdentifiersStored": false
+  },
+  "otherEventNotUsedAsCause": {
+    "atLocal": "2026-10-02T21:47:30.2205585+08:00",
+    "provider": "Tcpip",
+    "eventId": 4266,
+    "summary": "UDP ephemeral port allocation exhaustion warning occurred after both stream failures. It is not evidence that these established HTTPS/TCP streams failed because of port exhaustion."
+  },
+  "nextStep": "Prevent automatic idle sleep only for the duration of locally hosted active model work or long-running evaluation, then restore the previous execution state. This targets the demonstrated local interruption; it does not solve independent long-reasoning timeouts."
+}

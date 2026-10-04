@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 2,
+  "cases": [
+    {
+      "caseId": "ibm-fy2025q3-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "1e97ad1589482aafb24c70f331928613db86082ee3ea493a0ecf3a867316aea7",
+      "query": "根据IBM 2025年9月末资产负债表，计算流动比率、有息债务（短期债务加长期债务），以及现金和现金等价物加有价证券后的净债务。与2024年末比较变化，并给出审慎的短期流动性判断。此处净债务不扣受限现金，债务不含租赁负债。比率和百分比保留两位小数。",
+      "resolvedQuery": "根据IBM 2025年9月末资产负债表，计算流动比率、有息债务（短期债务加长期债务），以及现金和现金等价物加有价证券后的净债务。与2024年末比较变化，并给出审慎的短期流动性判断。此处净债务不扣受限现金，债务不含租赁负债。比率和百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-02",
+      "context": "[E1] {\"availableAt\":\"2025-10-22T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-30\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2025-10-22T00:00:00Z\",\"rawSha256\":\"dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f\",\"retrievedAt\":\"2026-10-02T08:00:40.120877+00:00\",\"sourceRef\":\"https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS\",\"sourceVersion\":\"IBM-Q3-2025-official-IR-balance\",\"target\":\"IBM\",\"unit\":\"million\",\"visibleSha256\":\"dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f\"}\nINTERNATIONAL BUSINESS MACHINES CORPORATION CONDENSED CONSOLIDATED BALANCE SHEET (Unaudited)\n\n(Dollars in Millions) |  | At September 30, 2025 |  | At December 31, 2024\nASSETS: |  |  |  | \nCurrent Assets: |  |  |  | \nCash and cash equivalents |  | $ 11,569 |  | $ 13,947\nRestricted cash |  | 30 |  | 214\nMarketable securities |  | 3,286 |  | 644\nNotes and accounts receivable - trade, net |  | 5,532 |  | 6,804\nShort-term financing receivables |  |  |  | \nHeld for investment, net |  | 5,156 |  | 6,259\nHeld for sale |  | 745 |  | 900\nOther accounts receivable, net |  | 1,174 |  | 947\nInventories |  | 1,397 |  | 1,289\nDeferred costs |  | 1,113 |  | 959\nPrepaid expenses and other current assets |  | 2,739 |  | 2,520\nTotal Current Assets |  | 32,740 |  | 34,482\n |  |  |  | \nProperty, plant and equipment, net |  | 5,851 |  | 5,731\nOperating right-of-use assets, net |  | 3,223 |  | 3,197\nLong-term financing receivables, net |  | 6,258 |  | 5,353\nPrepaid pension assets |  | 8,044 |  | 7,492\nDeferred costs |  | 768 |  | 788\nDeferred taxes |  | 8,505 |  | 6,978\nGoodwill |  | 67,396 |  | 60,706\nIntangibles, net |  | 11,729 |  | 10,660\nInvestments and sundry assets |  | 1,796 |  | 1,787\nTotal Assets |  | $ 146,312 |  | $ 137,175\n |  |  |  | \nLIABILITIES: |  |  |  | \nCurrent Liabilities: |  |  |  | \nTaxes |  | $ 1,663 |  | $ 2,033\nShort-term debt |  | 7,942 |  | 5,089\nAccounts payable |  | 3,867 |  | 4,032\nCompensation and benefits |  | 3,508 |  | 3,605\nDeferred income |  | 13,878 |  | 13,907\nOperating lease liabilities |  | 807 |  | 768\nOther liabilities |  | 3,477 |  | 3,709\nTotal Current Liabilities |  | 35,142 |  | 33,142\n |  |  |  | \nLong-term debt |  | 55,174 |  | 49,884\nRetirement-related obligations |  | 9,735 |  | 9,432\nDeferred income |  | 3,863 |  | 3,622\nOperating lease liabilities |  | 2,646 |  | 2,655\nOther liabilities |  | 11,762 |  | 11,048\nTotal Liabilities |  | 118,322 |  | 109,783\n |  |  |  | \nEQUITY: |  |  |  | \nIBM Stockholders' Equity: |  |  |  | \nCommon stock |  | 62,819 |  | 61,380\nRetained earnings |  | 151,581 |  | 151,163\nTreasury stock - at cost |  | (170,512) |  | (169,968)\nAccumulated other comprehensive income/(loss) |  | (15,983) |  | (15,269)\nTotal IBM Stockholders' Equity |  | 27,905 |  | 27,307\n |  |  |  | \nNoncontrolling interests |  | 85 |  | 86\nTotal Equity |  | 27,990 |  | 27,393\n |  |  |  | \nTotal Liabilities and Equity |  | $ 146,312 |  | $ 137,175",
+      "contextSha256": "56136db25a55ab0c158da95d7c070dc151390ecc685a580ed95e3bdba088145a",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "IBM",
+      "requestAttributes": {
+        "reportPeriod": "quarterly",
+        "reportCount": 2
+      },
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：IBM\n请求参数：{reportPeriod=quarterly, reportCount=2}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2025-10-22T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-09-30\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2025-10-22T00:00:00Z\",\"rawSha256\":\"dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f\",\"retrievedAt\":\"2026-10-02T08:00:40.120877+00:00\",\"sourceRef\":\"https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS\",\"sourceVersion\":\"IBM-Q3-2025-official-IR-balance\",\"target\":\"IBM\",\"unit\":\"million\",\"visibleSha256\":\"dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f\"}\nINTERNATIONAL BUSINESS MACHINES CORPORATION CONDENSED CONSOLIDATED BALANCE SHEET (Unaudited)\n\n(Dollars in Millions) |  | At September 30, 2025 |  | At December 31, 2024\nASSETS: |  |  |  | \nCurrent Assets: |  |  |  | \nCash and cash equivalents |  | $ 11,569 |  | $ 13,947\nRestricted cash |  | 30 |  | 214\nMarketable securities |  | 3,286 |  | 644\nNotes and accounts receivable - trade, net |  | 5,532 |  | 6,804\nShort-term financing receivables |  |  |  | \nHeld for investment, net |  | 5,156 |  | 6,259\nHeld for sale |  | 745 |  | 900\nOther accounts receivable, net |  | 1,174 |  | 947\nInventories |  | 1,397 |  | 1,289\nDeferred costs |  | 1,113 |  | 959\nPrepaid expenses and other current assets |  | 2,739 |  | 2,520\nTotal Current Assets |  | 32,740 |  | 34,482\n |  |  |  | \nProperty, plant and equipment, net |  | 5,851 |  | 5,731\nOperating right-of-use assets, net |  | 3,223 |  | 3,197\nLong-term financing receivables, net |  | 6,258 |  | 5,353\nPrepaid pension assets |  | 8,044 |  | 7,492\nDeferred costs |  | 768 |  | 788\nDeferred taxes |  | 8,505 |  | 6,978\nGoodwill |  | 67,396 |  | 60,706\nIntangibles, net |  | 11,729 |  | 10,660\nInvestments and sundry assets |  | 1,796 |  | 1,787\nTotal Assets |  | $ 146,312 |  | $ 137,175\n |  |  |  | \nLIABILITIES: |  |  |  | \nCurrent Liabilities: |  |  |  | \nTaxes |  | $ 1,663 |  | $ 2,033\nShort-term debt |  | 7,942 |  | 5,089\nAccounts payable |  | 3,867 |  | 4,032\nCompensation and benefits |  | 3,508 |  | 3,605\nDeferred income |  | 13,878 |  | 13,907\nOperating lease liabilities |  | 807 |  | 768\nOther liabilities |  | 3,477 |  | 3,709\nTotal Current Liabilities |  | 35,142 |  | 33,142\n |  |  |  | \nLong-term debt |  | 55,174 |  | 49,884\nRetirement-related obligations |  | 9,735 |  | 9,432\nDeferred income |  | 3,863 |  | 3,622\nOperating lease liabilities |  | 2,646 |  | 2,655\nOther liabilities |  | 11,762 |  | 11,048\nTotal Liabilities |  | 118,322 |  | 109,783\n |  |  |  | \nEQUITY: |  |  |  | \nIBM Stockholders' Equity: |  |  |  | \nCommon stock |  | 62,819 |  | 61,380\nRetained earnings |  | 151,581 |  | 151,163\nTreasury stock - at cost |  | (170,512) |  | (169,968)\nAccumulated other comprehensive income/(loss) |  | (15,983) |  | (15,269)\nTotal IBM Stockholders' Equity |  | 27,905 |  | 27,307\n |  |  |  | \nNoncontrolling interests |  | 85 |  | 86\nTotal Equity |  | 27,990 |  | 27,393\n |  |  |  | \nTotal Liabilities and Equity |  | $ 146,312 |  | $ 137,175",
+      "preAnalystContextSha256": "a2fd6fc59bc7179540774e84dfc5b09eb90861c6f639d3dd78e6e1756155ef48",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261002-batch-learning",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-02T08:23:03.229467+00:00",
+        "asOfInstant": "2026-10-02T08:23:03.229467+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-02T08:23:03.229467+00:00",
+        "sourceManifestSha256": "0dacb5cabf217e2d0687141eaafc28c814e99ac3a54e14962f243650cc58c418"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2025-10-22T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-09-30",
+          "periodStart": "2025-01-01",
+          "publishedAt": "2025-10-22T00:00:00Z",
+          "rawSha256": "dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f",
+          "retrievedAt": "2026-10-02T08:00:40.120877+00:00",
+          "sourceRef": "https://newsroom.ibm.com/2025-10-22-IBM-RELEASES-THIRD-QUARTER-RESULTS",
+          "sourceVersion": "IBM-Q3-2025-official-IR-balance",
+          "target": "IBM",
+          "unit": "million",
+          "visibleSha256": "dace1538877777143b58784947e6180e3d7c582efda57081c6abf21792aab47f",
+          "visibleText": "INTERNATIONAL BUSINESS MACHINES CORPORATION CONDENSED CONSOLIDATED BALANCE SHEET (Unaudited)\n\n(Dollars in Millions) |  | At September 30, 2025 |  | At December 31, 2024\nASSETS: |  |  |  | \nCurrent Assets: |  |  |  | \nCash and cash equivalents |  | $ 11,569 |  | $ 13,947\nRestricted cash |  | 30 |  | 214\nMarketable securities |  | 3,286 |  | 644\nNotes and accounts receivable - trade, net |  | 5,532 |  | 6,804\nShort-term financing receivables |  |  |  | \nHeld for investment, net |  | 5,156 |  | 6,259\nHeld for sale |  | 745 |  | 900\nOther accounts receivable, net |  | 1,174 |  | 947\nInventories |  | 1,397 |  | 1,289\nDeferred costs |  | 1,113 |  | 959\nPrepaid expenses and other current assets |  | 2,739 |  | 2,520\nTotal Current Assets |  | 32,740 |  | 34,482\n |  |  |  | \nProperty, plant and equipment, net |  | 5,851 |  | 5,731\nOperating right-of-use assets, net |  | 3,223 |  | 3,197\nLong-term financing receivables, net |  | 6,258 |  | 5,353\nPrepaid pension assets |  | 8,044 |  | 7,492\nDeferred costs |  | 768 |  | 788\nDeferred taxes |  | 8,505 |  | 6,978\nGoodwill |  | 67,396 |  | 60,706\nIntangibles, net |  | 11,729 |  | 10,660\nInvestments and sundry assets |  | 1,796 |  | 1,787\nTotal Assets |  | $ 146,312 |  | $ 137,175\n |  |  |  | \nLIABILITIES: |  |  |  | \nCurrent Liabilities: |  |  |  | \nTaxes |  | $ 1,663 |  | $ 2,033\nShort-term debt |  | 7,942 |  | 5,089\nAccounts payable |  | 3,867 |  | 4,032\nCompensation and benefits |  | 3,508 |  | 3,605\nDeferred income |  | 13,878 |  | 13,907\nOperating lease liabilities |  | 807 |  | 768\nOther liabilities |  | 3,477 |  | 3,709\nTotal Current Liabilities |  | 35,142 |  | 33,142\n |  |  |  | \nLong-term debt |  | 55,174 |  | 49,884\nRetirement-related obligations |  | 9,735 |  | 9,432\nDeferred income |  | 3,863 |  | 3,622\nOperating lease liabilities |  | 2,646 |  | 2,655\nOther liabilities |  | 11,762 |  | 11,048\nTotal Liabilities |  | 118,322 |  | 109,783\n |  |  |  | \nEQUITY: |  |  |  | \nIBM Stockholders' Equity: |  |  |  | \nCommon stock |  | 62,819 |  | 61,380\nRetained earnings |  | 151,581 |  | 151,163\nTreasury stock - at cost |  | (170,512) |  | (169,968)\nAccumulated other comprehensive income/(loss) |  | (15,983) |  | (15,269)\nTotal IBM Stockholders' Equity |  | 27,905 |  | 27,307\n |  |  |  | \nNoncontrolling interests |  | 85 |  | 86\nTotal Equity |  | 27,990 |  | 27,393\n |  |  |  | \nTotal Liabilities and Equity |  | $ 146,312 |  | $ 137,175"
+        }
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "runId": "development-unsubmitted-ibm-1-1",
+      "caseId": "ibm-fy2025q3-liquidity",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    }
+  ],
+  "context": {
+    "experimentId": "fundamentals-batch-learning-20261002",
+    "evaluatorVersion": "2c08f66dc96e9061e3dd753cf5c041c78c3e8e036e8c969ba0eccaa32fb132ed",
+    "runMode": "DEVELOPMENT"
+  }
+}

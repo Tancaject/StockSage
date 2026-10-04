@@ -7,6 +7,7 @@ import com.stocksage.repository.VectorDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,6 +66,7 @@ public class RagService {
 
     /** 解析镜像表保存的文档元数据 JSON。 */
     private final ObjectMapper objectMapper;
+    private final EmbeddingModel embeddingModel;
 
     /** 最终交给回答模型的上下文数量上限。 */
     @Value("${stocksage.rag.top-k}")
@@ -93,6 +95,29 @@ public class RagService {
     /** 是否根据原始问题中的已知 ticker 自动过滤文档。 */
     @Value("${stocksage.rag.metadata-filter.enabled:true}")
     private boolean metadataFilterEnabled;
+
+    /** Captures bound retrieval settings, not which optional stages succeeded for a query. */
+    public Map<String, Object> runtimeConfiguration() {
+        Map<String, Object> reranker = new LinkedHashMap<>(dashScopeReranker.runtimeConfiguration());
+        reranker.put("topN", topK);
+        Map<String, Object> settings = new LinkedHashMap<>(Map.of(
+                "topK", topK,
+                "candidateTopK", candidateTopK(),
+                "configuredRerankCandidateTopK", rerankCandidateTopK,
+                "similarityThreshold", similarityThreshold,
+                "hybridSearchEnabled", hybridSearchEnabled,
+                "keywordTopK", keywordTopK,
+                "rrfK", rrfK,
+                "metadataFilterEnabled", metadataFilterEnabled,
+                "reranker", Map.copyOf(reranker)));
+        settings.put("queryRewrite", queryRewriter.runtimeConfiguration());
+        settings.put("keywordSearch", keywordSearchService.runtimeConfiguration());
+        settings.put("embedding", embeddingModel instanceof LocalEmbeddingModel local
+                ? local.runtimeConfiguration()
+                : Map.of("implementation", embeddingModel.getClass().getName(),
+                        "configurationStatus", "UNKNOWN"));
+        return Map.copyOf(settings);
+    }
 
     /**
      * 使用自动元数据过滤执行生产检索。

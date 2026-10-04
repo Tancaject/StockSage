@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.client.DataServiceClient;
 import com.stocksage.model.dto.KnowledgeIngestionResult;
-import com.stocksage.service.KnowledgeIngestionService;
+import com.stocksage.knowledge.KnowledgeIngestionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;

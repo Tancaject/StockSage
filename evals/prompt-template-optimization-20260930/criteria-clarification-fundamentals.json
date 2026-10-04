@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-30T14:14:00.690271+00:00",
+  "reviewType": "AI_SOURCE_GROUNDED",
+  "humanReviewed": false,
+  "nonBlind": true,
+  "timing": "Recorded before this reviewer read any generated output from this prompt-template optimization smoke run. Reviewer has seen arm identities and historical diagnostic outputs; this is not a blind review.",
+  "outputsReadBeforeClarification": false,
+  "reason": "Frozen criteria inaccurately described multi-year and additional-account reporting as required by the actual user queries. Preserve raw capture and plan; evaluate both arms against the actual task, and separately verify every additional claim.",
+  "sourceCaptureSha256": {
+    "capture-before.json": "0139d40761903cc1b0b8d87c7ec713bf503588bd986e3131e0d97d40cf041fc2",
+    "capture-after.json": "a5ec0fb459fa3851be3bc8528e32ba2e7a02132510b418da1f8a697f2ffb87a2"
+  },
+  "cases": [
+    {
+      "caseId": "fundamentals-msft-fy2025-liquidity",
+      "originalCriteria": [
+        "按用户要求列出两年现金及短期投资、流动资产、流动负债与流动比率",
+        "保留 FY2025 一年内到期长期债务 2,999 百万美元，不说短期有息债务清零",
+        "未实现收入不等同于同额现金还款义务，但履约仍可能有现金成本；额外合计不能遗漏科目"
+      ],
+      "actualUserQuery": "根据微软（MSFT）FY2025期末资产负债表，列出现金及现金等价物、非流动长期债务、流动资产和流动负债，计算流动比率，简评流动性。请区分现金与流动资产、长期债务与总负债，不要仅凭一个比率断定偿债安全或危机。",
+      "clarifiedCriteria": [
+        "必答范围按实际用户问题：FY2025期末现金及现金等价物30,242、非流动长期债务40,152、流动资产191,131、流动负债141,218（百万美元），流动比率约1.35；区分现金与流动资产、非流动长期债务与总负债，并作有边界的流动性简评。",
+        "FY2024比较值、短期投资和一年内到期长期债务2,999不是用户强制要求主动列出的项目，未主动补充不扣任务覆盖。",
+        "若自行讨论短期有息义务，不得将Short-term debt=0扩成全部一年内有息义务清零；若自行计算额外合计，不得漏项或混淆科目范围。",
+        "若讨论递延收入，不得以全额剔除或无现金履约成本来保证真实偿债安全；账面覆盖与真实现金兑付能力须区分。未自行讨论递延收入不自动判遗漏。",
+        "自行补充的历史数值、公式、经营原因、主体能力和偿债结论均需来源支持；缺少用户未要求的额外内容本身不是错误。"
+      ]
+    },
+    {
+      "caseId": "fundamentals-wmt-fy2025-cashflow",
+      "originalCriteria": [
+        "按用户要求列出三个财年经营现金流、资本开支及自由现金流，期间、单位与公式一致",
+        "不根据现金流表编造具体资本开支投向、管理层意图或未来融资保证",
+        "需要新增计算时给出对应原值及公式，额外数字也应正确"
+      ],
+      "actualUserQuery": "沃尔玛（WMT）FY2025经营现金流能覆盖资本开支吗？列出经营现金流和购建固定资产的现金支出，按两者相减计算简化自由现金流，并说明资本开支占经营现金流的比例及其含义。这里使用现金购建支出的毛额，不含资产出售回款，不等于净利润。",
+      "clarifiedCriteria": [
+        "必答范围按实际用户问题：FY2025经营现金流36,443、购建固定资产现金支出毛额23,783、简化自由现金流36,443−23,783=12,660（百万美元），资本开支/经营现金流约65.2608%；说明指定当年经营现金流能够覆盖所问毛额资本开支，指标不等于净利润且不抵减资产出售回款。",
+        "FY2024和FY2023不是用户强制要求主动列出的比较期；未主动给三个财年不扣任务覆盖。",
+        "若自行补充任何历史期间、增速、比例或合计，均核对全部原值、公式、符号及单位，不因属于额外内容而免评。",
+        "不能从资本开支总额确认供应链、门店、电商等具体投向或管理层意图；可以明确以假设或数据缺口举例。",
+        "指定当年经营现金流覆盖所问资本开支不等于证明未来无需外部融资、整体偿债绝对安全或全部股东回报计划足额覆盖；一般可能用途不单独扣分。"
+      ]
+    }
+  ]
+}

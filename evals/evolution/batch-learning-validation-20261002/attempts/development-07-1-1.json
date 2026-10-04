@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-07-1-1",
+    "caseId": "ibm-fy2025q3-oneoff-cash-comparability",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-validation-20261002\\raw-development-07",
+  "executionSha256": "164ed7a58d36f016065c4efdbd385bb8740e6983990d33ebe6669e37aac35633",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

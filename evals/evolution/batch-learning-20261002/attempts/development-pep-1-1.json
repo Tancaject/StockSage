@@ -1,0 +1,11 @@
+{
+  "run": {
+    "runId": "development-pep-1-1",
+    "caseId": "pep-fy2025q3-quarter-reconstruction",
+    "bundleId": "baseline-v1",
+    "repeatId": 1
+  },
+  "output": "D:\\programming\\StockSage\\evals\\evolution\\batch-learning-20261002\\raw-development-pep",
+  "executionSha256": "5f7c32ddfb66a06906a65332b159930397461af94e674805594512713d0e00a5",
+  "reservation": "TWO_STAGE_CALLS_NO_AUTOMATIC_RETRY"
+}

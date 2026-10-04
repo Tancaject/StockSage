@@ -1,10 +1,12 @@
 package com.stocksage.agent;
 
+import com.stocksage.research.DeepEvidenceCollector;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.harness.EvidenceLedger;
+import com.stocksage.evidence.EvidenceLedger;
 import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.DebateModels.DebatePoint;

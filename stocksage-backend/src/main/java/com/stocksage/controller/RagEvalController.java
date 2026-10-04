@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 仅供 rag-eval 脚本使用的评估接口。
+ * 仅供 evals 中的 RAG 脚本使用的评估接口。
  *
  * <p>这些接口返回比对话界面更丰富的诊断载荷，
  * 包括检索上下文、引用信息和中间检索细节。</p>
@@ -27,7 +27,7 @@ public class RagEvalController {
     /**
      * 执行一次 RAG 离线评测请求。
      *
-     * <p>该接口面向 rag-eval 脚本而非普通前端聊天页面，返回值会包含检索上下文、引用和可选中间阶段，
+     * <p>该接口面向 evals 中的 RAG 脚本而非普通前端聊天页面，返回值会包含检索上下文、引用和可选中间阶段，
      * 用于定位召回、重排或回答生成环节的质量问题。</p>
      *
      * @param request 问题、过滤条件和诊断开关

@@ -1,7 +1,13 @@
 package com.stocksage.rag;
 
+import com.stocksage.tool.ToolCallContext;
+import com.stocksage.exception.ResearchBudgetExceededException;
+import com.stocksage.agent.ModelInvocationAdvisor;
+import com.stocksage.model.dto.ModelInvocationContext;
+import com.stocksage.research.ModelInvocationStore;
+
 import com.stocksage.repository.ContextualGistCacheRepository;
-import com.stocksage.service.KnowledgeIngestionService;
+import com.stocksage.knowledge.KnowledgeIngestionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,8 +19,8 @@ import org.springframework.stereotype.Service;
  *
  * <p>给定切片及其所在父块与结构化元信息，生成一句"这段在该财报中讲什么"的说明，
  * 供入库时拼进子块 embedding 文本，使向量与 Lucene BM25 两条检索腿都携带上下文。
- * gist 按目标文本 sha256 缓存，重新入库幂等；任何失败都返回 null（fail-open），
- * 由调用方回退到纯结构化前缀，绝不阻断入库。</p>
+ * gist 按目标文本 sha256 缓存，重新入库幂等；普通模型失败返回 null，
+ * 由调用方回退到结构化前缀。研究预算或执行权失效必须停止执行。</p>
  */
 @Slf4j
 @Service
@@ -28,6 +34,7 @@ public class ContextualEnricher {
 
     /** 按目标切片哈希复用已生成 gist。 */
     private final ContextualGistCacheRepository cacheRepository;
+    private final ModelInvocationAdvisor invocationAdvisor;
 
     /** Contextual Retrieval 总开关，默认关闭以避免额外模型成本。 */
     @Value("${stocksage.rag.contextual.enabled:false}")
@@ -49,9 +56,11 @@ public class ContextualEnricher {
      */
     public ContextualEnricher(
             @Qualifier("contextualGistChatClient") ChatClient chatClient,
-            ContextualGistCacheRepository cacheRepository) {
+            ContextualGistCacheRepository cacheRepository,
+            ModelInvocationStore invocations) {
         this.chatClient = chatClient;
         this.cacheRepository = cacheRepository;
+        this.invocationAdvisor = new ModelInvocationAdvisor("contextual-gist", invocations);
     }
 
     /**
@@ -61,6 +70,11 @@ public class ContextualEnricher {
      */
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public java.util.Map<String, Object> runtimeConfiguration() {
+        return java.util.Map.of("enabled", enabled, "maxGistWords", maxGistWords,
+                "maxGistChars", MAX_GIST_CHARS);
     }
 
     /**
@@ -85,6 +99,7 @@ public class ContextualEnricher {
             String filingType,
             String filingDate,
             String sectionName) {
+        ToolCallContext.checkRunDeadline();
         if (!enabled || targetText == null || targetText.isBlank()) {
             return null;
         }
@@ -93,16 +108,29 @@ public class ContextualEnricher {
         try {
             // findGist 先按内容哈希命中缓存，重复摄取不会再次调用模型。
             var cached = cacheRepository.findGist(hash);
+            ToolCallContext.checkRunDeadline();
             if (cached.isPresent()) {
                 return cached.get();
             }
 
             // 专用 ChatClient.call() 只读取给定父块，不接触主对话或外部工具。
-            String gist = normalize(chatClient.prompt()
-                    .user(buildUserPrompt(contextText, targetText, ticker, companyName,
-                            filingType, filingDate, sectionName))
-                    .call()
-                    .content());
+            String prompt = buildUserPrompt(contextText, targetText, ticker, companyName,
+                    filingType, filingDate, sectionName);
+            var request = chatClient.prompt().user(prompt);
+            var execution = ToolCallContext.currentRunExecution();
+            if (execution == null && ToolCallContext.currentRunDeadline() != null) {
+                throw new ResearchBudgetExceededException(ToolCallContext.currentRunDeadline().runId(),
+                        ResearchBudgetExceededException.Reason.BUDGET_UNAVAILABLE);
+            }
+            if (execution != null) {
+                var invocation = new ModelInvocationContext(execution.runId(), execution.attempt(),
+                        execution.leaseToken(), execution.traceId(), null, execution.deadlineEpochMs(),
+                        KnowledgeIngestionService.sha256(prompt));
+                request = request.advisors(invocationAdvisor)
+                        .advisors(a -> a.param(ModelInvocationAdvisor.CONTEXT_KEY, invocation));
+            }
+            String gist = normalize(request.call().content());
+            ToolCallContext.checkRunDeadline();
             if (gist.isBlank() || isLikelyInvalid(gist)) {
                 return null;
             }
@@ -110,6 +138,16 @@ public class ContextualEnricher {
             cacheRepository.save(hash, gist, modelName, granularity);
             return gist;
         } catch (Exception e) {
+            ResearchBudgetExceededException.rethrowIfPresent(e);
+            if (e instanceof ModelInvocationStore.InvocationRejectedException rejected) {
+                // The ingestion/provider fail-open layers already preserve this terminal signal.
+                var execution = ToolCallContext.currentRunExecution();
+                var unavailable = new ResearchBudgetExceededException(execution == null ? null : execution.runId(),
+                        ResearchBudgetExceededException.Reason.BUDGET_UNAVAILABLE);
+                unavailable.initCause(rejected);
+                throw unavailable;
+            }
+            ToolCallContext.checkRunDeadline();
             log.warn("Contextual gist generation failed (fail-open) for hash {}: {}", hash, e.getMessage());
             return null;
         }

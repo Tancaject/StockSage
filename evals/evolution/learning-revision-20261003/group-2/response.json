@@ -1,0 +1,30 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "{\"triggerTags\":[\"unit-conversion-billion-to-million\",\"derived-ratio-percentage-rounding\"],\"requiredEvidence\":[\"source-footnote-unit\",\"source-table-unit\"],\"requiredCapabilities\":[\"unit-comparison\",\"arithmetic\"],\"method\":\"当源文件以billion为单位披露金额而输出需以百万或中文亿为单位时，先写出换算等式（如0.7 billion = 7亿 = 700百万），确认等式两侧数值一致后再引用；禁止在中文表述中将billion误写为亿。计算派生比率时，先完成除法得到完整小数，再按题目要求的精度四舍五入，不得在中间步骤提前截断。\",\"applicabilityBoundary\":\"源文件金额单位与输出单位不同，或需从除法结果推导百分比表示时适用。\",\"counterexamples\":[\"源文件与输出单位相同无需换算\",\"题目未要求特定小数位数\"],\"forbiddenInferences\":[\"不得将billion直接等同于亿\",\"不得在除法结果上叠加未说明的中间舍入\"]}",
+        "reasoning_content": "Let me analyze the verified feedback findings to understand the failure mechanism and extract a transferable experience.\n\nThe failure mechanism is: INCONSISTENT_UNIT_AND_DERIVED_NUMERIC_REPRESENTATIONS\n\nThe findings show three issues:\n\n1. **Unit conversion error (billion vs 亿)**: The answer wrote \"0.7亿美元\" when the source says \"$0.7 billion\". 0.7 billion = 7亿 = 700 million. The answer incorrectly wrote \"0.7亿\" (which would be 70 million) but then correctly wrote \"700百万美元\". The inconsistency is that \"0.7亿\" ≠ \"700百万\" — 0.7亿 = 70百万. The correct Chinese expression should be \"7亿美元\".\n\n2. **Same unit conversion error**: \"0.3亿美元\" should be \"3亿美元\" (0.3 billion = 3亿 = 300 million).\n\n3. **Arithmetic rounding error**: 9153/4993 = 1.833166... × 100 = 183.32% (rounded to 2 decimal places), but the answer stated 183.34%.\n\nSo the core issue is: when converting between unit systems (billion ↔ 亿 ↔ million), the intermediate representation in one unit system is inconsistent with the final representation in another unit system. The answer correctly computed the million-dollar amounts but wrote incorrect 亿 amounts that don't match.\n\nThe method error is about **unit representation consistency**: when expressing the same amount in multiple unit systems (e.g., both in 亿 and in 百万), the two expressions must be arithmetically consistent with each other. The failure is that the analyst wrote \"0.7亿美元，即约700百万美元\" — but 0.7亿 = 70百万, not 700百万. The correct pairing is \"7亿美元，即约700百万美元\".\n\nThis is a specific mechanism: when an amount is stated in one unit (e.g., billion from the source) and then converted to another unit for presentation (e.g., 亿 or 百万), the intermediate and final representations must be cross-checked for arithmetic consistency.\n\nNow let me formulate the experience:\n\n- **Trigger**: When converting amounts between unit systems (billion, 亿, million, 百万) in the same sentence or table\n- **Required evidence**: The source amount in its original unit\n- **Required capabilities**: unit-comparison, arithmetic\n- **Method**: When expressing a source amount in multiple unit systems within the same output, verify that each representation is arithmetically equivalent to the others. Specifically: 1 billion = 10亿 = 1000百万. Before writing \"X亿，即Y百万\", confirm X×100 = Y.\n- **Applicability boundary**: Applies when the same monetary amount is expressed in more than one unit within the analysis output\n- **Counterexamples**: When only one unit is used consistently throughout; when units are not being converted\n- **Forbidden inferences**: Don't infer that the million-dollar amount is wrong just because the 亿 amount is wrong (or vice versa) — check which one matches the source\n\nLet me also consider the rounding issue. 9153/4993 = 1.833166... The percentage is 183.32% (rounded to 2 decimal places), not 183.34%. This is a separate arithmetic precision issue. But the main mechanism tagged is \"INCONSISTENT_UNIT_AND_DERIVED_NUMERIC_REPRESENTATIONS\" which covers both.\n\nActually, looking more carefully, the rounding error (183.34 vs 183.32) is a separate arithmetic error. The unit conversion errors are the primary mechanism. Let me focus on the unit conversion issue since that's the dominant pattern (2 out of 3 findings).\n\nLet me draft the JSON:\n\n```json\n{\n  \"triggerTags\": [\"unit-conversion-in-output\", \"multi-unit-representation\"],\n  \"requiredEvidence\": [\"source-amount-original-unit\"],\n  \"requiredCapabilities\": [\"unit-comparison\", \"arithmetic\"],\n  \"method\": \"当同一金额在输出中以多个单位制表达时（如同时写\"X亿美元\"和\"Y百万美元\"），必须验证各表达之间算术一致：1 billion = 10亿 = 1000百万。具体操作：先将源金额统一换算为百万，再反推亿值（百万÷100=亿），确认两个表达数值匹配后才可并列写出。若源为\"$0.7 billion\"，则正确表达为\"7亿美元，即700百万美元\"，而非\"0.7亿美元，即700百万美元\"。\",\n  \"applicabilityBoundary\": \"分析输出中对同一金额使用了两种或以上单位制表达时适用\",\n  \"counterexamples\": [\"输出全程仅使用单一单位制且未做换算\", \"金额仅引用原文未做任何单位转换\"],\n  \"forbiddenInferences\": [\"不得因亿值写错就推断百万值也错，应逐一与源数据核对\", \"不得将单位换算错误归因为数据源本身有误\"]\n}\n```\n\nWait, let me check the character count for method. Let me count... it's around 200 characters in Chinese, well within 350.\n\nLet me refine to make sure it's actionable and specific to the mechanism.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1791036131,
+  "id": "chatcmpl-c3a28cde-84ca-996e-8cc1-9ec97802aca1",
+  "model": "qwen3.8-max",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 1397,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1186,
+      "text_tokens": 1397
+    },
+    "prompt_tokens": 5482,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 5482
+    },
+    "total_tokens": 6879
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "schema": "ordinary_judge_repair_run_plan_v2",
+  "frozen_at": "2026-10-01T15:07:12.012973+00:00",
+  "purpose": "Validate repaired JSON output contract and rubric-based quote self-check; standard and all reviewed labels unchanged.",
+  "diagnostic_only": true,
+  "release_eligible": false,
+  "dataset_sha256": "7d2b93ba4a53e3b6c6555161efd1d25b462e10c56024f02e181d2c5b7cd15bd8",
+  "rubric_sha256": "3396bd8f16f563fd04079836ed8280f58b2e37f39a508a2189fb82321068f870",
+  "label_review_file_sha256": "49bde5ea3907d3306e0a51e0a28b7ef8bce0ab875757bd31290528047133ad9d",
+  "splits": {
+    "DEV": 30,
+    "VALIDATION": 12
+  },
+  "repeats": 2,
+  "workers": 4,
+  "config": {
+    "model": "qwen3.8-max",
+    "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+    "temperature": 0,
+    "enable_thinking": false,
+    "timeout_seconds": 180,
+    "max_tokens": 2400,
+    "max_calls": 4
+  },
+  "prompt_sha256": "7f3f12300b022238e7e8d609a08ac40141811606b5b77a6cb45a47df0a7db615",
+  "tools_sha256": "bad50e8ef62ce289aca2768d859094ab0140eb3f607d6fe6b42766f7edb3f207",
+  "source_sha256": {
+    "evals\\run_evaluation_agent.py": "a400bf529fd6fe3416878b57a59ef2fa0ded13051c519975bfa92b9e07413151",
+    "evals\\ordinary_answer_quality.py": "c548836d902170f2cb895158917d96e55ff84bac0e04036f1f7ed4ea0d0b0e14",
+    "evals\\judge_calibration.py": "ff4d983f3ced91a2cbb70a8843a3ec2e9722b44ad7760c0698008741f7a7c41e",
+    "evals\\propose_judge_prompt.py": "e27f4e1e95453a3f1cc549f1d7dd79bc6ce0b12a4ddecfe8ba291a42c7b2948a",
+    "evals\\prompts\\ordinary_judge.txt": "5c62ba3e36bdcef71ce68df2c3b88337a24b7fbd2067f4734ebce25c37324376"
+  },
+  "diagnostic_targets": {
+    "dimension_technical_valid_rate_min": 0.98,
+    "known_judgment_coverage_min": 0.95,
+    "semantic_agreement_rate_min": 0.9,
+    "each_dimension_semantic_agreement_rate_min": 0.8,
+    "false_pass_count_max": 0,
+    "expected_no_data_correct_rate_min": 1.0,
+    "repeat_consistency_rate_min": 0.9
+  },
+  "target_scope": "Apply separately to DEV and fresh VALIDATION; these predeclared working targets diagnose the small authored pilot, not production accuracy or human agreement. Technical failure and abstention do not count as correct known labels.",
+  "validation_rule": "Guidance, rubric, labels and runtime frozen before either run. Evaluate the same fixed judge on both splits without changing it from DEV or VALIDATION results. Future tuning requires a new run identity and fresh validation groups.",
+  "denominators": "Use judge_calibration_v2 metric definitions. Per-dimension target applies when semantic_comparison_count is nonzero; NO_DATA target applies only when expected_no_data_count is nonzero. Report all excluded counts.",
+  "historical_rule": "Do not rewrite v1 artifacts or compare scores across different standards. Existing business HOLDOUT is unused.",
+  "parent_run": "../20261001-fixed-judge/run-plan.json",
+  "smoke_case_ids": [
+    "msft-fy2025-q4-02",
+    "msft-fy2025-q4-03",
+    "wmt-fy2025-02"
+  ]
+}
