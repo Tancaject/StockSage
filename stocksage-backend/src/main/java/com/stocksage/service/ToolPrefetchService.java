@@ -14,6 +14,7 @@ import com.stocksage.evidence.adapter.EvidenceEnvelopeMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.Coordinator;
+import com.stocksage.agent.ModelCompletion;
 import com.stocksage.agent.ExecutionPlan;
 import com.stocksage.agent.PlanAction;
 import com.stocksage.agent.PlanRoute;
@@ -221,17 +222,20 @@ public class ToolPrefetchService {
         PlanAction analyst = actions.stream().filter(PlanAction::isAgentRole).findFirst().orElse(null);
         var methodSelection = analyst == PlanAction.FUNDAMENTALS_AGENT
                 ? fundamentalsAgent.selectMethod(userId, executionPlan.route() == PlanRoute.FUNDAMENTALS
-                    ? evidence.evolutionTaskTags() : Set.of(), evidence.evolutionEvidenceTags(),
-                    sourceEvidenceContext, methodRequest, agentPrefetchTimeoutSeconds) : null;
+                    ? evidence.evolutionTaskTags(userQuery) : Set.of(), evidence.evolutionEvidenceTags(),
+                    methodRequest, agentPrefetchTimeoutSeconds) : null;
         var pinnedMethod = methodSelection == null ? null : methodSelection.bundle();
         var methodObservation = new java.util.concurrent.atomic.AtomicReference<FundamentalsAgent.Analysis>();
         String analystStatus = "NOT_EXECUTED";
+        ModelCompletion analystCompletion = null;
         String analystCompletedAt = "";
         long analystStarted = System.nanoTime();
         AnalystSection analystSection = null;
+        String analystContext = null;
         if (analyst != null && evidence.hasUsefulResult() && !outcome.equals("BLOCKED")) {
             String agentInput = context.toString();
-            FutureTask<String> future = null;
+            analystContext = agentInput;
+            FutureTask<ModelCompletion.Output> future = null;
             try {
                 // FutureTask propagates cancellation to the running worker; CompletableFuture does not.
                 future = new FutureTask<>(
@@ -239,16 +243,18 @@ public class ToolPrefetchService {
                         case FUNDAMENTALS_AGENT -> {
                             var observation = fundamentalsAgent.analyzeObserved(userQuery, agentInput, pinnedMethod);
                             methodObservation.set(observation);
-                            yield observation.content();
+                            yield new ModelCompletion.Output(observation.content(), observation.completion());
                         }
-                        case MARKET_AGENT -> marketAgent.analyze(userQuery, agentInput);
-                        case NEWS_AGENT -> newsAgent.analyze(userQuery, agentInput);
+                        case MARKET_AGENT -> marketAgent.analyzeObserved(userQuery, agentInput);
+                        case NEWS_AGENT -> newsAgent.analyzeObserved(userQuery, agentInput);
                         default -> throw new IllegalStateException("Unsupported analyst: " + analyst);
                     }));
                 agentTaskExecutor.execute(future);
                 emitProgress(traceId, conversationId, "thought", "证据已取得，正在等待领域分析完成。");
-                String result = future.get(agentPrefetchTimeoutSeconds, TimeUnit.SECONDS);
-                AnalystDraft draft = appendAnalystDraft(context.toString(), analyst.label(), result, outcome);
+                ModelCompletion.Output result = future.get(agentPrefetchTimeoutSeconds, TimeUnit.SECONDS);
+                analystCompletion = result.completion();
+                AnalystDraft draft = appendAnalystDraft(context.toString(), analyst.label(), result.content(), outcome,
+                        result.completion());
                 context = new StringBuilder(draft.context());
                 outcome = draft.taskOutcome();
                 analystStatus = draft.status();
@@ -285,6 +291,10 @@ public class ToolPrefetchService {
                 "timeSensitivity", executionPlan.timeSensitivity().name(),
                 "request", read.attributes(), "observations", evidence.observations(), "taskOutcome", outcome,
                 "contextChars", context.length(), "analystPlanned", analyst != null, "analystStatus", analystStatus));
+        if (analystCompletion != null) {
+            evidenceAttributes.put("analystCompletionStatus", analystCompletion.status().name());
+            evidenceAttributes.put("analystFinishReason", analystCompletion.finishReason());
+        }
         if (analyst == PlanAction.FUNDAMENTALS_AGENT) {
             evidenceAttributes.put("methodBundle", pinnedMethod.identity());
             evidenceAttributes.put("methodSelection", methodSelection.attributes());
@@ -293,6 +303,9 @@ public class ToolPrefetchService {
             var observed = methodObservation.get();
             evidenceAttributes.put("analystUsage", observed == null ? Map.of("usageSource", "NO_DATA") : observed.responseMetadata());
             if (observed != null) {
+                // 完整分析师输入只写入本地 MySQL Trace（Phoenix 不导出该步骤属性），失败池据此构建可回放的回归题。
+                evidenceAttributes.put("analystQuery", userQuery);
+                evidenceAttributes.put("analystContext", analystContext);
                 evidenceAttributes.put("analystInvocation", Map.of("kind", "model-invocation", "scope", "fundamentals-analysis",
                         "actualSystemPromptSha256", AgentPolicyBundle.sha256(observed.systemPrompt()),
                         "actualUserPromptSha256", AgentPolicyBundle.sha256(observed.userPrompt()), "methodBundle", observed.methodBundle()));
@@ -366,16 +379,16 @@ public class ToolPrefetchService {
     /**
      * 安全执行智能体调用，失败时返回可读错误文本。
      */
-    private String safeAgentCall(String agentName, AgentCall agentCall) {
+    private ModelCompletion.Output safeAgentCall(String agentName, AgentCall agentCall) {
         try {
             log.info("{} started.", agentName);
-            String result = agentCall.call();
-            log.info("{} completed, chars={}.", agentName, result == null ? 0 : result.length());
-            return (result == null || result.isBlank()) ? null : result;
+            ModelCompletion.Output result = agentCall.call();
+            log.info("{} returned, completion={}.", agentName, result.completion().status());
+            return result;
         } catch (Exception e) {
             ResearchCapacityExceededException.rethrowIfPresent(e);
             log.warn("{} failed: {}", agentName, e.getMessage());
-            return null;
+            return new ModelCompletion.Output("", ModelCompletion.failure(e));
         }
     }
 
@@ -386,10 +399,18 @@ public class ToolPrefetchService {
         chatStreamEmitter.emit(traceId, conversationId, type, content);
     }
 
-    /** 草稿完整性由最终 Prompt 总预算统一检查；普通执行与冻结回放共享状态和可消融范围。 */
+    /** 旧制品未保存结束原因时不能据非空正文推断生成完整。 */
     public static AnalystDraft appendAnalystDraft(String context, String name, String content, String taskOutcome) {
-        if (content == null || content.isBlank()) {
-            return new AnalystDraft(context, "DEGRADED", "EMPTY", null);
+        return appendAnalystDraft(context, name, content, taskOutcome, ModelCompletion.assess("", content));
+    }
+
+    /** 不完整草稿保留在调用记录中；最终回答只使用原始证据，避免把半份分析作为完整依据。 */
+    public static AnalystDraft appendAnalystDraft(String context, String name, String content, String taskOutcome,
+                                                ModelCompletion completion) {
+        if (!completion.complete()) {
+            String outcome = "BLOCKED".equals(taskOutcome) || "FAILED".equals(taskOutcome) ? taskOutcome : "DEGRADED";
+            return new AnalystDraft(context + "\n领域分析未完整生成，本轮仅使用原始证据。\n",
+                    outcome, completion.status().name(), null);
         }
         String combined = context + "## " + name + "\n" + content + "\n\n";
         return new AnalystDraft(combined, taskOutcome, "COMPLETED",
@@ -446,7 +467,10 @@ public class ToolPrefetchService {
         }
 
         /** 生成成功仍需引用本轮可用证据；未知或缺失编号不能记作完整完成。 */
-        public String outcomeForAnswer(String answer) {
+        public String outcomeForAnswer(String answer, ModelCompletion completion) {
+            if ("BLOCKED".equals(taskOutcome) || "FAILED".equals(taskOutcome)) return taskOutcome;
+            if (completion.status() == ModelCompletion.Status.FAILED) return "FAILED";
+            if (!completion.complete()) return "DEGRADED";
             if (!"COMPLETED".equals(taskOutcome) || citationIds.isEmpty()) return taskOutcome;
             java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\[E([0-9]+)\\]").matcher(answer == null ? "" : answer);
             boolean cited = false;
@@ -487,7 +511,7 @@ public class ToolPrefetchService {
 
     @FunctionalInterface
     private interface AgentCall {
-        String call() throws Exception;
+        ModelCompletion.Output call() throws Exception;
     }
 
 

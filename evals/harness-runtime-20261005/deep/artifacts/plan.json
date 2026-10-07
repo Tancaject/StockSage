@@ -1,0 +1,7 @@
+{
+  "provider" : "127.0.0.1 controlled OpenAI SSE; no external model",
+  "seedBoundary" : "completed debate and current deterministic verdict",
+  "notCovered" : [ "real model quality", "database commit and row locks", "Redis lease takeover", "Bull/Bear generation", "report publication" ],
+  "scope" : "DEEP_REPORT_GENERATION_ACCEPTANCE_REPAIR_HTTP_REPLAY",
+  "failureModes" : [ "valid first report", "invalid schema and bounded excerpt", "invalid JSON and exhausted single repair", "empty output", "unknown evidence ID", "durable PLANNED JSON handover", "checkpoint rejection before repair", "legacy checkpoint without feedback", "checkpointed report revalidation", "execution guard rejects repair" ]
+}

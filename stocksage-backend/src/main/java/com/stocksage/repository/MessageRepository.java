@@ -51,6 +51,9 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             String content
     );
 
+    /** 按链路 ID 读取该链路最新的一条指定角色消息，供失败池分诊时回看最终回答。 */
+    java.util.Optional<Message> findFirstByTraceIdAndRoleOrderByIdDesc(String traceId, String role);
+
     /**
      * 删除某个会话下的全部消息，通常与会话元数据删除配套调用。
      *

@@ -28,8 +28,8 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class TickerResolutionService {
 
-    /** 匹配用户显式输入的 1～5 位大写美股代码。 */
-    private static final Pattern US_TICKER_PATTERN = Pattern.compile("\\b[A-Z]{1,5}\\b");
+    /** 匹配用户显式输入的 1～5 位大写美股代码，含 BRK.B 一类份额后缀（与多标的检查口径一致）。 */
+    private static final Pattern US_TICKER_PATTERN = Pattern.compile("\\b[A-Z]{1,5}(?:\\.[A-Z])?\\b");
     /** 匹配多标的检查中的美股代码，包含 BRK.B 一类份额后缀并排除市场代码前缀。 */
     private static final Pattern EXPLICIT_US_TICKER_PATTERN = Pattern.compile(
             "(?<![A-Z0-9.])[A-Z]{2,5}(?:\\.[A-Z])?(?![A-Z0-9]|\\.\\d)"
@@ -42,6 +42,11 @@ public class TickerResolutionService {
     private static final Pattern EXPLICIT_TOKEN_SPLIT = Pattern.compile("[^A-Z0-9.]+");
     private static final Pattern COMPARISON_MARKER_PATTERN = Pattern.compile(
             "(?i)(?:\\bvs\\.?\\b|\\bversus\\b|比较|对比|相比|和|与|/)"
+    );
+    /** 两个疑似代码隔着比较连接词直接相对，如 "AMD 和 NVDA"、"SNOW vs DDOG"，才把未知大写词当作第二个标的。 */
+    private static final Pattern TICKER_PAIR_PATTERN = Pattern.compile(
+            "(?<![A-Z0-9.])([A-Z]{2,5}(?:\\.[A-Z])?)\\s*(?i:vs\\.?|versus|and|or|和|与|跟|及|对比|相比|/|、|,|，)\\s*"
+                    + "([A-Z]{2,5}(?:\\.[A-Z])?)(?![A-Za-z0-9])"
     );
     private static final Set<String> SINGLE_LETTER_TICKERS = Set.of("F", "T", "C", "X");
 
@@ -234,20 +239,31 @@ public class TickerResolutionService {
                 return true;
             }
         }
-        Matcher usMatcher = EXPLICIT_US_TICKER_PATTERN.matcher(
-                MARKET_TICKER_PATTERN.matcher(query).replaceAll(" "));
+        String withoutMarketCodes = MARKET_TICKER_PATTERN.matcher(query).replaceAll(" ");
+        Set<String> pairedTickers = new java.util.HashSet<>();
+        Matcher pairMatcher = TICKER_PAIR_PATTERN.matcher(withoutMarketCodes);
+        while (pairMatcher.find()) {
+            if (!NON_TICKER_TERMS.contains(pairMatcher.group(1)) && !NON_TICKER_TERMS.contains(pairMatcher.group(2))) {
+                pairedTickers.add(pairMatcher.group(1));
+                pairedTickers.add(pairMatcher.group(2));
+            }
+        }
+        Matcher usMatcher = EXPLICIT_US_TICKER_PATTERN.matcher(withoutMarketCodes);
         while (usMatcher.find()) {
             String candidate = usMatcher.group();
             if (NON_TICKER_TERMS.contains(candidate)) {
                 continue;
             }
+            boolean known = TICKER_SECTOR_MAP.containsKey(candidate);
             for (CompanyAlias company : COMPANY_ALIASES) {
                 if (company.aliases().contains(candidate)) {
                     candidate = company.ticker();
+                    known = true;
                     break;
                 }
             }
-            if (!candidate.equals(expected)) {
+            // 未知的大写词（MCP、URL 等缩写）只有与另一个疑似代码成对出现时才算第二个标的，避免误判为多标的。
+            if (!candidate.equals(expected) && (known || pairedTickers.contains(candidate))) {
                 return true;
             }
         }
@@ -287,14 +303,23 @@ public class TickerResolutionService {
                 return company.ticker();
             }
         }
-        Matcher matcher = US_TICKER_PATTERN.matcher(query);
+        // 先去掉 SH.600519、0700.HK 等市场代码，否则其中的 "SH" 会被当成美股代码抢先返回。
+        Matcher matcher = US_TICKER_PATTERN.matcher(MARKET_TICKER_PATTERN.matcher(query).replaceAll(" "));
+        String firstUnknown = "";
         while (matcher.find()) {
             String candidate = matcher.group();
-            if (!NON_TICKER_TERMS.contains(candidate)) {
+            if (NON_TICKER_TERMS.contains(candidate)) {
+                continue;
+            }
+            // 已知代码优先于未知大写词，避免 "用 API 拉 NVDA" 把 API 当成主标的。
+            if (TICKER_SECTOR_MAP.containsKey(candidate)) {
                 return candidate;
             }
+            if (firstUnknown.isEmpty()) {
+                firstUnknown = candidate;
+            }
         }
-        return "";
+        return firstUnknown;
     }
 
     /**

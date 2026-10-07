@@ -16,7 +16,7 @@
 | 经验维护 | [registry](../../evals/evolution_experiences.py) 已有来源、条件、反例、父版本、冲突与撤回 | 这些机制可以复用。旧经验合并多个问题，难以分辨具体有效步骤。 |
 | 经验应用 | [候选编译](../../evals/evolution_candidates.py) 将一条经验编译为完整方法；[在线选择器](../../stocksage-backend/src/main/java/com/stocksage/evolution/FundamentalsMethodRegistry.java) 在 baseline 与一份 staged 包之间选择 | Python 的 select_approved() 尚未接在线调用。V1 有意固定完整包，未实现按研究子任务选择多条经验。 |
 | 适用条件 | [OrdinaryEvidence](../../stocksage-backend/src/main/java/com/stocksage/service/OrdinaryEvidence.java) 产生 fundamentals、报表期间、period-comparison 和合格证据标签 | 没有增长、现金流、流动性等子任务标签；自然语言 applicabilityBoundary 本身不执行语义判断。 |
-| 使用反馈 | [observation](../../evals/evolution_observation.py) 按方法包汇总普通执行、外部质量复核和撤回建议 | 经发布包能追溯经验，但没有自动把结果送回该经验的修订流程。 |
+| 使用反馈 | 普通请求在 Trace 的 `methodSelection` 中记录选用原因、灰度模式与推导标签；v1 的 observation 工具已归档到 [archive](../../evals/archive/evolution-v1-governance/README.md) | 还没有从生产反馈自动采集失败并送回经验修订流程（P2）。 |
 | 效果验证 | [两阶段回放](../../stocksage-backend/src/main/java/com/stocksage/evolution/EvolutionReplayService.java) 执行清单指定的包 | 它绕过普通请求选择。指定方法是否有效，与在线能否正确选用，需要分别验证。 |
 
 对[旧经验](../../evals/evolution/common-fundamentals-2025-v1/ai-experiment-001/experience.json)调用现有 load_record() 与 experience_matches() 的静态检查发现：其自身声明条件可以匹配，但无法匹配源码所产生的普通年度比较标签。未产生的条件是 historical-fundamentals 和 financial-statements。不能简单改名当作修复，必须确认真实证据满足其期间、科目与口径要求。该包没有上线，因此这是条件未贯通的证据，不是已经发生的线上故障。

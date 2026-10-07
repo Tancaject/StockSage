@@ -51,3 +51,4 @@ tmp/
 progress.md
 feature_list.json
 docs/archive/local/
+/target/

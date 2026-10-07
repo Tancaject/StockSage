@@ -1,0 +1,417 @@
+{
+  "query" : "根据固定证据分析 REPLAY 的中期风险。",
+  "timeSensitivity" : "NONE",
+  "primaryTicker" : "REPLAY",
+  "dataSnapshotHash" : "fixture-snapshot",
+  "contextHash" : "fixture-context",
+  "fundamentalsReport" : "这是合成回放证据：收入稳定，但现金流存在不确定性。",
+  "marketReport" : "这是合成回放证据：价格稳定，但成交量存在不确定性。",
+  "newsReport" : "本场景未提供新闻证据。",
+  "investmentReport" : {
+    "ticker" : "REPLAY",
+    "dataSnapshotHash" : "fixture-snapshot",
+    "contextHash" : "fixture-context",
+    "reportVersion" : null,
+    "modelTier" : null,
+    "modelName" : null,
+    "reusedFromCache" : null,
+    "qualityStatus" : "VERIFIED",
+    "completionPolicyId" : "deep-equity-v1",
+    "completionPolicyVersion" : 6,
+    "decisionAudit" : {
+      "policyId" : "debate-decision-v1",
+      "version" : 2,
+      "inputHash" : "879197a01fb400fd122b8065eaa23c92bd0451836b1db731af6b7a975f0d557f",
+      "dataSnapshotHash" : "fixture-snapshot",
+      "bullScore" : 77.5,
+      "bearScore" : 77.5,
+      "leadingSide" : "BALANCED",
+      "scoreMargin" : 0.0,
+      "recommendation" : "HOLD",
+      "analysisHorizon" : "MEDIUM_TERM",
+      "decisivePointIds" : [ ],
+      "unresolvedPointIds" : [ "bull-1", "bull-2", "bull-3", "bear-1", "bear-2", "bear-3" ],
+      "assessments" : [ {
+        "pointId" : "bull-1",
+        "evidenceSupport" : 3,
+        "questionRelevance" : 3,
+        "logicalCoherence" : 3,
+        "rebuttalSurvival" : 3,
+        "uncertaintyHandling" : 3,
+        "acceptedEvidenceIds" : [ "e-fund" ],
+        "decisiveRebuttalIds" : [ ],
+        "reasonCodes" : [ "SUPPORTED" ],
+        "explanation" : "固定语义评分，避免回放执行评分模型"
+      }, {
+        "pointId" : "bull-2",
+        "evidenceSupport" : 3,
+        "questionRelevance" : 3,
+        "logicalCoherence" : 3,
+        "rebuttalSurvival" : 3,
+        "uncertaintyHandling" : 3,
+        "acceptedEvidenceIds" : [ "e-fund" ],
+        "decisiveRebuttalIds" : [ ],
+        "reasonCodes" : [ "SUPPORTED" ],
+        "explanation" : "固定语义评分，避免回放执行评分模型"
+      }, {
+        "pointId" : "bull-3",
+        "evidenceSupport" : 3,
+        "questionRelevance" : 3,
+        "logicalCoherence" : 3,
+        "rebuttalSurvival" : 3,
+        "uncertaintyHandling" : 3,
+        "acceptedEvidenceIds" : [ "e-fund" ],
+        "decisiveRebuttalIds" : [ ],
+        "reasonCodes" : [ "SUPPORTED" ],
+        "explanation" : "固定语义评分，避免回放执行评分模型"
+      }, {
+        "pointId" : "bear-1",
+        "evidenceSupport" : 3,
+        "questionRelevance" : 3,
+        "logicalCoherence" : 3,
+        "rebuttalSurvival" : 3,
+        "uncertaintyHandling" : 3,
+        "acceptedEvidenceIds" : [ "e-fund" ],
+        "decisiveRebuttalIds" : [ ],
+        "reasonCodes" : [ "SUPPORTED" ],
+        "explanation" : "固定语义评分，避免回放执行评分模型"
+      }, {
+        "pointId" : "bear-2",
+        "evidenceSupport" : 3,
+        "questionRelevance" : 3,
+        "logicalCoherence" : 3,
+        "rebuttalSurvival" : 3,
+        "uncertaintyHandling" : 3,
+        "acceptedEvidenceIds" : [ "e-fund" ],
+        "decisiveRebuttalIds" : [ ],
+        "reasonCodes" : [ "SUPPORTED" ],
+        "explanation" : "固定语义评分，避免回放执行评分模型"
+      }, {
+        "pointId" : "bear-3",
+        "evidenceSupport" : 3,
+        "questionRelevance" : 3,
+        "logicalCoherence" : 3,
+        "rebuttalSurvival" : 3,
+        "uncertaintyHandling" : 3,
+        "acceptedEvidenceIds" : [ "e-fund" ],
+        "decisiveRebuttalIds" : [ ],
+        "reasonCodes" : [ "SUPPORTED" ],
+        "explanation" : "固定语义评分，避免回放执行评分模型"
+      } ]
+    },
+    "recommendation" : "HOLD",
+    "analysisHorizon" : "MEDIUM_TERM",
+    "rationale" : [ "固定证据支持审慎观察" ],
+    "riskFactors" : [ "现金流存在不确定性" ],
+    "citations" : [ "provider=controlled-fixture; sourceRef=fixture:fundamentals; asOf=2026-10-04T00:00:00Z" ],
+    "evidenceItems" : [ {
+      "dimension" : "财务",
+      "evidence" : "收入稳定",
+      "implication" : "支持中期观察",
+      "source" : "provider=controlled-fixture; sourceRef=fixture:fundamentals; asOf=2026-10-04T00:00:00Z",
+      "sourceEvidenceIds" : [ "e-fund" ]
+    } ],
+    "bullFactors" : [ "收入稳定" ],
+    "bearFactors" : [ "现金流不确定" ],
+    "suitableFor" : [ "能承受波动" ],
+    "notSuitableFor" : [ "要求确定回报" ],
+    "unknowns" : [ "后续公告变化" ],
+    "analystSummary" : "中期观察，结论服从服务器锁定裁决。",
+    "bullCase" : "- BULL独立合成论点1；关键假设：证据持续有效；失效条件：新公告推翻证据\n- BULL独立合成论点2；关键假设：证据持续有效；失效条件：新公告推翻证据\n- BULL独立合成论点3；关键假设：证据持续有效；失效条件：新公告推翻证据",
+    "bearCase" : "- BEAR独立合成论点1；关键假设：证据持续有效；失效条件：新公告推翻证据\n- BEAR独立合成论点2；关键假设：证据持续有效；失效条件：新公告推翻证据\n- BEAR独立合成论点3；关键假设：证据持续有效；失效条件：新公告推翻证据",
+    "dataFreshness" : "固定合成证据，2026-10-04。",
+    "generatedAt" : [ 2026, 10, 5, 11, 35, 13, 29415400 ]
+  },
+  "debateTurns" : [ {
+    "round" : 1,
+    "side" : "BULL",
+    "points" : [ {
+      "pointId" : "bull-1",
+      "type" : "THESIS",
+      "claim" : "BULL独立合成论点1",
+      "horizon" : "MEDIUM_TERM",
+      "evidenceRefs" : [ {
+        "evidenceId" : "e-fund",
+        "excerpt" : "收入稳定，但现金流存在不确定性"
+      } ],
+      "reasoning" : "固定的可展示合成解释",
+      "assumption" : "证据持续有效",
+      "invalidationCondition" : "新公告推翻证据",
+      "respondsToPointIds" : [ ]
+    }, {
+      "pointId" : "bull-2",
+      "type" : "THESIS",
+      "claim" : "BULL独立合成论点2",
+      "horizon" : "MEDIUM_TERM",
+      "evidenceRefs" : [ {
+        "evidenceId" : "e-fund",
+        "excerpt" : "收入稳定，但现金流存在不确定性"
+      } ],
+      "reasoning" : "固定的可展示合成解释",
+      "assumption" : "证据持续有效",
+      "invalidationCondition" : "新公告推翻证据",
+      "respondsToPointIds" : [ ]
+    }, {
+      "pointId" : "bull-3",
+      "type" : "THESIS",
+      "claim" : "BULL独立合成论点3",
+      "horizon" : "MEDIUM_TERM",
+      "evidenceRefs" : [ {
+        "evidenceId" : "e-fund",
+        "excerpt" : "收入稳定，但现金流存在不确定性"
+      } ],
+      "reasoning" : "固定的可展示合成解释",
+      "assumption" : "证据持续有效",
+      "invalidationCondition" : "新公告推翻证据",
+      "respondsToPointIds" : [ ]
+    } ]
+  }, {
+    "round" : 1,
+    "side" : "BEAR",
+    "points" : [ {
+      "pointId" : "bear-1",
+      "type" : "THESIS",
+      "claim" : "BEAR独立合成论点1",
+      "horizon" : "MEDIUM_TERM",
+      "evidenceRefs" : [ {
+        "evidenceId" : "e-fund",
+        "excerpt" : "收入稳定，但现金流存在不确定性"
+      } ],
+      "reasoning" : "固定的可展示合成解释",
+      "assumption" : "证据持续有效",
+      "invalidationCondition" : "新公告推翻证据",
+      "respondsToPointIds" : [ ]
+    }, {
+      "pointId" : "bear-2",
+      "type" : "THESIS",
+      "claim" : "BEAR独立合成论点2",
+      "horizon" : "MEDIUM_TERM",
+      "evidenceRefs" : [ {
+        "evidenceId" : "e-fund",
+        "excerpt" : "收入稳定，但现金流存在不确定性"
+      } ],
+      "reasoning" : "固定的可展示合成解释",
+      "assumption" : "证据持续有效",
+      "invalidationCondition" : "新公告推翻证据",
+      "respondsToPointIds" : [ ]
+    }, {
+      "pointId" : "bear-3",
+      "type" : "THESIS",
+      "claim" : "BEAR独立合成论点3",
+      "horizon" : "MEDIUM_TERM",
+      "evidenceRefs" : [ {
+        "evidenceId" : "e-fund",
+        "excerpt" : "收入稳定，但现金流存在不确定性"
+      } ],
+      "reasoning" : "固定的可展示合成解释",
+      "assumption" : "证据持续有效",
+      "invalidationCondition" : "新公告推翻证据",
+      "respondsToPointIds" : [ ]
+    } ]
+  } ],
+  "managerAssessment" : {
+    "contractId" : "manager-assessment-v1",
+    "version" : 1,
+    "inputHash" : "879197a01fb400fd122b8065eaa23c92bd0451836b1db731af6b7a975f0d557f",
+    "positionAIsBull" : false,
+    "assessments" : [ {
+      "pointId" : "bull-1",
+      "evidenceSupport" : 3,
+      "questionRelevance" : 3,
+      "logicalCoherence" : 3,
+      "rebuttalSurvival" : 3,
+      "uncertaintyHandling" : 3,
+      "acceptedEvidenceIds" : [ "e-fund" ],
+      "decisiveRebuttalIds" : [ ],
+      "reasonCodes" : [ "SUPPORTED" ],
+      "explanation" : "固定语义评分，避免回放执行评分模型"
+    }, {
+      "pointId" : "bull-2",
+      "evidenceSupport" : 3,
+      "questionRelevance" : 3,
+      "logicalCoherence" : 3,
+      "rebuttalSurvival" : 3,
+      "uncertaintyHandling" : 3,
+      "acceptedEvidenceIds" : [ "e-fund" ],
+      "decisiveRebuttalIds" : [ ],
+      "reasonCodes" : [ "SUPPORTED" ],
+      "explanation" : "固定语义评分，避免回放执行评分模型"
+    }, {
+      "pointId" : "bull-3",
+      "evidenceSupport" : 3,
+      "questionRelevance" : 3,
+      "logicalCoherence" : 3,
+      "rebuttalSurvival" : 3,
+      "uncertaintyHandling" : 3,
+      "acceptedEvidenceIds" : [ "e-fund" ],
+      "decisiveRebuttalIds" : [ ],
+      "reasonCodes" : [ "SUPPORTED" ],
+      "explanation" : "固定语义评分，避免回放执行评分模型"
+    }, {
+      "pointId" : "bear-1",
+      "evidenceSupport" : 3,
+      "questionRelevance" : 3,
+      "logicalCoherence" : 3,
+      "rebuttalSurvival" : 3,
+      "uncertaintyHandling" : 3,
+      "acceptedEvidenceIds" : [ "e-fund" ],
+      "decisiveRebuttalIds" : [ ],
+      "reasonCodes" : [ "SUPPORTED" ],
+      "explanation" : "固定语义评分，避免回放执行评分模型"
+    }, {
+      "pointId" : "bear-2",
+      "evidenceSupport" : 3,
+      "questionRelevance" : 3,
+      "logicalCoherence" : 3,
+      "rebuttalSurvival" : 3,
+      "uncertaintyHandling" : 3,
+      "acceptedEvidenceIds" : [ "e-fund" ],
+      "decisiveRebuttalIds" : [ ],
+      "reasonCodes" : [ "SUPPORTED" ],
+      "explanation" : "固定语义评分，避免回放执行评分模型"
+    }, {
+      "pointId" : "bear-3",
+      "evidenceSupport" : 3,
+      "questionRelevance" : 3,
+      "logicalCoherence" : 3,
+      "rebuttalSurvival" : 3,
+      "uncertaintyHandling" : 3,
+      "acceptedEvidenceIds" : [ "e-fund" ],
+      "decisiveRebuttalIds" : [ ],
+      "reasonCodes" : [ "SUPPORTED" ],
+      "explanation" : "固定语义评分，避免回放执行评分模型"
+    } ],
+    "parseStatus" : "VALID",
+    "issues" : [ ]
+  },
+  "debateVerdict" : {
+    "policyId" : "debate-decision-v1",
+    "version" : 2,
+    "inputHash" : "879197a01fb400fd122b8065eaa23c92bd0451836b1db731af6b7a975f0d557f",
+    "dataSnapshotHash" : "fixture-snapshot",
+    "bullScore" : 77.5,
+    "bearScore" : 77.5,
+    "leadingSide" : "BALANCED",
+    "scoreMargin" : 0.0,
+    "recommendation" : "HOLD",
+    "analysisHorizon" : "MEDIUM_TERM",
+    "decisivePointIds" : [ ],
+    "unresolvedPointIds" : [ "bull-1", "bull-2", "bull-3", "bear-1", "bear-2", "bear-3" ],
+    "assessments" : [ {
+      "pointId" : "bull-1",
+      "evidenceSupport" : 3,
+      "questionRelevance" : 3,
+      "logicalCoherence" : 3,
+      "rebuttalSurvival" : 3,
+      "uncertaintyHandling" : 3,
+      "acceptedEvidenceIds" : [ "e-fund" ],
+      "decisiveRebuttalIds" : [ ],
+      "reasonCodes" : [ "SUPPORTED" ],
+      "explanation" : "固定语义评分，避免回放执行评分模型"
+    }, {
+      "pointId" : "bull-2",
+      "evidenceSupport" : 3,
+      "questionRelevance" : 3,
+      "logicalCoherence" : 3,
+      "rebuttalSurvival" : 3,
+      "uncertaintyHandling" : 3,
+      "acceptedEvidenceIds" : [ "e-fund" ],
+      "decisiveRebuttalIds" : [ ],
+      "reasonCodes" : [ "SUPPORTED" ],
+      "explanation" : "固定语义评分，避免回放执行评分模型"
+    }, {
+      "pointId" : "bull-3",
+      "evidenceSupport" : 3,
+      "questionRelevance" : 3,
+      "logicalCoherence" : 3,
+      "rebuttalSurvival" : 3,
+      "uncertaintyHandling" : 3,
+      "acceptedEvidenceIds" : [ "e-fund" ],
+      "decisiveRebuttalIds" : [ ],
+      "reasonCodes" : [ "SUPPORTED" ],
+      "explanation" : "固定语义评分，避免回放执行评分模型"
+    }, {
+      "pointId" : "bear-1",
+      "evidenceSupport" : 3,
+      "questionRelevance" : 3,
+      "logicalCoherence" : 3,
+      "rebuttalSurvival" : 3,
+      "uncertaintyHandling" : 3,
+      "acceptedEvidenceIds" : [ "e-fund" ],
+      "decisiveRebuttalIds" : [ ],
+      "reasonCodes" : [ "SUPPORTED" ],
+      "explanation" : "固定语义评分，避免回放执行评分模型"
+    }, {
+      "pointId" : "bear-2",
+      "evidenceSupport" : 3,
+      "questionRelevance" : 3,
+      "logicalCoherence" : 3,
+      "rebuttalSurvival" : 3,
+      "uncertaintyHandling" : 3,
+      "acceptedEvidenceIds" : [ "e-fund" ],
+      "decisiveRebuttalIds" : [ ],
+      "reasonCodes" : [ "SUPPORTED" ],
+      "explanation" : "固定语义评分，避免回放执行评分模型"
+    }, {
+      "pointId" : "bear-3",
+      "evidenceSupport" : 3,
+      "questionRelevance" : 3,
+      "logicalCoherence" : 3,
+      "rebuttalSurvival" : 3,
+      "uncertaintyHandling" : 3,
+      "acceptedEvidenceIds" : [ "e-fund" ],
+      "decisiveRebuttalIds" : [ ],
+      "reasonCodes" : [ "SUPPORTED" ],
+      "explanation" : "固定语义评分，避免回放执行评分模型"
+    } ]
+  },
+  "citations" : [ ],
+  "evidenceLedger" : {
+    "target" : {
+      "canonicalKey" : "REPLAY",
+      "displaySymbol" : "REPLAY",
+      "status" : "RESOLVED"
+    },
+    "evidence" : [ {
+      "evidenceId" : "e-fund",
+      "dimension" : "FUNDAMENTALS",
+      "capabilityId" : "replay-fundamentals",
+      "targetKey" : "REPLAY",
+      "status" : "AVAILABLE",
+      "sourceRef" : "fixture:fundamentals",
+      "provider" : "controlled-fixture",
+      "observedAt" : 1791072000.000000000,
+      "asOf" : 1791072000.000000000,
+      "payloadHash" : "fixture-fund-hash",
+      "approvedReadOnly" : true,
+      "timing" : null
+    }, {
+      "evidenceId" : "e-market",
+      "dimension" : "MARKET",
+      "capabilityId" : "replay-market",
+      "targetKey" : "REPLAY",
+      "status" : "AVAILABLE",
+      "sourceRef" : "fixture:market",
+      "provider" : "controlled-fixture",
+      "observedAt" : 1791072000.000000000,
+      "asOf" : 1791072000.000000000,
+      "payloadHash" : "fixture-market-hash",
+      "approvedReadOnly" : true,
+      "timing" : null
+    } ]
+  },
+  "harnessSnapshot" : {
+    "policyId" : "deep-equity-v1",
+    "policyVersion" : "6",
+    "phase" : "EVIDENCE",
+    "outcome" : "PASS",
+    "violations" : [ ],
+    "recoveryAttempts" : { },
+    "recoveryLifecycle" : "NONE",
+    "recoveryActions" : [ ],
+    "recoveryEffectKey" : "",
+    "suspendedRecovery" : null
+  },
+  "reportRepairFeedback" : null,
+  "evidenceReplanState" : null
+}

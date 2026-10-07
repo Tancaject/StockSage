@@ -368,16 +368,46 @@ public final class HarnessModels {
      * @param report 成功解析的报告，失败时可为空
      * @param parseStatus 解析或模型失败分类
      * @param validationIssues 缺失/非法字段名的有限列表
+     * @param outputExcerpt 有界的失败报告片段；只供既有报告修复使用
      */
     public record SynthesisResult(
             InvestmentReport report,
             ParseStatus parseStatus,
-            List<String> validationIssues
+            List<String> validationIssues,
+            String outputExcerpt
     ) {
+        public SynthesisResult(InvestmentReport report, ParseStatus parseStatus, List<String> validationIssues) {
+            this(report, parseStatus, validationIssues, "");
+        }
+
         public SynthesisResult {
             parseStatus = parseStatus == null ? ParseStatus.MODEL_FAILURE : parseStatus;
             validationIssues = validationIssues == null ? List.of() : List.copyOf(validationIssues);
+            outputExcerpt = boundedExcerpt(outputExcerpt);
         }
+    }
+
+    /** 与 PLANNED 一起持久化的一次修复输入；违规码沿用 HarnessSnapshot，不保存报告全文。 */
+    public record ReportRepairFeedback(
+            ParseStatus parseStatus,
+            List<String> validationIssues,
+            String outputExcerpt
+    ) {
+        public ReportRepairFeedback {
+            parseStatus = parseStatus == null ? ParseStatus.MODEL_FAILURE : parseStatus;
+            validationIssues = validationIssues == null ? List.of() : validationIssues.stream()
+                    .filter(java.util.Objects::nonNull)
+                    .distinct()
+                    .limit(24)
+                    .map(issue -> issue.substring(0, Math.min(issue.length(), 160)))
+                    .toList();
+            outputExcerpt = boundedExcerpt(outputExcerpt);
+        }
+    }
+
+    private static String boundedExcerpt(String value) {
+        String text = safe(value);
+        return text.substring(0, Math.min(text.length(), 2000));
     }
 
     private static String safe(String value) {

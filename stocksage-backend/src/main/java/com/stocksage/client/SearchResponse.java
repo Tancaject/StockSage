@@ -1,12 +1,8 @@
 package com.stocksage.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.cfg.CoercionAction;
-import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
-import com.fasterxml.jackson.databind.type.LogicalType;
 
 import java.io.IOException;
 import java.net.URI;
@@ -33,24 +29,7 @@ public record SearchResponse(
     private static final Set<String> TIME_LIMITS = Set.of("d", "w", "m", "y");
     private static final Set<String> FALLBACK_REASONS = Set.of("PRIMARY_NOT_CONFIGURED", "UPSTREAM_TIMEOUT",
             "UPSTREAM_RATE_LIMIT", "UPSTREAM_ERROR", "INVALID_PROVIDER_DATA");
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-            .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT)
-            .enable(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS)
-            .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
-    static {
-        for (LogicalType type : List.of(LogicalType.Textual, LogicalType.Integer, LogicalType.Boolean)) {
-            var coercions = MAPPER.coercionConfigFor(type);
-            if (type != LogicalType.Textual) {
-                coercions.setCoercion(CoercionInputShape.String, CoercionAction.Fail)
-                        .setCoercion(CoercionInputShape.EmptyString, CoercionAction.Fail);
-            }
-            if (type != LogicalType.Boolean) coercions.setCoercion(CoercionInputShape.Boolean, CoercionAction.Fail);
-            if (type == LogicalType.Textual || type == LogicalType.Boolean) {
-                coercions.setCoercion(CoercionInputShape.Integer, CoercionAction.Fail)
-                        .setCoercion(CoercionInputShape.Float, CoercionAction.Fail);
-            }
-        }
-    }
+    private static final ObjectMapper MAPPER = StrictResponseJson.newMapper();
 
     public SearchResponse {
         if (schemaVersion != 1 || status == null || query == null || searchType == null

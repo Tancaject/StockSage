@@ -1,0 +1,22 @@
+{
+  "scope": "Controlled HTTP model responses through production Spring AI and ordinary answer components",
+  "quality_claim": "Generation completion and task outcome only; no semantic quality acceptance",
+  "cases": [
+    {"id": "normal", "finish_reason": "stop", "content": "已核对 [E1]。", "expected": "COMPLETE"},
+    {"id": "length", "finish_reason": "length", "content": "部分回答 [E1]", "expected": "TRUNCATED"},
+    {"id": "missing_finish", "finish_reason": null, "content": "已有正文 [E1]", "expected": "UNKNOWN"},
+    {"id": "unknown_finish", "finish_reason": "future_reason", "content": "已有正文 [E1]", "expected": "UNKNOWN"},
+    {"id": "empty", "finish_reason": "stop", "content": "", "expected": "FAILED"},
+    {"id": "filtered", "finish_reason": "content_filter", "content": "部分正文", "expected": "FAILED"},
+    {"id": "unexpected_tool", "finish_reason": "tool_calls", "content": "部分正文", "expected": "FAILED"},
+    {"id": "http_error", "http_status": 400, "expected": "FAILED"},
+    {"id": "stream_disconnect", "content": "部分正文 [E1]", "expected": "FAILED_OR_UNKNOWN_WITHOUT_COMPLETE"},
+    {"id": "cancelled", "expected": "FAILED_WITH_CANCELLED_REASON"}
+  ],
+  "outcome_checks": [
+    "Existing DEGRADED, BLOCKED and FAILED outcomes cannot be upgraded by a complete answer",
+    "Missing or unknown citation IDs downgrade an otherwise complete answer",
+    "Incomplete analyst drafts remain available in replay evidence but are excluded from synthesis context",
+    "Online and replay consume the same generation-completion and task-outcome rules"
+  ]
+}

@@ -69,6 +69,17 @@ export async function getTrace(traceId) {
 }
 
 /**
+ * 标记某次回答有问题，进入后端自进化失败池等待分诊。
+ */
+export async function submitAnswerFeedback(traceId, note) {
+  await requestOk(`${BASE_URL}/chat/feedback`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ traceId, note }),
+  })
+}
+
+/**
  * 获取用户画像。
  */
 export async function getUserProfile() {

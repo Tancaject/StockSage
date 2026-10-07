@@ -1,0 +1,8 @@
+{
+  "scenario" : "repair-exhausted",
+  "status" : "PASS",
+  "httpRequests" : 2,
+  "checkpoints" : 2,
+  "reportStatus" : "NOT_RATED",
+  "lifecycle" : "REVALIDATED"
+}

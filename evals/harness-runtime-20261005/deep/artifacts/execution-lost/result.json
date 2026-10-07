@@ -1,0 +1,8 @@
+{
+  "scenario" : "execution-lost",
+  "status" : "PASS",
+  "httpRequests" : 2,
+  "checkpoints" : 1,
+  "reportStatus" : "ABSENT",
+  "lifecycle" : "PLANNED"
+}

@@ -33,7 +33,11 @@ public class MarketAgent {
      * @return 市场分析师输出的结构化文本报告
      */
     public String analyze(String query, String context) {
-        return chatClient.prompt()
+        return analyzeObserved(query, context).content();
+    }
+
+    public ModelCompletion.Output analyzeObserved(String query, String context) {
+        return ModelCompletion.output(chatClient.prompt()
                 .user("""
                         用户问题：
                         %s
@@ -48,6 +52,6 @@ public class MarketAgent {
                         4. 按系统规定的固定章节输出，明确标注事实、分析观察和数据缺口，供后续研究角色复核。
                         """.formatted(query, context == null ? "" : context))
                 .call()
-                .content();
+                .chatResponse());
     }
 }

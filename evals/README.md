@@ -1,8 +1,10 @@
 # StockSage 评测入口
 
-> 离线评测、实验及诊断脚本已按用户要求删除，不保留备份。本目录保留财报入库工具 [ingest_corpus.py](ingest_corpus.py)、数据与历史报告。下文作为历史评测说明保留，其中引用的已删除脚本、运行命令和离线验收流程不再可用；业务服务源码未变。
-
 这里按评测对象维护标准、数据和运行脚本。**没有覆盖所有对象的统一评分标准或总分**：检索质量、规划正确性、执行契约、回答质量和方法改进分别评价。数值阈值以各项目的代码、配置或冻结实验策略为准，本页只链接这些来源。
+
+评测 Agent、评分器、校准器、数据集、标准、评测运行器及其依赖属于评测体系，不属于自动化测试套件。清理单元测试或回归测试时必须保留这些内容，不能仅因使用 Python、离线运行或位于 `evals` 就将其删除。
+
+例如 [agent_eval_summary.py](agent_eval_summary.py)（Planner 评测汇总与门禁）曾在提交 `7eb903b` 中被当作测试误删，现已恢复，属于评测体系，必须保留。自进化 v1 的发布签名、影子运行、上线授权和观测工具已归档到 [archive/evolution-v1-governance](archive/evolution-v1-governance/README.md)，现行审批与灰度流程见 [evolution/README.md](evolution/README.md#approval-rollout-and-withdrawal)。
 
 命令从仓库根目录执行。现有 Python 环境仍使用 `.venv-rag-eval`：
 
@@ -13,6 +15,26 @@ New-Item -ItemType Directory -Force evals/results | Out-Null
 
 真实接口评测需要对应服务和依赖可用；管理接口读取 `STOCKSAGE_ADMIN_TOKEN`。模型调用需要配置实际使用的供应商，密钥只放在环境变量或本地忽略配置中。运行与验收进度统一见 [progress.md](../progress.md)。
 
+## 日常回归
+
+改动路由、RAG 或 Harness 后先跑这一条，它和正式验收是两档：
+
+```powershell
+.\init.ps1 -Mode eval          # 等价于 python evals/run_daily_eval.py
+```
+
+| 步骤 | 内容 | 前提 |
+|---|---|---|
+| harness | 82 个固定用例离线调用生产 DEEP 完成策略 | 无需服务和模型 |
+| planner | 115 题 `LIVE_COORDINATOR`，即生产意图识别（qwen3.8-flash + Embedding + Pattern + n-gram） | 后端在线、`STOCKSAGE_ADMIN_TOKEN` |
+| rag | `golden_set.jsonl` 中有标注证据的题目，经 `/api/docs/search`（生产 `RagService.retrieve`）只算检索指标，不生成回答 | 后端在线 |
+
+- 缺前提的步骤记为 `SKIPPED`，不算通过。
+- 指标阈值沿用各自现有门禁；数据集哈希、用例数、schema/策略版本这类"身份固定项"不一致时只记为 `IDENTITY_CHANGED`，不判失败，所以加题不必同步改门禁文件。
+- 结果写入 `evals/results/daily/<时间戳>/`，并在 `history.jsonl` 追加一行；控制台列出与上一次的指标差值、误路由题和检索最差题。有步骤 FAIL 或 ERROR 时退出码为 1。
+- 日常回归是回归信号，不是发布证据；正式验收仍用下文各入口及其固定门禁。
+- Planner 的 `DETERMINISTIC` 模式评的是关键词兜底路由（`Coordinator.fallbackPlan`），不是生产识别器，日常回归不用它。
+
 ## 选择评测对象
 
 | 对象 | 数据与标准来源 | 结果含义 |
@@ -21,11 +43,15 @@ New-Item -ItemType Directory -Force evals/results | Out-Null
 | Planner / Agent 规划 | [agent_golden_set.jsonl](agent_golden_set.jsonl)、[PlannerEvalService](../stocksage-backend/src/main/java/com/stocksage/service/PlannerEvalService.java)；门禁 [agent_eval_gates.json](agent_eval_gates.json)，汇总 [agent_eval_summary.py](agent_eval_summary.py) | 路由、所需/禁止动作、上下文解析、fallback 和延迟；不代表实际工具执行或回答质量 |
 | Ordinary 执行与回答 | [ordinary_live_cases.jsonl](ordinary_live_cases.jsonl)、[run_ordinary_live_eval.py](run_ordinary_live_eval.py)；回答标准 [ordinary_answer_quality.py](ordinary_answer_quality.py) | 执行契约与答案语义分开；没有有效复核时，回答质量保持 `NO_DATA` |
 | Harness / DEEP | [harness_golden_set.jsonl](harness_golden_set.jsonl)、[harness_live_cases.jsonl](harness_live_cases.jsonl)、[harness_live_manifest.json](harness_live_manifest.json)；生产策略 [DeepResearchCompletionPolicy](../stocksage-backend/src/main/java/com/stocksage/harness/DeepResearchCompletionPolicy.java)；评价器 [harness_eval_summary.py](harness_eval_summary.py)，门禁 [harness_eval_gates.json](harness_eval_gates.json) | 完成策略的决策/违规/恢复匹配与真实任务安全终态；不能替代研究内容质量 |
-| FUNDAMENTALS 方法进化 | [evolution_rubric.py](evolution_rubric.py)、[evolution_dataset.py](evolution_dataset.py)、[evolution_quality.py](evolution_quality.py)、[evolution_acceptance.py](evolution_acceptance.py)；业务事实和改善门槛来自实验自己的冻结 gold / policy | 分别评价分析稿与最终回答，再判定候选是否改善；执行通过不等于进化有效 |
+| FUNDAMENTALS 方法进化 | [evolution_rubric.py](evolution_rubric.py)、[evolution_dataset.py](evolution_dataset.py)、[evolution_quality.py](evolution_quality.py)、[evolution_numeric_check.py](evolution_numeric_check.py)（确定性数值核验）、[evolution_acceptance.py](evolution_acceptance.py)；生产失败池 [evolution_failure_pool.py](evolution_failure_pool.py)；业务事实和改善门槛来自实验自己的冻结 gold / policy | 分别评价分析稿与最终回答，再判定候选是否改善；执行通过不等于进化有效 |
 
 脚本保留平铺入口。[eval_common.py](eval_common.py)、[eval_utils.py](eval_utils.py) 和 [eval_http.py](eval_http.py) 提供共享计算、绑定或传输能力；共享代码不提供跨项目的默认业务标准。
 
-自动化测试文件、测试辅助文件与测试产物已按用户要求移除；评测实现、数据和历史记录保留。依赖 `EvolutionLiveBaselineTest` 或后端 `target/test-classes` 的历史实验入口无法直接重跑，需要先从版本历史恢复对应测试驱动及测试依赖。历史记录中的测试结果不代表当前工作区仍包含这些测试。
+自动化测试文件、测试辅助文件与测试产物已按用户要求移除；评测实现、数据和历史记录保留。依赖 `EvolutionLiveBaselineTest`、后端 `target/test-classes` 或已移除的 Mockito/JUnit 依赖的历史实验入口当前无法直接重跑。普通评测 Agent、校准器和 HTTP 评测入口不依赖这些测试驱动。历史记录中的测试结果不代表当前工作区仍包含这些测试。
+
+部分历史草稿回放没有保存模型结束原因，不能据正文非空证明生成完整；适用限制见[完成判定验证记录](diagnostics/harness-completion-20261005/RESULTS.md#解释范围)。
+
+部分历史实验将测试源文件也纳入冻结哈希清单。例如 `scoped-repeatability-20261004/run.py` 的准备和校验依赖已删除的 `test_evolution_applicability.py`，该历史运行器当前不能完整重跑；保留原计划和哈希，不通过修改冻结记录来绕过缺失输入。
 
 ## RAG
 
@@ -106,7 +132,9 @@ python evals/run_harness_eval.py --fail-on-gate
 python evals/run_harness_live_eval.py --email "$env:STOCKSAGE_EVAL_EMAIL" --password-env STOCKSAGE_EVAL_PASSWORD --fail-on-gate
 ```
 
-离线 runner 原先通过 `HarnessGoldenSetTest` 调用生产策略；该测试驱动已移除，需要恢复驱动和测试依赖后才能重跑。live runner 提交真实 DEEP 任务并核对终态、Trace 和 Harness 决策；数据集与策略身份由 manifest 约束。用 `--case-limit` 缩小运行范围只构成 smoke，不能视为完整发布门禁。
+离线 runner 编译后端并通过 [HarnessPolicyEval.java](harness/HarnessPolicyEval.java) 调用生产策略，不依赖 JUnit、Mockito 或 `target/test-classes`，不启动服务、不调用模型。需要 JDK 17 或更新版本及后端 Maven 运行依赖。输出保留逐例决策、违规、恢复动作和覆盖统计；同目录的 `.summary.json` 由现有 Harness 门禁生成。`--output` 可指定报告路径，本次结果生成并校验后才替换已有报告；`--fail-on-gate` 在门禁未通过时返回 1，编译、运行或产物错误返回 2。统一编译已完成且 `stocksage-backend/target/harness-eval-classpath.txt` 已生成时，可用 `--skip-build` 跳过 Maven；Java 驱动仍会重新编译执行。
+
+live runner 提交真实 DEEP 任务并核对终态、Trace 和 Harness 决策；数据集与策略身份由 manifest 约束。用 `--case-limit` 缩小运行范围只构成 smoke，不能视为完整发布门禁。
 
 DEEP Replan 的证据支撑覆盖、新增证据利用率及配对 A/B 门槛在[有界重规划计划](../docs/architecture/deep-bounded-replan-plan.md)中定义；没有独立的已实现语义 runner，不能用 Harness 通过代替这些收益验证。
 

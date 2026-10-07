@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.stocksage.agent.AgentRuntimeConfiguration;
 import com.stocksage.conversation.ChatPromptAssembler;
-import org.springframework.ai.document.Document;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,23 +38,14 @@ public final class FundamentalsRuntimeIdentity {
                 "finalAnswer", finalCalls, "promptMaxChars", promptMaxChars, "analysisTimeoutSeconds", timeoutSeconds);
     }
 
-    public static Map<String, String> conditions(Map<String, Object> modelConfig, String buildHash, String memoryHash) {
-        return Map.of("modelConfigSha256", hash(modelConfig), "runtimeBuildSha256", buildHash,
-                "fixedFinalPromptSha256", hash(ChatPromptAssembler.ordinaryFixedRules()), "memorySnapshotSha256", memoryHash);
-    }
-
-    public static String memoryHash(String researchMemory, String userMemory, List<Document> documents) {
-        return hash(Map.of("researchMemory", researchMemory == null ? "" : researchMemory,
-                "userMemory", userMemory == null ? "" : userMemory,
-                "rag", documents.stream().map(doc -> {
-                    Map<String, Object> row = new LinkedHashMap<>();
-                    row.put("id", doc.getId()); row.put("text", doc.getText()); row.put("metadata", doc.getMetadata());
-                    return row;
-                }).toList()));
+    /** 方法包批准时固定、线上选用时比对的运行条件：模型配置与最终回答固定规则。 */
+    public static Map<String, String> conditions(Map<String, Object> modelConfig) {
+        return Map.of("modelConfigSha256", hash(modelConfig),
+                "fixedFinalPromptSha256", hash(ChatPromptAssembler.ordinaryFixedRules()));
     }
 
     /** Constructed in ChatService, never bound from a client request body. */
-    public record Request(String originalQuery, Map<String, Object> finalInvocation, String memorySnapshotSha256,
+    public record Request(String originalQuery, Map<String, Object> finalInvocation,
                           int promptMaxChars, boolean eligibleRouteAndModel) {
         public Request {
             originalQuery = originalQuery == null ? "" : originalQuery;

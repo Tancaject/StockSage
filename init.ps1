@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("fast", "backend", "frontend", "python")]
+    [ValidateSet("fast", "backend", "frontend", "python", "rag", "eval")]
     [string]$Mode = "fast",
     [switch]$SkipInstall
 )
@@ -85,6 +85,13 @@ function Resolve-Npm {
 }
 
 function Resolve-Python {
+    param([switch]$PreferRagEval)
+
+    $evalPython = "$Root\.venv-rag-eval\Scripts\python.exe"
+    if ($PreferRagEval -and (Test-Path -LiteralPath $evalPython)) {
+        return $evalPython
+    }
+
     $candidates = @()
     $candidates += "C:\Users\Orion\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe"
     $candidates += "$Root\stocksage-data-service\.venv\Scripts\python.exe"
@@ -149,6 +156,18 @@ function Invoke-PythonCheck {
     Invoke-CheckedCommand -FilePath $python -CommandArgs @("-m", "compileall", "$Root\stocksage-data-service\main.py", "$Root\stocksage-data-service\app")
 }
 
+function Invoke-RagCheck {
+    Write-Host "=== RAG retrieval eval ==="
+    $python = Resolve-Python -PreferRagEval
+    Invoke-CheckedCommand -FilePath $python -CommandArgs @("$Root\evals\run_retrieval_eval.py")
+}
+
+function Invoke-DailyEval {
+    Write-Host "=== Daily eval: Harness offline + Planner LIVE + RAG retrieval ==="
+    $python = Resolve-Python -PreferRagEval
+    Invoke-CheckedCommand -FilePath $python -CommandArgs @("$Root\evals\run_daily_eval.py")
+}
+
 Write-Host "=== StockSage harness verification: $Mode ==="
 
 switch ($Mode) {
@@ -160,6 +179,12 @@ switch ($Mode) {
     }
     "python" {
         Invoke-HarnessStep "python" { Invoke-PythonCheck }
+    }
+    "rag" {
+        Invoke-HarnessStep "rag" { Invoke-RagCheck }
+    }
+    "eval" {
+        Invoke-HarnessStep "eval" { Invoke-DailyEval }
     }
     "fast" {
         Invoke-HarnessStep "backend" { Invoke-BackendCheck }

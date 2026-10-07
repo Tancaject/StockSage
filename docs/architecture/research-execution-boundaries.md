@@ -81,7 +81,7 @@ SQL 中的 ID 关联分为聚合内关系和历史来源关系。删除聚合只
 | 会话 → Redis 短期记忆 | [`ChatService.deleteConversation`](../../stocksage-backend/src/main/java/com/stocksage/conversation/ChatService.java) 在 SQL 删除返回后清理 Redis | 这是跨存储顺序执行，不是原子删除，也不是账号数据物理擦除承诺 |
 | 运行 → checkpoint | [`ResearchTaskCheckpointService`](../../stocksage-backend/src/main/java/com/stocksage/research/ResearchTaskCheckpointService.java) 通过当前 owner 或锁定成功任务授权清理 | checkpoint 是可回收的恢复状态；删除它不删除运行历史、模型调用和独立证据快照 |
 | 报告 → 生产运行、证据快照；调用 → 运行、attempt、快照 | research 拥有发布和不可变归因，具体规则见[独立证据快照](#独立证据快照)及[报告生产者](#报告生产者) | 属于历史来源关系。报告复用保留原生产者；不能从消费者会话删除或 checkpoint 清理推导历史记录应级联删除 |
-| 报告 → 研究记忆 | [`ResearchMemoryService`](../../stocksage-backend/src/main/java/com/stocksage/knowledge/ResearchMemoryService.java) 校验用户、处理负向审核与显式撤回，提交后删除派生向量 | 撤回与物理删除不同；SQL 资格决定可用性，向量删除完成情况不能由撤回成功推断。资格规则见[记忆契约](research-memory-decay-conflict-plan.md) |
+| 报告 → 研究记忆 | [`ResearchMemoryService`](../../stocksage-backend/src/main/java/com/stocksage/knowledge/ResearchMemoryService.java) 校验用户、处理负向审核撤回 | 撤回与物理删除不同；SQL 资格决定可用性，向量删除完成情况不能由撤回成功推断。资格规则见[记忆契约](research-memory-decay-conflict-plan.md) |
 | RAG 来源 → SQL 分块 → Milvus/Lucene | [`KnowledgeIngestionService`](../../stocksage-backend/src/main/java/com/stocksage/knowledge/KnowledgeIngestionService.java) 持有来源锁，发布 SQL 当前版本，提交后更新/清理索引；过期来源保留空来源行作为清理标记 | SQL 是正文与版本真源，派生索引可重建。物理向量清理可重试，不因清理失败撤销已提交来源；详见[来源发布与清理](../reviews/2026-09-14-code-audit.md#rag-来源发布与清理) |
 | Trace → 步骤 JSON | [`TraceService`](../../stocksage-backend/src/main/java/com/stocksage/trace/TraceService.java) 拥有 Trace 及步骤，当前每次追加重写 steps JSON | 用于有界演示轨迹；摘要查询不读取 steps。它不是按步追加的审计存储，不承诺长轨迹恒定写成本 |
 
@@ -277,14 +277,6 @@ V15 的 `research_evidence_snapshots` 保存 query、ticker、时间要求、现
 V16 在报告版本上保存首次创建者的 producer_run_id、producer_attempt 和 producer_evidence_snapshot_id。仅新建报告时从服务端执行上下文赋值；正常复用、并发插入后的赢家回读及人工审核均保留原值，JPA 更新排除这三列。发布仍使用现有报告、消息与任务终态的原子事务。历史或无执行上下文的记录留空，不从后来的消费者运行推测来源。
 
 生产者表示创建该版本的执行尝试，不保证一定调用过模型：离线报告须结合运行 resultKind、报告模型标记及实际调用记录解释。消费任务的 result_report_version_id 指向交付版本，报告生产者指向原始创建尝试；二者不能混同。
-
-## 运行用量查询
-
-`GET /api/research-tasks/{taskId}/usage` 按当前登录用户查所属任务；不存在与无权访问均返回 404。响应只返回汇总，不暴露请求正文、凭据或租约。`scope=RECORDED_DEEP_INVOCATIONS` 限定为该运行已记录的 DEEP 调用，包含所有 attempt，并按 attempt、角色、请求模型和响应模型拆分；复用报告的原生产成本不计入消费运行。
-
-`observedUsage` 分别累加提供商返回的 input/output/total token 字段，同时返回各字段的已知调用数。没有数据时为 null；提供商明确返回零时才是零。不由 input/output 推测缺失的 total，也不累加同一流的多个累计快照。取消/失败的部分返回可计入已观察用量，但计入 `unconfirmedCalls`；仍为 RUNNING 的调用还计入 `unfinishedCalls`。`NO_DATA`、`PARTIAL`、`COMPLETE_RECORDED_USAGE` 描述这些记录的覆盖程度，后者不意味着任务完成、隐式 SDK 重试完全可见或供应商账单已核对。
-
-`monetaryCostStatus` 与 `observedUsage.estimatedCost.status` 同源，取值为 `UNAVAILABLE`、`PARTIAL_ESTIMATE` 或 `COMPLETE_RECORDED_ESTIMATE`。`estimatedCost` 分币种返回十进制字符串金额、可估算/未知/未确认调用数及未知原因计数；不进行外汇换算。`providerFingerprint` 来自该运行冻结的 `chatProvider`，不随当前部署换源而变化；历史没有来源时为 null。任务创建前的路由、普通问答及异步入库不在此 scope 中。
 
 ## 历史费率估算
 

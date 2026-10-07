@@ -1,0 +1,21 @@
+CREATE TABLE evolution_failure_cases (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    user_id VARCHAR(32) NOT NULL,
+    source VARCHAR(32) NOT NULL,
+    route VARCHAR(16) NOT NULL,
+    trace_id VARCHAR(64) NULL,
+    report_version_id BIGINT NULL,
+    task_outcome VARCHAR(32) NULL,
+    method_bundle_id VARCHAR(80) NULL,
+    user_query TEXT NULL,
+    note TEXT NULL,
+    status VARCHAR(16) NOT NULL,
+    failure_type VARCHAR(24) NULL,
+    triage_note TEXT NULL,
+    triaged_at DATETIME(6) NULL,
+    created_at DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_evolution_failure_trace UNIQUE (source, trace_id),
+    CONSTRAINT uk_evolution_failure_report UNIQUE (source, report_version_id),
+    INDEX idx_evolution_failure_status (status, failure_type, created_at)
+);

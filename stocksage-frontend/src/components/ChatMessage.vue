@@ -146,6 +146,17 @@
       </button>
 
       <button
+        v-if="showFeedback"
+        class="retry-button"
+        type="button"
+        :disabled="feedbackSent"
+        @click="reportProblem"
+      >
+        <el-icon><Warning /></el-icon>
+        <span>{{ feedbackSent ? '已反馈' : '答案有问题' }}</span>
+      </button>
+
+      <button
         v-if="showRetry"
         class="retry-button"
         type="button"
@@ -171,9 +182,9 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import { ElMessage } from 'element-plus'
-import { ArrowRight, DocumentCopy, EditPen, RefreshRight, TrendCharts, UserFilled } from '@element-plus/icons-vue'
-import { getTrace } from '../api/chat.js'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { ArrowRight, DocumentCopy, EditPen, RefreshRight, TrendCharts, UserFilled, Warning } from '@element-plus/icons-vue'
+import { getTrace, submitAnswerFeedback } from '../api/chat.js'
 import { markdownToPlainText, normalizeMarkdownEmphasis } from '../lib/markdown.js'
 import {
   buildAssistantEvidenceSummary,
@@ -263,6 +274,31 @@ const taskTone = computed(() => {
 const renderedContent = computed(() => DOMPurify.sanitize(
   marked.parse(normalizeMarkdownEmphasis(props.message.content || ''), { async: false }),
 ))
+
+// 只有已落库、带链路 ID 的助手回答才能反馈；反馈进入自进化失败池，由人工分诊。
+const showFeedback = computed(() => showCopy.value && Boolean(props.message.traceId))
+const feedbackSent = ref(false)
+
+async function reportProblem() {
+  let note
+  try {
+    ({ value: note } = await ElMessageBox.prompt('哪里有问题？（可选，例如数字算错、结论超出证据）', '反馈答案问题', {
+      confirmButtonText: '提交',
+      cancelButtonText: '取消',
+      inputType: 'textarea',
+      inputValidator: value => (value || '').length <= 1000 || '最多 1000 字',
+    }))
+  } catch {
+    return
+  }
+  try {
+    await submitAnswerFeedback(props.message.traceId, (note || '').trim())
+    feedbackSent.value = true
+    ElMessage.success('已收到反馈，会用于改进分析方法')
+  } catch (error) {
+    ElMessage.error(`反馈提交失败：${error.message}`)
+  }
+}
 
 async function copyMarkdown() {
   try {

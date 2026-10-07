@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.stocksage.agent.intent.TimeSensitivity;
 import com.stocksage.evidence.EvidenceLedger;
 import com.stocksage.harness.HarnessModels.HarnessSnapshot;
+import com.stocksage.harness.HarnessModels.ReportRepairFeedback;
 import com.stocksage.model.dto.DebateModels.DebateTurn;
 import com.stocksage.model.dto.DebateModels.DebateVerdict;
 import com.stocksage.model.dto.DebateModels.ManagerAssessment;
@@ -94,6 +95,9 @@ public class AnalysisState {
 
     /** 最近一次持久化的完成策略决策及有界恢复计数，供任务接管后继续执行。 */
     private HarnessSnapshot harnessSnapshot;
+
+    /** 报告修复输入与 PLANNED 同步落盘，确保接管继续消费同一份有界验收反馈。 */
+    private ReportRepairFeedback reportRepairFeedback;
 
     /** 问题相关补证的单步计划和执行结果；旧 checkpoint 缺失该字段时保持未开始。 */
     private EvidenceReplanState evidenceReplanState;

@@ -1,0 +1,8 @@
+{
+  "scenario" : "checkpoint-rejected",
+  "status" : "PASS",
+  "httpRequests" : 1,
+  "checkpoints" : 0,
+  "reportStatus" : "ABSENT",
+  "lifecycle" : "PLANNED"
+}

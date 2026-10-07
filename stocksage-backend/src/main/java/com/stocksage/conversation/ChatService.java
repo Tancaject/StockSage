@@ -14,6 +14,7 @@ import com.stocksage.research.ResearchTaskObservationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.AgentStep;
 import com.stocksage.agent.Coordinator;
+import com.stocksage.agent.ModelCompletion;
 import com.stocksage.agent.ExecutionPlan;
 import com.stocksage.agent.PlanRoute;
 import com.stocksage.agent.RoutingDecisionMetadata;
@@ -53,6 +54,7 @@ import java.util.Map;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -137,6 +139,8 @@ public class ChatService {
     private final ShortTermMemory shortTermMemory;
     /** 数据库用户画像及后台提取逻辑。 */
     private final LongTermMemory longTermMemory;
+    /** FUNDAMENTALS 回答未完成时写入自进化失败池。 */
+    private final com.stocksage.evolution.EvolutionFailurePool failurePool;
     /** 标题和画像更新使用独立的有界后台线程池。 */
     private final AsyncTaskExecutor backgroundTaskExecutor;
     /** 校验并解码当前轮多模态图片。 */
@@ -316,7 +320,6 @@ public class ChatService {
                     ? longTermMemory.buildPromptContext(request.getUserId()) : null;
             FundamentalsRuntimeIdentity.Request methodRequest = executionPlan.route() == PlanRoute.FUNDAMENTALS && !needsIntentClarification
                     ? new FundamentalsRuntimeIdentity.Request(request.getMessage(), coordinator.finalAnswerInvocation(selectedModel),
-                        FundamentalsRuntimeIdentity.memoryHash(researchMemory.promptContext(), pinnedUserMemory, retrievedDocs),
                         chatPromptAssembler.promptMaxTextChars(), !hasImages && !preparedContextOnly
                             && selectedModel.tier() == com.stocksage.agent.ModelTier.STANDARD) : null;
             // 澄清是硬执行闸门：不做 RAG/记忆/工具/Agent 预取，更不能提交 DEEP 后台任务。
@@ -369,8 +372,10 @@ public class ChatService {
                     .conversationId(conversationId)
                     .build()));
             // 调用 Coordinator 选择的无工具最终 ChatClient 流。
+            AtomicReference<ModelCompletion> answerCompletion = new AtomicReference<>(
+                    new ModelCompletion(ModelCompletion.Status.UNKNOWN, ""));
             Flux<String> responseTokens = coordinator.streamAnswer(promptMessages, preparedContextOnly,
-                    selectedModel.tier(), hasImages, attributes -> recordAnswerObservation(traceId, attributes));
+                    selectedModel.tier(), hasImages, attributes -> recordAnswerObservation(traceId, attributes), answerCompletion::set);
 
             return Flux.concat(modelStarted, responseTokens
                 .doFirst(() -> ToolCallContext.set(traceId, conversationId, resolvedQuery))
@@ -405,13 +410,12 @@ public class ChatService {
                                 .attributes(Map.of("kind", "answer-completion", "usageScope", "final-answer",
                                         "legacyTotalTokensSource", "CHARACTER_ESTIMATE", "estimatedTotalTokens", estimatedTokens))
                                 .build());
-                        traceService.endTrace(
-                                traceId,
-                                "success",
-                                estimatedTokens,
-                                durationMs,
-                                preparedToolContext.outcomeForAnswer(assistantText)
-                        );
+                        String taskOutcome = preparedToolContext.outcomeForAnswer(assistantText, answerCompletion.get());
+                        traceService.endTrace(traceId, "success", estimatedTokens, durationMs, taskOutcome);
+                        if (executionPlan.route() == PlanRoute.FUNDAMENTALS) {
+                            submitBackground("evolution-failure-capture", conversationId,
+                                    () -> failurePool.recordOrdinaryOutcome(traceId, taskOutcome));
+                        }
                         log.info("Chat completed, conversationId={}, traceId={}, responseLength={}",
                                 conversationId, traceId, fullResponse.length());
                     }
@@ -419,6 +423,7 @@ public class ChatService {
                 .onErrorResume(e -> {
                     long durationMs = System.currentTimeMillis() - startTime;
                     if (stream.tryRecordTerminal()) {
+                        String partial = fullResponse.toString();
                         traceService.addStep(traceId, AgentStep.builder()
                                 .thought("Streaming chat failed.")
                                 .action(null)
@@ -427,7 +432,8 @@ public class ChatService {
                                 .durationMs(durationMs)
                                 .tokenCount(0)
                                 .build());
-                        traceService.endTrace(traceId, "error", 0, durationMs);
+                        traceService.endTrace(traceId, "error", 0, durationMs,
+                                preparedToolContext.outcomeForAnswer(partial, answerCompletion.get()));
                         log.error("Streaming chat failed, conversationId={}, traceId={}", conversationId, traceId, e);
                     }
                     return Flux.just(stream.toJson(ChatChunk.builder()
@@ -478,6 +484,9 @@ public class ChatService {
     }
 
     private static String chatFailureMessage(Throwable error) {
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+            if (cause instanceof ModelCompletion.IncompleteOutputException incomplete) return incomplete.getMessage();
+        }
         ResearchCapacityExceededException capacity = ResearchCapacityExceededException.find(error);
         return capacity == null ? "服务暂时出错，请稍后重试。" : capacity.getMessage();
     }

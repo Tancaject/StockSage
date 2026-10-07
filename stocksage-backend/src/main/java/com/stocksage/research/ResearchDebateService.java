@@ -113,67 +113,6 @@ public class ResearchDebateService {
     private long modelStageTimeoutMs = 300_000L;
 
     /**
-     * 不记录链路追踪、不流式推送地运行一轮研究辩论。
-     *
-     * <p>主要供内部调用或测试使用；需要追踪面板展示和流式推送时请使用带 traceId 的重载。</p>
-     */
-    public AnalysisState runDebate(AnalysisState state) {
-        return runDebate(null, null, state);
-    }
-
-    /**
-     * 基于传入的证据状态运行辩论，并返回补充了辩论轮次和综合报告的同一个状态对象。
-     *
-     * @param traceId        链路 id；为空时静默跳过追踪与流式推送
-     * @param conversationId 会话 id，用于流式数据块关联
-     * @param state          已收集分析师证据的研究状态
-     */
-    public AnalysisState runDebate(String traceId, Long conversationId, AnalysisState state) {
-        return runDebate(traceId, conversationId, state, 1, 0, null);
-    }
-
-    /** 从指定轮次继续辩论；checkpoint 只授权下一轮，不预先固定总轮数。 */
-    public AnalysisState runDebate(
-            String traceId,
-            Long conversationId,
-            AnalysisState state,
-            int startRound,
-            int authorizedThroughRound,
-            RoundCheckpointer checkpointer
-    ) {
-        return runDebate(
-                traceId, conversationId, state, startRound, authorizedThroughRound,
-                checkpointer, null, null);
-    }
-
-    /**
-     * 从指定轮次继续辩论，并在每个流式 token 推送前检查当前执行权。
-     *
-     * <p>检查器必须是纯内存、非阻塞检查；抛出的异常会取消模型 token 流并原样传给调用方。
-     * 传 {@code null} 与旧重载行为一致。</p>
-     */
-    public AnalysisState runDebate(
-            String traceId,
-            Long conversationId,
-            AnalysisState state,
-            int startRound,
-            int authorizedThroughRound,
-            RoundCheckpointer checkpointer,
-            Runnable executionGuard
-    ) {
-        return runDebate(
-                traceId,
-                conversationId,
-                state,
-                startRound,
-                authorizedThroughRound,
-                checkpointer,
-                executionGuard,
-                null
-        );
-    }
-
-    /**
      * 从指定轮次运行或恢复完整辩论、报告综合与报告 Harness。
      *
      * <p>首次运行直接执行 Round 1 的 Bull/Bear；此后每轮由 Research Manager 根据完整辩论
@@ -417,6 +356,7 @@ public class ResearchDebateService {
         } else if (reportDecision.outcome() == HarnessOutcome.RECOVER
                 && reportDecision.recoveryActions().contains(RecoveryAction.RESYNTHESIZE_REPORT)) {
             reportRecoveryEffectKey = stableReportRecoveryEffectKey(traceId, conversationId);
+            workingState.setReportRepairFeedback(researchManager.reportRepairFeedback(synthesisResult));
             applyReportRecoverySnapshot(
                     workingState,
                     reportDecision,
@@ -559,18 +499,19 @@ public class ResearchDebateService {
 
         boolean currentVerdict = debateDecisionPolicy.isCurrentVerdict(
                 workingState, checkpointedReport.getDecisionAudit());
+        SynthesisResult checkpointedSynthesis = new SynthesisResult(
+                checkpointedReport,
+                hasCurrentPolicyMetadata(checkpointedReport) && currentVerdict
+                        ? com.stocksage.harness.HarnessModels.ParseStatus.VALID
+                        : com.stocksage.harness.HarnessModels.ParseStatus.INVALID_SCHEMA,
+                currentVerdict ? List.of() : List.of("decisionAudit")
+        );
         HarnessDecision reportDecision = researchHarness.evaluateReport(
                 traceId,
                 completionPolicy,
                 new RunContext("DEEP", previousAttempts),
                 workingState.getEvidenceLedger(),
-                new SynthesisResult(
-                        checkpointedReport,
-                        hasCurrentPolicyMetadata(checkpointedReport) && currentVerdict
-                                ? com.stocksage.harness.HarnessModels.ParseStatus.VALID
-                                : com.stocksage.harness.HarnessModels.ParseStatus.INVALID_SCHEMA,
-                        List.of()
-                )
+                checkpointedSynthesis
         );
 
         if (reportDecision.outcome() == HarnessOutcome.PASS) {
@@ -593,6 +534,7 @@ public class ResearchDebateService {
         if (reportDecision.outcome() == HarnessOutcome.RECOVER
                 && reportDecision.recoveryActions()
                 .contains(RecoveryAction.RESYNTHESIZE_REPORT)) {
+            workingState.setReportRepairFeedback(researchManager.reportRepairFeedback(checkpointedSynthesis));
             return executeCheckpointedReportRepair(
                     traceId,
                     conversationId,

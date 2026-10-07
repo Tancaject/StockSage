@@ -1,0 +1,8 @@
+{
+  "scenario" : "schema-repaired",
+  "status" : "PASS",
+  "httpRequests" : 2,
+  "checkpoints" : 2,
+  "reportStatus" : "VERIFIED",
+  "lifecycle" : "REVALIDATED"
+}

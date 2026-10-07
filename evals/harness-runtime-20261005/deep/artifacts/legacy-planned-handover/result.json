@@ -1,0 +1,8 @@
+{
+  "scenario" : "legacy-planned-handover",
+  "status" : "PASS",
+  "httpRequests" : 1,
+  "checkpoints" : 1,
+  "reportStatus" : "VERIFIED",
+  "lifecycle" : "REVALIDATED"
+}

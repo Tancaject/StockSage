@@ -32,12 +32,6 @@ public class FundamentalsAgent {
      * <p>该客户端只分析上游已经取得的财报、公告和结构化财务证据。</p>
      */
     public FundamentalsAgent(@Qualifier("fundamentalsAgentChatClient") ChatClient chatClient,
-                             FundamentalsMethodRegistry methods) {
-        this(chatClient, methods, null);
-    }
-
-    @org.springframework.beans.factory.annotation.Autowired
-    public FundamentalsAgent(@Qualifier("fundamentalsAgentChatClient") ChatClient chatClient,
                              FundamentalsMethodRegistry methods, AgentRuntimeConfiguration runtime) {
         this.chatClient = chatClient;
         this.methods = methods;
@@ -60,17 +54,14 @@ public class FundamentalsAgent {
     }
 
     public FundamentalsMethodRegistry.Selection selectMethod(String userId, java.util.Set<String> taskTags,
-            java.util.Set<String> evidenceTags, String evidenceContext, FundamentalsRuntimeIdentity.Request request, long timeoutSeconds) {
-        String caseHash = request == null ? null : FundamentalsRuntimeIdentity.hash(Map.of(
-                "query", request.originalQuery(), "evidenceSha256", AgentPolicyBundle.sha256(evidenceContext)));
-        Map<String, String> identity = null;
-        if (methods.hasAuthorization() && request != null && runtime != null && !request.finalInvocation().isEmpty()) {
-            var config = FundamentalsRuntimeIdentity.modelConfiguration(runtime, java.util.List.of(request.finalInvocation()),
-                    timeoutSeconds, request.promptMaxChars());
-            identity = FundamentalsRuntimeIdentity.conditions(config, methods.verifiedBuildHash(), request.memorySnapshotSha256());
+            java.util.Set<String> evidenceTags, FundamentalsRuntimeIdentity.Request request, long timeoutSeconds) {
+        Map<String, String> conditions = null;
+        if (methods.hasApproved() && request != null && request.eligibleRouteAndModel() && !request.finalInvocation().isEmpty()) {
+            conditions = FundamentalsRuntimeIdentity.conditions(FundamentalsRuntimeIdentity.modelConfiguration(
+                    runtime, java.util.List.of(request.finalInvocation()), timeoutSeconds, request.promptMaxChars()));
         }
-        return methods.select(userId, request != null && request.eligibleRouteAndModel() ? taskTags : java.util.Set.of(),
-                evidenceTags, java.util.Set.of("evidence-reading", "period-comparison", "unit-comparison", "arithmetic"), identity, caseHash);
+        return methods.select(userId, taskTags, evidenceTags,
+                java.util.Set.of("evidence-reading", "period-comparison", "unit-comparison", "arithmetic"), conditions);
     }
 
     /** 调用方保留此包用于本次执行与归属记录，撤回不得改变进行中的方法。 */
@@ -112,11 +103,13 @@ public class FundamentalsAgent {
                 }
             }
         }
-        String content = response == null || response.getResult() == null || response.getResult().getOutput() == null
-                ? null : response.getResult().getOutput().getText();
-        return new Analysis(content, system, user, bundle.identity(), Map.copyOf(facts));
+        ModelCompletion.Output output = ModelCompletion.output(response);
+        facts.put("finishReason", output.completion().finishReason());
+        facts.put("completionStatus", output.completion().status().name());
+        return new Analysis(output.content(), system, user, bundle.identity(), Map.copyOf(facts), output.completion());
     }
 
     public record Analysis(String content, String systemPrompt, String userPrompt,
-                           Map<String, String> methodBundle, Map<String, Object> responseMetadata) {}
+                           Map<String, String> methodBundle, Map<String, Object> responseMetadata,
+                           ModelCompletion completion) {}
 }

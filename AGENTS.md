@@ -1,28 +1,23 @@
 # StockSage
 
+本文件是项目约束的唯一权威来源。
+
 三服务架构：
 
 - stocksage-backend (Java, Spring AI Alibaba) → :8080
 - stocksage-data-service (Python, FastAPI) → :8001，后端通过 REST 调用
 - stocksage-frontend (Vue 3, Vite) → :5173
-- evals：财报入库工具、评测数据与历史报告；离线评测脚本已按用户要求移除，范围见 [evals/README.md](evals/README.md)
+- evals：财报入库、离线评测与实验工具、评测数据和历史报告；入口及复现限制见 [evals/README.md](evals/README.md)
 
 README 和后端配置使用 data-service 端口 `8001`。除非用户明确改变本地 setup，否则旧的 `8000` 引用视为过时。
 
 ## 开始工作前
 
-- 确认当前目录是仓库根目录：`D:\programming\StockSage`。
-- 先读 `CLAUDE.md`。本文件是项目约束的唯一权威来源；`AGENTS.md` 只指向本文件。
-- 架构或 RAG 相关工作，需要同时阅读 `README.md` 和 `RAG_EVALUATION.md` 的相关部分。
-- 检查 `feature_list.json` 和 `progress.md` 了解当前功能状态、最近进展、验证证据和已知阻塞。
-- 本地工具链可用时，先运行 `.\init.ps1 -Mode fast` 建立基线。
-- 如果基线验证失败，在扩大范围前把失败原因记录到 `progress.md`。
-
-## 项目进度
-
-- 如果需要了解当前项目进度、最近完成的工作、验证结果或已知阻塞，先阅读仓库根目录的 `progress.md`。
-- `feature_list.json` 用于查看功能状态；`progress.md` 用于查看人工可读的会话进度、验证证据和接手说明。
-- 如果讨论过程中新增了项目需求、功能想法、范围决定或后续待办，结束前要同步写入 `progress.md`。
+- 确认当前工作目录及任务涉及的模块。
+- 修改服务边界或整体架构时，阅读 `README.md` 的相关部分。
+- 修改 RAG 检索或评测行为时，阅读 `evals/README.md` 的相关部分。
+- 任务依赖已有进度、功能状态或已知阻塞时，读取 `progress.md` 和 `feature_list.json` 的相关条目。
+- 只读分析和纯文档修改不默认运行构建或评测。
 
 ## 不要建议的做法
 
@@ -36,15 +31,22 @@ README 和后端配置使用 data-service 端口 `8001`。除非用户明确改�
 ## 工作规则
 
 - 一次只做一个功能或 bug。
+- 清理测试前按 [evals/README.md](evals/README.md) 区分评测体系与自动化测试，保留评测能力及其依赖。`evals/` 下的评测脚本（含 `agent_eval_summary.py`）不是测试，不要删除；`evals/archive/` 是已归档的历史工具。
 - 优先使用现有项目模式，不为局部问题引入新抽象。
 - 前端、后端、data-service 和 eval 的改动要保持在各自模块边界内。
 - RAG、agent 或 prompt 行为变化，需要更新或运行相关 regression/eval 路径。
-- 讨论过程中新增的项目需求、功能想法、范围决定或后续待办，结束前要写入 `progress.md`。
-- 跨会话或较大工作结束前，更新 `progress.md` 和 `feature_list.json`。
+
+## 验证原则
+
+- 根据实际改动运行最小相关验证；可使用 `init.ps1` 的 `backend`、`frontend` 或 `python` 模式。
+- 跨模块改动需要整体编译检查，或用户明确要求时，运行 `init.ps1 -Mode fast`。
+- 仅在需要区分既有问题与本次改动时，运行修改前基线。
+- 验证通过后，只有新增改动、失败或未解决疑点才需要重跑。
+- 验证失败时，先定位原因；与本次任务无关的失败应说明，不自动扩大修复范围。
 
 ## 验证命令
 
-优先使用 harness：
+整体编译检查：
 
 ```powershell
 .\init.ps1 -Mode fast
@@ -66,7 +68,7 @@ npm run build
 python -m compileall stocksage-data-service\main.py stocksage-data-service\app
 ```
 
-离线 RAG、Agent 与自进化评测脚本已移除，`init.ps1` 不再提供 `rag` 模式。不要执行历史文档中的已删除入口，也不要未经新授权恢复测试或评测脚本。
+改动路由、RAG 或 DEEP 完成策略后运行日常回归 `.\init.ps1 -Mode eval`（Harness 离线 + Planner LIVE + RAG 检索，缺前提的步骤记为 SKIPPED）。RAG 检索评测可通过 `.\init.ps1 -Mode rag` 运行；其他评测入口、运行条件与复现限制统一见 [evals/README.md](evals/README.md)。自动化测试仍保持移除，未经新授权不要恢复测试驱动或测试依赖。
 
 ## 完成标准
 
@@ -74,10 +76,13 @@ python -m compileall stocksage-data-service\main.py stocksage-data-service\app
 - 已运行最小相关验证命令，或 blocker 已记录。
 - RAG、agent 或 prompt 行为变化需要有 eval 或 manual trace 证据。
 - 密钥和本地文件不能进入提交产物。
-- 跨会话工作完成时，`progress.md` 和 `feature_list.json` 已反映最新状态。
 
-## 结束会话前
+## 进度与交接
 
-- 更新 `progress.md`：完成内容、验证证据、blocker 和新产生的需求/待办。
-- 如果功能状态变化，更新 `feature_list.json`。
-- 留下下一次接手需要知道的明确下一步。
+`feature_list.json` 用于查看功能状态；`progress.md` 用于查看人工可读的会话进度、验证证据和接手说明。
+
+- 实际改动需要跨会话交接，或用户已确认新的需求、范围和待办时，更新 `progress.md`。
+- 记录完成内容、相关验证证据、阻塞及必要下一步；详细事实通过链接引用已有报告。
+- 仅在功能状态变化时更新 `feature_list.json`。
+- 只读问答、审计建议和未采纳的想法不默认写入项目文件。
+- 用户明确要求不修改文件时，在回复中提供交接信息。

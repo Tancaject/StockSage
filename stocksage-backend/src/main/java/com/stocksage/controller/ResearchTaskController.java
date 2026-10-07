@@ -6,7 +6,6 @@ import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.repository.ResearchTaskRepository;
 import com.stocksage.trace.TraceEventRelay;
 import com.stocksage.research.ResearchTaskObservationService;
-import com.stocksage.research.ModelInvocationStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -46,12 +45,6 @@ public class ResearchTaskController {
     private final ResearchTaskRepository researchTaskRepository;
     private final ResearchTaskObservationService observationService;
     private final RequestIdentity requestIdentity;
-    private final ModelInvocationStore modelInvocations;
-
-    @GetMapping("/{taskId}/usage")
-    public ModelInvocationStore.RunUsage taskUsage(@PathVariable Long taskId) {
-        return modelInvocations.usage(taskId, requestIdentity.currentUserId());
-    }
 
     /**
      * 查询会话最近一个仍在执行的研究任务。

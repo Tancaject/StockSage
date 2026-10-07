@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "taskTags": [
+    "fundamentals",
+    "annual",
+    "quarterly",
+    "period-comparison",
+    "topic-liquidity",
+    "topic-cash-flow",
+    "topic-growth",
+    "topic-profitability"
+  ],
+  "evidenceTags": [
+    "financial-evidence",
+    "dated-values",
+    "structured-financials",
+    "filing-text"
+  ],
+  "capabilities": [
+    "evidence-reading",
+    "period-comparison",
+    "unit-comparison",
+    "arithmetic"
+  ]
+}

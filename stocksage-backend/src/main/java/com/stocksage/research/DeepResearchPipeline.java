@@ -657,7 +657,7 @@ public class DeepResearchPipeline {
             throw error;
         }
         AtomicBoolean ownershipLost = new AtomicBoolean(false);
-        ScheduledFuture<?> heartbeat = startInlineHeartbeat(runningTask, acquired, ownershipLost);
+        ScheduledFuture<?> heartbeat = startResearchTaskHeartbeat(runningTask, acquired, ownershipLost);
         try {
             requireInlineOwnership(runningTask, acquired, ownershipLost, "evidence prefetch");
             checkDeadline(runningTask);
@@ -973,36 +973,6 @@ public class DeepResearchPipeline {
         );
     }
 
-    /** inline 降级仍可能包含耗时的数据预取，因此在进入辩论流水线前也必须持续续租。 */
-    private ScheduledFuture<?> startInlineHeartbeat(
-            ResearchTask task,
-            ResearchTaskLeaseService.Lease lease,
-            AtomicBoolean ownershipLost
-    ) {
-        Duration interval = researchTaskService.leaseHeartbeatInterval();
-        if (interval == null || interval.isZero() || interval.isNegative()) {
-            interval = Duration.ofSeconds(60);
-        }
-        return researchHeartbeatScheduler.scheduleAtFixedRate(() -> {
-            if (ownershipLost.get()) {
-                return;
-            }
-            try {
-                boolean leaseRenewed = researchTaskService.renewLease(lease);
-                boolean taskRenewed = leaseRenewed
-                        && researchTaskService.heartbeatForOwner(task, lease.token());
-                if (!taskRenewed) {
-                    ownershipLost.set(true);
-                    log.warn("Inline research task heartbeat lost ownership, taskId={}", task.getId());
-                }
-            } catch (Exception error) {
-                ownershipLost.set(true);
-                log.warn("Inline research task heartbeat failed, taskId={}, error={}",
-                        task.getId(), error.getMessage());
-            }
-        }, Instant.now().plus(interval), interval);
-    }
-
     /** 提交入口观察已有任务时复用其持久 Trace 身份，避免把聊天观察者当成任务执行者。 */
     public String taskTraceId(ResearchTask task, String fallbackTraceId) {
         if (task == null || task.getPayloadJson() == null || task.getPayloadJson().isBlank()) {
@@ -1261,42 +1231,6 @@ public class DeepResearchPipeline {
             ownershipLost.set(true);
             throw new OwnershipLostException("research task lost ownership before execution constraint failure update", budget);
         }
-    }
-
-    Optional<String> tryPersistOfflineFallbackReport(
-            String userId,
-            Long conversationId,
-            AnalysisState agentState,
-            ResearchTask runningTask,
-            ResearchTaskLeaseService.Lease lease,
-            Exception sourceError
-    ) {
-        AtomicBoolean ownershipLost = new AtomicBoolean(false);
-        requireTaskOwnership(runningTask, lease, ownershipLost);
-        Optional<PersistedFallback> persisted =
-                publicationTransaction.executeForUser(userId, () -> {
-                    Optional<PersistedFallback> candidate = persistOfflineFallbackReport(
-                            userId,
-                            conversationId,
-                            agentState,
-                            runningTask,
-                            lease,
-                            sourceError,
-                            ownershipLost
-                    );
-                    candidate.ifPresent(fallback -> markSucceededForOwner(
-                            runningTask,
-                            lease,
-                            fallback.reportVersionId(),
-                            ResearchTask.ResultKind.OFFLINE_FALLBACK,
-                            ownershipLost
-                    ));
-                    return candidate;
-                });
-        if (persisted.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(persisted.orElseThrow().reportJson());
     }
 
     private Optional<PersistedFallback> persistOfflineFallbackReport(

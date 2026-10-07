@@ -82,10 +82,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns(
                         "/api/docs/**",
                         "/api/eval/**",
-                        "/api/admin/**",
-                        "/api/memory/**",
-                        "/api/chat/regression/**",
-                        "/api/chat/test"
+                        "/api/admin/**"
                 )
                 // 只读检索探针放行：GET /api/docs/search 不改数据、不耗入库额度，
                 // 且被前端工作台当作 RAG 健康探针使用（无 admin token）。

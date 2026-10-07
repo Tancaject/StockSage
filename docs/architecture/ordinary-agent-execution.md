@@ -37,12 +37,14 @@ DEEP 的财务数据归入基本面快照，市场维度需要自己的行情或
 
 | 状态 | 确定性判定 |
 |---|---|
-| `COMPLETED` | 本轮取证通过来源、标的、支持的参数/响应契约和上下文完整性检查；计划中的领域报告完成；有可引用证据时，最终回答必须引用本轮编号 |
-| `DEGRADED` | 有可用数据，但存在部分失败、数量无法核验、正文裁减、领域分析失败，或最终引用缺失/未知 |
+| `COMPLETED` | 本轮取证通过来源、标的、支持的参数/响应契约和上下文完整性检查；需要模型生成时，正文非空且供应商明确正常结束；有可引用证据时，最终回答必须引用本轮编号 |
+| `DEGRADED` | 有可用数据，但存在部分失败、数量无法核验、领域分析未完成、最终回答截断或结束原因未知，或最终引用缺失/未知 |
 | `BLOCKED` | 请求组合不支持，或标的/权限检查不通过 |
-| `FAILED` | 未取得符合本次请求的可用数据 |
+| `FAILED` | 未取得符合本次请求的可用数据，或最终生成失败、返回空正文 |
 
 正常返回的空新闻结果与检索失败分别记录；前者可以完成“没有找到结果”的查询。API/生成流程的技术 `status` 和业务 `taskOutcome` 分开保存。回答引用 `[E1]` 等本轮证据编号，来源、采集时间、源时间字段和缺口进入 Trace。
+
+模型是否写完由 [`ModelCompletion`](../../stocksage-backend/src/main/java/com/stocksage/agent/ModelCompletion.java) 统一判断，保存供应商实际结束原因，区分正常完成、截断、未知和失败；流连接正常关闭或正文非空都不能单独证明生成完整。不完整的领域分析不进入最终回答上下文，已有证据缺口也不能因最终回答正常结束而消失。最终生成未完成时返回具体错误，Trace 保留生成状态；独立的答案质量评测仍按自己的标准进行。
 
 这些检查不等于语义事实核验，也不保证供应商返回了请求区间内每一根交易 K 线。请求参数回显、来源时间字段不能代替交易日历覆盖率与数据新鲜度评测；答案质量仍需独立标签或评审。
 
@@ -146,7 +148,7 @@ python evals/ordinary_answer_quality.py --input evals/results/ordinary-live.json
 
 ### 运行冻结输入回放
 
-`POST /api/eval/agent/answer` 使用现有管理令牌边界，只接受白名单文本消息角色及模型层级。它复用 `Coordinator.streamAnswer` 的普通无工具回答路径，不读取或写入会话、报告或持久化 Trace。每次返回独立 `replayId`、输入指纹、答案、实际调用配置、供应商用量或 `NO_DATA`、耗时及失败类型；生成限时复用 `stocksage.agent.prefetch.timeout-seconds`，响应中的 `timeoutSeconds` 是本次实际生效值。
+`POST /api/eval/agent/answer` 使用现有管理令牌边界，只接受白名单文本消息角色及模型层级。它复用 `Coordinator.streamAnswer` 的普通无工具回答路径，不读取或写入会话、报告或持久化 Trace。每次返回独立 `replayId`、输入指纹、答案、实际调用配置、供应商用量或 `NO_DATA`、耗时及失败类型；`completion` 保存生成状态与实际结束原因，未完成的正文保留供诊断，不记为成功回放。生成限时复用 `stocksage.agent.prefetch.timeout-seconds`，响应中的 `timeoutSeconds` 是本次实际生效值。
 
 在本机环境变量配置 `STOCKSAGE_ADMIN_TOKEN`（自定义管理头时同时配置 `STOCKSAGE_ADMIN_HEADER_NAME`），然后运行：
 

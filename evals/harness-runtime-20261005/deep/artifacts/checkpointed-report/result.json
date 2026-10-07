@@ -1,0 +1,8 @@
+{
+  "scenario" : "checkpointed-report",
+  "status" : "PASS",
+  "httpRequests" : 1,
+  "checkpoints" : 2,
+  "reportStatus" : "VERIFIED",
+  "lifecycle" : "REVALIDATED"
+}

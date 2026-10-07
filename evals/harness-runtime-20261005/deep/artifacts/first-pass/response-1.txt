@@ -1,0 +1,8 @@
+这是固定证据下的报告摘要，仅供回放验证。
+```json
+{"rationale":["固定证据支持审慎观察"],"riskFactors":["现金流存在不确定性"],
+ "analystSummary":"中期观察，结论服从服务器锁定裁决。",
+ "evidenceItems":[{"dimension":"财务","evidence":"收入稳定","implication":"支持中期观察", "source":"", "sourceEvidenceIds":["e-fund"]}],
+ "bullFactors":["收入稳定"],"bearFactors":["现金流不确定"],"suitableFor":["能承受波动"],
+ "notSuitableFor":["要求确定回报"],"unknowns":["后续公告变化"],"dataFreshness":"固定合成证据，2026-10-04。"}
+```

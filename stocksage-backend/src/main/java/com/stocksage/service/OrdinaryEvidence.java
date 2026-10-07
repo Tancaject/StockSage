@@ -89,8 +89,6 @@ final class OrdinaryEvidence {
             }
             if (status == EvidenceStatus.AVAILABLE && name.equals("getStockKLine")
                     && !request.klinePeriod().equals(root.path("period").asText())) gap = "PERIOD_MISMATCH";
-            if (status == EvidenceStatus.AVAILABLE && KLinePayloadMapper.isKlineTool(name)
-                    && new KLinePayloadMapper(mapper).toChartPayload(name, raw, new Object[0]).isEmpty()) gap = "BARS_MISSING";
             if (status == EvidenceStatus.AVAILABLE && name.equals("getTechnicalIndicators") && !request.bar().equals("1d")) {
                 gap = "INDICATOR_GRANULARITY_UNSUPPORTED";
             }
@@ -158,6 +156,10 @@ final class OrdinaryEvidence {
                 evolutionEvidenceTags.add("dated-values");
                 evolutionEvidenceTags.add("structured-financials");
             }
+        }
+        if (name.equals("searchCompanyReports") && item.status() == EvidenceStatus.AVAILABLE
+                && gap.isBlank() && usable && included) {
+            evolutionEvidenceTags.add("filing-text");
         }
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("id", id); row.put("tool", name); row.put("status", item.status().name());
@@ -296,11 +298,20 @@ final class OrdinaryEvidence {
 
     EvidenceLedger ledger() { return new EvidenceLedger(TargetIdentity.resolved(ticker), evidence); }
     Set<String> evolutionEvidenceTags() { return Set.copyOf(evolutionEvidenceTags); }
-    Set<String> evolutionTaskTags() {
+    Set<String> evolutionTaskTags(String query) {
         Set<String> tags = new HashSet<>(Set.of("fundamentals", request.reportPeriod()));
         if (request.reportCount() > 1 && evolutionEvidenceTags.contains("dated-values")) tags.add("period-comparison");
+        String text = query == null ? "" : query.toLowerCase(Locale.ROOT);
+        TOPIC_TAGS.forEach((tag, pattern) -> { if (pattern.matcher(text).find()) tags.add(tag); });
         return Set.copyOf(tags);
     }
+
+    /** 问题主题标签，词表与 evolution/tag-catalog.json 的 topic-* 一一对应。 */
+    private static final Map<String, java.util.regex.Pattern> TOPIC_TAGS = Map.of(
+            "topic-liquidity", java.util.regex.Pattern.compile("流动性|偿债|流动比率|速动|负债|债务|liquidity|solvency|debt|current ratio"),
+            "topic-cash-flow", java.util.regex.Pattern.compile("现金流|经营现金|资本开支|capex|cash flow|fcf"),
+            "topic-growth", java.util.regex.Pattern.compile("增长|增速|同比|营收|收入|growth|revenue"),
+            "topic-profitability", java.util.regex.Pattern.compile("利润率|毛利|盈利|净利|margin|profit|earnings"));
     List<Map<String, Object>> observations() { return List.copyOf(observations); }
     List<String> citationIds() { return observations.stream().filter(row -> Boolean.TRUE.equals(row.get("citable"))).map(row -> row.get("id").toString()).toList(); }
     boolean allIncluded() { return observations.stream().allMatch(row -> Boolean.TRUE.equals(row.get("included"))

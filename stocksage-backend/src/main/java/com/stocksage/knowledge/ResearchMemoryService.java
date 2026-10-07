@@ -348,38 +348,6 @@ public class ResearchMemoryService {
     }
 
     /**
-     * 列出用户未撤销的研究记忆。
-     *
-     * @param userId 当前用户 ID
-     * @param limit 最大条数，限制在 1 至 50
-     * @return 新到旧的记忆视图
-     */
-    @Transactional(readOnly = true)
-    public List<MemoryView> listForUser(String userId, int limit) {
-        int capped = Math.max(1, Math.min(50, limit));
-        List<ResearchMemoryEntry> entries = repository.findByUserIdAndRevokedAtIsNullOrderByCreatedAtDesc(
-                userId.trim(), PageRequest.of(0, capped));
-        Map<Long, InvestmentReportVersion> sources = sourceReports(userId.trim(), entries);
-        return entries.stream().map(entry -> toView(entry, qualification(entry, sources))).toList();
-    }
-
-    /**
-     * 按用户归属撤销一条研究记忆，并在提交后删除向量。
-     *
-     * @param userId 当前用户 ID
-     * @param id 记忆 ID
-     * @return true 表示本次从 active 变为 revoked
-     */
-    @Transactional
-    public boolean revoke(String userId, Long id) {
-        if (userId == null || userId.isBlank() || id == null) {
-            return false;
-        }
-        ResearchMemoryEntry entry = repository.findByIdAndUserId(id, userId.trim()).orElse(null);
-        return revokeEntry(entry, true);
-    }
-
-    /**
      * 撤销指定报告版本派生的研究记忆，供负向人工审核调用。
      *
      * @param source 报告版本实体
@@ -396,7 +364,7 @@ public class ResearchMemoryService {
                 SOURCE_TYPE,
                 String.valueOf(currentSource.getId())
         ).orElse(null);
-        return revokeEntry(entry, false);
+        return revokeEntry(entry);
     }
 
     /** 审核通过或重新进入审核时，仅恢复负向审核撤销的条目并重新计算冲突组。 */
@@ -444,7 +412,7 @@ public class ResearchMemoryService {
     }
 
     /** 先提交数据库 REVOKED 真源并重选冲突组，再安排非事务性向量删除。 */
-    private boolean revokeEntry(ResearchMemoryEntry observedEntry, boolean explicitUserRevoke) {
+    private boolean revokeEntry(ResearchMemoryEntry observedEntry) {
         if (observedEntry == null || !observedEntry.active()) {
             return false;
         }
@@ -467,28 +435,18 @@ public class ResearchMemoryService {
         if (entry == null || !entry.active()) {
             return false;
         }
-        boolean revokedCurrentWinner = group != null
-                && entry.getId().equals(group.getWinnerEntryId());
         entry.setRevokedAt(now);
         entry.setVectorStatus(ResearchMemoryEntry.VectorStatus.REVOKED);
         entry.setVectorErrorCode(null);
-        entry.setResolutionReason(explicitUserRevoke
-                ? REVOKED_BY_USER : REVOKED_BY_NEGATIVE_REVIEW);
+        entry.setResolutionReason(REVOKED_BY_NEGATIVE_REVIEW);
         // Flush the database truth before deleting the vector. A concurrent index CAS must either
         // finish first (then this delete removes its vector) or observe REVOKED and clean up its
         // own just-written vector after the guarded update is rejected.
         repository.saveAndFlush(entry);
         if (group != null) {
-            if (explicitUserRevoke && revokedCurrentWinner) {
-                group.setBlockedBeforeAt(now);
-            }
             reconcileLockedGroup(group);
         }
         // 负向审核允许重新进入审核，不能让迟到的旧删除覆盖恢复后的同 ID 向量。
-        // 用户主动撤销不可恢复，仍在数据库提交后尽力删除物理向量。
-        if (explicitUserRevoke) {
-            deleteVectorAfterCommit(entry.getId(), "entry revoked by user");
-        }
         return true;
     }
 
@@ -569,27 +527,6 @@ public class ResearchMemoryService {
             log.warn("Research memory vector delete failed. entryId={}, reason={}, errorType={}",
                     entryId, reason, error.getClass().getSimpleName());
         }
-    }
-
-    /** 仅在撤销事务提交成功后执行非事务性向量删除。 */
-    private void deleteVectorAfterCommit(Long entryId, String reason) {
-        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
-            deleteVectorBestEffort(entryId, reason);
-            return;
-        }
-        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-            // A Spring-managed @Transactional call always has synchronization. Failing closed here
-            // avoids deleting a vector for a database transaction that can still roll back.
-            log.warn("Research memory vector delete deferred without transaction synchronization. "
-                    + "entryId={}, reason={}", entryId, reason);
-            return;
-        }
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                deleteVectorBestEffort(entryId, reason);
-            }
-        });
     }
 
     /** 仅在 PENDING 记忆行提交后索引，并用独立事务提交 vector 状态 CAS。 */
@@ -1147,17 +1084,6 @@ public class ResearchMemoryService {
         }
     }
 
-    /** 将数据库实体转换为管理 API 视图。 */
-    private MemoryView toView(ResearchMemoryEntry entry, MemoryQualification qualification) {
-        return new MemoryView(
-                entry.getId(), entry.getTicker(), entry.getSourceType(), entry.getSourceId(),
-                entry.getMemoryText(), entry.getSourceCitations(), entry.getDataCutoffAt(),
-                entry.getSnapshotHash(), entry.getAnalysisHorizon(), entry.getRecommendation(),
-                entry.getResolutionStatus(), entry.getSupersededById(), entry.getResolutionReason(),
-                entry.getVectorStatus(), entry.getCreatedAt(), qualification
-        );
-    }
-
     /** 将来源引用序列化为数据库 JSON。 */
     private String writeJson(List<String> value) {
         try {
@@ -1230,26 +1156,5 @@ public class ResearchMemoryService {
         public static RetrievalResult empty() {
             return new RetrievalResult("", 0, false);
         }
-    }
-
-    /** 管理接口展示的未撤销研究记忆。 */
-    public record MemoryView(
-            Long id,
-            String ticker,
-            String sourceType,
-            String sourceId,
-            String memoryText,
-            String sourceCitations,
-            LocalDateTime dataCutoffAt,
-            String snapshotHash,
-            AnalysisHorizon analysisHorizon,
-            String recommendation,
-            ResearchMemoryEntry.ResolutionStatus resolutionStatus,
-            Long supersededById,
-            String resolutionReason,
-            ResearchMemoryEntry.VectorStatus vectorStatus,
-            LocalDateTime createdAt,
-            MemoryQualification qualification
-    ) {
     }
 }

@@ -106,10 +106,7 @@ public class SecurityConfig {
                         .ignoringRequestMatchers(
                                 "/api/docs/**",
                                 "/api/eval/**",
-                                "/api/admin/**",
-                                "/api/memory/**",
-                                "/api/chat/regression/**",
-                                "/api/chat/test"
+                                "/api/admin/**"
                         ))
                 .securityContext(context -> context.securityContextRepository(securityContextRepository))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
@@ -128,10 +125,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/docs/**",
                                 "/api/eval/**",
-                                "/api/admin/**",
-                                "/api/memory/**",
-                                "/api/chat/regression/**",
-                                "/api/chat/test"
+                                "/api/admin/**"
                         ).permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll());

@@ -231,6 +231,12 @@ public class Coordinator {
     public Flux<String> streamAnswer(List<Message> promptMessages, boolean usePreparedContextOnly,
                                      ModelTier modelTier, boolean useVisionModel,
                                      Consumer<Map<String, Object>> observer) {
+        return streamAnswer(promptMessages, usePreparedContextOnly, modelTier, useVisionModel, observer, completion -> {});
+    }
+
+    public Flux<String> streamAnswer(List<Message> promptMessages, boolean usePreparedContextOnly,
+                                     ModelTier modelTier, boolean useVisionModel,
+                                     Consumer<Map<String, Object>> observer, Consumer<ModelCompletion> completionConsumer) {
         SelectedModel selectedModel = selectFinalAnswerModel(modelTier, usePreparedContextOnly, useVisionModel);
         ModelTier effectiveTier = selectedModel.tier();
         String modelName = selectedModel.modelName();
@@ -254,6 +260,8 @@ public class Coordinator {
             observeFinalAnswer(observer, invocation);
             AtomicBoolean usageReported = new AtomicBoolean();
             AtomicReference<Map<String, Object>> latestUsage = new AtomicReference<>();
+            AtomicReference<String> finishReason = new AtomicReference<>("");
+            StringBuilder responseText = new StringBuilder();
             Runnable reportUsage = () -> {
                 if (usageReported.compareAndSet(false, true)) {
                     Map<String, Object> usage = latestUsage.get();
@@ -265,6 +273,8 @@ public class Coordinator {
             return responseChatClient.prompt().messages(promptMessages).options(options.build())
                     .stream().chatResponse()
                     .doOnNext(response -> {
+                        String reason = ModelCompletion.finishReason(response);
+                        if (reason != null && !reason.isBlank()) finishReason.set(reason);
                         Usage usage = response.getMetadata().getUsage();
                         if (usage == null || usage instanceof EmptyUsage) return;
                         Map<String, Object> event = new LinkedHashMap<>();
@@ -285,8 +295,31 @@ public class Coordinator {
                             || response.getResult().getOutput() == null
                             ? null : response.getResult().getOutput().getText())
                     .filter(text -> !text.isEmpty())
+                    .doOnNext(responseText::append)
+                    .concatWith(Flux.defer(() -> {
+                        ModelCompletion completion = ModelCompletion.assess(finishReason.get(), responseText.toString());
+                        completionConsumer.accept(completion);
+                        observeFinalAnswer(observer, completion.attributes("final-answer"));
+                        return completion.complete() ? Flux.empty()
+                                : Flux.error(new ModelCompletion.IncompleteOutputException(completion));
+                    }))
+                    .doOnError(error -> {
+                        if (!(error instanceof ModelCompletion.IncompleteOutputException)) {
+                            ModelCompletion completion = new ModelCompletion(ModelCompletion.Status.FAILED, finishReason.get());
+                            completionConsumer.accept(completion);
+                            observeFinalAnswer(observer, completion.attributes("final-answer"));
+                        }
+                    })
                     .doOnTerminate(reportUsage)
-                    .doOnCancel(reportUsage);
+                    .doOnCancel(() -> {
+                        reportUsage.run();
+                        ModelCompletion completion = new ModelCompletion(ModelCompletion.Status.FAILED, finishReason.get());
+                        completionConsumer.accept(completion);
+                        Map<String, Object> cancelled = new LinkedHashMap<>(
+                                completion.attributes("final-answer"));
+                        cancelled.put("termination", "CANCELLED");
+                        observeFinalAnswer(observer, Map.copyOf(cancelled));
+                    });
         });
     }
 

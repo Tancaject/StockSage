@@ -150,7 +150,7 @@ public class WorkbenchCockpitService {
         try {
             // 调用 MarketTools 的只读 IBKR history 工具，不触发任何交易操作。
             String raw = marketTools.getIbkrHistoricalBars(norm, INTRADAY_PERIOD, INTRADAY_BAR);
-            Optional<Map<String, Object>> chart = kLinePayloadMapper.toChartPayload("getIbkrHistoricalBars", raw, new Object[]{norm, INTRADAY_PERIOD, INTRADAY_BAR});
+            Optional<Map<String, Object>> chart = kLinePayloadMapper.toChartPayload("getIbkrHistoricalBars", raw);
             if (chart.isPresent()) {
                 Map<String, Object> payload = new LinkedHashMap<>(chart.get());
                 payload.put("period", "intraday");
@@ -174,17 +174,14 @@ public class WorkbenchCockpitService {
             return new ChartResult(null, "DEGRADED", "未选择标的。");
         }
         String sourceTool;
-        Object[] args;
         Object rawResult;
         try {
             if (isLikelyUsTicker(ticker)) {
                 sourceTool = "getIbkrHistoricalBars";
-                args = new Object[]{ticker, "1y", "1d"};
                 // 美股调用只读 IBKR 历史端点，驾驶舱固定展示 1y/1d 日线。
                 rawResult = marketTools.getIbkrHistoricalBars(ticker, "1y", "1d");
             } else {
                 sourceTool = "getStockKLine";
-                args = new Object[]{ticker, period, days};
                 // A 股/港股调用 Python data-service 的跨市场 K 线工具。
                 rawResult = marketTools.getStockKLine(ticker, period, days);
             }
@@ -192,7 +189,7 @@ public class WorkbenchCockpitService {
             return new ChartResult(null, "DEGRADED", "K 线暂不可用：" + truncate(e.getMessage(), 180));
         }
 
-        Optional<Map<String, Object>> chart = kLinePayloadMapper.toChartPayload(sourceTool, rawResult, args);
+        Optional<Map<String, Object>> chart = kLinePayloadMapper.toChartPayload(sourceTool, rawResult);
         if (chart.isPresent()) {
             return new ChartResult(chart.get(), "READY", "K 线数据已加载。");
         }

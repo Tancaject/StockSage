@@ -1,0 +1,76 @@
+{
+  "scenarios" : [ {
+    "scenario" : "first-pass",
+    "status" : "PASS",
+    "httpRequests" : 1,
+    "checkpoints" : 0,
+    "reportStatus" : "VERIFIED",
+    "lifecycle" : "NONE"
+  }, {
+    "scenario" : "schema-repaired",
+    "status" : "PASS",
+    "httpRequests" : 2,
+    "checkpoints" : 2,
+    "reportStatus" : "VERIFIED",
+    "lifecycle" : "REVALIDATED"
+  }, {
+    "scenario" : "empty-repaired",
+    "status" : "PASS",
+    "httpRequests" : 2,
+    "checkpoints" : 2,
+    "reportStatus" : "VERIFIED",
+    "lifecycle" : "REVALIDATED"
+  }, {
+    "scenario" : "unknown-evidence-repaired",
+    "status" : "PASS",
+    "httpRequests" : 2,
+    "checkpoints" : 2,
+    "reportStatus" : "VERIFIED",
+    "lifecycle" : "REVALIDATED"
+  }, {
+    "scenario" : "repair-exhausted",
+    "status" : "PASS",
+    "httpRequests" : 2,
+    "checkpoints" : 2,
+    "reportStatus" : "NOT_RATED",
+    "lifecycle" : "REVALIDATED"
+  }, {
+    "scenario" : "planned-handover",
+    "status" : "PASS",
+    "httpRequests" : 2,
+    "checkpoints" : 2,
+    "reportStatus" : "VERIFIED",
+    "lifecycle" : "REVALIDATED"
+  }, {
+    "scenario" : "checkpoint-rejected",
+    "status" : "PASS",
+    "httpRequests" : 1,
+    "checkpoints" : 0,
+    "reportStatus" : "ABSENT",
+    "lifecycle" : "PLANNED"
+  }, {
+    "scenario" : "legacy-planned-handover",
+    "status" : "PASS",
+    "httpRequests" : 1,
+    "checkpoints" : 1,
+    "reportStatus" : "VERIFIED",
+    "lifecycle" : "REVALIDATED"
+  }, {
+    "scenario" : "checkpointed-report",
+    "status" : "PASS",
+    "httpRequests" : 1,
+    "checkpoints" : 2,
+    "reportStatus" : "VERIFIED",
+    "lifecycle" : "REVALIDATED"
+  }, {
+    "scenario" : "execution-lost",
+    "status" : "PASS",
+    "httpRequests" : 2,
+    "checkpoints" : 1,
+    "reportStatus" : "ABSENT",
+    "lifecycle" : "PLANNED"
+  } ],
+  "status" : "PASS",
+  "externalModelCalls" : 0,
+  "scenarioCount" : 10
+}

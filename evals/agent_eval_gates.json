@@ -8,7 +8,7 @@
   "planner_live_context_resolution_cases_expected": 15,
   "planner_deterministic_total_cases_expected": 100,
   "planner_deterministic_skipped_live_only_cases_expected": 15,
-  "planner_dataset_sha256_expected": "cb3dd8f8923c41788cce0348785973a3dfe6dcb3e55f9c7bb618618d7bb6be0a",
+  "planner_dataset_sha256_expected": "5e9b3c95af5aa425042aa007854135ef5d1f87f83ef898d85b339d09449b2625",
   "route_accuracy_min": 0.95,
   "macro_f1_min": 0.95,
   "required_action_recall_min": 0.98,

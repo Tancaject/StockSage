@@ -2,20 +2,8 @@ package com.stocksage.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.cfg.CoercionAction;
-import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.type.LogicalType;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -37,39 +25,7 @@ public record HkFinancialsResponse(
         boolean error, String errorCode, String message, Boolean retryable
 ) {
     public enum Status { SUCCESS, PARTIAL, EMPTY, ERROR }
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-            .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT)
-            .enable(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS)
-            .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
-    static {
-        for (LogicalType type : List.of(LogicalType.Textual, LogicalType.Integer, LogicalType.Boolean)) {
-            var coercions = MAPPER.coercionConfigFor(type);
-            if (type != LogicalType.Textual) {
-                coercions.setCoercion(CoercionInputShape.String, CoercionAction.Fail)
-                        .setCoercion(CoercionInputShape.EmptyString, CoercionAction.Fail);
-            }
-            if (type != LogicalType.Boolean) coercions.setCoercion(CoercionInputShape.Boolean, CoercionAction.Fail);
-            if (type == LogicalType.Textual || type == LogicalType.Boolean) {
-                coercions.setCoercion(CoercionInputShape.Integer, CoercionAction.Fail)
-                        .setCoercion(CoercionInputShape.Float, CoercionAction.Fail);
-            }
-        }
-        SimpleModule decimals = new SimpleModule();
-        decimals.addDeserializer(BigDecimal.class, new JsonDeserializer<>() {
-            @Override public BigDecimal deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-                if (!parser.hasToken(JsonToken.VALUE_STRING) || !parser.getText().matches("-?(0|[1-9][0-9]*)(\\.[0-9]+)?")) {
-                    throw context.weirdStringException(parser.getValueAsString(), BigDecimal.class, "Expected a plain decimal string");
-                }
-                return new BigDecimal(parser.getText());
-            }
-        });
-        decimals.addSerializer(BigDecimal.class, new JsonSerializer<>() {
-            @Override public void serialize(BigDecimal value, JsonGenerator generator, SerializerProvider serializers) throws IOException {
-                generator.writeString(value.toPlainString());
-            }
-        });
-        MAPPER.registerModule(decimals);
-    }
+    private static final ObjectMapper MAPPER = StrictResponseJson.newDecimalStringMapper();
 
     public HkFinancialsResponse {
         if (schemaVersion != 1 || status == null || !"akshare".equals(provider) || !"HK".equals(market)

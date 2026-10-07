@@ -35,15 +35,6 @@ public interface ResearchMemoryEntryRepository extends JpaRepository<ResearchMem
             String userId, String sourceType, String sourceId);
 
     /**
-     * 按主键和所有者读取记忆，避免仅凭 ID 越权访问。
-     *
-     * @param id 记忆主键
-     * @param userId 当前用户标识
-     * @return 用户拥有的记忆；不存在或越权时为空
-     */
-    Optional<ResearchMemoryEntry> findByIdAndUserId(Long id, String userId);
-
-    /**
      * 批量回查向量搜索命中的有效 MySQL 真相行。
      *
      * <p>只返回当前用户、未撤销且状态完全匹配的记录，丢弃过期或跨用户向量结果。</p>
@@ -58,16 +49,6 @@ public interface ResearchMemoryEntryRepository extends JpaRepository<ResearchMem
             String userId,
             ResearchMemoryEntry.VectorStatus vectorStatus
     );
-
-    /**
-     * 分页列出用户未撤销记忆，创建时间新的在前。
-     *
-     * @param userId 当前用户标识
-     * @param pageable 页码和每页数量
-     * @return 当前页真相行；没有记录时为空列表
-     */
-    List<ResearchMemoryEntry> findByUserIdAndRevokedAtIsNullOrderByCreatedAtDesc(
-            String userId, Pageable pageable);
 
     /**
      * 查找待处理或失败的索引任务，最久未更新的优先。

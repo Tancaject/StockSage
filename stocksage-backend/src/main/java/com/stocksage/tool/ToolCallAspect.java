@@ -96,7 +96,7 @@ public class ToolCallAspect {
             emitChunk(traceId, "observation", summary, conversationId);
             // K 线结果额外映射为 chart 分片；普通工具不会进入该分支。
             if (!failed) {
-                emitChartChunk(traceId, methodName, joinPoint.getArgs(), result, conversationId);
+                emitChartChunk(traceId, methodName, result, conversationId);
             }
             recordTraceStep(traceId, methodName, label, joinPoint.getArgs(), result, duration, null, failed);
 
@@ -225,12 +225,12 @@ public class ToolCallAspect {
     }
 
     /** 将 K 线工具结果转换为 chart 事件；转换失败不影响原始工具结果。 */
-    private void emitChartChunk(String traceId, String methodName, Object[] args, Object result, Long conversationId) {
+    private void emitChartChunk(String traceId, String methodName, Object result, Long conversationId) {
         if (!KLinePayloadMapper.isKlineTool(methodName) || result == null) {
             return;
         }
         try {
-            kLinePayloadMapper.toChartPayload(methodName, result, args)
+            kLinePayloadMapper.toChartPayload(methodName, result)
                     .ifPresent(payload -> emitChartPayload(traceId, payload, conversationId));
         } catch (Exception e) {
             log.debug("Failed to build chart chunk for tool={}", methodName, e);

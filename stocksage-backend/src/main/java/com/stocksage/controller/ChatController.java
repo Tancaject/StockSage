@@ -1,6 +1,6 @@
 package com.stocksage.controller;
 
-import com.stocksage.agent.CoordinatorRegressionService;
+import com.stocksage.evolution.EvolutionFailurePool;
 import com.stocksage.identity.RequestIdentity;
 import com.stocksage.model.dto.ChatRequest;
 import com.stocksage.model.entity.Conversation;
@@ -8,17 +8,12 @@ import com.stocksage.model.entity.Message;
 import com.stocksage.conversation.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 对话控制器 —— 整个系统的核心入口。
@@ -41,18 +36,11 @@ public class ChatController {
     /** 对话编排、记忆、预取、模型流和消息持久化的主服务。 */
     private final ChatService chatService;
 
-    /** 仅供可选连通性探针使用的默认 ChatClient。 */
-    private final ChatClient chatClient;
-
-    /** 执行不调用模型的固定 Coordinator 回归用例。 */
-    private final CoordinatorRegressionService coordinatorRegressionService;
-
     /** 从登录 Session 提取用户 ID，覆盖请求体中任何不可信值。 */
     private final RequestIdentity requestIdentity;
 
-    /** 是否开放直接调用模型的开发连通性探针。 */
-    @Value("${stocksage.debug.chat-test-enabled:false}")
-    private boolean chatTestEnabled;
+    /** 用户反馈"答案有问题"时写入的自进化失败池。 */
+    private final EvolutionFailurePool failurePool;
 
     /**
      * 流式对话接口。
@@ -106,32 +94,20 @@ public class ChatController {
     }
 
     /**
-     * Coordinator 路由的固定回归检查。
+     * 标记当前用户的某次回答有问题，写入自进化失败池等待分诊。
      *
-     * <p>该接口不调用模型，适合快速确认路由规则没有被改坏。</p>
-     *
-     * @return 各固定用例的预期与实际路由
+     * @param request 回答所属链路 ID 与可选说明
+     * @return 无响应体的 204 结果
      */
-    @PostMapping({"/regression/coordinator", "/regression/react"})
-    public Map<String, Object> runCoordinatorRegression() {
-        return coordinatorRegressionService.runDefaultRegression();
+    @PostMapping("/feedback")
+    public ResponseEntity<Void> answerFeedback(@Valid @RequestBody AnswerFeedbackRequest request) {
+        failurePool.recordUserFeedback(requestIdentity.currentUserId(), request.traceId(), request.note());
+        return ResponseEntity.noContent().build();
     }
 
-    /**
-     * DashScope 连通性测试接口（阶段 1.1）。
-     * 用于验证 API 密钥配置和网络连通性，开发调试用。
-     * 成功返回 LLM 回复文本；失败返回错误信息。
-     *
-     * @return 模型的一句测试回复
-     */
-    @GetMapping("/test")
-    public String testConnection() {
-        if (!chatTestEnabled) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        return chatClient.prompt()
-                .user("你好，请用一句话介绍自己。")
-                .call()
-                .content();
+    /** 回答反馈请求；traceId 来自 SSE 返回的链路标识。 */
+    public record AnswerFeedbackRequest(
+            @jakarta.validation.constraints.NotBlank @jakarta.validation.constraints.Size(max = 64) String traceId,
+            @jakarta.validation.constraints.Size(max = 1000) String note) {
     }
 }

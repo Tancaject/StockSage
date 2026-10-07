@@ -76,6 +76,8 @@ public class InvestmentReportVersionService {
     private final ApplicationEventPublisher eventPublisher;
     /** 负向人工审核时撤销由该报告产生的研究记忆。 */
     private final ResearchMemoryService researchMemoryService;
+    /** 报告被驳回时写入自进化失败池。 */
+    private final com.stocksage.evolution.EvolutionFailurePool failurePool;
     /** 重新校验缓存报告在当前策略和证据账本下是否允许评级。 */
     private final DeepResearchCompletionPolicy completionPolicy;
 
@@ -418,6 +420,7 @@ public class InvestmentReportVersionService {
         if (isNegativeHumanReview(toStatus)) {
             // 调用研究记忆服务撤销被人工否定报告产生的长期偏好/研究线索。
             researchMemoryService.revokeForReport(entity);
+            failurePool.recordReportRejection(entity);
         } else {
             // 审核通过或重新进入审核时，重新计算该来源所在冲突组。
             researchMemoryService.reconcileForReport(entity);

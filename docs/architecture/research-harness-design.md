@@ -681,26 +681,11 @@ RETURN_SAFE_REFUSAL
 
 ### 5.4 SynthesisResult
 
-```java
-public record SynthesisResult(
-        InvestmentReport report,
-        ParseStatus parseStatus,
-        List<ValidationIssue> issues
-) {
-}
-```
-
-`ParseStatus`：
-
-```text
-VALID
-INVALID_JSON
-INVALID_SCHEMA
-EMPTY_OUTPUT
-MODEL_FAILURE
-```
+综合结果保留报告、解析状态、字段问题和有界的失败报告片段。具体字段、解析状态和片段上限由 [`HarnessModels`](../../stocksage-backend/src/main/java/com/stocksage/harness/HarnessModels.java) 定义。
 
 不能把非 `VALID` 结果静默包装为有效 `HOLD`。
+
+报告需要修复时，字段问题和失败片段与既有 `PLANNED` 状态一同保存；违规码仍由 `HarnessSnapshot` 保存。Manager 的唯一一次重综合读取这些反馈，保持原裁决、证据及验收要求。接管继续使用已保存的反馈；旧 checkpoint 没有新增字段时只使用其实际保存的违规码。失败片段按不可信数据处理，不作为新指令或新证据。
 
 ### 5.5 HarnessSnapshot
 

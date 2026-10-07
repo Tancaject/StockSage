@@ -24,7 +24,7 @@
 | Query Rewrite | `QueryRewriter` | 已实现 |
 | RAG 评估 | Golden Set、MRR、Recall、Precision、RAGAS | 已实现 |
 | RAG Eval 接口 | `RagEvalService`、`/api/eval/rag` | 已实现 |
-| 路由与检索回归 | `CoordinatorRegressionService`、`RagRegressionService` | 已实现 |
+| 路由与检索回归 | `PlannerEvalService`（DETERMINISTIC 模式）、`RagRegressionService` | 已实现 |
 | Agent 与 Workflow | `Coordinator`、`ExecutionPlan` | 核心 |
 | 多 Agent 协作 | Fundamentals、Market、News、Bull、Bear、Manager | 已实现 |
 | Planning、终止条件 | 固定动作计划、Research Manager 每轮自适应终止、超时 | 已实现 |
@@ -571,7 +571,7 @@ Eval 和 Trace 解决的是两个不同问题：
    - 负向 Query 不应错误命中；
    - 用来发现索引、检索和配置的明显退化。
 
-2. `CoordinatorRegressionService`
+2. `PlannerEvalService`（`/api/eval/agent/planner`，DETERMINISTIC 模式）
    - 使用确定性路由运行固定问题；
    - 比较 ExecutionPlan 是否包含预期动作；
    - 用来防止关键词规则或动作补齐逻辑发生回归。
@@ -1212,7 +1212,7 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 - `stocksage-backend/src/main/java/com/stocksage/service/RagEvalService.java`
 - `stocksage-backend/src/main/java/com/stocksage/rag/RagRetrievalEvaluation.java`
 - `stocksage-backend/src/main/java/com/stocksage/rag/RagRegressionService.java`
-- `stocksage-backend/src/main/java/com/stocksage/agent/CoordinatorRegressionService.java`
+- `stocksage-backend/src/main/java/com/stocksage/service/PlannerEvalService.java`
 - `stocksage-backend/src/main/java/com/stocksage/trace/TraceService.java`
 - `stocksage-backend/src/main/java/com/stocksage/trace/TraceEventStore.java`
 - `stocksage-backend/src/main/java/com/stocksage/trace/TraceEventRelay.java`

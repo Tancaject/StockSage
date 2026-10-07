@@ -80,27 +80,6 @@ public class LongTermMemory {
     }
 
     /**
-     * 读取用户长期画像。
-     *
-     * @param userId 当前用户 ID
-     * @return 数据库中的画像；不存在时由 UserService 返回默认画像
-     */
-    public UserProfileDTO loadUserProfile(String userId) {
-        return userService.getUserProfile(userId);
-    }
-
-    /**
-     * 合并更新用户长期画像，未提供的字段保持原值。
-     *
-     * @param userId 当前用户 ID
-     * @param update 本轮提取出的增量画像
-     * @return 持久化后的完整画像
-     */
-    public UserProfileDTO mergeUserProfile(String userId, UserProfileDTO update) {
-        return userService.updateUserProfile(userId, update);
-    }
-
-    /**
      * 构造可注入聊天提示词的长期画像上下文。
      *
      * <p>画像为空时返回空字符串，避免无意义的默认信息干扰模型回答。</p>

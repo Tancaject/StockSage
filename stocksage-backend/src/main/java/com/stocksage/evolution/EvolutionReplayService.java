@@ -6,6 +6,7 @@ import com.stocksage.agent.AgentRuntimeConfiguration;
 import com.stocksage.agent.FundamentalsAgent;
 import com.stocksage.agent.FundamentalsPrompts;
 import com.stocksage.agent.ModelTier;
+import com.stocksage.agent.ModelCompletion;
 import com.stocksage.agent.PlanAction;
 import com.stocksage.conversation.ChatPromptAssembler;
 import com.stocksage.conversation.OrdinaryAnswerReplayService;
@@ -56,7 +57,6 @@ public class EvolutionReplayService {
     private final int promptMaxChars;
     private final Map<String, Object> buildIdentity;
     private final EvaluationContext evaluationContext;
-    private final ApprovedMethodArtifact shadowArtifact;
 
     public EvolutionReplayService(FundamentalsAgent analyst, FundamentalsMethodRegistry methods,
                                   AgentRuntimeConfiguration runtime, ChatPromptAssembler assembler,
@@ -114,32 +114,16 @@ public class EvolutionReplayService {
                 if (evaluationContext == null || evaluationContext.evaluatorVersion() == null
                         || !evaluationContext.evaluatorVersion().matches("[a-f0-9]{64}")
                         || evaluationContext.runMode() == null
-                        || !Set.of("BASELINE", "DEVELOPMENT", "VALIDATION", "HOLDOUT", "SHADOW").contains(evaluationContext.runMode())) {
+                        || !Set.of("BASELINE", "DEVELOPMENT", "VALIDATION", "HOLDOUT").contains(evaluationContext.runMode())) {
                     throw new IllegalArgumentException("V2 执行清单需要固定 experimentId、评估器指纹和 runMode。");
                 }
                 requireId(evaluationContext.experimentId(), "experimentId");
             } else if (evaluationContext != null) {
                 throw new IllegalArgumentException("带实验上下文的执行清单必须使用 schemaVersion=2。");
             }
-            if (evaluationContext != null && "SHADOW".equals(evaluationContext.runMode())) {
-                if (evaluationMethods.size() != 2) {
-                    throw new IllegalArgumentException("影子验证必须登记基线和唯一的已批准待验证包，请核对发布制品与实验清单。");
-                }
-                String candidateId = evaluationMethods.keySet().stream().filter(id -> !AgentPolicyBundle.BASELINE_ID.equals(id)).findFirst().orElseThrow();
-                shadowArtifact = methods.approvedForValidation(candidateId);
-                if (!shadowArtifact.bundle().equals(evaluationMethods.get(candidateId))
-                        || !shadowArtifact.comparisonIdentity().get("runtimeBuildSha256").equals(canonicalHash(buildIdentity))) {
-                    throw new IllegalArgumentException("影子验证的方法正文或运行构建与批准包不一致，请恢复批准时的制品与构建清单。");
-                }
-            } else {
-                shadowArtifact = null;
-            }
             Map<String, FrozenCase> loaded = new LinkedHashMap<>();
             for (FrozenCase sample : registered.cases()) {
                 validateCase(sample);
-                if (shadowArtifact != null && !"PUBLIC_AUTHORIZED".equals(sample.origin())) {
-                    throw new IllegalArgumentException("影子验证只接受已授权的冻结证据快照；合成用例请使用机制验证模式。");
-                }
                 if (loaded.putIfAbsent(sample.caseId(), sample) != null) {
                     throw new IllegalArgumentException("进化回放登记文件含重复 caseId，请修正清单。");
                 }
@@ -193,14 +177,6 @@ public class EvolutionReplayService {
         if (!consumedRuns.add(request.runId())) {
             throw new IllegalArgumentException("此 runId 已提交（含失败或超时），不能重试；请由操作员登记新的执行计划。进程重启不提供 exactly-once 保证。");
         }
-        if (shadowArtifact != null) {
-            String blocked = methods.shadowBlockReason(bundle.bundleId(), false);
-            if (blocked != null) {
-                StageResult stage = stage("FUNDAMENTALS_ANALYSIS", "NOT_EXECUTED", "", analysisMessages,
-                        sample.preAnalystContext(), sample.context(), true, List.of(), 0, timeoutSeconds, blocked);
-                return result(request, sample, bundle, "FAILED", blocked, "NOT_EXECUTED", "DEGRADED", stage, null);
-            }
-        }
         Map<String, Object> invocation = new LinkedHashMap<>();
         invocation.put("kind", "model-invocation");
         invocation.put("scope", "fundamentals-analysis");
@@ -227,6 +203,7 @@ public class EvolutionReplayService {
             usage.put("kind", "model-usage");
             usage.put("scope", "fundamentals-analysis");
             observations.add(Map.copyOf(usage));
+            observations.add(observed.completion().attributes("fundamentals-analysis"));
         } catch (Exception failure) {
             if (future != null) future.cancel(true);
             if (failure instanceof InterruptedException) Thread.currentThread().interrupt();
@@ -239,20 +216,13 @@ public class EvolutionReplayService {
             return result(request, sample, bundle, "FAILED", code, "FAILED", "DEGRADED", stage, null);
         }
         String report = observed.content() == null ? "" : observed.content();
-        boolean empty = report.isBlank();
-        StageResult analysis = stage("FUNDAMENTALS_ANALYSIS", empty ? "FAILED" : "COMPLETED", report,
+        ModelCompletion analystCompletion = observed.completion();
+        StageResult analysis = stage("FUNDAMENTALS_ANALYSIS", analystCompletion.complete() ? "COMPLETED" : "FAILED", report,
                 analysisMessages, sample.preAnalystContext(), sample.context(), true, observations,
-                elapsed(started), timeoutSeconds, empty ? "EMPTY_ANSWER" : null);
-        if (empty) return result(request, sample, bundle, "FAILED", "EMPTY_ANSWER", "EMPTY", "DEGRADED", analysis, null);
-        if (shadowArtifact != null) {
-            String blocked = methods.shadowBlockReason(bundle.bundleId(), true);
-            if (blocked != null) {
-                return result(request, sample, bundle, "FAILED", blocked, "COMPLETED", "DEGRADED", analysis, null);
-            }
-        }
+                elapsed(started), timeoutSeconds, analystCompletion.complete() ? null : analystCompletion.errorCode());
 
         ToolPrefetchService.AnalystDraft draft = ToolPrefetchService.appendAnalystDraft(sample.preAnalystContext(),
-                PlanAction.FUNDAMENTALS_AGENT.label(), report, sample.initialTaskOutcome());
+                PlanAction.FUNDAMENTALS_AGENT.label(), report, sample.initialTaskOutcome(), analystCompletion);
         var prepared = new ToolPrefetchService.PreparedToolContext(
                 ToolPrefetchService.finishOrdinaryContext(draft.context(), draft.taskOutcome()), "", null, null,
                 draft.taskOutcome(), sample.citationIds(), sample.context(), draft.section());
@@ -274,7 +244,7 @@ public class EvolutionReplayService {
                         draft.taskOutcome(), analysis, finalStage);
             }
             return result(request, sample, bundle, answer.status().name(), answer.errorCode(), draft.status(),
-                    prepared.outcomeForAnswer(answer.answer()), analysis, finalStage);
+                    prepared.outcomeForAnswer(answer.answer(), answer.completion()), analysis, finalStage);
         } catch (RuntimeException failure) {
             return result(request, sample, bundle, "FAILED", "FINAL_ASSEMBLY_OR_REPLAY_FAILED", draft.status(),
                     draft.taskOutcome(), analysis, null);
@@ -302,14 +272,6 @@ public class EvolutionReplayService {
     private Result result(Request request, FrozenCase sample, AgentPolicyBundle bundle, String status, String error,
                           String analystStatus, String taskOutcome, StageResult analysis, StageResult finalAnswer) {
         var identity = comparisonIdentity(sample, finalAnswer);
-        if (shadowArtifact != null) {
-            boolean conditionsMatch = Boolean.TRUE.equals(((Map<?, ?>) identity.get("shadow")).get("conditionsMatch"));
-            if ("COMPLETED".equals(status) && !conditionsMatch) {
-                status = "FAILED";
-                error = "SHADOW_APPROVED_CONDITIONS_CHANGED";
-                taskOutcome = "DEGRADED";
-            }
-        }
         Map<String, Object> context = new LinkedHashMap<>();
         context.put("schemaVersion", 1);
         context.put("runId", request.runId());
@@ -347,13 +309,6 @@ public class EvolutionReplayService {
         identity.put("memorySnapshotSha256", canonicalHash(Map.of("researchMemory", "", "userMemory", "", "rag", List.of())));
         identity.put("runtimeBuild", buildIdentity);
         identity.put("runtimeBuildSha256", canonicalHash(buildIdentity));
-        if (shadowArtifact != null) {
-            boolean conditionsMatch = !finalConfig.isEmpty() && shadowArtifact.comparisonIdentity().entrySet().stream()
-                    .allMatch(entry -> entry.getValue().equals(identity.get(entry.getKey())));
-            identity.put("shadow", Map.of("approvedArtifactSha256", shadowArtifact.artifactSha256(),
-                    "packageSha256", shadowArtifact.packageSha256(), "approvalSha256", shadowArtifact.approvalSha256(),
-                    "conditionsMatch", conditionsMatch, "outputScope", "ISOLATED_REPLAY_ONLY"));
-        }
         return Map.copyOf(identity);
     }
 

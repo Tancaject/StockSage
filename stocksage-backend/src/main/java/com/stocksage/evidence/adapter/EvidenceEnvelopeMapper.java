@@ -44,8 +44,8 @@ public class EvidenceEnvelopeMapper {
 
     public static final String OMITTED_CONTEXT = "{\"contextReduced\":true,\"evidenceOmitted\":true}";
 
-    /** 仅用于容错解析工具响应来源信息的轻量 JSON 解析器。 */
-    private static final ObjectMapper PROVENANCE_MAPPER = new ObjectMapper();
+    /** 读取响应树；版本化契约由各响应类型验收。 */
+    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
     /** 递归扫描工具 JSON 时视为业务数据时间的字段名白名单。 */
     private static final Set<String> BUSINESS_TIME_FIELDS = Set.of(
             "asof",
@@ -73,190 +73,193 @@ public class EvidenceEnvelopeMapper {
             Instant observedAt,
             boolean approvedReadOnly
     ) {
-        String evidenceTarget = structuredEvidenceTarget(ticker, capabilityId, payload);
+        PayloadFacts facts = readFacts(ticker, capabilityId, payload);
         String payloadHash = sha256(payload);
         String evidenceId = sha256(
-                dimension.name() + "|" + capabilityId + "|" + evidenceTarget + "|" + payloadHash);
-        EvidenceStatus structuredStatus = status == EvidenceStatus.AVAILABLE ? inspectStatus(capabilityId, payload) : status;
+                dimension.name() + "|" + capabilityId + "|" + facts.target() + "|" + payloadHash);
+        EvidenceStatus structuredStatus = status == EvidenceStatus.AVAILABLE ? facts.status() : status;
         if (structuredStatus == EvidenceStatus.NO_RESULTS && dimension != EvidenceDimension.NEWS) {
             structuredStatus = EvidenceStatus.EMPTY;
         }
         EvidenceProvenance provenance = structuredStatus == EvidenceStatus.AVAILABLE || structuredStatus == EvidenceStatus.NO_RESULTS
-                ? extractProvenance(capabilityId, evidenceTarget, payload)
-                : EvidenceProvenance.empty();
+                ? facts.provenance() : EvidenceProvenance.empty();
         return new EvidenceEnvelope(
-                evidenceId,
-                dimension,
-                capabilityId,
-                evidenceTarget,
-                structuredStatus,
-                provenance.sourceRef(),
-                provenance.provider(),
-                observedAt,
-                provenance.asOf(),
-                payloadHash,
-                approvedReadOnly,
-                structuredStatus == EvidenceStatus.AVAILABLE || structuredStatus == EvidenceStatus.EMPTY
-                        || structuredStatus == EvidenceStatus.NO_RESULTS ? extractTiming(capabilityId, payload) : null
-        );
+                evidenceId, dimension, capabilityId, facts.target(), structuredStatus,
+                provenance.sourceRef(), provenance.provider(), observedAt, provenance.asOf(), payloadHash,
+                approvedReadOnly, structuredStatus == EvidenceStatus.AVAILABLE || structuredStatus == EvidenceStatus.EMPTY
+                        || structuredStatus == EvidenceStatus.NO_RESULTS ? facts.timing() : null);
     }
 
-    /** 只读取版本化契约；旧 asOf 的日期粒度和语义无法从字段名可靠还原。 */
-    private EvidenceTiming extractTiming(String capabilityId, String payload) {
+    /** 来源和业务数据分别验收；计数、日期、股票身份不能替代行情或财务数值。 */
+    public EvidenceStatus inspectStatus(String capabilityId, String payload) {
+        return readFacts("", capabilityId, payload).status();
+    }
+
+    /** 同一响应只解析和验收一次，身份、状态、来源和时间使用同一份契约事实。 */
+    private PayloadFacts readFacts(String ticker, String capabilityId, String payload) {
+        String requested = normalizedTarget(ticker, TargetIdentity.resolved(ticker).canonicalKey());
+        if (payload == null || payload.isBlank()) return PayloadFacts.empty(requested, EvidenceStatus.EMPTY);
+        String target = requested;
         try {
-            JsonNode root = PROVENANCE_MAPPER.readTree(payload);
-            if (isVersionedKLine(capabilityId, root)) {
-                KLineResponse response = KLineResponse.fromJson(root);
-                if (response.status() == KLineResponse.Status.ERROR || response.status() == KLineResponse.Status.UNSUPPORTED) return null;
-                String bar = switch (response.period()) {
-                    case "daily" -> "1d";
-                    case "weekly" -> "1w";
-                    case "monthly" -> "1m";
-                    default -> throw new IllegalArgumentException("Unsupported K-line period");
-                };
-                return new EvidenceTiming(1, Instant.parse(response.fetchedAt()),
-                        new EvidenceTiming.Market(response.market(), bar, "DATE", dateOrNull(response.asOf()), null, null), null, null);
+            JsonNode root = JSON_MAPPER.readTree(payload);
+            if (root == null || root.isNull() || root.isEmpty()) return PayloadFacts.empty(requested, EvidenceStatus.EMPTY);
+            String name = capabilityName(capabilityId);
+            if (root.has("schemaVersion")) {
+                if ("getStockKLine".equals(name)) {
+                    KLineResponse response = KLineResponse.fromJson(root);
+                    target = normalizedTarget(response.resolvedCode(), requested);
+                    EvidenceStatus status = contractStatus(response.status());
+                    if (status == EvidenceStatus.FAILED) return PayloadFacts.empty(target, status);
+                    String bar = switch (response.period()) {
+                        case "daily" -> "1d";
+                        case "weekly" -> "1w";
+                        case "monthly" -> "1m";
+                        default -> throw new IllegalArgumentException("Unsupported K-line period");
+                    };
+                    EvidenceTiming timing = new EvidenceTiming(1, Instant.parse(response.fetchedAt()),
+                            new EvidenceTiming.Market(response.market(), bar, "DATE", dateOrNull(response.asOf()), null, null), null, null);
+                    EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
+                            ? new EvidenceProvenance(stableProviderRef(response.provider(), capabilityId, response.resolvedCode()),
+                                    response.provider(), parseBusinessInstant(response.asOf())) : EvidenceProvenance.empty();
+                    return new PayloadFacts(target, status, provenance, timing);
+                }
+                if ("getIbkrHistoricalBars".equals(name)) {
+                    IbkrHistoricalResponse response = IbkrHistoricalResponse.fromJson(root);
+                    String symbol = "HK".equals(response.market()) ? "HK:" + response.symbol() : response.symbol();
+                    target = normalizedTarget(symbol, requested);
+                    EvidenceStatus status = contractStatus(response.status());
+                    if (status == EvidenceStatus.FAILED) return PayloadFacts.empty(target, status);
+                    Instant asOf = response.asOf() == null ? null : Instant.parse(response.asOf());
+                    EvidenceTiming timing = new EvidenceTiming(1, Instant.parse(response.fetchedAt()),
+                            new EvidenceTiming.Market(response.market(), response.bar(), "INSTANT", null, asOf, response.delayed()), null, null);
+                    EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
+                            ? new EvidenceProvenance(ibkrHistoryRef(root, target), response.provider(), asOf) : EvidenceProvenance.empty();
+                    return new PayloadFacts(target, status, provenance, timing);
+                }
+                if ("getStructuredFinancials".equals(name)
+                        || ("getFinancialReports".equals(name) && "SEC_EDGAR".equals(root.path("provider").asText()))) {
+                    SecFinancialsResponse response = SecFinancialsResponse.fromJson(root);
+                    target = normalizedTarget(response.ticker(), requested);
+                    EvidenceStatus status = contractStatus(response.status());
+                    if (status == EvidenceStatus.FAILED) return PayloadFacts.empty(target, status);
+                    var facts = response.metrics().values().stream().flatMap(metric -> metric.data().stream()).toList();
+                    LocalDate latestEnd = facts.stream().map(fact -> LocalDate.parse(fact.end())).max(LocalDate::compareTo).orElse(null);
+                    LocalDate latestFiled = facts.stream().map(fact -> LocalDate.parse(fact.filed())).max(LocalDate::compareTo).orElse(null);
+                    EvidenceTiming timing = new EvidenceTiming(1, Instant.parse(response.fetchedAt()), null,
+                            new EvidenceTiming.Financial(response.period(), latestEnd, latestFiled), null);
+                    // 申报日期决定事实修订版本，财务事实的业务期间仍取 asOf。
+                    EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
+                            ? new EvidenceProvenance(secCompanyFactsUrl(response.cik()), response.provider(),
+                                    parseBusinessInstant(response.asOf())) : EvidenceProvenance.empty();
+                    return new PayloadFacts(target, status, provenance, timing);
+                }
+                if ("getFinancialReports".equals(name) && "baostock".equals(root.path("provider").asText())) {
+                    AShareFinancialsResponse response = AShareFinancialsResponse.fromJson(root);
+                    target = normalizedTarget(response.code(), requested);
+                    EvidenceStatus status = contractStatus(response.status());
+                    if (status == EvidenceStatus.FAILED) return PayloadFacts.empty(target, status);
+                    var rows = response.reports().stream().flatMap(report -> report.statements().all().stream())
+                            .filter(statement -> statement.status() == AShareFinancialsResponse.Status.SUCCESS)
+                            .map(statement -> statement.data()).toList();
+                    LocalDate latestEnd = rows.stream().map(row -> LocalDate.parse(row.statDate())).max(LocalDate::compareTo).orElse(null);
+                    LocalDate latestPublished = rows.stream().map(row -> LocalDate.parse(row.pubDate())).max(LocalDate::compareTo).orElse(null);
+                    EvidenceTiming timing = new EvidenceTiming(1, Instant.parse(response.fetchedAt()), null,
+                            new EvidenceTiming.Financial(response.period(), latestEnd, latestPublished), null);
+                    EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
+                            ? new EvidenceProvenance(stableProviderRef(response.provider(), capabilityId, response.code()),
+                                    response.provider(), parseBusinessInstant(response.asOf())) : EvidenceProvenance.empty();
+                    return new PayloadFacts(target, status, provenance, timing);
+                }
+                if ("getFinancialReports".equals(name) && "HK".equals(root.path("market").asText())) {
+                    HkFinancialsResponse response = HkFinancialsResponse.fromJson(root);
+                    target = tickerResolutionService.normalizeStructuredTicker(response.resolvedCode());
+                    EvidenceStatus status = contractStatus(response.status());
+                    if (status == EvidenceStatus.FAILED) return PayloadFacts.empty(target, status);
+                    // 港股契约的 asOf 是有数值行的 REPORT_DATE，上游未提供明确披露日期。
+                    EvidenceTiming timing = new EvidenceTiming(1, Instant.parse(response.fetchedAt()), null,
+                            new EvidenceTiming.Financial(response.period(), dateOrNull(response.asOf()), null), null);
+                    EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
+                            ? new EvidenceProvenance(stableProviderRef(response.provider(), capabilityId, response.resolvedCode()),
+                                    response.provider(), parseBusinessInstant(response.asOf())) : EvidenceProvenance.empty();
+                    return new PayloadFacts(target, status, provenance, timing);
+                }
+                if (root.has("searchType") && isSearchEvidence(capabilityId)) {
+                    target = structuredEvidenceTarget(requested, root);
+                    SearchResponse response = SearchResponse.fromJson(root);
+                    EvidenceStatus status = contractStatus(response.status());
+                    if (status == EvidenceStatus.FAILED) return PayloadFacts.empty(target, status);
+                    if (status == EvidenceStatus.EMPTY) status = EvidenceStatus.NO_RESULTS;
+                    var instants = response.results().stream()
+                            .filter(row -> row.publishedTimeKind() == SearchResponse.PublicationTimeKind.INSTANT)
+                            .map(row -> Instant.parse(row.publishedAt())).toList();
+                    var dates = response.results().stream()
+                            .filter(row -> row.publishedTimeKind() == SearchResponse.PublicationTimeKind.DATE)
+                            .map(row -> LocalDate.parse(row.publishedDate())).toList();
+                    EvidenceTiming timing = new EvidenceTiming(1, Instant.parse(response.fetchedAt()), null, null,
+                            new EvidenceTiming.Search(response.requestedTimelimit(), response.effectiveTimelimit(), response.requestedDays(),
+                                    instants.stream().min(Instant::compareTo).orElse(null), instants.stream().max(Instant::compareTo).orElse(null),
+                                    dates.stream().min(LocalDate::compareTo).orElse(null), dates.stream().max(LocalDate::compareTo).orElse(null),
+                                    instants.size(), dates.size(), response.results().size() - instants.size() - dates.size()));
+                    EvidenceProvenance provenance;
+                    if (response.results().isEmpty()) {
+                        provenance = new EvidenceProvenance(stableProviderRef(response.provider(), capabilityId, target), response.provider(), null);
+                    } else {
+                        var first = response.results().get(0);
+                        // 来源和时间必须属于同一篇文章。
+                        provenance = new EvidenceProvenance(first.link(), response.provider(),
+                                first.publishedAt() == null ? null : Instant.parse(first.publishedAt()));
+                    }
+                    return new PayloadFacts(target, status, provenance, timing);
+                }
             }
-            if (isVersionedIbkrHistory(capabilityId, root)) {
-                IbkrHistoricalResponse response = IbkrHistoricalResponse.fromJson(root);
-                if (response.status() == IbkrHistoricalResponse.Status.ERROR || response.status() == IbkrHistoricalResponse.Status.UNSUPPORTED) return null;
-                return new EvidenceTiming(1, Instant.parse(response.fetchedAt()),
-                        new EvidenceTiming.Market(response.market(), response.bar(), "INSTANT", null,
-                                response.asOf() == null ? null : Instant.parse(response.asOf()), response.delayed()), null, null);
-            }
-            if (isVersionedSecFinancials(capabilityId, root)) {
-                SecFinancialsResponse response = SecFinancialsResponse.fromJson(root);
-                if (response.status() == SecFinancialsResponse.Status.ERROR || response.status() == SecFinancialsResponse.Status.UNSUPPORTED) return null;
-                var facts = response.metrics().values().stream().flatMap(metric -> metric.data().stream()).toList();
-                LocalDate latestEnd = facts.stream().map(fact -> LocalDate.parse(fact.end())).max(LocalDate::compareTo).orElse(null);
-                LocalDate latestFiled = facts.stream().map(fact -> LocalDate.parse(fact.filed())).max(LocalDate::compareTo).orElse(null);
-                return new EvidenceTiming(1, Instant.parse(response.fetchedAt()), null,
-                        new EvidenceTiming.Financial(response.period(), latestEnd, latestFiled), null);
-            }
-            if (isVersionedAShareFinancials(capabilityId, root)) {
-                AShareFinancialsResponse response = AShareFinancialsResponse.fromJson(root);
-                if (response.status() == AShareFinancialsResponse.Status.ERROR) return null;
-                var rows = response.reports().stream().flatMap(report -> report.statements().all().stream())
-                        .filter(statement -> statement.status() == AShareFinancialsResponse.Status.SUCCESS)
-                        .map(statement -> statement.data()).toList();
-                LocalDate latestEnd = rows.stream().map(row -> LocalDate.parse(row.statDate())).max(LocalDate::compareTo).orElse(null);
-                LocalDate latestPublished = rows.stream().map(row -> LocalDate.parse(row.pubDate())).max(LocalDate::compareTo).orElse(null);
-                return new EvidenceTiming(1, Instant.parse(response.fetchedAt()), null,
-                        new EvidenceTiming.Financial(response.period(), latestEnd, latestPublished), null);
-            }
-            if (isVersionedHkFinancials(capabilityId, root)) {
-                HkFinancialsResponse response = HkFinancialsResponse.fromJson(root);
-                if (response.status() == HkFinancialsResponse.Status.ERROR) return null;
-                // 此 asOf 已由 typed 合同核对为有数值行的 REPORT_DATE；上游未提供明确披露日期。
-                return new EvidenceTiming(1, Instant.parse(response.fetchedAt()), null,
-                        new EvidenceTiming.Financial(response.period(), dateOrNull(response.asOf()), null), null);
-            }
-            if (isVersionedSearch(capabilityId, root)) {
-                SearchResponse response = SearchResponse.fromJson(root);
-                if (response.status() == SearchResponse.Status.ERROR) return null;
-                var instants = response.results().stream()
-                        .filter(row -> row.publishedTimeKind() == SearchResponse.PublicationTimeKind.INSTANT)
-                        .map(row -> Instant.parse(row.publishedAt())).toList();
-                var dates = response.results().stream()
-                        .filter(row -> row.publishedTimeKind() == SearchResponse.PublicationTimeKind.DATE)
-                        .map(row -> LocalDate.parse(row.publishedDate())).toList();
-                return new EvidenceTiming(1, Instant.parse(response.fetchedAt()), null, null,
-                        new EvidenceTiming.Search(response.requestedTimelimit(), response.effectiveTimelimit(), response.requestedDays(),
-                                instants.stream().min(Instant::compareTo).orElse(null), instants.stream().max(Instant::compareTo).orElse(null),
-                                dates.stream().min(LocalDate::compareTo).orElse(null), dates.stream().max(LocalDate::compareTo).orElse(null),
-                                instants.size(), dates.size(), response.results().size() - instants.size() - dates.size()));
-            }
-        } catch (Exception ignored) {
-            return null;
+            target = structuredEvidenceTarget(requested, root);
+            EvidenceStatus status = inspectUnversionedStatus(name, root);
+            EvidenceProvenance provenance = extractProvenance(capabilityId, target, root);
+            return new PayloadFacts(target, status, provenance, null);
+        } catch (Exception invalid) {
+            return PayloadFacts.empty(target, EvidenceStatus.FAILED);
         }
-        return null;
+    }
+
+    private static EvidenceStatus contractStatus(Enum<?> status) {
+        return switch (status.name()) {
+            case "SUCCESS", "PARTIAL" -> EvidenceStatus.AVAILABLE;
+            case "EMPTY" -> EvidenceStatus.EMPTY;
+            case "UNSUPPORTED", "ERROR" -> EvidenceStatus.FAILED;
+            default -> throw new IllegalArgumentException("Unsupported evidence status: " + status);
+        };
     }
 
     private static LocalDate dateOrNull(String value) {
         return value == null ? null : LocalDate.parse(value);
     }
 
-    /** 来源和业务数据分别验收；计数、日期、股票身份不能替代行情或财务数值。 */
-    public EvidenceStatus inspectStatus(String capabilityId, String payload) {
-        if (payload == null || payload.isBlank()) return EvidenceStatus.EMPTY;
-        try {
-            JsonNode root = PROVENANCE_MAPPER.readTree(payload);
-            if (DataServicePayloads.hasTopLevelError(root)) return EvidenceStatus.FAILED;
-            if (root == null || root.isNull() || root.isEmpty()) return EvidenceStatus.EMPTY;
-            String name = capabilityId.substring(capabilityId.lastIndexOf('/') + 1).split("\\(", 2)[0];
-            if (isVersionedSearch(capabilityId, root)) {
-                return switch (SearchResponse.fromJson(root).status()) {
-                    case SUCCESS -> EvidenceStatus.AVAILABLE;
-                    case EMPTY -> EvidenceStatus.NO_RESULTS;
-                    case ERROR -> EvidenceStatus.FAILED;
-                };
-            }
-            if ("getStockKLine".equals(name) && root.has("schemaVersion")) {
-                return switch (KLineResponse.fromJson(root).status()) {
-                    case SUCCESS -> EvidenceStatus.AVAILABLE;
-                    case EMPTY -> EvidenceStatus.EMPTY;
-                    case UNSUPPORTED, ERROR -> EvidenceStatus.FAILED;
-                };
-            }
-            if ("getIbkrHistoricalBars".equals(name) && root.has("schemaVersion")) {
-                return switch (IbkrHistoricalResponse.fromJson(root).status()) {
-                    case SUCCESS -> EvidenceStatus.AVAILABLE;
-                    case EMPTY -> EvidenceStatus.EMPTY;
-                    case UNSUPPORTED, ERROR -> EvidenceStatus.FAILED;
-                };
-            }
-            if (isVersionedSecFinancials(capabilityId, root)) {
-                return switch (SecFinancialsResponse.fromJson(root).status()) {
-                    case SUCCESS -> EvidenceStatus.AVAILABLE;
-                    case EMPTY -> EvidenceStatus.EMPTY;
-                    case UNSUPPORTED, ERROR -> EvidenceStatus.FAILED;
-                };
-            }
-            if (isVersionedAShareFinancials(capabilityId, root)) {
-                return switch (AShareFinancialsResponse.fromJson(root).status()) {
-                    case SUCCESS, PARTIAL -> EvidenceStatus.AVAILABLE;
-                    case EMPTY -> EvidenceStatus.EMPTY;
-                    case ERROR -> EvidenceStatus.FAILED;
-                };
-            }
-            if (isVersionedHkFinancials(capabilityId, root)) {
-                return switch (HkFinancialsResponse.fromJson(root).status()) {
-                    case SUCCESS, PARTIAL -> EvidenceStatus.AVAILABLE;
-                    case EMPTY -> EvidenceStatus.EMPTY;
-                    case ERROR -> EvidenceStatus.FAILED;
-                };
-            }
-            if (KLinePayloadMapper.isKlineTool(name)) {
-                var chart = new KLinePayloadMapper(PROVENANCE_MAPPER).toChartPayload(name, root, new Object[0]);
-                if (chart.isEmpty()) return EvidenceStatus.EMPTY;
-                @SuppressWarnings("unchecked")
-                var rows = (List<java.util.Map<String, Object>>) chart.get().get("points");
-                return rows.stream().anyMatch(row -> List.of("open", "high", "low", "close").stream()
-                        .allMatch(key -> row.get(key) instanceof Number value && Double.isFinite(value.doubleValue())))
-                        ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
-            }
-            if (name.equals("getStructuredFinancials") || name.equals("getFinancialReports")) {
-                boolean financials = hasSecFinancialValue(root.path("metrics"))
-                        || hasBusinessNumber(root.path("reports")) || hasBusinessNumber(root.path("statements"))
-                        || hasBusinessNumber(root.path("indicators"));
-                return financials ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
-            }
-            if (name.equals("getFinancialMetrics")) {
-                return hasBusinessNumber(root.path("metrics")) || List.of("price", "pe", "pb", "marketCap", "roe")
-                        .stream().anyMatch(key -> hasBusinessNumber(root.path(key))) ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
-            }
-            if (name.equals("getTechnicalIndicators")) {
-                return hasBusinessNumber(root.path("indicators")) ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
-            }
-            for (String field : List.of("results", "news", "items", "data")) {
-                JsonNode rows = root.path(field);
-                if (rows.isArray()) return rows.isEmpty() ? EvidenceStatus.NO_RESULTS : EvidenceStatus.AVAILABLE;
-            }
-            // 未知能力不能凭提供方标签声明成功；仍保留有实质正文的既有结果。
-            return hasBusinessNumber(root) ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
-        } catch (Exception ignored) {
-            return EvidenceStatus.FAILED;
+    private static String capabilityName(String capabilityId) {
+        return capabilityId == null ? "" : capabilityId.substring(capabilityId.lastIndexOf('/') + 1).split("\\(", 2)[0];
+    }
+
+    private EvidenceStatus inspectUnversionedStatus(String name, JsonNode root) {
+        if (DataServicePayloads.hasTopLevelError(root)) return EvidenceStatus.FAILED;
+        if (KLinePayloadMapper.isKlineTool(name)) return EvidenceStatus.EMPTY;
+        if (name.equals("getStructuredFinancials") || name.equals("getFinancialReports")) {
+            boolean financials = hasSecFinancialValue(root.path("metrics"))
+                    || hasBusinessNumber(root.path("reports")) || hasBusinessNumber(root.path("statements"))
+                    || hasBusinessNumber(root.path("indicators"));
+            return financials ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
         }
+        if (name.equals("getFinancialMetrics")) {
+            return hasBusinessNumber(root.path("metrics")) || List.of("price", "pe", "pb", "marketCap", "roe")
+                    .stream().anyMatch(key -> hasBusinessNumber(root.path(key))) ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
+        }
+        if (name.equals("getTechnicalIndicators")) {
+            return hasBusinessNumber(root.path("indicators")) ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
+        }
+        for (String field : List.of("results", "news", "items", "data")) {
+            JsonNode rows = root.path(field);
+            if (rows.isArray()) return rows.isEmpty() ? EvidenceStatus.NO_RESULTS : EvidenceStatus.AVAILABLE;
+        }
+        // 未知能力不能凭提供方标签声明成功；仍保留有实质正文的既有结果。
+        return hasBusinessNumber(root) ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
     }
 
     /** SEC 的公告财年、期间和计数只是元数据；财务事实只能来自每个 concept 的 value。 */
@@ -299,109 +302,24 @@ public class EvidenceEnvelopeMapper {
         return false;
     }
 
-    private String structuredEvidenceTarget(String requestedTicker, String capabilityId, String payload) {
-        String requested = tickerResolutionService.normalizeStructuredTicker(requestedTicker);
-        if (requested == null || requested.isBlank()) {
-            requested = TargetIdentity.resolved(requestedTicker).canonicalKey();
-        }
-        if (payload == null || payload.isBlank()) {
-            return requested;
-        }
-        try {
-            JsonNode root = PROVENANCE_MAPPER.readTree(payload);
-            if (isVersionedKLine(capabilityId, root)) {
-                String candidate = tickerResolutionService.normalizeStructuredTicker(KLineResponse.fromJson(root).resolvedCode());
-                return candidate == null || candidate.isBlank() ? requested : candidate;
-            }
-            if (isVersionedIbkrHistory(capabilityId, root)) {
-                IbkrHistoricalResponse response = IbkrHistoricalResponse.fromJson(root);
-                String symbol = "HK".equals(response.market()) ? "HK:" + response.symbol() : response.symbol();
-                String candidate = tickerResolutionService.normalizeStructuredTicker(symbol);
-                return candidate == null || candidate.isBlank() ? requested : candidate;
-            }
-            if (isVersionedSecFinancials(capabilityId, root)) {
-                String candidate = tickerResolutionService.normalizeStructuredTicker(SecFinancialsResponse.fromJson(root).ticker());
-                return candidate == null || candidate.isBlank() ? requested : candidate;
-            }
-            if (isVersionedAShareFinancials(capabilityId, root)) {
-                String candidate = tickerResolutionService.normalizeStructuredTicker(AShareFinancialsResponse.fromJson(root).code());
-                return candidate == null || candidate.isBlank() ? requested : candidate;
-            }
-            if (isVersionedHkFinancials(capabilityId, root)) {
-                return tickerResolutionService.normalizeStructuredTicker(HkFinancialsResponse.fromJson(root).resolvedCode());
-            }
-            for (String field : List.of("resolvedCode", "symbol", "ticker")) {
-                JsonNode value = root == null ? null : root.get(field);
-                String candidate = value == null || !value.isTextual()
-                        ? ""
-                        : tickerResolutionService.normalizeStructuredTicker(value.asText());
-                if (candidate != null && !candidate.isBlank() && !candidate.equals(requested)) {
-                    return candidate;
-                }
-            }
-        } catch (Exception ignored) {
-            // 非 JSON 工具正文没有可验证的结构化标的，沿用请求侧已解析身份。
+    private String normalizedTarget(String candidate, String fallback) {
+        String normalized = tickerResolutionService.normalizeStructuredTicker(candidate);
+        return normalized.isBlank() ? fallback : normalized;
+    }
+
+    private String structuredEvidenceTarget(String requested, JsonNode root) {
+        for (String field : List.of("resolvedCode", "symbol", "ticker")) {
+            JsonNode value = root.get(field);
+            String candidate = value == null || !value.isTextual()
+                    ? "" : tickerResolutionService.normalizeStructuredTicker(value.asText());
+            if (!candidate.isBlank() && !candidate.equals(requested)) return candidate;
         }
         return requested;
     }
 
-    private EvidenceProvenance extractProvenance(
-            String capabilityId,
-            String ticker,
-            String payload
-    ) {
-        if (payload == null || payload.isBlank()) {
-            return EvidenceProvenance.empty();
-        }
+    private EvidenceProvenance extractProvenance(String capabilityId, String ticker, JsonNode root) {
+        if (root.path("error").asBoolean(false)) return EvidenceProvenance.empty();
         try {
-            JsonNode root = PROVENANCE_MAPPER.readTree(payload);
-            if (root == null || root.isNull() || root.isMissingNode()
-                    || root.path("error").asBoolean(false)) {
-                return EvidenceProvenance.empty();
-            }
-            if (isVersionedKLine(capabilityId, root)) {
-                KLineResponse response = KLineResponse.fromJson(root);
-                if (response.status() != KLineResponse.Status.SUCCESS) return EvidenceProvenance.empty();
-                return new EvidenceProvenance(stableProviderRef(response.provider(), capabilityId, response.resolvedCode()),
-                        response.provider(), parseBusinessInstant(response.asOf()));
-            }
-            if (isVersionedIbkrHistory(capabilityId, root)) {
-                IbkrHistoricalResponse response = IbkrHistoricalResponse.fromJson(root);
-                if (response.status() != IbkrHistoricalResponse.Status.SUCCESS) return EvidenceProvenance.empty();
-                return new EvidenceProvenance(ibkrHistoryRef(root, ticker), response.provider(), Instant.parse(response.asOf()));
-            }
-            if (isVersionedSecFinancials(capabilityId, root)) {
-                SecFinancialsResponse response = SecFinancialsResponse.fromJson(root);
-                if (response.status() != SecFinancialsResponse.Status.SUCCESS) return EvidenceProvenance.empty();
-                // 申报日期决定事实修订版本；不能将它当作财务事实的业务期间。
-                return new EvidenceProvenance(secCompanyFactsUrl(response.cik()), response.provider(),
-                        parseBusinessInstant(response.asOf()));
-            }
-            if (isVersionedAShareFinancials(capabilityId, root)) {
-                AShareFinancialsResponse response = AShareFinancialsResponse.fromJson(root);
-                if (response.status() != AShareFinancialsResponse.Status.SUCCESS
-                        && response.status() != AShareFinancialsResponse.Status.PARTIAL) return EvidenceProvenance.empty();
-                return new EvidenceProvenance(stableProviderRef(response.provider(), capabilityId, response.code()),
-                        response.provider(), parseBusinessInstant(response.asOf()));
-            }
-            if (isVersionedHkFinancials(capabilityId, root)) {
-                HkFinancialsResponse response = HkFinancialsResponse.fromJson(root);
-                if (response.status() != HkFinancialsResponse.Status.SUCCESS
-                        && response.status() != HkFinancialsResponse.Status.PARTIAL) return EvidenceProvenance.empty();
-                return new EvidenceProvenance(stableProviderRef(response.provider(), capabilityId, response.resolvedCode()),
-                        response.provider(), parseBusinessInstant(response.asOf()));
-            }
-            if (isVersionedSearch(capabilityId, root)) {
-                SearchResponse response = SearchResponse.fromJson(root);
-                if (response.status() == SearchResponse.Status.ERROR) return EvidenceProvenance.empty();
-                if (response.results().isEmpty()) return new EvidenceProvenance(
-                        stableProviderRef(response.provider(), capabilityId, ticker), response.provider(), null);
-                var first = response.results().get(0);
-                // 只能使用同一篇文章的时间；供应商检索窗口和抓取时间都不是文章发布时间。
-                return new EvidenceProvenance(first.link(), response.provider(),
-                        first.publishedAt() == null ? null : Instant.parse(first.publishedAt()));
-            }
-
             String provider = firstDirectText(root, "provider");
             if (provider.isBlank()) {
                 provider = firstDirectText(root, "source");
@@ -481,34 +399,9 @@ public class EvidenceEnvelopeMapper {
         }
     }
 
-    private boolean isVersionedKLine(String capabilityId, JsonNode root) {
-        if (root == null || !root.has("schemaVersion") || capabilityId == null) return false;
-        String name = capabilityId.substring(capabilityId.lastIndexOf('/') + 1).split("\\(", 2)[0];
-        return "getStockKLine".equals(name);
-    }
-
-    private boolean isVersionedIbkrHistory(String capabilityId, JsonNode root) {
-        if (root == null || !root.has("schemaVersion") || capabilityId == null) return false;
-        String name = capabilityId.substring(capabilityId.lastIndexOf('/') + 1).split("\\(", 2)[0];
-        return "getIbkrHistoricalBars".equals(name);
-    }
-
-    private boolean isVersionedSecFinancials(String capabilityId, JsonNode root) {
-        if (root == null || !root.has("schemaVersion") || capabilityId == null) return false;
-        String name = capabilityId.substring(capabilityId.lastIndexOf('/') + 1).split("\\(", 2)[0];
-        return "getStructuredFinancials".equals(name)
-                || ("getFinancialReports".equals(name) && "SEC_EDGAR".equals(root.path("provider").asText()));
-    }
-
-    private boolean isVersionedAShareFinancials(String capabilityId, JsonNode root) {
-        if (root == null || !root.has("schemaVersion") || capabilityId == null) return false;
-        String name = capabilityId.substring(capabilityId.lastIndexOf('/') + 1).split("\\(", 2)[0];
-        return "getFinancialReports".equals(name) && "baostock".equals(root.path("provider").asText());
-    }
-
     private boolean isVersionedHkFinancials(String capabilityId, JsonNode root) {
         if (root == null || !root.has("schemaVersion") || capabilityId == null) return false;
-        String name = capabilityId.substring(capabilityId.lastIndexOf('/') + 1).split("\\(", 2)[0];
+        String name = capabilityName(capabilityId);
         return "getFinancialReports".equals(name) && "HK".equals(root.path("market").asText());
     }
 
@@ -519,10 +412,10 @@ public class EvidenceEnvelopeMapper {
     /** 普通回答与 DEEP 共用有界视图，财务项目及新闻来源、时间均保持关联。 */
     public String compactStructuredContext(String capabilityId, String payload, int maxChars) {
         try {
-            JsonNode root = PROVENANCE_MAPPER.readTree(payload);
+            JsonNode root = JSON_MAPPER.readTree(payload);
             if (isVersionedSearch(capabilityId, root) && payload.length() > maxChars) {
                 SearchResponse.fromJson(root);
-                ObjectNode selected = PROVENANCE_MAPPER.createObjectNode();
+                ObjectNode selected = JSON_MAPPER.createObjectNode();
                 for (String key : List.of("schemaVersion", "status", "searchType", "provider", "fetchedAt",
                         "requestedTimelimit", "effectiveTimelimit", "requestedDepth", "effectiveDepth",
                         "requestedDays", "fallbackFrom", "fallbackReason")) selected.set(key, root.get(key));
@@ -551,7 +444,7 @@ public class EvidenceEnvelopeMapper {
             }
             if (!isVersionedHkFinancials(capabilityId, root) || payload.length() <= maxChars) return payload;
             HkFinancialsResponse response = HkFinancialsResponse.fromJson(root);
-            ObjectNode selected = PROVENANCE_MAPPER.createObjectNode();
+            ObjectNode selected = JSON_MAPPER.createObjectNode();
             for (String key : List.of("schemaVersion", "status", "provider", "market", "symbol", "resolvedCode",
                     "period", "requestedPeriod", "requestedYears", "timeKind", "fetchedAt", "asOf", "currency",
                     "valueScale", "valueEncoding", "numericPrecision", "aggregationBasis")) {
@@ -561,7 +454,7 @@ public class EvidenceEnvelopeMapper {
             ObjectNode statements = selected.putObject("statements");
             for (String name : List.of("balanceSheet", "incomeStatement", "cashFlow", "indicators")) {
                 JsonNode table = name.equals("indicators") ? root.path(name) : root.path("statements").path(name);
-                ObjectNode summary = PROVENANCE_MAPPER.createObjectNode();
+                ObjectNode summary = JSON_MAPPER.createObjectNode();
                 for (String key : List.of("status", "errorCode", "retryable")) summary.set(key, table.get(key));
                 if (name.equals("indicators")) selected.set(name, summary);
                 else statements.set(name, summary);
@@ -827,6 +720,12 @@ public class EvidenceEnvelopeMapper {
             return HexFormat.of().formatHex(bytes);
         } catch (NoSuchAlgorithmException error) {
             throw new IllegalStateException("SHA-256 is unavailable", error);
+        }
+    }
+
+    private record PayloadFacts(String target, EvidenceStatus status, EvidenceProvenance provenance, EvidenceTiming timing) {
+        private static PayloadFacts empty(String target, EvidenceStatus status) {
+            return new PayloadFacts(target, status, EvidenceProvenance.empty(), null);
         }
     }
 
