@@ -50,6 +50,7 @@ const TASK_RESULT_LABELS = {
   INSUFFICIENT_EVIDENCE: '证据不足，暂不评级',
   OFFLINE_FALLBACK: '离线兜底结果',
   POLICY_BLOCKED: '策略已阻断',
+  EVIDENCE_ONLY: '仅证据阶段（评测）',
 }
 
 const REPORT_REVIEW_STATUS_LABELS = {

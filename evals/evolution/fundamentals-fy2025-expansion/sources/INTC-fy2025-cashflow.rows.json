@@ -1,0 +1,476 @@
+[
+ {
+  "cells": [
+   "Consolidated Statements of Cash Flows - USD ($) $ in Millions",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 27, 2025",
+   "Dec. 28, 2024",
+   "Dec. 30, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Statement of Cash Flows [Abstract]",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:StatementOfCashFlowsAbstract"
+ },
+ {
+  "cells": [
+   "Cash and cash equivalents, beginning of period",
+   "$ 8,249",
+   "$ 7,079",
+   "$ 11,144"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Cash flows provided by (used for) operating activities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Net income (loss)",
+   "26",
+   "(19,233)",
+   "1,675"
+  ],
+  "concept": "us-gaap:ProfitLoss"
+ },
+ {
+  "cells": [
+   "Adjustments to reconcile net income to net cash provided by operating activities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Depreciation",
+   "10,757",
+   "9,951",
+   "7,847"
+  ],
+  "concept": "us-gaap:Depreciation"
+ },
+ {
+  "cells": [
+   "Share-based compensation",
+   "2,434",
+   "3,410",
+   "3,229"
+  ],
+  "concept": "us-gaap:ShareBasedCompensation"
+ },
+ {
+  "cells": [
+   "Restructuring and other charges",
+   "476",
+   "3,491",
+   "(424)"
+  ],
+  "concept": "us-gaap:RestructuringCharges"
+ },
+ {
+  "cells": [
+   "Amortization of intangibles",
+   "949",
+   "1,428",
+   "1,755"
+  ],
+  "concept": "us-gaap:AmortizationOfIntangibleAssets"
+ },
+ {
+  "cells": [
+   "(Gains) losses on equity investments, net",
+   "(514)",
+   "(246)",
+   "(42)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInEquitySecuritiesFvNi"
+ },
+ {
+  "cells": [
+   "Mark-to-market (gains) losses on Escrowed Shares",
+   "1,796",
+   "0",
+   "0"
+  ],
+  "concept": "us-gaap:UnrealizedGainLossOnDerivatives"
+ },
+ {
+  "cells": [
+   "(Gains) losses on divestitures",
+   "(5,323)",
+   "0",
+   "0"
+  ],
+  "concept": "us-gaap:DisposalGroupNotDiscontinuedOperationGainLossOnDisposal"
+ },
+ {
+  "cells": [
+   "Deferred taxes",
+   "328",
+   "6,132",
+   "(2,033)"
+  ],
+  "concept": "us-gaap:DeferredIncomeTaxesAndTaxCredits"
+ },
+ {
+  "cells": [
+   "Impairments and net (gain) loss on retirement of property, plant and equipment",
+   "515",
+   "2,252",
+   "33"
+  ],
+  "concept": "intc:AssetImpairmentChargesAndGainLossOnDisposalOfPropertyPlantAndEquipment"
+ },
+ {
+  "cells": [
+   "Changes in assets and liabilities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInOperatingCapitalAbstract"
+ },
+ {
+  "cells": [
+   "Accounts receivable",
+   "(449)",
+   "(75)",
+   "731"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInAccountsReceivable"
+ },
+ {
+  "cells": [
+   "Inventories",
+   "(138)",
+   "(1,105)",
+   "2,097"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInInventories"
+ },
+ {
+  "cells": [
+   "Accounts payable",
+   "297",
+   "634",
+   "(801)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInAccountsPayable"
+ },
+ {
+  "cells": [
+   "Accrued compensation and benefits",
+   "788",
+   "(218)",
+   "(614)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInEmployeeRelatedLiabilities"
+ },
+ {
+  "cells": [
+   "Income taxes",
+   "(995)",
+   "(356)",
+   "(1,498)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInIncomeTaxesPayableNetOfIncomeTaxesReceivable"
+ },
+ {
+  "cells": [
+   "Other assets and liabilities",
+   "(1,250)",
+   "2,223",
+   "(484)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInOtherOperatingCapitalNet"
+ },
+ {
+  "cells": [
+   "Total adjustments",
+   "9,671",
+   "27,521",
+   "9,796"
+  ],
+  "concept": "us-gaap:AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivities"
+ },
+ {
+  "cells": [
+   "Net cash provided by (used for) operating activities",
+   "9,697",
+   "8,288",
+   "11,471"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+ },
+ {
+  "cells": [
+   "Cash flows provided by (used for) investing activities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Additions to property, plant and equipment",
+   "(14,646)",
+   "(23,944)",
+   "(25,750)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment"
+ },
+ {
+  "cells": [
+   "Proceeds from capital-related government incentives",
+   "1,577",
+   "1,936",
+   "1,011"
+  ],
+  "concept": "intc:ProceedsFromCapitalGrants"
+ },
+ {
+  "cells": [
+   "Purchases of short-term investments",
+   "(24,319)",
+   "(37,940)",
+   "(44,414)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireAvailableForSaleSecuritiesDebt"
+ },
+ {
+  "cells": [
+   "Maturities and sales of short-term investments",
+   "15,387",
+   "41,463",
+   "44,077"
+  ],
+  "concept": "us-gaap:ProceedsFromSaleOfAvailableForSaleSecuritiesDebt"
+ },
+ {
+  "cells": [
+   "Sales of equity investments",
+   "671",
+   "1,047",
+   "472"
+  ],
+  "concept": "us-gaap:ProceedsFromEquityMethodInvestmentDividendsOrDistributionsReturnOfCapital"
+ },
+ {
+  "cells": [
+   "Proceeds from Divestiture of Businesses",
+   "6,157",
+   "0",
+   "0"
+  ],
+  "concept": "us-gaap:ProceedsFromDivestitureOfBusinesses"
+ },
+ {
+  "cells": [
+   "Other investing",
+   "352",
+   "(818)",
+   "563"
+  ],
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities"
+ },
+ {
+  "cells": [
+   "Net cash provided by (used for) investing activities",
+   "(14,821)",
+   "(18,256)",
+   "(24,041)"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivities"
+ },
+ {
+  "cells": [
+   "Cash flows provided by (used for) financing activities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Issuance of commercial paper, net of issuance costs",
+   "3,493",
+   "7,349",
+   "0"
+  ],
+  "concept": "us-gaap:ProceedsFromIssuanceOfCommercialPaper"
+ },
+ {
+  "cells": [
+   "Repayment of commercial paper",
+   "(3,493)",
+   "(7,349)",
+   "(3,944)"
+  ],
+  "concept": "us-gaap:RepaymentsOfCommercialPaper"
+ },
+ {
+  "cells": [
+   "Partner contributions",
+   "5,108",
+   "12,714",
+   "1,511"
+  ],
+  "concept": "us-gaap:ProceedsFromMinorityShareholders"
+ },
+ {
+  "cells": [
+   "Net proceeds from sales of subsidiary shares",
+   "921",
+   "0",
+   "2,959"
+  ],
+  "concept": "us-gaap:ProceedsFromIssuanceInitialPublicOffering"
+ },
+ {
+  "cells": [
+   "Additions to property, plant and equipment",
+   "(3,026)",
+   "(1,178)",
+   "0"
+  ],
+  "concept": "intc:PaymentsToAcquirePropertyPlantAndEquipmentFinancingActivities"
+ },
+ {
+  "cells": [
+   "Issuance of long-term debt, net of issuance costs",
+   "0",
+   "2,975",
+   "11,391"
+  ],
+  "concept": "us-gaap:ProceedsFromIssuanceOfLongTermDebt"
+ },
+ {
+  "cells": [
+   "Repayment of debt",
+   "(3,750)",
+   "(2,288)",
+   "(423)"
+  ],
+  "concept": "us-gaap:RepaymentsOfLongTermDebt"
+ },
+ {
+  "cells": [
+   "Proceeds from sales of common stock through employee equity incentive plans",
+   "771",
+   "987",
+   "1,042"
+  ],
+  "concept": "us-gaap:ProceedsFromStockPlans"
+ },
+ {
+  "cells": [
+   "Net proceeds attributed to common stock and warrants issued, and Escrowed Shares",
+   "12,706",
+   "0",
+   "0"
+  ],
+  "concept": "intc:ProceedsFromIssuanceOfCommonStockWarrantsAndEscrowedShares"
+ },
+ {
+  "cells": [
+   "Restricted stock unit withholdings",
+   "(423)",
+   "(631)",
+   "(534)"
+  ],
+  "concept": "us-gaap:PaymentsRelatedToTaxWithholdingForShareBasedCompensation"
+ },
+ {
+  "cells": [
+   "Payment of dividends to stockholders",
+   "0",
+   "(1,599)",
+   "(3,088)"
+  ],
+  "concept": "us-gaap:PaymentsOfDividendsCommonStock"
+ },
+ {
+  "cells": [
+   "Other financing",
+   "(720)",
+   "158",
+   "(409)"
+  ],
+  "concept": "us-gaap:ProceedsFromPaymentsForOtherFinancingActivities"
+ },
+ {
+  "cells": [
+   "Net cash provided by (used for) financing activities",
+   "11,587",
+   "11,138",
+   "8,505"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivities"
+ },
+ {
+  "cells": [
+   "Net increase (decrease) in cash and cash equivalents",
+   "6,463",
+   "1,170",
+   "(4,065)"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
+ },
+ {
+  "cells": [
+   "Cash, cash equivalents, and restricted cash, end of period",
+   "14,712",
+   "8,249",
+   "7,079"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Non-cash supplemental disclosures:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:SupplementalCashFlowInformationAbstract"
+ },
+ {
+  "cells": [
+   "Acquisition of property, plant and equipment",
+   "4,952",
+   "8,125",
+   "4,804"
+  ],
+  "concept": "us-gaap:CapitalExpendituresIncurredButNotYetPaid"
+ },
+ {
+  "cells": [
+   "Interest, net of capitalized interest",
+   "$ 1,106",
+   "$ 987",
+   "$ 613"
+  ],
+  "concept": "us-gaap:InterestPaidNet"
+ }
+]

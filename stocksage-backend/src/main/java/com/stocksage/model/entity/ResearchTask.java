@@ -99,7 +99,10 @@ public class ResearchTask {
         OFFLINE_FALLBACK,
 
         /** 完成策略主动阻止发布不满足门禁的结论。 */
-        POLICY_BLOCKED
+        POLICY_BLOCKED,
+
+        /** 评测专用：证据门禁通过后即结束，不进入辩论和报告（stocksage.research.eval.evidence-only）。 */
+        EVIDENCE_ONLY
     }
 
     /** 数据库自增任务主键。 */

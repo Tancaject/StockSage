@@ -44,6 +44,17 @@ public class ChatStreamEmitter {
                 .build());
     }
 
+    /** 推送一条带结构化元数据的进度块；元数据与 Trace attributes 同构，前端用同一套规则渲染。 */
+    public void emit(String traceId, Long conversationId, String type, String content, java.util.Map<String, Object> metadata) {
+        send(traceId, ChatChunk.builder()
+                .type(type)
+                .content(content)
+                .traceId(traceId)
+                .conversationId(conversationId)
+                .metadata(metadata)
+                .build());
+    }
+
     /**
      * 推送一条带分组标识的流式块。
      *

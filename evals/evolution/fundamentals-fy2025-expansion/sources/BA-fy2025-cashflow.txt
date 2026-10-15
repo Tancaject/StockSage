@@ -1,0 +1,54 @@
+Consolidated Statements of Cash Flows - USD ($) $ in Millions | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Cash flows – operating activities: |  |  | 
+Net earnings/(loss) | $ 2,238 | $ (11,829) | $ (2,242)
+Non-cash items – |  |  | 
+Share-based plans expense | 426 | 407 | 690
+Treasury shares issued for 401(k) contribution | 1,530 | 1,601 | 1,515
+Depreciation and amortization | 1,953 | 1,836 | 1,861
+Investment/asset impairment charges, net | 45 | 112 | 46
+Gain on dispositions, net | (9,672) | (46) | (2)
+777X and 767 reach-forward losses | 5,283 | 4,079 | 
+Other charges and credits, net | 264 | 528 | 3
+Changes in assets and liabilities – |  |  | 
+Accounts receivable | (95) | (37) | (128)
+Unbilled receivables | (677) | (60) | 321
+Advances and progress billings | (723) | 4,069 | 3,365
+Inventories | (1,501) | (12,353) | (1,681)
+Other current assets | 155 | (16) | 389
+Accounts payable | 724 | (793) | 1,672
+Accrued liabilities | 1,341 | 1,563 | 779
+Income taxes receivable, payable and deferred | 115 | (567) | 44
+Other long-term liabilities | (346) | (329) | (313)
+Pension and other postretirement plans | (593) | (959) | (1,049)
+Financing receivables and operating lease equipment, net | 274 | 512 | 571
+Other | 324 | 202 | 119
+Net cash provided/(used) by operating activities | 1,065 | (12,080) | 5,960
+Cash flows – investing activities: |  |  | 
+Payments to acquire property, plant and equipment | (2,942) | (2,230) | (1,527)
+Proceeds from disposals of property, plant and equipment | 82 | 49 | 27
+Acquisitions, net of cash acquired | (1,248) | (50) | (70)
+Proceeds from dispositions | 10,585 | 124 | 
+Contributions to investments | (51,938) | (13,856) | (16,448)
+Proceeds from investments | 46,628 | 4,743 | 15,739
+Supplier notes receivable | (662) | (694) | (162)
+Repayments on supplier notes receivable | 2 | 40 | 
+Purchase of distribution rights | (9) | (88) | 
+Other | 1 | (11) | 4
+Net cash provided/(used) by investing activities | 499 | (11,973) | (2,437)
+Cash flows – financing activities: |  |  | 
+New borrowings | 165 | 10,161 | 75
+Debt repayments | (3,621) | (8,673) | (5,216)
+Common stock issuance, net of issuance costs |  | 18,200 | 
+Mandatory convertible preferred stock issuance, net of issuance costs |  | 5,657 | 
+Stock options exercised |  |  | 45
+Employee taxes on certain share-based payment arrangements | (34) | (83) | (408)
+Dividends paid on Mandatory convertible preferred stock | (331) |  | 
+Other | 58 | (53) | 17
+Net cash (used)/provided by financing activities | (3,763) | 25,209 | (5,487)
+Effect of exchange rate changes on cash and cash equivalents | 40 | (47) | 30
+Net (decrease)/increase in cash & cash equivalents, including restricted | (2,159) | 1,109 | (1,934)
+Cash & cash equivalents, including restricted, at beginning of year | 13,822 | 12,713 | 14,647
+Cash & cash equivalents, including restricted, at end of year | 11,663 | 13,822 | 12,713
+Less restricted cash & cash equivalents, included in Investments | 742 | 21 | 22
+Cash and cash equivalents at end of year | $ 10,921 | $ 13,801 | $ 12,691

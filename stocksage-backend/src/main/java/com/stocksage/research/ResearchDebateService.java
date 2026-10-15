@@ -41,6 +41,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -168,7 +169,7 @@ public class ResearchDebateService {
             List<DebateTurn> parsedRound;
             try {
                 parsedRound = applyRound(
-                        workingState, round, roundResult.getT1(), roundResult.getT2());
+                        workingState, round, roundResult.getT1(), roundResult.getT2(), traceId, roundStart);
             } catch (DebateContractParser.DebateContractException error) {
                 return failClosedDebate(
                         workingState,
@@ -176,7 +177,7 @@ public class ResearchDebateService {
                         conversationId,
                         harnessCheckpointer,
                         ViolationCode.DEBATE_CONTRACT_INVALID,
-                        "辩论结构或证据引用未通过契约校验：" + error.code().name(),
+                        "辩论结构或证据引用未通过契约校验：" + error.getMessage(),
                         roundStart
                 );
             }
@@ -947,10 +948,22 @@ public class ResearchDebateService {
             AnalysisState state,
             int round,
             String bull,
-            String bear
+            String bear,
+            String traceId,
+            long roundStart
     ) {
-        DebateTurn bullTurn = debateContractParser.parse(bull, round, Side.BULL, state);
-        DebateTurn bearTurn = debateContractParser.parse(bear, round, Side.BEAR, state);
+        DebateContractParser.ParsedTurn bullParsed = debateContractParser.parseTurn(bull, round, Side.BULL, state);
+        DebateContractParser.ParsedTurn bearParsed = debateContractParser.parseTurn(bear, round, Side.BEAR, state);
+        DebateTurn bullTurn = bullParsed.turn();
+        DebateTurn bearTurn = bearParsed.turn();
+        List<String> repairs = new ArrayList<>();
+        bullParsed.repairs().forEach(repair -> repairs.add("Bull " + repair));
+        bearParsed.repairs().forEach(repair -> repairs.add("Bear " + repair));
+        if (!repairs.isEmpty()) {
+            // 记录被删除的无效反驳引用；保留下来的论点均通过契约校验。
+            addTraceStep(traceId, "Research Debate Contract Repair", "Round " + round,
+                    String.join("\n", repairs), roundStart);
+        }
         state.getDebateTurns().add(bullTurn);
         state.getDebateTurns().add(bearTurn);
         // 新轮次改变评分输入；checkpoint 不得携带与当前辩论不匹配的旧评分或旧裁决。

@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -35,19 +34,12 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class RagService {
 
-    /** 从用户原文识别 2 到 5 位大写美股代码。 */
-    private static final Pattern TICKER_PATTERN = Pattern.compile("\\b([A-Z]{2,5})\\b");
     /** Ticker 过滤值只接受规范化市场代码字符，禁止把用户文本拼入过滤表达式。 */
     private static final Pattern SAFE_TICKER_FILTER_VALUE = Pattern.compile("[A-Z0-9.:-]{1,16}");
-
-    /** 允许自动生成元数据过滤器的保守 ticker 白名单。 */
-    private static final Set<String> KNOWN_TICKERS = Set.of(
-            "AAPL", "MSFT", "NVDA", "GOOGL", "GOOG", "AMZN", "META", "TSLA",
-            "BRK", "JPM", "V", "UNH", "XOM", "JNJ", "WMT", "PG", "MA", "HD",
-            "CVX", "MRK", "ABBV", "LLY", "PEP", "KO", "COST", "AVGO", "TMO",
-            "MCD", "CSCO", "ACN", "ABT", "DHR", "CRM", "NKE", "TXN", "AMD",
-            "INTC", "QCOM", "NFLX", "ADBE", "PYPL", "DIS", "BA", "GS", "MS", "MU"
-    );
+    private static final Pattern ANNUAL_REPORT = Pattern.compile("(?i)(?<![A-Za-z0-9])10-?K(?![A-Za-z0-9])|annual report|年报|年度报告");
+    private static final Pattern QUARTERLY_REPORT = Pattern.compile("(?i)(?<![A-Za-z0-9])10-?Q(?![A-Za-z0-9])|quarterly report|季报|季度报告");
+    /** 多目标检索每个目标都要单独召回和重排，上限控制额外开销。 */
+    private static final int MAX_TARGETS = 4;
 
     /** Milvus 语义向量检索入口。 */
     private final VectorStore vectorStore;
@@ -63,6 +55,9 @@ public class RagService {
 
     /** 从 MySQL 镜像读取父级切片完整正文。 */
     private final VectorDocumentRepository vectorDocumentRepository;
+
+    /** 知识库已入库的公司，用于从问题中识别过滤用的 ticker。 */
+    private final IndexedCompanies indexedCompanies;
 
     /** 解析镜像表保存的文档元数据 JSON。 */
     private final ObjectMapper objectMapper;
@@ -146,7 +141,38 @@ public class RagService {
         if (!metadataFilterEnabled || !SAFE_TICKER_FILTER_VALUE.matcher(ticker).matches()) {
             return retrieve(query);
         }
-        return retrieve(query, "ticker == '" + ticker + "'");
+        List<String> forms = formsIn(query);
+        if (forms.isEmpty()) {
+            return retrieve(query, "ticker == '" + ticker + "'");
+        }
+        return retrieveForTargets(query, forms.stream().map(form -> new Target(ticker, form)).toList()).finalContexts();
+    }
+
+    /** DEEP 取证的财报原文检索：标的和表单都由服务端确定，不从问题文本推断。 */
+    public List<Document> retrieveForTickerForm(String query, String canonicalTicker, String filingType) {
+        String ticker = canonicalTicker == null ? "" : canonicalTicker.strip().toUpperCase(java.util.Locale.ROOT);
+        if (!SAFE_TICKER_FILTER_VALUE.matcher(ticker).matches() || !Set.of("10-K", "10-Q").contains(filingType)) {
+            throw new IllegalArgumentException("Unsupported filing retrieval target");
+        }
+        return retrieveForTargets(query, List.of(new Target(ticker, filingType))).finalContexts();
+    }
+
+    /**
+     * 多标的对比：使用服务器确认的完整标的列表，每家公司都单独召回，不依赖从问题文本里重新识别公司。
+     * 公司 × 表单超过上限时放弃按表单拆分，而不是截掉某家公司。
+     */
+    public List<Document> retrieveForTickers(String query, List<String> canonicalTickers) {
+        List<String> tickers = canonicalTickers == null ? List.of() : canonicalTickers.stream()
+                .map(ticker -> ticker == null ? "" : ticker.strip().toUpperCase(java.util.Locale.ROOT))
+                .filter(ticker -> SAFE_TICKER_FILTER_VALUE.matcher(ticker).matches())
+                .distinct().toList();
+        if (!metadataFilterEnabled || tickers.isEmpty()) {
+            return retrieve(query);
+        }
+        if (tickers.size() == 1) {
+            return retrieveForTicker(query, tickers.get(0));
+        }
+        return retrieveForTargets(query, expand(tickers, formsIn(query))).finalContexts();
     }
 
     /**
@@ -156,8 +182,68 @@ public class RagService {
      * @return 包含每个检索阶段结果的评测快照
      */
     public RagRetrievalEvaluation retrieveForEval(String query) {
-        String filterExpression = metadataFilterEnabled ? buildAutoFilter(query) : null;
-        return retrieveForEval(query, filterExpression);
+        List<Target> targets = metadataFilterEnabled ? targets(query) : List.of();
+        // 带表单的目标走多目标路径：BM25 不支持表单过滤，需在召回后按元数据筛选。
+        if (targets.isEmpty() || (targets.size() == 1 && targets.get(0).filingType() == null)) {
+            return retrieveForEval(query, targets.isEmpty() ? null : targets.get(0).filter());
+        }
+        return retrieveForTargets(query, targets);
+    }
+
+    /**
+     * 问题涉及多个检索目标（多家公司，或同时比较 10-K 与 10-Q）时，每个目标单独过滤、召回和重排，再轮流合并。
+     * 一次混合检索取前 topK 时，相关度高的一方常占满全部名额，另一方完全缺席。
+     */
+    private RagRetrievalEvaluation retrieveForTargets(String query, List<Target> targets) {
+        String retrievalQuery = queryRewriter.rewrite(query);
+        int candidateTopK = candidateTopK();
+        int perTarget = Math.max(1, (topK + targets.size() - 1) / targets.size());
+        List<Document> vectorCandidates = new ArrayList<>();
+        List<Document> keywordCandidates = new ArrayList<>();
+        List<Document> fusedCandidates = new ArrayList<>();
+        List<List<Document>> rankedByTarget = new ArrayList<>();
+        for (Target target : targets) {
+            List<Document> vector = similaritySearch(retrievalQuery, target.filter(), candidateTopK);
+            List<Document> fused = vector;
+            if (hybridSearchEnabled) {
+                // BM25 索引只有 ticker 字段，表单类型在召回后按元数据筛选；
+                // 先多取候选，避免另一种表单的切片占满名额后筛选剩下太少。
+                int keywordFetch = target.filingType() == null ? keywordTopK : keywordTopK * 3;
+                List<Document> keyword = committedCandidates(
+                        keywordSearchService.search(retrievalQuery, keywordFetch, target.keywordFilter())).stream()
+                        .filter(target::accepts)
+                        .limit(keywordTopK)
+                        .toList();
+                keywordCandidates.addAll(keyword);
+                fused = rrfFusion(vector, keyword);
+            }
+            vectorCandidates.addAll(vector);
+            fusedCandidates.addAll(fused);
+            rankedByTarget.add(dashScopeReranker.rerank(retrievalQuery, fused, perTarget));
+        }
+        List<Document> rerankedContexts = interleave(rankedByTarget, topK);
+        List<Document> finalContexts = expandToParentChunks(rerankedContexts);
+        String filterExpression = String.join(" || ", targets.stream().map(target -> "(" + target.filter() + ")").toList());
+        log.debug("RAG multi-target retrieve query='{}', rewritten='{}', targets={}, final={}",
+                query, retrievalQuery, filterExpression, finalContexts.size());
+        return new RagRetrievalEvaluation(query, retrievalQuery, filterExpression, hybridSearchEnabled,
+                dashScopeReranker.isEnabled(), topK, candidateTopK, vectorCandidates, keywordCandidates,
+                fusedCandidates, rerankedContexts, finalContexts);
+    }
+
+    /** 各目标按名次轮流取一条，去重后截到 limit，保证每个目标至少占一个位置。 */
+    private List<Document> interleave(List<List<Document>> rankedByTarget, int limit) {
+        List<Document> merged = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        int depth = rankedByTarget.stream().mapToInt(List::size).max().orElse(0);
+        for (int rank = 0; rank < depth && merged.size() < limit; rank++) {
+            for (List<Document> ranked : rankedByTarget) {
+                if (rank < ranked.size() && merged.size() < limit && seen.add(documentKey(ranked.get(rank)))) {
+                    merged.add(ranked.get(rank));
+                }
+            }
+        }
+        return merged;
     }
 
     /**
@@ -210,36 +296,56 @@ public class RagService {
     }
 
     /**
-     * 当查询包含已知美股代码时，构建保守的股票代码元数据过滤器。
-     * 未知大写词会被忽略，避免把 AI 或 SEC 等缩写误当作过滤条件。
-     *
-     * @param query 用户原始问题
-     * @return ticker 等值/OR 表达式；没有可信 ticker 时返回 {@code null}
+     * 从问题中识别检索目标：提到的已入库公司（代码或公司名，被否定的不算），
+     * 以及问题提到的表单（10-K、10-Q 或两者）。
+     * 未入库公司的代码和普通大写缩写（AI、SEC 等）都不会成为过滤条件。
      */
-    String buildAutoFilter(String query) {
-        if (query == null || query.isBlank()) {
-            return null;
-        }
+    List<Target> targets(String query) {
+        List<String> tickers = indexedCompanies.tickersIn(query).stream()
+                .filter(ticker -> SAFE_TICKER_FILTER_VALUE.matcher(ticker).matches())
+                .toList();
+        List<Target> targets = expand(tickers, formsIn(query));
+        return targets.size() > MAX_TARGETS ? targets.subList(0, MAX_TARGETS) : targets;
+    }
 
-        Matcher matcher = TICKER_PATTERN.matcher(query);
-        List<String> tickers = new ArrayList<>();
-        while (matcher.find()) {
-            String candidate = matcher.group(1);
-            if (KNOWN_TICKERS.contains(candidate)) {
-                tickers.add(candidate);
+    /** 公司 × 表单；超过上限时只按公司拆分，保证每家公司都在。 */
+    private static List<Target> expand(List<String> tickers, List<String> forms) {
+        if (tickers.size() * Math.max(1, forms.size()) > MAX_TARGETS && tickers.size() > 1) {
+            forms = List.of();
+        }
+        List<Target> targets = new ArrayList<>();
+        for (String ticker : tickers.isEmpty() ? java.util.Collections.<String>singletonList(null) : tickers) {
+            for (String form : forms.isEmpty() ? java.util.Collections.<String>singletonList(null) : forms) {
+                if (ticker != null || form != null) targets.add(new Target(ticker, form));
             }
         }
+        return targets;
+    }
 
-        if (tickers.isEmpty()) {
-            return null;
+    /** 问题明确提到的表单；只提一种就只检索这一种，避免另一种表单的大量切片挤占名次。 */
+    private static List<String> formsIn(String query) {
+        if (query == null) return List.of();
+        List<String> forms = new ArrayList<>();
+        if (ANNUAL_REPORT.matcher(query).find()) forms.add("10-K");
+        if (QUARTERLY_REPORT.matcher(query).find()) forms.add("10-Q");
+        return forms;
+    }
+
+    /** 一个检索目标：公司和/或表单类型，至少有一项。 */
+    record Target(String ticker, String filingType) {
+        String filter() {
+            String tickerPart = ticker == null ? null : "ticker == '" + ticker + "'";
+            String formPart = filingType == null ? null : "filing_type == '" + filingType + "'";
+            return tickerPart == null ? formPart : formPart == null ? tickerPart : tickerPart + " && " + formPart;
         }
-        if (tickers.size() == 1) {
-            return "ticker == '" + tickers.get(0) + "'";
+
+        String keywordFilter() {
+            return ticker == null ? null : "ticker == '" + ticker + "'";
         }
-        return tickers.stream()
-                .map(t -> "ticker == '" + t + "'")
-                .reduce((a, b) -> a + " || " + b)
-                .orElse(null);
+
+        boolean accepts(Document document) {
+            return filingType == null || filingType.equals(document.getMetadata().get("filing_type"));
+        }
     }
 
     /**

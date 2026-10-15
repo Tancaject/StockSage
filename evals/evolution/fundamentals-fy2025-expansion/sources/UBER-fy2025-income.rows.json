@@ -1,0 +1,251 @@
+[
+ {
+  "cells": [
+   "CONSOLIDATED STATEMENTS OF OPERATIONS - USD ($) shares in Thousands, $ in Millions",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 31, 2025",
+   "Dec. 31, 2024",
+   "Dec. 31, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Income Statement [Abstract]",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:IncomeStatementAbstract"
+ },
+ {
+  "cells": [
+   "Revenue",
+   "$ 52,017",
+   "$ 43,978",
+   "$ 37,281"
+  ],
+  "concept": "us-gaap:Revenues"
+ },
+ {
+  "cells": [
+   "Costs and expenses",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:CostOfRevenueAbstract"
+ },
+ {
+  "cells": [
+   "Cost of revenue, exclusive of depreciation and amortization shown separately below",
+   "31,338",
+   "26,651",
+   "22,457"
+  ],
+  "concept": "us-gaap:CostOfGoodsAndServiceExcludingDepreciationDepletionAndAmortization"
+ },
+ {
+  "cells": [
+   "Operations and support",
+   "2,854",
+   "2,732",
+   "2,689"
+  ],
+  "concept": "uber:OperationsAndSupportExpense"
+ },
+ {
+  "cells": [
+   "Sales and marketing",
+   "4,898",
+   "4,337",
+   "4,356"
+  ],
+  "concept": "us-gaap:SellingAndMarketingExpense"
+ },
+ {
+  "cells": [
+   "Research and development",
+   "3,402",
+   "3,109",
+   "3,164"
+  ],
+  "concept": "us-gaap:ResearchAndDevelopmentExpense"
+ },
+ {
+  "cells": [
+   "General and administrative",
+   "3,241",
+   "3,639",
+   "2,682"
+  ],
+  "concept": "us-gaap:GeneralAndAdministrativeExpense"
+ },
+ {
+  "cells": [
+   "Depreciation and amortization",
+   "719",
+   "711",
+   "823"
+  ],
+  "concept": "us-gaap:DepreciationDepletionAndAmortization"
+ },
+ {
+  "cells": [
+   "Total costs and expenses",
+   "46,452",
+   "41,179",
+   "36,171"
+  ],
+  "concept": "us-gaap:CostsAndExpenses"
+ },
+ {
+  "cells": [
+   "Income from operations",
+   "5,565",
+   "2,799",
+   "1,110"
+  ],
+  "concept": "us-gaap:OperatingIncomeLoss"
+ },
+ {
+  "cells": [
+   "Interest expense",
+   "(440)",
+   "(523)",
+   "(633)"
+  ],
+  "concept": "us-gaap:InterestExpenseNonoperating"
+ },
+ {
+  "cells": [
+   "Interest income",
+   "743",
+   "721",
+   "484"
+  ],
+  "concept": "us-gaap:InvestmentIncomeInterest"
+ },
+ {
+  "cells": [
+   "Other income (expense), net",
+   "(68)",
+   "1,128",
+   "1,360"
+  ],
+  "concept": "us-gaap:OtherNonoperatingIncomeExpense"
+ },
+ {
+  "cells": [
+   "Income before income taxes and income (loss) from equity method investments",
+   "5,800",
+   "4,125",
+   "2,321"
+  ],
+  "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments"
+ },
+ {
+  "cells": [
+   "Provision for (benefit from) income taxes",
+   "(4,346)",
+   "(5,758)",
+   "213"
+  ],
+  "concept": "us-gaap:IncomeTaxExpenseBenefit"
+ },
+ {
+  "cells": [
+   "Income (loss) from equity method investments",
+   "(53)",
+   "(38)",
+   "48"
+  ],
+  "concept": "us-gaap:IncomeLossFromEquityMethodInvestments"
+ },
+ {
+  "cells": [
+   "Net income including non-controlling interests",
+   "10,093",
+   "9,845",
+   "2,156"
+  ],
+  "concept": "us-gaap:ProfitLoss"
+ },
+ {
+  "cells": [
+   "Less: net income (loss) attributable to non-controlling interests, net of tax",
+   "40",
+   "(11)",
+   "269"
+  ],
+  "concept": "us-gaap:NetIncomeLossAttributableToNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Net income attributable to Uber Technologies, Inc.",
+   "$ 10,053",
+   "$ 9,856",
+   "$ 1,887"
+  ],
+  "concept": "us-gaap:NetIncomeLoss"
+ },
+ {
+  "cells": [
+   "Net income per share attributable to Uber Technologies, Inc. common stockholders:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:EarningsPerShareAbstract"
+ },
+ {
+  "cells": [
+   "Basic (in dollars per share)",
+   "$ 4.82",
+   "$ 4.71",
+   "$ 0.93"
+  ],
+  "concept": "us-gaap:EarningsPerShareBasic"
+ },
+ {
+  "cells": [
+   "Diluted (in dollars per share)",
+   "$ 4.73",
+   "$ 4.56",
+   "$ 0.87"
+  ],
+  "concept": "us-gaap:EarningsPerShareDiluted"
+ },
+ {
+  "cells": [
+   "Weighted-average shares used to compute net income per share attributable to common stockholders:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:EarningsPerShareDilutedOtherDisclosuresAbstract"
+ },
+ {
+  "cells": [
+   "Basic (in shares)",
+   "2,085,253",
+   "2,094,602",
+   "2,035,651"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfSharesOutstandingBasic"
+ },
+ {
+  "cells": [
+   "Diluted (in shares)",
+   "2,119,689",
+   "2,150,508",
+   "2,091,782"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding"
+ }
+]

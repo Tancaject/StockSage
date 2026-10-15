@@ -29,7 +29,7 @@ public class IbkrSessionKeepaliveScheduler {
      */
     @Scheduled(
             initialDelayString = "${stocksage.ibkr.keepalive-initial-delay-ms:15000}",
-            fixedDelayString = "${stocksage.ibkr.keepalive-interval-ms:60000}"
+            fixedDelayString = "${stocksage.ibkr.keepalive-interval-ms:30000}"
     )
     public void keepSessionAlive() {
         if (!properties.isEnabled() || !properties.isKeepaliveEnabled()) {

@@ -219,25 +219,94 @@ public class TickerResolutionService {
         if (expected.isBlank()) {
             expected = primaryTicker.strip().toUpperCase(Locale.ROOT);
         }
+        String target = expected;
+        return explicitTickerSet(query).stream().anyMatch(ticker -> !ticker.equals(target));
+    }
+
+    /**
+     * 文本中显式出现的全部标的，按首次出现的位置排序；主标的即使是未知大写代码也排在其中。
+     * 判定口径与 {@link #hasConflictingExplicitTicker} 相同，不调用股票搜索。
+     */
+    public List<String> resolveExplicitTickers(String query) {
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+        Set<String> tickers = new java.util.LinkedHashSet<>();
+        String primary = resolveExplicitTicker(query);
+        if (!primary.isBlank()) {
+            String normalized = normalizeStructuredTicker(primary);
+            tickers.add(normalized.isBlank() ? primary.strip().toUpperCase(Locale.ROOT) : normalized);
+        }
+        tickers.addAll(explicitTickerSet(query));
+        String upper = query.toUpperCase(Locale.ROOT);
+        return tickers.stream()
+                .sorted(java.util.Comparator.comparingInt(ticker -> firstMention(upper, ticker)))
+                .toList();
+    }
+
+    private int firstMention(String upperQuery, String ticker) {
+        int best = Integer.MAX_VALUE;
+        for (String form : mentionForms(ticker)) {
+            int index = form.isBlank() ? -1 : upperQuery.indexOf(form);
+            if (index >= 0) best = Math.min(best, index);
+        }
+        return best;
+    }
+
+    /** 供证据过滤判断文本是否提到当前标的；为空表示没有可靠的写法，不应据此过滤。 */
+    public List<String> targetMentionForms(String ticker) {
+        if (ticker == null || ticker.isBlank()) return List.of();
+        return mentionForms(ticker.strip().toUpperCase(java.util.Locale.ROOT)).stream()
+                .filter(form -> !form.isBlank()).distinct().toList();
+    }
+
+    /** 一个标的在文本里可能出现的写法：规范代码、去掉市场前后缀的代码和公司别名（均为大写）。 */
+    private List<String> mentionForms(String ticker) {
+        List<String> forms = new java.util.ArrayList<>(List.of(ticker, ticker.replaceAll("\\.(HK|SH|SZ|BJ)$", "")
+                .replaceAll("^(SH|SZ|BJ)\\.", "").replaceFirst("^0+(?=\\d)", "")));
+        for (CompanyAlias company : COMPANY_ALIASES) {
+            if (company.ticker().equals(ticker)) forms.addAll(company.aliases());
+        }
+        return forms;
+    }
+
+    /** 去掉文本中这些标的的代码和公司名，供为单个标的构造搜索主题，避免把对比问题原样搜两遍。 */
+    public String withoutTickerMentions(String query, List<String> tickers) {
+        String text = query == null ? "" : query;
+        for (String ticker : tickers == null ? List.<String>of() : tickers) {
+            for (String form : mentionForms(ticker)) {
+                if (form.isBlank()) continue;
+                // 拉丁字母写法按完整单词去除，避免 "C" 这类短代码删掉其他单词里的字母。
+                String pattern = form.matches(".*[A-Z0-9].*")
+                        ? "(?<![A-Za-z0-9])" + Pattern.quote(form) + "(?![A-Za-z0-9])" : Pattern.quote(form);
+                text = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(text).replaceAll(" ");
+            }
+        }
+        return text.replaceAll("\\s+", " ").strip();
+    }
+
+    /** 除未知主标的外，文本中所有可确认的显式标的。 */
+    private Set<String> explicitTickerSet(String query) {
+        Set<String> tickers = new java.util.LinkedHashSet<>();
         String upper = query.toUpperCase(Locale.ROOT);
         for (CompanyAlias company : COMPANY_ALIASES) {
-            if (company.matches(upper) && !company.ticker().equals(expected)) {
-                return true;
+            if (company.matches(upper)) {
+                tickers.add(company.ticker());
             }
         }
         boolean comparison = COMPARISON_MARKER_PATTERN.matcher(query).find();
         for (String token : EXPLICIT_TOKEN_SPLIT.split(upper)) {
             boolean explicitTicker = TICKER_SECTOR_MAP.containsKey(token)
                     || (comparison && SINGLE_LETTER_TICKERS.contains(token));
-            if (explicitTicker && !token.equals(expected)) {
-                return true;
+            if (explicitTicker) {
+                tickers.add(token);
             }
         }
         Matcher marketMatcher = MARKET_TICKER_PATTERN.matcher(query);
         while (marketMatcher.find()) {
-            if (!normalizeStructuredTicker(marketMatcher.group()).equals(expected)) {
-                return true;
-            }
+            // 无法规范化的市场代码仍算一个标的，交给后续取证阶段明确失败，而不是被忽略。
+            String normalized = normalizeStructuredTicker(marketMatcher.group());
+            tickers.add(normalized.isBlank() ? marketMatcher.group().strip().toUpperCase(Locale.ROOT) : normalized);
         }
         String withoutMarketCodes = MARKET_TICKER_PATTERN.matcher(query).replaceAll(" ");
         Set<String> pairedTickers = new java.util.HashSet<>();
@@ -263,11 +332,11 @@ public class TickerResolutionService {
                 }
             }
             // 未知的大写词（MCP、URL 等缩写）只有与另一个疑似代码成对出现时才算第二个标的，避免误判为多标的。
-            if (!candidate.equals(expected) && (known || pairedTickers.contains(candidate))) {
-                return true;
+            if (known || pairedTickers.contains(candidate)) {
+                tickers.add(candidate);
             }
         }
-        return false;
+        return tickers;
     }
 
     /** 规范化结构化工具字段中的显式 ticker；纯数字供应商代码保持未解析。 */

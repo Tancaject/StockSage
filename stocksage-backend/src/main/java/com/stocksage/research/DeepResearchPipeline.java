@@ -77,6 +77,12 @@ public class DeepResearchPipeline {
     private final ResearchTaskCheckpointService checkpointService;
     /** 收集/恢复确定性证据并执行首次 Harness 闸门。 */
     private final DeepEvidenceCollector evidenceCollector;
+
+    /** 评测专用：证据门禁通过后即结束，不进入辩论和报告；默认关闭。 */
+    @org.springframework.beans.factory.annotation.Value("${stocksage.research.eval.evidence-only:false}")
+    private boolean evidenceOnly;
+    /** 证据摘要上限；按每字 3 字节计不超过 messages.content（TEXT, 64KB）。 */
+    private static final int EVIDENCE_DIGEST_MAX_CHARS = 18000;
     /** 在证据门禁通过后最多执行一次有界问题相关补证。 */
     private final DeepEvidenceReplanService evidenceReplanService;
     /** 把结构化报告或证据不足状态渲染为用户 Markdown。 */
@@ -226,6 +232,13 @@ public class DeepResearchPipeline {
                                     : ResearchTask.ResultKind.INSUFFICIENT_EVIDENCE;
                     finishWithText(
                             runningTask, lease, payload, text, null, resultKind, ownershipLost);
+                    return;
+                }
+                if (evidenceOnly || payload.evidenceOnly()) {
+                    // 评测专用：证据阶段完成后结束，不调用辩论、Manager 和报告模型。
+                    finishWithText(runningTask, lease, payload,
+                            evidenceCollector.evidenceDigest(workingState, EVIDENCE_DIGEST_MAX_CHARS), null,
+                            ResearchTask.ResultKind.EVIDENCE_ONLY, ownershipLost);
                     return;
                 }
 
@@ -500,7 +513,8 @@ public class DeepResearchPipeline {
         }
         return switch (resultKind) {
             case FULL_REPORT -> "COMPLETED";
-            case INSUFFICIENT_EVIDENCE, OFFLINE_FALLBACK -> "DEGRADED";
+            // EVIDENCE_ONLY 只在评测开关下出现，没有报告，不能算 COMPLETED。
+            case INSUFFICIENT_EVIDENCE, OFFLINE_FALLBACK, EVIDENCE_ONLY -> "DEGRADED";
             case POLICY_BLOCKED -> "BLOCKED";
         };
     }
@@ -566,6 +580,8 @@ public class DeepResearchPipeline {
 
     private void deleteCompletedCheckpointBestEffort(ResearchTask task) {
         try {
+            // 评测任务保留结构化辩论等断点状态，供复盘和冻结证据回放。
+            if (parsePayload(task).evaluation()) return;
             checkpointService.deleteForCompletedTask(task.getId());
         } catch (Exception error) {
             log.warn("Completed research task checkpoint cleanup failed, taskId={}, error={}",
@@ -591,7 +607,9 @@ public class DeepResearchPipeline {
                     // 旧任务或未知枚举值不能升级成已确认的请求条件。
                 }
             }
-            return new SubmissionPayload(ticker, query, traceId, conversationId, timeSensitivity);
+            String evaluationMode = root.path("evaluationMode").asText("");
+            return new SubmissionPayload(ticker, query, traceId, conversationId, timeSensitivity,
+                    evaluationMode.isBlank() ? null : evaluationMode);
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid research task submission payload", e);
         }
@@ -601,8 +619,18 @@ public class DeepResearchPipeline {
         return error == null || error.getMessage() == null ? "unknown error" : error.getMessage();
     }
 
+    /** @param evaluationMode 评测专用的请求级模式，普通任务为 null */
     private record SubmissionPayload(String ticker, String query, String traceId, Long conversationId,
-                                     TimeSensitivity timeSensitivity) {
+                                     TimeSensitivity timeSensitivity, String evaluationMode) {
+        /** 证据阶段完成后结束。 */
+        boolean evidenceOnly() {
+            return "EVIDENCE_ONLY".equals(evaluationMode);
+        }
+
+        /** 评测任务：保存调用原文，并保留 checkpoint 供复盘和回放。 */
+        boolean evaluation() {
+            return evaluationMode != null;
+        }
     }
 
     /**
@@ -754,6 +782,14 @@ public class DeepResearchPipeline {
                 return new InlineResult(
                         context.toString().trim(), answer, null, traceId,
                         taskOutcome(runningTask));
+            }
+            if (evidenceOnly || parsePayload(task).evidenceOnly()) {
+                // 评测专用：与后台路径一致，证据阶段完成后结束。
+                completeInlineTaskForOwner(
+                        runningTask, acquired, ownershipLost, null, ResearchTask.ResultKind.EVIDENCE_ONLY);
+                return new InlineResult(
+                        context.toString().trim(), evidenceCollector.evidenceDigest(agentState, EVIDENCE_DIGEST_MAX_CHARS),
+                        null, traceId, taskOutcome(runningTask));
             }
 
             investmentReportVersionService.prepareHashes(agentState);

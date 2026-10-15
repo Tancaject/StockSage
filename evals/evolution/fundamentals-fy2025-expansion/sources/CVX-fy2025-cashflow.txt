@@ -1,0 +1,38 @@
+Consolidated Statement of Cash Flows - USD ($) $ in Millions | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Operating Activities |  |  | 
+Net Income (Loss) | $ 12,485 | $ 17,749 | $ 21,411
+Adjustments |  |  | 
+Depreciation, depletion and amortization | 20,132 | 17,282 | 17,326
+Dry hole expense | 325 | 429 | 436
+Distributions more (less) than income from equity affiliates | 2,282 | (366) | (885)
+Net before-tax gains on asset retirements and sales | (462) | (1,685) | (138)
+Net foreign currency effects | 585 | (629) | 578
+Deferred income tax provision | 986 | 1,240 | 298
+Net decrease (increase) in operating working capital | (1,008) | 1,211 | (3,185)
+Decrease (increase) in long-term receivables | (132) | 114 | 150
+Net decrease (increase) in other deferred charges | (508) | (1,225) | (300)
+Cash contributions to employee pension plans | (588) | (844) | (1,120)
+Other | (158) | (1,784) | 1,038
+Net Cash Provided by Operating Activities | 33,939 | 31,492 | 35,609
+Investing Activities |  |  | 
+Acquisition of businesses, net of cash received | 1,056 | 0 | 55
+Acquisition of Hess Corporation common stock | (2,225) | 0 | 0
+Capital expenditures | (17,347) | (16,448) | (15,829)
+Proceeds and deposits related to asset sales and returns of investment | 1,826 | 7,704 | 669
+Net maturities of (investments in) time deposits | 1 | (4) | 0
+Net sales (purchases) of marketable securities | 0 | 45 | 175
+Net repayment (borrowing) of loans by equity affiliates | 778 | (233) | (302)
+Net Cash Used for Investing Activities | (15,911) | (8,936) | (15,232)
+Financing Activities |  |  | 
+Net borrowings (repayments) of short-term obligations | (1,061) | 4,868 | 135
+Proceeds from issuances of long-term debt | 11,402 | 478 | 150
+Repayments of long-term debt and other financing obligations | (4,475) | (1,778) | (4,340)
+Cash dividends - common stock | (12,751) | (11,801) | (11,336)
+Net contributions from (distributions to) noncontrolling interests | (323) | (195) | (40)
+Net sales (purchases) of treasury shares | (11,855) | (15,044) | (14,678)
+Net Cash Provided by (Used for) Financing Activities | (19,063) | (23,472) | (30,109)
+Effect of Exchange Rate Changes on Cash, Cash Equivalents and Restricted Cash | 58 | (97) | (114)
+Net Change in Cash, Cash Equivalents and Restricted Cash | (977) | (1,013) | (9,846)
+Cash, Cash Equivalents and Restricted Cash at January 1 | 8,262 | 9,275 | 19,121
+Cash, Cash Equivalents and Restricted Cash at December 31 | $ 7,285 | $ 8,262 | $ 9,275

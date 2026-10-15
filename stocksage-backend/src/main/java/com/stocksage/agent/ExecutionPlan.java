@@ -21,6 +21,7 @@ import java.util.List;
  * @param modelTier 最终回答应使用的模型能力层级，由后端映射到具体模型名
  * @param routingDecision 有界路由诊断元数据；历史调用可为空
  * @param resolvedQuery 仅供当前请求内部执行的消歧问题，不写入路由 Trace 属性
+ * @param ordinaryPlan 最终执行计划；actions 由它的步骤派生，保证执行与展示读同一份计划
  */
 public record ExecutionPlan(
         PlanRoute route,
@@ -31,7 +32,8 @@ public record ExecutionPlan(
         ModelTier modelTier,
         RoutingDecisionMetadata routingDecision,
         String resolvedQuery,
-        ReadRequest readRequest
+        ReadRequest readRequest,
+        OrdinaryPlan ordinaryPlan
 ) {
     public ExecutionPlan {
         resolvedQuery = resolvedQuery == null ? "" : resolvedQuery.trim();
@@ -42,12 +44,23 @@ public record ExecutionPlan(
             readRequest = ReadRequest.parse(route, resolvedQuery,
                     routingDecision == null ? java.util.Map.of() : routingDecision.entities());
         }
+        if (ordinaryPlan == null) {
+            ordinaryPlan = OrdinaryPlan.fixed(List.of(), actions, readRequest, java.util.Set.of());
+        } else if (!ordinaryPlan.steps().isEmpty()) {
+            actions = ordinaryPlan.actions();
+        }
+    }
+
+    public ExecutionPlan(PlanRoute route, String taskType, String thought, List<PlanAction> actions,
+                         String observation, ModelTier modelTier, RoutingDecisionMetadata routingDecision,
+                         String resolvedQuery, ReadRequest readRequest) {
+        this(route, taskType, thought, actions, observation, modelTier, routingDecision, resolvedQuery, readRequest, null);
     }
 
     public ExecutionPlan(PlanRoute route, String taskType, String thought, List<PlanAction> actions,
                          String observation, ModelTier modelTier, RoutingDecisionMetadata routingDecision,
                          String resolvedQuery) {
-        this(route, taskType, thought, actions, observation, modelTier, routingDecision, resolvedQuery, null);
+        this(route, taskType, thought, actions, observation, modelTier, routingDecision, resolvedQuery, null, null);
     }
 
     /** 保留不传内部消歧问题的七字段调用形式。 */

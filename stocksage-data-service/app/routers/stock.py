@@ -477,11 +477,8 @@ def get_financial_report(
             return normalize_a_share_financials(None, route, period, years, error=e)
         return normalize_a_share_financials(payload, route, period, years)
     elif route.market == US:
-        if period == "quarterly":
-            return normalize_sec_financials(None, route.api_code, requested_period=period,
-                                           requested_years=years, route=route)
         try:
-            payload = edgar.get_xbrl(route.api_code)
+            payload = edgar.get_xbrl(route.api_code, period)
         except Exception as e:
             check_budget(e)
             return normalize_sec_financials(None, route.api_code, error=e, requested_period=period,

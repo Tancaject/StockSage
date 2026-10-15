@@ -72,6 +72,7 @@ public class DeepEvidenceReplanService {
     private final TraceService traceService;
     private final ChatStreamEmitter chatStreamEmitter;
     private final AsyncTaskExecutor agentTaskExecutor;
+    private final DeepEvidenceLoopService loopService;
 
     @Value("${stocksage.agent.deep-replan.enabled:false}")
     private boolean enabled;
@@ -86,7 +87,7 @@ public class DeepEvidenceReplanService {
     private long plannerTimeoutSeconds;
 
     public Map<String, Object> runtimeConfiguration() {
-        return Map.of("policyVersion", POLICY_VERSION, "enabled", enabled,
+        return Map.of("policyVersion", POLICY_VERSION, "enabled", enabled, "loop", loopService.runtimeConfiguration(),
                 "maxSearchResults", Math.max(1, Math.min(5, maxSearchResults)),
                 "toolTimeoutSeconds", Math.max(1, toolTimeoutSeconds),
                 "plannerTimeoutSeconds", Math.max(1, plannerTimeoutSeconds));
@@ -100,7 +101,8 @@ public class DeepEvidenceReplanService {
             TickerResolutionService tickerResolutionService,
             TraceService traceService,
             ChatStreamEmitter chatStreamEmitter,
-            AsyncTaskExecutor agentTaskExecutor
+            AsyncTaskExecutor agentTaskExecutor,
+            DeepEvidenceLoopService loopService
     ) {
         this.replanner = replanner;
         this.objectMapper = objectMapper;
@@ -110,6 +112,7 @@ public class DeepEvidenceReplanService {
         this.traceService = traceService;
         this.chatStreamEmitter = chatStreamEmitter;
         this.agentTaskExecutor = agentTaskExecutor;
+        this.loopService = loopService;
     }
 
     /**
@@ -144,6 +147,12 @@ public class DeepEvidenceReplanService {
                 validateTerminalState(taskId, state.getPrimaryTicker(), durable, evidence);
                 return evidence;
             }
+        }
+        // 取证循环（ReAct）开启时替代单步补证；已有单步补证状态的旧任务仍按单步路径收尾。
+        if (durable == null && loopService.enabled()) {
+            // 循环自己逐步落盘（PLANNED / REVALIDATED / STOPPED），接管时从同一 checkpoint 续跑。
+            return loopService.run(taskId, userId, conversationId, traceId, evidence, ownershipCheck, strictCheckpoint)
+                    .evidence();
         }
         if (!enabled) {
             if (durable != null) {
@@ -365,7 +374,7 @@ public class DeepEvidenceReplanService {
                 : proposed.replaceAll("\\p{Cntrl}+", " ").replaceAll("\\s+", " ").strip();
         if (target.isBlank()
                 || focus.isBlank()
-                || !tickerResolutionService.resolveExplicitTicker(focus).isBlank()) {
+                || tickerResolutionService.hasConflictingExplicitTicker(focus, target)) {
             return "";
         }
         String query = target + " " + focus;
@@ -392,7 +401,7 @@ public class DeepEvidenceReplanService {
                 || !query.equals(query.replaceAll("\\p{Cntrl}+", " ")
                         .replaceAll("\\s+", " ").strip())
                 || focus.isBlank()
-                || !tickerResolutionService.resolveExplicitTicker(focus).isBlank()
+                || tickerResolutionService.hasConflictingExplicitTicker(focus, target)
                 || (state.status() == EvidenceReplanStatus.PLANNED
                 && (!state.addedEvidenceIds().isEmpty() || state.stopReason() != null))
                 || !effectKey(taskId, query).equals(state.effectKey())) {

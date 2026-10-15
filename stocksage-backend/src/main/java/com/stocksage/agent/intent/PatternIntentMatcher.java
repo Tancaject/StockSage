@@ -29,7 +29,7 @@ public final class PatternIntentMatcher {
             "(?:组合诊断|持仓诊断|我的持仓|投资组合|"
                     + "\\b(?:portfolio|holdings?)\\s+(?:diagnosis|review|risk|analysis)\\b)", FLAGS);
     private static final Pattern FUNDAMENTALS = Pattern.compile(
-            "(?:\\b10\\s*-[kq]\\b|财报|年报|季报|风险因素|资产负债表|现金流量表|收入结构|"
+            "(?:\\b10\\s*-[kq]\\b|财报|年报|季报|风险因素|资产负债表|利润表|现金流量表|收入结构|"
                     + "\\b(?:annual|quarterly)\\s+(?:report|filing)\\b|"
                     + "\\bsec\\s+filing\\b|\\brisk\\s+factors?\\b)", FLAGS);
     private static final Pattern NEWS = Pattern.compile(

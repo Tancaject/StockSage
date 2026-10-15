@@ -1,0 +1,672 @@
+{
+  "schemaVersion": 2,
+  "cases": [
+    {
+      "caseId": "lly-fy2025-growth",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "0cd0a34b5ace6e144c823c0c549bdaf5f4cbc584e3db40afb091698320fc0228",
+      "query": "礼来（LLY）FY2025的增长和盈利能力怎么样？请根据利润表给出FY2025和FY2024的营业收入、税前利润，计算营业收入和税前利润的同比增速，以及两年的税前利润率（税前利润/营业收入），再判断盈利能力是改善还是走弱。金额注明单位，百分比保留两位小数。",
+      "resolvedQuery": "礼来（LLY）FY2025的增长和盈利能力怎么样？请根据利润表给出FY2025和FY2024的营业收入、税前利润，计算营业收入和税前利润的同比增速，以及两年的税前利润率（税前利润/营业收入），再判断盈利能力是改善还是走弱。金额注明单位，百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-07",
+      "context": "[E1] {\"availableAt\":\"2026-02-13T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2026-02-12T00:00:00Z\",\"rawSha256\":\"5f9395891b94f9bb2c13db79031160760c5b7844a7408acdbb08bbee3e5a294b\",\"retrievedAt\":\"2026-10-07T04:16:39.606257+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/59478/000005947826000013/R3.htm\",\"sourceVersion\":\"LLY-FY2025-10-K-0000059478-26-000013-income\",\"target\":\"LLY\",\"unit\":\"million\",\"visibleSha256\":\"5f9395891b94f9bb2c13db79031160760c5b7844a7408acdbb08bbee3e5a294b\"}\nConsolidated Statements of Operations - USD ($) shares in Millions, $ in Millions | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nIncome Statement [Abstract] |  |  | \nRevenue | $ 65,179 | $ 45,043 | $ 34,124\nCosts, expenses, and other: |  |  | \nCost of sales | 11,052 | 8,418 | 7,082\nResearch and development | 13,337 | 10,991 | 9,313\nMarketing, selling, and administrative | 11,094 | 8,594 | 7,404\nAcquired in-process research and development | 2,910 | 3,280 | 3,800\nAsset impairment, restructuring, and other special charges | 484 | 861 | 68\nOther—net, (income) expense | 571 | 219 | (97)\nCosts, expenses, and other | 39,448 | 32,363 | 27,570\nIncome before income taxes | 25,731 | 12,680 | 6,554\nIncome taxes | 5,091 | 2,090 | 1,314\nNet income | $ 20,640 | $ 10,590 | $ 5,240\nEarnings per share: |  |  | \nBasic (in dollars per share) | $ 23.00 | $ 11.76 | $ 5.82\nDiluted (in dollars per share) | $ 22.95 | $ 11.71 | $ 5.80\nShares used in calculation of earnings per share: |  |  | \nBasic (in shares) | 897.3 | 900.6 | 900.2\nDiluted (in shares) | 899.3 | 904.1 | 903.3\n",
+      "contextSha256": "2b2fd6b251e0167791d0d8e0b43ee16f2ef31b5ba2d28bb5cba552a3be3bc77f",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "LLY",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：LLY\n请求参数：{}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2026-02-13T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2026-02-12T00:00:00Z\",\"rawSha256\":\"5f9395891b94f9bb2c13db79031160760c5b7844a7408acdbb08bbee3e5a294b\",\"retrievedAt\":\"2026-10-07T04:16:39.606257+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/59478/000005947826000013/R3.htm\",\"sourceVersion\":\"LLY-FY2025-10-K-0000059478-26-000013-income\",\"target\":\"LLY\",\"unit\":\"million\",\"visibleSha256\":\"5f9395891b94f9bb2c13db79031160760c5b7844a7408acdbb08bbee3e5a294b\"}\nConsolidated Statements of Operations - USD ($) shares in Millions, $ in Millions | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nIncome Statement [Abstract] |  |  | \nRevenue | $ 65,179 | $ 45,043 | $ 34,124\nCosts, expenses, and other: |  |  | \nCost of sales | 11,052 | 8,418 | 7,082\nResearch and development | 13,337 | 10,991 | 9,313\nMarketing, selling, and administrative | 11,094 | 8,594 | 7,404\nAcquired in-process research and development | 2,910 | 3,280 | 3,800\nAsset impairment, restructuring, and other special charges | 484 | 861 | 68\nOther—net, (income) expense | 571 | 219 | (97)\nCosts, expenses, and other | 39,448 | 32,363 | 27,570\nIncome before income taxes | 25,731 | 12,680 | 6,554\nIncome taxes | 5,091 | 2,090 | 1,314\nNet income | $ 20,640 | $ 10,590 | $ 5,240\nEarnings per share: |  |  | \nBasic (in dollars per share) | $ 23.00 | $ 11.76 | $ 5.82\nDiluted (in dollars per share) | $ 22.95 | $ 11.71 | $ 5.80\nShares used in calculation of earnings per share: |  |  | \nBasic (in shares) | 897.3 | 900.6 | 900.2\nDiluted (in shares) | 899.3 | 904.1 | 903.3\n",
+      "preAnalystContextSha256": "3b647933d2f71517cc7a164f3651bc615791047815d19e86c400657c1ad0ff61",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261007-answer-quality-expansion",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-07T04:21:27.933420+00:00",
+        "asOfInstant": "2026-10-07T04:21:27.933420+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-07T04:21:27.933420+00:00",
+        "sourceManifestSha256": "0b1b97cdd3d4ed6539bb4ec39b0498b4622da97dd9d7292c0a8b604aa3ef30df"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2026-02-13T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-12-31",
+          "periodStart": "2025-01-01",
+          "publishedAt": "2026-02-12T00:00:00Z",
+          "rawSha256": "5f9395891b94f9bb2c13db79031160760c5b7844a7408acdbb08bbee3e5a294b",
+          "retrievedAt": "2026-10-07T04:16:39.606257+00:00",
+          "sourceRef": "https://www.sec.gov/Archives/edgar/data/59478/000005947826000013/R3.htm",
+          "sourceVersion": "LLY-FY2025-10-K-0000059478-26-000013-income",
+          "target": "LLY",
+          "unit": "million",
+          "visibleSha256": "5f9395891b94f9bb2c13db79031160760c5b7844a7408acdbb08bbee3e5a294b",
+          "visibleText": "Consolidated Statements of Operations - USD ($) shares in Millions, $ in Millions | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nIncome Statement [Abstract] |  |  | \nRevenue | $ 65,179 | $ 45,043 | $ 34,124\nCosts, expenses, and other: |  |  | \nCost of sales | 11,052 | 8,418 | 7,082\nResearch and development | 13,337 | 10,991 | 9,313\nMarketing, selling, and administrative | 11,094 | 8,594 | 7,404\nAcquired in-process research and development | 2,910 | 3,280 | 3,800\nAsset impairment, restructuring, and other special charges | 484 | 861 | 68\nOther—net, (income) expense | 571 | 219 | (97)\nCosts, expenses, and other | 39,448 | 32,363 | 27,570\nIncome before income taxes | 25,731 | 12,680 | 6,554\nIncome taxes | 5,091 | 2,090 | 1,314\nNet income | $ 20,640 | $ 10,590 | $ 5,240\nEarnings per share: |  |  | \nBasic (in dollars per share) | $ 23.00 | $ 11.76 | $ 5.82\nDiluted (in dollars per share) | $ 22.95 | $ 11.71 | $ 5.80\nShares used in calculation of earnings per share: |  |  | \nBasic (in shares) | 897.3 | 900.6 | 900.2\nDiluted (in shares) | 899.3 | 904.1 | 903.3\n"
+        }
+      ]
+    },
+    {
+      "caseId": "lly-fy2025-cash",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "855dcd0264f86544e161377f43a1444a534d56f247f366bcbff217de2d5b4bbb",
+      "query": "礼来（LLY）FY2025的利润有多少变成了现金？请根据现金流量表列出经营活动现金流、净利润和资本开支，计算经营现金流/净利润、简化自由现金流（经营现金流减资本开支）以及资本开支占经营现金流的比例，并评价现金创造能力。金额注明单位，比率保留两位小数。",
+      "resolvedQuery": "礼来（LLY）FY2025的利润有多少变成了现金？请根据现金流量表列出经营活动现金流、净利润和资本开支，计算经营现金流/净利润、简化自由现金流（经营现金流减资本开支）以及资本开支占经营现金流的比例，并评价现金创造能力。金额注明单位，比率保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-07",
+      "context": "[E1] {\"availableAt\":\"2026-02-13T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2026-02-12T00:00:00Z\",\"rawSha256\":\"5e7ea2afff700d1867b22f4fa265a34349ea3d325ff4c7e757fb268586817b98\",\"retrievedAt\":\"2026-10-07T04:16:40.963404+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/59478/000005947826000013/R9.htm\",\"sourceVersion\":\"LLY-FY2025-10-K-0000059478-26-000013-cashflow\",\"target\":\"LLY\",\"unit\":\"million\",\"visibleSha256\":\"5e7ea2afff700d1867b22f4fa265a34349ea3d325ff4c7e757fb268586817b98\"}\nConsolidated Statements of Cash Flows - USD ($) $ in Millions | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nCash Flows from Operating Activities |  |  | \nNet income | $ 20,640 | $ 10,590 | $ 5,240\nAdjustments to Reconcile Net Income to Cash Flows from Operating Activities: |  |  | \nDepreciation and amortization | 1,997 | 1,767 | 1,527\nChange in deferred income taxes | (1,707) | (2,683) | (2,341)\nStock-based compensation expense | 626 | 646 | 629\nGains on sale of product rights | (180) | (224) | (1,879)\nAcquired in-process research and development | 2,910 | 3,280 | 3,800\nOther operating activities, net | 620 | 826 | 319\nOther changes in operating assets and liabilities, net of acquisitions and divestitures: |  |  | \nReceivables—(increase) decrease | (7,000) | (2,155) | (2,451)\nInventories—(increase) decrease | (4,671) | (2,507) | (1,425)\nPrepaid expenses and other assets—(increase) decrease | (6,609) | (3,331) | (3,453)\nAccounts payable and other liabilities—increase (decrease) | 10,187 | 2,609 | 4,274\nNet Cash Provided by Operating Activities | 16,813 | 8,818 | 4,240\nCash Flows from Investing Activities |  |  | \nPurchases of property and equipment | (7,841) | (5,058) | (3,448)\nProceeds from sales of and distributions from noncurrent investments | 964 | 374 | 508\nPurchases of noncurrent investments | (645) | (677) | (731)\nProceeds from sale of product rights | 218 | 601 | 1,604\nPurchases of in-process research and development | (3,008) | (3,346) | (3,944)\nCash paid for acquisitions, net of cash acquired | (661) | (948) | (1,044)\nOther investing activities, net | 1 | (248) | (98)\nNet Cash Used for Investing Activities | (10,972) | (9,302) | (7,153)\nCash Flows from Financing Activities |  |  | \nDividends paid | (5,384) | (4,680) | (4,069)\nNet change in short-term borrowings | (4,338) | (1,852) | 4,691\nProceeds from issuance of long-term debt | 13,167 | 11,417 | 3,959\nRepayments of long-term debt | (778) | (664) | 0\nPurchases of common stock | (4,108) | (2,500) | (750)\nOther financing activities, net | (772) | (491) | (335)\nNet Cash Provided by (Used for) Financing Activities | (2,213) | 1,230 | 3,496\nEffect of exchange rate changes on cash and cash equivalents | 372 | (297) | 169\nNet increase in cash and cash equivalents | 4,000 | 449 | 752\nCash and cash equivalents at beginning of year | 3,268 | 2,819 | 2,067\nCash and Cash Equivalents at End of Year | $ 7,268 | $ 3,268 | $ 2,819\n",
+      "contextSha256": "4d34fc66ba1741a11c1e55a78806c144aceb27e68cf6e910070c4a25261412d1",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "LLY",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：LLY\n请求参数：{}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2026-02-13T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2026-02-12T00:00:00Z\",\"rawSha256\":\"5e7ea2afff700d1867b22f4fa265a34349ea3d325ff4c7e757fb268586817b98\",\"retrievedAt\":\"2026-10-07T04:16:40.963404+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/59478/000005947826000013/R9.htm\",\"sourceVersion\":\"LLY-FY2025-10-K-0000059478-26-000013-cashflow\",\"target\":\"LLY\",\"unit\":\"million\",\"visibleSha256\":\"5e7ea2afff700d1867b22f4fa265a34349ea3d325ff4c7e757fb268586817b98\"}\nConsolidated Statements of Cash Flows - USD ($) $ in Millions | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nCash Flows from Operating Activities |  |  | \nNet income | $ 20,640 | $ 10,590 | $ 5,240\nAdjustments to Reconcile Net Income to Cash Flows from Operating Activities: |  |  | \nDepreciation and amortization | 1,997 | 1,767 | 1,527\nChange in deferred income taxes | (1,707) | (2,683) | (2,341)\nStock-based compensation expense | 626 | 646 | 629\nGains on sale of product rights | (180) | (224) | (1,879)\nAcquired in-process research and development | 2,910 | 3,280 | 3,800\nOther operating activities, net | 620 | 826 | 319\nOther changes in operating assets and liabilities, net of acquisitions and divestitures: |  |  | \nReceivables—(increase) decrease | (7,000) | (2,155) | (2,451)\nInventories—(increase) decrease | (4,671) | (2,507) | (1,425)\nPrepaid expenses and other assets—(increase) decrease | (6,609) | (3,331) | (3,453)\nAccounts payable and other liabilities—increase (decrease) | 10,187 | 2,609 | 4,274\nNet Cash Provided by Operating Activities | 16,813 | 8,818 | 4,240\nCash Flows from Investing Activities |  |  | \nPurchases of property and equipment | (7,841) | (5,058) | (3,448)\nProceeds from sales of and distributions from noncurrent investments | 964 | 374 | 508\nPurchases of noncurrent investments | (645) | (677) | (731)\nProceeds from sale of product rights | 218 | 601 | 1,604\nPurchases of in-process research and development | (3,008) | (3,346) | (3,944)\nCash paid for acquisitions, net of cash acquired | (661) | (948) | (1,044)\nOther investing activities, net | 1 | (248) | (98)\nNet Cash Used for Investing Activities | (10,972) | (9,302) | (7,153)\nCash Flows from Financing Activities |  |  | \nDividends paid | (5,384) | (4,680) | (4,069)\nNet change in short-term borrowings | (4,338) | (1,852) | 4,691\nProceeds from issuance of long-term debt | 13,167 | 11,417 | 3,959\nRepayments of long-term debt | (778) | (664) | 0\nPurchases of common stock | (4,108) | (2,500) | (750)\nOther financing activities, net | (772) | (491) | (335)\nNet Cash Provided by (Used for) Financing Activities | (2,213) | 1,230 | 3,496\nEffect of exchange rate changes on cash and cash equivalents | 372 | (297) | 169\nNet increase in cash and cash equivalents | 4,000 | 449 | 752\nCash and cash equivalents at beginning of year | 3,268 | 2,819 | 2,067\nCash and Cash Equivalents at End of Year | $ 7,268 | $ 3,268 | $ 2,819\n",
+      "preAnalystContextSha256": "ea61a27c272fbb0e7c88f01c89b1cc937bf734b302eca82b867ee375c2e8162a",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261007-answer-quality-expansion",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-07T04:21:27.933420+00:00",
+        "asOfInstant": "2026-10-07T04:21:27.933420+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-07T04:21:27.933420+00:00",
+        "sourceManifestSha256": "0b1b97cdd3d4ed6539bb4ec39b0498b4622da97dd9d7292c0a8b604aa3ef30df"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2026-02-13T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-12-31",
+          "periodStart": "2025-01-01",
+          "publishedAt": "2026-02-12T00:00:00Z",
+          "rawSha256": "5e7ea2afff700d1867b22f4fa265a34349ea3d325ff4c7e757fb268586817b98",
+          "retrievedAt": "2026-10-07T04:16:40.963404+00:00",
+          "sourceRef": "https://www.sec.gov/Archives/edgar/data/59478/000005947826000013/R9.htm",
+          "sourceVersion": "LLY-FY2025-10-K-0000059478-26-000013-cashflow",
+          "target": "LLY",
+          "unit": "million",
+          "visibleSha256": "5e7ea2afff700d1867b22f4fa265a34349ea3d325ff4c7e757fb268586817b98",
+          "visibleText": "Consolidated Statements of Cash Flows - USD ($) $ in Millions | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nCash Flows from Operating Activities |  |  | \nNet income | $ 20,640 | $ 10,590 | $ 5,240\nAdjustments to Reconcile Net Income to Cash Flows from Operating Activities: |  |  | \nDepreciation and amortization | 1,997 | 1,767 | 1,527\nChange in deferred income taxes | (1,707) | (2,683) | (2,341)\nStock-based compensation expense | 626 | 646 | 629\nGains on sale of product rights | (180) | (224) | (1,879)\nAcquired in-process research and development | 2,910 | 3,280 | 3,800\nOther operating activities, net | 620 | 826 | 319\nOther changes in operating assets and liabilities, net of acquisitions and divestitures: |  |  | \nReceivables—(increase) decrease | (7,000) | (2,155) | (2,451)\nInventories—(increase) decrease | (4,671) | (2,507) | (1,425)\nPrepaid expenses and other assets—(increase) decrease | (6,609) | (3,331) | (3,453)\nAccounts payable and other liabilities—increase (decrease) | 10,187 | 2,609 | 4,274\nNet Cash Provided by Operating Activities | 16,813 | 8,818 | 4,240\nCash Flows from Investing Activities |  |  | \nPurchases of property and equipment | (7,841) | (5,058) | (3,448)\nProceeds from sales of and distributions from noncurrent investments | 964 | 374 | 508\nPurchases of noncurrent investments | (645) | (677) | (731)\nProceeds from sale of product rights | 218 | 601 | 1,604\nPurchases of in-process research and development | (3,008) | (3,346) | (3,944)\nCash paid for acquisitions, net of cash acquired | (661) | (948) | (1,044)\nOther investing activities, net | 1 | (248) | (98)\nNet Cash Used for Investing Activities | (10,972) | (9,302) | (7,153)\nCash Flows from Financing Activities |  |  | \nDividends paid | (5,384) | (4,680) | (4,069)\nNet change in short-term borrowings | (4,338) | (1,852) | 4,691\nProceeds from issuance of long-term debt | 13,167 | 11,417 | 3,959\nRepayments of long-term debt | (778) | (664) | 0\nPurchases of common stock | (4,108) | (2,500) | (750)\nOther financing activities, net | (772) | (491) | (335)\nNet Cash Provided by (Used for) Financing Activities | (2,213) | 1,230 | 3,496\nEffect of exchange rate changes on cash and cash equivalents | 372 | (297) | 169\nNet increase in cash and cash equivalents | 4,000 | 449 | 752\nCash and cash equivalents at beginning of year | 3,268 | 2,819 | 2,067\nCash and Cash Equivalents at End of Year | $ 7,268 | $ 3,268 | $ 2,819\n"
+        }
+      ]
+    },
+    {
+      "caseId": "lly-fy2025-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "9f20b918f0910a3064438972968628933b2dc0269d72d42b7cdc5f4fd7ed12f2",
+      "query": "礼来（LLY）FY2025末的短期偿债能力和债务情况如何？请根据资产负债表给出期末现金及现金等价物、两期的流动资产和流动负债，计算两期流动比率；有息债务按短期借款及一年内到期长期债务、长期债务合计，再计算净债务（有息债务减现金及现金等价物），并说明变化。金额注明单位，比率保留两位小数。",
+      "resolvedQuery": "礼来（LLY）FY2025末的短期偿债能力和债务情况如何？请根据资产负债表给出期末现金及现金等价物、两期的流动资产和流动负债，计算两期流动比率；有息债务按短期借款及一年内到期长期债务、长期债务合计，再计算净债务（有息债务减现金及现金等价物），并说明变化。金额注明单位，比率保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-07",
+      "context": "[E1] {\"availableAt\":\"2026-02-13T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":null,\"publishedAt\":\"2026-02-12T00:00:00Z\",\"rawSha256\":\"0d575ddabaee9121e994af01151aa7a1b98be8703fddac4a384d8edef9cbf6f6\",\"retrievedAt\":\"2026-10-07T04:16:40.295566+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/59478/000005947826000013/R5.htm\",\"sourceVersion\":\"LLY-FY2025-10-K-0000059478-26-000013-balance\",\"target\":\"LLY\",\"unit\":\"million\",\"visibleSha256\":\"0d575ddabaee9121e994af01151aa7a1b98be8703fddac4a384d8edef9cbf6f6\"}\nConsolidated Balance Sheets - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024\nCurrent Assets |  | \nCash and cash equivalents | $ 7,268 | $ 3,268\nAccounts receivable | 17,760 | 11,006\nOther receivables | 2,395 | 2,270\nInventories | 13,744 | 7,589\nPrepaid expenses | 14,315 | 8,341\nOther current assets | 147 | 266\nTotal current assets | 55,629 | 32,740\nNoncurrent Assets |  | \nInvestments | 2,802 | 3,216\nGoodwill | 5,898 | 5,770\nOther intangibles, net | 6,521 | 6,166\nDeferred tax assets | 9,959 | 8,001\nProperty and equipment, net | 24,675 | 17,102\nOther noncurrent assets | 6,992 | 5,720\nTotal assets | 112,476 | 78,715\nCurrent Liabilities |  | \nShort-term borrowings and current maturities of long-term debt | 1,635 | 5,117\nAccounts payable | 5,379 | 3,229\nEmployee compensation | 2,375 | 2,094\nSales rebates and discounts | 17,382 | 11,539\nOther current liabilities | 8,457 | 6,397\nTotal current liabilities | 35,228 | 28,376\nNoncurrent Liabilities |  | \nLong-term debt | 40,868 | 28,527\nLong-term income taxes payable | 5,875 | 4,061\nOther noncurrent liabilities | 3,970 | 3,479\nTotal noncurrent liabilities | 50,713 | 36,067\nCommitments and Contingencies |  | \nEquity |  | \nCommon stock—no par value Authorized shares: 3,200.0 Issued shares: 944.8 (2025) and 947.9 (2024) | 590 | 592\nAdditional paid-in capital | 7,346 | 7,439\nRetained earnings | 24,470 | 13,545\nEmployee benefit trust | (3,013) | (3,013)\nAccumulated other comprehensive loss | (2,880) | (4,322)\nOther equity | 22 | 31\nTotal equity | 26,535 | 14,272\nTotal liabilities and equity | $ 112,476 | $ 78,715\n",
+      "contextSha256": "b1dff5dfe57df77c8b6b5c144f7e5ddd2e742fe7bfb0cc081e77d4ccade09d48",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "LLY",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：LLY\n请求参数：{}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2026-02-13T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":null,\"publishedAt\":\"2026-02-12T00:00:00Z\",\"rawSha256\":\"0d575ddabaee9121e994af01151aa7a1b98be8703fddac4a384d8edef9cbf6f6\",\"retrievedAt\":\"2026-10-07T04:16:40.295566+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/59478/000005947826000013/R5.htm\",\"sourceVersion\":\"LLY-FY2025-10-K-0000059478-26-000013-balance\",\"target\":\"LLY\",\"unit\":\"million\",\"visibleSha256\":\"0d575ddabaee9121e994af01151aa7a1b98be8703fddac4a384d8edef9cbf6f6\"}\nConsolidated Balance Sheets - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024\nCurrent Assets |  | \nCash and cash equivalents | $ 7,268 | $ 3,268\nAccounts receivable | 17,760 | 11,006\nOther receivables | 2,395 | 2,270\nInventories | 13,744 | 7,589\nPrepaid expenses | 14,315 | 8,341\nOther current assets | 147 | 266\nTotal current assets | 55,629 | 32,740\nNoncurrent Assets |  | \nInvestments | 2,802 | 3,216\nGoodwill | 5,898 | 5,770\nOther intangibles, net | 6,521 | 6,166\nDeferred tax assets | 9,959 | 8,001\nProperty and equipment, net | 24,675 | 17,102\nOther noncurrent assets | 6,992 | 5,720\nTotal assets | 112,476 | 78,715\nCurrent Liabilities |  | \nShort-term borrowings and current maturities of long-term debt | 1,635 | 5,117\nAccounts payable | 5,379 | 3,229\nEmployee compensation | 2,375 | 2,094\nSales rebates and discounts | 17,382 | 11,539\nOther current liabilities | 8,457 | 6,397\nTotal current liabilities | 35,228 | 28,376\nNoncurrent Liabilities |  | \nLong-term debt | 40,868 | 28,527\nLong-term income taxes payable | 5,875 | 4,061\nOther noncurrent liabilities | 3,970 | 3,479\nTotal noncurrent liabilities | 50,713 | 36,067\nCommitments and Contingencies |  | \nEquity |  | \nCommon stock—no par value Authorized shares: 3,200.0 Issued shares: 944.8 (2025) and 947.9 (2024) | 590 | 592\nAdditional paid-in capital | 7,346 | 7,439\nRetained earnings | 24,470 | 13,545\nEmployee benefit trust | (3,013) | (3,013)\nAccumulated other comprehensive loss | (2,880) | (4,322)\nOther equity | 22 | 31\nTotal equity | 26,535 | 14,272\nTotal liabilities and equity | $ 112,476 | $ 78,715\n",
+      "preAnalystContextSha256": "05bf112fa816da5e26ba878391825fef9baefe22c755b244d70f1d2209a8c2ad",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261007-answer-quality-expansion",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-07T04:21:27.933420+00:00",
+        "asOfInstant": "2026-10-07T04:21:27.933420+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-07T04:21:27.933420+00:00",
+        "sourceManifestSha256": "0b1b97cdd3d4ed6539bb4ec39b0498b4622da97dd9d7292c0a8b604aa3ef30df"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2026-02-13T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-12-31",
+          "periodStart": null,
+          "publishedAt": "2026-02-12T00:00:00Z",
+          "rawSha256": "0d575ddabaee9121e994af01151aa7a1b98be8703fddac4a384d8edef9cbf6f6",
+          "retrievedAt": "2026-10-07T04:16:40.295566+00:00",
+          "sourceRef": "https://www.sec.gov/Archives/edgar/data/59478/000005947826000013/R5.htm",
+          "sourceVersion": "LLY-FY2025-10-K-0000059478-26-000013-balance",
+          "target": "LLY",
+          "unit": "million",
+          "visibleSha256": "0d575ddabaee9121e994af01151aa7a1b98be8703fddac4a384d8edef9cbf6f6",
+          "visibleText": "Consolidated Balance Sheets - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024\nCurrent Assets |  | \nCash and cash equivalents | $ 7,268 | $ 3,268\nAccounts receivable | 17,760 | 11,006\nOther receivables | 2,395 | 2,270\nInventories | 13,744 | 7,589\nPrepaid expenses | 14,315 | 8,341\nOther current assets | 147 | 266\nTotal current assets | 55,629 | 32,740\nNoncurrent Assets |  | \nInvestments | 2,802 | 3,216\nGoodwill | 5,898 | 5,770\nOther intangibles, net | 6,521 | 6,166\nDeferred tax assets | 9,959 | 8,001\nProperty and equipment, net | 24,675 | 17,102\nOther noncurrent assets | 6,992 | 5,720\nTotal assets | 112,476 | 78,715\nCurrent Liabilities |  | \nShort-term borrowings and current maturities of long-term debt | 1,635 | 5,117\nAccounts payable | 5,379 | 3,229\nEmployee compensation | 2,375 | 2,094\nSales rebates and discounts | 17,382 | 11,539\nOther current liabilities | 8,457 | 6,397\nTotal current liabilities | 35,228 | 28,376\nNoncurrent Liabilities |  | \nLong-term debt | 40,868 | 28,527\nLong-term income taxes payable | 5,875 | 4,061\nOther noncurrent liabilities | 3,970 | 3,479\nTotal noncurrent liabilities | 50,713 | 36,067\nCommitments and Contingencies |  | \nEquity |  | \nCommon stock—no par value Authorized shares: 3,200.0 Issued shares: 944.8 (2025) and 947.9 (2024) | 590 | 592\nAdditional paid-in capital | 7,346 | 7,439\nRetained earnings | 24,470 | 13,545\nEmployee benefit trust | (3,013) | (3,013)\nAccumulated other comprehensive loss | (2,880) | (4,322)\nOther equity | 22 | 31\nTotal equity | 26,535 | 14,272\nTotal liabilities and equity | $ 112,476 | $ 78,715\n"
+        }
+      ]
+    },
+    {
+      "caseId": "mcd-fy2025-growth",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "619f201d0b2f9700a73af76aad24f443af233e7f578d72b9effaf8726117b7fa",
+      "query": "麦当劳（MCD）FY2025的增长和盈利能力怎么样？请根据利润表给出FY2025和FY2024的总收入、营业利润，计算总收入和营业利润的同比增速，以及两年的营业利润率（营业利润/总收入），再判断盈利能力是改善还是走弱。金额注明单位，百分比保留两位小数。",
+      "resolvedQuery": "麦当劳（MCD）FY2025的增长和盈利能力怎么样？请根据利润表给出FY2025和FY2024的总收入、营业利润，计算总收入和营业利润的同比增速，以及两年的营业利润率（营业利润/总收入），再判断盈利能力是改善还是走弱。金额注明单位，百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-07",
+      "context": "[E1] {\"availableAt\":\"2026-02-25T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2026-02-24T00:00:00Z\",\"rawSha256\":\"925b79e2a4bdffc4cf53c0c67cbb869f81da161aabb36cc79a001e57ef0dd308\",\"retrievedAt\":\"2026-10-07T04:16:41.393722+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/R3.htm\",\"sourceVersion\":\"MCD-FY2025-10-K-0000063908-26-000035-income\",\"target\":\"MCD\",\"unit\":\"million\",\"visibleSha256\":\"925b79e2a4bdffc4cf53c0c67cbb869f81da161aabb36cc79a001e57ef0dd308\"}\nConsolidated Statement of Income - USD ($) $ in Millions | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nREVENUES |  |  | \nRevenues from franchised restaurants | $ 16,548.0 | $ 15,715.0 | $ 15,437.0\nSales by Company-owned and operated restaurants | 9,690.0 | 9,782.0 | 9,742.0\nOther revenues | 647.0 | 423.0 | 316.0\nTotal revenues | 26,885.0 | 25,920.0 | 25,494.0\nOPERATING COSTS AND EXPENSES |  |  | \nFranchised restaurants-occupancy expenses | 2,618.0 | 2,536.0 | 2,475.0\nFood & paper | 3,006.0 | 2,995.0 | 3,039.0\nPayroll & employee benefits | 2,905.0 | 2,959.0 | 2,886.0\nOccupancy & other operating expenses | 2,358.0 | 2,381.0 | 2,299.0\nOther restaurant expenses | 564.0 | 339.0 | 232.0\nDepreciation and amortization | 457.0 | 447.0 | 382.0\nOther | 2,583.0 | 2,412.0 | 2,435.0\nOther operating (income) expense, net | 2.0 | 139.0 | 99.0\nTotal operating costs and expenses | 14,492.0 | 14,208.0 | 13,847.0\nOperating income | 12,393.0 | 11,712.0 | 11,647.0\nInterest expense-net of capitalized interest of $29, $22 and $14 | 1,582.0 | 1,506.0 | 1,361.0\nNonoperating (income) expense, net | (87.0) | (139.0) | (236.0)\nIncome before provision for income taxes | 10,897.0 | 10,345.0 | 10,522.0\nProvision for income taxes | 2,334.0 | 2,121.0 | 2,053.0\nNet income | $ 8,563.0 | $ 8,223.0 | $ 8,469.0\nEarnings per common share–basic | $ 12.00 | $ 11.45 | $ 11.63\nEarnings per common share–diluted | 11.95 | 11.39 | 11.56\nDividends declared per common share | $ 7.17 | $ 6.78 | $ 6.23\nWeighted-average shares outstanding–basic | 713.4 | 718.3 | 727.9\nWeighted-average shares outstanding–diluted | 716.4 | 721.9 | 732.3\n",
+      "contextSha256": "bcd67835b5ae4d565ce07c37bdbb3e26a571651b2fbd1dedbb87a68a49dd0d5b",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "MCD",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：MCD\n请求参数：{}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2026-02-25T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2026-02-24T00:00:00Z\",\"rawSha256\":\"925b79e2a4bdffc4cf53c0c67cbb869f81da161aabb36cc79a001e57ef0dd308\",\"retrievedAt\":\"2026-10-07T04:16:41.393722+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/R3.htm\",\"sourceVersion\":\"MCD-FY2025-10-K-0000063908-26-000035-income\",\"target\":\"MCD\",\"unit\":\"million\",\"visibleSha256\":\"925b79e2a4bdffc4cf53c0c67cbb869f81da161aabb36cc79a001e57ef0dd308\"}\nConsolidated Statement of Income - USD ($) $ in Millions | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nREVENUES |  |  | \nRevenues from franchised restaurants | $ 16,548.0 | $ 15,715.0 | $ 15,437.0\nSales by Company-owned and operated restaurants | 9,690.0 | 9,782.0 | 9,742.0\nOther revenues | 647.0 | 423.0 | 316.0\nTotal revenues | 26,885.0 | 25,920.0 | 25,494.0\nOPERATING COSTS AND EXPENSES |  |  | \nFranchised restaurants-occupancy expenses | 2,618.0 | 2,536.0 | 2,475.0\nFood & paper | 3,006.0 | 2,995.0 | 3,039.0\nPayroll & employee benefits | 2,905.0 | 2,959.0 | 2,886.0\nOccupancy & other operating expenses | 2,358.0 | 2,381.0 | 2,299.0\nOther restaurant expenses | 564.0 | 339.0 | 232.0\nDepreciation and amortization | 457.0 | 447.0 | 382.0\nOther | 2,583.0 | 2,412.0 | 2,435.0\nOther operating (income) expense, net | 2.0 | 139.0 | 99.0\nTotal operating costs and expenses | 14,492.0 | 14,208.0 | 13,847.0\nOperating income | 12,393.0 | 11,712.0 | 11,647.0\nInterest expense-net of capitalized interest of $29, $22 and $14 | 1,582.0 | 1,506.0 | 1,361.0\nNonoperating (income) expense, net | (87.0) | (139.0) | (236.0)\nIncome before provision for income taxes | 10,897.0 | 10,345.0 | 10,522.0\nProvision for income taxes | 2,334.0 | 2,121.0 | 2,053.0\nNet income | $ 8,563.0 | $ 8,223.0 | $ 8,469.0\nEarnings per common share–basic | $ 12.00 | $ 11.45 | $ 11.63\nEarnings per common share–diluted | 11.95 | 11.39 | 11.56\nDividends declared per common share | $ 7.17 | $ 6.78 | $ 6.23\nWeighted-average shares outstanding–basic | 713.4 | 718.3 | 727.9\nWeighted-average shares outstanding–diluted | 716.4 | 721.9 | 732.3\n",
+      "preAnalystContextSha256": "ce5248713d1475363b001fc774e57aefe204c8264c60edd21712efac89183443",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261007-answer-quality-expansion",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-07T04:21:27.933420+00:00",
+        "asOfInstant": "2026-10-07T04:21:27.933420+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-07T04:21:27.933420+00:00",
+        "sourceManifestSha256": "0b1b97cdd3d4ed6539bb4ec39b0498b4622da97dd9d7292c0a8b604aa3ef30df"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2026-02-25T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-12-31",
+          "periodStart": "2025-01-01",
+          "publishedAt": "2026-02-24T00:00:00Z",
+          "rawSha256": "925b79e2a4bdffc4cf53c0c67cbb869f81da161aabb36cc79a001e57ef0dd308",
+          "retrievedAt": "2026-10-07T04:16:41.393722+00:00",
+          "sourceRef": "https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/R3.htm",
+          "sourceVersion": "MCD-FY2025-10-K-0000063908-26-000035-income",
+          "target": "MCD",
+          "unit": "million",
+          "visibleSha256": "925b79e2a4bdffc4cf53c0c67cbb869f81da161aabb36cc79a001e57ef0dd308",
+          "visibleText": "Consolidated Statement of Income - USD ($) $ in Millions | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nREVENUES |  |  | \nRevenues from franchised restaurants | $ 16,548.0 | $ 15,715.0 | $ 15,437.0\nSales by Company-owned and operated restaurants | 9,690.0 | 9,782.0 | 9,742.0\nOther revenues | 647.0 | 423.0 | 316.0\nTotal revenues | 26,885.0 | 25,920.0 | 25,494.0\nOPERATING COSTS AND EXPENSES |  |  | \nFranchised restaurants-occupancy expenses | 2,618.0 | 2,536.0 | 2,475.0\nFood & paper | 3,006.0 | 2,995.0 | 3,039.0\nPayroll & employee benefits | 2,905.0 | 2,959.0 | 2,886.0\nOccupancy & other operating expenses | 2,358.0 | 2,381.0 | 2,299.0\nOther restaurant expenses | 564.0 | 339.0 | 232.0\nDepreciation and amortization | 457.0 | 447.0 | 382.0\nOther | 2,583.0 | 2,412.0 | 2,435.0\nOther operating (income) expense, net | 2.0 | 139.0 | 99.0\nTotal operating costs and expenses | 14,492.0 | 14,208.0 | 13,847.0\nOperating income | 12,393.0 | 11,712.0 | 11,647.0\nInterest expense-net of capitalized interest of $29, $22 and $14 | 1,582.0 | 1,506.0 | 1,361.0\nNonoperating (income) expense, net | (87.0) | (139.0) | (236.0)\nIncome before provision for income taxes | 10,897.0 | 10,345.0 | 10,522.0\nProvision for income taxes | 2,334.0 | 2,121.0 | 2,053.0\nNet income | $ 8,563.0 | $ 8,223.0 | $ 8,469.0\nEarnings per common share–basic | $ 12.00 | $ 11.45 | $ 11.63\nEarnings per common share–diluted | 11.95 | 11.39 | 11.56\nDividends declared per common share | $ 7.17 | $ 6.78 | $ 6.23\nWeighted-average shares outstanding–basic | 713.4 | 718.3 | 727.9\nWeighted-average shares outstanding–diluted | 716.4 | 721.9 | 732.3\n"
+        }
+      ]
+    },
+    {
+      "caseId": "mcd-fy2025-cash",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "78964ee9d6712d19b83a8bd6f398cc147fa830492aaa21a30eb92724506de4e5",
+      "query": "麦当劳（MCD）FY2025的利润有多少变成了现金？请根据现金流量表列出经营活动现金流、净利润和资本开支，计算经营现金流/净利润、简化自由现金流（经营现金流减资本开支）以及资本开支占经营现金流的比例，并评价现金创造能力。金额注明单位，比率保留两位小数。",
+      "resolvedQuery": "麦当劳（MCD）FY2025的利润有多少变成了现金？请根据现金流量表列出经营活动现金流、净利润和资本开支，计算经营现金流/净利润、简化自由现金流（经营现金流减资本开支）以及资本开支占经营现金流的比例，并评价现金创造能力。金额注明单位，比率保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-07",
+      "context": "[E1] {\"availableAt\":\"2026-02-25T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2026-02-24T00:00:00Z\",\"rawSha256\":\"26f1309f29cd4efadbd3e5b1cd97ed9aef75cad55e83f61fe76dc283ab4eca97\",\"retrievedAt\":\"2026-10-07T04:16:42.571721+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/R9.htm\",\"sourceVersion\":\"MCD-FY2025-10-K-0000063908-26-000035-cashflow\",\"target\":\"MCD\",\"unit\":\"million\",\"visibleSha256\":\"26f1309f29cd4efadbd3e5b1cd97ed9aef75cad55e83f61fe76dc283ab4eca97\"}\nConsolidated Statement of Cash Flows - USD ($) $ in Millions | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nOperating activities |  |  | \nNet income | $ 8,563.0 | $ 8,223.0 | $ 8,469.0\nCharges and credits: |  |  | \nDepreciation and amortization | 2,199.0 | 2,097.0 | 1,978.0\nDeferred income taxes | (126.0) | (574.0) | (686.0)\nShare-based compensation expense | 165.0 | 172.0 | 175.0\nNet (gain) loss on sale of restaurant and other businesses | (149.0) | (37.0) | (103.0)\nOther | (207.0) | 3.0 | (113.0)\nChanges in working capital items: |  |  | \nAccounts receivable | 231.0 | 10.0 | (161.0)\nInventories, prepaid expenses and other current assets | (140.0) | 71.0 | 17.0\nAccounts payable | 100.0 | (10.0) | 50.0\nIncome taxes | (239.0) | (292.0) | (220.0)\nOther accrued liabilities | 154.0 | (217.0) | 206.0\nCash provided by operations | 10,551.0 | 9,447.0 | 9,612.0\nInvesting activities |  |  | \nCapital expenditures | (3,365.0) | (2,775.0) | (2,357.0)\nPurchases of restaurant businesses | (354.0) | (669.0) | (441.0)\nPayments to Acquire Equity Method Investments | 0.0 | 1,837.0 | 0.0\nSales of restaurant and other businesses | 346.0 | 311.0 | 195.0\nSales of property | 130.0 | 122.0 | 95.0\nOther | (579.0) | (498.0) | (676.0)\nCash used for investing activities | (3,822.0) | (5,346.0) | (3,185.0)\nFinancing activities |  |  | \nNet short-term borrowings | 6.0 | 326.0 | 213.0\nLong-term financing issuances | 4,724.0 | 2,380.0 | 5,221.0\nLong-term financing repayments | (4,802.0) | (2,777.0) | (2,441.0)\nTreasury stock purchases | (2,056.0) | (2,824.0) | (3,054.0)\nCommon stock dividends | (5,115.0) | (4,870.0) | (4,533.0)\nProceeds from stock option exercises | 285.0 | 328.0 | 260.0\nOther | (167.0) | (56.0) | (40.0)\nCash used for financing activities | (7,125.0) | (7,495.0) | (4,374.0)\nEffect of exchange rates on cash and equivalents | 86.0 | (101.0) | (58.0)\nCash and equivalents increase (decrease) | (311.0) | (3,494.0) | 1,996.0\nCash and equivalents at beginning of year | 1,085.0 | 4,579.0 | 2,584.0\nCash and equivalents at end of year | 774.0 | 1,085.0 | 4,579.0\nSupplemental cash flow disclosures |  |  | \nInterest Paid | $ 1,555.0 | $ 1,523.0 | $ 1,287.0\n",
+      "contextSha256": "b7af6fe88c6779185f9a298d8616a7641513a3c6a1160acb82a8c81b037a2909",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "MCD",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：MCD\n请求参数：{}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2026-02-25T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2026-02-24T00:00:00Z\",\"rawSha256\":\"26f1309f29cd4efadbd3e5b1cd97ed9aef75cad55e83f61fe76dc283ab4eca97\",\"retrievedAt\":\"2026-10-07T04:16:42.571721+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/R9.htm\",\"sourceVersion\":\"MCD-FY2025-10-K-0000063908-26-000035-cashflow\",\"target\":\"MCD\",\"unit\":\"million\",\"visibleSha256\":\"26f1309f29cd4efadbd3e5b1cd97ed9aef75cad55e83f61fe76dc283ab4eca97\"}\nConsolidated Statement of Cash Flows - USD ($) $ in Millions | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nOperating activities |  |  | \nNet income | $ 8,563.0 | $ 8,223.0 | $ 8,469.0\nCharges and credits: |  |  | \nDepreciation and amortization | 2,199.0 | 2,097.0 | 1,978.0\nDeferred income taxes | (126.0) | (574.0) | (686.0)\nShare-based compensation expense | 165.0 | 172.0 | 175.0\nNet (gain) loss on sale of restaurant and other businesses | (149.0) | (37.0) | (103.0)\nOther | (207.0) | 3.0 | (113.0)\nChanges in working capital items: |  |  | \nAccounts receivable | 231.0 | 10.0 | (161.0)\nInventories, prepaid expenses and other current assets | (140.0) | 71.0 | 17.0\nAccounts payable | 100.0 | (10.0) | 50.0\nIncome taxes | (239.0) | (292.0) | (220.0)\nOther accrued liabilities | 154.0 | (217.0) | 206.0\nCash provided by operations | 10,551.0 | 9,447.0 | 9,612.0\nInvesting activities |  |  | \nCapital expenditures | (3,365.0) | (2,775.0) | (2,357.0)\nPurchases of restaurant businesses | (354.0) | (669.0) | (441.0)\nPayments to Acquire Equity Method Investments | 0.0 | 1,837.0 | 0.0\nSales of restaurant and other businesses | 346.0 | 311.0 | 195.0\nSales of property | 130.0 | 122.0 | 95.0\nOther | (579.0) | (498.0) | (676.0)\nCash used for investing activities | (3,822.0) | (5,346.0) | (3,185.0)\nFinancing activities |  |  | \nNet short-term borrowings | 6.0 | 326.0 | 213.0\nLong-term financing issuances | 4,724.0 | 2,380.0 | 5,221.0\nLong-term financing repayments | (4,802.0) | (2,777.0) | (2,441.0)\nTreasury stock purchases | (2,056.0) | (2,824.0) | (3,054.0)\nCommon stock dividends | (5,115.0) | (4,870.0) | (4,533.0)\nProceeds from stock option exercises | 285.0 | 328.0 | 260.0\nOther | (167.0) | (56.0) | (40.0)\nCash used for financing activities | (7,125.0) | (7,495.0) | (4,374.0)\nEffect of exchange rates on cash and equivalents | 86.0 | (101.0) | (58.0)\nCash and equivalents increase (decrease) | (311.0) | (3,494.0) | 1,996.0\nCash and equivalents at beginning of year | 1,085.0 | 4,579.0 | 2,584.0\nCash and equivalents at end of year | 774.0 | 1,085.0 | 4,579.0\nSupplemental cash flow disclosures |  |  | \nInterest Paid | $ 1,555.0 | $ 1,523.0 | $ 1,287.0\n",
+      "preAnalystContextSha256": "c0d3ac53822033f8b6e2859a2abd08cbeec3d0d141e4d3c5303582cdbb1aac3c",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261007-answer-quality-expansion",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-07T04:21:27.933420+00:00",
+        "asOfInstant": "2026-10-07T04:21:27.933420+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-07T04:21:27.933420+00:00",
+        "sourceManifestSha256": "0b1b97cdd3d4ed6539bb4ec39b0498b4622da97dd9d7292c0a8b604aa3ef30df"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2026-02-25T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-12-31",
+          "periodStart": "2025-01-01",
+          "publishedAt": "2026-02-24T00:00:00Z",
+          "rawSha256": "26f1309f29cd4efadbd3e5b1cd97ed9aef75cad55e83f61fe76dc283ab4eca97",
+          "retrievedAt": "2026-10-07T04:16:42.571721+00:00",
+          "sourceRef": "https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/R9.htm",
+          "sourceVersion": "MCD-FY2025-10-K-0000063908-26-000035-cashflow",
+          "target": "MCD",
+          "unit": "million",
+          "visibleSha256": "26f1309f29cd4efadbd3e5b1cd97ed9aef75cad55e83f61fe76dc283ab4eca97",
+          "visibleText": "Consolidated Statement of Cash Flows - USD ($) $ in Millions | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nOperating activities |  |  | \nNet income | $ 8,563.0 | $ 8,223.0 | $ 8,469.0\nCharges and credits: |  |  | \nDepreciation and amortization | 2,199.0 | 2,097.0 | 1,978.0\nDeferred income taxes | (126.0) | (574.0) | (686.0)\nShare-based compensation expense | 165.0 | 172.0 | 175.0\nNet (gain) loss on sale of restaurant and other businesses | (149.0) | (37.0) | (103.0)\nOther | (207.0) | 3.0 | (113.0)\nChanges in working capital items: |  |  | \nAccounts receivable | 231.0 | 10.0 | (161.0)\nInventories, prepaid expenses and other current assets | (140.0) | 71.0 | 17.0\nAccounts payable | 100.0 | (10.0) | 50.0\nIncome taxes | (239.0) | (292.0) | (220.0)\nOther accrued liabilities | 154.0 | (217.0) | 206.0\nCash provided by operations | 10,551.0 | 9,447.0 | 9,612.0\nInvesting activities |  |  | \nCapital expenditures | (3,365.0) | (2,775.0) | (2,357.0)\nPurchases of restaurant businesses | (354.0) | (669.0) | (441.0)\nPayments to Acquire Equity Method Investments | 0.0 | 1,837.0 | 0.0\nSales of restaurant and other businesses | 346.0 | 311.0 | 195.0\nSales of property | 130.0 | 122.0 | 95.0\nOther | (579.0) | (498.0) | (676.0)\nCash used for investing activities | (3,822.0) | (5,346.0) | (3,185.0)\nFinancing activities |  |  | \nNet short-term borrowings | 6.0 | 326.0 | 213.0\nLong-term financing issuances | 4,724.0 | 2,380.0 | 5,221.0\nLong-term financing repayments | (4,802.0) | (2,777.0) | (2,441.0)\nTreasury stock purchases | (2,056.0) | (2,824.0) | (3,054.0)\nCommon stock dividends | (5,115.0) | (4,870.0) | (4,533.0)\nProceeds from stock option exercises | 285.0 | 328.0 | 260.0\nOther | (167.0) | (56.0) | (40.0)\nCash used for financing activities | (7,125.0) | (7,495.0) | (4,374.0)\nEffect of exchange rates on cash and equivalents | 86.0 | (101.0) | (58.0)\nCash and equivalents increase (decrease) | (311.0) | (3,494.0) | 1,996.0\nCash and equivalents at beginning of year | 1,085.0 | 4,579.0 | 2,584.0\nCash and equivalents at end of year | 774.0 | 1,085.0 | 4,579.0\nSupplemental cash flow disclosures |  |  | \nInterest Paid | $ 1,555.0 | $ 1,523.0 | $ 1,287.0\n"
+        }
+      ]
+    },
+    {
+      "caseId": "mcd-fy2025-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "3ab9c54c00369608f6a9063603b733583b300377fb8e0238ec839901d047a2f0",
+      "query": "麦当劳（MCD）FY2025末的短期偿债能力和债务情况如何？请根据资产负债表给出期末现金及现金等价物、两期的流动资产和流动负债，计算两期流动比率；有息债务按资产负债表列示的长期债务合计，再计算净债务（有息债务减现金及现金等价物），并说明变化。金额注明单位，比率保留两位小数。",
+      "resolvedQuery": "麦当劳（MCD）FY2025末的短期偿债能力和债务情况如何？请根据资产负债表给出期末现金及现金等价物、两期的流动资产和流动负债，计算两期流动比率；有息债务按资产负债表列示的长期债务合计，再计算净债务（有息债务减现金及现金等价物），并说明变化。金额注明单位，比率保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-07",
+      "context": "[E1] {\"availableAt\":\"2026-02-25T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":null,\"publishedAt\":\"2026-02-24T00:00:00Z\",\"rawSha256\":\"8d0dc469c170d57f6aac48bdc8c470e473d973a9beca96db2bf0f0896a0c318b\",\"retrievedAt\":\"2026-10-07T04:16:41.877982+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/R7.htm\",\"sourceVersion\":\"MCD-FY2025-10-K-0000063908-26-000035-balance\",\"target\":\"MCD\",\"unit\":\"million\",\"visibleSha256\":\"8d0dc469c170d57f6aac48bdc8c470e473d973a9beca96db2bf0f0896a0c318b\"}\nConsolidated Balance Sheet - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024\nCurrent assets |  | \nCash and equivalents | $ 774.0 | $ 1,085.0\nAccounts and notes receivable | 2,466.0 | 2,383.0\nInventories, at cost, not in excess of market | 61.0 | 56.0\nPrepaid expenses and other current assets | 863.0 | 1,074.0\nTotal current assets | 4,163.0 | 4,599.0\nOther assets |  | \nInvestments in and advances to affiliates | 2,820.0 | 2,710.0\nGoodwill | 3,354.0 | 3,145.0\nMiscellaneous | 6,331.0 | 6,095.0\nTotal other assets | 12,505.0 | 11,950.0\nLease right-of use asset, net | 14,606.0 | 13,339.0\nProperty and equipment |  | \nProperty and equipment, at cost | 49,290.0 | 44,177.0\nAccumulated depreciation and amortization | (21,049.0) | (18,882.0)\nNet property and equipment | 28,241.0 | 25,295.0\nTotal assets | 59,515.0 | 55,182.0\nCurrent liabilities |  | \nAccounts payable | 1,149.0 | 1,029.0\nCurrent lease liability | 694.0 | 636.0\nIncome taxes | 250.0 | 361.0\nOther taxes | 247.0 | 224.0\nAccrued interest | 533.0 | 482.0\nAccrued payroll and other liabilities | 1,488.0 | 1,129.0\nTotal current liabilities | 4,361.0 | 3,861.0\nLong-term debt | 39,973.0 | 38,424.0\nLong-term lease liability (noncurrent), net | 14,147.0 | 12,888.0\nLong-term income taxes | 139.0 | 344.0\nDeferred revenues - initial franchise fees | 945.0 | 778.0\nOther long-term liabilities | 704.0 | 771.0\nDeferred income taxes | 1,038.0 | 1,914.0\nShareholders' equity (deficit) |  | \nPreferred stock, no par value; authorized – 165.0 million shares; issued – none | 0.0 | 0.0\nCommon stock, $.01 par value; authorized – 3.5 billion shares; issued – 1,660.6 million shares | 17.0 | 17.0\nAdditional paid-in capital | 9,641.0 | 9,281.0\nRetained earnings | 70,282.0 | 66,834.0\nAccumulated other comprehensive income (loss) | (2,414.0) | (2,553.0)\nCommon stock in treasury, at cost; 950.0 and 945.4 million shares | (79,316.0) | (77,375.0)\nTotal shareholders' equity (deficit) | (1,791.0) | (3,797.0)\nTotal liabilities and shareholders' equity (deficit) | $ 59,515.0 | $ 55,182.0\n",
+      "contextSha256": "1a1a88735ed534920b8880cd62a1bc0b69aa9b24b3c314cf429ba9c4720b3f29",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "MCD",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：MCD\n请求参数：{}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2026-02-25T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":null,\"publishedAt\":\"2026-02-24T00:00:00Z\",\"rawSha256\":\"8d0dc469c170d57f6aac48bdc8c470e473d973a9beca96db2bf0f0896a0c318b\",\"retrievedAt\":\"2026-10-07T04:16:41.877982+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/R7.htm\",\"sourceVersion\":\"MCD-FY2025-10-K-0000063908-26-000035-balance\",\"target\":\"MCD\",\"unit\":\"million\",\"visibleSha256\":\"8d0dc469c170d57f6aac48bdc8c470e473d973a9beca96db2bf0f0896a0c318b\"}\nConsolidated Balance Sheet - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024\nCurrent assets |  | \nCash and equivalents | $ 774.0 | $ 1,085.0\nAccounts and notes receivable | 2,466.0 | 2,383.0\nInventories, at cost, not in excess of market | 61.0 | 56.0\nPrepaid expenses and other current assets | 863.0 | 1,074.0\nTotal current assets | 4,163.0 | 4,599.0\nOther assets |  | \nInvestments in and advances to affiliates | 2,820.0 | 2,710.0\nGoodwill | 3,354.0 | 3,145.0\nMiscellaneous | 6,331.0 | 6,095.0\nTotal other assets | 12,505.0 | 11,950.0\nLease right-of use asset, net | 14,606.0 | 13,339.0\nProperty and equipment |  | \nProperty and equipment, at cost | 49,290.0 | 44,177.0\nAccumulated depreciation and amortization | (21,049.0) | (18,882.0)\nNet property and equipment | 28,241.0 | 25,295.0\nTotal assets | 59,515.0 | 55,182.0\nCurrent liabilities |  | \nAccounts payable | 1,149.0 | 1,029.0\nCurrent lease liability | 694.0 | 636.0\nIncome taxes | 250.0 | 361.0\nOther taxes | 247.0 | 224.0\nAccrued interest | 533.0 | 482.0\nAccrued payroll and other liabilities | 1,488.0 | 1,129.0\nTotal current liabilities | 4,361.0 | 3,861.0\nLong-term debt | 39,973.0 | 38,424.0\nLong-term lease liability (noncurrent), net | 14,147.0 | 12,888.0\nLong-term income taxes | 139.0 | 344.0\nDeferred revenues - initial franchise fees | 945.0 | 778.0\nOther long-term liabilities | 704.0 | 771.0\nDeferred income taxes | 1,038.0 | 1,914.0\nShareholders' equity (deficit) |  | \nPreferred stock, no par value; authorized – 165.0 million shares; issued – none | 0.0 | 0.0\nCommon stock, $.01 par value; authorized – 3.5 billion shares; issued – 1,660.6 million shares | 17.0 | 17.0\nAdditional paid-in capital | 9,641.0 | 9,281.0\nRetained earnings | 70,282.0 | 66,834.0\nAccumulated other comprehensive income (loss) | (2,414.0) | (2,553.0)\nCommon stock in treasury, at cost; 950.0 and 945.4 million shares | (79,316.0) | (77,375.0)\nTotal shareholders' equity (deficit) | (1,791.0) | (3,797.0)\nTotal liabilities and shareholders' equity (deficit) | $ 59,515.0 | $ 55,182.0\n",
+      "preAnalystContextSha256": "e541abe22d6ff46aae45ebbb6d2b3d717adad0e5cb504518691d9c8c02158248",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261007-answer-quality-expansion",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-07T04:21:27.933420+00:00",
+        "asOfInstant": "2026-10-07T04:21:27.933420+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-07T04:21:27.933420+00:00",
+        "sourceManifestSha256": "0b1b97cdd3d4ed6539bb4ec39b0498b4622da97dd9d7292c0a8b604aa3ef30df"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2026-02-25T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-12-31",
+          "periodStart": null,
+          "publishedAt": "2026-02-24T00:00:00Z",
+          "rawSha256": "8d0dc469c170d57f6aac48bdc8c470e473d973a9beca96db2bf0f0896a0c318b",
+          "retrievedAt": "2026-10-07T04:16:41.877982+00:00",
+          "sourceRef": "https://www.sec.gov/Archives/edgar/data/63908/000006390826000035/R7.htm",
+          "sourceVersion": "MCD-FY2025-10-K-0000063908-26-000035-balance",
+          "target": "MCD",
+          "unit": "million",
+          "visibleSha256": "8d0dc469c170d57f6aac48bdc8c470e473d973a9beca96db2bf0f0896a0c318b",
+          "visibleText": "Consolidated Balance Sheet - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024\nCurrent assets |  | \nCash and equivalents | $ 774.0 | $ 1,085.0\nAccounts and notes receivable | 2,466.0 | 2,383.0\nInventories, at cost, not in excess of market | 61.0 | 56.0\nPrepaid expenses and other current assets | 863.0 | 1,074.0\nTotal current assets | 4,163.0 | 4,599.0\nOther assets |  | \nInvestments in and advances to affiliates | 2,820.0 | 2,710.0\nGoodwill | 3,354.0 | 3,145.0\nMiscellaneous | 6,331.0 | 6,095.0\nTotal other assets | 12,505.0 | 11,950.0\nLease right-of use asset, net | 14,606.0 | 13,339.0\nProperty and equipment |  | \nProperty and equipment, at cost | 49,290.0 | 44,177.0\nAccumulated depreciation and amortization | (21,049.0) | (18,882.0)\nNet property and equipment | 28,241.0 | 25,295.0\nTotal assets | 59,515.0 | 55,182.0\nCurrent liabilities |  | \nAccounts payable | 1,149.0 | 1,029.0\nCurrent lease liability | 694.0 | 636.0\nIncome taxes | 250.0 | 361.0\nOther taxes | 247.0 | 224.0\nAccrued interest | 533.0 | 482.0\nAccrued payroll and other liabilities | 1,488.0 | 1,129.0\nTotal current liabilities | 4,361.0 | 3,861.0\nLong-term debt | 39,973.0 | 38,424.0\nLong-term lease liability (noncurrent), net | 14,147.0 | 12,888.0\nLong-term income taxes | 139.0 | 344.0\nDeferred revenues - initial franchise fees | 945.0 | 778.0\nOther long-term liabilities | 704.0 | 771.0\nDeferred income taxes | 1,038.0 | 1,914.0\nShareholders' equity (deficit) |  | \nPreferred stock, no par value; authorized – 165.0 million shares; issued – none | 0.0 | 0.0\nCommon stock, $.01 par value; authorized – 3.5 billion shares; issued – 1,660.6 million shares | 17.0 | 17.0\nAdditional paid-in capital | 9,641.0 | 9,281.0\nRetained earnings | 70,282.0 | 66,834.0\nAccumulated other comprehensive income (loss) | (2,414.0) | (2,553.0)\nCommon stock in treasury, at cost; 950.0 and 945.4 million shares | (79,316.0) | (77,375.0)\nTotal shareholders' equity (deficit) | (1,791.0) | (3,797.0)\nTotal liabilities and shareholders' equity (deficit) | $ 59,515.0 | $ 55,182.0\n"
+        }
+      ]
+    },
+    {
+      "caseId": "nflx-fy2025-growth",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "8148ba5977321e197dcb0f62d2659dfd6f60f0205e2d80a21edcf66556abc978",
+      "query": "奈飞（NFLX）FY2025的增长和盈利能力怎么样？请根据利润表给出FY2025和FY2024的营业收入、营业利润，计算营业收入和营业利润的同比增速，以及两年的营业利润率（营业利润/营业收入），再判断盈利能力是改善还是走弱。金额注明单位，百分比保留两位小数。",
+      "resolvedQuery": "奈飞（NFLX）FY2025的增长和盈利能力怎么样？请根据利润表给出FY2025和FY2024的营业收入、营业利润，计算营业收入和营业利润的同比增速，以及两年的营业利润率（营业利润/营业收入），再判断盈利能力是改善还是走弱。金额注明单位，百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-07",
+      "context": "[E1] {\"availableAt\":\"2026-01-24T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2026-01-23T00:00:00Z\",\"rawSha256\":\"f84b679b5b3f12d7f641531e06571c820dfa931884264ec0fc56526f7eb99091\",\"retrievedAt\":\"2026-10-07T04:16:43.239311+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/R3.htm\",\"sourceVersion\":\"NFLX-FY2025-10-K-0001065280-26-000034-income\",\"target\":\"NFLX\",\"unit\":\"thousand\",\"visibleSha256\":\"f84b679b5b3f12d7f641531e06571c820dfa931884264ec0fc56526f7eb99091\"}\nCONSOLIDATED STATEMENTS OF OPERATIONS - USD ($) shares in Thousands, $ in Thousands | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nIncome Statement [Abstract] |  |  | \nRevenues | $ 45,183,036 | $ 39,000,966 | $ 33,723,297\nCost of revenues | 23,275,329 | 21,038,464 | 19,715,368\nSales and marketing | 3,301,306 | 2,917,554 | 2,657,883\nTechnology and development | 3,391,390 | 2,925,295 | 2,675,758\nGeneral and administrative | 1,888,408 | 1,702,039 | 1,720,285\nOperating income | 13,326,603 | 10,417,614 | 6,954,003\nOther income (expense): |  |  | \nInterest expense | (776,510) | (718,733) | (699,826)\nInterest and other income (expense) | 172,459 | 266,776 | (48,772)\nIncome before income taxes | 12,722,552 | 9,965,657 | 6,205,405\nProvision for income taxes | (1,741,351) | (1,254,026) | (797,415)\nNet income | $ 10,981,201 | $ 8,711,631 | $ 5,407,990\nEarnings per share: |  |  | \nBasic (in USD per share) | $ 2.58 | $ 2.03 | $ 1.22\nDiluted (in USD per share) | $ 2.53 | $ 1.98 | $ 1.20\nWeighted-average shares of common stock outstanding: |  |  | \nBasic (in shares) | 4,249,512 | 4,295,191 | 4,415,712\nDiluted (in shares) | 4,343,863 | 4,392,608 | 4,494,966\n",
+      "contextSha256": "22ce16956d3353718726b987c4a915951995d75876f93757f6908290b18aad81",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "NFLX",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：NFLX\n请求参数：{}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2026-01-24T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2026-01-23T00:00:00Z\",\"rawSha256\":\"f84b679b5b3f12d7f641531e06571c820dfa931884264ec0fc56526f7eb99091\",\"retrievedAt\":\"2026-10-07T04:16:43.239311+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/R3.htm\",\"sourceVersion\":\"NFLX-FY2025-10-K-0001065280-26-000034-income\",\"target\":\"NFLX\",\"unit\":\"thousand\",\"visibleSha256\":\"f84b679b5b3f12d7f641531e06571c820dfa931884264ec0fc56526f7eb99091\"}\nCONSOLIDATED STATEMENTS OF OPERATIONS - USD ($) shares in Thousands, $ in Thousands | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nIncome Statement [Abstract] |  |  | \nRevenues | $ 45,183,036 | $ 39,000,966 | $ 33,723,297\nCost of revenues | 23,275,329 | 21,038,464 | 19,715,368\nSales and marketing | 3,301,306 | 2,917,554 | 2,657,883\nTechnology and development | 3,391,390 | 2,925,295 | 2,675,758\nGeneral and administrative | 1,888,408 | 1,702,039 | 1,720,285\nOperating income | 13,326,603 | 10,417,614 | 6,954,003\nOther income (expense): |  |  | \nInterest expense | (776,510) | (718,733) | (699,826)\nInterest and other income (expense) | 172,459 | 266,776 | (48,772)\nIncome before income taxes | 12,722,552 | 9,965,657 | 6,205,405\nProvision for income taxes | (1,741,351) | (1,254,026) | (797,415)\nNet income | $ 10,981,201 | $ 8,711,631 | $ 5,407,990\nEarnings per share: |  |  | \nBasic (in USD per share) | $ 2.58 | $ 2.03 | $ 1.22\nDiluted (in USD per share) | $ 2.53 | $ 1.98 | $ 1.20\nWeighted-average shares of common stock outstanding: |  |  | \nBasic (in shares) | 4,249,512 | 4,295,191 | 4,415,712\nDiluted (in shares) | 4,343,863 | 4,392,608 | 4,494,966\n",
+      "preAnalystContextSha256": "0ee79fb0402bbeaac14effe419f8e82e170438d4f64b766dbe417f4019919477",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261007-answer-quality-expansion",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-07T04:21:27.933420+00:00",
+        "asOfInstant": "2026-10-07T04:21:27.933420+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-07T04:21:27.933420+00:00",
+        "sourceManifestSha256": "0b1b97cdd3d4ed6539bb4ec39b0498b4622da97dd9d7292c0a8b604aa3ef30df"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2026-01-24T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-12-31",
+          "periodStart": "2025-01-01",
+          "publishedAt": "2026-01-23T00:00:00Z",
+          "rawSha256": "f84b679b5b3f12d7f641531e06571c820dfa931884264ec0fc56526f7eb99091",
+          "retrievedAt": "2026-10-07T04:16:43.239311+00:00",
+          "sourceRef": "https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/R3.htm",
+          "sourceVersion": "NFLX-FY2025-10-K-0001065280-26-000034-income",
+          "target": "NFLX",
+          "unit": "thousand",
+          "visibleSha256": "f84b679b5b3f12d7f641531e06571c820dfa931884264ec0fc56526f7eb99091",
+          "visibleText": "CONSOLIDATED STATEMENTS OF OPERATIONS - USD ($) shares in Thousands, $ in Thousands | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nIncome Statement [Abstract] |  |  | \nRevenues | $ 45,183,036 | $ 39,000,966 | $ 33,723,297\nCost of revenues | 23,275,329 | 21,038,464 | 19,715,368\nSales and marketing | 3,301,306 | 2,917,554 | 2,657,883\nTechnology and development | 3,391,390 | 2,925,295 | 2,675,758\nGeneral and administrative | 1,888,408 | 1,702,039 | 1,720,285\nOperating income | 13,326,603 | 10,417,614 | 6,954,003\nOther income (expense): |  |  | \nInterest expense | (776,510) | (718,733) | (699,826)\nInterest and other income (expense) | 172,459 | 266,776 | (48,772)\nIncome before income taxes | 12,722,552 | 9,965,657 | 6,205,405\nProvision for income taxes | (1,741,351) | (1,254,026) | (797,415)\nNet income | $ 10,981,201 | $ 8,711,631 | $ 5,407,990\nEarnings per share: |  |  | \nBasic (in USD per share) | $ 2.58 | $ 2.03 | $ 1.22\nDiluted (in USD per share) | $ 2.53 | $ 1.98 | $ 1.20\nWeighted-average shares of common stock outstanding: |  |  | \nBasic (in shares) | 4,249,512 | 4,295,191 | 4,415,712\nDiluted (in shares) | 4,343,863 | 4,392,608 | 4,494,966\n"
+        }
+      ]
+    },
+    {
+      "caseId": "nflx-fy2025-cash",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "26cf3faecf18388ab8d6257e6329c7a0a8623f437e72dc9b4ae925f3a27e7a14",
+      "query": "奈飞（NFLX）FY2025的利润有多少变成了现金？请根据现金流量表列出经营活动现金流、净利润和资本开支，计算经营现金流/净利润、简化自由现金流（经营现金流减资本开支）以及资本开支占经营现金流的比例，并评价现金创造能力。金额注明单位，比率保留两位小数。",
+      "resolvedQuery": "奈飞（NFLX）FY2025的利润有多少变成了现金？请根据现金流量表列出经营活动现金流、净利润和资本开支，计算经营现金流/净利润、简化自由现金流（经营现金流减资本开支）以及资本开支占经营现金流的比例，并评价现金创造能力。金额注明单位，比率保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-07",
+      "context": "[E1] {\"availableAt\":\"2026-01-24T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2026-01-23T00:00:00Z\",\"rawSha256\":\"d091e8b7d2aa269afb2e4a45972aaaf00494f15be2d5f23e70b768c5926dc1eb\",\"retrievedAt\":\"2026-10-07T04:16:45.216613+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/R5.htm\",\"sourceVersion\":\"NFLX-FY2025-10-K-0001065280-26-000034-cashflow\",\"target\":\"NFLX\",\"unit\":\"thousand\",\"visibleSha256\":\"d091e8b7d2aa269afb2e4a45972aaaf00494f15be2d5f23e70b768c5926dc1eb\"}\nCONSOLIDATED STATEMENTS OF CASH FLOWS - USD ($) $ in Thousands | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nCash flows from operating activities: |  |  | \nNet income | $ 10,981,201 | $ 8,711,631 | $ 5,407,990\nAdjustments to reconcile net income to net cash provided by operating activities: |  |  | \nAdditions to content assets | (17,096,617) | (16,223,617) | (12,554,703)\nChange in content liabilities | (610,838) | (779,135) | (585,602)\nAmortization of content assets | 16,422,166 | 15,301,517 | 14,197,437\nDepreciation and amortization of property, equipment and intangibles | 333,389 | 328,914 | 356,947\nStock-based compensation expense | 368,449 | 272,588 | 339,368\nForeign currency remeasurement loss (gain) on debt | 72,348 | (121,539) | 176,296\nOther non-cash items | 577,451 | 494,778 | 512,075\nDeferred income taxes | (442,056) | (590,698) | (459,359)\nChanges in operating assets and liabilities: |  |  | \nOther current assets | (790,661) | 22,180 | (181,003)\nAccounts payable | (8,039) | 121,353 | 93,502\nAccrued expenses and other liabilities | 881,218 | 191,899 | 103,565\nDeferred revenue | 254,917 | 77,844 | 178,708\nOther non-current assets and liabilities | (793,655) | (446,351) | (310,920)\nNet cash provided by operating activities | 10,149,273 | 7,361,364 | 7,274,301\nCash flows from investing activities: |  |  | \nPurchases of property and equipment | (688,220) | (439,538) | (348,552)\nAcquisitions | (17,194) | 0 | 0\nPurchases of investments | (169,965) | (1,742,246) | (504,862)\nProceeds from maturities and sales of investments | 1,917,067 | 0 | 1,395,165\nNet cash provided by (used in) investing activities | 1,041,688 | (2,181,784) | 541,751\nCash flows from financing activities: |  |  | \nProceeds from issuance of debt | 0 | 1,794,460 | 0\nRepayments of debt | (1,833,450) | (400,000) | 0\nProceeds from issuance of common stock | 666,965 | 832,887 | 169,990\nRepurchases of common stock | (9,127,167) | (6,263,746) | (6,045,347)\nTaxes paid related to net share settlement of equity awards | (46,165) | (8,285) | 0\nOther financing activities | (5,806) | (29,743) | (75,446)\nNet cash used in financing activities | (10,345,623) | (4,074,427) | (5,950,803)\nEffect of exchange rate changes on cash, cash equivalents and restricted cash | 386,519 | (416,331) | 82,684\nNet increase in cash, cash equivalents and restricted cash | 1,231,857 | 688,822 | 1,947,933\nCash, cash equivalents and restricted cash, beginning of year | 7,807,337 | 7,118,515 | 5,170,582\nCash, cash equivalents and restricted cash, end of year | 9,039,194 | 7,807,337 | 7,118,515\nSupplemental disclosure: |  |  | \nInterest paid | $ 718,611 | $ 674,502 | $ 684,504\n",
+      "contextSha256": "ea1e3914a37e77b2a915fde2a9ea5ba686e1bd38802fff0a42b2d8a25ce08eab",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "NFLX",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：NFLX\n请求参数：{}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2026-01-24T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":\"2025-01-01\",\"publishedAt\":\"2026-01-23T00:00:00Z\",\"rawSha256\":\"d091e8b7d2aa269afb2e4a45972aaaf00494f15be2d5f23e70b768c5926dc1eb\",\"retrievedAt\":\"2026-10-07T04:16:45.216613+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/R5.htm\",\"sourceVersion\":\"NFLX-FY2025-10-K-0001065280-26-000034-cashflow\",\"target\":\"NFLX\",\"unit\":\"thousand\",\"visibleSha256\":\"d091e8b7d2aa269afb2e4a45972aaaf00494f15be2d5f23e70b768c5926dc1eb\"}\nCONSOLIDATED STATEMENTS OF CASH FLOWS - USD ($) $ in Thousands | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nCash flows from operating activities: |  |  | \nNet income | $ 10,981,201 | $ 8,711,631 | $ 5,407,990\nAdjustments to reconcile net income to net cash provided by operating activities: |  |  | \nAdditions to content assets | (17,096,617) | (16,223,617) | (12,554,703)\nChange in content liabilities | (610,838) | (779,135) | (585,602)\nAmortization of content assets | 16,422,166 | 15,301,517 | 14,197,437\nDepreciation and amortization of property, equipment and intangibles | 333,389 | 328,914 | 356,947\nStock-based compensation expense | 368,449 | 272,588 | 339,368\nForeign currency remeasurement loss (gain) on debt | 72,348 | (121,539) | 176,296\nOther non-cash items | 577,451 | 494,778 | 512,075\nDeferred income taxes | (442,056) | (590,698) | (459,359)\nChanges in operating assets and liabilities: |  |  | \nOther current assets | (790,661) | 22,180 | (181,003)\nAccounts payable | (8,039) | 121,353 | 93,502\nAccrued expenses and other liabilities | 881,218 | 191,899 | 103,565\nDeferred revenue | 254,917 | 77,844 | 178,708\nOther non-current assets and liabilities | (793,655) | (446,351) | (310,920)\nNet cash provided by operating activities | 10,149,273 | 7,361,364 | 7,274,301\nCash flows from investing activities: |  |  | \nPurchases of property and equipment | (688,220) | (439,538) | (348,552)\nAcquisitions | (17,194) | 0 | 0\nPurchases of investments | (169,965) | (1,742,246) | (504,862)\nProceeds from maturities and sales of investments | 1,917,067 | 0 | 1,395,165\nNet cash provided by (used in) investing activities | 1,041,688 | (2,181,784) | 541,751\nCash flows from financing activities: |  |  | \nProceeds from issuance of debt | 0 | 1,794,460 | 0\nRepayments of debt | (1,833,450) | (400,000) | 0\nProceeds from issuance of common stock | 666,965 | 832,887 | 169,990\nRepurchases of common stock | (9,127,167) | (6,263,746) | (6,045,347)\nTaxes paid related to net share settlement of equity awards | (46,165) | (8,285) | 0\nOther financing activities | (5,806) | (29,743) | (75,446)\nNet cash used in financing activities | (10,345,623) | (4,074,427) | (5,950,803)\nEffect of exchange rate changes on cash, cash equivalents and restricted cash | 386,519 | (416,331) | 82,684\nNet increase in cash, cash equivalents and restricted cash | 1,231,857 | 688,822 | 1,947,933\nCash, cash equivalents and restricted cash, beginning of year | 7,807,337 | 7,118,515 | 5,170,582\nCash, cash equivalents and restricted cash, end of year | 9,039,194 | 7,807,337 | 7,118,515\nSupplemental disclosure: |  |  | \nInterest paid | $ 718,611 | $ 674,502 | $ 684,504\n",
+      "preAnalystContextSha256": "c1c6f99ccfa7ea5faa2aac0fcb94e2f85f4b07126bbdab3c273d2cccb462016e",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261007-answer-quality-expansion",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-07T04:21:27.933420+00:00",
+        "asOfInstant": "2026-10-07T04:21:27.933420+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-07T04:21:27.933420+00:00",
+        "sourceManifestSha256": "0b1b97cdd3d4ed6539bb4ec39b0498b4622da97dd9d7292c0a8b604aa3ef30df"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2026-01-24T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-12-31",
+          "periodStart": "2025-01-01",
+          "publishedAt": "2026-01-23T00:00:00Z",
+          "rawSha256": "d091e8b7d2aa269afb2e4a45972aaaf00494f15be2d5f23e70b768c5926dc1eb",
+          "retrievedAt": "2026-10-07T04:16:45.216613+00:00",
+          "sourceRef": "https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/R5.htm",
+          "sourceVersion": "NFLX-FY2025-10-K-0001065280-26-000034-cashflow",
+          "target": "NFLX",
+          "unit": "thousand",
+          "visibleSha256": "d091e8b7d2aa269afb2e4a45972aaaf00494f15be2d5f23e70b768c5926dc1eb",
+          "visibleText": "CONSOLIDATED STATEMENTS OF CASH FLOWS - USD ($) $ in Thousands | 12 Months Ended\nDec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023\nCash flows from operating activities: |  |  | \nNet income | $ 10,981,201 | $ 8,711,631 | $ 5,407,990\nAdjustments to reconcile net income to net cash provided by operating activities: |  |  | \nAdditions to content assets | (17,096,617) | (16,223,617) | (12,554,703)\nChange in content liabilities | (610,838) | (779,135) | (585,602)\nAmortization of content assets | 16,422,166 | 15,301,517 | 14,197,437\nDepreciation and amortization of property, equipment and intangibles | 333,389 | 328,914 | 356,947\nStock-based compensation expense | 368,449 | 272,588 | 339,368\nForeign currency remeasurement loss (gain) on debt | 72,348 | (121,539) | 176,296\nOther non-cash items | 577,451 | 494,778 | 512,075\nDeferred income taxes | (442,056) | (590,698) | (459,359)\nChanges in operating assets and liabilities: |  |  | \nOther current assets | (790,661) | 22,180 | (181,003)\nAccounts payable | (8,039) | 121,353 | 93,502\nAccrued expenses and other liabilities | 881,218 | 191,899 | 103,565\nDeferred revenue | 254,917 | 77,844 | 178,708\nOther non-current assets and liabilities | (793,655) | (446,351) | (310,920)\nNet cash provided by operating activities | 10,149,273 | 7,361,364 | 7,274,301\nCash flows from investing activities: |  |  | \nPurchases of property and equipment | (688,220) | (439,538) | (348,552)\nAcquisitions | (17,194) | 0 | 0\nPurchases of investments | (169,965) | (1,742,246) | (504,862)\nProceeds from maturities and sales of investments | 1,917,067 | 0 | 1,395,165\nNet cash provided by (used in) investing activities | 1,041,688 | (2,181,784) | 541,751\nCash flows from financing activities: |  |  | \nProceeds from issuance of debt | 0 | 1,794,460 | 0\nRepayments of debt | (1,833,450) | (400,000) | 0\nProceeds from issuance of common stock | 666,965 | 832,887 | 169,990\nRepurchases of common stock | (9,127,167) | (6,263,746) | (6,045,347)\nTaxes paid related to net share settlement of equity awards | (46,165) | (8,285) | 0\nOther financing activities | (5,806) | (29,743) | (75,446)\nNet cash used in financing activities | (10,345,623) | (4,074,427) | (5,950,803)\nEffect of exchange rate changes on cash, cash equivalents and restricted cash | 386,519 | (416,331) | 82,684\nNet increase in cash, cash equivalents and restricted cash | 1,231,857 | 688,822 | 1,947,933\nCash, cash equivalents and restricted cash, beginning of year | 7,807,337 | 7,118,515 | 5,170,582\nCash, cash equivalents and restricted cash, end of year | 9,039,194 | 7,807,337 | 7,118,515\nSupplemental disclosure: |  |  | \nInterest paid | $ 718,611 | $ 674,502 | $ 684,504\n"
+        }
+      ]
+    },
+    {
+      "caseId": "nflx-fy2025-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "5428d5afe6e3bdb51df32372d9a7a661e32eaa00baf30a7db234411ad3afe08e",
+      "query": "奈飞（NFLX）FY2025末的短期偿债能力和债务情况如何？请根据资产负债表给出期末现金及现金等价物、两期的流动资产和流动负债，计算两期流动比率；有息债务按短期债务与长期债务合计，再计算净债务（有息债务减现金及现金等价物），并说明变化。金额注明单位，比率保留两位小数。",
+      "resolvedQuery": "奈飞（NFLX）FY2025末的短期偿债能力和债务情况如何？请根据资产负债表给出期末现金及现金等价物、两期的流动资产和流动负债，计算两期流动比率；有息债务按短期债务与长期债务合计，再计算净债务（有息债务减现金及现金等价物），并说明变化。金额注明单位，比率保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-07",
+      "context": "[E1] {\"availableAt\":\"2026-01-24T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":null,\"publishedAt\":\"2026-01-23T00:00:00Z\",\"rawSha256\":\"5669e0e0e57c8327620ea220ad654eee35af6ce07b8d2f65ec289d8c1a55493d\",\"retrievedAt\":\"2026-10-07T04:16:44.564079+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/R6.htm\",\"sourceVersion\":\"NFLX-FY2025-10-K-0001065280-26-000034-balance\",\"target\":\"NFLX\",\"unit\":\"thousand\",\"visibleSha256\":\"5669e0e0e57c8327620ea220ad654eee35af6ce07b8d2f65ec289d8c1a55493d\"}\nCONSOLIDATED BALANCE SHEETS - USD ($) $ in Thousands | Dec. 31, 2025 | Dec. 31, 2024\nCurrent assets: |  | \nCash and cash equivalents | $ 9,033,681 | $ 7,804,733\nShort-term investments | 28,678 | 1,779,006\nOther current assets | 3,957,832 | 3,516,640\nTotal current assets | 13,020,191 | 13,100,379\nContent assets, net | 32,778,392 | 32,452,462\nProperty and equipment, net | 2,004,350 | 1,593,756\nOther non-current assets | 7,794,060 | 6,483,777\nTotal assets | 55,596,993 | 53,630,374\nCurrent liabilities: |  | \nCurrent content liabilities | 4,084,854 | 4,393,681\nAccounts payable | 900,612 | 899,909\nAccrued expenses and other liabilities | 3,220,869 | 2,156,544\nDeferred revenue | 1,775,730 | 1,520,813\nShort-term debt | 998,865 | 1,784,453\nTotal current liabilities | 10,980,930 | 10,755,400\nNon-current content liabilities | 1,579,476 | 1,780,806\nLong-term debt | 13,463,971 | 13,798,351\nOther non-current liabilities | 2,957,128 | 2,552,250\nTotal liabilities | 28,981,505 | 28,886,807\nCommitments and contingencies (Note 9) |  | \nStockholders’ equity: |  | \nPreferred stock, $0.001 par value; 10,000,000 shares authorized at December 31, 2025 and December 31, 2024; no shares issued and outstanding at December 31, 2025 and December 31, 2024 | 0 | 0\nCommon stock, $0.001 par value; 49,900,000,000 shares authorized at December 31, 2025 and December 31, 2024; 4,222,162,150 and 4,277,571,000 issued and outstanding at December 31, 2025 and December 31, 2024, respectively | 7,286,410 | 6,252,126\nTreasury stock at cost (346,541,145 and 259,534,600 shares at December 31, 2025 and December 31, 2024) | (22,372,658) | (13,171,638)\nAccumulated other comprehensive income (loss) | (580,382) | 362,162\nRetained earnings | 42,282,118 | 31,300,917\nTotal stockholders’ equity | 26,615,488 | 24,743,567\nTotal liabilities and stockholders’ equity | $ 55,596,993 | $ 53,630,374\n",
+      "contextSha256": "567c2beff49f19bf9f3fc18d1b70ab420f0c5dcf675cfc1eacb087c8ffdf27f2",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "NFLX",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：NFLX\n请求参数：{}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2026-01-24T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-31\",\"periodStart\":null,\"publishedAt\":\"2026-01-23T00:00:00Z\",\"rawSha256\":\"5669e0e0e57c8327620ea220ad654eee35af6ce07b8d2f65ec289d8c1a55493d\",\"retrievedAt\":\"2026-10-07T04:16:44.564079+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/R6.htm\",\"sourceVersion\":\"NFLX-FY2025-10-K-0001065280-26-000034-balance\",\"target\":\"NFLX\",\"unit\":\"thousand\",\"visibleSha256\":\"5669e0e0e57c8327620ea220ad654eee35af6ce07b8d2f65ec289d8c1a55493d\"}\nCONSOLIDATED BALANCE SHEETS - USD ($) $ in Thousands | Dec. 31, 2025 | Dec. 31, 2024\nCurrent assets: |  | \nCash and cash equivalents | $ 9,033,681 | $ 7,804,733\nShort-term investments | 28,678 | 1,779,006\nOther current assets | 3,957,832 | 3,516,640\nTotal current assets | 13,020,191 | 13,100,379\nContent assets, net | 32,778,392 | 32,452,462\nProperty and equipment, net | 2,004,350 | 1,593,756\nOther non-current assets | 7,794,060 | 6,483,777\nTotal assets | 55,596,993 | 53,630,374\nCurrent liabilities: |  | \nCurrent content liabilities | 4,084,854 | 4,393,681\nAccounts payable | 900,612 | 899,909\nAccrued expenses and other liabilities | 3,220,869 | 2,156,544\nDeferred revenue | 1,775,730 | 1,520,813\nShort-term debt | 998,865 | 1,784,453\nTotal current liabilities | 10,980,930 | 10,755,400\nNon-current content liabilities | 1,579,476 | 1,780,806\nLong-term debt | 13,463,971 | 13,798,351\nOther non-current liabilities | 2,957,128 | 2,552,250\nTotal liabilities | 28,981,505 | 28,886,807\nCommitments and contingencies (Note 9) |  | \nStockholders’ equity: |  | \nPreferred stock, $0.001 par value; 10,000,000 shares authorized at December 31, 2025 and December 31, 2024; no shares issued and outstanding at December 31, 2025 and December 31, 2024 | 0 | 0\nCommon stock, $0.001 par value; 49,900,000,000 shares authorized at December 31, 2025 and December 31, 2024; 4,222,162,150 and 4,277,571,000 issued and outstanding at December 31, 2025 and December 31, 2024, respectively | 7,286,410 | 6,252,126\nTreasury stock at cost (346,541,145 and 259,534,600 shares at December 31, 2025 and December 31, 2024) | (22,372,658) | (13,171,638)\nAccumulated other comprehensive income (loss) | (580,382) | 362,162\nRetained earnings | 42,282,118 | 31,300,917\nTotal stockholders’ equity | 26,615,488 | 24,743,567\nTotal liabilities and stockholders’ equity | $ 55,596,993 | $ 53,630,374\n",
+      "preAnalystContextSha256": "4a29620afd90b2717b0b7fa96b421666f9279fe1a8f1b85602520d42fcfbd246",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261007-answer-quality-expansion",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-07T04:21:27.933420+00:00",
+        "asOfInstant": "2026-10-07T04:21:27.933420+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-07T04:21:27.933420+00:00",
+        "sourceManifestSha256": "0b1b97cdd3d4ed6539bb4ec39b0498b4622da97dd9d7292c0a8b604aa3ef30df"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2026-01-24T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-12-31",
+          "periodStart": null,
+          "publishedAt": "2026-01-23T00:00:00Z",
+          "rawSha256": "5669e0e0e57c8327620ea220ad654eee35af6ce07b8d2f65ec289d8c1a55493d",
+          "retrievedAt": "2026-10-07T04:16:44.564079+00:00",
+          "sourceRef": "https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/R6.htm",
+          "sourceVersion": "NFLX-FY2025-10-K-0001065280-26-000034-balance",
+          "target": "NFLX",
+          "unit": "thousand",
+          "visibleSha256": "5669e0e0e57c8327620ea220ad654eee35af6ce07b8d2f65ec289d8c1a55493d",
+          "visibleText": "CONSOLIDATED BALANCE SHEETS - USD ($) $ in Thousands | Dec. 31, 2025 | Dec. 31, 2024\nCurrent assets: |  | \nCash and cash equivalents | $ 9,033,681 | $ 7,804,733\nShort-term investments | 28,678 | 1,779,006\nOther current assets | 3,957,832 | 3,516,640\nTotal current assets | 13,020,191 | 13,100,379\nContent assets, net | 32,778,392 | 32,452,462\nProperty and equipment, net | 2,004,350 | 1,593,756\nOther non-current assets | 7,794,060 | 6,483,777\nTotal assets | 55,596,993 | 53,630,374\nCurrent liabilities: |  | \nCurrent content liabilities | 4,084,854 | 4,393,681\nAccounts payable | 900,612 | 899,909\nAccrued expenses and other liabilities | 3,220,869 | 2,156,544\nDeferred revenue | 1,775,730 | 1,520,813\nShort-term debt | 998,865 | 1,784,453\nTotal current liabilities | 10,980,930 | 10,755,400\nNon-current content liabilities | 1,579,476 | 1,780,806\nLong-term debt | 13,463,971 | 13,798,351\nOther non-current liabilities | 2,957,128 | 2,552,250\nTotal liabilities | 28,981,505 | 28,886,807\nCommitments and contingencies (Note 9) |  | \nStockholders’ equity: |  | \nPreferred stock, $0.001 par value; 10,000,000 shares authorized at December 31, 2025 and December 31, 2024; no shares issued and outstanding at December 31, 2025 and December 31, 2024 | 0 | 0\nCommon stock, $0.001 par value; 49,900,000,000 shares authorized at December 31, 2025 and December 31, 2024; 4,222,162,150 and 4,277,571,000 issued and outstanding at December 31, 2025 and December 31, 2024, respectively | 7,286,410 | 6,252,126\nTreasury stock at cost (346,541,145 and 259,534,600 shares at December 31, 2025 and December 31, 2024) | (22,372,658) | (13,171,638)\nAccumulated other comprehensive income (loss) | (580,382) | 362,162\nRetained earnings | 42,282,118 | 31,300,917\nTotal stockholders’ equity | 26,615,488 | 24,743,567\nTotal liabilities and stockholders’ equity | $ 55,596,993 | $ 53,630,374\n"
+        }
+      ]
+    },
+    {
+      "caseId": "intc-fy2025-growth",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "994f104ab94b4801ecc97a4bb290c400e5f9fcb01ba31b37903fd53b19526e27",
+      "query": "英特尔（INTC）FY2025的增长和盈利能力怎么样？请根据利润表给出FY2025和FY2024的净收入、营业利润（亏损），计算收入同比增速，以及营业利润（亏损）较上年的变化金额，以及两年的营业利润（亏损）率（营业利润（亏损）/净收入），再判断盈利能力是改善还是走弱。金额注明单位，百分比保留两位小数。",
+      "resolvedQuery": "英特尔（INTC）FY2025的增长和盈利能力怎么样？请根据利润表给出FY2025和FY2024的净收入、营业利润（亏损），计算收入同比增速，以及营业利润（亏损）较上年的变化金额，以及两年的营业利润（亏损）率（营业利润（亏损）/净收入），再判断盈利能力是改善还是走弱。金额注明单位，百分比保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-07",
+      "context": "[E1] {\"availableAt\":\"2026-01-24T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-27\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2026-01-23T00:00:00Z\",\"rawSha256\":\"fe1e0e266ec7cbf6aa51eb7bf544196097743dde89ea0ea7eb371326ee68d17b\",\"retrievedAt\":\"2026-10-07T04:16:45.985839+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/R3.htm\",\"sourceVersion\":\"INTC-FY2025-10-K-0000050863-26-000011-income\",\"target\":\"INTC\",\"unit\":\"million\",\"visibleSha256\":\"fe1e0e266ec7cbf6aa51eb7bf544196097743dde89ea0ea7eb371326ee68d17b\"}\nConsolidated Statements of Income - USD ($) shares in Millions, $ in Millions | 12 Months Ended\nDec. 27, 2025 | Dec. 28, 2024 | Dec. 30, 2023\nIncome Statement [Abstract] |  |  | \nNet revenue | $ 52,853 | $ 53,101 | $ 54,228\nCost of sales | 34,478 | 35,756 | 32,517\nGross profit | 18,375 | 17,345 | 21,711\nResearch and development | 13,774 | 16,546 | 16,046\nMarketing, general, and administrative | 4,624 | 5,507 | 5,634\nRestructuring and other charges | 2,191 | 6,970 | (62)\nOperating expenses | 20,589 | 29,023 | 21,618\nOperating income (loss) | (2,214) | (11,678) | 93\nGains (losses) on equity investments, net | 514 | 242 | 40\nInterest and other, net | 3,257 | 226 | 629\nIncome (loss) before taxes | 1,557 | (11,210) | 762\nProvision for (benefit from) taxes | 1,531 | 8,023 | (913)\nNet income (loss) | 26 | (19,233) | 1,675\nLess: net income (loss) attributable to non-controlling interests | 293 | (477) | (14)\nNet income (loss) attributable to Intel | $ (267) | $ (18,756) | $ 1,689\nEarnings (loss) per share attributable to Intel—basic (in dollars per share) | $ (0.06) | $ (4.38) | $ 0.40\nEarnings (loss) per share attributable to Intel—diluted (in dollars per share) | $ (0.06) | $ (4.38) | $ 0.40\nWeighted average shares of common stock outstanding: |  |  | \nBasic (shares) | 4,530 | 4,280 | 4,190\nDiluted (shares) | 4,530 | 4,280 | 4,212\n",
+      "contextSha256": "81d8c0035aa8a03ac42eca466b58395adc134e84e2263f38b6e30cde61f715bb",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "INTC",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：INTC\n请求参数：{}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2026-01-24T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-27\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2026-01-23T00:00:00Z\",\"rawSha256\":\"fe1e0e266ec7cbf6aa51eb7bf544196097743dde89ea0ea7eb371326ee68d17b\",\"retrievedAt\":\"2026-10-07T04:16:45.985839+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/R3.htm\",\"sourceVersion\":\"INTC-FY2025-10-K-0000050863-26-000011-income\",\"target\":\"INTC\",\"unit\":\"million\",\"visibleSha256\":\"fe1e0e266ec7cbf6aa51eb7bf544196097743dde89ea0ea7eb371326ee68d17b\"}\nConsolidated Statements of Income - USD ($) shares in Millions, $ in Millions | 12 Months Ended\nDec. 27, 2025 | Dec. 28, 2024 | Dec. 30, 2023\nIncome Statement [Abstract] |  |  | \nNet revenue | $ 52,853 | $ 53,101 | $ 54,228\nCost of sales | 34,478 | 35,756 | 32,517\nGross profit | 18,375 | 17,345 | 21,711\nResearch and development | 13,774 | 16,546 | 16,046\nMarketing, general, and administrative | 4,624 | 5,507 | 5,634\nRestructuring and other charges | 2,191 | 6,970 | (62)\nOperating expenses | 20,589 | 29,023 | 21,618\nOperating income (loss) | (2,214) | (11,678) | 93\nGains (losses) on equity investments, net | 514 | 242 | 40\nInterest and other, net | 3,257 | 226 | 629\nIncome (loss) before taxes | 1,557 | (11,210) | 762\nProvision for (benefit from) taxes | 1,531 | 8,023 | (913)\nNet income (loss) | 26 | (19,233) | 1,675\nLess: net income (loss) attributable to non-controlling interests | 293 | (477) | (14)\nNet income (loss) attributable to Intel | $ (267) | $ (18,756) | $ 1,689\nEarnings (loss) per share attributable to Intel—basic (in dollars per share) | $ (0.06) | $ (4.38) | $ 0.40\nEarnings (loss) per share attributable to Intel—diluted (in dollars per share) | $ (0.06) | $ (4.38) | $ 0.40\nWeighted average shares of common stock outstanding: |  |  | \nBasic (shares) | 4,530 | 4,280 | 4,190\nDiluted (shares) | 4,530 | 4,280 | 4,212\n",
+      "preAnalystContextSha256": "ef221966a45dedf2837e18e2276dbefeb3ddb55efc03515e5ab33f06fd0f6e3f",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261007-answer-quality-expansion",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-07T04:21:27.933420+00:00",
+        "asOfInstant": "2026-10-07T04:21:27.933420+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-07T04:21:27.933420+00:00",
+        "sourceManifestSha256": "0b1b97cdd3d4ed6539bb4ec39b0498b4622da97dd9d7292c0a8b604aa3ef30df"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2026-01-24T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-12-27",
+          "periodStart": "2024-12-29",
+          "publishedAt": "2026-01-23T00:00:00Z",
+          "rawSha256": "fe1e0e266ec7cbf6aa51eb7bf544196097743dde89ea0ea7eb371326ee68d17b",
+          "retrievedAt": "2026-10-07T04:16:45.985839+00:00",
+          "sourceRef": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/R3.htm",
+          "sourceVersion": "INTC-FY2025-10-K-0000050863-26-000011-income",
+          "target": "INTC",
+          "unit": "million",
+          "visibleSha256": "fe1e0e266ec7cbf6aa51eb7bf544196097743dde89ea0ea7eb371326ee68d17b",
+          "visibleText": "Consolidated Statements of Income - USD ($) shares in Millions, $ in Millions | 12 Months Ended\nDec. 27, 2025 | Dec. 28, 2024 | Dec. 30, 2023\nIncome Statement [Abstract] |  |  | \nNet revenue | $ 52,853 | $ 53,101 | $ 54,228\nCost of sales | 34,478 | 35,756 | 32,517\nGross profit | 18,375 | 17,345 | 21,711\nResearch and development | 13,774 | 16,546 | 16,046\nMarketing, general, and administrative | 4,624 | 5,507 | 5,634\nRestructuring and other charges | 2,191 | 6,970 | (62)\nOperating expenses | 20,589 | 29,023 | 21,618\nOperating income (loss) | (2,214) | (11,678) | 93\nGains (losses) on equity investments, net | 514 | 242 | 40\nInterest and other, net | 3,257 | 226 | 629\nIncome (loss) before taxes | 1,557 | (11,210) | 762\nProvision for (benefit from) taxes | 1,531 | 8,023 | (913)\nNet income (loss) | 26 | (19,233) | 1,675\nLess: net income (loss) attributable to non-controlling interests | 293 | (477) | (14)\nNet income (loss) attributable to Intel | $ (267) | $ (18,756) | $ 1,689\nEarnings (loss) per share attributable to Intel—basic (in dollars per share) | $ (0.06) | $ (4.38) | $ 0.40\nEarnings (loss) per share attributable to Intel—diluted (in dollars per share) | $ (0.06) | $ (4.38) | $ 0.40\nWeighted average shares of common stock outstanding: |  |  | \nBasic (shares) | 4,530 | 4,280 | 4,190\nDiluted (shares) | 4,530 | 4,280 | 4,212\n"
+        }
+      ]
+    },
+    {
+      "caseId": "intc-fy2025-cash",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "b64017edb4e3abca8ff89f436ba37478c1d86ec24097fcdf01a7f681e0795057",
+      "query": "英特尔（INTC）FY2025的利润有多少变成了现金？请根据现金流量表列出经营活动现金流、净利润（含少数股东）和资本开支，计算经营现金流与净利润的差额、简化自由现金流（经营现金流减资本开支）以及资本开支占经营现金流的比例，并评价现金创造能力。金额注明单位，比率保留两位小数。",
+      "resolvedQuery": "英特尔（INTC）FY2025的利润有多少变成了现金？请根据现金流量表列出经营活动现金流、净利润（含少数股东）和资本开支，计算经营现金流与净利润的差额、简化自由现金流（经营现金流减资本开支）以及资本开支占经营现金流的比例，并评价现金创造能力。金额注明单位，比率保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-07",
+      "context": "[E1] {\"availableAt\":\"2026-01-24T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-27\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2026-01-23T00:00:00Z\",\"rawSha256\":\"bedf59999ab1f4cc41b249bd2519175663648760dd15b13834635d56b84a4758\",\"retrievedAt\":\"2026-10-07T04:16:47.163032+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/R7.htm\",\"sourceVersion\":\"INTC-FY2025-10-K-0000050863-26-000011-cashflow\",\"target\":\"INTC\",\"unit\":\"million\",\"visibleSha256\":\"bedf59999ab1f4cc41b249bd2519175663648760dd15b13834635d56b84a4758\"}\nConsolidated Statements of Cash Flows - USD ($) $ in Millions | 12 Months Ended\nDec. 27, 2025 | Dec. 28, 2024 | Dec. 30, 2023\nStatement of Cash Flows [Abstract] |  |  | \nCash and cash equivalents, beginning of period | $ 8,249 | $ 7,079 | $ 11,144\nCash flows provided by (used for) operating activities: |  |  | \nNet income (loss) | 26 | (19,233) | 1,675\nAdjustments to reconcile net income to net cash provided by operating activities: |  |  | \nDepreciation | 10,757 | 9,951 | 7,847\nShare-based compensation | 2,434 | 3,410 | 3,229\nRestructuring and other charges | 476 | 3,491 | (424)\nAmortization of intangibles | 949 | 1,428 | 1,755\n(Gains) losses on equity investments, net | (514) | (246) | (42)\nMark-to-market (gains) losses on Escrowed Shares | 1,796 | 0 | 0\n(Gains) losses on divestitures | (5,323) | 0 | 0\nDeferred taxes | 328 | 6,132 | (2,033)\nImpairments and net (gain) loss on retirement of property, plant and equipment | 515 | 2,252 | 33\nChanges in assets and liabilities: |  |  | \nAccounts receivable | (449) | (75) | 731\nInventories | (138) | (1,105) | 2,097\nAccounts payable | 297 | 634 | (801)\nAccrued compensation and benefits | 788 | (218) | (614)\nIncome taxes | (995) | (356) | (1,498)\nOther assets and liabilities | (1,250) | 2,223 | (484)\nTotal adjustments | 9,671 | 27,521 | 9,796\nNet cash provided by (used for) operating activities | 9,697 | 8,288 | 11,471\nCash flows provided by (used for) investing activities: |  |  | \nAdditions to property, plant and equipment | (14,646) | (23,944) | (25,750)\nProceeds from capital-related government incentives | 1,577 | 1,936 | 1,011\nPurchases of short-term investments | (24,319) | (37,940) | (44,414)\nMaturities and sales of short-term investments | 15,387 | 41,463 | 44,077\nSales of equity investments | 671 | 1,047 | 472\nProceeds from Divestiture of Businesses | 6,157 | 0 | 0\nOther investing | 352 | (818) | 563\nNet cash provided by (used for) investing activities | (14,821) | (18,256) | (24,041)\nCash flows provided by (used for) financing activities: |  |  | \nIssuance of commercial paper, net of issuance costs | 3,493 | 7,349 | 0\nRepayment of commercial paper | (3,493) | (7,349) | (3,944)\nPartner contributions | 5,108 | 12,714 | 1,511\nNet proceeds from sales of subsidiary shares | 921 | 0 | 2,959\nAdditions to property, plant and equipment | (3,026) | (1,178) | 0\nIssuance of long-term debt, net of issuance costs | 0 | 2,975 | 11,391\nRepayment of debt | (3,750) | (2,288) | (423)\nProceeds from sales of common stock through employee equity incentive plans | 771 | 987 | 1,042\nNet proceeds attributed to common stock and warrants issued, and Escrowed Shares | 12,706 | 0 | 0\nRestricted stock unit withholdings | (423) | (631) | (534)\nPayment of dividends to stockholders | 0 | (1,599) | (3,088)\nOther financing | (720) | 158 | (409)\nNet cash provided by (used for) financing activities | 11,587 | 11,138 | 8,505\nNet increase (decrease) in cash and cash equivalents | 6,463 | 1,170 | (4,065)\nCash, cash equivalents, and restricted cash, end of period | 14,712 | 8,249 | 7,079\nNon-cash supplemental disclosures: |  |  | \nAcquisition of property, plant and equipment | 4,952 | 8,125 | 4,804\nInterest, net of capitalized interest | $ 1,106 | $ 987 | $ 613\n",
+      "contextSha256": "325795eec7d73eee7859650787567a9560abcf1cc142b7a1528332f3daab9b93",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "INTC",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：INTC\n请求参数：{}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2026-01-24T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-27\",\"periodStart\":\"2024-12-29\",\"publishedAt\":\"2026-01-23T00:00:00Z\",\"rawSha256\":\"bedf59999ab1f4cc41b249bd2519175663648760dd15b13834635d56b84a4758\",\"retrievedAt\":\"2026-10-07T04:16:47.163032+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/R7.htm\",\"sourceVersion\":\"INTC-FY2025-10-K-0000050863-26-000011-cashflow\",\"target\":\"INTC\",\"unit\":\"million\",\"visibleSha256\":\"bedf59999ab1f4cc41b249bd2519175663648760dd15b13834635d56b84a4758\"}\nConsolidated Statements of Cash Flows - USD ($) $ in Millions | 12 Months Ended\nDec. 27, 2025 | Dec. 28, 2024 | Dec. 30, 2023\nStatement of Cash Flows [Abstract] |  |  | \nCash and cash equivalents, beginning of period | $ 8,249 | $ 7,079 | $ 11,144\nCash flows provided by (used for) operating activities: |  |  | \nNet income (loss) | 26 | (19,233) | 1,675\nAdjustments to reconcile net income to net cash provided by operating activities: |  |  | \nDepreciation | 10,757 | 9,951 | 7,847\nShare-based compensation | 2,434 | 3,410 | 3,229\nRestructuring and other charges | 476 | 3,491 | (424)\nAmortization of intangibles | 949 | 1,428 | 1,755\n(Gains) losses on equity investments, net | (514) | (246) | (42)\nMark-to-market (gains) losses on Escrowed Shares | 1,796 | 0 | 0\n(Gains) losses on divestitures | (5,323) | 0 | 0\nDeferred taxes | 328 | 6,132 | (2,033)\nImpairments and net (gain) loss on retirement of property, plant and equipment | 515 | 2,252 | 33\nChanges in assets and liabilities: |  |  | \nAccounts receivable | (449) | (75) | 731\nInventories | (138) | (1,105) | 2,097\nAccounts payable | 297 | 634 | (801)\nAccrued compensation and benefits | 788 | (218) | (614)\nIncome taxes | (995) | (356) | (1,498)\nOther assets and liabilities | (1,250) | 2,223 | (484)\nTotal adjustments | 9,671 | 27,521 | 9,796\nNet cash provided by (used for) operating activities | 9,697 | 8,288 | 11,471\nCash flows provided by (used for) investing activities: |  |  | \nAdditions to property, plant and equipment | (14,646) | (23,944) | (25,750)\nProceeds from capital-related government incentives | 1,577 | 1,936 | 1,011\nPurchases of short-term investments | (24,319) | (37,940) | (44,414)\nMaturities and sales of short-term investments | 15,387 | 41,463 | 44,077\nSales of equity investments | 671 | 1,047 | 472\nProceeds from Divestiture of Businesses | 6,157 | 0 | 0\nOther investing | 352 | (818) | 563\nNet cash provided by (used for) investing activities | (14,821) | (18,256) | (24,041)\nCash flows provided by (used for) financing activities: |  |  | \nIssuance of commercial paper, net of issuance costs | 3,493 | 7,349 | 0\nRepayment of commercial paper | (3,493) | (7,349) | (3,944)\nPartner contributions | 5,108 | 12,714 | 1,511\nNet proceeds from sales of subsidiary shares | 921 | 0 | 2,959\nAdditions to property, plant and equipment | (3,026) | (1,178) | 0\nIssuance of long-term debt, net of issuance costs | 0 | 2,975 | 11,391\nRepayment of debt | (3,750) | (2,288) | (423)\nProceeds from sales of common stock through employee equity incentive plans | 771 | 987 | 1,042\nNet proceeds attributed to common stock and warrants issued, and Escrowed Shares | 12,706 | 0 | 0\nRestricted stock unit withholdings | (423) | (631) | (534)\nPayment of dividends to stockholders | 0 | (1,599) | (3,088)\nOther financing | (720) | 158 | (409)\nNet cash provided by (used for) financing activities | 11,587 | 11,138 | 8,505\nNet increase (decrease) in cash and cash equivalents | 6,463 | 1,170 | (4,065)\nCash, cash equivalents, and restricted cash, end of period | 14,712 | 8,249 | 7,079\nNon-cash supplemental disclosures: |  |  | \nAcquisition of property, plant and equipment | 4,952 | 8,125 | 4,804\nInterest, net of capitalized interest | $ 1,106 | $ 987 | $ 613\n",
+      "preAnalystContextSha256": "033076ee81695deabec567f745d12b70d7e8e22715320728ac14567c6e3a7752",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261007-answer-quality-expansion",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-07T04:21:27.933420+00:00",
+        "asOfInstant": "2026-10-07T04:21:27.933420+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-07T04:21:27.933420+00:00",
+        "sourceManifestSha256": "0b1b97cdd3d4ed6539bb4ec39b0498b4622da97dd9d7292c0a8b604aa3ef30df"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2026-01-24T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-12-27",
+          "periodStart": "2024-12-29",
+          "publishedAt": "2026-01-23T00:00:00Z",
+          "rawSha256": "bedf59999ab1f4cc41b249bd2519175663648760dd15b13834635d56b84a4758",
+          "retrievedAt": "2026-10-07T04:16:47.163032+00:00",
+          "sourceRef": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/R7.htm",
+          "sourceVersion": "INTC-FY2025-10-K-0000050863-26-000011-cashflow",
+          "target": "INTC",
+          "unit": "million",
+          "visibleSha256": "bedf59999ab1f4cc41b249bd2519175663648760dd15b13834635d56b84a4758",
+          "visibleText": "Consolidated Statements of Cash Flows - USD ($) $ in Millions | 12 Months Ended\nDec. 27, 2025 | Dec. 28, 2024 | Dec. 30, 2023\nStatement of Cash Flows [Abstract] |  |  | \nCash and cash equivalents, beginning of period | $ 8,249 | $ 7,079 | $ 11,144\nCash flows provided by (used for) operating activities: |  |  | \nNet income (loss) | 26 | (19,233) | 1,675\nAdjustments to reconcile net income to net cash provided by operating activities: |  |  | \nDepreciation | 10,757 | 9,951 | 7,847\nShare-based compensation | 2,434 | 3,410 | 3,229\nRestructuring and other charges | 476 | 3,491 | (424)\nAmortization of intangibles | 949 | 1,428 | 1,755\n(Gains) losses on equity investments, net | (514) | (246) | (42)\nMark-to-market (gains) losses on Escrowed Shares | 1,796 | 0 | 0\n(Gains) losses on divestitures | (5,323) | 0 | 0\nDeferred taxes | 328 | 6,132 | (2,033)\nImpairments and net (gain) loss on retirement of property, plant and equipment | 515 | 2,252 | 33\nChanges in assets and liabilities: |  |  | \nAccounts receivable | (449) | (75) | 731\nInventories | (138) | (1,105) | 2,097\nAccounts payable | 297 | 634 | (801)\nAccrued compensation and benefits | 788 | (218) | (614)\nIncome taxes | (995) | (356) | (1,498)\nOther assets and liabilities | (1,250) | 2,223 | (484)\nTotal adjustments | 9,671 | 27,521 | 9,796\nNet cash provided by (used for) operating activities | 9,697 | 8,288 | 11,471\nCash flows provided by (used for) investing activities: |  |  | \nAdditions to property, plant and equipment | (14,646) | (23,944) | (25,750)\nProceeds from capital-related government incentives | 1,577 | 1,936 | 1,011\nPurchases of short-term investments | (24,319) | (37,940) | (44,414)\nMaturities and sales of short-term investments | 15,387 | 41,463 | 44,077\nSales of equity investments | 671 | 1,047 | 472\nProceeds from Divestiture of Businesses | 6,157 | 0 | 0\nOther investing | 352 | (818) | 563\nNet cash provided by (used for) investing activities | (14,821) | (18,256) | (24,041)\nCash flows provided by (used for) financing activities: |  |  | \nIssuance of commercial paper, net of issuance costs | 3,493 | 7,349 | 0\nRepayment of commercial paper | (3,493) | (7,349) | (3,944)\nPartner contributions | 5,108 | 12,714 | 1,511\nNet proceeds from sales of subsidiary shares | 921 | 0 | 2,959\nAdditions to property, plant and equipment | (3,026) | (1,178) | 0\nIssuance of long-term debt, net of issuance costs | 0 | 2,975 | 11,391\nRepayment of debt | (3,750) | (2,288) | (423)\nProceeds from sales of common stock through employee equity incentive plans | 771 | 987 | 1,042\nNet proceeds attributed to common stock and warrants issued, and Escrowed Shares | 12,706 | 0 | 0\nRestricted stock unit withholdings | (423) | (631) | (534)\nPayment of dividends to stockholders | 0 | (1,599) | (3,088)\nOther financing | (720) | 158 | (409)\nNet cash provided by (used for) financing activities | 11,587 | 11,138 | 8,505\nNet increase (decrease) in cash and cash equivalents | 6,463 | 1,170 | (4,065)\nCash, cash equivalents, and restricted cash, end of period | 14,712 | 8,249 | 7,079\nNon-cash supplemental disclosures: |  |  | \nAcquisition of property, plant and equipment | 4,952 | 8,125 | 4,804\nInterest, net of capitalized interest | $ 1,106 | $ 987 | $ 613\n"
+        }
+      ]
+    },
+    {
+      "caseId": "intc-fy2025-liquidity",
+      "origin": "PUBLIC_AUTHORIZED",
+      "route": "FUNDAMENTALS",
+      "caseSha256": "46169ed48effd3991140af35c47fd720dea7ff0fb946d6ae39a36b4af5416888",
+      "query": "英特尔（INTC）FY2025末的短期偿债能力和债务情况如何？请根据资产负债表给出期末现金及现金等价物、两期的流动资产和流动负债，计算两期流动比率；有息债务按短期债务与长期债务（表中列为 Debt）合计，再计算净债务（有息债务减现金及现金等价物），并说明变化。金额注明单位，比率保留两位小数。",
+      "resolvedQuery": "英特尔（INTC）FY2025末的短期偿债能力和债务情况如何？请根据资产负债表给出期末现金及现金等价物、两期的流动资产和流动负债，计算两期流动比率；有息债务按短期债务与长期债务（表中列为 Debt）合计，再计算净债务（有息债务减现金及现金等价物），并说明变化。金额注明单位，比率保留两位小数。",
+      "history": [],
+      "asOf": "2026-10-07",
+      "context": "[E1] {\"availableAt\":\"2026-01-24T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-27\",\"periodStart\":null,\"publishedAt\":\"2026-01-23T00:00:00Z\",\"rawSha256\":\"fb0d6872b40b46924b09c918da17c2ebdc3aa3e4b57cc8dd6fae47db343ae176\",\"retrievedAt\":\"2026-10-07T04:16:46.477543+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/R5.htm\",\"sourceVersion\":\"INTC-FY2025-10-K-0000050863-26-000011-balance\",\"target\":\"INTC\",\"unit\":\"million\",\"visibleSha256\":\"fb0d6872b40b46924b09c918da17c2ebdc3aa3e4b57cc8dd6fae47db343ae176\"}\nConsolidated Balance Sheets - USD ($) $ in Millions | Dec. 27, 2025 | Dec. 28, 2024\nCurrent assets: |  | \nCash and cash equivalents | $ 14,265 | $ 8,249\nShort-term investments | 23,151 | 13,813\nAccounts receivable, net | 3,839 | 3,478\nInventories | 11,618 | 12,198\nOther current assets | 10,815 | 9,586\nTotal current assets | 63,688 | 47,324\nProperty, plant and equipment, net | 105,414 | 107,919\nEquity investments | 8,512 | 5,383\nGoodwill | 23,912 | 24,693\nIdentified intangible assets, net | 2,772 | 3,691\nOther long-term assets | 7,131 | 7,475\nTotal assets | 211,429 | 196,485\nCurrent liabilities: |  | \nShort-term debt | 2,499 | 3,729\nAccounts payable | 9,882 | 12,556\nAccrued compensation and benefits | 3,990 | 3,343\nIncome taxes payable | 604 | 1,756\nOther accrued liabilities | 14,600 | 14,282\nTotal current liabilities | 31,575 | 35,666\nDebt | 44,086 | 46,282\nOther long-term liabilities | 9,408 | 9,505\nCommitments and Contingencies (Note 19) |  | \nStockholders' equity: |  | \nPreferred stock, $0.001 par value, 50 shares authorized; none issued | 0 | 0\nCommon stock, $0.001 par value, 10,000 shares authorized; 4,994 shares issued and outstanding (4,330 issued and outstanding in 2024) and capital in excess of par value | 65,185 | 50,949\nAccumulated other comprehensive income (loss) | 113 | (711)\nRetained earnings | 48,983 | 49,032\nTotal Intel stockholders' equity | 114,281 | 99,270\nNon-controlling interests | 12,079 | 5,762\nTotal stockholders' equity | 126,360 | 105,032\nTotal liabilities and stockholders' equity | $ 211,429 | $ 196,485\n",
+      "contextSha256": "f82e92446ad59b3010099a9692c6d6c68ed49a6702c7c0fa8fb97f090b442f2e",
+      "executionScope": "FROZEN_COMPONENT_CHAIN",
+      "ticker": "INTC",
+      "requestAttributes": {},
+      "timeSensitivity": "HISTORICAL",
+      "initialTaskOutcome": "COMPLETED",
+      "citationIds": [
+        "E1"
+      ],
+      "preAnalystContext": "本轮标的：INTC\n请求参数：{}\n请求时间要求：HISTORICAL\n证据验收：COMPLETED。仅引用下列可用证据，使用 [E1] 等编号并保留来源；数据缺口必须明确说明。\n[E1] {\"availableAt\":\"2026-01-24T00:00:00Z\",\"currency\":\"USD\",\"evidenceId\":\"E1\",\"periodEnd\":\"2025-12-27\",\"periodStart\":null,\"publishedAt\":\"2026-01-23T00:00:00Z\",\"rawSha256\":\"fb0d6872b40b46924b09c918da17c2ebdc3aa3e4b57cc8dd6fae47db343ae176\",\"retrievedAt\":\"2026-10-07T04:16:46.477543+00:00\",\"sourceRef\":\"https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/R5.htm\",\"sourceVersion\":\"INTC-FY2025-10-K-0000050863-26-000011-balance\",\"target\":\"INTC\",\"unit\":\"million\",\"visibleSha256\":\"fb0d6872b40b46924b09c918da17c2ebdc3aa3e4b57cc8dd6fae47db343ae176\"}\nConsolidated Balance Sheets - USD ($) $ in Millions | Dec. 27, 2025 | Dec. 28, 2024\nCurrent assets: |  | \nCash and cash equivalents | $ 14,265 | $ 8,249\nShort-term investments | 23,151 | 13,813\nAccounts receivable, net | 3,839 | 3,478\nInventories | 11,618 | 12,198\nOther current assets | 10,815 | 9,586\nTotal current assets | 63,688 | 47,324\nProperty, plant and equipment, net | 105,414 | 107,919\nEquity investments | 8,512 | 5,383\nGoodwill | 23,912 | 24,693\nIdentified intangible assets, net | 2,772 | 3,691\nOther long-term assets | 7,131 | 7,475\nTotal assets | 211,429 | 196,485\nCurrent liabilities: |  | \nShort-term debt | 2,499 | 3,729\nAccounts payable | 9,882 | 12,556\nAccrued compensation and benefits | 3,990 | 3,343\nIncome taxes payable | 604 | 1,756\nOther accrued liabilities | 14,600 | 14,282\nTotal current liabilities | 31,575 | 35,666\nDebt | 44,086 | 46,282\nOther long-term liabilities | 9,408 | 9,505\nCommitments and Contingencies (Note 19) |  | \nStockholders' equity: |  | \nPreferred stock, $0.001 par value, 50 shares authorized; none issued | 0 | 0\nCommon stock, $0.001 par value, 10,000 shares authorized; 4,994 shares issued and outstanding (4,330 issued and outstanding in 2024) and capital in excess of par value | 65,185 | 50,949\nAccumulated other comprehensive income (loss) | 113 | (711)\nRetained earnings | 48,983 | 49,032\nTotal Intel stockholders' equity | 114,281 | 99,270\nNon-controlling interests | 12,079 | 5,762\nTotal stockholders' equity | 126,360 | 105,032\nTotal liabilities and stockholders' equity | $ 211,429 | $ 196,485\n",
+      "preAnalystContextSha256": "eebb556a3c7e181ddaa40878b6183b595167e0c66473ab56f8ae848c02c90b15",
+      "snapshotProvenance": {
+        "authorizationRef": "user-request-20261007-answer-quality-expansion",
+        "authorizedBy": "user",
+        "capturedAt": "2026-10-07T04:21:27.933420+00:00",
+        "asOfInstant": "2026-10-07T04:21:27.933420+00:00",
+        "reviewedBy": "AI-source-check-not-human",
+        "reviewedAt": "2026-10-07T04:21:27.933420+00:00",
+        "sourceManifestSha256": "0b1b97cdd3d4ed6539bb4ec39b0498b4622da97dd9d7292c0a8b604aa3ef30df"
+      },
+      "evidenceMetadata": [
+        {
+          "availableAt": "2026-01-24T00:00:00Z",
+          "currency": "USD",
+          "evidenceId": "E1",
+          "periodEnd": "2025-12-27",
+          "periodStart": null,
+          "publishedAt": "2026-01-23T00:00:00Z",
+          "rawSha256": "fb0d6872b40b46924b09c918da17c2ebdc3aa3e4b57cc8dd6fae47db343ae176",
+          "retrievedAt": "2026-10-07T04:16:46.477543+00:00",
+          "sourceRef": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/R5.htm",
+          "sourceVersion": "INTC-FY2025-10-K-0000050863-26-000011-balance",
+          "target": "INTC",
+          "unit": "million",
+          "visibleSha256": "fb0d6872b40b46924b09c918da17c2ebdc3aa3e4b57cc8dd6fae47db343ae176",
+          "visibleText": "Consolidated Balance Sheets - USD ($) $ in Millions | Dec. 27, 2025 | Dec. 28, 2024\nCurrent assets: |  | \nCash and cash equivalents | $ 14,265 | $ 8,249\nShort-term investments | 23,151 | 13,813\nAccounts receivable, net | 3,839 | 3,478\nInventories | 11,618 | 12,198\nOther current assets | 10,815 | 9,586\nTotal current assets | 63,688 | 47,324\nProperty, plant and equipment, net | 105,414 | 107,919\nEquity investments | 8,512 | 5,383\nGoodwill | 23,912 | 24,693\nIdentified intangible assets, net | 2,772 | 3,691\nOther long-term assets | 7,131 | 7,475\nTotal assets | 211,429 | 196,485\nCurrent liabilities: |  | \nShort-term debt | 2,499 | 3,729\nAccounts payable | 9,882 | 12,556\nAccrued compensation and benefits | 3,990 | 3,343\nIncome taxes payable | 604 | 1,756\nOther accrued liabilities | 14,600 | 14,282\nTotal current liabilities | 31,575 | 35,666\nDebt | 44,086 | 46,282\nOther long-term liabilities | 9,408 | 9,505\nCommitments and Contingencies (Note 19) |  | \nStockholders' equity: |  | \nPreferred stock, $0.001 par value, 50 shares authorized; none issued | 0 | 0\nCommon stock, $0.001 par value, 10,000 shares authorized; 4,994 shares issued and outstanding (4,330 issued and outstanding in 2024) and capital in excess of par value | 65,185 | 50,949\nAccumulated other comprehensive income (loss) | 113 | (711)\nRetained earnings | 48,983 | 49,032\nTotal Intel stockholders' equity | 114,281 | 99,270\nNon-controlling interests | 12,079 | 5,762\nTotal stockholders' equity | 126,360 | 105,032\nTotal liabilities and stockholders' equity | $ 211,429 | $ 196,485\n"
+        }
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "runId": "fy25-val-baseline-07",
+      "caseId": "lly-fy2025-growth",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "fy25-val-baseline-08",
+      "caseId": "lly-fy2025-cash",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "fy25-val-baseline-09",
+      "caseId": "lly-fy2025-liquidity",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "fy25-val-baseline-10",
+      "caseId": "mcd-fy2025-growth",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "fy25-val-baseline-11",
+      "caseId": "mcd-fy2025-cash",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "fy25-val-baseline-12",
+      "caseId": "mcd-fy2025-liquidity",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "fy25-val-baseline-13",
+      "caseId": "nflx-fy2025-growth",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "fy25-val-baseline-14",
+      "caseId": "nflx-fy2025-cash",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "fy25-val-baseline-15",
+      "caseId": "nflx-fy2025-liquidity",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "fy25-val-baseline-16",
+      "caseId": "intc-fy2025-growth",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "fy25-val-baseline-17",
+      "caseId": "intc-fy2025-cash",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    },
+    {
+      "runId": "fy25-val-baseline-18",
+      "caseId": "intc-fy2025-liquidity",
+      "bundleId": "baseline-v1",
+      "repeatId": 1
+    }
+  ],
+  "context": {
+    "experimentId": "fy2025-expansion-validation-baseline-20261007",
+    "evaluatorVersion": "d6ff30aa69457633ecdf9c22a5c488e7d30f4cb5114a46a574886173523421b4",
+    "runMode": "BASELINE"
+  }
+}

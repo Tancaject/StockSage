@@ -1,0 +1,43 @@
+Consolidated Balance Sheets - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024
+Current assets |  | 
+Cash and cash equivalents | $ 19,048 | $ 4,194
+Accounts receivable | 28,347 | 27,261
+Less Allowance for credit losses | 1,250 | 1,152
+Accounts receivable, net | 27,097 | 26,109
+Inventories | 2,441 | 2,247
+Prepaid expenses and other | 8,336 | 7,973
+Total current assets | 56,922 | 40,523
+Property, plant and equipment | 337,991 | 331,406
+Less Accumulated depreciation | 228,524 | 222,884
+Property, plant and equipment, net | 109,467 | 108,522
+Investments in unconsolidated businesses | 785 | 842
+Wireless licenses | 157,039 | 156,613
+Goodwill | 22,841 | 22,841
+Other intangible assets, net | 10,458 | 11,129
+Operating lease right-of-use assets | 23,498 | 24,472
+Other assets | 23,248 | 19,769
+Total assets | 404,258 | 384,711
+Current liabilities |  | 
+Debt maturing within one year | 18,618 | 22,633
+Accounts payable and accrued liabilities | 24,981 | 23,374
+Current operating lease liabilities | 4,542 | 4,415
+Other current liabilities | 14,229 | 14,349
+Total current liabilities | 62,370 | 64,771
+Long-term debt | 139,532 | 121,381
+Employee benefit obligations | 11,099 | 11,997
+Deferred income taxes | 48,717 | 46,732
+Non-current operating lease liabilities | 18,951 | 19,928
+Other liabilities | 17,848 | 19,327
+Total long-term liabilities | 236,147 | 219,365
+Commitments and Contingencies |  | 
+Equity |  | 
+Series preferred stock ($0.10 par value; 250,000,000 shares authorized; none issued) | 0 | 0
+Common stock ($0.10 par value; 6,250,000,000 shares authorized in each period; 4,291,433,646 shares issued in each period) | 429 | 429
+Additional paid in capital | 13,372 | 13,466
+Retained earnings | 94,744 | 89,110
+Accumulated other comprehensive loss | (1,727) | (923)
+Common stock in treasury, at cost (74,258,296 and 81,753,488 shares outstanding) | (3,255) | (3,583)
+Deferred compensation – employee stock ownership plans (ESOPs) and other | 897 | 738
+Noncontrolling interests | 1,281 | 1,338
+Total equity | 105,741 | 100,575
+Total liabilities and equity | $ 404,258 | $ 384,711

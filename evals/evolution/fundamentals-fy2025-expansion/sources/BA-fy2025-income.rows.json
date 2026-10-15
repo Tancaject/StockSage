@@ -1,0 +1,251 @@
+[
+ {
+  "cells": [
+   "Consolidated Statements of Operations - USD ($) $ in Millions",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 31, 2025",
+   "Dec. 31, 2024",
+   "Dec. 31, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Total revenues",
+   "$ 89,463",
+   "$ 66,517",
+   "$ 77,794"
+  ],
+  "concept": "us-gaap:Revenues"
+ },
+ {
+  "cells": [
+   "Total costs and expenses",
+   "(85,174)",
+   "(68,508)",
+   "(70,070)"
+  ],
+  "concept": "us-gaap:CostOfRevenue"
+ },
+ {
+  "cells": [
+   "Gross profit",
+   "4,289",
+   "(1,991)",
+   "7,724"
+  ],
+  "concept": "us-gaap:GrossProfit"
+ },
+ {
+  "cells": [
+   "Income from operating investments, net",
+   "25",
+   "71",
+   "46"
+  ],
+  "concept": "ba:IncomeLossfromInvestments"
+ },
+ {
+  "cells": [
+   "General and administrative expense",
+   "(6,090)",
+   "(5,021)",
+   "(5,168)"
+  ],
+  "concept": "us-gaap:GeneralAndAdministrativeExpense"
+ },
+ {
+  "cells": [
+   "Research and development expense, net",
+   "(3,615)",
+   "(3,812)",
+   "(3,377)"
+  ],
+  "concept": "us-gaap:ResearchAndDevelopmentExpense"
+ },
+ {
+  "cells": [
+   "Gain on dispositions, net",
+   "(9,672)",
+   "(46)",
+   "(2)"
+  ],
+  "concept": "us-gaap:GainLossOnDispositionOfAssets"
+ },
+ {
+  "cells": [
+   "Earnings/(loss) from operations",
+   "4,281",
+   "(10,707)",
+   "(773)"
+  ],
+  "concept": "us-gaap:OperatingIncomeLoss"
+ },
+ {
+  "cells": [
+   "Other income, net",
+   "1,125",
+   "1,222",
+   "1,227"
+  ],
+  "concept": "us-gaap:OtherNonoperatingIncomeExpense"
+ },
+ {
+  "cells": [
+   "Interest and debt expense",
+   "(2,771)",
+   "(2,725)",
+   "(2,459)"
+  ],
+  "concept": "us-gaap:InterestAndDebtExpense"
+ },
+ {
+  "cells": [
+   "Earnings/(loss) before income taxes",
+   "2,635",
+   "(12,210)",
+   "(2,005)"
+  ],
+  "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Income tax (expense)/benefit",
+   "(397)",
+   "381",
+   "(237)"
+  ],
+  "concept": "us-gaap:IncomeTaxExpenseBenefit"
+ },
+ {
+  "cells": [
+   "Net earnings/(loss)",
+   "2,238",
+   "(11,829)",
+   "(2,242)"
+  ],
+  "concept": "us-gaap:ProfitLoss"
+ },
+ {
+  "cells": [
+   "Less: Net earnings/(loss) attributable to noncontrolling interest",
+   "3",
+   "(12)",
+   "(20)"
+  ],
+  "concept": "us-gaap:NetIncomeLossAttributableToNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Net earnings/(loss) attributable to Boeing shareholders",
+   "2,235",
+   "(11,817)",
+   "(2,222)"
+  ],
+  "concept": "us-gaap:NetIncomeLoss"
+ },
+ {
+  "cells": [
+   "Less: Mandatory convertible preferred stock dividends accumulated during the period",
+   "345",
+   "58",
+   ""
+  ],
+  "concept": "us-gaap:PreferredStockDividendsIncomeStatementImpact"
+ },
+ {
+  "cells": [
+   "Net earnings/(loss) attributable to Boeing common shareholders",
+   "1,890",
+   "(11,875)",
+   "(2,222)"
+  ],
+  "concept": "us-gaap:NetIncomeLossAvailableToCommonStockholdersDiluted"
+ },
+ {
+  "cells": [
+   "Net earnings/(loss) attributable to Boeing common shareholders",
+   "$ 1,890",
+   "$ (11,875)",
+   "$ (2,222)"
+  ],
+  "concept": "us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic"
+ },
+ {
+  "cells": [
+   "Basic earnings/(loss) per share (in dollars per share)",
+   "$ 2.49",
+   "$ (18.36)",
+   "$ (3.67)"
+  ],
+  "concept": "us-gaap:EarningsPerShareBasic"
+ },
+ {
+  "cells": [
+   "Diluted earnings/(loss) per share (in dollars per share)",
+   "$ 2.48",
+   "$ (18.36)",
+   "$ (3.67)"
+  ],
+  "concept": "us-gaap:EarningsPerShareDiluted"
+ },
+ {
+  "cells": [
+   "Sales of products",
+   "",
+   "",
+   ""
+  ],
+  "concept": "srt:ProductOrServiceAxis"
+ },
+ {
+  "cells": [
+   "Total revenues",
+   "$ 75,356",
+   "$ 53,227",
+   "$ 65,581"
+  ],
+  "concept": "us-gaap:Revenues"
+ },
+ {
+  "cells": [
+   "Cost of goods and services sold",
+   "(73,761)",
+   "(57,394)",
+   "(59,864)"
+  ],
+  "concept": "us-gaap:CostOfGoodsAndServicesSold"
+ },
+ {
+  "cells": [
+   "Sales of services",
+   "",
+   "",
+   ""
+  ],
+  "concept": "srt:ProductOrServiceAxis"
+ },
+ {
+  "cells": [
+   "Total revenues",
+   "14,107",
+   "13,290",
+   "12,213"
+  ],
+  "concept": "us-gaap:Revenues"
+ },
+ {
+  "cells": [
+   "Cost of goods and services sold",
+   "$ (11,413)",
+   "$ (11,114)",
+   "$ (10,206)"
+  ],
+  "concept": "us-gaap:CostOfGoodsAndServicesSold"
+ }
+]

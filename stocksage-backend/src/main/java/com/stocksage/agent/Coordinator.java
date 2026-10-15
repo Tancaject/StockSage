@@ -1,6 +1,7 @@
 package com.stocksage.agent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.config.ThinkingModels;
 import com.stocksage.agent.intent.AnalysisDepth;
 import com.stocksage.agent.intent.FineIntent;
 import com.stocksage.agent.intent.IntentDecision;
@@ -27,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -46,6 +48,7 @@ public class Coordinator {
 
     public static final String MULTI_TARGET_UNSUPPORTED = "MULTI_TARGET_UNSUPPORTED";
     public static final String TARGET_REWRITE_MISMATCH = "TARGET_REWRITE_MISMATCH";
+    public static final String MULTI_TARGET_PARAMETERS_DIFFER = "MULTI_TARGET_PARAMETERS_DIFFER";
 
     /** 统一执行语义、向量、模式和 n-gram 识别的意图服务。 */
     private final IntentRecognitionService intentRecognitionService;
@@ -57,15 +60,15 @@ public class Coordinator {
     private final RoutePlanCatalog routePlanCatalog;
 
     /** FAST 层级映射的后端白名单模型名。 */
-    @Value("${stocksage.chat.model-routing.fast-model:qwen3.6-flash}")
+    @Value("${stocksage.chat.model-routing.fast-model:qwen3.8-flash}")
     private String fastModel;
 
     /** STANDARD 层级映射的后端白名单模型名。 */
-    @Value("${stocksage.chat.model-routing.standard-model:${STOCKSAGE_CHAT_MODEL:qwen3.6-plus}}")
+    @Value("${stocksage.chat.model-routing.standard-model:${STOCKSAGE_CHAT_MODEL:deepseek-flash}}")
     private String standardModel;
 
     /** STRONG 层级映射的后端白名单模型名。 */
-    @Value("${stocksage.chat.model-routing.strong-model:qwen3.6-max-preview}")
+    @Value("${stocksage.chat.model-routing.strong-model:deepseek-v4-pro-0813}")
     private String strongModel;
 
     /** 图片输入固定使用的视觉模型名。 */
@@ -82,6 +85,26 @@ public class Coordinator {
 
     @Value("${stocksage.chat.model-routing.standard-thinking-budget:32768}")
     private int standardThinkingBudget;
+
+    /** 是否把 2～4 个明确标的的普通路线请求按标的扇出执行；关闭时多标的仍要求澄清。 */
+    @Value("${stocksage.agent.ordinary.multi-target.enabled:false}")
+    private boolean multiTargetEnabled;
+
+    /** 多标的扇出的标的数上限。 */
+    @Value("${stocksage.agent.ordinary.multi-target.max-targets:4}")
+    private int maxTargets = 4;
+
+    /** 普通路线计划来源：FIXED 使用固定动作表，DYNAMIC 调用规划器。 */
+    @Value("${stocksage.agent.ordinary.planner.mode:FIXED}")
+    private String plannerMode = "FIXED";
+
+    /** 动态规划器；未装配时只能使用固定计划。 */
+    private OrdinaryPlanner ordinaryPlanner;
+
+    @Autowired(required = false)
+    void setOrdinaryPlanner(OrdinaryPlanner ordinaryPlanner) {
+        this.ordinaryPlanner = ordinaryPlanner;
+    }
 
     /** 注入意图识别、最终回答和服务器计划目录。 */
     @Autowired
@@ -217,8 +240,7 @@ public class Coordinator {
             invocation.put("temperature", modelRoutingTemperature);
             invocation.put("maxOutputTokens", modelRoutingMaxOutputTokens);
             invocation.put("configurationSource", "REQUEST_OPTIONS");
-            if (selected.tier() == ModelTier.STANDARD && "qwen3.8-max".equals(selected.modelName())) {
-                invocation.put("enableThinking", true);
+            if (ThinkingModels.thinksByDefault(selected.modelName())) {
                 invocation.put("thinkingBudget", standardThinkingBudget);
             }
         } else {
@@ -253,9 +275,11 @@ public class Coordinator {
                 options.model(modelName).temperature(((Number) invocation.get("temperature")).doubleValue())
                         .maxTokens(((Number) invocation.get("maxOutputTokens")).intValue());
             }
-            if (invocation.containsKey("thinkingBudget")) {
+            if (invocation.containsKey("enableThinking")) {
                 options.extraBody(Map.of("enable_thinking", invocation.get("enableThinking"),
                         "thinking_budget", invocation.get("thinkingBudget")));
+            } else if (invocation.containsKey("thinkingBudget")) {
+                options.extraBody(Map.of("thinking_budget", invocation.get("thinkingBudget")));
             }
             observeFinalAnswer(observer, invocation);
             AtomicBoolean usageReported = new AtomicBoolean();
@@ -350,6 +374,47 @@ public class Coordinator {
     public record SelectedModel(ModelTier tier, String modelName) {
     }
 
+    /**
+     * 请求检查：不调用模型，只确定本轮取数参数及其是否需要澄清。
+     * 参数澄清阶段和计划生成都使用它，保证两处判断一致。
+     */
+    public ReadRequest inspectRequest(IntentRecognitionResult recognition, String originalQuery) {
+        if (recognition == null || recognition.decision() == null) {
+            return ReadRequest.parse(PlanRoute.DIRECT, originalQuery, Map.of());
+        }
+        IntentDecision decision = enforceSingleTargetContract(recognition, originalQuery).decision();
+        String resolvedQuery = decision.resolvedQuery().isBlank() ? originalQuery : decision.resolvedQuery();
+        return readRequest(decision, originalQuery, resolvedQuery);
+    }
+
+    private ReadRequest readRequest(IntentDecision decision, String originalQuery, String resolvedQuery) {
+        PlanRoute route = decision.targetRoute();
+        ReadRequest readRequest = ReadRequest.parse(route, resolvedQuery, decision.entities());
+        // 当前消息的显式约束不能被模型改写覆盖；省略的约束仍从已消歧问题取得。
+        ReadRequest explicit = ReadRequest.parse(route, originalQuery, readRequest.attributes().entrySet().stream()
+                .collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, entry -> String.valueOf(entry.getValue()))));
+        if (explicit.clarification().isBlank() && !readRequest.clarification().isBlank()) explicit = readRequest;
+        return explicit;
+    }
+
+    /** 供聊天链路在取证前（例如知识库检索）获知本轮扇出的标的。 */
+    public List<String> fanOutTargets(IntentRecognitionResult recognition, String originalQuery) {
+        if (recognition == null || recognition.decision() == null) return List.of();
+        IntentDecision decision = enforceSingleTargetContract(recognition, originalQuery).decision();
+        String resolvedQuery = decision.resolvedQuery().isBlank() ? originalQuery : decision.resolvedQuery();
+        return fanOutTargets(decision, originalQuery, resolvedQuery);
+    }
+
+    /** 本轮多标的扇出的标的；不足两个时为空，按单标的执行。 */
+    private List<String> fanOutTargets(IntentDecision decision, String originalQuery, String resolvedQuery) {
+        if (!multiTargetEnabled || decision.needsClarification()) return List.of();
+        PlanRoute route = decision.targetRoute();
+        if (route != PlanRoute.MARKET && route != PlanRoute.FUNDAMENTALS && route != PlanRoute.NEWS) return List.of();
+        List<String> targets = tickerResolutionService.resolveExplicitTickers(originalQuery);
+        if (targets.size() < 2) targets = tickerResolutionService.resolveExplicitTickers(resolvedQuery);
+        return targets.size() >= 2 && targets.size() <= maxTargets ? targets : List.of();
+    }
+
     /** 把融合后的直接 targetRoute 转换为服务器拥有动作表的固定执行计划。 */
     private ExecutionPlan buildPlan(
             IntentRecognitionResult recognition,
@@ -402,17 +467,39 @@ public class Coordinator {
                 recognition.bestSignals().stream().map(signal -> new RoutingDecisionMetadata.SignalSnapshot(
                         signal.source(), signal.targetRoute(), signal.fineIntent(), signal.confidence())).toList()
         );
-        ReadRequest readRequest = ReadRequest.parse(route, resolvedQuery, decision.entities());
-        // 当前消息的显式约束不能被模型改写覆盖；省略的约束仍从已消歧问题取得。
-        ReadRequest explicit = ReadRequest.parse(route, originalQuery, readRequest.attributes().entrySet().stream()
-                .collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, entry -> String.valueOf(entry.getValue()))));
-        if (explicit.clarification().isBlank() && !readRequest.clarification().isBlank()) explicit = readRequest;
+        ReadRequest explicit = readRequest(decision, originalQuery, resolvedQuery);
         if (explicit.barsOnly()) {
             actions = List.of(PlanAction.GET_STOCK_KLINE, PlanAction.FINAL_ANSWER);
         }
+        List<String> targets = fanOutTargets(decision, originalQuery, resolvedQuery);
+        if (targets.size() >= 2) {
+            // 多标的由最终回答模型直接对比各标的证据，不逐个调用领域分析师。
+            actions = actions.stream().filter(action -> !action.isAgentRole()).toList();
+        }
+        Set<DataRequirement> requirements = DataRequirement.explicitIn(resolvedQuery);
+        if (route == PlanRoute.MARKET || route == PlanRoute.FUNDAMENTALS || route == PlanRoute.NEWS) {
+            // 跨类别问题（如行情题顺带问新闻）不用等规划器，按明确需求确定性补步骤。
+            actions = OrdinaryPlan.withRequirementSteps(actions, requirements);
+        }
+        OrdinaryPlan ordinaryPlan = OrdinaryPlan.fixed(targets, actions, explicit, requirements);
+        if (usesPlanner(route, decision, explicit)) {
+            ordinaryPlan = ordinaryPlanner.plan(route, resolvedQuery, originalQuery, ordinaryPlan);
+            if (Boolean.TRUE.equals(ordinaryPlan.diagnostics().get("parametersDifferByTarget"))) {
+                // 规划器补充发现参数不对称：只能澄清，不能退回共用参数的固定计划。
+                explicit = ReadRequest.clarify("这次对比的几个标的要求了不同的期间、粒度或年报/季报口径。请为所有标的指定同一种取数要求后再对比。");
+            }
+        }
+        actions = ordinaryPlan.actions();
         observation = buildPlanObservation(route, modelTier, actions);
         return new ExecutionPlan(
-                route, taskType, thought, actions, observation, modelTier, routingDecision, resolvedQuery, explicit);
+                route, taskType, thought, actions, observation, modelTier, routingDecision, resolvedQuery, explicit,
+                ordinaryPlan);
+    }
+
+    private boolean usesPlanner(PlanRoute route, IntentDecision decision, ReadRequest request) {
+        return "DYNAMIC".equalsIgnoreCase(plannerMode) && ordinaryPlanner != null
+                && !decision.needsClarification() && request.clarification().isBlank()
+                && (route == PlanRoute.MARKET || route == PlanRoute.FUNDAMENTALS || route == PlanRoute.NEWS);
     }
 
     /**
@@ -518,6 +605,8 @@ public class Coordinator {
         boolean targetChanged = !explicitTicker.isBlank() && !rewrittenTicker.isBlank()
                 && !explicitTicker.equals(rewrittenTicker);
         boolean comparisonIntent = current.fineIntent() == FineIntent.COMPARISON;
+        String multiTargetReason = multiTargetReason(current, userQuery, resolvedQuery);
+        if (multiTargetReason.isEmpty()) return recognition;
         if (!comparisonIntent
                 && !hasMultipleExplicitTargets(userQuery)
                 && !hasMultipleExplicitTargets(resolvedQuery)) {
@@ -533,7 +622,9 @@ public class Coordinator {
             }
         }
         java.util.ArrayList<String> reasonCodes = new java.util.ArrayList<>(current.reasonCodes());
-        String reason = targetChanged ? TARGET_REWRITE_MISMATCH : MULTI_TARGET_UNSUPPORTED;
+        String reason = multiTargetReason.equals(MULTI_TARGET_PARAMETERS_DIFFER)
+                || current.reasonCodes().contains(MULTI_TARGET_PARAMETERS_DIFFER) ? MULTI_TARGET_PARAMETERS_DIFFER
+                : targetChanged ? TARGET_REWRITE_MISMATCH : MULTI_TARGET_UNSUPPORTED;
         if (!reasonCodes.contains(reason)) reasonCodes.add(reason);
         IntentDecision safeDecision = new IntentDecision(
                 FineIntent.COMPARISON,
@@ -552,11 +643,33 @@ public class Coordinator {
                 safeDecision,
                 recognition.rawRoute(),
                 recognition.rawRouteValid(),
-                targetChanged ? "改写标的与用户明确指定的股票不一致，已停止取证。" : "当前执行链一次只支持一个明确标的。",
+                reason.equals(MULTI_TARGET_PARAMETERS_DIFFER) ? "多个标的要求了不同的取数参数，需要统一后再对比。"
+                        : targetChanged ? "改写标的与用户明确指定的股票不一致，已停止取证。" : "当前执行链一次只支持一个明确标的。",
                 recognition.signals(),
                 recognition.degradationReason(),
                 recognition.durationMs()
         );
+    }
+
+    /**
+     * 多标的扇出的准入判断。返回空串表示放行；返回 {@link #MULTI_TARGET_PARAMETERS_DIFFER} 表示参数不对称须澄清；
+     * 其余情况返回 "N/A"，交给原有单标的规则处理。参数对称性在取证前判定，FIXED 与 DYNAMIC 共用。
+     */
+    private String multiTargetReason(IntentDecision decision, String userQuery, String resolvedQuery) {
+        PlanRoute route = decision.targetRoute();
+        if (!multiTargetEnabled
+                || (route != PlanRoute.MARKET && route != PlanRoute.FUNDAMENTALS && route != PlanRoute.NEWS)) {
+            return "N/A";
+        }
+        List<String> userTargets = tickerResolutionService.resolveExplicitTickers(userQuery);
+        List<String> rewrittenTargets = tickerResolutionService.resolveExplicitTickers(resolvedQuery);
+        List<String> targets = userTargets.size() >= 2 ? userTargets : rewrittenTargets;
+        if (targets.size() < 2 || targets.size() > maxTargets) return "N/A";
+        // 改写不能引入用户没提到的标的；用户本轮只提到一个时，可以由上下文补全对比对象。
+        if (userTargets.size() >= 2 && !userTargets.containsAll(rewrittenTargets)) return "N/A";
+        // 由上下文补全时，用户本轮明确提到的标的必须仍在其中。
+        if (!rewrittenTargets.isEmpty() && !rewrittenTargets.containsAll(userTargets)) return "N/A";
+        return ReadRequest.hasConflictingParameters(userQuery) ? MULTI_TARGET_PARAMETERS_DIFFER : "";
     }
 
     private boolean hasMultipleExplicitTargets(String query) {

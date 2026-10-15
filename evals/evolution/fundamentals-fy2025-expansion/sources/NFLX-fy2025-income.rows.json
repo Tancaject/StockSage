@@ -1,0 +1,188 @@
+[
+ {
+  "cells": [
+   "CONSOLIDATED STATEMENTS OF OPERATIONS - USD ($) shares in Thousands, $ in Thousands",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 31, 2025",
+   "Dec. 31, 2024",
+   "Dec. 31, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Income Statement [Abstract]",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:IncomeStatementAbstract"
+ },
+ {
+  "cells": [
+   "Revenues",
+   "$ 45,183,036",
+   "$ 39,000,966",
+   "$ 33,723,297"
+  ],
+  "concept": "us-gaap:Revenues"
+ },
+ {
+  "cells": [
+   "Cost of revenues",
+   "23,275,329",
+   "21,038,464",
+   "19,715,368"
+  ],
+  "concept": "us-gaap:CostOfRevenue"
+ },
+ {
+  "cells": [
+   "Sales and marketing",
+   "3,301,306",
+   "2,917,554",
+   "2,657,883"
+  ],
+  "concept": "us-gaap:SellingAndMarketingExpense"
+ },
+ {
+  "cells": [
+   "Technology and development",
+   "3,391,390",
+   "2,925,295",
+   "2,675,758"
+  ],
+  "concept": "us-gaap:ResearchAndDevelopmentExpense"
+ },
+ {
+  "cells": [
+   "General and administrative",
+   "1,888,408",
+   "1,702,039",
+   "1,720,285"
+  ],
+  "concept": "us-gaap:GeneralAndAdministrativeExpense"
+ },
+ {
+  "cells": [
+   "Operating income",
+   "13,326,603",
+   "10,417,614",
+   "6,954,003"
+  ],
+  "concept": "us-gaap:OperatingIncomeLoss"
+ },
+ {
+  "cells": [
+   "Other income (expense):",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NonoperatingIncomeExpenseAbstract"
+ },
+ {
+  "cells": [
+   "Interest expense",
+   "(776,510)",
+   "(718,733)",
+   "(699,826)"
+  ],
+  "concept": "us-gaap:InterestExpenseNonoperating"
+ },
+ {
+  "cells": [
+   "Interest and other income (expense)",
+   "172,459",
+   "266,776",
+   "(48,772)"
+  ],
+  "concept": "us-gaap:NonoperatingIncomeExpense"
+ },
+ {
+  "cells": [
+   "Income before income taxes",
+   "12,722,552",
+   "9,965,657",
+   "6,205,405"
+  ],
+  "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Provision for income taxes",
+   "(1,741,351)",
+   "(1,254,026)",
+   "(797,415)"
+  ],
+  "concept": "us-gaap:IncomeTaxExpenseBenefit"
+ },
+ {
+  "cells": [
+   "Net income",
+   "$ 10,981,201",
+   "$ 8,711,631",
+   "$ 5,407,990"
+  ],
+  "concept": "us-gaap:NetIncomeLoss"
+ },
+ {
+  "cells": [
+   "Earnings per share:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:EarningsPerShareAbstract"
+ },
+ {
+  "cells": [
+   "Basic (in USD per share)",
+   "$ 2.58",
+   "$ 2.03",
+   "$ 1.22"
+  ],
+  "concept": "us-gaap:EarningsPerShareBasic"
+ },
+ {
+  "cells": [
+   "Diluted (in USD per share)",
+   "$ 2.53",
+   "$ 1.98",
+   "$ 1.20"
+  ],
+  "concept": "us-gaap:EarningsPerShareDiluted"
+ },
+ {
+  "cells": [
+   "Weighted-average shares of common stock outstanding:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfSharesOutstandingAbstract"
+ },
+ {
+  "cells": [
+   "Basic (in shares)",
+   "4,249,512",
+   "4,295,191",
+   "4,415,712"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfSharesOutstandingBasic"
+ },
+ {
+  "cells": [
+   "Diluted (in shares)",
+   "4,343,863",
+   "4,392,608",
+   "4,494,966"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding"
+ }
+]

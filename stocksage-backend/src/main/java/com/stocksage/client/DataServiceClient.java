@@ -221,7 +221,7 @@ public class DataServiceClient {
      * @return 多期财报 JSON
      */
     public String getFinancialReports(String code, String period, int years) {
-        String json = cached("financial-report:v2", new String[]{code, period, String.valueOf(years)}, TTL_FINANCIAL_REPORT,
+        String json = cached("financial-report:v4", new String[]{code, period, String.valueOf(years)}, TTL_FINANCIAL_REPORT,
                 () -> fetchFinancialReport(code, period, years));
         return validateFinancialReport(json, period, years);
     }
@@ -498,7 +498,7 @@ public class DataServiceClient {
      * @return 校验后的 SEC 年度公司事实；失败时为明确的 ERROR 状态
      */
     public SecFinancialsResponse getEdgarXbrl(String ticker) {
-        String json = cached("edgar-xbrl:v1", new String[]{ticker}, TTL_EDGAR_XBRL,
+        String json = cached("edgar-xbrl:v3", new String[]{ticker}, TTL_EDGAR_XBRL,
                 () -> objectMapper.valueToTree(fetchEdgarXbrl(ticker)).toString());
         try {
             return SecFinancialsResponse.fromJson(objectMapper.reader()
@@ -762,6 +762,12 @@ public class DataServiceClient {
             } catch (Exception e) {
                 rethrowBudgetFailure(e);
                 lastError = e;
+                if (Thread.currentThread().isInterrupted()
+                        || reactor.core.Exceptions.unwrap(e) instanceof InterruptedException) {
+                    // 调用方已取消本次取证：不再重试，并保留中断状态让上层停止。
+                    Thread.currentThread().interrupt();
+                    break;
+                }
                 if (attempt < maxAttempts) {
                     log.warn("Data service call failed, retrying ({}/{}): {}", attempt, maxRetries, uri, e);
                 } else if (maxAttempts == 1) {

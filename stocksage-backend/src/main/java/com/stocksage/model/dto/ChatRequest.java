@@ -44,6 +44,12 @@ public class ChatRequest {
     private Boolean replaceLastTurn;
 
     /**
+     * 评测专用的请求级模式，只在请求携带有效管理员令牌时由控制器保留：EVIDENCE_ONLY 在证据阶段结束；
+     * FULL_CAPTURE 完整运行。两者都会保存每次模型调用的原文，并在任务结束后保留 checkpoint。
+     */
+    private String evaluationMode;
+
+    /**
      * 当前聊天轮次上传或粘贴的图片附件。
      *
      * <p>后端校验 MIME 类型与 data URL 后把图片传给多模态模型，不把原图写入消息表。</p>

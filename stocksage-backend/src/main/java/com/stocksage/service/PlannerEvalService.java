@@ -170,7 +170,11 @@ public class PlannerEvalService {
             boolean fallback = routing != null && routing.fallback();
             boolean executionGuarded = routing != null
                     && (routing.reasonCodes().contains(Coordinator.MULTI_TARGET_UNSUPPORTED)
-                    || routing.reasonCodes().contains(Coordinator.TARGET_REWRITE_MISMATCH));
+                    || routing.reasonCodes().contains(Coordinator.TARGET_REWRITE_MISMATCH)
+                    || routing.reasonCodes().contains(Coordinator.MULTI_TARGET_PARAMETERS_DIFFER));
+            List<String> actualTargets = plan.ordinaryPlan().targets();
+            Boolean targetsMatched = evalCase.expectedTargets() == null ? null
+                    : new java.util.HashSet<>(evalCase.expectedTargets()).equals(new java.util.HashSet<>(actualTargets));
             Boolean actualClarification = routing == null ? null : routing.needsClarification();
             Boolean clarificationMatched = evalCase.expectedClarification() == null || actualClarification == null
                     ? null : evalCase.expectedClarification().equals(actualClarification);
@@ -191,7 +195,8 @@ public class PlannerEvalService {
                     && decisionSourceMatched
                     && noFallbackMatched
                     && contextResolutionMatched
-                    && (evalCase.expectedClarification() == null || Boolean.TRUE.equals(clarificationMatched));
+                    && (evalCase.expectedClarification() == null || Boolean.TRUE.equals(clarificationMatched))
+                    && !Boolean.FALSE.equals(targetsMatched);
             return new PlannerEvalResult(
                     evalCase.id(), evalCase.expectedRoute(), plan.route(), planned,
                     missing, forbidden, evalCase.critical(), passed, true,
@@ -222,7 +227,8 @@ public class PlannerEvalService {
                     actualClarification,
                     clarificationMatched,
                     routing == null ? List.of() : routing.signalDiagnostics(),
-                    routing == null ? List.of() : routing.reasonCodes()
+                    routing == null ? List.of() : routing.reasonCodes(),
+                    evalCase.expectedTargets(), actualTargets, targetsMatched
             );
         } catch (Exception ignored) {
             return new PlannerEvalResult(
@@ -236,7 +242,8 @@ public class PlannerEvalService {
                     !evalCase.recentTurns().isEmpty(), false, false, false, false,
                     evalCase.expectedResolvedQueryContains(), "",
                     evalCase.expectedResolvedQueryContains() == null,
-                    evalCase.expectedClarification(), null, null, List.of(), List.of()
+                    evalCase.expectedClarification(), null, null, List.of(), List.of(),
+                    evalCase.expectedTargets(), List.of(), null
             );
         }
     }

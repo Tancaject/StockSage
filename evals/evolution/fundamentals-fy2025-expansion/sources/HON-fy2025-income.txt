@@ -1,0 +1,35 @@
+CONSOLIDATED STATEMENT OF OPERATIONS - USD ($) | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Net sales | $ 37,442,000,000 | $ 34,717,000,000 | $ 33,009,000,000
+Costs, expenses and other |  |  | 
+Cost of products and services sold | 23,613,000,000 | 21,360,000,000 | 20,637,000,000
+Research and development expenses | 1,812,000,000 | 1,454,000,000 | 1,375,000,000
+Selling, general and administrative expenses | 5,450,000,000 | 5,235,000,000 | 4,887,000,000
+Impairment of goodwill | 724,000,000 | 0 | 0
+Impairment of assets held for sale | 270,000,000 | 219,000,000 | 0
+Other (income) expense | (1,247,000,000) | (843,000,000) | (830,000,000)
+Interest and other financial charges | 1,344,000,000 | 1,048,000,000 | 749,000,000
+Total costs, expenses and other | 31,966,000,000 | 28,473,000,000 | 26,818,000,000
+Income from continuing operations before taxes | 5,476,000,000 | 6,244,000,000 | 6,191,000,000
+Tax expense | 1,008,000,000 | 1,249,000,000 | 1,262,000,000
+Net income from continuing operations | 4,468,000,000 | 4,995,000,000 | 4,929,000,000
+Net income from discontinued operations | 304,000,000 | 745,000,000 | 743,000,000
+Net income | 4,772,000,000 | 5,740,000,000 | 5,672,000,000
+Less: Net income attributable to noncontrolling interest | 43,000,000 | 35,000,000 | 14,000,000
+Net income attributable to Honeywell | $ 4,729,000,000 | $ 5,705,000,000 | $ 5,658,000,000
+Earnings per share of common stock—basic: |  |  | 
+Earnings per share of common stock from continuing operations - basic (in dollars per share) | $ 6.98 | $ 7.63 | $ 7.41
+Earnings per share of common stock from discontinued operations - basic (in dollars per share) | 0.42 | 1.13 | 1.12
+Total earnings per share of common stock—basic (in dollars per share) | 7.40 | 8.76 | 8.53
+Earnings per share of common stock—assuming dilution: |  |  | 
+Earnings per share of common stock from continuing operations - assuming dilution (in dollars per share) | 6.94 | 7.58 | 7.36
+Earnings per share of common stock from discontinued operations - assuming dilution (in dollars per share) | 0.42 | 1.13 | 1.11
+Total earnings per share of common stock—assuming dilution (in dollars per share) | $ 7.36 | $ 8.71 | $ 8.47
+Product |  |  | 
+Net sales | $ 24,515,000,000 | $ 22,841,000,000 | $ 22,345,000,000
+Costs, expenses and other |  |  | 
+Cost of products and services sold | 16,153,000,000 | 15,017,000,000 | 14,836,000,000
+Service |  |  | 
+Net sales | 12,927,000,000 | 11,876,000,000 | 10,664,000,000
+Costs, expenses and other |  |  | 
+Cost of products and services sold | $ 7,460,000,000 | $ 6,343,000,000 | $ 5,801,000,000

@@ -1,0 +1,14 @@
+{"id":"cmp-price-week","question":"比较AAPL和MSFT最近一周的股价","route":"MARKET","targets":["AAPL","MSFT"],"requirements":["PRICE_HISTORY"],"outcomes":["COMPLETED","DEGRADED","FAILED"],"set":"E2"}
+{"id":"cmp-valuation","question":"比较 MSFT 和 GOOGL 的估值","route":"MARKET","targets":["MSFT","GOOGL"],"requirements":["VALUATION"],"outcomes":["COMPLETED","DEGRADED","FAILED"],"set":"E2"}
+{"id":"cmp-macd-us","question":"比较 AAPL 和 MSFT 的 MACD","route":"MARKET","targets":["AAPL","MSFT"],"requirements":["TECHNICAL"],"outcomes":["FAILED"],"set":"E2"}
+{"id":"cmp-annual-revenue","question":"比较 NVDA 和 AMD 最近三年的年度营收和净利润","route":"FUNDAMENTALS","targets":["NVDA","AMD"],"requirements":["FINANCIAL_STATEMENTS"],"outcomes":["COMPLETED","DEGRADED","FAILED"],"set":"E2"}
+{"id":"cmp-three-targets","question":"比较 AAPL、MSFT、NVDA 最近三年的营收","route":"FUNDAMENTALS","targets":["AAPL","MSFT","NVDA"],"requirements":["FINANCIAL_STATEMENTS"],"outcomes":["COMPLETED","DEGRADED","FAILED"],"set":"E2"}
+{"id":"cmp-ashare-annual","question":"对比 sh.600519 和 sz.000858 最近三年的年报财务数据","route":"FUNDAMENTALS","targets":["SH.600519","SZ.000858"],"requirements":["FINANCIAL_STATEMENTS"],"outcomes":["COMPLETED","DEGRADED","FAILED"],"set":"E2"}
+{"id":"cmp-risk-factors","question":"比较 AAPL 和 MSFT 10-K 里的风险因素","route":"FUNDAMENTALS","targets":["AAPL","MSFT"],"requirements":["FILING_TEXT"],"outcomes":["COMPLETED","DEGRADED","FAILED"],"set":"E2"}
+{"id":"cmp-news","question":"对比一下 AAPL 和 GOOGL 最近的新闻","route":"NEWS","targets":["AAPL","GOOGL"],"requirements":["NEWS"],"outcomes":["COMPLETED","DEGRADED","FAILED"],"set":"E2"}
+{"id":"cmp-cross-revenue-price","question":"比较 AAPL 和 MSFT 最近三年的营收，以及最近一个月的股价走势","route":["MARKET","FUNDAMENTALS"],"targets":["AAPL","MSFT"],"requirements":["FINANCIAL_STATEMENTS","PRICE_HISTORY"],"outcomes":["COMPLETED","DEGRADED","FAILED"],"set":"E3"}
+{"id":"cmp-cross-valuation-news","question":"比较 NVDA 和 AMD 的估值和最近新闻","route":["MARKET","NEWS"],"targets":["NVDA","AMD"],"requirements":["VALUATION","NEWS"],"outcomes":["COMPLETED","DEGRADED","FAILED"],"set":"E3"}
+{"id":"cmp-asymmetric","question":"比较 AAPL 最近一周和 MSFT 最近一个月的股价","route":["DIRECT","MARKET"],"no_tools":true,"outcomes":["BLOCKED"],"set":"E2"}
+{"id":"cmp-intraday-ah","question":"比较 sh.600519 和 0700.HK 最近一周的小时线","route":"MARKET","no_tools":true,"outcomes":["BLOCKED"],"set":"E2"}
+{"id":"single-cross-revenue-price","question":"AAPL 最近三年的营收和最近一个月的股价走势","route":["MARKET","FUNDAMENTALS"],"requirements":["FINANCIAL_STATEMENTS","PRICE_HISTORY"],"targets_single":"AAPL","outcomes":["COMPLETED","DEGRADED","FAILED"],"set":"E3"}
+{"id":"single-valuation-news","question":"NVDA 现在的估值怎么样，最近有什么新闻","route":["MARKET","NEWS"],"requirements":["VALUATION","NEWS"],"targets_single":"NVDA","outcomes":["COMPLETED","DEGRADED","FAILED"],"set":"E3"}

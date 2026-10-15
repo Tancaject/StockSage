@@ -1,0 +1,41 @@
+Consolidated Balance Sheet - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024
+Current assets |  | 
+Cash and equivalents | $ 774.0 | $ 1,085.0
+Accounts and notes receivable | 2,466.0 | 2,383.0
+Inventories, at cost, not in excess of market | 61.0 | 56.0
+Prepaid expenses and other current assets | 863.0 | 1,074.0
+Total current assets | 4,163.0 | 4,599.0
+Other assets |  | 
+Investments in and advances to affiliates | 2,820.0 | 2,710.0
+Goodwill | 3,354.0 | 3,145.0
+Miscellaneous | 6,331.0 | 6,095.0
+Total other assets | 12,505.0 | 11,950.0
+Lease right-of use asset, net | 14,606.0 | 13,339.0
+Property and equipment |  | 
+Property and equipment, at cost | 49,290.0 | 44,177.0
+Accumulated depreciation and amortization | (21,049.0) | (18,882.0)
+Net property and equipment | 28,241.0 | 25,295.0
+Total assets | 59,515.0 | 55,182.0
+Current liabilities |  | 
+Accounts payable | 1,149.0 | 1,029.0
+Current lease liability | 694.0 | 636.0
+Income taxes | 250.0 | 361.0
+Other taxes | 247.0 | 224.0
+Accrued interest | 533.0 | 482.0
+Accrued payroll and other liabilities | 1,488.0 | 1,129.0
+Total current liabilities | 4,361.0 | 3,861.0
+Long-term debt | 39,973.0 | 38,424.0
+Long-term lease liability (noncurrent), net | 14,147.0 | 12,888.0
+Long-term income taxes | 139.0 | 344.0
+Deferred revenues - initial franchise fees | 945.0 | 778.0
+Other long-term liabilities | 704.0 | 771.0
+Deferred income taxes | 1,038.0 | 1,914.0
+Shareholders' equity (deficit) |  | 
+Preferred stock, no par value; authorized – 165.0 million shares; issued – none | 0.0 | 0.0
+Common stock, $.01 par value; authorized – 3.5 billion shares; issued – 1,660.6 million shares | 17.0 | 17.0
+Additional paid-in capital | 9,641.0 | 9,281.0
+Retained earnings | 70,282.0 | 66,834.0
+Accumulated other comprehensive income (loss) | (2,414.0) | (2,553.0)
+Common stock in treasury, at cost; 950.0 and 945.4 million shares | (79,316.0) | (77,375.0)
+Total shareholders' equity (deficit) | (1,791.0) | (3,797.0)
+Total liabilities and shareholders' equity (deficit) | $ 59,515.0 | $ 55,182.0

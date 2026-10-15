@@ -1,0 +1,43 @@
+Consolidated Statements of Financial Position - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024
+Assets |  | 
+Cash and cash equivalents | $ 10,921 | $ 13,801
+Short-term and other investments | 18,479 | 12,481
+Accounts receivable, net | 2,921 | 2,631
+Unbilled receivables, net | 9,158 | 8,363
+Current portion of financing receivables, net |  | 207
+Inventories | 84,679 | 87,550
+Other current assets, net | 2,301 | 2,965
+Total current assets | 128,459 | 127,998
+Financing receivables and operating lease equipment, net | 241 | 314
+Property, plant and equipment, net | 15,361 | 11,412
+Goodwill | 17,275 | 8,084
+Acquired intangible assets, net | 1,567 | 1,957
+Deferred income taxes | 107 | 185
+Investments | 1,048 | 999
+Other assets, net of accumulated amortization of $1,014 and $1,085 | 4,177 | 5,414
+Total assets | 168,235 | 156,363
+Liabilities and equity |  | 
+Accounts payable | 13,109 | 11,364
+Accrued liabilities | 27,141 | 24,103
+Advances and progress billings | 59,404 | 60,333
+Short-term debt and current portion of long-term debt | 8,461 | 1,278
+Total current liabilities | 108,115 | 97,078
+Deferred income taxes | 216 | 122
+Accrued retiree health care | 2,091 | 2,176
+Accrued pension plan liability, net | 4,287 | 5,997
+Other long-term liabilities | 2,432 | 2,318
+Long-term debt | 45,637 | 52,586
+Total liabilities | 162,778 | 160,277
+Shareholders’ equity: |  | 
+Common stock, par value $5.00 – 1,200,000,000 shares authorized; 1,012,261,159 shares issued | 5,061 | 5,061
+Additional paid-in capital | 21,441 | 18,964
+Treasury stock, at cost | (28,029) | (32,386)
+Retained earnings | 17,252 | 15,362
+Accumulated other comprehensive loss | (10,277) | (10,915)
+Total shareholders' equity/(deficit) | 5,454 | (3,908)
+Noncontrolling interests | 3 | (6)
+Total equity | 5,457 | (3,914)
+Total liabilities and equity | 168,235 | 156,363
+Mandatory convertible preferred stock |  | 
+Shareholders’ equity: |  | 
+Mandatory convertible preferred stock, 6.00% Series A, par value $1.00 – 20,000,000 shares authorized; 5,750,000 shares issued; aggregate liquidation preference $5,750 | $ 6 | $ 6

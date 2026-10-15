@@ -709,12 +709,21 @@ public class ResearchTaskService {
 
     public String buildSubmissionPayload(String ticker, String query, String traceId, Long conversationId,
                                          TimeSensitivity timeSensitivity) {
+        return buildSubmissionPayload(ticker, query, traceId, conversationId, timeSensitivity, null);
+    }
+
+    /** @param evaluationMode 评测专用的请求级模式；只在评测时写入载荷，普通任务载荷保持不变 */
+    public String buildSubmissionPayload(String ticker, String query, String traceId, Long conversationId,
+                                         TimeSensitivity timeSensitivity, String evaluationMode) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("ticker", normalizeTicker(ticker));
         payload.put("query", normalizeText(query));
         payload.put("traceId", normalizeText(traceId));
         payload.put("conversationId", conversationId);
         payload.put("timeSensitivity", timeSensitivity == null ? TimeSensitivity.UNSPECIFIED : timeSensitivity);
+        if (evaluationMode != null && !evaluationMode.isBlank()) {
+            payload.put("evaluationMode", evaluationMode);
+        }
         try {
             return objectMapper.writeValueAsString(payload);
         } catch (JsonProcessingException e) {

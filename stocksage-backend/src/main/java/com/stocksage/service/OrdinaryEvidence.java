@@ -20,7 +20,6 @@ import com.stocksage.evidence.EvidenceFreshness;
 import com.stocksage.evidence.EvidenceLedger;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Supplier;
 
 /** 单次普通请求的证据与展示预算；实例只属于当前调用，绝不跨请求共享。 */
 final class OrdinaryEvidence {
@@ -34,6 +33,10 @@ final class OrdinaryEvidence {
     private final List<String> sections = new ArrayList<>();
     private int chars;
     private final Set<String> evolutionEvidenceTags = new HashSet<>();
+    /** 证据编号来源；多标的时所有标的共用一个，保证整轮请求内编号唯一。 */
+    private final java.util.function.IntSupplier nextId;
+    /** 本实例可写入回答上下文的字符预算。 */
+    private final int contextBudget;
 
     OrdinaryEvidence(String ticker, ReadRequest request, ObjectMapper mapper, EvidenceEnvelopeMapper evidenceEnvelopeMapper) {
         this(ticker, request, mapper, evidenceEnvelopeMapper, TimeSensitivity.UNSPECIFIED);
@@ -41,19 +44,19 @@ final class OrdinaryEvidence {
 
     OrdinaryEvidence(String ticker, ReadRequest request, ObjectMapper mapper, EvidenceEnvelopeMapper evidenceEnvelopeMapper,
                      TimeSensitivity timeSensitivity) {
+        this(ticker, request, mapper, evidenceEnvelopeMapper, timeSensitivity,
+                new java.util.concurrent.atomic.AtomicInteger()::incrementAndGet, 11000);
+    }
+
+    OrdinaryEvidence(String ticker, ReadRequest request, ObjectMapper mapper, EvidenceEnvelopeMapper evidenceEnvelopeMapper,
+                     TimeSensitivity timeSensitivity, java.util.function.IntSupplier nextId, int contextBudget) {
+        this.nextId = nextId;
+        this.contextBudget = contextBudget;
         this.ticker = ticker;
         this.request = request;
         this.timeSensitivity = timeSensitivity == null ? TimeSensitivity.UNSPECIFIED : timeSensitivity;
         this.mapper = mapper;
         this.evidenceEnvelopeMapper = evidenceEnvelopeMapper;
-    }
-
-    String call(String name, EvidenceDimension dimension, Supplier<String> call) {
-        String raw;
-        try { raw = call.get(); }
-        catch (Exception error) { raw = "{\"error\":true,\"message\":\"取证调用失败，请稍后重试\"}"; }
-        add(name, dimension, raw);
-        return raw;
     }
 
     void add(com.stocksage.capability.CapabilityResult result) {
@@ -73,6 +76,11 @@ final class OrdinaryEvidence {
     }
 
     void add(String name, EvidenceDimension dimension, String raw) {
+        add(name, dimension, raw, request);
+    }
+
+    /** 按产生这条证据的那一步参数核对周期、粒度和份数。 */
+    void add(String name, EvidenceDimension dimension, String raw, ReadRequest request) {
         EvidenceStatus status = evidenceEnvelopeMapper.inspectStatus(name, raw);
         String gap = "";
         JsonNode root = null;
@@ -118,10 +126,10 @@ final class OrdinaryEvidence {
         }
         if (status == EvidenceStatus.AVAILABLE && name.equals("getFinancialReports") && !root.path("reports").isArray()) {
             if (root.has("schemaVersion") && "HK".equals(root.path("market").asText())) {
-                gap = hkCoverageGap(HkFinancialsResponse.fromJson(root));
+                gap = hkCoverageGap(HkFinancialsResponse.fromJson(root), request);
             } else {
                 gap = "SEC_EDGAR".equals(root.path("provider").asText()) && root.has("schemaVersion")
-                        ? secCoverageGap(SecFinancialsResponse.fromJson(root)) : "REPORT_COUNT_UNVERIFIED";
+                        ? secCoverageGap(SecFinancialsResponse.fromJson(root), request) : "REPORT_COUNT_UNVERIFIED";
             }
         }
         EvidenceEnvelope item = evidenceEnvelopeMapper.map(dimension, ticker, name, raw == null ? "" : raw,
@@ -130,7 +138,7 @@ final class OrdinaryEvidence {
         var freshness = EvidenceFreshness.assess(item, timeSensitivity, item.observedAt());
         if (item.hasUsableData() && gap.isBlank() && (freshness.status() == EvidenceFreshness.Status.UNKNOWN
                 || freshness.status() == EvidenceFreshness.Status.STALE)) gap = freshness.reason();
-        String id = "E" + evidence.size();
+        String id = "E" + nextId.getAsInt();
         boolean usable = item.hasProvenance() && (ticker == null || ticker.isBlank()
                 || TargetIdentity.resolved(ticker).canonicalKey().equals(item.targetKey()));
         String data = usable && root != null ? compact(root) : "本项未取得符合请求的可引用数据。";
@@ -145,7 +153,7 @@ final class OrdinaryEvidence {
                 + "\ntimeSensitivity=" + timeSensitivity + "; timing=" + (item.timing() == null ? "UNKNOWN" : item.timing())
                 + "\nfreshness=" + freshness.status() + "; reason=" + freshness.reason() + "\n";
         String section = header + data + "\n";
-        boolean included = chars + section.length() <= 11000;
+        boolean included = chars + section.length() <= contextBudget;
         if (included) { sections.add(section); chars += section.length(); }
         if (name.equals("getFinancialReports") && item.status() == EvidenceStatus.AVAILABLE
                 && gap.isBlank() && usable && included && !reduced) {
@@ -163,6 +171,8 @@ final class OrdinaryEvidence {
         }
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("id", id); row.put("tool", name); row.put("status", item.status().name());
+        row.put("request", request.attributes());
+        row.put("dimension", dimension.name());
         row.put("target", item.targetKey()); row.put("source", item.sourceRef());
         row.put("provider", item.provider()); row.put("asOf", item.asOf() == null ? "" : item.asOf().toString());
         row.put("observedAt", item.observedAt() == null ? "" : item.observedAt().toString());
@@ -177,7 +187,7 @@ final class OrdinaryEvidence {
     }
 
     /** 不同指标数量和同期间重复事实均不能冒充多年度覆盖。 */
-    private String secCoverageGap(SecFinancialsResponse response) {
+    private String secCoverageGap(SecFinancialsResponse response, ReadRequest request) {
         Set<String> commonEnds = null;
         for (var metric : response.metrics().values()) {
             Set<String> ends = new HashSet<>();
@@ -189,7 +199,7 @@ final class OrdinaryEvidence {
         return commonEnds == null || commonEnds.size() < request.reportCount() ? "REPORT_PERIODS_UNALIGNED" : "";
     }
 
-    private String hkCoverageGap(HkFinancialsResponse response) {
+    private String hkCoverageGap(HkFinancialsResponse response, ReadRequest request) {
         if (response.status() == HkFinancialsResponse.Status.PARTIAL) return "REPORT_TABLES_INCOMPLETE";
         // 港股报告期可能是中期或累计值，不能以足够条数冒充用户要求的独立季度。
         if (request.reportPeriod().equals("quarterly")) return "REPORT_QUARTER_BASIS_UNVERIFIED";
@@ -212,6 +222,10 @@ final class OrdinaryEvidence {
     /** JSON 按完整字段/记录缩减；K 线点集由已有图表事件单独提供。 */
     private String compact(JsonNode root) {
         if (root.toString().length() <= 2200) return root.toString();
+        // 日线改写为最新优先的确定性摘要（各期涨跌、区间高低、均线、最近收盘），不再只给首尾几根。
+        var summary = new com.stocksage.evidence.adapter.EvidencePresenter(mapper)
+                .present("getStockKLine", root.toString());
+        if (summary.isPresent() && summary.get().length() <= 2200) return summary.get();
         if (!root.isObject()) return "数据较长，本次正文未纳入完整结果，不能据此断言已经完整回答。";
         if (root.has("schemaVersion") && root.has("searchType")) {
             return evidenceEnvelopeMapper.compactStructuredContext("searchNews", root.toString(), 2200);
@@ -237,6 +251,9 @@ final class OrdinaryEvidence {
             selected.set("historyMetadata", metadata);
         }
         if (root.has("schemaVersion") && "SEC_EDGAR".equals(root.path("provider").asText())) {
+            // 优先用多年度紧凑财务表：全部指标和年度都放得下；原写法逐条保留 JSON，超长时后面的指标（如经营现金流）会被整项丢掉。
+            var table = new com.stocksage.evidence.adapter.EvidencePresenter(mapper).present("getFinancialReports", root.toString());
+            if (table.isPresent() && table.get().length() <= 2200) return table.get();
             // 一条财务数值必须连同单位、概念、期间和来源保留；不能只留下指标计数。
             ObjectNode metrics = selected.putObject("metrics");
             var sourceMetrics = root.path("metrics").fields();

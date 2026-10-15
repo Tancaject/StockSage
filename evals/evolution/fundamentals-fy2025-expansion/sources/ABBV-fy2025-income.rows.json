@@ -1,0 +1,215 @@
+[
+ {
+  "cells": [
+   "Consolidated Statements of Earnings - USD ($) shares in Millions, $ in Millions",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 31, 2025",
+   "Dec. 31, 2024",
+   "Dec. 31, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Income Statement [Abstract]",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:IncomeStatementAbstract"
+ },
+ {
+  "cells": [
+   "Net revenues",
+   "$ 61,160",
+   "$ 56,334",
+   "$ 54,318"
+  ],
+  "concept": "us-gaap:Revenues"
+ },
+ {
+  "cells": [
+   "Cost of products sold",
+   "18,204",
+   "16,904",
+   "20,415"
+  ],
+  "concept": "us-gaap:CostOfGoodsAndServicesSold"
+ },
+ {
+  "cells": [
+   "Selling, general and administrative",
+   "14,010",
+   "14,752",
+   "12,872"
+  ],
+  "concept": "us-gaap:SellingGeneralAndAdministrativeExpense"
+ },
+ {
+  "cells": [
+   "Research and development",
+   "9,096",
+   "12,791",
+   "7,675"
+  ],
+  "concept": "us-gaap:ResearchAndDevelopmentExpenseExcludingAcquiredInProcessCost"
+ },
+ {
+  "cells": [
+   "Acquired IPR&D and milestones",
+   "5,016",
+   "2,757",
+   "778"
+  ],
+  "concept": "us-gaap:ResearchAndDevelopmentAssetAcquiredOtherThanThroughBusinessCombinationWrittenOff"
+ },
+ {
+  "cells": [
+   "Other operating income",
+   "(241)",
+   "(7)",
+   "(179)"
+  ],
+  "concept": "us-gaap:OtherOperatingIncomeExpenseNet"
+ },
+ {
+  "cells": [
+   "Total operating costs and expenses",
+   "46,085",
+   "47,197",
+   "41,561"
+  ],
+  "concept": "us-gaap:CostsAndExpenses"
+ },
+ {
+  "cells": [
+   "Operating earnings",
+   "15,075",
+   "9,137",
+   "12,757"
+  ],
+  "concept": "us-gaap:OperatingIncomeLoss"
+ },
+ {
+  "cells": [
+   "Interest expense, net",
+   "2,627",
+   "2,160",
+   "1,684"
+  ],
+  "concept": "us-gaap:InterestIncomeExpenseNonoperatingNet"
+ },
+ {
+  "cells": [
+   "Net foreign exchange loss",
+   "58",
+   "21",
+   "146"
+  ],
+  "concept": "us-gaap:ForeignCurrencyTransactionGainLossBeforeTax"
+ },
+ {
+  "cells": [
+   "Other expense, net",
+   "5,793",
+   "3,240",
+   "4,677"
+  ],
+  "concept": "us-gaap:OtherNonoperatingIncomeExpense"
+ },
+ {
+  "cells": [
+   "Earnings before income tax expense",
+   "6,597",
+   "3,716",
+   "6,250"
+  ],
+  "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Income tax expense (benefit)",
+   "2,364",
+   "(570)",
+   "1,377"
+  ],
+  "concept": "us-gaap:IncomeTaxExpenseBenefit"
+ },
+ {
+  "cells": [
+   "Net earnings",
+   "4,233",
+   "4,286",
+   "4,873"
+  ],
+  "concept": "us-gaap:ProfitLoss"
+ },
+ {
+  "cells": [
+   "Net earnings attributable to noncontrolling interest",
+   "7",
+   "8",
+   "10"
+  ],
+  "concept": "us-gaap:NetIncomeLossAttributableToNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Net earnings attributable to AbbVie Inc.",
+   "$ 4,226",
+   "$ 4,278",
+   "$ 4,863"
+  ],
+  "concept": "us-gaap:NetIncomeLoss"
+ },
+ {
+  "cells": [
+   "Per share data",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:EarningsPerShareAbstract"
+ },
+ {
+  "cells": [
+   "Basic earnings per share (in dollars per share)",
+   "$ 2.37",
+   "$ 2.40",
+   "$ 2.73"
+  ],
+  "concept": "us-gaap:EarningsPerShareBasic"
+ },
+ {
+  "cells": [
+   "Diluted earnings per share (in dollars per share)",
+   "$ 2.36",
+   "$ 2.39",
+   "$ 2.72"
+  ],
+  "concept": "us-gaap:EarningsPerShareDiluted"
+ },
+ {
+  "cells": [
+   "Weighted-average basic shares outstanding (in shares)",
+   "1,769",
+   "1,769",
+   "1,768"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfSharesOutstandingBasic"
+ },
+ {
+  "cells": [
+   "Weighted-average diluted shares outstanding (in shares)",
+   "1,773",
+   "1,773",
+   "1,773"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding"
+ }
+]

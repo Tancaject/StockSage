@@ -1,0 +1,341 @@
+[
+ {
+  "cells": [
+   "Consolidated Statement of Cash Flows - USD ($) $ in Millions",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 31, 2025",
+   "Dec. 31, 2024",
+   "Dec. 31, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Operating Activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Net Income (Loss)",
+   "$ 12,485",
+   "$ 17,749",
+   "$ 21,411"
+  ],
+  "concept": "us-gaap:ProfitLoss"
+ },
+ {
+  "cells": [
+   "Adjustments",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Depreciation, depletion and amortization",
+   "20,132",
+   "17,282",
+   "17,326"
+  ],
+  "concept": "us-gaap:DepreciationDepletionAndAmortization"
+ },
+ {
+  "cells": [
+   "Dry hole expense",
+   "325",
+   "429",
+   "436"
+  ],
+  "concept": "cvx:DryHoleExpense"
+ },
+ {
+  "cells": [
+   "Distributions more (less) than income from equity affiliates",
+   "2,282",
+   "(366)",
+   "(885)"
+  ],
+  "concept": "us-gaap:IncomeLossFromEquityMethodInvestmentsNetOfDividendsOrDistributions"
+ },
+ {
+  "cells": [
+   "Net before-tax gains on asset retirements and sales",
+   "(462)",
+   "(1,685)",
+   "(138)"
+  ],
+  "concept": "us-gaap:GainLossOnSaleOfPropertyPlantEquipment"
+ },
+ {
+  "cells": [
+   "Net foreign currency effects",
+   "585",
+   "(629)",
+   "578"
+  ],
+  "concept": "us-gaap:ForeignCurrencyTransactionGainLossUnrealized"
+ },
+ {
+  "cells": [
+   "Deferred income tax provision",
+   "986",
+   "1,240",
+   "298"
+  ],
+  "concept": "us-gaap:DeferredIncomeTaxesAndTaxCredits"
+ },
+ {
+  "cells": [
+   "Net decrease (increase) in operating working capital",
+   "(1,008)",
+   "1,211",
+   "(3,185)"
+  ],
+  "concept": "cvx:IncreaseDecreaseInOperatingWorkingCapital"
+ },
+ {
+  "cells": [
+   "Decrease (increase) in long-term receivables",
+   "(132)",
+   "114",
+   "150"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInLongTermReceivablesCurrent"
+ },
+ {
+  "cells": [
+   "Net decrease (increase) in other deferred charges",
+   "(508)",
+   "(1,225)",
+   "(300)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInDeferredCharges"
+ },
+ {
+  "cells": [
+   "Cash contributions to employee pension plans",
+   "(588)",
+   "(844)",
+   "(1,120)"
+  ],
+  "concept": "us-gaap:PensionContributions"
+ },
+ {
+  "cells": [
+   "Other",
+   "(158)",
+   "(1,784)",
+   "1,038"
+  ],
+  "concept": "us-gaap:OtherNoncashIncomeExpense"
+ },
+ {
+  "cells": [
+   "Net Cash Provided by Operating Activities",
+   "33,939",
+   "31,492",
+   "35,609"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+ },
+ {
+  "cells": [
+   "Investing Activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Acquisition of businesses, net of cash received",
+   "1,056",
+   "0",
+   "55"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireBusinessesNetOfCashAcquired"
+ },
+ {
+  "cells": [
+   "Acquisition of Hess Corporation common stock",
+   "(2,225)",
+   "0",
+   "0"
+  ],
+  "concept": "cvx:PaymentsToAcquireCommonStockDuringAcquisition"
+ },
+ {
+  "cells": [
+   "Capital expenditures",
+   "(17,347)",
+   "(16,448)",
+   "(15,829)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireProductiveAssets"
+ },
+ {
+  "cells": [
+   "Proceeds and deposits related to asset sales and returns of investment",
+   "1,826",
+   "7,704",
+   "669"
+  ],
+  "concept": "us-gaap:ProceedsFromSaleOfProductiveAssets"
+ },
+ {
+  "cells": [
+   "Net maturities of (investments in) time deposits",
+   "1",
+   "(4)",
+   "0"
+  ],
+  "concept": "cvx:IncreaseDecreaseInTimeDepositsInvestingActivities"
+ },
+ {
+  "cells": [
+   "Net sales (purchases) of marketable securities",
+   "0",
+   "45",
+   "175"
+  ],
+  "concept": "us-gaap:PaymentsForProceedsFromInvestments"
+ },
+ {
+  "cells": [
+   "Net repayment (borrowing) of loans by equity affiliates",
+   "778",
+   "(233)",
+   "(302)"
+  ],
+  "concept": "us-gaap:ProceedsFromPaymentsForLongTermLoansForRelatedParties"
+ },
+ {
+  "cells": [
+   "Net Cash Used for Investing Activities",
+   "(15,911)",
+   "(8,936)",
+   "(15,232)"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivities"
+ },
+ {
+  "cells": [
+   "Financing Activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Net borrowings (repayments) of short-term obligations",
+   "(1,061)",
+   "4,868",
+   "135"
+  ],
+  "concept": "us-gaap:ProceedsFromRepaymentsOfShortTermDebt"
+ },
+ {
+  "cells": [
+   "Proceeds from issuances of long-term debt",
+   "11,402",
+   "478",
+   "150"
+  ],
+  "concept": "us-gaap:ProceedsFromIssuanceOfLongTermDebt"
+ },
+ {
+  "cells": [
+   "Repayments of long-term debt and other financing obligations",
+   "(4,475)",
+   "(1,778)",
+   "(4,340)"
+  ],
+  "concept": "us-gaap:RepaymentsOfLongTermDebtAndCapitalSecurities"
+ },
+ {
+  "cells": [
+   "Cash dividends - common stock",
+   "(12,751)",
+   "(11,801)",
+   "(11,336)"
+  ],
+  "concept": "us-gaap:PaymentsOfDividendsCommonStock"
+ },
+ {
+  "cells": [
+   "Net contributions from (distributions to) noncontrolling interests",
+   "(323)",
+   "(195)",
+   "(40)"
+  ],
+  "concept": "us-gaap:ProceedsFromPaymentsToMinorityShareholders"
+ },
+ {
+  "cells": [
+   "Net sales (purchases) of treasury shares",
+   "(11,855)",
+   "(15,044)",
+   "(14,678)"
+  ],
+  "concept": "us-gaap:ProceedsFromRepurchaseOfEquity"
+ },
+ {
+  "cells": [
+   "Net Cash Provided by (Used for) Financing Activities",
+   "(19,063)",
+   "(23,472)",
+   "(30,109)"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivities"
+ },
+ {
+  "cells": [
+   "Effect of Exchange Rate Changes on Cash, Cash Equivalents and Restricted Cash",
+   "58",
+   "(97)",
+   "(114)"
+  ],
+  "concept": "us-gaap:EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Net Change in Cash, Cash Equivalents and Restricted Cash",
+   "(977)",
+   "(1,013)",
+   "(9,846)"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
+ },
+ {
+  "cells": [
+   "Cash, Cash Equivalents and Restricted Cash at January 1",
+   "8,262",
+   "9,275",
+   "19,121"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Cash, Cash Equivalents and Restricted Cash at December 31",
+   "$ 7,285",
+   "$ 8,262",
+   "$ 9,275"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ }
+]

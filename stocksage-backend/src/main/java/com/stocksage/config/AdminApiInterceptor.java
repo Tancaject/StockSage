@@ -64,6 +64,16 @@ public class AdminApiInterceptor implements HandlerInterceptor {
         return true;
     }
 
+    /** 供非管理路由判断请求是否携带有效管理员令牌（如评测专用的请求级模式）。 */
+    public boolean hasValidAdminToken(HttpServletRequest request) {
+        if (!enabled || headerName == null || headerName.isBlank() || adminToken == null || adminToken.isBlank()) {
+            return false;
+        }
+        String providedToken = request.getHeader(headerName);
+        return providedToken != null && !providedToken.isBlank()
+                && constantTimeEquals(adminToken.trim(), providedToken.trim());
+    }
+
     /**
      * 使用恒定时间算法比较 UTF-8 令牌。
      *

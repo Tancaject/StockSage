@@ -1,0 +1,33 @@
+Consolidated Balance Sheets - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024
+Current assets |  | 
+Cash and equivalents | $ 5,229 | $ 5,524
+Short-term investments | 28 | 31
+Accounts receivable, net | 12,589 | 10,919
+Inventories | 4,951 | 4,181
+Prepaid expenses and other | 6,265 | 4,927
+Total current assets | 29,062 | 25,582
+Investments | 268 | 279
+Property and equipment, net | 5,628 | 5,134
+Intangible assets, net | 52,641 | 60,068
+Goodwill | 35,640 | 34,956
+Other assets | 10,721 | 9,142
+Total assets | 133,960 | 135,161
+Current liabilities |  | 
+Short-term borrowings | 2,499 | 0
+Current portion of long-term debt and finance lease obligations | 6,056 | 6,804
+Accounts payable and accrued liabilities | 34,734 | 31,945
+Total current liabilities | 43,289 | 38,749
+Long-term debt and finance lease obligations | 58,941 | 60,340
+Deferred income taxes | 2,389 | 2,579
+Other long-term liabilities | 32,569 | 30,129
+Commitments and contingencies |  | 
+Stockholders' equity (deficit) |  | 
+Common stock, $0.01 par value, 4,000,000,000 shares authorized, 1,838,678,628 shares issued as of December 31, 2025 and 1,831,594,494 as of December 31, 2024 | 18 | 18
+Common stock held in treasury, at cost, 70,802,593 shares as of December 31, 2025 and 66,337,508 as of December 31, 2024 | (9,146) | (8,201)
+Additional paid-in capital | 22,495 | 21,333
+Accumulated deficit | (15,493) | (7,900)
+Accumulated other comprehensive loss | (1,144) | (1,925)
+Total stockholders' equity (deficit) | (3,270) | 3,325
+Noncontrolling interest | 42 | 39
+Total equity (deficit) | (3,228) | 3,364
+Total liabilities and equity | $ 133,960 | $ 135,161

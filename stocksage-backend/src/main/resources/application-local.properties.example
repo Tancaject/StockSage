@@ -8,3 +8,7 @@ spring.datasource.password=your-mysql-password
 
 # Optional overrides:
 # spring.datasource.url=jdbc:mysql://localhost:3306/stocksage?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+# IBKR Client Portal market data (read-only); false keeps market data on the data-service fallback
+# stocksage.ibkr.enabled=true
+# DeepSeek official API key for deepseek-v4-pro (optional; empty keeps every chat model on Bailian)
+stocksage.chat.deepseek.api-key=${STOCKSAGE_DEEPSEEK_API_KEY:}

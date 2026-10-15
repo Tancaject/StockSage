@@ -1,0 +1,35 @@
+Consolidated Statements of Cash Flows - USD ($) $ in Millions | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Cash Flows from Operating Activities |  |  | 
+Net Income | $ 17,608 | $ 17,949 | $ 12,095
+Adjustments to reconcile net income to net cash provided by operating activities: |  |  | 
+Depreciation and amortization expense | 18,349 | 17,892 | 17,624
+Employee retirement benefits | 1,025 | (52) | 1,206
+Deferred income taxes | 2,340 | 815 | 2,388
+Provision for expected credit losses | 2,349 | 2,338 | 2,214
+Equity in losses of unconsolidated businesses, inclusive of dividends received | 42 | 75 | 84
+Verizon Business Group goodwill impairment | 0 | 0 | 5,841
+Changes in current assets and liabilities, net of effects from acquisition/disposition of businesses: |  |  | 
+Accounts receivable | (2,513) | (2,565) | (2,198)
+Inventories | (232) | (196) | 287
+Prepaid expenses and other | (1,394) | (626) | (435)
+Accounts payable and accrued liabilities and Other current liabilities | 1,819 | 1,109 | 2,079
+Other, net | (2,256) | 173 | (3,710)
+Net cash provided by operating activities | 37,137 | 36,912 | 37,475
+Cash Flows from Investing Activities |  |  | 
+Capital expenditures (including capitalized software) | (17,011) | (17,090) | (18,767)
+Cash paid related to acquisitions of businesses, net of cash acquired | 0 | 0 | (30)
+Acquisitions of wireless licenses | (450) | (900) | (5,796)
+Other, net | 801 | (684) | 1,161
+Net cash used in investing activities | (16,660) | (18,674) | (23,432)
+Cash Flows from Financing Activities |  |  | 
+Proceeds from long-term borrowings | 18,268 | 3,146 | 2,018
+Proceeds from asset-backed long-term borrowings | 9,338 | 12,422 | 6,594
+Repayments of long-term borrowings and finance lease obligations | (11,352) | (11,854) | (6,181)
+Repayments of asset-backed long-term borrowings | (8,437) | (8,490) | (4,443)
+Dividends paid | (11,481) | (11,249) | (11,025)
+Other, net | (1,949) | (1,075) | (1,620)
+Net cash used in financing activities | (5,613) | (17,100) | (14,657)
+Increase (decrease) in cash, cash equivalents and restricted cash | 14,864 | 1,138 | (614)
+Cash, cash equivalents and restricted cash, beginning of period | 4,635 | 3,497 | 4,111
+Cash, cash equivalents and restricted cash, end of period | $ 19,499 | $ 4,635 | $ 3,497

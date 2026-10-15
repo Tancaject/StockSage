@@ -1,0 +1,378 @@
+[
+ {
+  "cells": [
+   "CONSOLIDATED BALANCE SHEET - USD ($) $ in Millions",
+   "Dec. 31, 2025",
+   "Dec. 31, 2024"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Current assets",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AssetsCurrentAbstract"
+ },
+ {
+  "cells": [
+   "Cash and cash equivalents",
+   "$ 12,487",
+   "$ 9,906"
+  ],
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue"
+ },
+ {
+  "cells": [
+   "Short-term investments",
+   "443",
+   "386"
+  ],
+  "concept": "us-gaap:ShortTermInvestments"
+ },
+ {
+  "cells": [
+   "Accounts receivable, less allowances of $202 and $307, respectively",
+   "7,621",
+   "7,247"
+  ],
+  "concept": "us-gaap:AccountsReceivableNetCurrent"
+ },
+ {
+  "cells": [
+   "Inventories",
+   "6,162",
+   "5,884"
+  ],
+  "concept": "us-gaap:InventoryNet"
+ },
+ {
+  "cells": [
+   "Assets held for sale",
+   "2,492",
+   "1,365"
+  ],
+  "concept": "us-gaap:AssetsHeldForSaleNotPartOfDisposalGroupCurrent"
+ },
+ {
+  "cells": [
+   "Other current assets",
+   "1,182",
+   "1,259"
+  ],
+  "concept": "us-gaap:OtherAssetsCurrent"
+ },
+ {
+  "cells": [
+   "Current assets of discontinued operations",
+   "0",
+   "1,861"
+  ],
+  "concept": "us-gaap:AssetsOfDisposalGroupIncludingDiscontinuedOperationCurrent"
+ },
+ {
+  "cells": [
+   "Total current assets",
+   "30,387",
+   "27,908"
+  ],
+  "concept": "us-gaap:AssetsCurrent"
+ },
+ {
+  "cells": [
+   "Investments and long-term receivables",
+   "1,404",
+   "1,230"
+  ],
+  "concept": "us-gaap:LongTermInvestmentsAndReceivablesNet"
+ },
+ {
+  "cells": [
+   "Property, plant and equipment—net",
+   "4,629",
+   "4,457"
+  ],
+  "concept": "us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization"
+ },
+ {
+  "cells": [
+   "Goodwill",
+   "21,079",
+   "21,019"
+  ],
+  "concept": "us-gaap:Goodwill"
+ },
+ {
+  "cells": [
+   "Other intangible assets—net",
+   "6,736",
+   "6,621"
+  ],
+  "concept": "us-gaap:IntangibleAssetsNetExcludingGoodwill"
+ },
+ {
+  "cells": [
+   "Deferred income taxes",
+   "199",
+   "235"
+  ],
+  "concept": "us-gaap:DeferredIncomeTaxAssetsNet"
+ },
+ {
+  "cells": [
+   "Other assets",
+   "9,247",
+   "10,556"
+  ],
+  "concept": "us-gaap:OtherAssetsNoncurrent"
+ },
+ {
+  "cells": [
+   "Assets of discontinued operations",
+   "0",
+   "3,170"
+  ],
+  "concept": "us-gaap:DisposalGroupIncludingDiscontinuedOperationAssetsNoncurrent"
+ },
+ {
+  "cells": [
+   "Total assets",
+   "73,681",
+   "75,196"
+  ],
+  "concept": "us-gaap:Assets"
+ },
+ {
+  "cells": [
+   "Current liabilities",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LiabilitiesCurrentAbstract"
+ },
+ {
+  "cells": [
+   "Accounts payable",
+   "6,315",
+   "6,109"
+  ],
+  "concept": "us-gaap:AccountsPayableCurrent"
+ },
+ {
+  "cells": [
+   "Commercial paper and other short-term borrowings",
+   "5,893",
+   "4,273"
+  ],
+  "concept": "us-gaap:ShortTermBorrowings"
+ },
+ {
+  "cells": [
+   "Current maturities of long-term debt",
+   "1,546",
+   "1,325"
+  ],
+  "concept": "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent"
+ },
+ {
+  "cells": [
+   "Accrued liabilities",
+   "8,462",
+   "8,055"
+  ],
+  "concept": "us-gaap:AccruedLiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Total current liabilities",
+   "23,414",
+   "21,256"
+  ],
+  "concept": "us-gaap:LiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Long-term debt",
+   "27,141",
+   "25,440"
+  ],
+  "concept": "us-gaap:LongTermDebtAndCapitalLeaseObligations"
+ },
+ {
+  "cells": [
+   "Deferred income taxes",
+   "1,577",
+   "1,581"
+  ],
+  "concept": "us-gaap:DeferredIncomeTaxLiabilitiesNet"
+ },
+ {
+  "cells": [
+   "Postretirement benefit obligations other than pensions",
+   "111",
+   "112"
+  ],
+  "concept": "us-gaap:OtherPostretirementDefinedBenefitPlanLiabilitiesNoncurrent"
+ },
+ {
+  "cells": [
+   "Asbestos-related liabilities",
+   "0",
+   "1,325"
+  ],
+  "concept": "us-gaap:LossContingencyAccrualCarryingValueNoncurrent"
+ },
+ {
+  "cells": [
+   "Other liabilities",
+   "6,408",
+   "5,581"
+  ],
+  "concept": "us-gaap:OtherLiabilitiesNoncurrent"
+ },
+ {
+  "cells": [
+   "Liabilities of discontinued operations",
+   "0",
+   "740"
+  ],
+  "concept": "us-gaap:LiabilitiesOfDisposalGroupIncludingDiscontinuedOperationNoncurrent"
+ },
+ {
+  "cells": [
+   "Redeemable noncontrolling interest",
+   "0",
+   "7"
+  ],
+  "concept": "us-gaap:RedeemableNoncontrollingInterestEquityCommonCarryingAmount"
+ },
+ {
+  "cells": [
+   "SHAREOWNERS’ EQUITY",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:StockholdersEquityAbstract"
+ },
+ {
+  "cells": [
+   "Capital—common stock issued",
+   "958",
+   "958"
+  ],
+  "concept": "us-gaap:CommonStockValueOutstanding"
+ },
+ {
+  "cells": [
+   "Capital - additional paid in capital",
+   "10,157",
+   "9,695"
+  ],
+  "concept": "us-gaap:AdditionalPaidInCapitalCommonStock"
+ },
+ {
+  "cells": [
+   "Common stock held in treasury, at cost",
+   "(43,029)",
+   "(39,378)"
+  ],
+  "concept": "us-gaap:TreasuryStockValue"
+ },
+ {
+  "cells": [
+   "Accumulated other comprehensive loss",
+   "(5,146)",
+   "(3,491)"
+  ],
+  "concept": "us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax"
+ },
+ {
+  "cells": [
+   "Retained earnings",
+   "50,964",
+   "50,835"
+  ],
+  "concept": "us-gaap:RetainedEarningsAccumulatedDeficit"
+ },
+ {
+  "cells": [
+   "Total Honeywell shareowners’ equity",
+   "13,904",
+   "18,619"
+  ],
+  "concept": "us-gaap:StockholdersEquity"
+ },
+ {
+  "cells": [
+   "Noncontrolling interest",
+   "1,126",
+   "535"
+  ],
+  "concept": "us-gaap:MinorityInterest"
+ },
+ {
+  "cells": [
+   "Total shareowners’ equity",
+   "15,030",
+   "19,154"
+  ],
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Total liabilities, redeemable noncontrolling interest and shareowners’ equity",
+   "73,681",
+   "75,196"
+  ],
+  "concept": "us-gaap:LiabilitiesAndStockholdersEquity"
+ },
+ {
+  "cells": [
+   "Discontinued Operations",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:DisposalGroupClassificationAxis"
+ },
+ {
+  "cells": [
+   "Current liabilities",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LiabilitiesCurrentAbstract"
+ },
+ {
+  "cells": [
+   "Current liabilities of discontinued operations/Liabilities held for sale",
+   "0",
+   "1,086"
+  ],
+  "concept": "us-gaap:LiabilitiesOfDisposalGroupIncludingDiscontinuedOperationCurrent"
+ },
+ {
+  "cells": [
+   "Disposal Group, Held-for-Sale, Not Discontinued Operations",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:DisposalGroupClassificationAxis"
+ },
+ {
+  "cells": [
+   "Current liabilities",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LiabilitiesCurrentAbstract"
+ },
+ {
+  "cells": [
+   "Current liabilities of discontinued operations/Liabilities held for sale",
+   "$ 1,198",
+   "$ 408"
+  ],
+  "concept": "us-gaap:LiabilitiesOfDisposalGroupIncludingDiscontinuedOperationCurrent"
+ }
+]

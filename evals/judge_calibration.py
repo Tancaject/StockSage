@@ -1,4 +1,7 @@
-"""Calibrate AI diagnostic reviews against frozen pilot labels; never authorize release."""
+"""Calibrate AI diagnostic reviews against frozen pilot labels; never authorize release.
+
+Ordinary five-dimension reports use calibrate/compare_reports; DEEP facet reports use calibrate_facets.
+"""
 from __future__ import annotations
 
 import argparse
@@ -204,6 +207,67 @@ def calibrate(dataset: list[dict], report: dict) -> dict:
             "cost": _cost(report["reviews"]), "observations": observations}
 
 
+def _weighted_kappa(pairs: list[tuple[int, int]], k: int = 3) -> float | None:
+    """Quadratic weighted kappa for ordinal 0..k-1 scores."""
+    n = len(pairs)
+    observed = [[sum(e == i and a == j for e, a in pairs) for j in range(k)] for i in range(k)]
+    rows = [sum(observed[i]) for i in range(k)]
+    cols = [sum(observed[i][j] for i in range(k)) for j in range(k)]
+    weight = [[(i - j) ** 2 / (k - 1) ** 2 for j in range(k)] for i in range(k)]
+    disagreement = sum(weight[i][j] * observed[i][j] for i in range(k) for j in range(k))
+    expected = sum(weight[i][j] * rows[i] * cols[j] / n for i in range(k) for j in range(k)) if n else 0
+    return 1 - disagreement / expected if expected else None
+
+
+def calibrate_facets(dataset: list[dict], report: dict) -> dict:
+    """Agreement of DEEP facet scores with labelled rows. Invalid judgments count against coverage, not agreement."""
+    from deep_facet_quality import input_hash
+    if report.get("schema") != "deep_facet_judge_v1" or report.get("input_kind") != "pilot":
+        raise ValueError("Expected a deep facet judge report on a labelled pilot")
+    if report.get("dataset_sha256") != json_hash(dataset):
+        raise ValueError("Judge report does not match the full labelled dataset")
+    selected = [row for row in dataset if row.get("split") == report.get("split")]
+    if not selected:
+        raise ValueError("The selected split has no dataset rows")
+    for row in selected:
+        labels = row.get("expected_facets")
+        if (not isinstance(labels, dict) or set(labels) != {facet["id"] for facet in row["facets"]}
+                or any(type(label.get("score")) is not int or label["score"] not in (0, 1, 2) for label in labels.values())):
+            raise ValueError("Each pilot row needs a 0/1/2 label for every facet: " + str(row.get("id")))
+    reviews = {(row["id"], row["repeat"]): row for row in report.get("reviews", [])}
+    pairs, invalid, disagreements = [], 0, []
+    for row in selected:
+        for repeat in range(1, report["repeats"] + 1):
+            review = reviews.get((row["id"], repeat)) or {}
+            bound = review.get("input_sha256") == input_hash(row)
+            for facet, label in row["expected_facets"].items():
+                actual = ((review.get("facets") or {}).get(facet) or {}).get("score") if bound else None
+                if actual is None:
+                    invalid += 1
+                    continue
+                pairs.append((label["score"], actual))
+                if actual != label["score"]:
+                    disagreements.append({"id": row["id"], "repeat": repeat, "facet": facet, "expected": label["score"],
+                                          "actual": actual, "judge_reason": review["facets"][facet].get("reason")})
+    total = len(pairs) + invalid
+    uncovered = [pair for pair in pairs if pair[0] == 0]
+    covered = [pair for pair in pairs if pair[0] >= 1]
+    return {"schema": "deep_facet_calibration_v1", "split": report["split"], "repeats": report["repeats"],
+            "judge": report.get("judge"), "sample_count": len(selected),
+            "label_origins": sorted({str(row.get("label_origin", "UNSPECIFIED")) for row in selected}),
+            "facet_judgments": total, "technical_invalid_rate": invalid / total if total else None,
+            "exact_agreement": sum(e == a for e, a in pairs) / len(pairs) if pairs else None,
+            "within_one_agreement": sum(abs(e - a) <= 1 for e, a in pairs) / len(pairs) if pairs else None,
+            "quadratic_weighted_kappa": _weighted_kappa(pairs),
+            # False coverage is the facet analogue of a false pass: the judge credits evidence that is not there.
+            "false_coverage_rate": sum(a >= 1 for _, a in uncovered) / len(uncovered) if uncovered else None,
+            "false_coverage_denominator": len(uncovered),
+            "missed_coverage_rate": sum(a == 0 for _, a in covered) / len(covered) if covered else None,
+            "missed_coverage_denominator": len(covered),
+            "confusion": {str(e): {str(a): sum(pair == (e, a) for pair in pairs) for a in range(3)} for e in range(3)},
+            "disagreements": disagreements}
+
+
 def compare_reports(dataset: list[dict], baseline: dict, candidate: dict) -> dict:
     before, after = calibrate(dataset, baseline), calibrate(dataset, candidate)
     for field in ("dataset_sha256", "rubric", "split", "repeats"):
@@ -270,7 +334,10 @@ def main() -> int:
     try:
         dataset = [json.loads(line) for line in Path(args.dataset).read_text(encoding="utf-8-sig").splitlines() if line.strip()]
         report = json.loads(Path(args.report).read_text(encoding="utf-8-sig"))
-        result = compare_reports(dataset, json.loads(Path(args.baseline).read_text(encoding="utf-8-sig")), report) if args.baseline else calibrate(dataset, report)
+        if report.get("schema") == "deep_facet_judge_v1":
+            result = calibrate_facets(dataset, report)
+        else:
+            result = compare_reports(dataset, json.loads(Path(args.baseline).read_text(encoding="utf-8-sig")), report) if args.baseline else calibrate(dataset, report)
         output = Path(args.output)
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

@@ -35,7 +35,8 @@ public class ResearchSubmissionService {
             Coordinator.SelectedModel selectedModel,
             String primaryTicker,
             TimeSensitivity timeSensitivity,
-            String submissionId
+            String submissionId,
+            String evaluationMode
     ) {
         String submissionKey = submissionId == null
                 ? researchTaskService.buildSubmissionKey(userId, primaryTicker, userQuery, conversationId)
@@ -51,7 +52,7 @@ public class ResearchSubmissionService {
         }
 
         String payload = researchTaskService.buildSubmissionPayload(
-                primaryTicker, userQuery, traceId, conversationId, timeSensitivity);
+                primaryTicker, userQuery, traceId, conversationId, timeSensitivity, evaluationMode);
         ResearchTaskService.TaskCreation creation = researchTaskService.createIfAbsent(
                 submissionKey,
                 userId,

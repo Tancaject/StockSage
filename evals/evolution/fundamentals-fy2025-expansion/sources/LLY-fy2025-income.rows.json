@@ -1,0 +1,188 @@
+[
+ {
+  "cells": [
+   "Consolidated Statements of Operations - USD ($) shares in Millions, $ in Millions",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 31, 2025",
+   "Dec. 31, 2024",
+   "Dec. 31, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Income Statement [Abstract]",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:IncomeStatementAbstract"
+ },
+ {
+  "cells": [
+   "Revenue",
+   "$ 65,179",
+   "$ 45,043",
+   "$ 34,124"
+  ],
+  "concept": "us-gaap:Revenues"
+ },
+ {
+  "cells": [
+   "Costs, expenses, and other:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:CostsAndExpensesAbstract"
+ },
+ {
+  "cells": [
+   "Cost of sales",
+   "11,052",
+   "8,418",
+   "7,082"
+  ],
+  "concept": "us-gaap:CostOfGoodsAndServicesSold"
+ },
+ {
+  "cells": [
+   "Research and development",
+   "13,337",
+   "10,991",
+   "9,313"
+  ],
+  "concept": "us-gaap:ResearchAndDevelopmentExpenseExcludingAcquiredInProcessCost"
+ },
+ {
+  "cells": [
+   "Marketing, selling, and administrative",
+   "11,094",
+   "8,594",
+   "7,404"
+  ],
+  "concept": "us-gaap:SellingGeneralAndAdministrativeExpense"
+ },
+ {
+  "cells": [
+   "Acquired in-process research and development",
+   "2,910",
+   "3,280",
+   "3,800"
+  ],
+  "concept": "us-gaap:ResearchAndDevelopmentAssetAcquiredOtherThanThroughBusinessCombinationWrittenOff"
+ },
+ {
+  "cells": [
+   "Asset impairment, restructuring, and other special charges",
+   "484",
+   "861",
+   "68"
+  ],
+  "concept": "us-gaap:RestructuringSettlementAndImpairmentProvisions"
+ },
+ {
+  "cells": [
+   "Other—net, (income) expense",
+   "571",
+   "219",
+   "(97)"
+  ],
+  "concept": "us-gaap:NonoperatingIncomeExpense"
+ },
+ {
+  "cells": [
+   "Costs, expenses, and other",
+   "39,448",
+   "32,363",
+   "27,570"
+  ],
+  "concept": "lly:CostOfSalesOperatingExpensesAndOtherNet"
+ },
+ {
+  "cells": [
+   "Income before income taxes",
+   "25,731",
+   "12,680",
+   "6,554"
+  ],
+  "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Income taxes",
+   "5,091",
+   "2,090",
+   "1,314"
+  ],
+  "concept": "us-gaap:IncomeTaxExpenseBenefit"
+ },
+ {
+  "cells": [
+   "Net income",
+   "$ 20,640",
+   "$ 10,590",
+   "$ 5,240"
+  ],
+  "concept": "us-gaap:NetIncomeLoss"
+ },
+ {
+  "cells": [
+   "Earnings per share:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:EarningsPerShareAbstract"
+ },
+ {
+  "cells": [
+   "Basic (in dollars per share)",
+   "$ 23.00",
+   "$ 11.76",
+   "$ 5.82"
+  ],
+  "concept": "us-gaap:EarningsPerShareBasic"
+ },
+ {
+  "cells": [
+   "Diluted (in dollars per share)",
+   "$ 22.95",
+   "$ 11.71",
+   "$ 5.80"
+  ],
+  "concept": "us-gaap:EarningsPerShareDiluted"
+ },
+ {
+  "cells": [
+   "Shares used in calculation of earnings per share:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfSharesOutstandingAbstract"
+ },
+ {
+  "cells": [
+   "Basic (in shares)",
+   "897.3",
+   "900.6",
+   "900.2"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfSharesOutstandingBasic"
+ },
+ {
+  "cells": [
+   "Diluted (in shares)",
+   "899.3",
+   "904.1",
+   "903.3"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding"
+ }
+]

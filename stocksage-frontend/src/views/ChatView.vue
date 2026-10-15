@@ -201,6 +201,7 @@
             :message="msg"
             :show-retry="msg.role === 'assistant' && idx === messages.length - 1 && !isStreaming"
             :show-edit="msg.role === 'user' && idx === lastUserIndex && !isStreaming"
+            :streaming="isStreaming && idx === messages.length - 1"
             @retry="handleRetry"
             @edit="handleEdit"
           />

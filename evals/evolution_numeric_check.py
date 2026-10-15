@@ -22,7 +22,8 @@ MONEY_UNITS = {'万亿': Decimal(1000000), '千亿': Decimal(100000), '亿': Dec
                'million': Decimal(1), 'mn': Decimal(1), 'b': Decimal(1000), 'm': Decimal(1)}
 NUMBER = r'[+\-−]?\d{1,3}(?:,\d{3})+(?:\.\d+)?|[+\-−]?\d+(?:\.\d+)?'
 UNIT = r'万亿|千亿|亿|千万|百万|万|billion|bn|million|mn|%|个百分点|倍|(?-i:B|M)(?![A-Za-z])'
-TOKEN = re.compile(rf'(?<![\w.])({NUMBER})\s*({UNIT})?', re.IGNORECASE)
+# 只排除紧跟在 ASCII 字母数字后的数字（如 FY2025 里的 2025）；中文字符在 Python 中也算 \w，"增长15.85%" 必须能匹配。
+TOKEN = re.compile(rf'(?<![A-Za-z0-9_.])({NUMBER})\s*({UNIT})?', re.IGNORECASE)
 CONVERSION = re.compile(rf'({NUMBER})\s*({UNIT})[^。；;\n\d]{{0,12}}?(?:即|约|合|相当于|=)\s*约?\s*({NUMBER})\s*({UNIT})', re.IGNORECASE)
 OPERAND = rf'[\(（]?\s*(?:{NUMBER})\s*[\)）]?'
 # 结果后若紧跟运算符（如 "A − (B+C) = A − D = E" 的中间项），它是下一个算式的开头，不是结果。

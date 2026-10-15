@@ -1,0 +1,314 @@
+[
+ {
+  "cells": [
+   "Consolidated Balance Sheets - USD ($) $ in Millions",
+   "Dec. 31, 2025",
+   "Dec. 31, 2024"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Current Assets",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AssetsCurrentAbstract"
+ },
+ {
+  "cells": [
+   "Cash and cash equivalents",
+   "$ 7,268",
+   "$ 3,268"
+  ],
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue"
+ },
+ {
+  "cells": [
+   "Accounts receivable",
+   "17,760",
+   "11,006"
+  ],
+  "concept": "us-gaap:AccountsReceivableNetCurrent"
+ },
+ {
+  "cells": [
+   "Other receivables",
+   "2,395",
+   "2,270"
+  ],
+  "concept": "us-gaap:OtherReceivablesNetCurrent"
+ },
+ {
+  "cells": [
+   "Inventories",
+   "13,744",
+   "7,589"
+  ],
+  "concept": "us-gaap:InventoryNet"
+ },
+ {
+  "cells": [
+   "Prepaid expenses",
+   "14,315",
+   "8,341"
+  ],
+  "concept": "us-gaap:PrepaidExpenseCurrent"
+ },
+ {
+  "cells": [
+   "Other current assets",
+   "147",
+   "266"
+  ],
+  "concept": "us-gaap:OtherAssetsCurrent"
+ },
+ {
+  "cells": [
+   "Total current assets",
+   "55,629",
+   "32,740"
+  ],
+  "concept": "us-gaap:AssetsCurrent"
+ },
+ {
+  "cells": [
+   "Noncurrent Assets",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AssetsNoncurrentAbstract"
+ },
+ {
+  "cells": [
+   "Investments",
+   "2,802",
+   "3,216"
+  ],
+  "concept": "us-gaap:LongTermInvestments"
+ },
+ {
+  "cells": [
+   "Goodwill",
+   "5,898",
+   "5,770"
+  ],
+  "concept": "us-gaap:Goodwill"
+ },
+ {
+  "cells": [
+   "Other intangibles, net",
+   "6,521",
+   "6,166"
+  ],
+  "concept": "us-gaap:IntangibleAssetsNetExcludingGoodwill"
+ },
+ {
+  "cells": [
+   "Deferred tax assets",
+   "9,959",
+   "8,001"
+  ],
+  "concept": "us-gaap:DeferredIncomeTaxAssetsNet"
+ },
+ {
+  "cells": [
+   "Property and equipment, net",
+   "24,675",
+   "17,102"
+  ],
+  "concept": "us-gaap:PropertyPlantAndEquipmentNet"
+ },
+ {
+  "cells": [
+   "Other noncurrent assets",
+   "6,992",
+   "5,720"
+  ],
+  "concept": "us-gaap:OtherAssetsNoncurrent"
+ },
+ {
+  "cells": [
+   "Total assets",
+   "112,476",
+   "78,715"
+  ],
+  "concept": "us-gaap:Assets"
+ },
+ {
+  "cells": [
+   "Current Liabilities",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LiabilitiesCurrentAbstract"
+ },
+ {
+  "cells": [
+   "Short-term borrowings and current maturities of long-term debt",
+   "1,635",
+   "5,117"
+  ],
+  "concept": "us-gaap:DebtCurrent"
+ },
+ {
+  "cells": [
+   "Accounts payable",
+   "5,379",
+   "3,229"
+  ],
+  "concept": "us-gaap:AccountsPayableCurrent"
+ },
+ {
+  "cells": [
+   "Employee compensation",
+   "2,375",
+   "2,094"
+  ],
+  "concept": "us-gaap:EmployeeRelatedLiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Sales rebates and discounts",
+   "17,382",
+   "11,539"
+  ],
+  "concept": "lly:SalesRebatesAndDiscounts"
+ },
+ {
+  "cells": [
+   "Other current liabilities",
+   "8,457",
+   "6,397"
+  ],
+  "concept": "us-gaap:OtherLiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Total current liabilities",
+   "35,228",
+   "28,376"
+  ],
+  "concept": "us-gaap:LiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Noncurrent Liabilities",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LiabilitiesNoncurrentAbstract"
+ },
+ {
+  "cells": [
+   "Long-term debt",
+   "40,868",
+   "28,527"
+  ],
+  "concept": "us-gaap:LongTermDebtNoncurrent"
+ },
+ {
+  "cells": [
+   "Long-term income taxes payable",
+   "5,875",
+   "4,061"
+  ],
+  "concept": "us-gaap:AccruedIncomeTaxesNoncurrent"
+ },
+ {
+  "cells": [
+   "Other noncurrent liabilities",
+   "3,970",
+   "3,479"
+  ],
+  "concept": "us-gaap:OtherLiabilitiesNoncurrent"
+ },
+ {
+  "cells": [
+   "Total noncurrent liabilities",
+   "50,713",
+   "36,067"
+  ],
+  "concept": "us-gaap:LiabilitiesNoncurrent"
+ },
+ {
+  "cells": [
+   "Commitments and Contingencies",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:CommitmentsAndContingencies"
+ },
+ {
+  "cells": [
+   "Equity",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract"
+ },
+ {
+  "cells": [
+   "Common stock—no par value Authorized shares: 3,200.0 Issued shares: 944.8 (2025) and 947.9 (2024)",
+   "590",
+   "592"
+  ],
+  "concept": "us-gaap:CommonStockValue"
+ },
+ {
+  "cells": [
+   "Additional paid-in capital",
+   "7,346",
+   "7,439"
+  ],
+  "concept": "us-gaap:AdditionalPaidInCapitalCommonStock"
+ },
+ {
+  "cells": [
+   "Retained earnings",
+   "24,470",
+   "13,545"
+  ],
+  "concept": "us-gaap:RetainedEarningsAccumulatedDeficit"
+ },
+ {
+  "cells": [
+   "Employee benefit trust",
+   "(3,013)",
+   "(3,013)"
+  ],
+  "concept": "us-gaap:CommonStockSharesHeldInEmployeeTrust"
+ },
+ {
+  "cells": [
+   "Accumulated other comprehensive loss",
+   "(2,880)",
+   "(4,322)"
+  ],
+  "concept": "us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax"
+ },
+ {
+  "cells": [
+   "Other equity",
+   "22",
+   "31"
+  ],
+  "concept": "us-gaap:OtherAdditionalCapital"
+ },
+ {
+  "cells": [
+   "Total equity",
+   "26,535",
+   "14,272"
+  ],
+  "concept": "us-gaap:StockholdersEquity"
+ },
+ {
+  "cells": [
+   "Total liabilities and equity",
+   "$ 112,476",
+   "$ 78,715"
+  ],
+  "concept": "us-gaap:LiabilitiesAndStockholdersEquity"
+ }
+]

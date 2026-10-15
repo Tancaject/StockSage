@@ -1,0 +1,330 @@
+[
+ {
+  "cells": [
+   "CONSOLIDATED BALANCE SHEETS - USD ($) $ in Millions",
+   "Dec. 31, 2025",
+   "Dec. 31, 2024"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Assets",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AssetsAbstract"
+ },
+ {
+  "cells": [
+   "Cash and cash equivalents",
+   "$ 7,105",
+   "$ 5,893"
+  ],
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue"
+ },
+ {
+  "cells": [
+   "Short-term investments",
+   "528",
+   "1,084"
+  ],
+  "concept": "us-gaap:MarketableSecuritiesCurrent"
+ },
+ {
+  "cells": [
+   "Restricted cash and cash equivalents",
+   "631",
+   "545"
+  ],
+  "concept": "us-gaap:RestrictedCashAndCashEquivalentsAtCarryingValue"
+ },
+ {
+  "cells": [
+   "Accounts receivable, net of allowance of $95 and $91, respectively",
+   "3,827",
+   "3,333"
+  ],
+  "concept": "us-gaap:AccountsReceivableNetCurrent"
+ },
+ {
+  "cells": [
+   "Prepaid expenses and other current assets",
+   "1,902",
+   "1,390"
+  ],
+  "concept": "us-gaap:PrepaidExpenseAndOtherAssetsCurrent"
+ },
+ {
+  "cells": [
+   "Total current assets",
+   "13,993",
+   "12,245"
+  ],
+  "concept": "us-gaap:AssetsCurrent"
+ },
+ {
+  "cells": [
+   "Restricted cash and cash equivalents",
+   "1,911",
+   "2,172"
+  ],
+  "concept": "us-gaap:RestrictedCashAndCashEquivalentsNoncurrent"
+ },
+ {
+  "cells": [
+   "Restricted investments",
+   "8,874",
+   "7,019"
+  ],
+  "concept": "us-gaap:RestrictedInvestments"
+ },
+ {
+  "cells": [
+   "Investments",
+   "9,178",
+   "8,460"
+  ],
+  "concept": "uber:MarketableAndNonMarketableInvestments"
+ },
+ {
+  "cells": [
+   "Equity method investments",
+   "287",
+   "302"
+  ],
+  "concept": "us-gaap:EquityMethodInvestments"
+ },
+ {
+  "cells": [
+   "Property and equipment, net",
+   "1,897",
+   "1,952"
+  ],
+  "concept": "us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization"
+ },
+ {
+  "cells": [
+   "Operating lease right-of-use assets",
+   "1,114",
+   "1,158"
+  ],
+  "concept": "us-gaap:OperatingLeaseRightOfUseAsset"
+ },
+ {
+  "cells": [
+   "Intangible assets, net",
+   "1,048",
+   "1,125"
+  ],
+  "concept": "us-gaap:IntangibleAssetsNetExcludingGoodwill"
+ },
+ {
+  "cells": [
+   "Goodwill",
+   "8,931",
+   "8,066"
+  ],
+  "concept": "us-gaap:Goodwill"
+ },
+ {
+  "cells": [
+   "Deferred tax assets",
+   "10,951",
+   "6,171"
+  ],
+  "concept": "us-gaap:DeferredIncomeTaxAssetsNet"
+ },
+ {
+  "cells": [
+   "Other assets",
+   "3,618",
+   "2,574"
+  ],
+  "concept": "us-gaap:OtherAssetsNoncurrent"
+ },
+ {
+  "cells": [
+   "Total assets",
+   "61,802",
+   "51,244"
+  ],
+  "concept": "us-gaap:Assets"
+ },
+ {
+  "cells": [
+   "Liabilities, redeemable non-controlling interests and equity",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LiabilitiesAndStockholdersEquityAbstract"
+ },
+ {
+  "cells": [
+   "Accounts payable",
+   "1,013",
+   "858"
+  ],
+  "concept": "us-gaap:AccountsPayableCurrent"
+ },
+ {
+  "cells": [
+   "Short-term insurance reserves",
+   "3,387",
+   "2,754"
+  ],
+  "concept": "uber:InsuranceReserveCurrent"
+ },
+ {
+  "cells": [
+   "Operating lease liabilities, current",
+   "169",
+   "175"
+  ],
+  "concept": "us-gaap:OperatingLeaseLiabilityCurrent"
+ },
+ {
+  "cells": [
+   "Accrued and other current liabilities",
+   "7,751",
+   "7,689"
+  ],
+  "concept": "uber:AccruedLiabilitiesAndOtherLiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Total current liabilities",
+   "12,320",
+   "11,476"
+  ],
+  "concept": "us-gaap:LiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Long-term insurance reserves",
+   "9,076",
+   "7,042"
+  ],
+  "concept": "uber:InsuranceReserveNoncurrent"
+ },
+ {
+  "cells": [
+   "Long-term debt, net of current portion",
+   "10,521",
+   "8,347"
+  ],
+  "concept": "us-gaap:LongTermDebtNoncurrent"
+ },
+ {
+  "cells": [
+   "Operating lease liabilities, non-current",
+   "1,390",
+   "1,454"
+  ],
+  "concept": "us-gaap:OperatingLeaseLiabilityNoncurrent"
+ },
+ {
+  "cells": [
+   "Other long-term liabilities",
+   "412",
+   "449"
+  ],
+  "concept": "us-gaap:OtherLiabilitiesNoncurrent"
+ },
+ {
+  "cells": [
+   "Total liabilities",
+   "33,719",
+   "28,768"
+  ],
+  "concept": "us-gaap:Liabilities"
+ },
+ {
+  "cells": [
+   "Commitments and contingencies (Note 14)",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:CommitmentsAndContingencies"
+ },
+ {
+  "cells": [
+   "Redeemable non-controlling interests",
+   "165",
+   "93"
+  ],
+  "concept": "us-gaap:RedeemableNoncontrollingInterestEquityCarryingAmount"
+ },
+ {
+  "cells": [
+   "Equity",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:StockholdersEquityAbstract"
+ },
+ {
+  "cells": [
+   "Common stock, $0.00001 par value, 5,000,000 shares authorized for both periods, 2,107,953 and 2,067,905 shares issued and outstanding, respectively",
+   "0",
+   "0"
+  ],
+  "concept": "us-gaap:CommonStockValue"
+ },
+ {
+  "cells": [
+   "Additional paid-in capital",
+   "38,101",
+   "42,801"
+  ],
+  "concept": "us-gaap:AdditionalPaidInCapital"
+ },
+ {
+  "cells": [
+   "Accumulated other comprehensive loss",
+   "(432)",
+   "(517)"
+  ],
+  "concept": "us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax"
+ },
+ {
+  "cells": [
+   "Accumulated deficit",
+   "(10,628)",
+   "(20,726)"
+  ],
+  "concept": "us-gaap:RetainedEarningsAccumulatedDeficit"
+ },
+ {
+  "cells": [
+   "Total Uber Technologies, Inc. stockholders' equity",
+   "27,041",
+   "21,558"
+  ],
+  "concept": "us-gaap:StockholdersEquity"
+ },
+ {
+  "cells": [
+   "Non-redeemable non-controlling interests",
+   "877",
+   "825"
+  ],
+  "concept": "us-gaap:NonredeemableNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Total equity",
+   "27,918",
+   "22,383"
+  ],
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Total liabilities, redeemable non-controlling interests and equity",
+   "$ 61,802",
+   "$ 51,244"
+  ],
+  "concept": "us-gaap:LiabilitiesAndStockholdersEquity"
+ }
+]

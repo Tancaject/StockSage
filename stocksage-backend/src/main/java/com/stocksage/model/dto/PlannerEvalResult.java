@@ -47,6 +47,9 @@ import java.util.List;
  * @param clarificationMatched 已声明标签且观测存在时的匹配结果；否则为 null
  * @param signalDiagnostics 各来源实际候选的安全快照；没有观测时为空
  * @param reasonCodes 实际路由理由代码；没有观测时为空
+ * @param expectedTargets 可选的期望扇出标的
+ * @param actualTargets 计划实际扇出的标的；单标的为空
+ * @param targetsMatched 已声明期望时的匹配结果；否则为 null
  */
 public record PlannerEvalResult(
         String id,
@@ -86,9 +89,13 @@ public record PlannerEvalResult(
         Boolean actualClarification,
         Boolean clarificationMatched,
         List<SignalSnapshot> signalDiagnostics,
-        List<String> reasonCodes
+        List<String> reasonCodes,
+        List<String> expectedTargets,
+        List<String> actualTargets,
+        Boolean targetsMatched
 ) {
     public PlannerEvalResult {
+        actualTargets = actualTargets == null ? List.of() : List.copyOf(actualTargets);
         signalDiagnostics = signalDiagnostics == null ? List.of() : List.copyOf(signalDiagnostics);
         reasonCodes = reasonCodes == null ? List.of() : List.copyOf(reasonCodes);
     }

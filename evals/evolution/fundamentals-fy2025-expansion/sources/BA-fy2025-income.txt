@@ -1,0 +1,28 @@
+Consolidated Statements of Operations - USD ($) $ in Millions | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Total revenues | $ 89,463 | $ 66,517 | $ 77,794
+Total costs and expenses | (85,174) | (68,508) | (70,070)
+Gross profit | 4,289 | (1,991) | 7,724
+Income from operating investments, net | 25 | 71 | 46
+General and administrative expense | (6,090) | (5,021) | (5,168)
+Research and development expense, net | (3,615) | (3,812) | (3,377)
+Gain on dispositions, net | (9,672) | (46) | (2)
+Earnings/(loss) from operations | 4,281 | (10,707) | (773)
+Other income, net | 1,125 | 1,222 | 1,227
+Interest and debt expense | (2,771) | (2,725) | (2,459)
+Earnings/(loss) before income taxes | 2,635 | (12,210) | (2,005)
+Income tax (expense)/benefit | (397) | 381 | (237)
+Net earnings/(loss) | 2,238 | (11,829) | (2,242)
+Less: Net earnings/(loss) attributable to noncontrolling interest | 3 | (12) | (20)
+Net earnings/(loss) attributable to Boeing shareholders | 2,235 | (11,817) | (2,222)
+Less: Mandatory convertible preferred stock dividends accumulated during the period | 345 | 58 | 
+Net earnings/(loss) attributable to Boeing common shareholders | 1,890 | (11,875) | (2,222)
+Net earnings/(loss) attributable to Boeing common shareholders | $ 1,890 | $ (11,875) | $ (2,222)
+Basic earnings/(loss) per share (in dollars per share) | $ 2.49 | $ (18.36) | $ (3.67)
+Diluted earnings/(loss) per share (in dollars per share) | $ 2.48 | $ (18.36) | $ (3.67)
+Sales of products |  |  | 
+Total revenues | $ 75,356 | $ 53,227 | $ 65,581
+Cost of goods and services sold | (73,761) | (57,394) | (59,864)
+Sales of services |  |  | 
+Total revenues | 14,107 | 13,290 | 12,213
+Cost of goods and services sold | $ (11,413) | $ (11,114) | $ (10,206)

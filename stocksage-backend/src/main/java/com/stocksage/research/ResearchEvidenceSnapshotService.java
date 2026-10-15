@@ -78,6 +78,15 @@ public class ResearchEvidenceSnapshotService {
         }
     }
 
+    /** 任务最终证据快照的原始 JSON（即辩论和报告模型实际消费的证据）；供评测读取，不存在时为空。 */
+    public java.util.Optional<String> finalSnapshotJson(Long taskId) {
+        return jdbc.queryForList("""
+                SELECT s.payload_json FROM research_tasks t
+                JOIN research_evidence_snapshots s ON s.id = t.final_evidence_snapshot_id
+                WHERE t.id = ?
+                """, String.class, taskId).stream().findFirst();
+    }
+
     public static class SnapshotException extends IllegalStateException {
         public SnapshotException(Long runId, String reason, Throwable cause) {
             super("研究任务 " + runId + " 的证据快照操作失败（" + reason

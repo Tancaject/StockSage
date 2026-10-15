@@ -1,0 +1,39 @@
+Consolidated Balance Sheets - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024
+Current Assets |  | 
+Cash and cash equivalents | $ 7,268 | $ 3,268
+Accounts receivable | 17,760 | 11,006
+Other receivables | 2,395 | 2,270
+Inventories | 13,744 | 7,589
+Prepaid expenses | 14,315 | 8,341
+Other current assets | 147 | 266
+Total current assets | 55,629 | 32,740
+Noncurrent Assets |  | 
+Investments | 2,802 | 3,216
+Goodwill | 5,898 | 5,770
+Other intangibles, net | 6,521 | 6,166
+Deferred tax assets | 9,959 | 8,001
+Property and equipment, net | 24,675 | 17,102
+Other noncurrent assets | 6,992 | 5,720
+Total assets | 112,476 | 78,715
+Current Liabilities |  | 
+Short-term borrowings and current maturities of long-term debt | 1,635 | 5,117
+Accounts payable | 5,379 | 3,229
+Employee compensation | 2,375 | 2,094
+Sales rebates and discounts | 17,382 | 11,539
+Other current liabilities | 8,457 | 6,397
+Total current liabilities | 35,228 | 28,376
+Noncurrent Liabilities |  | 
+Long-term debt | 40,868 | 28,527
+Long-term income taxes payable | 5,875 | 4,061
+Other noncurrent liabilities | 3,970 | 3,479
+Total noncurrent liabilities | 50,713 | 36,067
+Commitments and Contingencies |  | 
+Equity |  | 
+Common stock—no par value Authorized shares: 3,200.0 Issued shares: 944.8 (2025) and 947.9 (2024) | 590 | 592
+Additional paid-in capital | 7,346 | 7,439
+Retained earnings | 24,470 | 13,545
+Employee benefit trust | (3,013) | (3,013)
+Accumulated other comprehensive loss | (2,880) | (4,322)
+Other equity | 22 | 31
+Total equity | 26,535 | 14,272
+Total liabilities and equity | $ 112,476 | $ 78,715

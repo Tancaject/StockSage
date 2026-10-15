@@ -198,6 +198,7 @@ const props = defineProps({
   message: { type: Object, required: true },
   showRetry: { type: Boolean, default: false },
   showEdit: { type: Boolean, default: false },
+  streaming: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['retry', 'edit'])
@@ -326,7 +327,9 @@ const hasReasoning = computed(() => {
 const researchTimeline = computed(() => buildResearchTimeline({
   reasoning: displayReasoning.value,
   charts: messageCharts.value,
-  hasAnswer: !props.message.streamError && Boolean(String(props.message.content || '').trim()),
+  // 后台研究受理后先返回"已受理"文本，任务结束前不算已有结论。
+  hasAnswer: !props.message.streamError && Boolean(String(props.message.content || '').trim())
+    && !(props.message.task && !['SUCCEEDED', 'FAILED', 'CANCELLED'].includes(props.message.task.status)),
 }))
 
 // 流式推理（含多空辩论）首次到达时自动展开一次。后台任务可能先返回受理文本，
@@ -350,6 +353,16 @@ watch(
     traceTokens.value = 0
     traceTaskOutcome.value = ''
     reasoningError.value = null
+  }
+)
+
+// 回答生成结束时，若思考过程仍展开，补载完整链路：执行计划与逐标的验收只记录在 Trace 中。
+watch(
+  () => props.streaming,
+  (now, before) => {
+    if (before && !now && reasoningOpen.value && props.message.traceId && !traceFetched) {
+      loadTraceReasoning()
+    }
   }
 )
 

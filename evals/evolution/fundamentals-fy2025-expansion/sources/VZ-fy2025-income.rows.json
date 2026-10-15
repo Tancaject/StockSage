@@ -1,0 +1,323 @@
+[
+ {
+  "cells": [
+   "Consolidated Statements of Income - USD ($) shares in Millions, $ in Millions",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 31, 2025",
+   "Dec. 31, 2024",
+   "Dec. 31, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Operating Revenues",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:RevenuesAbstract"
+ },
+ {
+  "cells": [
+   "Operating Revenues",
+   "$ 138,191",
+   "$ 134,788",
+   "$ 133,974"
+  ],
+  "concept": "us-gaap:Revenues"
+ },
+ {
+  "cells": [
+   "Operating Expenses",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:CostsAndExpensesAbstract"
+ },
+ {
+  "cells": [
+   "Selling, general and administrative expense",
+   "33,818",
+   "34,113",
+   "32,745"
+  ],
+  "concept": "us-gaap:SellingGeneralAndAdministrativeExpense"
+ },
+ {
+  "cells": [
+   "Depreciation and amortization expense",
+   "18,349",
+   "17,892",
+   "17,624"
+  ],
+  "concept": "us-gaap:DepreciationAndAmortization"
+ },
+ {
+  "cells": [
+   "Verizon Business Group goodwill impairment",
+   "0",
+   "0",
+   "5,841"
+  ],
+  "concept": "us-gaap:GoodwillImpairmentLoss"
+ },
+ {
+  "cells": [
+   "Total Operating Expenses",
+   "108,932",
+   "106,102",
+   "111,097"
+  ],
+  "concept": "us-gaap:CostsAndExpenses"
+ },
+ {
+  "cells": [
+   "Operating Income",
+   "29,259",
+   "28,686",
+   "22,877"
+  ],
+  "concept": "us-gaap:OperatingIncomeLoss"
+ },
+ {
+  "cells": [
+   "Equity in earnings (losses) of unconsolidated businesses",
+   "0",
+   "(53)",
+   "(53)"
+  ],
+  "concept": "us-gaap:IncomeLossFromEquityMethodInvestments"
+ },
+ {
+  "cells": [
+   "Other income (expense), net",
+   "107",
+   "995",
+   "(313)"
+  ],
+  "concept": "us-gaap:OtherNonoperatingIncomeExpense"
+ },
+ {
+  "cells": [
+   "Interest expense",
+   "(6,694)",
+   "(6,649)",
+   "(5,524)"
+  ],
+  "concept": "us-gaap:InterestExpenseNonoperating"
+ },
+ {
+  "cells": [
+   "Income Before Provision For Income Taxes",
+   "22,672",
+   "22,979",
+   "16,987"
+  ],
+  "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Provision for income taxes",
+   "(5,064)",
+   "(5,030)",
+   "(4,892)"
+  ],
+  "concept": "us-gaap:IncomeTaxExpenseBenefit"
+ },
+ {
+  "cells": [
+   "Net Income",
+   "17,608",
+   "17,949",
+   "12,095"
+  ],
+  "concept": "us-gaap:ProfitLoss"
+ },
+ {
+  "cells": [
+   "Net income attributable to noncontrolling interests",
+   "434",
+   "443",
+   "481"
+  ],
+  "concept": "us-gaap:NetIncomeLossAttributableToNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Net income attributable to Verizon",
+   "17,174",
+   "17,506",
+   "11,614"
+  ],
+  "concept": "us-gaap:NetIncomeLoss"
+ },
+ {
+  "cells": [
+   "Net Income",
+   "$ 17,608",
+   "$ 17,949",
+   "$ 12,095"
+  ],
+  "concept": "us-gaap:ProfitLoss"
+ },
+ {
+  "cells": [
+   "Basic Earnings Per Common Share",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:EarningsPerShareBasicAbstract"
+ },
+ {
+  "cells": [
+   "Net income attributable to Verizon (in USD per share)",
+   "$ 4.06",
+   "$ 4.15",
+   "$ 2.76"
+  ],
+  "concept": "us-gaap:EarningsPerShareBasic"
+ },
+ {
+  "cells": [
+   "Weighted-average shares outstanding (in shares)",
+   "4,226",
+   "4,218",
+   "4,211"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfSharesOutstandingBasic"
+ },
+ {
+  "cells": [
+   "Diluted Earnings Per Common Share",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:EarningsPerShareDilutedAbstract"
+ },
+ {
+  "cells": [
+   "Net income attributable to Verizon (in USD per share)",
+   "$ 4.06",
+   "$ 4.14",
+   "$ 2.75"
+  ],
+  "concept": "us-gaap:EarningsPerShareDiluted"
+ },
+ {
+  "cells": [
+   "Weighted-average shares outstanding (in shares)",
+   "4,231",
+   "4,223",
+   "4,215"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding"
+ },
+ {
+  "cells": [
+   "Service revenues and other",
+   "",
+   "",
+   ""
+  ],
+  "concept": "srt:ProductOrServiceAxis"
+ },
+ {
+  "cells": [
+   "Operating Revenues",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:RevenuesAbstract"
+ },
+ {
+  "cells": [
+   "Operating Revenues",
+   "$ 112,721",
+   "$ 111,571",
+   "$ 109,652"
+  ],
+  "concept": "us-gaap:Revenues"
+ },
+ {
+  "cells": [
+   "Wireless equipment",
+   "",
+   "",
+   ""
+  ],
+  "concept": "srt:ProductOrServiceAxis"
+ },
+ {
+  "cells": [
+   "Operating Revenues",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:RevenuesAbstract"
+ },
+ {
+  "cells": [
+   "Operating Revenues",
+   "25,470",
+   "23,217",
+   "24,322"
+  ],
+  "concept": "us-gaap:Revenues"
+ },
+ {
+  "cells": [
+   "Operating Expenses",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:CostsAndExpensesAbstract"
+ },
+ {
+  "cells": [
+   "Cost of services and wireless equipment",
+   "28,976",
+   "26,100",
+   "26,787"
+  ],
+  "concept": "us-gaap:CostOfGoodsAndServicesSold"
+ },
+ {
+  "cells": [
+   "Service",
+   "",
+   "",
+   ""
+  ],
+  "concept": "srt:ProductOrServiceAxis"
+ },
+ {
+  "cells": [
+   "Operating Expenses",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:CostsAndExpensesAbstract"
+ },
+ {
+  "cells": [
+   "Cost of services and wireless equipment",
+   "$ 27,789",
+   "$ 27,997",
+   "$ 28,100"
+  ],
+  "concept": "us-gaap:CostOfGoodsAndServicesSold"
+ }
+]

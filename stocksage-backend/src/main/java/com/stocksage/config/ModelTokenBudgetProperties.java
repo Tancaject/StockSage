@@ -103,6 +103,52 @@ public record ModelTokenBudgetProperties(Long maxTokens, String providerFingerpr
         return sum(input, output, reasoning);
     }
 
+    /**
+     * 只放行能被 {@link #reserve} 的"输入+输出+思考"上限完全覆盖的聊天请求选项。
+     *
+     * <ul>
+     *   <li>n 只能为 1；</li>
+     *   <li>extraBody 只允许 enable_thinking 和 thinking_budget：思考预算不超过该模型的思考上限，
+     *       max_tokens（百炼口径包含思考）不超过输出上限加思考上限；</li>
+     *   <li>带工具定义时必须关闭内部自动执行，保证一条调用记录只对应一次模型请求。</li>
+     * </ul>
+     *
+     * @param request ModelInvocationAdvisor 记录的请求选项
+     */
+    public static void requireBoundedChatRequest(JsonNode request, JsonNode frozen, String model) {
+        JsonNode n = request.path("n");
+        require(n.isMissingNode() || (n.isIntegralNumber() && n.canConvertToLong() && n.longValue() == 1),
+                "unbounded request: n must be 1");
+        // 未记录的标志按"存在"处理，旧记录不会被放行。
+        if (request.path("extraBodyPresent").asBoolean(true)) {
+            JsonNode limit = frozen.path("models").path(model == null ? "" : model);
+            require(limit.isObject(), "model limit unavailable");
+            long reasoning = number(limit, "maxReasoningTokens");
+            JsonNode keys = request.path("extraBodyKeys");
+            require(keys.isArray() && !keys.isEmpty(), "unbounded request: extraBody keys unknown");
+            boolean budgetKey = false;
+            for (JsonNode key : keys) {
+                require(java.util.Set.of("enable_thinking", "thinking_budget").contains(key.asText()),
+                        "unbounded request: extraBody key not allowed");
+                budgetKey |= "thinking_budget".equals(key.asText());
+            }
+            if (budgetKey) {
+                JsonNode budget = request.path("thinkingBudget");
+                require(budget.isIntegralNumber() && budget.longValue() >= 0 && budget.longValue() <= reasoning,
+                        "unbounded request: thinking budget exceeds model reasoning limit");
+            }
+            JsonNode maxTokens = request.path("maxTokens");
+            require(maxTokens.isIntegralNumber() && maxTokens.longValue() > 0
+                            && maxTokens.longValue() <= sum(0, number(limit, "maxOutputTokens"), reasoning),
+                    "unbounded request: max tokens exceed model output and reasoning limits");
+        }
+        if (request.path("toolsPresent").asBoolean(true)) {
+            JsonNode internal = request.path("internalToolExecutionEnabled");
+            require(internal.isBoolean() && !internal.booleanValue(),
+                    "unbounded request: tools require external execution");
+        }
+    }
+
     public static long reserveEmbedding(JsonNode frozen, JsonNode provider, String model, int inputCount,
             long contextTokens, Instant now) {
         validateFrozenBudget(frozen, now);

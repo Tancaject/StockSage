@@ -38,19 +38,24 @@ public record ModelPricingProperties(String providerFingerprint, String version,
         rates = Collections.unmodifiableMap(new TreeMap<>(rates));
     }
 
-    // ponytail: flat nominal rates only; tier/cache billing needs provider usage details and a versioned tariff.
-    public record Rate(BigDecimal inputPerMillion, BigDecimal outputPerMillion, long maxInputTokens) {
+    // ponytail: flat nominal rates; the optional cache-hit rate only applies to provider-reported cached input tokens.
+    public record Rate(BigDecimal inputPerMillion, BigDecimal outputPerMillion, long maxInputTokens,
+                       BigDecimal cachedInputPerMillion) {
         public Rate {
             require(inputPerMillion != null && inputPerMillion.signum() >= 0,
                     "inputPerMillion must be nonnegative");
             require(outputPerMillion != null && outputPerMillion.signum() >= 0,
                     "outputPerMillion must be nonnegative");
             require(maxInputTokens > 0, "maxInputTokens must be positive");
+            require(cachedInputPerMillion == null || cachedInputPerMillion.signum() >= 0,
+                    "cachedInputPerMillion must be nonnegative");
         }
 
         private Map<String, Object> snapshot() {
-            return Map.of("inputPerMillion", inputPerMillion.toPlainString(), "outputPerMillion", outputPerMillion.toPlainString(),
-                    "maxInputTokens", maxInputTokens);
+            Map<String, Object> snapshot = new TreeMap<>(Map.of("inputPerMillion", inputPerMillion.toPlainString(),
+                    "outputPerMillion", outputPerMillion.toPlainString(), "maxInputTokens", maxInputTokens));
+            if (cachedInputPerMillion != null) snapshot.put("cachedInputPerMillion", cachedInputPerMillion.toPlainString());
+            return snapshot;
         }
     }
 

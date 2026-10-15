@@ -171,6 +171,11 @@ class EdgarService:
         ("Item 2.", "Management's Discussion and Analysis"),
         ("Item 3.", "Quantitative and Qualitative Disclosures About Market Risk"),
         ("Item 4.", "Controls and Procedures"),
+        # Part II。Item 1–4 与 Part I 编号重复，只登记编号唯一的几项来截断 Part I Item 4；
+        # 否则风险因素会并进 "Item 4. Controls and Procedures"。
+        ("Item 1A.", "Risk Factors"),
+        ("Item 5.", "Other Information"),
+        ("Item 6.", "Exhibits"),
     ]
 
     def get_filing_content(self, document_url: str, filing_type: str = "10-K") -> dict:
@@ -368,7 +373,8 @@ class EdgarService:
         for item_num, item_title in items:
             item_pattern = self._item_number_pattern(item_num)
             # 匹配标题开头的几个词，以兼容较长或变化的标题。
-            title_prefix = re.escape(item_title.split()[0]) if item_title else ""
+            # 字母间允许一个空格：分段排版的标题转文本后会变成 "RIS K FACTORS"、"B USINESS"。
+            title_prefix = r" ?".join(re.escape(char) for char in item_title.split()[0]) if item_title else ""
             pattern = re.compile(
                 rf"^\s*(?:#{{1,6}}\s*)?{item_pattern}(?:\s|[-—:.])*{title_prefix}",
                 re.IGNORECASE | re.MULTILINE,
@@ -478,6 +484,10 @@ class EdgarService:
         "NetIncome": [
             "us-gaap:NetIncomeLoss",
         ],
+        # 现金流量表起点的合并净利润（含少数股东权益）；和归母净利润相同时不输出。
+        "ConsolidatedNetIncome": [
+            "us-gaap:ProfitLoss",
+        ],
         "TotalAssets": [
             "us-gaap:Assets",
         ],
@@ -501,47 +511,79 @@ class EdgarService:
             "us-gaap:LongTermDebt",
             "us-gaap:LongTermDebtNoncurrent",
         ],
+        # 自由现金流和估值需要资本开支、现金和股本。
+        "CapitalExpenditure": [
+            "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+            "us-gaap:PaymentsToAcquireProductiveAssets",
+            "us-gaap:PaymentsToAcquireOtherPropertyPlantAndEquipment",
+        ],
+        "Cash": [
+            "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+            "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+        ],
+        "DilutedShares": [
+            "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+        ],
     }
-    _INSTANT_METRICS = {"TotalAssets", "TotalLiabilities", "StockholdersEquity", "TotalDebt"}
+    _INSTANT_METRICS = {"TotalAssets", "TotalLiabilities", "StockholdersEquity", "TotalDebt", "Cash"}
+    # 银行（SIC 6020-6039）的经营现金流和资本开支没有分析意义，换成净利息收入和信贷损失拨备。
+    _BANK_DROPPED = {"OperatingCashFlow", "CapitalExpenditure"}
+    _BANK_CONCEPTS = {
+        "NetInterestIncome": ["us-gaap:InterestIncomeExpenseNet"],
+        "CreditLossProvision": [
+            "us-gaap:ProvisionForLoanLeaseAndOtherLosses",
+            "us-gaap:ProvisionForLoanAndLeaseLosses",
+        ],
+    }
+    # 最新期末比公司最新期末早一年以上的指标，说明公司已改用其它概念，展示出来会被当成当前数据。
+    _STALE_METRIC_DAYS = 400
 
-    def get_xbrl(self, ticker: str) -> dict:
+    def get_xbrl(self, ticker: str, period: str = "annual") -> dict:
         """
         从 XBRL companyfacts API 获取结构化财务数据。
 
         返回按实际 start/end 排列的年度指标；filing_fiscal_year 只表示公告标签。
+        period="quarterly" 时只取 10-Q 中约 90 天的单季事实：10-Q 不含第四财季，这里不做年报减三季的推算。
         """
+        quarterly = period == "quarterly"
         cik = self._resolve_cik(ticker)
         url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
         data = self._get(url).json()
 
         company_name = data.get("entityName", ticker)
         facts = data.get("facts", {}).get("us-gaap", {})
+        concept_table = dict(self._XBRL_CONCEPTS)
+        if self._is_bank(cik):
+            for label in self._BANK_DROPPED:
+                concept_table.pop(label, None)
+            concept_table.update(self._BANK_CONCEPTS)
 
         # 10-K 的资产负债事实也可能含季度时点；以同份公司事实中的全年期间确认年末。
         annual_ends = set()
-        for label, concepts in self._XBRL_CONCEPTS.items():
+        for label, concepts in concept_table.items():
             if label in self._INSTANT_METRICS:
                 continue
             for concept in concepts:
                 units = facts.get(concept.split(":")[-1], {}).get("units", {})
                 for entries in units.values():
-                    annual_ends.update(row["end"] for row in self._filter_annual(entries))
+                    annual_ends.update(row["end"] for row in self._filter_annual(entries, quarterly=quarterly))
 
         metrics = {}
-        for label, concept_keys in self._XBRL_CONCEPTS.items():
+        for label, concept_keys in concept_table.items():
             best = None
             for concept in concept_keys:
                 concept_name = concept.split(":")[-1]
                 if concept_name not in facts:
                     continue
                 units_data = facts[concept_name].get("units", {})
-                for unit_key in ["USD", "USD/shares"]:
+                for unit_key in ["USD", "USD/shares", "shares"]:
                     if unit_key not in units_data:
                         continue
                     annual = self._filter_annual(
                         units_data[unit_key],
                         instant=label in self._INSTANT_METRICS,
                         annual_ends=annual_ends,
+                        quarterly=quarterly,
                     )
                     if not annual:
                         continue
@@ -557,6 +599,17 @@ class EdgarService:
             if best:
                 metrics[label] = best
 
+        consolidated, parent = metrics.get("ConsolidatedNetIncome"), metrics.get("NetIncome")
+        if consolidated and parent and consolidated["data"][-1]["value"] == parent["data"][-1]["value"]:
+            del metrics["ConsolidatedNetIncome"]
+
+        if metrics:
+            newest = max(date.fromisoformat(metric["data"][-1]["end"]) for metric in metrics.values())
+            metrics = {
+                label: metric for label, metric in metrics.items()
+                if (newest - date.fromisoformat(metric["data"][-1]["end"])).days <= self._STALE_METRIC_DAYS
+            }
+
         return {
             "ticker": ticker.upper(),
             "company_name": company_name,
@@ -565,14 +618,23 @@ class EdgarService:
             "metrics": metrics,
         }
 
+    def _is_bank(self, cik: str) -> bool:
+        """SEC submissions 的 SIC 6020-6039 为商业银行和储蓄机构；取不到时按一般公司处理。"""
+        try:
+            sic = str(self._get(f"https://data.sec.gov/submissions/CIK{cik}.json").json().get("sic") or "")
+        except httpx.HTTPError:
+            return False
+        return sic.isdigit() and 6020 <= int(sic) <= 6039
+
     @staticmethod
     def _filter_annual(
         entries: list[dict], *, instant: bool = False, annual_ends: set[str] | None = None,
+        quarterly: bool = False,
     ) -> list[dict]:
         """按实际期间取最新年度事实；公告 fy 保留为来源，不猜测事实的 fiscal_year。"""
         annual = {}
         for e in entries:
-            if e.get("form") not in {"10-K", "10-K/A"}:
+            if e.get("form") not in ({"10-Q", "10-Q/A"} if quarterly else {"10-K", "10-K/A"}):
                 continue
             value = e.get("val")
             if isinstance(value, bool) or not isinstance(value, (int, float)) or not isfinite(value):
@@ -588,7 +650,8 @@ class EdgarService:
                     continue
             # SEC annual-frame tolerance includes 52/53-week and non-calendar fiscal years.
             # https://www.sec.gov/search-filings/edgar-application-programming-interfaces
-            elif start is None or not 335 <= (end - start).days <= 395:
+            elif start is None or not ((80 <= (end - start).days <= 100) if quarterly
+                                       else (335 <= (end - start).days <= 395)):
                 continue
             if filed < end:
                 continue

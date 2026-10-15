@@ -1,0 +1,314 @@
+[
+ {
+  "cells": [
+   "Consolidated Statements of Cash Flows - USD ($) $ in Millions",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 31, 2025",
+   "Dec. 31, 2024",
+   "Dec. 31, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Cash Flows from Operating Activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Net Income",
+   "$ 17,608",
+   "$ 17,949",
+   "$ 12,095"
+  ],
+  "concept": "us-gaap:ProfitLoss"
+ },
+ {
+  "cells": [
+   "Adjustments to reconcile net income to net cash provided by operating activities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Depreciation and amortization expense",
+   "18,349",
+   "17,892",
+   "17,624"
+  ],
+  "concept": "us-gaap:DepreciationAndAmortization"
+ },
+ {
+  "cells": [
+   "Employee retirement benefits",
+   "1,025",
+   "(52)",
+   "1,206"
+  ],
+  "concept": "us-gaap:EmployeeBenefitsAndShareBasedCompensationNoncash"
+ },
+ {
+  "cells": [
+   "Deferred income taxes",
+   "2,340",
+   "815",
+   "2,388"
+  ],
+  "concept": "us-gaap:DeferredIncomeTaxExpenseBenefit"
+ },
+ {
+  "cells": [
+   "Provision for expected credit losses",
+   "2,349",
+   "2,338",
+   "2,214"
+  ],
+  "concept": "us-gaap:ProvisionForDoubtfulAccounts"
+ },
+ {
+  "cells": [
+   "Equity in losses of unconsolidated businesses, inclusive of dividends received",
+   "42",
+   "75",
+   "84"
+  ],
+  "concept": "us-gaap:IncomeLossFromEquityMethodInvestmentsNetOfDividendsOrDistributions"
+ },
+ {
+  "cells": [
+   "Verizon Business Group goodwill impairment",
+   "0",
+   "0",
+   "5,841"
+  ],
+  "concept": "us-gaap:GoodwillImpairmentLoss"
+ },
+ {
+  "cells": [
+   "Changes in current assets and liabilities, net of effects from acquisition/disposition of businesses:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInOperatingCapitalAbstract"
+ },
+ {
+  "cells": [
+   "Accounts receivable",
+   "(2,513)",
+   "(2,565)",
+   "(2,198)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInAccountsReceivable"
+ },
+ {
+  "cells": [
+   "Inventories",
+   "(232)",
+   "(196)",
+   "287"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInInventories"
+ },
+ {
+  "cells": [
+   "Prepaid expenses and other",
+   "(1,394)",
+   "(626)",
+   "(435)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets"
+ },
+ {
+  "cells": [
+   "Accounts payable and accrued liabilities and Other current liabilities",
+   "1,819",
+   "1,109",
+   "2,079"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInAccountsPayableAndAccruedLiabilities"
+ },
+ {
+  "cells": [
+   "Other, net",
+   "(2,256)",
+   "173",
+   "(3,710)"
+  ],
+  "concept": "us-gaap:OtherOperatingActivitiesCashFlowStatement"
+ },
+ {
+  "cells": [
+   "Net cash provided by operating activities",
+   "37,137",
+   "36,912",
+   "37,475"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+ },
+ {
+  "cells": [
+   "Cash Flows from Investing Activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Capital expenditures (including capitalized software)",
+   "(17,011)",
+   "(17,090)",
+   "(18,767)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireOtherProductiveAssets"
+ },
+ {
+  "cells": [
+   "Cash paid related to acquisitions of businesses, net of cash acquired",
+   "0",
+   "0",
+   "(30)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireBusinessesNetOfCashAcquired"
+ },
+ {
+  "cells": [
+   "Acquisitions of wireless licenses",
+   "(450)",
+   "(900)",
+   "(5,796)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireIntangibleAssets"
+ },
+ {
+  "cells": [
+   "Other, net",
+   "801",
+   "(684)",
+   "1,161"
+  ],
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities"
+ },
+ {
+  "cells": [
+   "Net cash used in investing activities",
+   "(16,660)",
+   "(18,674)",
+   "(23,432)"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivities"
+ },
+ {
+  "cells": [
+   "Cash Flows from Financing Activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Proceeds from long-term borrowings",
+   "18,268",
+   "3,146",
+   "2,018"
+  ],
+  "concept": "vz:ProceedsFromIssuanceOfLongtermDebtExcludingAssetbackedDebt"
+ },
+ {
+  "cells": [
+   "Proceeds from asset-backed long-term borrowings",
+   "9,338",
+   "12,422",
+   "6,594"
+  ],
+  "concept": "us-gaap:ProceedsFromIssuanceOfSecuredDebt"
+ },
+ {
+  "cells": [
+   "Repayments of long-term borrowings and finance lease obligations",
+   "(11,352)",
+   "(11,854)",
+   "(6,181)"
+  ],
+  "concept": "vz:RepaymentsOfLongTermBorrowingsAndFinanceLeaseObligations"
+ },
+ {
+  "cells": [
+   "Repayments of asset-backed long-term borrowings",
+   "(8,437)",
+   "(8,490)",
+   "(4,443)"
+  ],
+  "concept": "us-gaap:RepaymentsOfSecuredDebt"
+ },
+ {
+  "cells": [
+   "Dividends paid",
+   "(11,481)",
+   "(11,249)",
+   "(11,025)"
+  ],
+  "concept": "us-gaap:PaymentsOfDividends"
+ },
+ {
+  "cells": [
+   "Other, net",
+   "(1,949)",
+   "(1,075)",
+   "(1,620)"
+  ],
+  "concept": "us-gaap:ProceedsFromPaymentsForOtherFinancingActivities"
+ },
+ {
+  "cells": [
+   "Net cash used in financing activities",
+   "(5,613)",
+   "(17,100)",
+   "(14,657)"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivities"
+ },
+ {
+  "cells": [
+   "Increase (decrease) in cash, cash equivalents and restricted cash",
+   "14,864",
+   "1,138",
+   "(614)"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
+ },
+ {
+  "cells": [
+   "Cash, cash equivalents and restricted cash, beginning of period",
+   "4,635",
+   "3,497",
+   "4,111"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Cash, cash equivalents and restricted cash, end of period",
+   "$ 19,499",
+   "$ 4,635",
+   "$ 3,497"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ }
+]

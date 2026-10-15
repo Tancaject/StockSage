@@ -102,6 +102,70 @@ public class AnalysisState {
     /** 问题相关补证的单步计划和执行结果；旧 checkpoint 缺失该字段时保持未开始。 */
     private EvidenceReplanState evidenceReplanState;
 
+    /** 取证循环（ReAct）的逐步状态；旧 checkpoint 缺失该字段时视为未开始。 */
+    private EvidenceLoopState evidenceLoopState;
+
+    /** 取证循环的持久化生命周期。 */
+    public enum EvidenceLoopStatus {
+        RUNNING,
+        STOPPED
+    }
+
+    /** 单个工具调用的生命周期：PLANNED 记录确切调用，REVALIDATED 表示结果已入账并重跑证据门禁。 */
+    public enum EvidenceLoopCallStatus {
+        PLANNED,
+        REVALIDATED
+    }
+
+    /**
+     * 取证循环状态。接管时 STOPPED 直接返回，PLANNED 调用直接执行，都不再请求模型；
+     * 对话历史由已保存的轮次重建。
+     *
+     * @param policyVersion 循环契约版本
+     * @param status 生命周期
+     * @param rounds 已通过校验的轮次（被拒绝或主动结束的轮次不保存调用）
+     * @param toolCalls 已计入上限的工具调用数
+     * @param stagnantRounds 连续无新增证据的轮数
+     * @param stopReason 停止原因；RUNNING 时为空
+     */
+    public record EvidenceLoopState(
+            int policyVersion,
+            EvidenceLoopStatus status,
+            List<EvidenceLoopRound> rounds,
+            int toolCalls,
+            int stagnantRounds,
+            String stopReason
+    ) {
+        public EvidenceLoopState {
+            rounds = rounds == null ? List.of() : List.copyOf(rounds);
+        }
+    }
+
+    /** 一轮通过校验的工具调用。 */
+    public record EvidenceLoopRound(int round, List<EvidenceLoopCall> calls) {
+        public EvidenceLoopRound {
+            calls = calls == null ? List.of() : List.copyOf(calls);
+        }
+    }
+
+    /**
+     * 一次工具调用。保存模型给出的原始参数以便接管后重新校验，observation 是回传给模型的压缩摘要。
+     */
+    public record EvidenceLoopCall(
+            String toolCallId,
+            String toolName,
+            String argumentsJson,
+            String effectKey,
+            EvidenceLoopCallStatus status,
+            String outcome,
+            List<String> addedEvidenceIds,
+            String observation
+    ) {
+        public EvidenceLoopCall {
+            addedEvidenceIds = addedEvidenceIds == null ? List.of() : List.copyOf(addedEvidenceIds);
+        }
+    }
+
     /** 单步补证只允许一个服务端映射的只读动作。 */
     public enum EvidenceReplanAction {
         FOCUSED_NEWS_SEARCH

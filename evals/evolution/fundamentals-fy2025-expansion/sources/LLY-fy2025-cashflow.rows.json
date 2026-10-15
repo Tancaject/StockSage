@@ -1,0 +1,341 @@
+[
+ {
+  "cells": [
+   "Consolidated Statements of Cash Flows - USD ($) $ in Millions",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 31, 2025",
+   "Dec. 31, 2024",
+   "Dec. 31, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Cash Flows from Operating Activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Net income",
+   "$ 20,640",
+   "$ 10,590",
+   "$ 5,240"
+  ],
+  "concept": "us-gaap:NetIncomeLoss"
+ },
+ {
+  "cells": [
+   "Adjustments to Reconcile Net Income to Cash Flows from Operating Activities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Depreciation and amortization",
+   "1,997",
+   "1,767",
+   "1,527"
+  ],
+  "concept": "us-gaap:DepreciationDepletionAndAmortization"
+ },
+ {
+  "cells": [
+   "Change in deferred income taxes",
+   "(1,707)",
+   "(2,683)",
+   "(2,341)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInDeferredIncomeTaxes"
+ },
+ {
+  "cells": [
+   "Stock-based compensation expense",
+   "626",
+   "646",
+   "629"
+  ],
+  "concept": "us-gaap:ShareBasedCompensation"
+ },
+ {
+  "cells": [
+   "Gains on sale of product rights",
+   "(180)",
+   "(224)",
+   "(1,879)"
+  ],
+  "concept": "us-gaap:GainLossOnDispositionOfIntangibleAssets"
+ },
+ {
+  "cells": [
+   "Acquired in-process research and development",
+   "2,910",
+   "3,280",
+   "3,800"
+  ],
+  "concept": "us-gaap:ResearchAndDevelopmentAssetAcquiredOtherThanThroughBusinessCombinationWrittenOff"
+ },
+ {
+  "cells": [
+   "Other operating activities, net",
+   "620",
+   "826",
+   "319"
+  ],
+  "concept": "us-gaap:OtherOperatingActivitiesCashFlowStatement"
+ },
+ {
+  "cells": [
+   "Other changes in operating assets and liabilities, net of acquisitions and divestitures:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInOperatingCapitalAbstract"
+ },
+ {
+  "cells": [
+   "Receivables—(increase) decrease",
+   "(7,000)",
+   "(2,155)",
+   "(2,451)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInAccountsAndOtherReceivables"
+ },
+ {
+  "cells": [
+   "Inventories—(increase) decrease",
+   "(4,671)",
+   "(2,507)",
+   "(1,425)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInInventories"
+ },
+ {
+  "cells": [
+   "Prepaid expenses and other assets—(increase) decrease",
+   "(6,609)",
+   "(3,331)",
+   "(3,453)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets"
+ },
+ {
+  "cells": [
+   "Accounts payable and other liabilities—increase (decrease)",
+   "10,187",
+   "2,609",
+   "4,274"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInAccountsPayableAndAccruedLiabilities"
+ },
+ {
+  "cells": [
+   "Net Cash Provided by Operating Activities",
+   "16,813",
+   "8,818",
+   "4,240"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+ },
+ {
+  "cells": [
+   "Cash Flows from Investing Activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Purchases of property and equipment",
+   "(7,841)",
+   "(5,058)",
+   "(3,448)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireOtherPropertyPlantAndEquipment"
+ },
+ {
+  "cells": [
+   "Proceeds from sales of and distributions from noncurrent investments",
+   "964",
+   "374",
+   "508"
+  ],
+  "concept": "us-gaap:ProceedsFromSaleAndMaturityOfOtherInvestments"
+ },
+ {
+  "cells": [
+   "Purchases of noncurrent investments",
+   "(645)",
+   "(677)",
+   "(731)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireOtherInvestments"
+ },
+ {
+  "cells": [
+   "Proceeds from sale of product rights",
+   "218",
+   "601",
+   "1,604"
+  ],
+  "concept": "us-gaap:ProceedsFromSaleOfIntangibleAssets"
+ },
+ {
+  "cells": [
+   "Purchases of in-process research and development",
+   "(3,008)",
+   "(3,346)",
+   "(3,944)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireInProcessResearchAndDevelopment"
+ },
+ {
+  "cells": [
+   "Cash paid for acquisitions, net of cash acquired",
+   "(661)",
+   "(948)",
+   "(1,044)"
+  ],
+  "concept": "us-gaap:OtherPaymentsToAcquireBusinesses"
+ },
+ {
+  "cells": [
+   "Other investing activities, net",
+   "1",
+   "(248)",
+   "(98)"
+  ],
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities"
+ },
+ {
+  "cells": [
+   "Net Cash Used for Investing Activities",
+   "(10,972)",
+   "(9,302)",
+   "(7,153)"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivities"
+ },
+ {
+  "cells": [
+   "Cash Flows from Financing Activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Dividends paid",
+   "(5,384)",
+   "(4,680)",
+   "(4,069)"
+  ],
+  "concept": "us-gaap:PaymentsOfDividends"
+ },
+ {
+  "cells": [
+   "Net change in short-term borrowings",
+   "(4,338)",
+   "(1,852)",
+   "4,691"
+  ],
+  "concept": "us-gaap:ProceedsFromRepaymentsOfShortTermDebt"
+ },
+ {
+  "cells": [
+   "Proceeds from issuance of long-term debt",
+   "13,167",
+   "11,417",
+   "3,959"
+  ],
+  "concept": "us-gaap:ProceedsFromIssuanceOfLongTermDebt"
+ },
+ {
+  "cells": [
+   "Repayments of long-term debt",
+   "(778)",
+   "(664)",
+   "0"
+  ],
+  "concept": "us-gaap:RepaymentsOfLongTermDebt"
+ },
+ {
+  "cells": [
+   "Purchases of common stock",
+   "(4,108)",
+   "(2,500)",
+   "(750)"
+  ],
+  "concept": "us-gaap:PaymentsForRepurchaseOfCommonStock"
+ },
+ {
+  "cells": [
+   "Other financing activities, net",
+   "(772)",
+   "(491)",
+   "(335)"
+  ],
+  "concept": "us-gaap:ProceedsFromPaymentsForOtherFinancingActivities"
+ },
+ {
+  "cells": [
+   "Net Cash Provided by (Used for) Financing Activities",
+   "(2,213)",
+   "1,230",
+   "3,496"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivities"
+ },
+ {
+  "cells": [
+   "Effect of exchange rate changes on cash and cash equivalents",
+   "372",
+   "(297)",
+   "169"
+  ],
+  "concept": "us-gaap:EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Net increase in cash and cash equivalents",
+   "4,000",
+   "449",
+   "752"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
+ },
+ {
+  "cells": [
+   "Cash and cash equivalents at beginning of year",
+   "3,268",
+   "2,819",
+   "2,067"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations"
+ },
+ {
+  "cells": [
+   "Cash and Cash Equivalents at End of Year",
+   "$ 7,268",
+   "$ 3,268",
+   "$ 2,819"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations"
+ }
+]

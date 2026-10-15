@@ -14,11 +14,11 @@ import com.stocksage.agent.intent.TimeSensitivity;
 import com.stocksage.client.DataServicePayloads;
 import com.stocksage.agent.PlanAction;
 import com.stocksage.capability.CapabilityResult;
+import com.stocksage.capability.LocalFilingTextCapabilityAdapter;
 import com.stocksage.capability.CapabilityException;
 import com.stocksage.capability.CapabilityGateway;
 import com.stocksage.capability.CapabilityInvocationContext;
 import com.stocksage.capability.LocalNewsSearchCapabilityAdapter;
-import com.stocksage.capability.LocalWebSearchCapabilityAdapter;
 import com.stocksage.harness.DeepResearchCompletionPolicy;
 import com.stocksage.evidence.EvidenceLedger;
 import com.stocksage.evidence.EvidenceFreshness;
@@ -113,6 +113,8 @@ public class DeepEvidenceCollector {
     /** 定义最低证据、恢复白名单和尝试上限。 */
     private final DeepResearchCompletionPolicy completionPolicy;
     private final EvidenceEnvelopeMapper evidenceEnvelopeMapper;
+    /** 把行情和 SEC 财务改写成给模型读的紧凑正文。 */
+    private final com.stocksage.evidence.adapter.EvidencePresenter evidencePresenter;
     private final CapabilityGateway capabilityGateway;
 
     /** 搜索类工具最多返回的结果数。 */
@@ -204,7 +206,8 @@ public class DeepEvidenceCollector {
                 "DEEP prefetch started: collecting deterministic tool data for ticker=" + ticker + ".");
 
         // 依次调用三类确定性工具构造证据；每类内部可并行，但维度结果独立验收。
-        EvidenceSnapshot fundamentals = buildFundamentalsSnapshot(ticker, agentState.getTimeSensitivity());
+        EvidenceSnapshot fundamentals = buildFundamentalsSnapshot(ticker, agentState.getTimeSensitivity(),
+                userQuery, userId, traceId, conversationId);
         agentState.setFundamentalsReport(fundamentals.text());
         boolean fundamentalsOk = fundamentals.hasUsableData();
         emitProgress(traceId, conversationId, "observation",
@@ -323,8 +326,11 @@ public class DeepEvidenceCollector {
 
         if (recoveryActions.contains(RecoveryAction.RETRY_FUNDAMENTALS)) {
             attempts.merge(RecoveryAction.RETRY_FUNDAMENTALS, 1, Integer::sum);
-            EvidenceSnapshot fundamentals = buildFundamentalsSnapshot(ticker, state.getTimeSensitivity());
+            EvidenceSnapshot fundamentals = buildFundamentalsSnapshot(ticker, state.getTimeSensitivity(),
+                    state.getQuery(), userId, traceId, conversationId);
             state.setFundamentalsReport(fundamentals.text());
+            // 基本面快照整体重建，其中的 10-K 段落（RAG 维度）也一并替换；循环证据在恢复之后才追加。
+            merged.removeIf(item -> item.dimension() == EvidenceDimension.RAG);
             replaceDimension(merged, EvidenceDimension.FUNDAMENTALS, fundamentals.evidence());
             fundamentalsOk = fundamentals.hasUsableData();
             emitProgress(traceId, conversationId, "observation",
@@ -505,6 +511,80 @@ public class DeepEvidenceCollector {
         return reevaluateEvidence(state, recoveryAttempts, traceId);
     }
 
+    /**
+     * 把取证循环中一次已授权的能力结果追加到快照，并重新执行当前 Evidence Gate。
+     *
+     * <p>与 {@link #appendFocusedNews} 的区别：循环可以多次追加，也可以追加非新闻维度。不可用、无来源、
+     * 跨标的、与已有证据载荷相同，或超出该维度快照预算的结果都不入账；基础证据永远不被替换。</p>
+     *
+     * @param evidenceCapabilityId 写入证据的能力名；结构化工具沿用基础取证的工具名，复用同一套解析
+     * @param snapshotName 证据段在快照中的名称
+     * @return 追加后的证据集合，以及入账、截断或不入账的原因（回传给循环并写进 Trace）
+     */
+    LoopAppend appendLoopEvidence(
+            EvidenceCollection existing,
+            CapabilityResult result,
+            EvidenceDimension dimension,
+            String evidenceCapabilityId,
+            String snapshotName,
+            String traceId
+    ) {
+        if (existing == null || result == null || existing.state() == null || existing.evidenceLedger() == null) {
+            return new LoopAppend(existing, "NOT_ADDED:NO_RESULT");
+        }
+        AnalysisState state = existing.state();
+        EvidenceLedger current = existing.evidenceLedger();
+        if (!current.target().isResolved()) {
+            return new LoopAppend(existing, "NOT_ADDED:TARGET_UNRESOLVED");
+        }
+        String ticker = state.getPrimaryTicker() == null ? "" : state.getPrimaryTicker().strip();
+        String content = result.content() == null ? "" : result.content();
+        EvidenceEnvelope envelope = evidenceEnvelopeMapper.map(
+                dimension, ticker, evidenceCapabilityId, content, capabilityEvidenceStatus(content), Instant.now(), true);
+        String rejected = !envelope.hasUsableData() ? "NO_USABLE_DATA"
+                : !envelope.hasProvenance() ? "NO_PROVENANCE"
+                : !envelope.approvedReadOnly() ? "NOT_APPROVED"
+                : !current.target().canonicalKey().equals(envelope.targetKey()) ? "TARGET_MISMATCH"
+                : current.evidenceIds().contains(envelope.evidenceId())
+                        || current.evidence().stream().anyMatch(item -> item.payloadHash().equals(envelope.payloadHash()))
+                        ? "DUPLICATE" : null;
+        if (rejected != null) {
+            return new LoopAppend(existing, "NOT_ADDED:" + rejected);
+        }
+
+        String before = switch (dimension) {
+            case MARKET -> state.getMarketReport();
+            case NEWS -> state.getNewsReport();
+            case FUNDAMENTALS, RAG -> state.getFundamentalsReport();
+        };
+        StringBuilder report = new StringBuilder(before == null ? "" : before);
+        String shown;
+        try {
+            shown = appendEvidenceSnapshotItem(report, snapshotName, envelope, content, 3500, state.getTimeSensitivity());
+        } catch (IllegalStateException snapshotBudgetFull) {
+            // 快照放不下就不能把它记作可引用证据。
+            return new LoopAppend(existing, "NOT_ADDED:SNAPSHOT_BUDGET_FULL");
+        }
+        List<EvidenceEnvelope> merged = new ArrayList<>(current.evidence());
+        merged.add(envelope);
+        state.setEvidenceLedger(new EvidenceLedger(current.target(), merged));
+        switch (dimension) {
+            case MARKET -> state.setMarketReport(report.toString().strip());
+            case NEWS -> state.setNewsReport(report.toString().strip());
+            case FUNDAMENTALS, RAG -> state.setFundamentalsReport(report.toString().strip());
+        }
+
+        Map<RecoveryAction, Integer> recoveryAttempts = state.getHarnessSnapshot() == null
+                ? Map.of()
+                : state.getHarnessSnapshot().recoveryAttempts();
+        return new LoopAppend(reevaluateEvidence(state, recoveryAttempts, traceId),
+                "full".equals(shown) ? "ADDED" : "ADDED:" + shown.replace(' ', '_'));
+    }
+
+    /** 循环追加一条证据的结果；note 为 ADDED、ADDED:truncated_x/y 或 NOT_ADDED:原因。 */
+    record LoopAppend(EvidenceCollection collection, String note) {
+    }
+
     private void replaceDimension(
             List<EvidenceEnvelope> merged,
             EvidenceDimension dimension,
@@ -528,12 +608,18 @@ public class DeepEvidenceCollector {
         return context.toString();
     }
 
-    /** 构造基本面预取快照。 */
-    private EvidenceSnapshot buildFundamentalsSnapshot(String ticker, TimeSensitivity timeSensitivity) {
+    /**
+     * 构造基本面预取快照。
+     *
+     * <p>美股（SEC）用知识库按用户问题检索 10-K 段落，不再做网页"财报"搜索：后者实测返回的是
+     * 与标的无关的聚合页。未入库的标的检索为空，按 EMPTY 记录。A/H 股仍用网页检索公告。</p>
+     */
+    private EvidenceSnapshot buildFundamentalsSnapshot(String ticker, TimeSensitivity timeSensitivity, String userQuery,
+                                                       String userId, String traceId, Long conversationId) {
         StringBuilder report = new StringBuilder();
         List<EvidenceEnvelope> evidence = new ArrayList<>();
-        appendNonCitableSnapshotNote(report, "snapshotMetadata", "Ticker: " + ticker, 256);
         boolean hasData = false;
+        boolean sec = tickerResolutionService.isLikelySecTicker(ticker);
 
         ToolObservation financialReports = runPrefetchTool("Fundamentals Agent/getFinancialReports",
                 () -> fundamentalsTools.getFinancialReports(ticker, "annual", 5));
@@ -542,14 +628,21 @@ public class DeepEvidenceCollector {
                 report, evidence, EvidenceDimension.FUNDAMENTALS, ticker,
                 "getFinancialReports", "getFinancialReports(annual,5)", financialReports, 4500, timeSensitivity);
 
-        ToolObservation companyReports = runPrefetchTool("Fundamentals Agent/searchCompanyReports",
-                () -> fundamentalsTools.searchCompanyReports(ticker, "财报", toolPrefetchMaxSearchResults));
-        hasData |= companyReports.hasUsableData();
-        captureSnapshotEvidence(
-                report, evidence, EvidenceDimension.FUNDAMENTALS, ticker,
-                "searchCompanyReports", "searchCompanyReports", companyReports, 3000, timeSensitivity);
+        if (sec) {
+            ToolObservation filing = invokeFilingSearch(ticker, userQuery, userId, traceId, conversationId);
+            captureSnapshotEvidence(
+                    report, evidence, EvidenceDimension.RAG, ticker,
+                    LocalFilingTextCapabilityAdapter.ID, "filingText(10-K)", filing, 3500, timeSensitivity);
+        } else {
+            ToolObservation companyReports = runPrefetchTool("Fundamentals Agent/searchCompanyReports",
+                    () -> fundamentalsTools.searchCompanyReports(ticker, "财报", toolPrefetchMaxSearchResults));
+            hasData |= companyReports.hasUsableData();
+            captureSnapshotEvidence(
+                    report, evidence, EvidenceDimension.FUNDAMENTALS, ticker,
+                    "searchCompanyReports", "searchCompanyReports", companyReports, 3000, timeSensitivity);
+        }
 
-        if (tickerResolutionService.isLikelySecTicker(ticker)) {
+        if (sec) {
             if (autoEdgarIngestEnabled) {
                 ToolObservation ingestion = runPrefetchTool("Fundamentals Agent/ingestCompanyFilings",
                         () -> fundamentalsTools.ingestCompanyFilings(ticker, "10-K", 1));
@@ -557,62 +650,76 @@ public class DeepEvidenceCollector {
                         report, evidence, EvidenceDimension.FUNDAMENTALS, ticker,
                         "ingestCompanyFilings", "ingestCompanyFilings(10-K x1)",
                         ingestion, 2000, false, timeSensitivity);
-            } else {
-                appendNonCitableSnapshotNote(report, "ingestCompanyFilings",
-                        "Auto EDGAR ingestion is disabled for chat prefetch; use existing indexed filings or trigger manual ingestion if more filing context is needed.",
-                        600);
             }
         }
         return new EvidenceSnapshot(report.toString().trim(), hasData, evidence);
     }
 
-    /** 构造市场预取快照。 */
+    /** 按用户问题检索当前标的 10-K 原文；失败只记为不可用证据，不中断基础取证。 */
+    private ToolObservation invokeFilingSearch(String ticker, String userQuery, String userId,
+                                               String traceId, Long conversationId) {
+        String topic = userQuery == null ? "" : userQuery.replaceAll("\\p{Cntrl}+", " ").replaceAll("\\s+", " ").strip();
+        if (topic.isBlank()) topic = "business overview and risk factors";
+        if (topic.length() > 110) topic = topic.substring(0, 110);
+        try {
+            CapabilityResult result = capabilityGateway.invoke(LocalFilingTextCapabilityAdapter.ID,
+                    Map.of("ticker", ticker, "form", "10-K", "topic", topic),
+                    new CapabilityInvocationContext(userId, conversationId, traceId, null,
+                            Set.of(LocalFilingTextCapabilityAdapter.ID),
+                            Instant.now().plusSeconds(toolPrefetchPerToolTimeoutSeconds),
+                            ToolCallContext.currentRunDeadline(), userQuery, ToolCallContext.currentRunExecution()));
+            String content = result.content() == null ? "" : result.content();
+            return new ToolObservation(content.isBlank() ? "(empty result)" : content,
+                    capabilityEvidenceStatus(content), Instant.now());
+        } catch (CapabilityException error) {
+            ResearchBudgetExceededException.rethrowIfPresent(error);
+            if (error.reason() == CapabilityException.Reason.CAPACITY_EXCEEDED) {
+                throw new ResearchCapacityExceededException(LocalFilingTextCapabilityAdapter.ID, error);
+            }
+            return new ToolObservation("Capability " + LocalFilingTextCapabilityAdapter.ID + " failed: " + error.reason(),
+                    error.reason() == CapabilityException.Reason.TIMEOUT ? EvidenceStatus.TIMED_OUT : EvidenceStatus.FAILED,
+                    Instant.now());
+        }
+    }
+
+    /**
+     * 构造市场预取快照。
+     *
+     * <p>一年日线由 {@link EvidencePresenter} 改写为最新优先的摘要（各期涨跌、区间高低、波动率、均线）
+     * 和最近 20 个收盘价；A/H 股另有数据服务计算的技术指标和板块表现。</p>
+     */
     private EvidenceSnapshot buildMarketSnapshot(String ticker, TimeSensitivity timeSensitivity) {
         StringBuilder report = new StringBuilder();
         List<EvidenceEnvelope> evidence = new ArrayList<>();
-        appendNonCitableSnapshotNote(report, "snapshotMetadata", "Ticker: " + ticker, 256);
-        boolean hasData = false;
+        boolean sec = tickerResolutionService.isLikelySecTicker(ticker);
 
-        String klineTool = marketKLineToolName(ticker);
-        ToolObservation kline = runPrefetchTool("Market Agent/" + klineTool,
-                () -> getMarketKLine(ticker));
-        hasData |= kline.hasUsableData();
+        String klineTool = sec ? "getIbkrHistoricalBars(1y,1d)" : "getStockKLine(daily,260)";
+        ToolObservation kline = runPrefetchTool("Market Agent/" + klineTool, () -> sec
+                ? marketTools.getIbkrHistoricalBars(ticker, "1y", "1d")
+                : marketTools.getStockKLine(ticker, "daily", 260));
+        boolean hasData = kline.hasUsableData();
         captureSnapshotEvidence(
                 report, evidence, EvidenceDimension.MARKET, ticker,
-                klineTool, klineTool, kline, 4500, timeSensitivity);
+                klineTool, klineTool, kline, 3000, timeSensitivity);
 
-        String technicalTool = marketTechnicalToolName(ticker);
-        ToolObservation technical = runPrefetchTool("Market Agent/" + technicalTool,
-                () -> getMarketTechnicalContext(ticker));
-        hasData |= technical.hasUsableData();
-        captureSnapshotEvidence(
-                report, evidence, EvidenceDimension.MARKET, ticker,
-                technicalTool, technicalTool, technical, 3000, timeSensitivity);
-
-        appendSectorContext(report, evidence, ticker, timeSensitivity);
+        if (sec && kline.hasUsableData()) {
+            // 估值是行情与财务的派生计算，只作不可引用的说明；财报结果通常已在本轮基本面取证时缓存。
+            ToolObservation financials = runPrefetchTool("Market Agent/valuationInputs",
+                    () -> fundamentalsTools.getFinancialReports(ticker, "annual", 5));
+            evidencePresenter.valuationNote(financials.text(), kline.text())
+                    .ifPresent(note -> appendNonCitableSnapshotNote(report, "valuation", note, 900));
+        }
+        if (!sec) {
+            String technicalTool = "getTechnicalIndicators(MA,MACD,RSI)";
+            ToolObservation technical = runPrefetchTool("Market Agent/" + technicalTool,
+                    () -> marketTools.getTechnicalIndicators(ticker, "MA,MACD,RSI"));
+            hasData |= technical.hasUsableData();
+            captureSnapshotEvidence(
+                    report, evidence, EvidenceDimension.MARKET, ticker,
+                    technicalTool, technicalTool, technical, 3000, timeSensitivity);
+            appendSectorContext(report, evidence, ticker, timeSensitivity);
+        }
         return new EvidenceSnapshot(report.toString().trim(), hasData, evidence);
-    }
-
-    private String marketKLineToolName(String ticker) {
-        return tickerResolutionService.isLikelySecTicker(ticker) ? "getIbkrHistoricalBars(3m,1d)" : "getStockKLine(daily,60)";
-    }
-
-    private String marketTechnicalToolName(String ticker) {
-        return tickerResolutionService.isLikelySecTicker(ticker) ? "getIbkrHistoricalBars(6m,1d)" : "getTechnicalIndicators(MA,MACD,RSI)";
-    }
-
-    private String getMarketKLine(String ticker) {
-        if (tickerResolutionService.isLikelySecTicker(ticker)) {
-            return marketTools.getIbkrHistoricalBars(ticker, "3m", "1d");
-        }
-        return marketTools.getStockKLine(ticker, "daily", 60);
-    }
-
-    private String getMarketTechnicalContext(String ticker) {
-        if (tickerResolutionService.isLikelySecTicker(ticker)) {
-            return marketTools.getIbkrHistoricalBars(ticker, "6m", "1d");
-        }
-        return marketTools.getTechnicalIndicators(ticker, "MA,MACD,RSI");
     }
 
     private void appendSectorContext(
@@ -648,33 +755,41 @@ public class DeepEvidenceCollector {
         StringBuilder report = new StringBuilder();
         List<EvidenceEnvelope> evidence = new ArrayList<>();
         String query = buildNewsQuery(ticker, userQuery);
-        appendNonCitableSnapshotNote(
-                report, "snapshotMetadata", "Ticker: " + ticker + "\nNews query: " + query, 600);
         boolean hasData = false;
+        // 只保留提到当前标的、且本轮没出现过的结果；美股另用 SEC 登记名补充公司写法（财报结果已缓存）。
+        List<String> mentionForms = new ArrayList<>(tickerResolutionService.targetMentionForms(ticker));
+        if (tickerResolutionService.isLikelySecTicker(ticker)) {
+            evidencePresenter.secCompanyShortName(fundamentalsTools.getFinancialReports(ticker, "annual", 5))
+                    .ifPresent(mentionForms::add);
+        }
+        Set<String> seenLinks = new java.util.HashSet<>();
 
-        ToolObservation stockNews = runPrefetchTool("News Agent/getStockNews",
-                () -> newsTools.getStockNews(ticker, 7));
+        ToolObservation stockNews = filtered(runPrefetchTool("News Agent/getStockNews",
+                () -> newsTools.getStockNews(ticker, 7)), mentionForms, seenLinks);
         hasData |= stockNews.hasUsableData();
         captureSnapshotEvidence(
                 report, evidence, EvidenceDimension.NEWS, ticker,
                 "getStockNews", "getStockNews(7d)", stockNews, 3500, timeSensitivity);
 
         // 深度投研预取：搜索证据质量直接影响最终报告，这里显式开启 Tavily advanced 深度检索。
-        ToolObservation searchNews = invokeNewsCapability(LocalNewsSearchCapabilityAdapter.ID, "searchNews",
-                query, userQuery, userId, traceId, conversationId);
+        ToolObservation searchNews = filtered(invokeNewsCapability(LocalNewsSearchCapabilityAdapter.ID, "searchNews",
+                query, userQuery, userId, traceId, conversationId), mentionForms, seenLinks);
         hasData |= searchNews.hasUsableData();
         captureSnapshotEvidence(
                 report, evidence, EvidenceDimension.NEWS, ticker,
-                "searchNews", "searchNews", searchNews, 3500, timeSensitivity);
+                "searchNews", "searchNews", searchNews, 5000, timeSensitivity);
 
-        ToolObservation webSearch = invokeNewsCapability(LocalWebSearchCapabilityAdapter.ID, "webSearch",
-                query, userQuery, userId, traceId, conversationId);
-        hasData |= webSearch.hasUsableData();
-        captureSnapshotEvidence(
-                report, evidence, EvidenceDimension.NEWS, ticker,
-                "webSearch", "webSearch", webSearch, 3500, timeSensitivity);
-
+        // 与 searchNews 同一查询的网页搜索实测大量重叠，已从基础取证中移除；需要时由取证循环补充。
         return new EvidenceSnapshot(report.toString().trim(), hasData, evidence);
+    }
+
+    /** 过滤后重新判定状态：删空的搜索结果记为 EMPTY，不能再算可用证据。 */
+    private ToolObservation filtered(ToolObservation observation, List<String> mentionForms, Set<String> seenLinks) {
+        if (observation == null || observation.text() == null) return observation;
+        String text = evidencePresenter.filterSearchResults(observation.text(), mentionForms, seenLinks);
+        if (text.equals(observation.text())) return observation;
+        boolean empty = text.contains("\"status\":\"EMPTY\"");
+        return new ToolObservation(text, empty ? EvidenceStatus.EMPTY : observation.status(), observation.observedAt());
     }
 
     /** Gateway 是搜索调用的唯一异步提交者，不能再包在同池的 runPrefetchTool 内等待。 */
@@ -755,8 +870,13 @@ public class DeepEvidenceCollector {
         appendEvidenceSnapshotItem(report, displayName, envelope, observation.text(), maxLength, timeSensitivity);
     }
 
-    /** 写入可被 DebateContractParser 精确定位的有界证据段。 */
-    private void appendEvidenceSnapshotItem(
+    /**
+     * 写入可被 DebateContractParser 精确定位的有界证据段。
+     *
+     * @return 正文展示情况：{@code full}，或 {@code truncated 展示字数/原始字数}；同一句也写进段头，
+     *         模型和事后复盘都能看到证据被截断
+     */
+    private String appendEvidenceSnapshotItem(
             StringBuilder report,
             String name,
             EvidenceEnvelope envelope,
@@ -764,26 +884,59 @@ public class DeepEvidenceCollector {
             int maxLength,
             TimeSensitivity timeSensitivity
     ) {
-        String prefix = new StringBuilder().append('\n').append(SNAPSHOT_EVIDENCE_BEGIN).append('\n')
+        String head = new StringBuilder().append('\n').append(SNAPSHOT_EVIDENCE_BEGIN).append('\n')
                 .append("name: ").append(snapshotMetadata(name, 160)).append('\n')
                 .append("evidenceId: ").append(envelope.evidenceId()).append('\n')
                 .append("status: ").append(envelope.status().name()).append('\n')
-                .append("provider: ").append(snapshotMetadata(envelope.provider(), 240)).append('\n')
-                .append("sourceRef: ").append(snapshotMetadata(envelope.sourceRef(), 500)).append('\n')
+                .append("provider: ").append(snapshotMetadata(envelope.provider(), 120)).append('\n')
+                .append("sourceRef: ").append(snapshotMetadata(envelope.sourceRef(), 200)).append('\n')
                 .append("asOf: ").append(envelope.asOf() == null ? "unknown" : envelope.asOf()).append('\n')
-                .append("timing: ").append(snapshotMetadata(envelope.timing() == null ? "UNKNOWN" : envelope.timing().toString(), 1200)).append('\n')
+                .append("timing: ").append(snapshotMetadata(compactTiming(envelope), 300)).append('\n')
                 .append(timingAssessmentMetadata(envelope, timeSensitivity, envelope.observedAt()))
                 .append("citable: ").append(envelope.hasProvenance() && envelope.approvedReadOnly()).append('\n')
-                .append(SNAPSHOT_CONTENT_BEGIN).append('\n').toString();
+                .toString();
         String suffix = "\n" + SNAPSHOT_CONTENT_END + "\n" + SNAPSHOT_EVIDENCE_END + "\n";
-        int contentBudget = Math.min(maxLength, MAX_SNAPSHOT_CHARS - report.length() - prefix.length() - suffix.length());
+        // 预留展示情况一行和正文起始标记的长度；是否截断要等正文压缩后才知道。
+        int reserved = "contentShown: truncated 000000/000000\n".length() + SNAPSHOT_CONTENT_BEGIN.length() + 1;
+        int contentBudget = Math.min(maxLength,
+                MAX_SNAPSHOT_CHARS - report.length() - head.length() - reserved - suffix.length());
         if (contentBudget < 32) {
             throw new IllegalStateException("证据快照超出单维度上下文预算，不能将未展示的证据记作可引用。");
         }
-        String escaped = escapeSnapshotMarkers(value == null ? "" : value);
+        // 结构化结果先改写成给模型读的紧凑正文（行情摘要、财务表）；账本哈希仍来自原始结果。
+        String presented = evidencePresenter.present(envelope.capabilityId(), value).orElse(value);
+        String escaped = escapeSnapshotMarkers(presented == null ? "" : presented);
         String content = evidenceEnvelopeMapper.compactStructuredContext(envelope.capabilityId(), escaped, contentBudget);
-        if (EvidenceEnvelopeMapper.OMITTED_CONTEXT.equals(content)) prefix = prefix.replace("citable: true\n", "citable: false\n");
-        report.append(prefix).append(PromptText.truncate(content, contentBudget)).append(suffix);
+        if (EvidenceEnvelopeMapper.OMITTED_CONTEXT.equals(content)) head = head.replace("citable: true\n", "citable: false\n");
+        String shown = PromptText.truncate(content, contentBudget);
+        String note = shown.length() < content.length()
+                ? "truncated " + Math.min(contentBudget, 999_999) + "/" + Math.min(content.length(), 999_999)
+                : "full";
+        report.append(head).append("contentShown: ").append(note).append('\n')
+                .append(SNAPSHOT_CONTENT_BEGIN).append('\n').append(shown).append(suffix);
+        return note;
+    }
+
+    /** 段头里给模型看的时间事实：只保留业务时点，不输出内部记录结构。 */
+    private static String compactTiming(EvidenceEnvelope envelope) {
+        var timing = envelope.timing();
+        if (timing == null) return "UNKNOWN";
+        if (timing.market() != null) {
+            var market = timing.market();
+            Object latest = market.latestDate() != null ? market.latestDate() : market.latestInstant();
+            return "market bar=" + market.bar() + " latest=" + latest
+                    + (market.delayed() == null ? "" : " delayed=" + market.delayed());
+        }
+        if (timing.financial() != null) {
+            var financial = timing.financial();
+            return "financial period=" + financial.period() + " latestPeriodEnd=" + financial.latestPeriodEnd()
+                    + " disclosed=" + financial.latestDisclosureDate();
+        }
+        var search = timing.search();
+        Object earliest = search.earliestPublishedAt() != null ? search.earliestPublishedAt() : search.earliestPublishedDate();
+        Object latest = search.latestPublishedAt() != null ? search.latestPublishedAt() : search.latestPublishedDate();
+        return "search window=" + search.effectiveWindow() + " published=" + earliest + ".." + latest
+                + " undated=" + search.unknownCount();
     }
 
     /** 仅刷新服务端生成的段头；收齐、恢复和重放均使用整个账本的固定评估时点。 */
@@ -809,11 +962,10 @@ public class DeepEvidenceCollector {
         return refreshed.toString();
     }
 
+    /** 一行时效判断；旧快照的四行写法由 refreshSnapshotTiming 一并替换。 */
     private String timingAssessmentMetadata(EvidenceEnvelope evidence, TimeSensitivity requirement, Instant evaluatedAt) {
         EvidenceFreshness.Assessment assessment = EvidenceFreshness.assess(evidence, requirement, evaluatedAt);
-        return "timeSensitivity: " + requirement + "\nfreshness: " + assessment.status()
-                + "\nfreshnessReason: " + assessment.reason() + "\nfreshnessEvaluatedAt: "
-                + (evaluatedAt == null ? "unknown" : evaluatedAt) + "\n";
+        return "freshness: " + assessment.status() + " (" + assessment.reason() + "; requirement=" + requirement + ")\n";
     }
 
     /** 写入无 EvidenceEnvelope 的说明段，并明确禁止模型引用。 */
@@ -941,6 +1093,38 @@ public class DeepEvidenceCollector {
 
     private void emitProgress(String traceId, Long conversationId, String type, String content) {
         chatStreamEmitter.emit(traceId, conversationId, type, content);
+    }
+
+    /**
+     * 评测用证据摘要：逐条列出三类快照中的证据段（元数据 + 正文开头），总长有上限。
+     *
+     * <p>与 {@link #rebuildContext} 不同，这里不按维度截断，循环追加在末尾的证据也会出现。</p>
+     */
+    public String evidenceDigest(AnalysisState state, int maxChars) {
+        StringBuilder digest = new StringBuilder();
+        Pattern block = Pattern.compile(Pattern.quote(SNAPSHOT_EVIDENCE_BEGIN) + "\\n(.*?)" + Pattern.quote(SNAPSHOT_CONTENT_BEGIN)
+                + "\\n(.*?)" + Pattern.quote(SNAPSHOT_CONTENT_END), Pattern.DOTALL);
+        for (Map.Entry<String, String> section : Map.of(
+                "Fundamentals", String.valueOf(state.getFundamentalsReport()),
+                "Market", String.valueOf(state.getMarketReport()),
+                "News", String.valueOf(state.getNewsReport())).entrySet().stream()
+                .sorted(Map.Entry.comparingByKey()).toList()) {
+            digest.append("## ").append(section.getKey()).append('\n');
+            Matcher matcher = block.matcher(section.getValue());
+            while (matcher.find()) {
+                String header = matcher.group(1).lines()
+                        .filter(line -> line.startsWith("name: ") || line.startsWith("evidenceId: ")
+                                || line.startsWith("provider: ") || line.startsWith("sourceRef: ")
+                                || line.startsWith("asOf: ") || line.startsWith("citable: "))
+                        .reduce((left, right) -> left + " | " + right).orElse("");
+                String content = matcher.group(2).replaceAll("\\s+", " ").strip();
+                digest.append("- ").append(header).append("\n  ")
+                        .append(content.length() > 500 ? content.substring(0, 500) + "…" : content).append('\n');
+            }
+            digest.append('\n');
+        }
+        String text = digest.toString().strip();
+        return text.length() > maxChars ? text.substring(0, maxChars) + "\n…（证据摘要已截断）" : text;
     }
 
     private void appendContextSection(StringBuilder context, String name, String content) {

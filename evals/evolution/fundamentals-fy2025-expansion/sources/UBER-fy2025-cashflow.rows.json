@@ -1,0 +1,440 @@
+[
+ {
+  "cells": [
+   "CONSOLIDATED STATEMENTS OF CASH FLOWS - USD ($) $ in Millions",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 31, 2025",
+   "Dec. 31, 2024",
+   "Dec. 31, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Cash flows from operating activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Net income including non-controlling interests",
+   "$ 10,093",
+   "$ 9,845",
+   "$ 2,156"
+  ],
+  "concept": "us-gaap:ProfitLoss"
+ },
+ {
+  "cells": [
+   "Adjustments to reconcile net income to net cash provided by operating activities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Depreciation and amortization",
+   "747",
+   "737",
+   "823"
+  ],
+  "concept": "uber:DepreciationAndAmortizationIncludingAmountFromOtherIncomeExpense"
+ },
+ {
+  "cells": [
+   "Stock-based compensation",
+   "1,826",
+   "1,796",
+   "1,935"
+  ],
+  "concept": "us-gaap:ShareBasedCompensation"
+ },
+ {
+  "cells": [
+   "Deferred income taxes",
+   "(4,779)",
+   "(6,027)",
+   "26"
+  ],
+  "concept": "us-gaap:DeferredIncomeTaxExpenseBenefit"
+ },
+ {
+  "cells": [
+   "Accretion of discounts on marketable debt securities, net",
+   "(158)",
+   "(251)",
+   "(154)"
+  ],
+  "concept": "us-gaap:AccretionAmortizationOfDiscountsAndPremiumsInvestments"
+ },
+ {
+  "cells": [
+   "Unrealized (gain) loss on debt and equity securities, net",
+   "97",
+   "(1,832)",
+   "(1,610)"
+  ],
+  "concept": "us-gaap:DebtAndEquitySecuritiesUnrealizedGainLoss"
+ },
+ {
+  "cells": [
+   "Unrealized foreign currency transactions",
+   "(120)",
+   "308",
+   "138"
+  ],
+  "concept": "us-gaap:ForeignCurrencyTransactionGainLossUnrealized"
+ },
+ {
+  "cells": [
+   "Other",
+   "166",
+   "187",
+   "106"
+  ],
+  "concept": "us-gaap:OtherNoncashIncomeExpense"
+ },
+ {
+  "cells": [
+   "Change in assets and liabilities, net of impact of business acquisitions and disposals:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInOperatingCapitalAbstract"
+ },
+ {
+  "cells": [
+   "Accounts receivable",
+   "(466)",
+   "(142)",
+   "(758)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInAccountsReceivable"
+ },
+ {
+  "cells": [
+   "Prepaid expenses and other assets",
+   "(1,028)",
+   "(694)",
+   "(1,462)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInPrepaidDeferredExpenseAndOtherAssets"
+ },
+ {
+  "cells": [
+   "Operating lease right-of-use assets",
+   "177",
+   "196",
+   "191"
+  ],
+  "concept": "uber:IncreaseDecreaseInOperatingLeaseRightOfUseAssets"
+ },
+ {
+  "cells": [
+   "Accounts payable",
+   "126",
+   "86",
+   "64"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInAccountsPayable"
+ },
+ {
+  "cells": [
+   "Accrued insurance reserves",
+   "2,660",
+   "2,819",
+   "2,230"
+  ],
+  "concept": "uber:IncreaseDecreaseInInsuranceReserve"
+ },
+ {
+  "cells": [
+   "Accrued expenses and other liabilities",
+   "967",
+   "330",
+   "80"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInAccruedLiabilitiesAndOtherOperatingLiabilities"
+ },
+ {
+  "cells": [
+   "Operating lease liabilities",
+   "(209)",
+   "(221)",
+   "(180)"
+  ],
+  "concept": "uber:IncreaseDecreaseInOperatingLeaseLiabilities"
+ },
+ {
+  "cells": [
+   "Net cash provided by operating activities",
+   "10,099",
+   "7,137",
+   "3,585"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+ },
+ {
+  "cells": [
+   "Cash flows from investing activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Purchases of property and equipment",
+   "(336)",
+   "(242)",
+   "(223)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment"
+ },
+ {
+  "cells": [
+   "Purchases of non-marketable equity securities",
+   "(676)",
+   "(289)",
+   "(52)"
+  ],
+  "concept": "uber:PaymentsToAcquireNonMarketableInvestments"
+ },
+ {
+  "cells": [
+   "Purchases of marketable securities",
+   "(21,447)",
+   "(12,765)",
+   "(8,774)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireMarketableSecurities"
+ },
+ {
+  "cells": [
+   "Proceeds from maturities and sales of marketable securities",
+   "20,046",
+   "10,204",
+   "5,069"
+  ],
+  "concept": "us-gaap:ProceedsFromSaleAndMaturityOfMarketableSecurities"
+ },
+ {
+  "cells": [
+   "Proceeds from sale of equity method investments",
+   "0",
+   "17",
+   "721"
+  ],
+  "concept": "us-gaap:ProceedsFromSaleOfEquityMethodInvestments"
+ },
+ {
+  "cells": [
+   "Acquisition of businesses, net of cash acquired",
+   "(815)",
+   "0",
+   "0"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireBusinessesNetOfCashAcquired"
+ },
+ {
+  "cells": [
+   "Other investing activities",
+   "(336)",
+   "(102)",
+   "33"
+  ],
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities"
+ },
+ {
+  "cells": [
+   "Net cash used in investing activities",
+   "(3,564)",
+   "(3,177)",
+   "(3,226)"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivities"
+ },
+ {
+  "cells": [
+   "Cash flows from financing activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Issuance of term loan and notes, net of issuance costs",
+   "3,359",
+   "3,972",
+   "2,824"
+  ],
+  "concept": "us-gaap:ProceedsFromIssuanceOfLongTermDebt"
+ },
+ {
+  "cells": [
+   "Principal repayment on term loan and notes",
+   "(2,350)",
+   "(3,986)",
+   "(2,675)"
+  ],
+  "concept": "us-gaap:RepaymentsOfLongTermDebt"
+ },
+ {
+  "cells": [
+   "Principal payments on finance leases",
+   "(157)",
+   "(172)",
+   "(171)"
+  ],
+  "concept": "us-gaap:FinanceLeasePrincipalPayments"
+ },
+ {
+  "cells": [
+   "Proceeds from the issuance of common stock under the Employee Stock Purchase Plan",
+   "183",
+   "156",
+   "130"
+  ],
+  "concept": "uber:ProceedsFromIssuanceOfCommonStockUnderEmployeeStockPurchasePlan"
+ },
+ {
+  "cells": [
+   "Repurchases of common stock",
+   "(6,523)",
+   "(1,252)",
+   "0"
+  ],
+  "concept": "us-gaap:PaymentsForRepurchaseOfCommonStock"
+ },
+ {
+  "cells": [
+   "Redemption of non-controlling interests",
+   "(109)",
+   "(851)",
+   "0"
+  ],
+  "concept": "us-gaap:PaymentsForRepurchaseOfRedeemableNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Other financing activities",
+   "(116)",
+   "46",
+   "(203)"
+  ],
+  "concept": "us-gaap:ProceedsFromPaymentsForOtherFinancingActivities"
+ },
+ {
+  "cells": [
+   "Net cash used in financing activities",
+   "(5,713)",
+   "(2,087)",
+   "(95)"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivities"
+ },
+ {
+  "cells": [
+   "Effect of exchange rate changes on cash and cash equivalents, and restricted cash and cash equivalents",
+   "215",
+   "(267)",
+   "63"
+  ],
+  "concept": "us-gaap:EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Net increase in cash and cash equivalents, and restricted cash and cash equivalents",
+   "1,037",
+   "1,606",
+   "327"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
+ },
+ {
+  "cells": [
+   "Cash and cash equivalents, and restricted cash and cash equivalents",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectAbstract"
+ },
+ {
+  "cells": [
+   "Beginning of period",
+   "8,610",
+   "7,004",
+   "6,677"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "End of period",
+   "9,647",
+   "8,610",
+   "7,004"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Cash paid for:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "uber:InterestPaidAndIncomeTaxesPaidAbstract"
+ },
+ {
+  "cells": [
+   "Interest, net of amount capitalized",
+   "386",
+   "475",
+   "629"
+  ],
+  "concept": "us-gaap:InterestPaidNet"
+ },
+ {
+  "cells": [
+   "Income taxes, net of refunds",
+   "345",
+   "324",
+   "234"
+  ],
+  "concept": "us-gaap:IncomeTaxesPaidNet"
+ },
+ {
+  "cells": [
+   "Non-cash investing and financing activities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:CashFlowNoncashInvestingAndFinancingActivitiesDisclosureAbstract"
+ },
+ {
+  "cells": [
+   "Ownership interest received in exchange for divestitures",
+   "$ 0",
+   "$ 0",
+   "$ 300"
+  ],
+  "concept": "uber:OwnershipInterestReceivedInExchangeForDivestiture"
+ }
+]

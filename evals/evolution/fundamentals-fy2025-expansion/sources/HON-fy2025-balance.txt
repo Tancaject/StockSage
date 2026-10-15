@@ -1,0 +1,47 @@
+CONSOLIDATED BALANCE SHEET - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024
+Current assets |  | 
+Cash and cash equivalents | $ 12,487 | $ 9,906
+Short-term investments | 443 | 386
+Accounts receivable, less allowances of $202 and $307, respectively | 7,621 | 7,247
+Inventories | 6,162 | 5,884
+Assets held for sale | 2,492 | 1,365
+Other current assets | 1,182 | 1,259
+Current assets of discontinued operations | 0 | 1,861
+Total current assets | 30,387 | 27,908
+Investments and long-term receivables | 1,404 | 1,230
+Property, plant and equipment—net | 4,629 | 4,457
+Goodwill | 21,079 | 21,019
+Other intangible assets—net | 6,736 | 6,621
+Deferred income taxes | 199 | 235
+Other assets | 9,247 | 10,556
+Assets of discontinued operations | 0 | 3,170
+Total assets | 73,681 | 75,196
+Current liabilities |  | 
+Accounts payable | 6,315 | 6,109
+Commercial paper and other short-term borrowings | 5,893 | 4,273
+Current maturities of long-term debt | 1,546 | 1,325
+Accrued liabilities | 8,462 | 8,055
+Total current liabilities | 23,414 | 21,256
+Long-term debt | 27,141 | 25,440
+Deferred income taxes | 1,577 | 1,581
+Postretirement benefit obligations other than pensions | 111 | 112
+Asbestos-related liabilities | 0 | 1,325
+Other liabilities | 6,408 | 5,581
+Liabilities of discontinued operations | 0 | 740
+Redeemable noncontrolling interest | 0 | 7
+SHAREOWNERS’ EQUITY |  | 
+Capital—common stock issued | 958 | 958
+Capital - additional paid in capital | 10,157 | 9,695
+Common stock held in treasury, at cost | (43,029) | (39,378)
+Accumulated other comprehensive loss | (5,146) | (3,491)
+Retained earnings | 50,964 | 50,835
+Total Honeywell shareowners’ equity | 13,904 | 18,619
+Noncontrolling interest | 1,126 | 535
+Total shareowners’ equity | 15,030 | 19,154
+Total liabilities, redeemable noncontrolling interest and shareowners’ equity | 73,681 | 75,196
+Discontinued Operations |  | 
+Current liabilities |  | 
+Current liabilities of discontinued operations/Liabilities held for sale | 0 | 1,086
+Disposal Group, Held-for-Sale, Not Discontinued Operations |  | 
+Current liabilities |  | 
+Current liabilities of discontinued operations/Liabilities held for sale | $ 1,198 | $ 408

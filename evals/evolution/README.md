@@ -1,5 +1,7 @@
 # Evolution datasets and offline evaluation
 
+The [FY2025 10-K expansion](fundamentals-fy2025-expansion/README.md) adds 36 source-checked fundamentals tasks from 12 previously unused issuers (6 VALIDATION, 6 HOLDOUT); values are read from SEC statement pages by row locator and cross-checked against SEC companyfacts. Gold remains AI-checked and `UNREVIEWED`.
+
 The [batch-learning experiment](batch-learning-20261002/README.md) provides source-checked development tasks, conditional-experience generation and a combined-method comparison on new companies; executed stages and limitations are recorded in [its results](batch-learning-20261002/RESULTS.md). [`evolution_batch.py`](../evolution_batch.py) exports a diagnostic bundle with ordered member identities; it does not extend the single-experience formal release contract. [`evolution_ai_review.py`](../evolution_ai_review.py) is an experimental adapter for native analysis/final stages under the fundamentals rubric and keeps AI gold `UNREVIEWED`; ordinary-answer calibration does not qualify this adapter, and its results do not grant release approval.
 
 Protocol repairs, thinking-budget comparisons and their frozen evidence are recorded in [the repair results](batch-repair-20261002/RESULTS.md). Technical review validity, agreement with independent source review and business answer quality are reported separately.

@@ -43,7 +43,7 @@ public final class ModelInvocationAdvisor implements CallAdvisor, StreamAdvisor 
             return chain.nextCall(request);
         }
         context.remainingMillis();
-        Observation observation = new Observation(store.begin(context, role, fingerprint(request)));
+        Observation observation = new Observation(store.begin(context, role, fingerprint(request)), request);
         try {
             context.remainingMillis();
             ChatClientResponse response = ToolCallContext.withRunDeadline(
@@ -67,7 +67,7 @@ public final class ModelInvocationAdvisor implements CallAdvisor, StreamAdvisor 
         }
         return Flux.defer(() -> {
             context.remainingMillis();
-            Observation observation = new Observation(store.begin(context, role, fingerprint(request)));
+            Observation observation = new Observation(store.begin(context, role, fingerprint(request)), request);
             return Flux.defer(() -> {
                         long remaining = context.remainingMillis();
                         AtomicBoolean deadlineReached = new AtomicBoolean();
@@ -86,6 +86,16 @@ public final class ModelInvocationAdvisor implements CallAdvisor, StreamAdvisor 
                     .doOnError(error -> observation.finish("FAILED"))
                     .doOnCancel(() -> observation.finish("CANCELLED"));
         });
+    }
+
+    /** 按顺序拼出实际发送的文本消息，供评测复盘。 */
+    private static String promptText(ChatClientRequest request) {
+        StringBuilder text = new StringBuilder();
+        for (var message : request.prompt().getInstructions()) {
+            text.append("[").append(message.getMessageType()).append("]\n")
+                    .append(message.getText() == null ? "" : message.getText()).append("\n\n");
+        }
+        return text.toString();
     }
 
     private Map<String, Object> fingerprint(ChatClientRequest request) {
@@ -121,8 +131,13 @@ public final class ModelInvocationAdvisor implements CallAdvisor, StreamAdvisor 
                 if (openAi.getMaxCompletionTokens() != null) values.put("maxCompletionTokens", openAi.getMaxCompletionTokens());
                 if (openAi.getN() != null) values.put("n", openAi.getN());
                 if (openAi.getReasoningEffort() != null) values.put("reasoningEffort", openAi.getReasoningEffort());
+                if (openAi.getInternalToolExecutionEnabled() != null) {
+                    values.put("internalToolExecutionEnabled", openAi.getInternalToolExecutionEnabled());
+                }
                 var extra = openAi.getExtraBody();
                 values.put("extraBodyPresent", extra != null && !extra.isEmpty());
+                // 只记录键名，用于预算判断是否可证明有界；值仍不持久化。
+                values.put("extraBodyKeys", extra == null ? java.util.List.of() : java.util.List.copyOf(new java.util.TreeSet<>(extra.keySet())));
                 if (extra != null) {
                     // Do not persist arbitrary extraBody data: it may contain private provider settings.
                     if (extra.get("enable_thinking") instanceof Boolean enabled) values.put("enableThinking", enabled);
@@ -135,14 +150,31 @@ public final class ModelInvocationAdvisor implements CallAdvisor, StreamAdvisor 
 
     private final class Observation {
         private final String id;
+        private final ChatClientRequest request;
         private final AtomicBoolean terminal = new AtomicBoolean();
+        // 只在评测任务里会被持久化（见 ModelInvocationStore.recordTranscript）；流式时按块拼接。
+        private final StringBuffer output = new StringBuffer();
+        private final StringBuffer reasoning = new StringBuffer();
         private volatile Map<String, Object> response = Map.of(
                 "usageSource", "NO_DATA", "usageSemantics", "INVOCATION_SNAPSHOT");
 
-        private Observation(String id) { this.id = id; }
+        private Observation(String id, ChatClientRequest request) {
+            this.id = id;
+            this.request = request;
+        }
 
         private void accept(ChatClientResponse value) {
             if (value == null || value.chatResponse() == null) return;
+            for (var generation : value.chatResponse().getResults()) {
+                var message = generation.getOutput();
+                if (message == null) continue;
+                if (message.getText() != null) output.append(message.getText());
+                if (message.getMetadata().get("reasoningContent") instanceof String thought) reasoning.append(thought);
+                if (message.hasToolCalls()) {
+                    message.getToolCalls().forEach(call -> output.append("\n[tool_call] ").append(call.name())
+                            .append(' ').append(call.arguments()));
+                }
+            }
             var metadata = value.chatResponse().getMetadata();
             Map<String, Object> latest = new LinkedHashMap<>(response);
             if (metadata.getModel() != null && !metadata.getModel().isBlank()) {
@@ -153,6 +185,8 @@ public final class ModelInvocationAdvisor implements CallAdvisor, StreamAdvisor 
                 latest.remove("inputTokens");
                 latest.remove("outputTokens");
                 latest.remove("totalTokens");
+                latest.remove("cachedInputTokens");
+                latest.remove("reasoningTokens");
                 // DefaultUsage turns missing fields into zero or a calculated total. Only native
                 // fields establish provider usage and may release a durable token reservation.
                 if (usage.getNativeUsage() instanceof org.springframework.ai.openai.api.OpenAiApi.Usage nativeUsage) {
@@ -160,6 +194,13 @@ public final class ModelInvocationAdvisor implements CallAdvisor, StreamAdvisor 
                     if (nativeUsage.promptTokens() != null) latest.put("inputTokens", nativeUsage.promptTokens());
                     if (nativeUsage.completionTokens() != null) latest.put("outputTokens", nativeUsage.completionTokens());
                     if (nativeUsage.totalTokens() != null) latest.put("totalTokens", nativeUsage.totalTokens());
+                    // Missing details stay absent (NO_DATA), never zero: not every provider reports them.
+                    if (nativeUsage.promptTokensDetails() != null && nativeUsage.promptTokensDetails().cachedTokens() != null) {
+                        latest.put("cachedInputTokens", nativeUsage.promptTokensDetails().cachedTokens());
+                    }
+                    if (nativeUsage.completionTokenDetails() != null && nativeUsage.completionTokenDetails().reasoningTokens() != null) {
+                        latest.put("reasoningTokens", nativeUsage.completionTokenDetails().reasoningTokens());
+                    }
                 } else {
                     latest.put("usageSource", "SDK_NORMALIZED");
                 }
@@ -168,7 +209,14 @@ public final class ModelInvocationAdvisor implements CallAdvisor, StreamAdvisor 
         }
 
         private void finish(String status) {
-            if (terminal.compareAndSet(false, true)) store.finish(id, status, response);
+            if (!terminal.compareAndSet(false, true)) return;
+            store.finish(id, status, response);
+            try {
+                store.recordTranscript(id, promptText(request), output.toString(),
+                        reasoning.isEmpty() ? null : reasoning.toString());
+            } catch (RuntimeException ignored) {
+                // 复盘材料是旁路记录，不能改变调用结果。
+            }
         }
     }
 }

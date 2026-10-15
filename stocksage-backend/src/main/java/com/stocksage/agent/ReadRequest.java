@@ -76,6 +76,70 @@ public record ReadRequest(String period, String bar, String reportPeriod, int re
         }
     }
 
+    /**
+     * 多标的共用一份取数参数；问题里出现两种不同的范围、粒度或年报/季报口径时，无法判断哪个标的用哪份，
+     * 只能请用户统一，不能任选一份套给所有标的。
+     */
+    public static boolean hasConflictingParameters(String query) {
+        String text = query == null ? "" : query.toLowerCase(Locale.ROOT);
+        Set<String> ranges = new java.util.HashSet<>();
+        Matcher range = RANGE.matcher(text);
+        while (range.find()) ranges.add(range.group(1) + range.group(2));
+        Set<String> bars = new java.util.HashSet<>();
+        Matcher bar = BAR.matcher(RANGE.matcher(text).replaceAll(""));
+        while (bar.find()) bars.add(bar.group(0).replaceAll("\\s", ""));
+        for (String named : java.util.List.of("日线", "周线", "月线")) if (text.contains(named)) bars.add(named);
+        boolean annual = text.contains("年报") || text.contains("annual") || text.contains("10-k");
+        boolean quarterly = text.contains("季报") || text.contains("季度") || text.contains("10-q") || text.contains("quarter");
+        // 问题同时要几类数据时（如营收和股价），各类数据各带一个范围不是标的间的参数不对称。
+        int dataKinds = Math.max(1, DataRequirement.explicitIn(query).size());
+        return ranges.size() > dataKinds || bars.size() > 1 || (annual && quarterly);
+    }
+
+    /** 用户原话里明确写出的取数参数；规划器给出的这些字段一律以原话解析结果为准。 */
+    public static Set<String> explicitFields(String query) {
+        String text = query == null ? "" : query.toLowerCase(Locale.ROOT);
+        Set<String> fields = new java.util.HashSet<>();
+        if (RANGE.matcher(text).find()) fields.add("period");
+        if (BAR.matcher(RANGE.matcher(text).replaceAll("")).find()
+                || text.matches("(?s).*(日线|周线|月线|daily|weekly|monthly).*")) fields.add("bar");
+        if (text.matches("(?s).*(年报|季报|季度|annual|quarter|10-k|10-q).*")) fields.add("reportPeriod");
+        if (REPORTS.matcher(text).find()) fields.add("reportCount");
+        return Set.copyOf(fields);
+    }
+
+    /** K 线步骤的范围和粒度；按与 {@link #parse} 相同的约束校验，越界时返回带澄清信息的请求。 */
+    public ReadRequest withBars(String period, String bar) {
+        String newPeriod = period == null ? this.period : period;
+        String newBar = bar == null ? this.bar : bar;
+        if (!isValidBars(newPeriod, newBar)) {
+            return invalid("行情查询的范围或粒度不支持。请指定最近 1 年以内的范围，以及分钟、小时、日、周或月线。");
+        }
+        return new ReadRequest(newPeriod, newBar, reportPeriod, reportCount, barsOnly, clarification);
+    }
+
+    /** 财报步骤的年报/季报口径和期数；越界时返回带澄清信息的请求。 */
+    public ReadRequest withReports(String reportPeriod, Integer reportCount) {
+        String newReportPeriod = reportPeriod == null ? this.reportPeriod : reportPeriod;
+        int newCount = reportCount == null ? this.reportCount : reportCount;
+        if (!Set.of("annual", "quarterly").contains(newReportPeriod) || newCount < 1 || newCount > 40
+                || (newReportPeriod.equals("annual") && newCount > 10)) {
+            return invalid("财报查询参数不支持。请指定年度或季度，以及最多 10 年或 40 个季度。");
+        }
+        return new ReadRequest(period, bar, newReportPeriod, newCount, barsOnly, clarification);
+    }
+
+    /** 范围和粒度是否是 K 线取数支持的值。 */
+    public static boolean isValidBars(String period, String bar) {
+        return period != null && bar != null && period.matches("[1-9][0-9]{0,2}[hdwmy]") && days(period) <= 365
+                && Set.of("1min", "5min", "10min", "15min", "30min", "1h", "2h", "4h", "1d", "1w", "1m").contains(bar);
+    }
+
+    /** 只携带澄清信息的请求；执行阶段看到它会直接返回澄清，不取证。 */
+    public static ReadRequest clarify(String message) {
+        return invalid(message);
+    }
+
     private static ReadRequest invalid(String message) {
         return new ReadRequest("3m", "1d", "annual", 5, false, message);
     }

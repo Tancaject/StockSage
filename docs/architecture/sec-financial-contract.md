@@ -1,18 +1,18 @@
-# SEC 年度财务数据契约
+# SEC 财务数据契约
 
-`/api/edgar/xbrl` 和 `/api/stock/financial-report` 的美股分支复用 [Pydantic 模型](../../stocksage-data-service/app/sec_financials.py)，独立 XBRL 端点通过 OpenAPI 发布结构。Java 客户端使用 [SecFinancialsResponse](../../stocksage-backend/src/main/java/com/stocksage/client/SecFinancialsResponse.java) 校验，模型工具仍输出 JSON。此契约针对现有 SEC 年度指标，不代表 A/H 股财报或季度报表已统一。
+`/api/edgar/xbrl` 和 `/api/stock/financial-report` 的美股分支复用 [Pydantic 模型](../../stocksage-data-service/app/sec_financials.py)，独立 XBRL 端点通过 OpenAPI 发布结构。Java 客户端使用 [SecFinancialsResponse](../../stocksage-backend/src/main/java/com/stocksage/client/SecFinancialsResponse.java) 校验，模型工具仍输出 JSON。此契约覆盖 SEC 年度（10-K）和单季（10-Q）指标，不代表 A/H 股财报已统一。
 
 ## 期间、版本与单位
 
 `asOf` 为返回事实中最新的 `end`，精度为日期；它不表示每个指标都有该期数据。各事实的 `start/end/period_type` 决定该数值属于期间累计还是时点值。`filed` 和 `accn` 保留申报版本，`fetchedAt` 表示获取时间，三者不互相替代。证据账本将日期转换为 UTC 零点仅用于兼容已有 Instant 字段，不代表财报发布时间。
 
-指标保留具体 `concept`、`unit` 和原始有限数值。`fiscal_year` 未知时为空，不能从申报标签 `filing_fiscal_year` 推断；`metric_count` 是指标种类数，不是报表或覆盖年度数。年度资格与修订筛选仍由 [EdgarService](../../stocksage-data-service/app/services/edgar_service.py) 负责。
+指标为营收、净利润（归母，`NetIncomeLoss`）、合并净利润（含少数股东，`ProfitLoss`，即现金流量表起点；与归母净利润最新值相同时不返回）、营业利润、稀释 EPS、经营现金流、资本开支、总资产、总负债、股东权益、长期债务、现金及等价物和稀释加权股数；银行（SEC submissions 的 SIC 6020–6039）不返回经营现金流和资本开支，改为净利息收入和信贷损失拨备。某指标最新期末比公司最新期末早 400 天以上时视为公司已改用其他概念，不返回。资本开支依次取 `PaymentsToAcquirePropertyPlantAndEquipment`、`PaymentsToAcquireProductiveAssets`、`PaymentsToAcquireOtherPropertyPlantAndEquipment` 中最新期末的概念。单位为 `USD`、`USD/shares` 或 `shares`。指标保留具体 `concept`、`unit` 和原始有限数值。`fiscal_year` 未知时为空，不能从申报标签 `filing_fiscal_year` 推断；`metric_count` 是指标种类数，不是报表或覆盖年度数。年度资格与修订筛选仍由 [EdgarService](../../stocksage-data-service/app/services/edgar_service.py) 负责。
 
 `SUCCESS` 仅证明返回了符合本契约的年度事实，不证明最新申报已经收录、所有指标覆盖一致或请求的年度数已满足。`EMPTY` 表示没有合格事实；`UNSUPPORTED` 表示请求的周期不受支持；`ERROR` 表示上游调用或协议失败。可重试性根据明确异常类别记录，未知时保留空值，不解析错误文案猜测。
 
 ## 财报请求与覆盖
 
-财报入口保留 `requestedPeriod/requestedYears` 和已解析路由信息。年度请求对每个指标选取最新的 N 个不同 `end`，同一结束日期的多条事实仍属于一个期间；该期间内的事实保留各自实际起止日期与申报信息。独立 XBRL 端点没有这两个请求约束，字段为空。季度请求直接返回不支持，不将年度数据伪装成季度结果；用户可改查年报或使用已有 10-Q 公告检索。
+财报入口保留 `requestedPeriod/requestedYears` 和已解析路由信息。年度请求对每个指标选取最新的 N 个不同 `end`，同一结束日期的多条事实仍属于一个期间；该期间内的事实保留各自实际起止日期与申报信息。独立 XBRL 端点没有这两个请求约束，字段为空。季度请求返回 `period=quarterly`，只含 10-Q 中 80～100 天的单季事实，每个指标最多保留 `requestedYears×4` 个期末。10-Q 不含第四财季，也不做年报减前三季的推算；经营现金流、资本开支在 10-Q 中多为年初至今累计口径，因此季度结果中通常缺失。年度事实与季度事实不能混在同一响应中。
 
 实际财务数据来源由 `provider=SEC_EDGAR` 和事实的 SEC URL 表达。保留的 `source` 是既有市场路由提示，美股可能为 `ibkr`；它不是本次财报提供方，也不能替代 `provider` 用于来源归因。
 

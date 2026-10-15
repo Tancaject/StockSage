@@ -1,59 +1,105 @@
 # StockSage 评测入口
 
-这里按评测对象维护标准、数据和运行脚本。**没有覆盖所有对象的统一评分标准或总分**：检索质量、规划正确性、执行契约、回答质量和方法改进分别评价。数值阈值以各项目的代码、配置或冻结实验策略为准，本页只链接这些来源。
+评测回答三个问题：改动有没有造成退步、两个方案哪个更好、系统现在的实际水平。原则见 [AGENTS.md 的评测原则](../AGENTS.md#评测原则)，整体方案见[评测体系优化方案](../docs/architecture/eval-system-plan.md)。
 
-评测 Agent、评分器、校准器、数据集、标准、评测运行器及其依赖属于评测体系，不属于自动化测试套件。清理单元测试或回归测试时必须保留这些内容，不能仅因使用 Python、离线运行或位于 `evals` 就将其删除。
+评测脚本、评审、校准器、数据集和历史结果属于评测体系，不是自动化测试，清理测试时不能删除（[agent_eval_summary.py](agent_eval_summary.py) 曾在提交 `7eb903b` 中被误删，已恢复）。[archive/](archive/) 是已归档的历史工具，自进化 v1 的发布签名、影子运行、上线授权和观测工具在 [archive/evolution-v1-governance](archive/evolution-v1-governance/README.md)。
 
-例如 [agent_eval_summary.py](agent_eval_summary.py)（Planner 评测汇总与门禁）曾在提交 `7eb903b` 中被当作测试误删，现已恢复，属于评测体系，必须保留。自进化 v1 的发布签名、影子运行、上线授权和观测工具已归档到 [archive/evolution-v1-governance](archive/evolution-v1-governance/README.md)，现行审批与灰度流程见 [evolution/README.md](evolution/README.md#approval-rollout-and-withdrawal)。
-
-命令从仓库根目录执行。现有 Python 环境仍使用 `.venv-rag-eval`：
+命令从仓库根目录执行，Python 环境用 `.venv-rag-eval`：
 
 ```powershell
 .\.venv-rag-eval\Scripts\Activate.ps1
-New-Item -ItemType Directory -Force evals/results | Out-Null
 ```
 
-真实接口评测需要对应服务和依赖可用；管理接口读取 `STOCKSAGE_ADMIN_TOKEN`。模型调用需要配置实际使用的供应商，密钥只放在环境变量或本地忽略配置中。运行与验收进度统一见 [progress.md](../progress.md)。
+真实接口评测需要后端在线。管理接口和请求级评测模式读取 `STOCKSAGE_ADMIN_TOKEN`（与后端配置同一令牌）；需要登录的评测用专用账号 `STOCKSAGE_EVAL_EMAIL`、`STOCKSAGE_EVAL_PASSWORD`。模型密钥只放在环境变量或本地忽略配置中。进度见 [progress.md](../progress.md)。
 
-## 日常回归
+## 成绩单：三档运行
 
-改动路由、RAG 或 Harness 后先跑这一条，它和正式验收是两档：
+统一入口是 [run_daily_eval.py](run_daily_eval.py)：
 
 ```powershell
-.\init.ps1 -Mode eval          # 等价于 python evals/run_daily_eval.py
+.\init.ps1 -Mode eval                                 # daily 档，等价于 python evals/run_daily_eval.py
+python evals/run_daily_eval.py --tier change          # 加普通回答层、DEEP 证据全集和 AI 评审
+python evals/run_daily_eval.py --since <git-sha>      # 只跑受改动影响的层（默认按 change 档）
+python evals/run_daily_eval.py --repeat 2             # 每层跑两次，记录噪声
+python evals/run_daily_eval.py --only deep_evidence   # 只跑指定层，可重复给出
 ```
 
-| 步骤 | 内容 | 前提 |
+| 层 | 内容 | daily | change / milestone | 前提 |
+|---|---|---|---|---|
+| harness | 82 个固定用例离线调用生产 DEEP 完成策略 | ✓ | ✓ | JDK 17；不需要服务和模型 |
+| planner | 115 题 `LIVE_COORDINATOR`，即生产意图识别。这套题已参与调参，是开发集 | ✓ | ✓ | 后端、管理令牌 |
+| rag | `golden_set.jsonl` 中有标注证据的题，经 `/api/docs/search` 只算检索指标 | ✓ | ✓ | 后端 |
+| deep_evidence | DEEP 只跑证据阶段（请求级 `EVIDENCE_ONLY`，不调用辩论和报告模型）：完成率、终态安全、越权调用、可用证据数 | 4 题冒烟 | 11 题全集 + 维度覆盖评审 | 后端、管理令牌、评测账号、IBKR 已登录 |
+| ordinary | 普通路线执行契约，生产配置下的 8 题（多标的对比题 `cmp-*` 需要打开多标的扇出，不在成绩单里）；上次通过、这次失败的题判为退步 | — | ✓ + 五维评审 | 后端、评测账号 |
+
+- **成本**：daily 约 0.5 元；change 约 12 元（普通回答约 4 元，两个评审合计约 6～7 元，其余约 1 元；DEEP 维度评审 10-13 实测每次约 0.21 元）；milestone 目前同 change，DEEP 报告质量层还没有实现。真实运行前先说明题数和费用。
+- 缺前提的层记为 `SKIPPED`，不算通过。数据集哈希、题数、schema 版本变化记为 `IDENTITY_CHANGED`，不判失败。
+- `judge_` 前缀的指标来自 AI 评审。评审在人工标签上校准之前只作诊断，不参与层的通过判定。
+- Planner 的 `DETERMINISTIC` 模式评的是关键词兜底路由，不是生产识别器，成绩单不用它。
+
+**成绩单内容**：每次运行写入 `evals/results/daily/<时间戳>/`（各层原始报告和 `summary.json`），并在 `history.jsonl` 追加一行。
+
+- 各层指标和逐题结果；
+- 配置身份：git SHA，以及 `/api/admin/agent/model-config` 返回的各角色模型、输出上限、思考设置和系统提示词哈希，`configSha` 是它的摘要；
+- 与该层上一次有效运行的差值。`--repeat` 测得的每个指标的标准差存在 `results/daily/noise.json`，差值不超过 2 倍标准差时标为 within noise；
+- 超过 7 天没有有效运行的层标为 STALE。
+
+有层 FAIL 或 ERROR 时退出码为 1。
+
+## 按改动选层
+
+`--since <sha>` 用 `git diff`（含工作区改动和未跟踪文件）把改动路径映射到层。映射表是 `run_daily_eval.py` 中的 `CHANGE_MAP`：
+
+| 改动 | 跑哪些层 |
+|---|---|
+| 意图识别、路由（`agent/intent`、Coordinator、路由计划） | planner，涉及执行计划的加 ordinary |
+| 检索、入库（`rag`、`knowledge`） | rag、ordinary |
+| DEEP 完成策略（`harness`） | harness、deep_evidence |
+| 普通路线的分析师、Planner、提示词、记忆 | ordinary |
+| 共用工具层（`tool`、`capability`、`client`、`ibkr`、data-service） | ordinary、deep_evidence |
+| DEEP 取证、取证循环、研究任务 | deep_evidence |
+| 辩论、Manager、报告渲染 | deep_report：还没有可运行的层，打印 NOT COVERED，需要跑完整 DEEP |
+| 换模型、改思考预算、改模型客户端（`application.properties`、`AgentConfig` 等） | 所有回答层 |
+
+认证、管理接口、Trace 等不影响回答的代码映射为空。没有登记的产品代码打印为 unmapped，需要补进 `CHANGE_MAP`。前端改动打印 NOT COVERED，要在浏览器里看渲染结果。
+
+## 评审：run_evaluation_agent.py
+
+[run_evaluation_agent.py](run_evaluation_agent.py) 用 `--rubric` 选择评分标准，评审协议相同：
+
+| rubric | 输入 | 判定 |
 |---|---|---|
-| harness | 82 个固定用例离线调用生产 DEEP 完成策略 | 无需服务和模型 |
-| planner | 115 题 `LIVE_COORDINATOR`，即生产意图识别（qwen3.8-flash + Embedding + Pattern + n-gram） | 后端在线、`STOCKSAGE_ADMIN_TOKEN` |
-| rag | `golden_set.jsonl` 中有标注证据的题目，经 `/api/docs/search`（生产 `RagService.retrieve`）只算检索指标，不生成回答 | 后端在线 |
+| `ordinary`（默认） | `run_ordinary_live_eval.py` 或回放结果 | 五维 PASS/FAIL/NOT_APPLICABLE/NO_DATA，标准是 [ordinary_rubric()](ordinary_answer_quality.py)；可调用计算器核算派生数值 |
+| `deep_facets` | `run_deep_m0.py --evidence-only` 的结果（含完整证据快照） | 每个必需维度 0/1/2：未覆盖、部分覆盖、直接覆盖，标准在 [deep_facet_quality.py](deep_facet_quality.py) |
 
-- 缺前提的步骤记为 `SKIPPED`，不算通过。
-- 指标阈值沿用各自现有门禁；数据集哈希、用例数、schema/策略版本这类"身份固定项"不一致时只记为 `IDENTITY_CHANGED`，不判失败，所以加题不必同步改门禁文件。
-- 结果写入 `evals/results/daily/<时间戳>/`，并在 `history.jsonl` 追加一行；控制台列出与上一次的指标差值、误路由题和检索最差题。有步骤 FAIL 或 ERROR 时退出码为 1。
-- 日常回归是回归信号，不是发布证据；正式验收仍用下文各入口及其固定门禁。
-- Planner 的 `DETERMINISTIC` 模式评的是关键词兜底路由（`Coordinator.fallbackPlan`），不是生产识别器，日常回归不用它。
+- 证据原文完整提供给评审。DEEP 用辩论和报告模型实际读到的最终证据快照（后端 `/api/admin/agent/research-tasks/{id}/evidence-snapshot`）；会暴露组别的工具名（`loop*` 等）和检索词替换成中性类型，证据按内容确定的种子打乱并编号 E1…En。
+- 每个判断都要引用原文：引文必须是输入中的连续片段（DEEP 必须出自所引的那条证据）。普通回答只容忍空白差异，DEEP 另外容忍全半角和引号样式差异。格式错误、引文对不上或缺少引用的项记为技术无效，不计入分数；各维度独立计分。
+- 评审模型用 `qwen3.8-max`，开思考、预算 4096，与生成用的 deepseek 不同家。
 
-## 选择评测对象
+```powershell
+python evals/run_evaluation_agent.py --input evals/results/ordinary-live.json --output evals/results/ordinary-judge.json --model qwen3.8-max --enable-thinking --thinking-budget 4096
+python evals/run_deep_m0.py --arm C --evidence-only --output evals/results/deep-evidence.json
+python evals/run_evaluation_agent.py --rubric deep_facets --input evals/results/deep-evidence.json --output evals/results/deep-facet-judge.json --model qwen3.8-max --enable-thinking --thinking-budget 4096 --max-tokens 8000
+python evals/judge_calibration.py --dataset <标注集.jsonl> --report <评审结果.json> --output <校准报告.json>
+```
 
-| 对象 | 数据与标准来源 | 结果含义 |
+**校准状态**：普通回答五维评审在 AI 编写的[判官校准集](judge-pilot/v2/README.md)上判对 90～95%，标签由 AI 交叉核查；DEEP 维度评审尚未校准。两者都还没有在系统真实输出的人工标签上校准（方案 S5），结果只作诊断。DEEP 校准报告给出一致率、相差不超过 1 分的比例、二次加权 κ、误判覆盖率（标签 0 分而评审给分）和漏判率。
+
+`--dry-run` 只检查输入；输出文件已存在时拒绝覆盖；密钥从 `DASHSCOPE_API_KEY` 或后端本地忽略配置读取。普通回答评审提示词的候选生成和对比用 [propose_judge_prompt.py](propose_judge_prompt.py)：只用 DEV 生成和选择，VALIDATION 只做验证，不回流优化。
+
+## 各评测对象
+
+| 对象 | 数据与标准 | 说明 |
 |---|---|---|
-| RAG 检索与回答 | [questions.jsonl](questions.jsonl)、[golden_set.jsonl](golden_set.jsonl)；指标实现 [run_rag_eval.py](run_rag_eval.py)，门禁 [rag_summary.py](rag_summary.py)；RAGAS 指标及门槛 [run_ragas_eval.py](run_ragas_eval.py) | 检索、引用、拒答等启发式指标与 `ragas_` 语义指标分别报告 |
-| Planner / Agent 规划 | [agent_golden_set.jsonl](agent_golden_set.jsonl)、[PlannerEvalService](../stocksage-backend/src/main/java/com/stocksage/service/PlannerEvalService.java)；门禁 [agent_eval_gates.json](agent_eval_gates.json)，汇总 [agent_eval_summary.py](agent_eval_summary.py) | 路由、所需/禁止动作、上下文解析、fallback 和延迟；不代表实际工具执行或回答质量 |
-| Ordinary 执行与回答 | [ordinary_live_cases.jsonl](ordinary_live_cases.jsonl)、[run_ordinary_live_eval.py](run_ordinary_live_eval.py)；回答标准 [ordinary_answer_quality.py](ordinary_answer_quality.py) | 执行契约与答案语义分开；没有有效复核时，回答质量保持 `NO_DATA` |
-| Harness / DEEP | [harness_golden_set.jsonl](harness_golden_set.jsonl)、[harness_live_cases.jsonl](harness_live_cases.jsonl)、[harness_live_manifest.json](harness_live_manifest.json)；生产策略 [DeepResearchCompletionPolicy](../stocksage-backend/src/main/java/com/stocksage/harness/DeepResearchCompletionPolicy.java)；评价器 [harness_eval_summary.py](harness_eval_summary.py)，门禁 [harness_eval_gates.json](harness_eval_gates.json) | 完成策略的决策/违规/恢复匹配与真实任务安全终态；不能替代研究内容质量 |
-| FUNDAMENTALS 方法进化 | [evolution_rubric.py](evolution_rubric.py)、[evolution_dataset.py](evolution_dataset.py)、[evolution_quality.py](evolution_quality.py)、[evolution_numeric_check.py](evolution_numeric_check.py)（确定性数值核验）、[evolution_acceptance.py](evolution_acceptance.py)；生产失败池 [evolution_failure_pool.py](evolution_failure_pool.py)；业务事实和改善门槛来自实验自己的冻结 gold / policy | 分别评价分析稿与最终回答，再判定候选是否改善；执行通过不等于进化有效 |
+| RAG 检索与回答 | [golden_set.jsonl](golden_set.jsonl)、[questions.jsonl](questions.jsonl)；指标 [run_rag_eval.py](run_rag_eval.py)，门禁 [rag_summary.py](rag_summary.py)，RAGAS [run_ragas_eval.py](run_ragas_eval.py) | 检索、引用、拒答指标与 `ragas_` 语义指标分开报告 |
+| Planner 路由 | [agent_golden_set.jsonl](agent_golden_set.jsonl)、[PlannerEvalService](../stocksage-backend/src/main/java/com/stocksage/service/PlannerEvalService.java)；门禁 [agent_eval_gates.json](agent_eval_gates.json)，汇总 [agent_eval_summary.py](agent_eval_summary.py) | 路由、所需/禁止动作、上下文解析、fallback 和延迟；不代表工具执行或回答质量 |
+| 普通路线 | [ordinary_live_cases.jsonl](ordinary_live_cases.jsonl)、[ordinary_compare_cases.jsonl](ordinary_compare_cases.jsonl)、[run_ordinary_live_eval.py](run_ordinary_live_eval.py)；回答标准 [ordinary_answer_quality.py](ordinary_answer_quality.py) | 执行契约和回答质量分开评价 |
+| DEEP | [harness_golden_set.jsonl](harness_golden_set.jsonl)、[harness_live_cases.jsonl](harness_live_cases.jsonl)、[deep_react_cases.jsonl](deep_react_cases.jsonl)；生产策略 [DeepResearchCompletionPolicy](../stocksage-backend/src/main/java/com/stocksage/harness/DeepResearchCompletionPolicy.java) | 完成策略、真实任务终态安全、证据阶段的维度覆盖 |
+| FUNDAMENTALS 方法进化 | [evolution_rubric.py](evolution_rubric.py)、[evolution_quality.py](evolution_quality.py)、[evolution_numeric_check.py](evolution_numeric_check.py) 等 | 分析稿与最终回答分别评价，再判定候选是否改善 |
 
-脚本保留平铺入口。[eval_common.py](eval_common.py)、[eval_utils.py](eval_utils.py) 和 [eval_http.py](eval_http.py) 提供共享计算、绑定或传输能力；共享代码不提供跨项目的默认业务标准。
+[eval_common.py](eval_common.py)、[eval_utils.py](eval_utils.py) 和 [eval_http.py](eval_http.py) 提供共享计算和传输，不提供跨项目的默认业务标准。
 
-自动化测试文件、测试辅助文件与测试产物已按用户要求移除；评测实现、数据和历史记录保留。依赖 `EvolutionLiveBaselineTest`、后端 `target/test-classes` 或已移除的 Mockito/JUnit 依赖的历史实验入口当前无法直接重跑。普通评测 Agent、校准器和 HTTP 评测入口不依赖这些测试驱动。历史记录中的测试结果不代表当前工作区仍包含这些测试。
-
-部分历史草稿回放没有保存模型结束原因，不能据正文非空证明生成完整；适用限制见[完成判定验证记录](diagnostics/harness-completion-20261005/RESULTS.md#解释范围)。
-
-部分历史实验将测试源文件也纳入冻结哈希清单。例如 `scoped-repeatability-20261004/run.py` 的准备和校验依赖已删除的 `test_evolution_applicability.py`，该历史运行器当前不能完整重跑；保留原计划和哈希，不通过修改冻结记录来绕过缺失输入。
-
-## RAG
+### RAG
 
 ```powershell
 python evals/run_retrieval_eval.py
@@ -62,102 +108,60 @@ python evals/rag_summary.py evals/results/rag.json --fail-on-gate
 python evals/run_ragas_eval.py --input evals/results/rag.json
 ```
 
-`run_retrieval_eval.py` 只检查检索结果中的预期术语及排名。`run_rag_eval.py` 使用已标注证据评价召回、排名、来源、引用和回答关键词等；`rag_summary.py` 按自己的 `DEFAULT_GATES` 逐项判定，缺失必需指标不会通过。其案例均值只用于最差案例排序，不是全域质量总分。
+`run_retrieval_eval.py` 只检查预期术语及排名；`run_rag_eval.py` 用标注证据评价召回、排名、来源、引用和回答关键词，`rag_summary.py` 按 `DEFAULT_GATES` 逐项判定。`run_ragas_eval.py` 读取已有结果调用判官模型，单独记录 `ragas_` 指标，不重跑检索。
 
-`run_ragas_eval.py` 读取已有结果并调用判官模型，单独记录 `ragas_` 指标、判官配置和评估器版本。它不会重跑检索，也不参与普通 Agent 或基本面进化的默认评分。
-
-## Planner / Agent 规划
+### Planner
 
 ```powershell
-python evals/run_agent_eval.py --mode DETERMINISTIC --output evals/results/planner-deterministic.json
 python evals/run_agent_eval.py --mode LIVE_COORDINATOR --output evals/results/planner-live.json
+python evals/run_agent_eval.py --mode DETERMINISTIC --output evals/results/planner-deterministic.json
 ```
 
-两种模式都调用后端规划评测接口；`DETERMINISTIC` 不代表完整 Agent 已经过真实模型验证。规划模式、数据身份和门禁由 [agent_eval_summary.py](agent_eval_summary.py) 与 [agent_eval_gates.json](agent_eval_gates.json) 校验。可附加 RAG、Harness 等报告进行分区汇总，附加报告仍保留各自的判断标准。`--gates` 只配置 Planner，`--harness-gates` 单独配置 Harness，默认各自读取上表中的文件。
+规划模式、数据身份和门禁由 [agent_eval_summary.py](agent_eval_summary.py) 与 [agent_eval_gates.json](agent_eval_gates.json) 校验；`--gates` 只配置 Planner，`--harness-gates` 单独配置附加的 Harness 报告。115 题在 10-11、10-12 修失败题时用过，对外报告路由水平需要另建留出集（方案 S6）。
 
-## Ordinary 执行与回答
-
-先通过环境变量配置专用评测账号 `STOCKSAGE_EVAL_EMAIL`、`STOCKSAGE_EVAL_PASSWORD`，再采集真实聊天和 Trace：
+### 普通路线
 
 ```powershell
 python evals/run_ordinary_live_eval.py --output evals/results/ordinary-live.json
 python evals/ordinary_answer_quality.py --input evals/results/ordinary-live.json --review-template evals/results/ordinary-reviews.json
-```
-
-执行检查包括路由、参数、工具、证据时效、终态和引用编号合法性。填妥绑定到该次回答的复核记录后，再计算语义质量：
-
-```powershell
 python evals/ordinary_answer_quality.py --input evals/results/ordinary-live.json --reviews evals/results/ordinary-reviews.json --output evals/results/ordinary-reviewed.json
 ```
 
-普通回答使用自己的五维标准：论断支持、数字与期间正确、反证处理、不确定性表达、任务完成度。具体判据、适用状态和错误归属统一由 [ordinary_rubric()](ordinary_answer_quality.py) 定义，标注、判官输入和评分器引用同一份标准并绑定哈希。标准变化后必须重新复核标签，旧评审不能沿用。标签、理由、回答及证据绑定共同决定复核是否有效；程序检查绑定和汇总，不能凭引用编号自动确定语义正确。固定输入的分析稿消融由 [run_ordinary_answer_replay.py](run_ordinary_answer_replay.py) 执行，仅覆盖最终回答生成。完整步骤和解释边界见[普通路线执行说明](../docs/architecture/ordinary-agent-execution.md)。
+执行检查包括路由、参数、工具、证据时效、终态和引用编号合法性。人工复核用第二、三条命令：先导出绑定到该次回答的复核模板，填好后计算五维结果；标准变化后旧复核不能沿用。固定输入的最终回答消融用 [run_ordinary_answer_replay.py](run_ordinary_answer_replay.py)。完整说明见[普通路线执行说明](../docs/architecture/ordinary-agent-execution.md)。
 
-### 评测 Agent 与判官校准
+普通回答 AI 评审的辅助试用配置是原提示词、`qwen3.8-max`、开思考、预算 4096；用户接受“最终通过/失败判定正确率超过 80% 即进入辅助试用”，统计以全部登记样本为分母，技术无效不算判对。依据见[控制变量实验](judge-pilot/controlled-20261002/RESULTS.md)。
 
-[run_evaluation_agent.py](run_evaluation_agent.py) 根据已登记的 Ordinary 结果 schema 读取实际答案、Trace 和证据，沿用上述标准。完整冻结证据直接提供给判官，需要核算派生数值时可调用 `calculate`；每轮启用 JSON 输出模式，最后一轮不再提供工具。绑定核查、摘录校验和状态汇总固定执行；工具不访问网络来源或执行任意脚本。本入口目前只支持普通最终答案，其他领域仍使用各自入口。
-
-```powershell
-python evals/run_evaluation_agent.py --input evals/results/ordinary-live.json --output evals/results/ordinary-ai-review.json
-python evals/run_evaluation_agent.py --dataset evals/judge-pilot/v2/cases.jsonl --split DEV --output evals/results/judge-dev.json
-python evals/judge_calibration.py --dataset evals/judge-pilot/v2/cases.jsonl --report evals/results/judge-dev.json --output evals/results/judge-dev-calibration.json
-python evals/propose_judge_prompt.py --dataset evals/judge-pilot/v2/cases.jsonl --baseline evals/results/judge-dev.json --output evals/results/judge-candidate
-python evals/run_evaluation_agent.py --dataset evals/judge-pilot/v2/cases.jsonl --split DEV --prompt evals/results/judge-candidate/candidate-prompt.txt --output evals/results/judge-candidate-dev.json
-python evals/judge_calibration.py --dataset evals/judge-pilot/v2/cases.jsonl --baseline evals/results/judge-dev.json --report evals/results/judge-candidate-dev.json --output evals/results/judge-comparison.json
-```
-
-凭据复用现有 `DASHSCOPE_API_KEY` / 本地忽略配置读取方式；`--model`、`--endpoint`、调用上限及超时可通过 `--help` 查看。报告记录实际返回的模型、提示词和标准身份、每次响应、工具调用及供应商用量；缺用量时不虚构费用。`--dry-run` 只检查输入，不调用模型。输出文件已存在会拒绝覆盖。
-
-判官默认关闭思考；`--enable-thinking` 可开启，`--thinking-budget` 可选指定供应商思考预算。报告保存请求实际使用的配置，工具续轮保留供应商返回的 `reasoning_content`。这些开关用于显式实验，不自动改变业务模型或启用候选提示词；[提示词提案入口](propose_judge_prompt.py)仍只接受其已有固定配置契约。
-
-### 普通回答辅助试用
-
-当前接受的试用配置使用原提示词、`qwen3.8-max`、开启思考和 4096 思考预算。下面的显式命令覆盖兼容性 CLI 默认值，读取真实保存的 Ordinary 回答及证据：
-
-```powershell
-python evals/run_evaluation_agent.py --input evals/results/ordinary-live.json --output evals/results/ordinary-ai-trial.json --model qwen3.8-max --prompt evals/prompts/ordinary_judge.txt --enable-thinking --thinking-budget 4096 --timeout-seconds 180 --max-tokens 2400 --max-calls 4
-```
-
-用户接受最终通过／失败判定正确率超过 80% 即进入辅助试用，并在实际使用中完善。统计时以全部登记样本为分母，技术无效不算判对；逐维标签一致与五维全部一致另外报告，不能混称准确率。[控制变量实验](judge-pilot/controlled-20261002/RESULTS.md)提供这套配置的样例证据与适用边界；详细归因继续用于分析，不直接授权业务候选发布。业务 Agent 自进化的流程与当前迭代记录见[自进化评测入口](evolution/README.md)。
-
-AI 诊断采用独立 `ordinary_judge_diagnostic_v2` schema，始终标记 `diagnostic_only: true`、`release_eligible: false` 和人工复核未完成，不直接回填人工评审或发布门禁。摘录要求来自冻结标准：提供的片段必须能在原文中找到。单项摘录或格式错误只使该项技术无效；输入绑定损坏、接口失败和不可解析的整份输出影响全部维度。`technical_status`、全局 `errors` 与逐维 `errors` 明确区分这些情况，原始判断保存在 `reported_status`，无效项不计作语义判断。合理的材料不足属于有效 `NO_DATA`；有出处的摘录只能证明定位，不能单独证明语义判断正确。
-
-[判官校准集](judge-pilot/v2/README.md) 包含有官方来源的编写答案与 AI 交叉核查标签，不冒充业务 Agent 的真实输出。运行前校验标签复核状态、两个不同复核角色及标准哈希；争议或未复核标签阻止模型调用。开发和验证按公司/报告分组隔离。校准器分别报告技术有效率、已知判断覆盖率、有效已知判断上的语义一致率、合理弃权及全项目一致率，并给出各自分母。误放与误杀需结合覆盖率阅读；`--baseline` 只在共同有效且已知的项目上计算纠正/退化，覆盖增减单列，比较条件由 [COMPARISON_POLICY](judge_calibration.py) 定义。v1 历史数据和运行不重写，也不与 v2 跨标准比较。
-
-[propose_judge_prompt.py](propose_judge_prompt.py) 收集完整 DEV 运行中已核实的分歧和无效评审，一次调用提出一个通用流程候选；没有开发集错误时不生成。生成输入只包含 DEV，标准、协议、模型和工具保持固定，原始响应及父版本身份随候选保存。使用 `--prompt` 显式评估候选；先在 DEV 选择并冻结版本，再以 `--split VALIDATION` 验证，验证结果不能回流本轮优化。生成和比较不会自动安装候选，不改变业务 Agent 的模板或发布资格。
-
-## Harness / DEEP
+### DEEP
 
 ```powershell
 python evals/run_harness_eval.py --fail-on-gate
 python evals/run_harness_live_eval.py --email "$env:STOCKSAGE_EVAL_EMAIL" --password-env STOCKSAGE_EVAL_PASSWORD --fail-on-gate
+python evals/run_deep_m0.py --arm C --evidence-only --output evals/results/deep-evidence.json
 ```
 
-离线 runner 编译后端并通过 [HarnessPolicyEval.java](harness/HarnessPolicyEval.java) 调用生产策略，不依赖 JUnit、Mockito 或 `target/test-classes`，不启动服务、不调用模型。需要 JDK 17 或更新版本及后端 Maven 运行依赖。输出保留逐例决策、违规、恢复动作和覆盖统计；同目录的 `.summary.json` 由现有 Harness 门禁生成。`--output` 可指定报告路径，本次结果生成并校验后才替换已有报告；`--fail-on-gate` 在门禁未通过时返回 1，编译、运行或产物错误返回 2。统一编译已完成且 `stocksage-backend/target/harness-eval-classpath.txt` 已生成时，可用 `--skip-build` 跳过 Maven；Java 驱动仍会重新编译执行。
+- 离线 Harness 通过 [HarnessPolicyEval.java](harness/HarnessPolicyEval.java) 调用生产策略，不启动服务、不调用模型；`--skip-build` 复用已编译的后端。编译或产物错误返回 2，门禁未通过且带 `--fail-on-gate` 时返回 1。
+- Harness live 提交真实 DEEP 任务核对终态、Trace 和 Harness 决策；`--case-limit` 缩小范围只算冒烟。
+- `run_deep_m0.py` 按 `deep_react_cases.jsonl` 提交 DEEP 研究。`--evidence-only` 用请求级评测模式只跑证据阶段（约 0.05 元/题），并保存完整证据快照供维度评审；不带该参数时跑完整研究并保存报告。多组对照的盲评汇总用 [deep_m0_score.py](deep_m0_score.py)。
+- DEEP 报告质量（辩论和报告）还没有可运行的评测层；需要时用完整研究加人工复核，冻结证据回放见方案 S7。
 
-live runner 提交真实 DEEP 任务并核对终态、Trace 和 Harness 决策；数据集与策略身份由 manifest 约束。用 `--case-limit` 缩小运行范围只构成 smoke，不能视为完整发布门禁。
-
-DEEP Replan 的证据支撑覆盖、新增证据利用率及配对 A/B 门槛在[有界重规划计划](../docs/architecture/deep-bounded-replan-plan.md)中定义；没有独立的已实现语义 runner，不能用 Harness 通过代替这些收益验证。
-
-## FUNDAMENTALS 方法进化
-
-数据契约可先用明确标记的合成机制样本检查：
+### FUNDAMENTALS 方法进化
 
 ```powershell
 python evals/evolution_dataset.py evals/evolution/synthetic-smoke/cases.jsonl --gold evals/evolution/synthetic-smoke/gold.jsonl
 ```
 
-这条命令不调用模型，也不证明真实研究质量。真实实验按[进化评测工作流](evolution/README.md)准备独立来源/gold、冻结策略和执行清单，再使用 `run_evolution_replay.py`、`evolution_quality.py`、`evolution_compare.py` 完成回放、复核和比较。
+这条命令只检查数据契约，不调用模型。真实实验流程见[进化评测工作流](evolution/README.md)，评审与改善门槛的边界见 [V1 契约](../docs/evolution/evolution-v1-contract.md)。
 
-基本面评审由 [evolution_rubric.py](evolution_rubric.py) 独立维护。必答事实、单位、期间、数值容差和派生公式来自 gold；改善幅度、非退化界限、样本与资源约束来自该实验冻结的 policy。最终回答是改善判断的主终点，分析稿仍需单独复核。正式验收和单次实验的 AI 诊断有不同资格，不能互相替代；边界见 [V1 契约](../docs/evolution/evolution-v1-contract.md)。
+**不再扩展**：这条线的治理部分（冻结清单、执行清单哈希、审批与发布：`evolution_release.py`、`evolution_acceptance.py`、`evolution_experiment.py`、`evolution_build.py` 等）保持现状，不再新增功能或层级。后续进化改用统一内核方案（[deep-evidence-evolution-plan.md](../docs/architecture/deep-evidence-evolution-plan.md)），等评测方案 S4～S6 完成后再继续。
 
-## Research Memory 与其他专项
+### 其他
 
-[研究记忆计划](../docs/architecture/research-memory-decay-conflict-plan.md)保留检索召回、排序、泄漏、字符预算和延迟的既定验收目标；当前没有独立的 Research Memory live 质量 runner。现有 Memory 定向测试证明各自代码契约，不能证明注入记忆改善了回答；后者需固定当前证据和模型条件做注入/不注入配对评价。
+- Research Memory 没有独立的 live 质量评测；证明注入记忆改善了回答，需要固定证据和模型做注入/不注入配对评价（见[研究记忆计划](../docs/architecture/research-memory-decay-conflict-plan.md)）。
+- 模型或提示模板实验使用各自目录内的冻结标准、原始输出和复核记录，不把单次实验的标准当作默认标准。
 
-模型或提示模板实验使用其目录内的冻结 `criteria`、原始输出和复核记录，不将单次诊断标准提升为所有项目的默认标准。
+## 历史记录
 
-## 历史制品与路径
-
-历史实验制品保留原始字节，包括其中记录的 `rag-eval` 路径、哈希和签名。查找旧记录引用的本仓库路径时，将其 `rag-eval` 目录对应到现在的 `evals` 位置；不要为了使历史路径可点击而改写制品内部字段。
-
-目录迁移、评估器或标准变更后的新实验需要重新建立并冻结实际输入、构建及评估器身份，重新满足对应验收条件；定位到旧文件不代表旧资格适用于新实验。
+- 自动化测试已按用户要求移除。依赖已删测试驱动的历史实验入口（如 `EvolutionLiveBaselineTest`、`scoped-repeatability-20261004/run.py`）不能直接重跑；保留原计划和哈希，不改写冻结记录。
+- 部分历史草稿回放没有保存模型结束原因，不能据正文非空判定生成完整（见[完成判定验证记录](diagnostics/harness-completion-20261005/RESULTS.md#解释范围)）。
+- 历史制品保留原始字节，其中的 `rag-eval` 路径对应现在的 `evals` 目录；不要改写制品内部字段。
+- 目录、评估器或标准变更后的新实验要重新记录实际输入和评估器身份，旧结果的结论不自动适用。

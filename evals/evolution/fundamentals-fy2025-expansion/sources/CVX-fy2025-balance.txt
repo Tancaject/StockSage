@@ -1,0 +1,45 @@
+Consolidated Balance Sheet - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024
+Assets |  |  | 
+Cash and cash equivalents |  | $ 6,293 | $ 6,781
+Time deposits |  | 4 | 4
+Marketable securities |  | 0 | 0
+Accounts and notes receivable (less allowance: 2025 - $176; 2024 - $259) |  | 18,075 | 20,684
+Inventories: |  |  | 
+Crude oil and products |  | 6,640 | 6,490
+Chemicals |  | 571 | 502
+Materials, supplies and other |  | 2,500 | 2,082
+Total inventories |  | 9,711 | 9,074
+Prepaid expenses and other current assets |  | 4,469 | 4,368
+Total Current Assets |  | 38,552 | 40,911
+Long-term receivables, net (less allowances: 2025 - $216; 2024 - $352) |  | 1,035 | 877
+Investments and advances |  | 43,867 | 47,438
+Properties, plant and equipment, at cost |  | 434,955 | 345,933
+Less: Accumulated depreciation, depletion and amortization |  | 215,226 | 198,134
+Properties, plant and equipment, net |  | 219,729 | 147,799
+Deferred charges and other assets |  | 16,236 | 14,854
+Goodwill |  | 4,568 | 4,578
+Assets held for sale |  | 25 | 481
+Total Assets |  | 324,012 | 256,938
+Liabilities and Equity |  |  | 
+Short-term debt |  | 977 | 4,406
+Accounts payable |  | 19,280 | 22,079
+Accrued liabilities |  | 10,763 | 8,486
+Federal and other taxes on income |  | 844 | 1,872
+Other taxes payable |  | 1,523 | 1,715
+Total Current Liabilities |  | 33,387 | 38,558
+Long-term debt | [1] | 39,781 | 20,135
+Deferred credits and other noncurrent obligations |  | 24,543 | 22,094
+Noncurrent deferred income taxes |  | 30,014 | 19,137
+Noncurrent employee benefit plans |  | 4,111 | 3,857
+Total Liabilities | [2] | 131,836 | 103,781
+Preferred stock (authorized 100,000,000 shares; $1.00 par value; none issued) |  | 0 | 0
+Common stock (authorized 6,000,000,000 shares; $0.75 par value; 2,442,676,580 shares issued at December 31, 2025 and 2024) |  | 1,832 | 1,832
+Capital in excess of par value |  | 33,886 | 21,671
+Retained earnings |  | 205,365 | 205,852
+Accumulated other comprehensive losses |  | (2,464) | (2,760)
+Deferred compensation and benefit plan trust |  | (240) | (240)
+Treasury stock, at cost (2025 - 448,260,458 shares; 2024 - 673,664,306 shares) |  | (51,929) | (74,037)
+Total Chevron Corporation Stockholders’ Equity |  | 186,450 | 152,318
+Noncontrolling interests |  | 5,726 | 839
+Total Equity |  | 192,176 | 153,157
+Total Liabilities and Equity |  | $ 324,012 | $ 256,938

@@ -1,0 +1,406 @@
+[
+ {
+  "cells": [
+   "Consolidated Balance Sheet - USD ($) $ in Millions",
+   "Dec. 31, 2025",
+   "Dec. 31, 2024"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Assets",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AssetsAbstract"
+ },
+ {
+  "cells": [
+   "Cash and cash equivalents",
+   "",
+   "$ 6,293",
+   "$ 6,781"
+  ],
+  "concept": "cvx:CashAndCashEquivalentsExcludingTimeDeposits"
+ },
+ {
+  "cells": [
+   "Time deposits",
+   "",
+   "4",
+   "4"
+  ],
+  "concept": "us-gaap:TimeDepositsAtCarryingValue"
+ },
+ {
+  "cells": [
+   "Marketable securities",
+   "",
+   "0",
+   "0"
+  ],
+  "concept": "us-gaap:MarketableSecuritiesCurrent"
+ },
+ {
+  "cells": [
+   "Accounts and notes receivable (less allowance: 2025 - $176; 2024 - $259)",
+   "",
+   "18,075",
+   "20,684"
+  ],
+  "concept": "us-gaap:AccountsNotesAndLoansReceivableNetCurrent"
+ },
+ {
+  "cells": [
+   "Inventories:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:InventoryNetAbstract"
+ },
+ {
+  "cells": [
+   "Crude oil and products",
+   "",
+   "6,640",
+   "6,490"
+  ],
+  "concept": "us-gaap:InventoryFinishedGoodsAndWorkInProcess"
+ },
+ {
+  "cells": [
+   "Chemicals",
+   "",
+   "571",
+   "502"
+  ],
+  "concept": "us-gaap:EnergyRelatedInventoryChemicals"
+ },
+ {
+  "cells": [
+   "Materials, supplies and other",
+   "",
+   "2,500",
+   "2,082"
+  ],
+  "concept": "us-gaap:OtherInventorySupplies"
+ },
+ {
+  "cells": [
+   "Total inventories",
+   "",
+   "9,711",
+   "9,074"
+  ],
+  "concept": "us-gaap:InventoryNet"
+ },
+ {
+  "cells": [
+   "Prepaid expenses and other current assets",
+   "",
+   "4,469",
+   "4,368"
+  ],
+  "concept": "us-gaap:PrepaidExpenseCurrent"
+ },
+ {
+  "cells": [
+   "Total Current Assets",
+   "",
+   "38,552",
+   "40,911"
+  ],
+  "concept": "us-gaap:AssetsCurrent"
+ },
+ {
+  "cells": [
+   "Long-term receivables, net (less allowances: 2025 - $216; 2024 - $352)",
+   "",
+   "1,035",
+   "877"
+  ],
+  "concept": "us-gaap:AccountsReceivableExcludingAccruedInterestAfterAllowanceForCreditLossNoncurrent"
+ },
+ {
+  "cells": [
+   "Investments and advances",
+   "",
+   "43,867",
+   "47,438"
+  ],
+  "concept": "us-gaap:InvestmentsInAffiliatesSubsidiariesAssociatesAndJointVentures"
+ },
+ {
+  "cells": [
+   "Properties, plant and equipment, at cost",
+   "",
+   "434,955",
+   "345,933"
+  ],
+  "concept": "us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization"
+ },
+ {
+  "cells": [
+   "Less: Accumulated depreciation, depletion and amortization",
+   "",
+   "215,226",
+   "198,134"
+  ],
+  "concept": "us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization"
+ },
+ {
+  "cells": [
+   "Properties, plant and equipment, net",
+   "",
+   "219,729",
+   "147,799"
+  ],
+  "concept": "us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization"
+ },
+ {
+  "cells": [
+   "Deferred charges and other assets",
+   "",
+   "16,236",
+   "14,854"
+  ],
+  "concept": "us-gaap:OtherAssetsNoncurrent"
+ },
+ {
+  "cells": [
+   "Goodwill",
+   "",
+   "4,568",
+   "4,578"
+  ],
+  "concept": "us-gaap:Goodwill"
+ },
+ {
+  "cells": [
+   "Assets held for sale",
+   "",
+   "25",
+   "481"
+  ],
+  "concept": "us-gaap:DisposalGroupIncludingDiscontinuedOperationPropertyPlantAndEquipment"
+ },
+ {
+  "cells": [
+   "Total Assets",
+   "",
+   "324,012",
+   "256,938"
+  ],
+  "concept": "us-gaap:Assets"
+ },
+ {
+  "cells": [
+   "Liabilities and Equity",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LiabilitiesAndStockholdersEquityAbstract"
+ },
+ {
+  "cells": [
+   "Short-term debt",
+   "",
+   "977",
+   "4,406"
+  ],
+  "concept": "us-gaap:ShortTermBorrowings"
+ },
+ {
+  "cells": [
+   "Accounts payable",
+   "",
+   "19,280",
+   "22,079"
+  ],
+  "concept": "us-gaap:AccountsPayableCurrent"
+ },
+ {
+  "cells": [
+   "Accrued liabilities",
+   "",
+   "10,763",
+   "8,486"
+  ],
+  "concept": "us-gaap:AccruedLiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Federal and other taxes on income",
+   "",
+   "844",
+   "1,872"
+  ],
+  "concept": "us-gaap:AccruedIncomeTaxesCurrent"
+ },
+ {
+  "cells": [
+   "Other taxes payable",
+   "",
+   "1,523",
+   "1,715"
+  ],
+  "concept": "us-gaap:AccrualForTaxesOtherThanIncomeTaxesCurrent"
+ },
+ {
+  "cells": [
+   "Total Current Liabilities",
+   "",
+   "33,387",
+   "38,558"
+  ],
+  "concept": "us-gaap:LiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Long-term debt",
+   "[1]",
+   "39,781",
+   "20,135"
+  ],
+  "concept": "us-gaap:LongTermDebtAndCapitalLeaseObligationsIncludingCurrentMaturities"
+ },
+ {
+  "cells": [
+   "Deferred credits and other noncurrent obligations",
+   "",
+   "24,543",
+   "22,094"
+  ],
+  "concept": "cvx:ContractWithCustomerLiabilityAndOtherNoncurrentLiability"
+ },
+ {
+  "cells": [
+   "Noncurrent deferred income taxes",
+   "",
+   "30,014",
+   "19,137"
+  ],
+  "concept": "us-gaap:DeferredIncomeTaxLiabilitiesNet"
+ },
+ {
+  "cells": [
+   "Noncurrent employee benefit plans",
+   "",
+   "4,111",
+   "3,857"
+  ],
+  "concept": "us-gaap:PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent"
+ },
+ {
+  "cells": [
+   "Total Liabilities",
+   "[2]",
+   "131,836",
+   "103,781"
+  ],
+  "concept": "us-gaap:Liabilities"
+ },
+ {
+  "cells": [
+   "Preferred stock (authorized 100,000,000 shares; $1.00 par value; none issued)",
+   "",
+   "0",
+   "0"
+  ],
+  "concept": "us-gaap:PreferredStockValue"
+ },
+ {
+  "cells": [
+   "Common stock (authorized 6,000,000,000 shares; $0.75 par value; 2,442,676,580 shares issued at December 31, 2025 and 2024)",
+   "",
+   "1,832",
+   "1,832"
+  ],
+  "concept": "us-gaap:CommonStockValue"
+ },
+ {
+  "cells": [
+   "Capital in excess of par value",
+   "",
+   "33,886",
+   "21,671"
+  ],
+  "concept": "us-gaap:AdditionalPaidInCapitalCommonStock"
+ },
+ {
+  "cells": [
+   "Retained earnings",
+   "",
+   "205,365",
+   "205,852"
+  ],
+  "concept": "us-gaap:RetainedEarningsAccumulatedDeficit"
+ },
+ {
+  "cells": [
+   "Accumulated other comprehensive losses",
+   "",
+   "(2,464)",
+   "(2,760)"
+  ],
+  "concept": "us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax"
+ },
+ {
+  "cells": [
+   "Deferred compensation and benefit plan trust",
+   "",
+   "(240)",
+   "(240)"
+  ],
+  "concept": "us-gaap:CommonStockHeldInTrust"
+ },
+ {
+  "cells": [
+   "Treasury stock, at cost (2025 - 448,260,458 shares; 2024 - 673,664,306 shares)",
+   "",
+   "(51,929)",
+   "(74,037)"
+  ],
+  "concept": "us-gaap:TreasuryStockCommonValue"
+ },
+ {
+  "cells": [
+   "Total Chevron Corporation Stockholders’ Equity",
+   "",
+   "186,450",
+   "152,318"
+  ],
+  "concept": "us-gaap:StockholdersEquity"
+ },
+ {
+  "cells": [
+   "Noncontrolling interests",
+   "",
+   "5,726",
+   "839"
+  ],
+  "concept": "us-gaap:MinorityInterest"
+ },
+ {
+  "cells": [
+   "Total Equity",
+   "",
+   "192,176",
+   "153,157"
+  ],
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Total Liabilities and Equity",
+   "",
+   "$ 324,012",
+   "$ 256,938"
+  ],
+  "concept": "us-gaap:LiabilitiesAndStockholdersEquity"
+ }
+]

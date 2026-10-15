@@ -27,6 +27,7 @@ import java.util.List;
  * @param requireNoFallback 是否要求本例不得使用确定性回退
  * @param expectedResolvedQueryContains 可选的消歧结果片段；提供时要求执行计划的 resolvedQuery 包含它
  * @param expectedClarification 可选的路由元数据澄清标签（含 Coordinator 安全覆盖），不含 ReadRequest 参数澄清
+ * @param expectedTargets 可选的多标的扇出标的（顺序无关）；为空时不参与判定，空列表表示期望不扇出
  */
 public record PlannerEvalCase(
         @NotBlank String id,
@@ -41,7 +42,8 @@ public record PlannerEvalCase(
         String expectedDecisionSource,
         boolean requireNoFallback,
         String expectedResolvedQueryContains,
-        Boolean expectedClarification
+        Boolean expectedClarification,
+        List<String> expectedTargets
 ) {
     /**
      * 将动作断言复制为不可变列表，防止评测期间被外部修改。
@@ -69,6 +71,18 @@ public record PlannerEvalCase(
         expectedFineIntent = normalizeOptionalExpectation(expectedFineIntent);
         expectedDecisionSource = normalizeOptionalExpectation(expectedDecisionSource);
         expectedResolvedQueryContains = normalizeOptionalExpectation(expectedResolvedQueryContains);
+    }
+
+    /** 保留十三字段构造方式；旧样例没有标的断言。 */
+    public PlannerEvalCase(
+            String id, String query, int ragHitCount, PlanRoute expectedRoute,
+            List<PlanAction> requiredActions, List<PlanAction> forbiddenActions, boolean critical,
+            List<String> recentTurns, String expectedFineIntent, String expectedDecisionSource,
+            boolean requireNoFallback, String expectedResolvedQueryContains, Boolean expectedClarification
+    ) {
+        this(id, query, ragHitCount, expectedRoute, requiredActions, forbiddenActions, critical,
+                recentTurns, expectedFineIntent, expectedDecisionSource, requireNoFallback,
+                expectedResolvedQueryContains, expectedClarification, null);
     }
 
     /** 保留十二字段构造方式；旧样例没有澄清标签。 */

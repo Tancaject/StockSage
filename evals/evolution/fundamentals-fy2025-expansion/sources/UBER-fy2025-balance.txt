@@ -1,0 +1,41 @@
+CONSOLIDATED BALANCE SHEETS - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024
+Assets |  | 
+Cash and cash equivalents | $ 7,105 | $ 5,893
+Short-term investments | 528 | 1,084
+Restricted cash and cash equivalents | 631 | 545
+Accounts receivable, net of allowance of $95 and $91, respectively | 3,827 | 3,333
+Prepaid expenses and other current assets | 1,902 | 1,390
+Total current assets | 13,993 | 12,245
+Restricted cash and cash equivalents | 1,911 | 2,172
+Restricted investments | 8,874 | 7,019
+Investments | 9,178 | 8,460
+Equity method investments | 287 | 302
+Property and equipment, net | 1,897 | 1,952
+Operating lease right-of-use assets | 1,114 | 1,158
+Intangible assets, net | 1,048 | 1,125
+Goodwill | 8,931 | 8,066
+Deferred tax assets | 10,951 | 6,171
+Other assets | 3,618 | 2,574
+Total assets | 61,802 | 51,244
+Liabilities, redeemable non-controlling interests and equity |  | 
+Accounts payable | 1,013 | 858
+Short-term insurance reserves | 3,387 | 2,754
+Operating lease liabilities, current | 169 | 175
+Accrued and other current liabilities | 7,751 | 7,689
+Total current liabilities | 12,320 | 11,476
+Long-term insurance reserves | 9,076 | 7,042
+Long-term debt, net of current portion | 10,521 | 8,347
+Operating lease liabilities, non-current | 1,390 | 1,454
+Other long-term liabilities | 412 | 449
+Total liabilities | 33,719 | 28,768
+Commitments and contingencies (Note 14) |  | 
+Redeemable non-controlling interests | 165 | 93
+Equity |  | 
+Common stock, $0.00001 par value, 5,000,000 shares authorized for both periods, 2,107,953 and 2,067,905 shares issued and outstanding, respectively | 0 | 0
+Additional paid-in capital | 38,101 | 42,801
+Accumulated other comprehensive loss | (432) | (517)
+Accumulated deficit | (10,628) | (20,726)
+Total Uber Technologies, Inc. stockholders' equity | 27,041 | 21,558
+Non-redeemable non-controlling interests | 877 | 825
+Total equity | 27,918 | 22,383
+Total liabilities, redeemable non-controlling interests and equity | $ 61,802 | $ 51,244

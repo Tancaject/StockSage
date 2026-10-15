@@ -1,0 +1,33 @@
+Consolidated Statements of Operations - USD ($) shares in Millions, $ in Millions | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Revenues: |  |  | 
+Premiums | $ 352,229 | $ 308,810 | $ 290,827
+Investment and other income | 3,920 | 5,202 | 4,089
+Total revenues | 447,567 | 400,278 | 371,622
+Operating costs: |  |  | 
+Medical costs | 313,995 | 264,185 | 241,894
+Operating costs | 59,592 | 53,013 | 54,628
+Cost of products sold | 50,655 | 46,694 | 38,770
+Depreciation and amortization | 4,361 | 4,099 | 3,972
+Total operating costs | 428,603 | 367,991 | 339,264
+Earnings from operations | 18,964 | 32,287 | 32,358
+Interest expense | (4,002) | (3,906) | (3,246)
+Loss on sale of subsidiary and subsidiaries held for sale | (265) | (8,310) | 0
+Total income before income taxes | 14,697 | 20,071 | 29,112
+Provision for income taxes | (1,890) | (4,829) | (5,968)
+Net earnings | 12,807 | 15,242 | 23,144
+Earnings attributable to noncontrolling interests | (751) | (837) | (763)
+Net earnings attributable to UnitedHealth Group common shareholders | $ 12,056 | $ 14,405 | $ 22,381
+Earnings per share attributable to UnitedHealth Group common shareholders: |  |  | 
+Basic | $ 13.28 | $ 15.64 | $ 24.12
+Diluted | $ 13.23 | $ 15.51 | $ 23.86
+Basic weighted-average number of common shares outstanding | 908 | 921 | 928
+Dilutive effect of common share equivalents | 3 | 8 | 10
+Diluted weighted-average number of common shares outstanding | 911 | 929 | 938
+Anti-dilutive shares excluded from the calculation of dilutive effect of common share equivalents | 12 | 6 | 6
+Products |  |  | 
+Revenues: |  |  | 
+Revenue from Products and Services | $ 53,380 | $ 50,226 | $ 42,583
+Services |  |  | 
+Revenues: |  |  | 
+Revenue from Products and Services | $ 38,038 | $ 36,040 | $ 34,123

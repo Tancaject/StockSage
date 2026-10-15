@@ -85,6 +85,30 @@ public class ModelInvocationStore {
         return id;
     }
 
+    /**
+     * 只为带评测模式的任务保存本次调用的完整输入输出；普通任务不落原文，SQL 条件直接不插入。
+     * 写入失败只影响复盘材料，调用方按旁路处理。
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void recordTranscript(String invocationId, String requestText, String responseText, String reasoningText) {
+        jdbc.update("""
+                INSERT IGNORE INTO research_model_transcripts (invocation_id, run_id, request_text, response_text, reasoning_text)
+                SELECT i.id, i.run_id, ?, ?, ?
+                  FROM research_model_invocations i JOIN research_tasks t ON t.id = i.run_id
+                 WHERE i.id = ? AND JSON_EXTRACT(t.payload_json, '$.evaluationMode') IS NOT NULL
+                """, requestText, responseText, reasoningText, invocationId);
+    }
+
+    /** 本次运行剩余的模型调用次数（只读）；预算缺失时返回 0，由调用方停止可选步骤。 */
+    public long remainingModelCalls(Long runId) {
+        if (runId == null) return 0;
+        Integer max = jdbc.queryForObject("SELECT max_model_calls FROM research_tasks WHERE id = ?", Integer.class, runId);
+        if (max == null || max <= 0) return 0;
+        Long calls = jdbc.queryForObject("SELECT COUNT(*) FROM research_model_invocations WHERE run_id = ?",
+                Long.class, runId);
+        return Math.max(0, max - (calls == null ? 0 : calls));
+    }
+
     private record BudgetLimits(Long deadlineEpochMs, Integer maxModelCalls) { }
 
     private Long reserveTokens(Long runId, Map<String, Object> request) {
@@ -105,12 +129,10 @@ public class ModelInvocationStore {
             }
             if ("DISABLED".equals(frozen.path("status").asText())) return null;
             requireCurrentTokenContract(frozen, runId);
-            JsonNode n = parameters.path("n");
-            if (!embedding && (!Boolean.FALSE.equals(request.get("extraBodyPresent")) || !Boolean.FALSE.equals(request.get("toolsPresent"))
-                    || (!n.isMissingNode() && (!n.isIntegralNumber() || !n.canConvertToLong() || n.longValue() != 1)))) {
-                throw new IllegalArgumentException("Unbounded model request options");
-            }
             String model = request.get("requestedModel") instanceof String value ? value : null;
+            if (!embedding) {
+                ModelTokenBudgetProperties.requireBoundedChatRequest(parameters, frozen, model);
+            }
             long reservation;
             if (embedding) {
                 JsonNode count = parameters.path("inputCount");
@@ -226,12 +248,20 @@ public class ModelInvocationStore {
             return unknownCost("USAGE_UNKNOWN");
         }
         if (input > price.path("maxInputTokens").longValue()) return unknownCost("INPUT_LIMIT_EXCEEDED");
-        BigDecimal amount = new BigDecimal(price.path("inputPerMillion").textValue()).multiply(BigDecimal.valueOf(input))
-                .add(new BigDecimal(price.path("outputPerMillion").textValue()).multiply(BigDecimal.valueOf(output)))
-                .movePointLeft(6);
+        // Cached input is billed at the cache-hit rate only when both the provider count and the rate exist.
+        Long cached = tokenCount(response.path("cachedInputTokens"));
+        boolean cacheRated = cached != null && cached <= input && price.hasNonNull("cachedInputPerMillion");
+        long fullRateInput = cacheRated ? input - cached : input;
+        BigDecimal amount = new BigDecimal(price.path("inputPerMillion").textValue()).multiply(BigDecimal.valueOf(fullRateInput))
+                .add(new BigDecimal(price.path("outputPerMillion").textValue()).multiply(BigDecimal.valueOf(output)));
+        if (cacheRated) {
+            amount = amount.add(new BigDecimal(price.path("cachedInputPerMillion").textValue()).multiply(BigDecimal.valueOf(cached)));
+        }
+        amount = amount.movePointLeft(6);
         return Map.of("status", "SUCCEEDED".equals(status) ? "COMPLETE_RECORDED_ESTIMATE" : "PARTIAL_ESTIMATE",
                 "basis", "CONFIGURED_FLAT_RATE_ESTIMATE", "currency", price.path("currency").textValue(),
-                "amount", amount.toPlainString(), "rateVersion", price.path("version").textValue());
+                "amount", amount.toPlainString(), "rateVersion", price.path("version").textValue(),
+                "cacheBasis", cacheRated ? "CACHE_HIT_RATE_APPLIED" : "FULL_INPUT_RATE");
     }
 
     private static Map<String, Object> unknownCost(String reason) {

@@ -24,9 +24,11 @@ class LiveEvalStreamError(LiveEvalError):
 
 
 class StockSageClient:
-    def __init__(self, base_url: str, timeout_seconds: int = 30):
+    def __init__(self, base_url: str, timeout_seconds: int = 30, extra_headers: dict[str, str] | None = None):
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
+        # Sent with every request, e.g. the admin token that enables request-level evaluation modes.
+        self.extra_headers = dict(extra_headers or {})
         self.cookies = http.cookiejar.CookieJar()
         self.opener = urllib.request.build_opener(
             urllib.request.HTTPCookieProcessor(self.cookies)
@@ -40,7 +42,7 @@ class StockSageClient:
         timeout_seconds: int | None = None,
         accept: str = "application/json",
     ) -> tuple[int, bytes]:
-        headers = {"Accept": accept}
+        headers = {"Accept": accept, **self.extra_headers}
         payload = None
         if body is not None:
             payload = json.dumps(body, ensure_ascii=False).encode("utf-8")
@@ -111,7 +113,7 @@ class StockSageClient:
         deadline: float | None = None,
         on_event: Callable[[dict[str, Any]], None] | None = None,
     ) -> list[dict[str, Any]]:
-        headers = {"Accept": "text/event-stream"}
+        headers = {"Accept": "text/event-stream", **self.extra_headers}
         payload = None
         if body is not None:
             payload = json.dumps(body, ensure_ascii=False).encode("utf-8")

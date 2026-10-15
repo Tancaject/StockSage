@@ -1,11 +1,13 @@
 package com.stocksage.controller;
 
+import com.stocksage.config.AdminApiInterceptor;
 import com.stocksage.evolution.EvolutionFailurePool;
 import com.stocksage.identity.RequestIdentity;
 import com.stocksage.model.dto.ChatRequest;
 import com.stocksage.model.entity.Conversation;
 import com.stocksage.model.entity.Message;
 import com.stocksage.conversation.ChatService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -42,6 +44,9 @@ public class ChatController {
     /** 用户反馈"答案有问题"时写入的自进化失败池。 */
     private final EvolutionFailurePool failurePool;
 
+    /** 评测专用请求级模式的管理员令牌判断。 */
+    private final AdminApiInterceptor adminApiInterceptor;
+
     /**
      * 流式对话接口。
      *
@@ -54,9 +59,14 @@ public class ChatController {
      * @return 持续发送元数据、进度、观察和答案块的 SSE Flux
      */
     @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> streamChat(@Valid @RequestBody ChatRequest request) {
+    public Flux<String> streamChat(@Valid @RequestBody ChatRequest request, HttpServletRequest httpRequest) {
         // 服务端身份覆盖客户端字段，ChatService 后续所有读写都以当前 Session 用户为准。
         request.setUserId(requestIdentity.currentUserId());
+        // 评测模式只对持有管理员令牌的请求生效，其余请求一律按普通对话处理。
+        if (!java.util.Set.of("EVIDENCE_ONLY", "FULL_CAPTURE").contains(String.valueOf(request.getEvaluationMode()))
+                || !adminApiInterceptor.hasValidAdminToken(httpRequest)) {
+            request.setEvaluationMode(null);
+        }
         return chatService.streamChat(request);
     }
 

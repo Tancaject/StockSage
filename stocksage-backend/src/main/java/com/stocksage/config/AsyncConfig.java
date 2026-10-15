@@ -75,6 +75,26 @@ public class AsyncConfig {
         return executor;
     }
 
+    /**
+     * 多标的取证扇出的独立线程池。
+     *
+     * <p>经 CapabilityGateway 的调用会再向 Agent 池提交任务并同步等待；扇出线程若也来自 Agent 池，
+     * 多个请求可能把全部线程占在等待上。因此扇出使用独立的有界池，满载时对应步骤记为容量拒绝。</p>
+     */
+    @Bean
+    public AsyncTaskExecutor ordinaryFanoutExecutor(
+            @Value("${stocksage.agent.ordinary.multi-target.pool-size:8}") int poolSize,
+            @Value("${stocksage.agent.ordinary.multi-target.queue-capacity:16}") int queueCapacity) {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(poolSize);
+        executor.setMaxPoolSize(poolSize);
+        executor.setQueueCapacity(queueCapacity);
+        executor.setThreadNamePrefix("ordinary-fanout-");
+        executor.setDaemon(true);
+        executor.setWaitForTasksToCompleteOnShutdown(false);
+        return executor;
+    }
+
     /** Background model/embedding work cannot occupy the online pool's slots. */
     @Bean
     public AsyncTaskExecutor backgroundTaskExecutor(

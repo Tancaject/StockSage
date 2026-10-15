@@ -3,11 +3,12 @@
     <div class="panel">
       <div class="panel-header">
         <h2>多标的对比</h2>
-        <span class="status-chip">暂未开放</span>
+        <span class="status-chip">在对话中使用</span>
       </div>
       <p class="compare-boundary">
-        当前执行链一次只支持一个股票或公司，尚不能保证多标的证据隔离和逐标的完成状态。
-        请先在“研究”页逐个分析；独立的多标的执行器接入后再开放这里。
+        多标的对比在对话中进行，例如“比较 AAPL 和 MSFT 最近四个季度的营收”。
+        支持 2～4 个标的在行情、财报或新闻上的对比，每个标的的证据分开取证、分别验收；
+        综合投资判断仍需逐个发起深度研究。该功能需服务端开启多标的对比开关。
       </p>
     </div>
   </section>

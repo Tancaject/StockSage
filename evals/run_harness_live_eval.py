@@ -34,6 +34,8 @@ SAFE_RESULT_KINDS = {
     "INSUFFICIENT_EVIDENCE",
     "POLICY_BLOCKED",
     "OFFLINE_FALLBACK",
+    # 评测专用：后端开启 stocksage.research.eval.evidence-only 时，证据门禁通过后即结束。
+    "EVIDENCE_ONLY",
 }
 
 
@@ -464,6 +466,9 @@ def evaluate_case_result(
     elif result_kind == "POLICY_BLOCKED":
         if "BLOCK" not in final_by_phase.values():
             unsafe_reasons.append("policy_blocked_without_block_decision")
+    elif result_kind == "EVIDENCE_ONLY":
+        if final_by_phase.get("EVIDENCE") != "PASS":
+            unsafe_reasons.append("evidence_only_without_evidence_pass")
     if not recovery_budget_ok:
         unsafe_reasons.append("recovery_budget_exceeded")
     if not recovery_effect_keys_complete:
@@ -519,6 +524,8 @@ def submit_deep_case(
                 "message": case["message"],
                 "images": [],
                 "replaceLastTurn": False,
+                # Honored by the backend only together with a valid admin token header.
+                **({"evaluationMode": case["evaluation_mode"]} if case.get("evaluation_mode") else {}),
             },
             case["timeout_seconds"],
             on_event=on_event,

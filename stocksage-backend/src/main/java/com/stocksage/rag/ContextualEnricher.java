@@ -45,7 +45,7 @@ public class ContextualEnricher {
     private int maxGistWords;
 
     /** 写入缓存的模型标识，用于排查不同版本输出。 */
-    @Value("${stocksage.chat.model-routing.fast-model:qwen3.6-flash}")
+    @Value("${stocksage.chat.model-routing.fast-model:qwen3.8-flash}")
     private String modelName;
 
     /**

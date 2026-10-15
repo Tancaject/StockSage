@@ -1,0 +1,24 @@
+Consolidated Statements of Earnings - USD ($) shares in Millions, $ in Millions | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Income Statement [Abstract] |  |  | 
+Net revenues | $ 61,160 | $ 56,334 | $ 54,318
+Cost of products sold | 18,204 | 16,904 | 20,415
+Selling, general and administrative | 14,010 | 14,752 | 12,872
+Research and development | 9,096 | 12,791 | 7,675
+Acquired IPR&D and milestones | 5,016 | 2,757 | 778
+Other operating income | (241) | (7) | (179)
+Total operating costs and expenses | 46,085 | 47,197 | 41,561
+Operating earnings | 15,075 | 9,137 | 12,757
+Interest expense, net | 2,627 | 2,160 | 1,684
+Net foreign exchange loss | 58 | 21 | 146
+Other expense, net | 5,793 | 3,240 | 4,677
+Earnings before income tax expense | 6,597 | 3,716 | 6,250
+Income tax expense (benefit) | 2,364 | (570) | 1,377
+Net earnings | 4,233 | 4,286 | 4,873
+Net earnings attributable to noncontrolling interest | 7 | 8 | 10
+Net earnings attributable to AbbVie Inc. | $ 4,226 | $ 4,278 | $ 4,863
+Per share data |  |  | 
+Basic earnings per share (in dollars per share) | $ 2.37 | $ 2.40 | $ 2.73
+Diluted earnings per share (in dollars per share) | $ 2.36 | $ 2.39 | $ 2.72
+Weighted-average basic shares outstanding (in shares) | 1,769 | 1,769 | 1,768
+Weighted-average diluted shares outstanding (in shares) | 1,773 | 1,773 | 1,773

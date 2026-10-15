@@ -1,0 +1,54 @@
+Consolidated Financial Position at December 31 - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024
+Current assets: |  | 
+Cash and cash equivalents | $ 9,980 | $ 6,889
+Receivables – trade and other | 10,920 | 9,282
+Receivables – finance | 10,649 | 9,565
+Prepaid expenses and other current assets | 2,801 | 3,119
+Inventories | 18,135 | 16,827
+Total current assets | 52,485 | 45,682
+Property, plant and equipment - net | 15,140 | 13,361
+Long-term receivables – trade and other | 2,142 | 1,225
+Long-term receivables – finance | 14,272 | 13,242
+Noncurrent deferred and refundable income taxes | 2,882 | 3,312
+Intangible assets | 241 | 399
+Goodwill | 5,321 | 5,241
+Other assets | 6,102 | 5,302
+Total assets | 98,585 | 87,764
+Short-term borrowings: |  | 
+Short-term borrowings | 5,514 | 4,393
+Accounts payable | 8,968 | 7,675
+Accrued expenses | 5,587 | 5,243
+Accrued wages, salaries and employee benefits | 2,554 | 2,391
+Customer advances | 3,314 | 2,322
+Dividends payable | 703 | 674
+Other current liabilities | 2,798 | 2,909
+Long-term debt due within one year: |  | 
+Total current liabilities | 36,558 | 32,272
+Long-term debt due after one year: |  | 
+Liability for postemployment benefits | 3,838 | 3,757
+Other liabilities | 6,175 | 4,890
+Total liabilities | 77,267 | 68,270
+Commitments and contingencies |  | 
+Shareholders’ equity |  | 
+Common stock, par value (in dollars per share) | $ 1.00 | $ 1.00
+Authorized shares: 2,000,000,000 Issued shares: (2025 and 2024 – 814,894,624 shares) at paid-in amount | $ 7,181 | $ 6,941
+Treasury stock: (2025 - 349,607,292 shares; and 2024 - 336,962,600 shares) at cost | (49,539) | (44,331)
+Profit employed in the business | 65,448 | 59,352
+Accumulated other comprehensive income (loss) | (1,772) | (2,471)
+Noncontrolling interests | 0 | 3
+Total shareholders’ equity | 21,318 | 19,494
+Total liabilities and shareholders’ equity | 98,585 | 87,764
+Machinery, Power & Energy |  | 
+Short-term borrowings: |  | 
+Short-term borrowings | 0 | 0
+Long-term debt due within one year: |  | 
+Long-term debt due within one year | 35 | 46
+Long-term debt due after one year: |  | 
+Long-term debt due after one year | 10,678 | 8,564
+Financial Products |  | 
+Short-term borrowings: |  | 
+Short-term borrowings | 5,514 | 4,393
+Long-term debt due within one year: |  | 
+Long-term debt due within one year | 7,085 | 6,619
+Long-term debt due after one year: |  | 
+Long-term debt due after one year | $ 20,018 | $ 18,787

@@ -1,0 +1,206 @@
+[
+ {
+  "cells": [
+   "Consolidated Statements of Income - USD ($) shares in Millions, $ in Millions",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 27, 2025",
+   "Dec. 28, 2024",
+   "Dec. 30, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Income Statement [Abstract]",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:IncomeStatementAbstract"
+ },
+ {
+  "cells": [
+   "Net revenue",
+   "$ 52,853",
+   "$ 53,101",
+   "$ 54,228"
+  ],
+  "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+ },
+ {
+  "cells": [
+   "Cost of sales",
+   "34,478",
+   "35,756",
+   "32,517"
+  ],
+  "concept": "us-gaap:CostOfGoodsAndServicesSold"
+ },
+ {
+  "cells": [
+   "Gross profit",
+   "18,375",
+   "17,345",
+   "21,711"
+  ],
+  "concept": "us-gaap:GrossProfit"
+ },
+ {
+  "cells": [
+   "Research and development",
+   "13,774",
+   "16,546",
+   "16,046"
+  ],
+  "concept": "us-gaap:ResearchAndDevelopmentExpense"
+ },
+ {
+  "cells": [
+   "Marketing, general, and administrative",
+   "4,624",
+   "5,507",
+   "5,634"
+  ],
+  "concept": "us-gaap:SellingGeneralAndAdministrativeExpense"
+ },
+ {
+  "cells": [
+   "Restructuring and other charges",
+   "2,191",
+   "6,970",
+   "(62)"
+  ],
+  "concept": "us-gaap:RestructuringSettlementAndImpairmentProvisions"
+ },
+ {
+  "cells": [
+   "Operating expenses",
+   "20,589",
+   "29,023",
+   "21,618"
+  ],
+  "concept": "us-gaap:OperatingExpenses"
+ },
+ {
+  "cells": [
+   "Operating income (loss)",
+   "(2,214)",
+   "(11,678)",
+   "93"
+  ],
+  "concept": "us-gaap:OperatingIncomeLoss"
+ },
+ {
+  "cells": [
+   "Gains (losses) on equity investments, net",
+   "514",
+   "242",
+   "40"
+  ],
+  "concept": "intc:GainsLossesOnEquityInvestments"
+ },
+ {
+  "cells": [
+   "Interest and other, net",
+   "3,257",
+   "226",
+   "629"
+  ],
+  "concept": "us-gaap:NonoperatingIncomeExpense"
+ },
+ {
+  "cells": [
+   "Income (loss) before taxes",
+   "1,557",
+   "(11,210)",
+   "762"
+  ],
+  "concept": "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Provision for (benefit from) taxes",
+   "1,531",
+   "8,023",
+   "(913)"
+  ],
+  "concept": "us-gaap:IncomeTaxExpenseBenefit"
+ },
+ {
+  "cells": [
+   "Net income (loss)",
+   "26",
+   "(19,233)",
+   "1,675"
+  ],
+  "concept": "us-gaap:ProfitLoss"
+ },
+ {
+  "cells": [
+   "Less: net income (loss) attributable to non-controlling interests",
+   "293",
+   "(477)",
+   "(14)"
+  ],
+  "concept": "us-gaap:NetIncomeLossAttributableToNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Net income (loss) attributable to Intel",
+   "$ (267)",
+   "$ (18,756)",
+   "$ 1,689"
+  ],
+  "concept": "us-gaap:NetIncomeLoss"
+ },
+ {
+  "cells": [
+   "Earnings (loss) per share attributable to Intel—basic (in dollars per share)",
+   "$ (0.06)",
+   "$ (4.38)",
+   "$ 0.40"
+  ],
+  "concept": "us-gaap:EarningsPerShareBasic"
+ },
+ {
+  "cells": [
+   "Earnings (loss) per share attributable to Intel—diluted (in dollars per share)",
+   "$ (0.06)",
+   "$ (4.38)",
+   "$ 0.40"
+  ],
+  "concept": "us-gaap:EarningsPerShareDiluted"
+ },
+ {
+  "cells": [
+   "Weighted average shares of common stock outstanding:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfSharesOutstandingAbstract"
+ },
+ {
+  "cells": [
+   "Basic (shares)",
+   "4,530",
+   "4,280",
+   "4,190"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfSharesOutstandingBasic"
+ },
+ {
+  "cells": [
+   "Diluted (shares)",
+   "4,530",
+   "4,280",
+   "4,212"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding"
+ }
+]

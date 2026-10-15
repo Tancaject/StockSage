@@ -1,0 +1,36 @@
+Consolidated Balance Sheets - USD ($) $ in Millions | Dec. 31, 2025 | Dec. 31, 2024
+Current assets: |  | 
+Cash and cash equivalents | $ 24,365 | $ 25,312
+Short-term investments | 3,756 | 3,801
+Accounts receivable, net of allowances of $1,208 and $985 | 23,018 | 22,365
+Other current receivables, net of allowances of $3,763 and $2,864 | 29,697 | 26,089
+Prepaid expenses and other current assets | 9,746 | 8,212
+Total current assets | 90,582 | 85,779
+Long-term investments | 54,251 | 52,354
+Property, equipment and capitalized software, net of accumulated depreciation and amortization of $7,546 and $6,971 | 10,762 | 10,553
+Goodwill | 110,499 | 106,734
+Other intangible assets, net of accumulated amortization of $7,472 and $8,350 | 20,474 | 23,268
+Other assets | 23,013 | 19,590
+Total assets | 309,581 | 298,278
+Current liabilities: |  | 
+Medical costs payable | 39,337 | 34,224
+Accounts payable and accrued liabilities | 38,032 | 34,337
+Short-term borrowings and current maturities of long-term debt | 6,069 | 4,545
+Unearned revenues | 3,413 | 3,317
+Other current liabilities | 28,046 | 27,346
+Total current liabilities | 114,897 | 103,769
+Long-term debt, less current maturities | 72,320 | 72,359
+Deferred income taxes | 2,421 | 3,620
+Other liabilities | 18,245 | 15,939
+Total liabilities | 207,883 | 195,687
+Commitments and contingencies (Note 12) |  | 
+Redeemable noncontrolling interests | 1,608 | 4,323
+Equity: |  | 
+Preferred stock, $0.001 par value - 10 shares authorized; no shares issued or outstanding | 0 | 0
+Common stock, $0.01 par value - 3,000 shares authorized; 906 and 915 issued and outstanding | 9 | 9
+Additional paid-in capital | 559 | 0
+Retained earnings | 95,603 | 96,036
+Accumulated other comprehensive loss | (2,061) | (3,387)
+Nonredeemable noncontrolling interests | 5,980 | 5,610
+Total equity | 100,090 | 98,268
+Total liabilities and shareholders’ equity | $ 309,581 | $ 298,278

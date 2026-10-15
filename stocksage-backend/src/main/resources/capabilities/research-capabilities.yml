@@ -1,0 +1,37 @@
+capabilities:
+  # DEEP 取证循环的工具菜单（docs/architecture/deep-react-plan.md M1）。标的由服务端填入，模型不能指定。
+  - id: local.filing.searchText
+    providerType: LOCAL
+    providerId: local
+    nativeName: searchFilingText
+    riskLevel: READ_ONLY
+    timeoutMs: 20000
+    maxResultBytes: 65536
+    enabled: true
+
+  - id: local.relation.query
+    providerType: LOCAL
+    providerId: local
+    nativeName: queryCompanyRelations
+    riskLevel: READ_ONLY
+    timeoutMs: 5000
+    maxResultBytes: 32768
+    enabled: true
+
+  - id: local.fundamentals.getFinancialReports
+    providerType: LOCAL
+    providerId: local
+    nativeName: getFinancialReports
+    riskLevel: READ_ONLY
+    timeoutMs: 15000
+    maxResultBytes: 131072
+    enabled: true
+
+  - id: local.market.priceHistory
+    providerType: LOCAL
+    providerId: local
+    nativeName: getPriceHistory
+    riskLevel: READ_ONLY
+    timeoutMs: 15000
+    maxResultBytes: 131072
+    enabled: true

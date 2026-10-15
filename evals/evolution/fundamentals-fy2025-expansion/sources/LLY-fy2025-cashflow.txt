@@ -1,0 +1,38 @@
+Consolidated Statements of Cash Flows - USD ($) $ in Millions | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Cash Flows from Operating Activities |  |  | 
+Net income | $ 20,640 | $ 10,590 | $ 5,240
+Adjustments to Reconcile Net Income to Cash Flows from Operating Activities: |  |  | 
+Depreciation and amortization | 1,997 | 1,767 | 1,527
+Change in deferred income taxes | (1,707) | (2,683) | (2,341)
+Stock-based compensation expense | 626 | 646 | 629
+Gains on sale of product rights | (180) | (224) | (1,879)
+Acquired in-process research and development | 2,910 | 3,280 | 3,800
+Other operating activities, net | 620 | 826 | 319
+Other changes in operating assets and liabilities, net of acquisitions and divestitures: |  |  | 
+Receivables—(increase) decrease | (7,000) | (2,155) | (2,451)
+Inventories—(increase) decrease | (4,671) | (2,507) | (1,425)
+Prepaid expenses and other assets—(increase) decrease | (6,609) | (3,331) | (3,453)
+Accounts payable and other liabilities—increase (decrease) | 10,187 | 2,609 | 4,274
+Net Cash Provided by Operating Activities | 16,813 | 8,818 | 4,240
+Cash Flows from Investing Activities |  |  | 
+Purchases of property and equipment | (7,841) | (5,058) | (3,448)
+Proceeds from sales of and distributions from noncurrent investments | 964 | 374 | 508
+Purchases of noncurrent investments | (645) | (677) | (731)
+Proceeds from sale of product rights | 218 | 601 | 1,604
+Purchases of in-process research and development | (3,008) | (3,346) | (3,944)
+Cash paid for acquisitions, net of cash acquired | (661) | (948) | (1,044)
+Other investing activities, net | 1 | (248) | (98)
+Net Cash Used for Investing Activities | (10,972) | (9,302) | (7,153)
+Cash Flows from Financing Activities |  |  | 
+Dividends paid | (5,384) | (4,680) | (4,069)
+Net change in short-term borrowings | (4,338) | (1,852) | 4,691
+Proceeds from issuance of long-term debt | 13,167 | 11,417 | 3,959
+Repayments of long-term debt | (778) | (664) | 0
+Purchases of common stock | (4,108) | (2,500) | (750)
+Other financing activities, net | (772) | (491) | (335)
+Net Cash Provided by (Used for) Financing Activities | (2,213) | 1,230 | 3,496
+Effect of exchange rate changes on cash and cash equivalents | 372 | (297) | 169
+Net increase in cash and cash equivalents | 4,000 | 449 | 752
+Cash and cash equivalents at beginning of year | 3,268 | 2,819 | 2,067
+Cash and Cash Equivalents at End of Year | $ 7,268 | $ 3,268 | $ 2,819

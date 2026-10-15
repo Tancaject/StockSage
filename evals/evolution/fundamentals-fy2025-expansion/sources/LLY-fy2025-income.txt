@@ -1,0 +1,21 @@
+Consolidated Statements of Operations - USD ($) shares in Millions, $ in Millions | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Income Statement [Abstract] |  |  | 
+Revenue | $ 65,179 | $ 45,043 | $ 34,124
+Costs, expenses, and other: |  |  | 
+Cost of sales | 11,052 | 8,418 | 7,082
+Research and development | 13,337 | 10,991 | 9,313
+Marketing, selling, and administrative | 11,094 | 8,594 | 7,404
+Acquired in-process research and development | 2,910 | 3,280 | 3,800
+Asset impairment, restructuring, and other special charges | 484 | 861 | 68
+Other—net, (income) expense | 571 | 219 | (97)
+Costs, expenses, and other | 39,448 | 32,363 | 27,570
+Income before income taxes | 25,731 | 12,680 | 6,554
+Income taxes | 5,091 | 2,090 | 1,314
+Net income | $ 20,640 | $ 10,590 | $ 5,240
+Earnings per share: |  |  | 
+Basic (in dollars per share) | $ 23.00 | $ 11.76 | $ 5.82
+Diluted (in dollars per share) | $ 22.95 | $ 11.71 | $ 5.80
+Shares used in calculation of earnings per share: |  |  | 
+Basic (in shares) | 897.3 | 900.6 | 900.2
+Diluted (in shares) | 899.3 | 904.1 | 903.3

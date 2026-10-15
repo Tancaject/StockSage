@@ -18,10 +18,11 @@ import java.util.TreeSet;
 public class AgentRuntimeConfiguration {
 
     private static final Set<String> ROLES = Set.of(
-            "fundamentals", "market", "news", "bull", "bear", "manager", "scoring", "continuation", "replan",
+            "fundamentals", "market", "news", "bull", "bear", "manager", "scoring", "continuation", "replan", "evidence-loop",
             "query-rewrite", "contextual-gist");
     private final Map<String, Object> clients = new TreeMap<>();
     private Map<String, Object> chatProvider;
+    private Map<String, Object> deepseekProvider;
 
     public synchronized void recordChatProvider(String baseUrl, String completionsPath) {
         if (chatProvider != null) throw new IllegalStateException("Chat provider already registered");
@@ -31,9 +32,19 @@ public class AgentRuntimeConfiguration {
                 "unknownProviderRevision", true);
     }
 
+    /** deepseek-* 模型改走 DeepSeek 官方 API 时记录其端点身份和思考强度；未分流时不记录。 */
+    public synchronized void recordDeepSeekProvider(String baseUrl, String reasoningEffort, int thinkingMaxTokens) {
+        deepseekProvider = Map.of("models", "deepseek-v4-pro, deepseek-flash, deepseek-v4-pro-0813",
+                "base", endpointIdentity(baseUrl), "reasoningEffort", reasoningEffort,
+                "thinkingMaxTokens", thinkingMaxTokens);
+    }
+
     public synchronized Map<String, Object> chatProviderSnapshot() {
         if (chatProvider == null) throw new IllegalStateException("Chat provider has not been registered");
-        return chatProvider;
+        if (deepseekProvider == null) return chatProvider;
+        Map<String, Object> snapshot = new TreeMap<>(chatProvider);
+        snapshot.put("deepseekRoute", deepseekProvider);
+        return Collections.unmodifiableMap(snapshot);
     }
 
     public static Map<String, Object> endpointIdentity(String value) {

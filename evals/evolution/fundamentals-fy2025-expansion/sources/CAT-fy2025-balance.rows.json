@@ -1,0 +1,434 @@
+[
+ {
+  "cells": [
+   "Consolidated Financial Position at December 31 - USD ($) $ in Millions",
+   "Dec. 31, 2025",
+   "Dec. 31, 2024"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Current assets:",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AssetsCurrentAbstract"
+ },
+ {
+  "cells": [
+   "Cash and cash equivalents",
+   "$ 9,980",
+   "$ 6,889"
+  ],
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue"
+ },
+ {
+  "cells": [
+   "Receivables – trade and other",
+   "10,920",
+   "9,282"
+  ],
+  "concept": "us-gaap:AccountsReceivableNetCurrent"
+ },
+ {
+  "cells": [
+   "Receivables – finance",
+   "10,649",
+   "9,565"
+  ],
+  "concept": "us-gaap:NotesAndLoansReceivableNetCurrent"
+ },
+ {
+  "cells": [
+   "Prepaid expenses and other current assets",
+   "2,801",
+   "3,119"
+  ],
+  "concept": "us-gaap:PrepaidExpenseAndOtherAssetsCurrent"
+ },
+ {
+  "cells": [
+   "Inventories",
+   "18,135",
+   "16,827"
+  ],
+  "concept": "us-gaap:InventoryNet"
+ },
+ {
+  "cells": [
+   "Total current assets",
+   "52,485",
+   "45,682"
+  ],
+  "concept": "us-gaap:AssetsCurrent"
+ },
+ {
+  "cells": [
+   "Property, plant and equipment - net",
+   "15,140",
+   "13,361"
+  ],
+  "concept": "us-gaap:PropertyPlantAndEquipmentNet"
+ },
+ {
+  "cells": [
+   "Long-term receivables – trade and other",
+   "2,142",
+   "1,225"
+  ],
+  "concept": "us-gaap:AccountsReceivableNetNoncurrent"
+ },
+ {
+  "cells": [
+   "Long-term receivables – finance",
+   "14,272",
+   "13,242"
+  ],
+  "concept": "us-gaap:NotesAndLoansReceivableNetNoncurrent"
+ },
+ {
+  "cells": [
+   "Noncurrent deferred and refundable income taxes",
+   "2,882",
+   "3,312"
+  ],
+  "concept": "cat:NoncurrentDeferredAndRefundableIncomeTaxes"
+ },
+ {
+  "cells": [
+   "Intangible assets",
+   "241",
+   "399"
+  ],
+  "concept": "us-gaap:IntangibleAssetsNetExcludingGoodwill"
+ },
+ {
+  "cells": [
+   "Goodwill",
+   "5,321",
+   "5,241"
+  ],
+  "concept": "us-gaap:Goodwill"
+ },
+ {
+  "cells": [
+   "Other assets",
+   "6,102",
+   "5,302"
+  ],
+  "concept": "us-gaap:OtherAssetsNoncurrent"
+ },
+ {
+  "cells": [
+   "Total assets",
+   "98,585",
+   "87,764"
+  ],
+  "concept": "us-gaap:Assets"
+ },
+ {
+  "cells": [
+   "Short-term borrowings:",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:ShortTermBorrowingsAbstract"
+ },
+ {
+  "cells": [
+   "Short-term borrowings",
+   "5,514",
+   "4,393"
+  ],
+  "concept": "us-gaap:ShortTermBorrowings"
+ },
+ {
+  "cells": [
+   "Accounts payable",
+   "8,968",
+   "7,675"
+  ],
+  "concept": "us-gaap:AccountsPayableCurrent"
+ },
+ {
+  "cells": [
+   "Accrued expenses",
+   "5,587",
+   "5,243"
+  ],
+  "concept": "us-gaap:AccruedLiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Accrued wages, salaries and employee benefits",
+   "2,554",
+   "2,391"
+  ],
+  "concept": "us-gaap:EmployeeRelatedLiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Customer advances",
+   "3,314",
+   "2,322"
+  ],
+  "concept": "us-gaap:ContractWithCustomerLiabilityCurrent"
+ },
+ {
+  "cells": [
+   "Dividends payable",
+   "703",
+   "674"
+  ],
+  "concept": "us-gaap:DividendsPayableCurrent"
+ },
+ {
+  "cells": [
+   "Other current liabilities",
+   "2,798",
+   "2,909"
+  ],
+  "concept": "us-gaap:OtherLiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Long-term debt due within one year:",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LongTermDebtCurrentAbstract"
+ },
+ {
+  "cells": [
+   "Total current liabilities",
+   "36,558",
+   "32,272"
+  ],
+  "concept": "us-gaap:LiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Long-term debt due after one year:",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LongTermDebtNoncurrentAbstract"
+ },
+ {
+  "cells": [
+   "Liability for postemployment benefits",
+   "3,838",
+   "3,757"
+  ],
+  "concept": "us-gaap:PensionAndOtherPostretirementAndPostemploymentBenefitPlansLiabilitiesNoncurrent"
+ },
+ {
+  "cells": [
+   "Other liabilities",
+   "6,175",
+   "4,890"
+  ],
+  "concept": "us-gaap:OtherLiabilitiesNoncurrent"
+ },
+ {
+  "cells": [
+   "Total liabilities",
+   "77,267",
+   "68,270"
+  ],
+  "concept": "us-gaap:Liabilities"
+ },
+ {
+  "cells": [
+   "Commitments and contingencies",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:CommitmentsAndContingencies"
+ },
+ {
+  "cells": [
+   "Shareholders’ equity",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract"
+ },
+ {
+  "cells": [
+   "Common stock, par value (in dollars per share)",
+   "$ 1.00",
+   "$ 1.00"
+  ],
+  "concept": "us-gaap:CommonStockParOrStatedValuePerShare"
+ },
+ {
+  "cells": [
+   "Authorized shares: 2,000,000,000 Issued shares: (2025 and 2024 – 814,894,624 shares) at paid-in amount",
+   "$ 7,181",
+   "$ 6,941"
+  ],
+  "concept": "us-gaap:CommonStocksIncludingAdditionalPaidInCapital"
+ },
+ {
+  "cells": [
+   "Treasury stock: (2025 - 349,607,292 shares; and 2024 - 336,962,600 shares) at cost",
+   "(49,539)",
+   "(44,331)"
+  ],
+  "concept": "us-gaap:TreasuryStockValue"
+ },
+ {
+  "cells": [
+   "Profit employed in the business",
+   "65,448",
+   "59,352"
+  ],
+  "concept": "us-gaap:RetainedEarningsAccumulatedDeficit"
+ },
+ {
+  "cells": [
+   "Accumulated other comprehensive income (loss)",
+   "(1,772)",
+   "(2,471)"
+  ],
+  "concept": "us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax"
+ },
+ {
+  "cells": [
+   "Noncontrolling interests",
+   "0",
+   "3"
+  ],
+  "concept": "us-gaap:MinorityInterest"
+ },
+ {
+  "cells": [
+   "Total shareholders’ equity",
+   "21,318",
+   "19,494"
+  ],
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"
+ },
+ {
+  "cells": [
+   "Total liabilities and shareholders’ equity",
+   "98,585",
+   "87,764"
+  ],
+  "concept": "us-gaap:LiabilitiesAndStockholdersEquity"
+ },
+ {
+  "cells": [
+   "Machinery, Power & Energy",
+   "",
+   ""
+  ],
+  "concept": "srt:ProductOrServiceAxis"
+ },
+ {
+  "cells": [
+   "Short-term borrowings:",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:ShortTermBorrowingsAbstract"
+ },
+ {
+  "cells": [
+   "Short-term borrowings",
+   "0",
+   "0"
+  ],
+  "concept": "us-gaap:ShortTermBorrowings"
+ },
+ {
+  "cells": [
+   "Long-term debt due within one year:",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LongTermDebtCurrentAbstract"
+ },
+ {
+  "cells": [
+   "Long-term debt due within one year",
+   "35",
+   "46"
+  ],
+  "concept": "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent"
+ },
+ {
+  "cells": [
+   "Long-term debt due after one year:",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LongTermDebtNoncurrentAbstract"
+ },
+ {
+  "cells": [
+   "Long-term debt due after one year",
+   "10,678",
+   "8,564"
+  ],
+  "concept": "us-gaap:LongTermDebtAndCapitalLeaseObligations"
+ },
+ {
+  "cells": [
+   "Financial Products",
+   "",
+   ""
+  ],
+  "concept": "srt:ProductOrServiceAxis"
+ },
+ {
+  "cells": [
+   "Short-term borrowings:",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:ShortTermBorrowingsAbstract"
+ },
+ {
+  "cells": [
+   "Short-term borrowings",
+   "5,514",
+   "4,393"
+  ],
+  "concept": "us-gaap:ShortTermBorrowings"
+ },
+ {
+  "cells": [
+   "Long-term debt due within one year:",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LongTermDebtCurrentAbstract"
+ },
+ {
+  "cells": [
+   "Long-term debt due within one year",
+   "7,085",
+   "6,619"
+  ],
+  "concept": "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent"
+ },
+ {
+  "cells": [
+   "Long-term debt due after one year:",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LongTermDebtNoncurrentAbstract"
+ },
+ {
+  "cells": [
+   "Long-term debt due after one year",
+   "$ 20,018",
+   "$ 18,787"
+  ],
+  "concept": "us-gaap:LongTermDebtAndCapitalLeaseObligations"
+ }
+]

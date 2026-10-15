@@ -1,0 +1,330 @@
+[
+ {
+  "cells": [
+   "Consolidated Balance Sheet - USD ($) $ in Millions",
+   "Dec. 31, 2025",
+   "Dec. 31, 2024"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Current assets",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AssetsCurrentAbstract"
+ },
+ {
+  "cells": [
+   "Cash and equivalents",
+   "$ 774.0",
+   "$ 1,085.0"
+  ],
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue"
+ },
+ {
+  "cells": [
+   "Accounts and notes receivable",
+   "2,466.0",
+   "2,383.0"
+  ],
+  "concept": "us-gaap:AccountsNotesAndLoansReceivableNetCurrent"
+ },
+ {
+  "cells": [
+   "Inventories, at cost, not in excess of market",
+   "61.0",
+   "56.0"
+  ],
+  "concept": "us-gaap:InventoryNet"
+ },
+ {
+  "cells": [
+   "Prepaid expenses and other current assets",
+   "863.0",
+   "1,074.0"
+  ],
+  "concept": "us-gaap:PrepaidExpenseAndOtherAssetsCurrent"
+ },
+ {
+  "cells": [
+   "Total current assets",
+   "4,163.0",
+   "4,599.0"
+  ],
+  "concept": "us-gaap:AssetsCurrent"
+ },
+ {
+  "cells": [
+   "Other assets",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:OtherAssetsAbstract"
+ },
+ {
+  "cells": [
+   "Investments in and advances to affiliates",
+   "2,820.0",
+   "2,710.0"
+  ],
+  "concept": "us-gaap:InvestmentsInAffiliatesSubsidiariesAssociatesAndJointVentures"
+ },
+ {
+  "cells": [
+   "Goodwill",
+   "3,354.0",
+   "3,145.0"
+  ],
+  "concept": "us-gaap:Goodwill"
+ },
+ {
+  "cells": [
+   "Miscellaneous",
+   "6,331.0",
+   "6,095.0"
+  ],
+  "concept": "us-gaap:OtherAssetsNoncurrent"
+ },
+ {
+  "cells": [
+   "Total other assets",
+   "12,505.0",
+   "11,950.0"
+  ],
+  "concept": "mcd:TotalOtherAssets"
+ },
+ {
+  "cells": [
+   "Lease right-of use asset, net",
+   "14,606.0",
+   "13,339.0"
+  ],
+  "concept": "mcd:LeaseRightOfUseAssetNet"
+ },
+ {
+  "cells": [
+   "Property and equipment",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:PropertyPlantAndEquipmentNetAbstract"
+ },
+ {
+  "cells": [
+   "Property and equipment, at cost",
+   "49,290.0",
+   "44,177.0"
+  ],
+  "concept": "us-gaap:PropertyPlantAndEquipmentGross"
+ },
+ {
+  "cells": [
+   "Accumulated depreciation and amortization",
+   "(21,049.0)",
+   "(18,882.0)"
+  ],
+  "concept": "us-gaap:AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment"
+ },
+ {
+  "cells": [
+   "Net property and equipment",
+   "28,241.0",
+   "25,295.0"
+  ],
+  "concept": "us-gaap:PropertyPlantAndEquipmentNet"
+ },
+ {
+  "cells": [
+   "Total assets",
+   "59,515.0",
+   "55,182.0"
+  ],
+  "concept": "us-gaap:Assets"
+ },
+ {
+  "cells": [
+   "Current liabilities",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:LiabilitiesCurrentAbstract"
+ },
+ {
+  "cells": [
+   "Accounts payable",
+   "1,149.0",
+   "1,029.0"
+  ],
+  "concept": "us-gaap:AccountsPayableCurrent"
+ },
+ {
+  "cells": [
+   "Current lease liability",
+   "694.0",
+   "636.0"
+  ],
+  "concept": "mcd:CurrentLeaseLiabilityNet"
+ },
+ {
+  "cells": [
+   "Income taxes",
+   "250.0",
+   "361.0"
+  ],
+  "concept": "us-gaap:AccruedIncomeTaxesCurrent"
+ },
+ {
+  "cells": [
+   "Other taxes",
+   "247.0",
+   "224.0"
+  ],
+  "concept": "us-gaap:AccrualForTaxesOtherThanIncomeTaxesCurrent"
+ },
+ {
+  "cells": [
+   "Accrued interest",
+   "533.0",
+   "482.0"
+  ],
+  "concept": "us-gaap:InterestPayableCurrent"
+ },
+ {
+  "cells": [
+   "Accrued payroll and other liabilities",
+   "1,488.0",
+   "1,129.0"
+  ],
+  "concept": "mcd:AccruedExpensesAndOtherCurrentLiabilities"
+ },
+ {
+  "cells": [
+   "Total current liabilities",
+   "4,361.0",
+   "3,861.0"
+  ],
+  "concept": "us-gaap:LiabilitiesCurrent"
+ },
+ {
+  "cells": [
+   "Long-term debt",
+   "39,973.0",
+   "38,424.0"
+  ],
+  "concept": "us-gaap:LongTermDebtNoncurrent"
+ },
+ {
+  "cells": [
+   "Long-term lease liability (noncurrent), net",
+   "14,147.0",
+   "12,888.0"
+  ],
+  "concept": "mcd:LongTermLeaseLiabilityNoncurrentNet"
+ },
+ {
+  "cells": [
+   "Long-term income taxes",
+   "139.0",
+   "344.0"
+  ],
+  "concept": "us-gaap:AccruedIncomeTaxesNoncurrent"
+ },
+ {
+  "cells": [
+   "Deferred revenues - initial franchise fees",
+   "945.0",
+   "778.0"
+  ],
+  "concept": "us-gaap:DeferredRevenueNoncurrent"
+ },
+ {
+  "cells": [
+   "Other long-term liabilities",
+   "704.0",
+   "771.0"
+  ],
+  "concept": "us-gaap:OtherLiabilitiesNoncurrent"
+ },
+ {
+  "cells": [
+   "Deferred income taxes",
+   "1,038.0",
+   "1,914.0"
+  ],
+  "concept": "us-gaap:DeferredIncomeTaxLiabilitiesNet"
+ },
+ {
+  "cells": [
+   "Shareholders' equity (deficit)",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:StockholdersEquityAbstract"
+ },
+ {
+  "cells": [
+   "Preferred stock, no par value; authorized – 165.0 million shares; issued – none",
+   "0.0",
+   "0.0"
+  ],
+  "concept": "us-gaap:PreferredStockValue"
+ },
+ {
+  "cells": [
+   "Common stock, $.01 par value; authorized – 3.5 billion shares; issued – 1,660.6 million shares",
+   "17.0",
+   "17.0"
+  ],
+  "concept": "us-gaap:CommonStockValue"
+ },
+ {
+  "cells": [
+   "Additional paid-in capital",
+   "9,641.0",
+   "9,281.0"
+  ],
+  "concept": "us-gaap:AdditionalPaidInCapital"
+ },
+ {
+  "cells": [
+   "Retained earnings",
+   "70,282.0",
+   "66,834.0"
+  ],
+  "concept": "us-gaap:RetainedEarningsAccumulatedDeficit"
+ },
+ {
+  "cells": [
+   "Accumulated other comprehensive income (loss)",
+   "(2,414.0)",
+   "(2,553.0)"
+  ],
+  "concept": "us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax"
+ },
+ {
+  "cells": [
+   "Common stock in treasury, at cost; 950.0 and 945.4 million shares",
+   "(79,316.0)",
+   "(77,375.0)"
+  ],
+  "concept": "us-gaap:TreasuryStockValue"
+ },
+ {
+  "cells": [
+   "Total shareholders' equity (deficit)",
+   "(1,791.0)",
+   "(3,797.0)"
+  ],
+  "concept": "us-gaap:StockholdersEquity"
+ },
+ {
+  "cells": [
+   "Total liabilities and shareholders' equity (deficit)",
+   "$ 59,515.0",
+   "$ 55,182.0"
+  ],
+  "concept": "us-gaap:LiabilitiesAndStockholdersEquity"
+ }
+]

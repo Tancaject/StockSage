@@ -1,0 +1,28 @@
+CONSOLIDATED STATEMENTS OF OPERATIONS - USD ($) shares in Thousands, $ in Millions | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Income Statement [Abstract] |  |  | 
+Revenue | $ 52,017 | $ 43,978 | $ 37,281
+Costs and expenses |  |  | 
+Cost of revenue, exclusive of depreciation and amortization shown separately below | 31,338 | 26,651 | 22,457
+Operations and support | 2,854 | 2,732 | 2,689
+Sales and marketing | 4,898 | 4,337 | 4,356
+Research and development | 3,402 | 3,109 | 3,164
+General and administrative | 3,241 | 3,639 | 2,682
+Depreciation and amortization | 719 | 711 | 823
+Total costs and expenses | 46,452 | 41,179 | 36,171
+Income from operations | 5,565 | 2,799 | 1,110
+Interest expense | (440) | (523) | (633)
+Interest income | 743 | 721 | 484
+Other income (expense), net | (68) | 1,128 | 1,360
+Income before income taxes and income (loss) from equity method investments | 5,800 | 4,125 | 2,321
+Provision for (benefit from) income taxes | (4,346) | (5,758) | 213
+Income (loss) from equity method investments | (53) | (38) | 48
+Net income including non-controlling interests | 10,093 | 9,845 | 2,156
+Less: net income (loss) attributable to non-controlling interests, net of tax | 40 | (11) | 269
+Net income attributable to Uber Technologies, Inc. | $ 10,053 | $ 9,856 | $ 1,887
+Net income per share attributable to Uber Technologies, Inc. common stockholders: |  |  | 
+Basic (in dollars per share) | $ 4.82 | $ 4.71 | $ 0.93
+Diluted (in dollars per share) | $ 4.73 | $ 4.56 | $ 0.87
+Weighted-average shares used to compute net income per share attributable to common stockholders: |  |  | 
+Basic (in shares) | 2,085,253 | 2,094,602 | 2,035,651
+Diluted (in shares) | 2,119,689 | 2,150,508 | 2,091,782

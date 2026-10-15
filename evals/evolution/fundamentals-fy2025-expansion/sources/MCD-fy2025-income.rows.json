@@ -1,0 +1,251 @@
+[
+ {
+  "cells": [
+   "Consolidated Statement of Income - USD ($) $ in Millions",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 31, 2025",
+   "Dec. 31, 2024",
+   "Dec. 31, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "REVENUES",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:RevenuesAbstract"
+ },
+ {
+  "cells": [
+   "Revenues from franchised restaurants",
+   "$ 16,548.0",
+   "$ 15,715.0",
+   "$ 15,437.0"
+  ],
+  "concept": "mcd:Revenuesfromfranchisedrestaurants"
+ },
+ {
+  "cells": [
+   "Sales by Company-owned and operated restaurants",
+   "9,690.0",
+   "9,782.0",
+   "9,742.0"
+  ],
+  "concept": "mcd:SalesbyCompanyoperatedrestaurants"
+ },
+ {
+  "cells": [
+   "Other revenues",
+   "647.0",
+   "423.0",
+   "316.0"
+  ],
+  "concept": "mcd:OtherRevenues"
+ },
+ {
+  "cells": [
+   "Total revenues",
+   "26,885.0",
+   "25,920.0",
+   "25,494.0"
+  ],
+  "concept": "us-gaap:Revenues"
+ },
+ {
+  "cells": [
+   "OPERATING COSTS AND EXPENSES",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:OperatingCostsAndExpensesAbstract"
+ },
+ {
+  "cells": [
+   "Franchised restaurants-occupancy expenses",
+   "2,618.0",
+   "2,536.0",
+   "2,475.0"
+  ],
+  "concept": "mcd:Franchisedrestaurantsoccupancyexpenses"
+ },
+ {
+  "cells": [
+   "Food & paper",
+   "3,006.0",
+   "2,995.0",
+   "3,039.0"
+  ],
+  "concept": "mcd:FoodAndPaperCosts"
+ },
+ {
+  "cells": [
+   "Payroll & employee benefits",
+   "2,905.0",
+   "2,959.0",
+   "2,886.0"
+  ],
+  "concept": "mcd:PayrollAndEmployeeBenefits"
+ },
+ {
+  "cells": [
+   "Occupancy & other operating expenses",
+   "2,358.0",
+   "2,381.0",
+   "2,299.0"
+  ],
+  "concept": "mcd:OccupancyAndOtherOperatingExpenses"
+ },
+ {
+  "cells": [
+   "Other restaurant expenses",
+   "564.0",
+   "339.0",
+   "232.0"
+  ],
+  "concept": "us-gaap:OtherExpenses"
+ },
+ {
+  "cells": [
+   "Depreciation and amortization",
+   "457.0",
+   "447.0",
+   "382.0"
+  ],
+  "concept": "us-gaap:DepreciationDepletionAndAmortization"
+ },
+ {
+  "cells": [
+   "Other",
+   "2,583.0",
+   "2,412.0",
+   "2,435.0"
+  ],
+  "concept": "us-gaap:OtherSellingGeneralAndAdministrativeExpense"
+ },
+ {
+  "cells": [
+   "Other operating (income) expense, net",
+   "2.0",
+   "139.0",
+   "99.0"
+  ],
+  "concept": "us-gaap:OtherOperatingIncomeExpenseNet"
+ },
+ {
+  "cells": [
+   "Total operating costs and expenses",
+   "14,492.0",
+   "14,208.0",
+   "13,847.0"
+  ],
+  "concept": "us-gaap:CostsAndExpenses"
+ },
+ {
+  "cells": [
+   "Operating income",
+   "12,393.0",
+   "11,712.0",
+   "11,647.0"
+  ],
+  "concept": "us-gaap:OperatingIncomeLoss"
+ },
+ {
+  "cells": [
+   "Interest expense-net of capitalized interest of $29, $22 and $14",
+   "1,582.0",
+   "1,506.0",
+   "1,361.0"
+  ],
+  "concept": "us-gaap:InterestExpense"
+ },
+ {
+  "cells": [
+   "Nonoperating (income) expense, net",
+   "(87.0)",
+   "(139.0)",
+   "(236.0)"
+  ],
+  "concept": "us-gaap:NonoperatingIncomeExpense"
+ },
+ {
+  "cells": [
+   "Income before provision for income taxes",
+   "10,897.0",
+   "10,345.0",
+   "10,522.0"
+  ],
+  "concept": "mcd:IncomeLossFromContinuingOperationsBeforeIncomeTaxes"
+ },
+ {
+  "cells": [
+   "Provision for income taxes",
+   "2,334.0",
+   "2,121.0",
+   "2,053.0"
+  ],
+  "concept": "us-gaap:IncomeTaxExpenseBenefit"
+ },
+ {
+  "cells": [
+   "Net income",
+   "$ 8,563.0",
+   "$ 8,223.0",
+   "$ 8,469.0"
+  ],
+  "concept": "us-gaap:NetIncomeLoss"
+ },
+ {
+  "cells": [
+   "Earnings per common share–basic",
+   "$ 12.00",
+   "$ 11.45",
+   "$ 11.63"
+  ],
+  "concept": "us-gaap:EarningsPerShareBasic"
+ },
+ {
+  "cells": [
+   "Earnings per common share–diluted",
+   "11.95",
+   "11.39",
+   "11.56"
+  ],
+  "concept": "us-gaap:EarningsPerShareDiluted"
+ },
+ {
+  "cells": [
+   "Dividends declared per common share",
+   "$ 7.17",
+   "$ 6.78",
+   "$ 6.23"
+  ],
+  "concept": "us-gaap:CommonStockDividendsPerShareDeclared"
+ },
+ {
+  "cells": [
+   "Weighted-average shares outstanding–basic",
+   "713.4",
+   "718.3",
+   "727.9"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfSharesOutstandingBasic"
+ },
+ {
+  "cells": [
+   "Weighted-average shares outstanding–diluted",
+   "716.4",
+   "721.9",
+   "732.3"
+  ],
+  "concept": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding"
+ }
+]

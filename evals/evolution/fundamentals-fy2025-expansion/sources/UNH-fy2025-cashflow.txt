@@ -1,0 +1,51 @@
+Consolidated Statements of Cash Flows - USD ($) $ in Millions | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Operating activities |  |  | 
+Net earnings | $ 12,807 | $ 15,242 | $ 23,144
+Noncash items: |  |  | 
+Depreciation and amortization | 4,361 | 4,099 | 3,972
+Deferred income taxes | (1,752) | (296) | (245)
+Share-based compensation | 971 | 1,018 | 1,059
+Loss on sale of subsidiary and subsidiaries held for sale | 265 | 8,310 | 0
+Net gains on dispositions and other strategic transactions | (910) | (3,333) | (489)
+Other, net | 1,673 | (28) | (16)
+Net change in other operating items, net of effects from acquisitions and dispositions: |  |  | 
+Accounts receivable | (764) | (1,437) | (3,114)
+Other assets | (4,606) | (4,140) | (2,444)
+Medical costs payable | 5,824 | 2,503 | 3,482
+Accounts payable and other liabilities | 1,665 | 2,463 | 3,516
+Unearned revenues | 163 | (197) | 203
+Cash flows from operating activities | 19,697 | 24,204 | 29,068
+Investing activities |  |  | 
+Purchases of investments | (17,373) | (27,308) | (18,314)
+Sales of investments | 9,288 | 18,514 | 7,307
+Maturities of investments | 8,446 | 9,319 | 9,230
+Cash paid for acquisitions and other transactions, net of cash assumed | (4,509) | (13,408) | (10,136)
+Purchases of property, equipment and capitalized software | (3,622) | (3,499) | (3,386)
+Loans to care providers - cyberattack | 0 | (9,033) | 0
+Repayments of care provider loans - cyberattack | 1,680 | 4,514 | 0
+Cash received from dispositions, net | 561 | 2,041 | 685
+Originations and purchases of loans | (4,795) | (2,477) | (1,664)
+Repayments and maturities of loans | 1,980 | 908 | 613
+Other, net | (341) | (98) | 91
+Cash flows used for investing activities | (8,685) | (20,527) | (15,574)
+Financing activities |  |  | 
+Common share repurchases | (5,545) | (9,000) | (8,000)
+Cash dividends paid | (7,916) | (7,533) | (6,761)
+Proceeds from common stock issuances | 827 | 1,846 | 1,353
+Repayments of long-term debt | (3,050) | (3,000) | (2,125)
+Proceeds from (repayments of) short-term borrowings, net | 807 | (151) | 11
+Proceeds from issuance of long-term debt | 2,969 | 17,811 | 6,394
+Customer funds administered | 366 | (1,560) | (521)
+Purchases of redeemable noncontrolling interests | (165) | (280) | (730)
+Other, net | 63 | (1,645) | (1,150)
+Cash flows used for financing activities | (11,644) | (3,512) | (11,529)
+Effect of exchange rate changes on cash and cash equivalents | 40 | (61) | 97
+(Decrease) increase in cash and cash equivalents, including cash within businesses held for sale | (592) | 104 | 2,062
+Less: net increase in cash within businesses held for sale | (355) | (219) | 0
+Net (decrease) increase in cash and cash equivalents | (947) | (115) | 2,062
+Cash and cash equivalents, beginning of period | 25,312 | 25,427 | 23,365
+Cash and cash equivalents, end of period | 24,365 | 25,312 | 25,427
+Supplemental cash flow disclosures |  |  | 
+Cash paid for interest | 4,030 | 3,594 | 3,035
+Cash paid for income taxes | $ 3,714 | $ 4,620 | $ 6,078

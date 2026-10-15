@@ -1,0 +1,359 @@
+[
+ {
+  "cells": [
+   "CONSOLIDATED STATEMENTS OF CASH FLOWS - USD ($) $ in Thousands",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 31, 2025",
+   "Dec. 31, 2024",
+   "Dec. 31, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Cash flows from operating activities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Net income",
+   "$ 10,981,201",
+   "$ 8,711,631",
+   "$ 5,407,990"
+  ],
+  "concept": "us-gaap:NetIncomeLoss"
+ },
+ {
+  "cells": [
+   "Adjustments to reconcile net income to net cash provided by operating activities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Additions to content assets",
+   "(17,096,617)",
+   "(16,223,617)",
+   "(12,554,703)"
+  ],
+  "concept": "nflx:AdditionstoStreamingContentAssets"
+ },
+ {
+  "cells": [
+   "Change in content liabilities",
+   "(610,838)",
+   "(779,135)",
+   "(585,602)"
+  ],
+  "concept": "nflx:ChangeInStreamingContentLiabilities"
+ },
+ {
+  "cells": [
+   "Amortization of content assets",
+   "16,422,166",
+   "15,301,517",
+   "14,197,437"
+  ],
+  "concept": "nflx:CostofServicesAmortizationofStreamingContentAssets"
+ },
+ {
+  "cells": [
+   "Depreciation and amortization of property, equipment and intangibles",
+   "333,389",
+   "328,914",
+   "356,947"
+  ],
+  "concept": "us-gaap:DepreciationDepletionAndAmortization"
+ },
+ {
+  "cells": [
+   "Stock-based compensation expense",
+   "368,449",
+   "272,588",
+   "339,368"
+  ],
+  "concept": "us-gaap:ShareBasedCompensation"
+ },
+ {
+  "cells": [
+   "Foreign currency remeasurement loss (gain) on debt",
+   "72,348",
+   "(121,539)",
+   "176,296"
+  ],
+  "concept": "us-gaap:ForeignCurrencyTransactionGainLossBeforeTax"
+ },
+ {
+  "cells": [
+   "Other non-cash items",
+   "577,451",
+   "494,778",
+   "512,075"
+  ],
+  "concept": "us-gaap:OtherNoncashIncomeExpense"
+ },
+ {
+  "cells": [
+   "Deferred income taxes",
+   "(442,056)",
+   "(590,698)",
+   "(459,359)"
+  ],
+  "concept": "nflx:DeferredIncomeTaxExpenseBenefitIncludingReclassifications"
+ },
+ {
+  "cells": [
+   "Changes in operating assets and liabilities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInOperatingAssetsAbstract"
+ },
+ {
+  "cells": [
+   "Other current assets",
+   "(790,661)",
+   "22,180",
+   "(181,003)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInOtherCurrentAssets"
+ },
+ {
+  "cells": [
+   "Accounts payable",
+   "(8,039)",
+   "121,353",
+   "93,502"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInAccountsPayable"
+ },
+ {
+  "cells": [
+   "Accrued expenses and other liabilities",
+   "881,218",
+   "191,899",
+   "103,565"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInAccruedLiabilities"
+ },
+ {
+  "cells": [
+   "Deferred revenue",
+   "254,917",
+   "77,844",
+   "178,708"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInContractWithCustomerLiability"
+ },
+ {
+  "cells": [
+   "Other non-current assets and liabilities",
+   "(793,655)",
+   "(446,351)",
+   "(310,920)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInOtherNoncurrentAssetsAndLiabilitiesNet"
+ },
+ {
+  "cells": [
+   "Net cash provided by operating activities",
+   "10,149,273",
+   "7,361,364",
+   "7,274,301"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+ },
+ {
+  "cells": [
+   "Cash flows from investing activities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Purchases of property and equipment",
+   "(688,220)",
+   "(439,538)",
+   "(348,552)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment"
+ },
+ {
+  "cells": [
+   "Acquisitions",
+   "(17,194)",
+   "0",
+   "0"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireBusinessesNetOfCashAcquired"
+ },
+ {
+  "cells": [
+   "Purchases of investments",
+   "(169,965)",
+   "(1,742,246)",
+   "(504,862)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireInvestments"
+ },
+ {
+  "cells": [
+   "Proceeds from maturities and sales of investments",
+   "1,917,067",
+   "0",
+   "1,395,165"
+  ],
+  "concept": "us-gaap:ProceedsFromSaleMaturityAndCollectionsOfInvestments"
+ },
+ {
+  "cells": [
+   "Net cash provided by (used in) investing activities",
+   "1,041,688",
+   "(2,181,784)",
+   "541,751"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivities"
+ },
+ {
+  "cells": [
+   "Cash flows from financing activities:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Proceeds from issuance of debt",
+   "0",
+   "1,794,460",
+   "0"
+  ],
+  "concept": "us-gaap:ProceedsFromIssuanceOfDebt"
+ },
+ {
+  "cells": [
+   "Repayments of debt",
+   "(1,833,450)",
+   "(400,000)",
+   "0"
+  ],
+  "concept": "us-gaap:RepaymentsOfLongTermDebt"
+ },
+ {
+  "cells": [
+   "Proceeds from issuance of common stock",
+   "666,965",
+   "832,887",
+   "169,990"
+  ],
+  "concept": "us-gaap:ProceedsFromStockOptionsExercised"
+ },
+ {
+  "cells": [
+   "Repurchases of common stock",
+   "(9,127,167)",
+   "(6,263,746)",
+   "(6,045,347)"
+  ],
+  "concept": "us-gaap:PaymentsForRepurchaseOfCommonStock"
+ },
+ {
+  "cells": [
+   "Taxes paid related to net share settlement of equity awards",
+   "(46,165)",
+   "(8,285)",
+   "0"
+  ],
+  "concept": "us-gaap:PaymentsRelatedToTaxWithholdingForShareBasedCompensation"
+ },
+ {
+  "cells": [
+   "Other financing activities",
+   "(5,806)",
+   "(29,743)",
+   "(75,446)"
+  ],
+  "concept": "us-gaap:ProceedsFromPaymentsForOtherFinancingActivities"
+ },
+ {
+  "cells": [
+   "Net cash used in financing activities",
+   "(10,345,623)",
+   "(4,074,427)",
+   "(5,950,803)"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivities"
+ },
+ {
+  "cells": [
+   "Effect of exchange rate changes on cash, cash equivalents and restricted cash",
+   "386,519",
+   "(416,331)",
+   "82,684"
+  ],
+  "concept": "us-gaap:EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Net increase in cash, cash equivalents and restricted cash",
+   "1,231,857",
+   "688,822",
+   "1,947,933"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
+ },
+ {
+  "cells": [
+   "Cash, cash equivalents and restricted cash, beginning of year",
+   "7,807,337",
+   "7,118,515",
+   "5,170,582"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Cash, cash equivalents and restricted cash, end of year",
+   "9,039,194",
+   "7,807,337",
+   "7,118,515"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Supplemental disclosure:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:SupplementalCashFlowInformationAbstract"
+ },
+ {
+  "cells": [
+   "Interest paid",
+   "$ 718,611",
+   "$ 674,502",
+   "$ 684,504"
+  ],
+  "concept": "us-gaap:InterestPaidNet"
+ }
+]

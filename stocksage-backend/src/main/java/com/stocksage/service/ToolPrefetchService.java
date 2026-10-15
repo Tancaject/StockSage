@@ -19,6 +19,10 @@ import com.stocksage.agent.ExecutionPlan;
 import com.stocksage.agent.PlanAction;
 import com.stocksage.agent.PlanRoute;
 import com.stocksage.agent.ReadRequest;
+import com.stocksage.agent.DataRequirement;
+import com.stocksage.agent.OrdinaryPlan;
+import com.stocksage.agent.PlanStep;
+import com.stocksage.tool.ToolCallContext;
 import com.stocksage.agent.AgentStep;
 import com.stocksage.harness.OrdinaryCompletionPolicy;
 import com.stocksage.harness.ResearchHarness;
@@ -47,7 +51,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
@@ -92,6 +99,8 @@ public class ToolPrefetchService {
     private final ObjectMapper objectMapper;
     /** 在线分析师使用独立于后台入库的有界线程池。 */
     private final AsyncTaskExecutor agentTaskExecutor;
+    /** 多标的取证扇出使用的独立有界线程池，不与 Gateway 内部任务争用 Agent 池。 */
+    private final AsyncTaskExecutor ordinaryFanoutExecutor;
     private final ResearchHarness researchHarness;
     private final OrdinaryCompletionPolicy ordinaryCompletionPolicy;
     private final TraceService traceService;
@@ -102,6 +111,13 @@ public class ToolPrefetchService {
 
     @Value("${stocksage.chat.tool-prefetch.per-tool-timeout-seconds:8}")
     private long toolPrefetchPerToolTimeoutSeconds = 8;
+
+    /** 多标的扇出整轮取证的等待上限，单位为秒；到期未完成的步骤被取消并记为超时。 */
+    @Value("${stocksage.agent.ordinary.multi-target.timeout-seconds:45}")
+    private long fanoutTimeoutSeconds = 45;
+
+    /** 普通路线证据可写入回答上下文的总字符预算；多标的按标的平分。 */
+    private static final int ORDINARY_CONTEXT_BUDGET = 11000;
 
     /** 普通路由分析师的等待上限，单位为秒。 */
     @Value("${stocksage.agent.prefetch.timeout-seconds:120}")
@@ -141,74 +157,66 @@ public class ToolPrefetchService {
             ExecutionPlan executionPlan, String userQuery, String traceId, Long conversationId,
             String userId, Coordinator.SelectedModel selectedModel, String submissionId, FundamentalsRuntimeIdentity.Request methodRequest
     ) {
+        return prefetch(executionPlan, userQuery, traceId, conversationId, userId, selectedModel, submissionId,
+                methodRequest, Set.of(), null);
+    }
+
+    /**
+     * @param retrievedTickers 本轮知识库实际召回了正文的标的，用于判断"财报原文"需求是否满足
+     * @param evaluationMode 评测专用的请求级模式（已由控制器按管理员令牌校验），普通请求为 null
+     */
+    public PreparedToolContext prefetch(
+            ExecutionPlan executionPlan, String userQuery, String traceId, Long conversationId,
+            String userId, Coordinator.SelectedModel selectedModel, String submissionId,
+            FundamentalsRuntimeIdentity.Request methodRequest, Set<String> retrievedTickers, String evaluationMode
+    ) {
         if (executionPlan == null || executionPlan.actions() == null) {
             return PreparedToolContext.empty();
         }
 
         if (executionPlan.route() == PlanRoute.DIRECT) return PreparedToolContext.empty();
         List<PlanAction> actions = executionPlan.actions();
-        String primaryTicker = tickerResolutionService.resolvePrimaryTicker(userQuery, conversationId);
         if (isDeepResearchPlan(actions)) {
+            String primaryTicker = tickerResolutionService.resolvePrimaryTicker(userQuery, conversationId);
             // 深度计划交给持久化任务与 Redis 队列；提交失败时由其内部切换同步降级路线。
             var result = researchSubmissionService.submit(
                     userQuery, traceId, conversationId, userId, selectedModel, primaryTicker,
-                    executionPlan.timeSensitivity(), submissionId);
+                    executionPlan.timeSensitivity(), submissionId, evaluationMode);
             return new PreparedToolContext(result.context(), result.directAnswer(), result.submittedTaskId(),
                     result.eventTraceId(), result.taskOutcome());
         }
 
         ReadRequest read = executionPlan.readRequest();
-        String clarification = read.clarification();
-        boolean us = tickerResolutionService.isLikelySecTicker(primaryTicker);
-        if (executionPlan.route() == PlanRoute.MARKET && read.intraday() && !us) {
-            clarification = "当前 A 股/港股取数只支持日、周、月线，无法提供本次小时或分钟线。请改用日线或选择支持的美股标的。";
+        if (!read.clarification().isBlank()) return new PreparedToolContext("", read.clarification(), null, traceId, "BLOCKED");
+        OrdinaryPlan ordinaryPlan = executionPlan.ordinaryPlan();
+        if (ordinaryPlan.multiTarget()) {
+            return prefetchMultiTarget(executionPlan, userQuery, traceId, conversationId, userId, retrievedTickers);
         }
-        if (!clarification.isBlank()) return new PreparedToolContext("", clarification, null, traceId, "BLOCKED");
+        String primaryTicker = tickerResolutionService.resolvePrimaryTicker(userQuery, conversationId);
+        boolean us = tickerResolutionService.isLikelySecTicker(primaryTicker);
+        if (executionPlan.route() == PlanRoute.MARKET && !us
+                && ordinaryPlan.steps().stream().anyMatch(step -> step.request().intraday())) {
+            return new PreparedToolContext("", "当前 A 股/港股取数只支持日、周、月线，无法提供本次小时或分钟线。请改用日线或选择支持的美股标的。",
+                    null, traceId, "BLOCKED");
+        }
         OrdinaryEvidence evidence = new OrdinaryEvidence(
                 primaryTicker, read, objectMapper, evidenceEnvelopeMapper, executionPlan.timeSensitivity());
         emitProgress(traceId, conversationId, "thought", "正在按已校验的周期与粒度获取证据。");
-        for (PlanAction action : actions) {
-            switch (action) {
-                case GET_FINANCIAL_REPORTS, GET_STRUCTURED_FINANCIALS -> evidence.call("getFinancialReports", EvidenceDimension.FUNDAMENTALS,
-                        () -> withResolvedTicker(primaryTicker, ticker -> fundamentalsTools.getFinancialReports(ticker, read.reportPeriod(), read.reportYears())));
-                case SEARCH_COMPANY_REPORTS -> {
-                    String result = evidence.call("searchCompanyReports", EvidenceDimension.FUNDAMENTALS,
-                            () -> withResolvedTicker(primaryTicker, ticker -> fundamentalsTools.searchCompanyReports(ticker,
-                                    read.reportPeriod().equals("quarterly") ? "10-Q 季报" : "10-K 年报", toolPrefetchMaxSearchResults)));
-                    searchResultIngestionService.submit("searchCompanyReports", result, userQuery);
+        for (PlanStep step : ordinaryPlan.steps()) {
+            for (StepEvidence item : fetch(step, primaryTicker, us, userQuery, userQuery, traceId, conversationId, userId, executionPlan)) {
+                item.addTo(evidence);
+            }
+        }
+        List<String> fallbackExecuted = new ArrayList<>();
+        List<PlanStep> fallbackSteps = fallbackStepsFor(ordinaryPlan, evidence,
+                retrievedTickers.contains(primaryTicker.toUpperCase(Locale.ROOT)));
+        if (!fallbackSteps.isEmpty()) {
+            emitProgress(traceId, conversationId, "thought", "主数据源未取得所需证据，补跑同类备用取数步骤。");
+            for (PlanStep step : fallbackSteps) {
+                fallbackExecuted.add(step.action().label());
+                for (StepEvidence item : fetch(step, primaryTicker, us, userQuery, userQuery, traceId, conversationId, userId, executionPlan)) {
+                    item.addTo(evidence);
                 }
-                case GET_STOCK_KLINE -> evidence.call(us ? "getIbkrHistoricalBars" : "getStockKLine", EvidenceDimension.MARKET,
-                        () -> withResolvedTicker(primaryTicker, ticker -> us
-                                ? marketTools.getIbkrHistoricalBars(ticker, read.period(), read.bar())
-                                : marketTools.getStockKLine(ticker, read.klinePeriod(), read.days())));
-                case GET_FINANCIAL_METRICS -> evidence.call(us ? "getStructuredFinancials" : "getFinancialMetrics", EvidenceDimension.MARKET,
-                        () -> withResolvedTicker(primaryTicker, this::getMarketFinancialContext));
-                case GET_TECHNICAL_INDICATORS -> {
-                    // 美股分析复用本轮 K 线，不再额外取固定 6 个月日线。
-                    if (!us) evidence.call("getTechnicalIndicators", EvidenceDimension.MARKET,
-                            () -> withResolvedTicker(primaryTicker, ticker -> marketTools.getTechnicalIndicators(ticker, "MA,MACD,RSI")));
-                    else if (userQuery.toLowerCase(java.util.Locale.ROOT).matches("(?s).*(指标|macd|rsi|ma[0-9]|均线|kdj).*")) {
-                        evidence.add("getTechnicalIndicators", EvidenceDimension.MARKET,
-                                "{\"error\":true,\"message\":\"美股指标尚无确定性计算工具，已有 K 线不能替代指标结果\"}");
-                    }
-                }
-                case SEARCH_NEWS -> {
-                    SkillExecutionService.ExecutionResult skill = skillExecutionService.executePrefetch(
-                            executionPlan, userQuery, toolPrefetchMaxSearchResults, traceId, conversationId, userId);
-                    if (skill.skillId().isBlank()) {
-                        prefetchSearch(evidence, LocalNewsSearchCapabilityAdapter.ID, "searchNews",
-                                userQuery, traceId, conversationId, userId);
-                    } else if (skill.evidence().isEmpty()) {
-                        evidence.add("searchNews", EvidenceDimension.NEWS, "{\"error\":true,\"message\":\"未取得可用新闻证据\"}");
-                    } else {
-                        for (var result : skill.evidence()) evidence.add(result);
-                    }
-                }
-                case WEB_SEARCH -> {
-                    prefetchSearch(evidence, LocalWebSearchCapabilityAdapter.ID, "webSearch",
-                            userQuery, traceId, conversationId, userId);
-                }
-                default -> { /* 标的已解析；角色分析在取证完成后执行。 */ }
             }
         }
         var decision = researchHarness.observeEvidence(traceId, ordinaryCompletionPolicy,
@@ -216,8 +224,11 @@ public class ToolPrefetchService {
         String outcome = decision.outcome() == HarnessOutcome.BLOCK ? "BLOCKED"
                 : decision.outcome() == HarnessOutcome.PASS && evidence.allIncluded() ? "COMPLETED"
                 : evidence.hasUsefulResult() ? "DEGRADED" : "FAILED";
-        StringBuilder context = new StringBuilder(ordinaryEvidenceContext(primaryTicker, read.attributes(),
-                executionPlan.timeSensitivity().name(), outcome, evidence.context()));
+        List<DataRequirement> unmet = unmetRequirements(ordinaryPlan, evidence,
+                retrievedTickers.contains(primaryTicker.toUpperCase(Locale.ROOT)));
+        if ("COMPLETED".equals(outcome) && !unmet.isEmpty()) outcome = "DEGRADED";
+        StringBuilder context = new StringBuilder(ordinaryEvidenceContext(primaryTicker, planRequestAttributes(ordinaryPlan, read),
+                executionPlan.timeSensitivity().name(), outcome, evidence.context()) + requirementNote(unmet));
         String sourceEvidenceContext = evidence.context();
         PlanAction analyst = actions.stream().filter(PlanAction::isAgentRole).findFirst().orElse(null);
         var methodSelection = analyst == PlanAction.FUNDAMENTALS_AGENT
@@ -291,6 +302,10 @@ public class ToolPrefetchService {
                 "timeSensitivity", executionPlan.timeSensitivity().name(),
                 "request", read.attributes(), "observations", evidence.observations(), "taskOutcome", outcome,
                 "contextChars", context.length(), "analystPlanned", analyst != null, "analystStatus", analystStatus));
+        evidenceAttributes.put("planSource", ordinaryPlan.source().name());
+        evidenceAttributes.put("requirements", ordinaryPlan.requirements().stream().map(Enum::name).sorted().toList());
+        evidenceAttributes.put("unmetRequirements", unmet.stream().map(Enum::name).toList());
+        evidenceAttributes.put("fallbackExecuted", fallbackExecuted);
         if (analystCompletion != null) {
             evidenceAttributes.put("analystCompletionStatus", analystCompletion.status().name());
             evidenceAttributes.put("analystFinishReason", analystCompletion.finishReason());
@@ -323,25 +338,365 @@ public class ToolPrefetchService {
                 evidence.citationIds(), sourceEvidenceContext, analystSection);
     }
 
+    /**
+     * 一步取数的原始结果。执行线程只产出它，入账统一在请求线程按计划顺序进行，
+     * 证据对象（列表、编号、字符预算）因此不会被多个线程同时修改。
+     */
+    private record StepEvidence(String name, EvidenceDimension dimension, String raw,
+                                CapabilityResult capability, ReadRequest request) {
+        void addTo(OrdinaryEvidence evidence) {
+            if (capability != null) evidence.add(capability);
+            else evidence.add(name, dimension, raw, request);
+        }
+    }
+
+    /** 执行计划中的一步，不修改任何共享证据状态。 */
+    private List<StepEvidence> fetch(PlanStep step, String ticker, boolean us, String searchQuery, String userQuery,
+                                     String traceId, Long conversationId, String userId, ExecutionPlan executionPlan) {
+        ReadRequest read = step.request();
+        return switch (step.action()) {
+            case GET_FINANCIAL_REPORTS, GET_STRUCTURED_FINANCIALS -> List.of(raw("getFinancialReports", EvidenceDimension.FUNDAMENTALS, read,
+                    () -> withResolvedTicker(ticker, symbol -> fundamentalsTools.getFinancialReports(symbol, read.reportPeriod(), read.reportYears()))));
+            case SEARCH_COMPANY_REPORTS -> {
+                StepEvidence result = raw("searchCompanyReports", EvidenceDimension.FUNDAMENTALS, read,
+                        () -> withResolvedTicker(ticker, symbol -> fundamentalsTools.searchCompanyReports(symbol,
+                                read.reportPeriod().equals("quarterly") ? "10-Q 季报" : "10-K 年报", toolPrefetchMaxSearchResults)));
+                searchResultIngestionService.submit("searchCompanyReports", result.raw(), userQuery);
+                yield List.of(result);
+            }
+            case GET_STOCK_KLINE -> List.of(raw(us ? "getIbkrHistoricalBars" : "getStockKLine", EvidenceDimension.MARKET, read,
+                    () -> withResolvedTicker(ticker, symbol -> us
+                            ? marketTools.getIbkrHistoricalBars(symbol, read.period(), read.bar())
+                            : marketTools.getStockKLine(symbol, read.klinePeriod(), read.days()))));
+            case GET_FINANCIAL_METRICS -> List.of(raw(us ? "getStructuredFinancials" : "getFinancialMetrics", EvidenceDimension.MARKET, read,
+                    () -> withResolvedTicker(ticker, this::getMarketFinancialContext)));
+            case GET_TECHNICAL_INDICATORS -> {
+                // 美股分析复用本轮 K 线，不再额外取固定 6 个月日线。
+                if (!us) yield List.of(raw("getTechnicalIndicators", EvidenceDimension.MARKET, read,
+                        () -> withResolvedTicker(ticker, symbol -> marketTools.getTechnicalIndicators(symbol, "MA,MACD,RSI"))));
+                if (userQuery.toLowerCase(Locale.ROOT).matches("(?s).*(指标|macd|rsi|ma[0-9]|均线|kdj).*")) {
+                    yield List.of(new StepEvidence("getTechnicalIndicators", EvidenceDimension.MARKET,
+                            "{\"error\":true,\"message\":\"美股指标尚无确定性计算工具，已有 K 线不能替代指标结果\"}", null, read));
+                }
+                yield List.of();
+            }
+            case SEARCH_NEWS -> {
+                SkillExecutionService.ExecutionResult skill = skillExecutionService.executePrefetch(
+                        executionPlan, searchQuery, toolPrefetchMaxSearchResults, traceId, conversationId, userId);
+                if (skill.skillId().isBlank()) {
+                    yield List.of(search(LocalNewsSearchCapabilityAdapter.ID, "searchNews", searchQuery, read,
+                            traceId, conversationId, userId));
+                }
+                if (skill.evidence().isEmpty()) {
+                    yield List.of(new StepEvidence("searchNews", EvidenceDimension.NEWS,
+                            "{\"error\":true,\"message\":\"未取得可用新闻证据\"}", null, read));
+                }
+                yield skill.evidence().stream().map(result -> new StepEvidence("", EvidenceDimension.NEWS, "", result, read)).toList();
+            }
+            case WEB_SEARCH -> List.of(search(LocalWebSearchCapabilityAdapter.ID, "webSearch", searchQuery, read,
+                    traceId, conversationId, userId));
+            default -> List.of(); // 标的已解析；角色分析在取证完成后执行。
+        };
+    }
+
+    private StepEvidence raw(String name, EvidenceDimension dimension, ReadRequest request, java.util.function.Supplier<String> call) {
+        String raw;
+        try { raw = call.get(); }
+        catch (Exception error) { raw = "{\"error\":true,\"message\":\"取证调用失败，请稍后重试\"}"; }
+        return new StepEvidence(name, dimension, raw, null, request);
+    }
+
     /** 普通搜索也经过注册表；策略拒绝不允许退回直接工具调用。 */
-    private void prefetchSearch(OrdinaryEvidence evidence, String capabilityId, String toolName,
-                                String query, String traceId, Long conversationId, String userId) {
+    private StepEvidence search(String capabilityId, String toolName, String query, ReadRequest request,
+                                String traceId, Long conversationId, String userId) {
         try {
             CapabilityResult result = capabilityGateway.invoke(capabilityId,
                     Map.of("query", query, "maxResults", toolPrefetchMaxSearchResults),
                     new CapabilityInvocationContext(userId, conversationId, traceId, null,
                             Set.of(capabilityId), Instant.now().plusSeconds(toolPrefetchPerToolTimeoutSeconds)));
-            evidence.add(result);
             if (result.status() == CapabilityResult.Status.SUCCESS) {
                 searchResultIngestionService.submit(toolName, result.content(), query);
             }
+            return new StepEvidence("", EvidenceDimension.NEWS, "", result, request);
         } catch (CapabilityException error) {
             if (error.reason() == CapabilityException.Reason.DENIED
                     || error.reason() == CapabilityException.Reason.UNKNOWN) throw error;
-            evidence.add(capabilityId, EvidenceDimension.NEWS,
+            return new StepEvidence(capabilityId, EvidenceDimension.NEWS,
                     "{\"error\":true,\"errorCode\":\"" + error.reason().name()
-                            + "\",\"message\":\"能力取证失败，请稍后重试\"}");
+                            + "\",\"message\":\"能力取证失败，请稍后重试\"}", null, request);
         }
+    }
+
+    /**
+     * 多标的对比：所有标的共用一份已校验计划，每个 (标的, 步骤) 并行执行；
+     * 结果在请求线程按标的、步骤顺序入账，证据编号整轮唯一，每个标的各自验收。
+     */
+    private PreparedToolContext prefetchMultiTarget(ExecutionPlan executionPlan, String userQuery, String traceId,
+                                                    Long conversationId, String userId, Set<String> retrievedTickers) {
+        OrdinaryPlan ordinaryPlan = executionPlan.ordinaryPlan();
+        List<String> targets = ordinaryPlan.targets();
+        ReadRequest read = executionPlan.readRequest();
+        if (executionPlan.route() == PlanRoute.MARKET
+                && targets.stream().anyMatch(target -> !tickerResolutionService.isLikelySecTicker(target))
+                && ordinaryPlan.steps().stream().anyMatch(step -> step.request().intraday())) {
+            return new PreparedToolContext("", "当前 A 股/港股取数只支持日、周、月线，无法为对比中的这些标的提供小时或分钟线。请改用日线后再对比。",
+                    null, traceId, "BLOCKED");
+        }
+        List<PlanStep> steps = ordinaryPlan.steps().stream()
+                .filter(step -> !step.action().isAgentRole() && step.action() != PlanAction.FINAL_ANSWER
+                        && step.action() != PlanAction.KNOWLEDGE_RETRIEVAL)
+                .toList();
+        String topic = tickerResolutionService.withoutTickerMentions(userQuery, targets);
+        emitProgress(traceId, conversationId, "thought", "正在并行获取 " + String.join("、", targets) + " 的证据。");
+
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(fanoutTimeoutSeconds);
+        List<List<List<StepEvidence>>> results = fanOut(targets, steps, topic, deadline, userQuery, traceId,
+                conversationId, userId, executionPlan);
+
+        AtomicInteger ids = new AtomicInteger();
+        int budget = Math.max(2500, ORDINARY_CONTEXT_BUDGET / targets.size());
+        List<OrdinaryEvidence> evidences = new ArrayList<>();
+        for (int t = 0; t < targets.size(); t++) {
+            OrdinaryEvidence evidence = new OrdinaryEvidence(targets.get(t), read, objectMapper, evidenceEnvelopeMapper,
+                    executionPlan.timeSensitivity(), ids::incrementAndGet, budget);
+            for (List<StepEvidence> items : results.get(t)) items.forEach(item -> item.addTo(evidence));
+            evidences.add(evidence);
+        }
+        // 动态计划取数失败或需求未满足的标的，补跑同类数据的兜底步骤；所需步骤相同的标的一起并行，共用同一截止时间。
+        Map<List<PlanStep>, List<Integer>> fallbackGroups = new LinkedHashMap<>();
+        Map<Integer, List<String>> fallbackExecuted = new LinkedHashMap<>();
+        for (int t = 0; t < targets.size(); t++) {
+            List<PlanStep> needed = fallbackStepsFor(ordinaryPlan, evidences.get(t), retrievedTickers.contains(targets.get(t)));
+            if (needed.isEmpty()) continue;
+            fallbackGroups.computeIfAbsent(needed, key -> new ArrayList<>()).add(t);
+            fallbackExecuted.put(t, needed.stream().map(step -> step.action().label()).toList());
+        }
+        if (!fallbackGroups.isEmpty()) {
+            emitProgress(traceId, conversationId, "thought", "部分标的主数据源未取得所需证据，补跑同类备用取数步骤。");
+        }
+        for (var group : fallbackGroups.entrySet()) {
+            List<Integer> indexes = group.getValue();
+            List<List<List<StepEvidence>>> fallbackResults = fanOut(indexes.stream().map(targets::get).toList(),
+                    group.getKey(), topic, deadline, userQuery, traceId, conversationId, userId, executionPlan);
+            for (int i = 0; i < indexes.size(); i++) {
+                OrdinaryEvidence evidence = evidences.get(indexes.get(i));
+                for (List<StepEvidence> items : fallbackResults.get(i)) items.forEach(item -> item.addTo(evidence));
+            }
+        }
+
+        StringBuilder context = new StringBuilder(comparisonHeader(targets));
+        StringBuilder sourceEvidence = new StringBuilder();
+        List<String> citationIds = new ArrayList<>();
+        List<List<String>> citationGroups = new ArrayList<>();
+        List<Map<String, Object>> targetRows = new ArrayList<>();
+        List<String> blocked = new ArrayList<>();
+        int comparable = 0;
+        boolean allCompleted = true;
+        for (int t = 0; t < targets.size(); t++) {
+            String target = targets.get(t);
+            OrdinaryEvidence evidence = evidences.get(t);
+            var decision = researchHarness.observeEvidence(traceId, ordinaryCompletionPolicy,
+                    new RunContext(executionPlan.route().name(), Map.of(), executionPlan.timeSensitivity()), evidence.ledger());
+            String outcome = decision.outcome() == HarnessOutcome.BLOCK ? "BLOCKED"
+                    : decision.outcome() == HarnessOutcome.PASS && evidence.allIncluded() ? "COMPLETED"
+                    : evidence.hasUsefulResult() ? "DEGRADED" : "FAILED";
+            List<DataRequirement> unmet = unmetRequirements(ordinaryPlan, evidence, retrievedTickers.contains(target));
+            if ("COMPLETED".equals(outcome) && !unmet.isEmpty()) outcome = "DEGRADED";
+            // "可比较"按本题需求判断：拿到任意数据不够，必须满足全部明确需求。
+            boolean usable = !"BLOCKED".equals(outcome) && !"FAILED".equals(outcome) && unmet.isEmpty();
+            if ("BLOCKED".equals(outcome)) blocked.add(target);
+            if (usable) {
+                comparable++;
+                citationGroups.add(evidence.citationIds());
+            }
+            allCompleted &= "COMPLETED".equals(outcome);
+            citationIds.addAll(evidence.citationIds());
+            sourceEvidence.append(evidence.context()).append('\n');
+            context.append("\n## 标的 ").append(target).append('\n')
+                    .append(ordinaryEvidenceContext(target, planRequestAttributes(ordinaryPlan, read), executionPlan.timeSensitivity().name(),
+                            outcome, evidence.context()))
+                    .append(requirementNote(unmet));
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("target", target); row.put("taskOutcome", outcome); row.put("comparable", usable);
+            row.put("unmetRequirements", unmet.stream().map(Enum::name).toList());
+            targetRows.add(row);
+            Map<String, Object> attributes = new LinkedHashMap<>(Map.of(
+                    "kind", "ordinary-evidence", "route", executionPlan.route().name(), "target", target,
+                    "timeSensitivity", executionPlan.timeSensitivity().name(), "request", read.attributes(),
+                    "observations", evidence.observations(), "taskOutcome", outcome,
+                    "planSource", ordinaryPlan.source().name(),
+                    "requirements", ordinaryPlan.requirements().stream().map(Enum::name).sorted().toList(),
+                    "unmetRequirements", unmet.stream().map(Enum::name).toList()));
+            attributes.put("fallbackExecuted", fallbackExecuted.getOrDefault(t, List.of()));
+            traceService.addStep(traceId, AgentStep.builder().action("Ordinary Evidence")
+                    .observation(target + " 证据验收：" + outcome).attributes(attributes).build());
+        }
+        // 对比汇总：任一被拦截即停止；可比较不足两个无法对比；全部完成才算完成；其余为部分完成。
+        String outcome = !blocked.isEmpty() ? "BLOCKED" : comparable < 2 ? "FAILED" : allCompleted ? "COMPLETED" : "DEGRADED";
+        traceService.addStep(traceId, AgentStep.builder().action("Ordinary Comparison")
+                .observation("多标的对比验收：" + outcome)
+                .attributes(Map.of("kind", "ordinary-comparison", "taskOutcome", outcome, "targets", targetRows,
+                        "comparableTargets", comparable))
+                .build());
+        emitProgress(traceId, conversationId, "observation", "对比证据验收：" + outcome + "；回答将按标的保留来源和数据缺口。");
+        String direct = switch (outcome) {
+            case "BLOCKED" -> String.join("、", blocked) + " 的取证标的或权限不符合请求，已停止生成对比。请确认股票代码后重试。";
+            case "FAILED" -> "本轮能满足对比所需数据的标的不足两个，无法完成对比。请检查数据服务后重试，或减少对比的数据项；不会用其他周期或公司的数据替代。";
+            default -> "";
+        };
+        return new PreparedToolContext(finishOrdinaryContext(context.toString(), outcome), direct, null, traceId, outcome,
+                citationIds, sourceEvidence.toString(), null, citationGroups);
+    }
+
+    /**
+     * 对每个 (标的, 步骤) 并行取数：执行线程只返回原始结果，按标的、步骤顺序收集；
+     * 截止时间覆盖整轮，取消会传到正在执行的任务。
+     */
+    private List<List<List<StepEvidence>>> fanOut(List<String> targets, List<PlanStep> steps, String topic, long deadline,
+                                                  String userQuery, String traceId, Long conversationId, String userId,
+                                                  ExecutionPlan executionPlan) {
+        List<List<FutureTask<List<StepEvidence>>>> tasks = new ArrayList<>();
+        for (String target : targets) {
+            boolean us = tickerResolutionService.isLikelySecTicker(target);
+            // 搜索绑定到各自标的，不把整句对比问题原样搜两遍。
+            String searchQuery = (target + " " + topic).strip();
+            List<FutureTask<List<StepEvidence>>> row = new ArrayList<>();
+            for (PlanStep step : steps) {
+                FutureTask<List<StepEvidence>> task = new FutureTask<>(() -> {
+                    ToolCallContext.set(traceId, conversationId, searchQuery);
+                    try {
+                        return fetch(step, target, us, searchQuery, userQuery, traceId, conversationId, userId, executionPlan);
+                    } finally {
+                        ToolCallContext.clear();
+                    }
+                });
+                try {
+                    ordinaryFanoutExecutor.execute(task);
+                } catch (RejectedExecutionException rejected) {
+                    task = null;
+                }
+                row.add(task);
+            }
+            tasks.add(row);
+        }
+        List<List<List<StepEvidence>>> results = new ArrayList<>();
+        try {
+            for (List<FutureTask<List<StepEvidence>>> row : tasks) {
+                List<List<StepEvidence>> rowResults = new ArrayList<>();
+                for (int i = 0; i < row.size(); i++) {
+                    rowResults.add(await(row.get(i), steps.get(i), deadline, tasks));
+                }
+                results.add(rowResults);
+            }
+        } catch (InterruptedException interrupted) {
+            cancelAll(tasks);
+            Thread.currentThread().interrupt();
+            var cancelled = new CancellationException("多标的取证已取消。");
+            cancelled.initCause(interrupted);
+            throw cancelled;
+        }
+        return results;
+    }
+
+    /** 等待单个扇出任务；超时、容量拒绝和失败都转成这一步的错误证据，策略拒绝则终止整轮。 */
+    private List<StepEvidence> await(FutureTask<List<StepEvidence>> task, PlanStep step, long deadline,
+                                     List<List<FutureTask<List<StepEvidence>>>> all) throws InterruptedException {
+        if (task == null) return List.of(stepError(step, "CAPACITY_REJECTED", "取证容量已满，本步未执行"));
+        try {
+            return task.get(Math.max(0, deadline - System.nanoTime()), TimeUnit.NANOSECONDS);
+        } catch (java.util.concurrent.TimeoutException timeout) {
+            task.cancel(true);
+            return List.of(stepError(step, "TIMEOUT", "取证超时，本步结果未采用"));
+        } catch (java.util.concurrent.ExecutionException failure) {
+            if (failure.getCause() instanceof CapabilityException denied
+                    && (denied.reason() == CapabilityException.Reason.DENIED
+                    || denied.reason() == CapabilityException.Reason.UNKNOWN)) {
+                cancelAll(all);
+                throw denied;
+            }
+            return List.of(stepError(step, "FAILED", "取证调用失败，请稍后重试"));
+        }
+    }
+
+    private static void cancelAll(List<List<FutureTask<List<StepEvidence>>>> tasks) {
+        tasks.forEach(row -> row.forEach(task -> { if (task != null) task.cancel(true); }));
+    }
+
+    private static StepEvidence stepError(PlanStep step, String code, String message) {
+        return new StepEvidence(step.action().label(), dimensionOf(step.action()),
+                "{\"error\":true,\"errorCode\":\"" + code + "\",\"message\":\"" + message + "\"}", null, step.request());
+    }
+
+    private static String comparisonHeader(List<String> targets) {
+        return "本轮为多标的对比：" + String.join("、", targets) + "。各标的证据分区列出，证据编号整轮唯一。\n"
+                + "对比规则：描述某个标的只能引用它自己分区内的证据，不得把一个标的的数据套用到另一个标的；"
+                + "某标的缺少的数据必须写明缺失，不得用其他口径或推测补齐；不同市场的标的分别标注币种和会计口径，不做汇率换算。\n";
+    }
+
+    /**
+     * 写给回答模型的请求参数：各取数步骤参数相同时只给一份；规划器让各步参数不同时按步骤列出，
+     * 避免模型拿一份总参数去解读另一步的数据。
+     */
+    private static Map<String, Object> planRequestAttributes(OrdinaryPlan plan, ReadRequest read) {
+        List<PlanStep> dataSteps = plan.steps().stream()
+                .filter(step -> !step.action().isAgentRole() && step.action() != PlanAction.FINAL_ANSWER
+                        && step.action() != PlanAction.KNOWLEDGE_RETRIEVAL)
+                .toList();
+        if (dataSteps.stream().allMatch(step -> step.request().equals(read))) return read.attributes();
+        Map<String, Object> bySteps = new LinkedHashMap<>();
+        // 同一动作可能以不同参数出现多次，键里带上步骤序号。
+        for (int i = 0; i < dataSteps.size(); i++) {
+            bySteps.put((i + 1) + "." + dataSteps.get(i).action().label(), dataSteps.get(i).request().attributes());
+        }
+        return bySteps;
+    }
+
+    /**
+     * 动态计划取数后要补跑的兜底步骤：只取与失败数据同类（财报、行情、新闻）的被删步骤，
+     * 类别来自取数失败的证据和未满足的需求。只补跑一轮，不再调用模型。
+     */
+    private static List<PlanStep> fallbackStepsFor(OrdinaryPlan plan, OrdinaryEvidence evidence, boolean filingTextRetrieved) {
+        if (plan.fallbackSteps().isEmpty()) return List.of();
+        Set<String> failing = new java.util.HashSet<>();
+        evidence.observations().stream()
+                .filter(row -> "FAILED".equals(row.get("status")) || "EMPTY".equals(row.get("status")))
+                .forEach(row -> failing.add(String.valueOf(row.get("dimension"))));
+        unmetRequirements(plan, evidence, filingTextRetrieved)
+                .forEach(requirement -> failing.add(dimensionOf(requirement).name()));
+        return plan.fallbackSteps().stream()
+                .filter(step -> failing.contains(dimensionOf(step.action()).name()))
+                .toList();
+    }
+
+    private static EvidenceDimension dimensionOf(PlanAction action) {
+        return switch (action) {
+            case GET_FINANCIAL_REPORTS, GET_STRUCTURED_FINANCIALS, SEARCH_COMPANY_REPORTS -> EvidenceDimension.FUNDAMENTALS;
+            case SEARCH_NEWS, WEB_SEARCH -> EvidenceDimension.NEWS;
+            default -> EvidenceDimension.MARKET;
+        };
+    }
+
+    private static EvidenceDimension dimensionOf(DataRequirement requirement) {
+        return switch (requirement) {
+            case FINANCIAL_STATEMENTS, FILING_TEXT -> EvidenceDimension.FUNDAMENTALS;
+            case NEWS -> EvidenceDimension.NEWS;
+            case PRICE_HISTORY, VALUATION, TECHNICAL -> EvidenceDimension.MARKET;
+        };
+    }
+
+    /** 每项明确需求都要有满足条件的证据；新闻正常查无结果算满足。 */
+    private static List<DataRequirement> unmetRequirements(OrdinaryPlan plan, OrdinaryEvidence evidence,
+                                                           boolean filingTextRetrieved) {
+        return plan.requirements().stream()
+                .filter(requirement -> !requirement.isSatisfied(evidence.observations(), filingTextRetrieved))
+                .sorted()
+                .toList();
+    }
+
+    private static String requirementNote(List<DataRequirement> unmet) {
+        if (unmet.isEmpty()) return "";
+        return "未满足的数据需求：" + String.join("、", unmet.stream().map(DataRequirement::label).toList())
+                + "。回答必须明确说明这些数据本轮没有取得，不得推测补齐。\n";
     }
 
     /**
@@ -448,8 +803,19 @@ public class ToolPrefetchService {
             String taskOutcome,
             List<String> citationIds,
             String sourceEvidenceContext,
-            AnalystSection analystSection
+            AnalystSection analystSection,
+            List<List<String>> requiredCitationGroups
     ) {
+        public PreparedToolContext {
+            requiredCitationGroups = requiredCitationGroups == null ? List.of() : List.copyOf(requiredCitationGroups);
+        }
+
+        public PreparedToolContext(String context, String directAnswer, Long submittedTaskId,
+                                   String eventTraceId, String taskOutcome, List<String> citationIds,
+                                   String sourceEvidenceContext, AnalystSection analystSection) {
+            this(context, directAnswer, submittedTaskId, eventTraceId, taskOutcome, citationIds,
+                    sourceEvidenceContext, analystSection, List.of());
+        }
         public PreparedToolContext(String context, String directAnswer, Long submittedTaskId,
                                    String eventTraceId, String taskOutcome, List<String> citationIds,
                                    String sourceEvidenceContext) {
@@ -474,11 +840,16 @@ public class ToolPrefetchService {
             if (!"COMPLETED".equals(taskOutcome) || citationIds.isEmpty()) return taskOutcome;
             java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\[E([0-9]+)\\]").matcher(answer == null ? "" : answer);
             boolean cited = false;
+            Set<String> citedIds = new java.util.HashSet<>();
             while (matcher.find()) {
                 if (!citationIds.contains("E" + matcher.group(1))) return "DEGRADED";
                 cited = true;
+                citedIds.add("E" + matcher.group(1));
             }
-            return cited ? taskOutcome : "DEGRADED";
+            // 对比任务：每个可比较的标的都要在回答里被引用，否则不能算完整对比。
+            boolean everyTargetCited = requiredCitationGroups.stream()
+                    .allMatch(group -> group.stream().anyMatch(citedIds::contains));
+            return cited && everyTargetCited ? taskOutcome : "DEGRADED";
         }
         public PreparedToolContext(
                 String context,

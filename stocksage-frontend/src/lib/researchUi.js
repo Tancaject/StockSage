@@ -95,6 +95,8 @@ export function buildAssistantEvidenceSummary(message = {}) {
   }
 }
 
+const PLAN_SOURCE_LABELS = { FIXED: '固定计划', DYNAMIC: '动态规划', FALLBACK: '规划失败，退回固定计划' }
+
 export function buildResearchTimeline({ reasoning = [], charts = [], hasAnswer = false } = {}) {
   const items = normalizeReasoningList(reasoning)
   const routeDecisions = items.filter(item => item.type === 'route_decision')
@@ -115,6 +117,22 @@ export function buildResearchTimeline({ reasoning = [], charts = [], hasAnswer =
     })
   }
 
+  // 执行计划：与后端执行、Trace 读同一份最终计划。
+  const plan = observations.find(item => item.metadata?.kind === 'ordinary-plan')
+  if (plan) {
+    const metadata = plan.metadata
+    const steps = (Array.isArray(metadata.steps) ? metadata.steps : [])
+      .map(step => step.action)
+      .filter(action => action && action !== 'Final Answer')
+    const targets = Array.isArray(metadata.targets) ? metadata.targets : []
+    timeline.push({
+      kind: 'plan',
+      label: '执行计划',
+      detail: `${PLAN_SOURCE_LABELS[metadata.source] || metadata.source}：${steps.join(' → ') || '无取数步骤'}`,
+      meta: targets.length > 0 ? `对比标的：${targets.join('、')}` : '',
+    })
+  }
+
   if (actions.length > 0 || observations.length > 0) {
     const dataStage = summarizeDataStage(actions, observations)
     timeline.push({
@@ -124,6 +142,22 @@ export function buildResearchTimeline({ reasoning = [], charts = [], hasAnswer =
       meta: dataStage.meta,
     })
   }
+
+  // 多标的对比：每个标的单独列出验收结果和未满足的数据需求。
+  observations
+    .filter(item => item.metadata?.kind === 'ordinary-evidence' && item.metadata?.target)
+    .forEach((item) => {
+      const unmet = Array.isArray(item.metadata.unmetRequirements) ? item.metadata.unmetRequirements : []
+      timeline.push({
+        kind: 'evidence',
+        label: `数据获取 · ${item.metadata.target}`,
+        detail: `证据验收：${formatTaskOutcome(item.metadata.taskOutcome)}`,
+        meta: unmet.length > 0 ? `未满足：${unmet.join('、')}` : '',
+      })
+    })
+
+  // DEEP 取证循环：流式块与 Trace 携带同一份 attributes，按 stepKind + 轮次去重。
+  timeline.push(...buildEvidenceLoopRows(items))
 
   if (harnessEvents.length > 0) {
     const latest = harnessEvents[harnessEvents.length - 1]
@@ -176,6 +210,110 @@ export function buildResearchTimeline({ reasoning = [], charts = [], hasAnswer =
   }
 
   return timeline
+}
+
+const LOOP_TOOL_LABELS = {
+  focused_news_search: '新闻搜索',
+  filing_text_search: '财报原文',
+  relation_lookup: '关系图谱',
+  financial_statements: '结构化财报',
+  price_history: 'K 线',
+  declare_facets: '声明必答维度',
+}
+
+const LOOP_OUTCOME_LABELS = { EXECUTED: '完成', DECLARED: '已记录' }
+
+const LOOP_STOP_LABELS = {
+  'FINISHED:SUFFICIENT': '模型判断证据已足够',
+  'FINISHED:NO_SAFE_ACTION': '模型判断没有安全可行的下一步',
+  NO_TOOL_CALLS: '模型没有再提出工具调用',
+  MAX_ROUNDS: '达到轮数上限',
+  MAX_TOOL_CALLS: '达到工具调用上限',
+  TIME_BUDGET: '时间预算不足',
+  MODEL_CALL_QUOTA: '模型调用配额需留给后续分析',
+  STAGNATION: '连续多轮没有新增证据',
+  MODEL_TIMEOUT: '模型响应超时',
+  MODEL_ERROR: '模型调用失败',
+  CAPACITY_UNAVAILABLE: '执行容量已满',
+  HARNESS_NOT_PASS: '证据验收未通过',
+}
+
+const LOOP_STEP_KINDS = new Set(['loop_round', 'loop_resume', 'loop_stop'])
+
+function buildEvidenceLoopRows(items) {
+  const seen = new Set()
+  const rows = []
+  items.forEach((item) => {
+    const metadata = item.metadata || {}
+    if (!LOOP_STEP_KINDS.has(metadata.stepKind)) return
+    const key = `${metadata.stepKind}:${metadata.round ?? ''}`
+    if (seen.has(key)) return
+    seen.add(key)
+    if (metadata.stepKind === 'loop_round') {
+      const tools = Array.isArray(metadata.tools) ? metadata.tools : []
+      const outcomes = Array.isArray(metadata.outcomes) ? metadata.outcomes : []
+      const added = Array.isArray(metadata.addedEvidenceIds) ? metadata.addedEvidenceIds.length : 0
+      const rejected = metadata.stopReason ? formatLoopStop(metadata.stopReason) : ''
+      rows.push({
+        kind: rejected ? 'analysis' : 'evidence',
+        label: `补充取证 · 第 ${metadata.round} 轮`,
+        detail: outcomes.length > 0
+          ? outcomes.map(formatLoopOutcome).join('、')
+          : tools.map(tool => LOOP_TOOL_LABELS[tool] || tool).join('、'),
+        meta: rejected || (added > 0 ? `新增 ${added} 条可引用证据` : '没有新增可引用证据'),
+      })
+    } else if (metadata.stepKind === 'loop_resume') {
+      const pending = Array.isArray(metadata.pendingCalls) ? metadata.pendingCalls : []
+      rows.push({
+        kind: 'plan',
+        label: '从断点恢复',
+        detail: `已完成 ${metadata.completedRounds ?? 0} 轮，沿用已保存的结果，不重新请求这些轮次。`,
+        meta: pending.length > 0 ? `继续执行：${pending.map(tool => LOOP_TOOL_LABELS[tool] || tool).join('、')}` : '',
+      })
+    } else {
+      const added = Array.isArray(metadata.addedEvidenceIds) ? metadata.addedEvidenceIds.length : 0
+      rows.push({
+        kind: 'evidence',
+        label: '补充取证结束',
+        detail: [
+          formatLoopStop(metadata.stopReason),
+          metadata.facets ? `必答维度：${String(metadata.facets).split(';').join('、')}` : '',
+          metadata.facetCoverage ? `覆盖情况：${metadata.facetCoverage}` : '',
+        ].filter(Boolean).join('；'),
+        meta: `共 ${metadata.rounds ?? 0} 轮 · ${metadata.toolCalls ?? 0} 次工具调用 · 新增 ${added} 条证据`,
+      })
+    }
+  })
+  return rows
+}
+
+const LOOP_APPEND_LABELS = {
+  ADDED: '',
+  'NOT_ADDED:DUPLICATE': '（与已有证据重复，未入账）',
+  'NOT_ADDED:NO_USABLE_DATA': '（没有可用数据）',
+  'NOT_ADDED:NO_PROVENANCE': '（缺来源，未入账）',
+  'NOT_ADDED:TARGET_MISMATCH': '（标的不符，未入账）',
+  'NOT_ADDED:SNAPSHOT_BUDGET_FULL': '（证据预算已满，未入账）',
+}
+
+function formatLoopOutcome(value) {
+  const [tool, rest = ''] = String(value || '').split('=')
+  const [outcome, append = ''] = rest.split(';')
+  const label = LOOP_TOOL_LABELS[tool] || tool
+  if (LOOP_OUTCOME_LABELS[outcome]) {
+    const note = append.startsWith('ADDED:truncated')
+      ? '（正文被截短后入账）'
+      : (LOOP_APPEND_LABELS[append] ?? (append ? `（${append}）` : ''))
+    return `${label}${LOOP_OUTCOME_LABELS[outcome]}${note}`
+  }
+  return outcome.startsWith('FAILED') ? `${label}失败` : `${label} ${outcome}`.trim()
+}
+
+function formatLoopStop(reason) {
+  const text = String(reason || '')
+  if (LOOP_STOP_LABELS[text]) return LOOP_STOP_LABELS[text]
+  if (text.startsWith('REJECTED:')) return `模型的调用未通过校验，未执行（${text.slice('REJECTED:'.length)}）`
+  return text || '已结束'
 }
 
 /** 把持久化 Trace 压平为聊天页和工作台共用的 reasoning 契约。 */
@@ -307,8 +445,10 @@ function summarizeDataStage(actions, observations) {
   const detail = visibleCategories.length > 0
     ? `已完成${visibleCategories.join('、')}${categories.length > visibleCategories.length ? '等' : ''}数据获取。`
     : '已完成所需数据检索与读取。'
+  // 多空辩论论点（[pt-…] 开头）是分析文本，不是取数结果，不参与数据阶段告警。
   const warning = observations
     .map(item => normalizeObservationDetail(item.content))
+    .filter(item => !/^\[pt-[0-9a-f]{8,}\]/.test(item))
     .find(item => /超时|失败|不可用|降级|部分|timeout|failed|unavailable/i.test(item))
 
   return {

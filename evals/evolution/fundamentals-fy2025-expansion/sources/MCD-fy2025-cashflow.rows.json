@@ -1,0 +1,359 @@
+[
+ {
+  "cells": [
+   "Consolidated Statement of Cash Flows - USD ($) $ in Millions",
+   "12 Months Ended"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Dec. 31, 2025",
+   "Dec. 31, 2024",
+   "Dec. 31, 2023"
+  ],
+  "concept": null
+ },
+ {
+  "cells": [
+   "Operating activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Net income",
+   "$ 8,563.0",
+   "$ 8,223.0",
+   "$ 8,469.0"
+  ],
+  "concept": "us-gaap:NetIncomeLoss"
+ },
+ {
+  "cells": [
+   "Charges and credits:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:AdjustmentsNoncashItemsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Depreciation and amortization",
+   "2,199.0",
+   "2,097.0",
+   "1,978.0"
+  ],
+  "concept": "us-gaap:DepreciationAndAmortization"
+ },
+ {
+  "cells": [
+   "Deferred income taxes",
+   "(126.0)",
+   "(574.0)",
+   "(686.0)"
+  ],
+  "concept": "us-gaap:DeferredIncomeTaxExpenseBenefit"
+ },
+ {
+  "cells": [
+   "Share-based compensation expense",
+   "165.0",
+   "172.0",
+   "175.0"
+  ],
+  "concept": "us-gaap:ShareBasedCompensation"
+ },
+ {
+  "cells": [
+   "Net (gain) loss on sale of restaurant and other businesses",
+   "(149.0)",
+   "(37.0)",
+   "(103.0)"
+  ],
+  "concept": "us-gaap:GainLossOnSaleOfBusiness"
+ },
+ {
+  "cells": [
+   "Other",
+   "(207.0)",
+   "3.0",
+   "(113.0)"
+  ],
+  "concept": "us-gaap:OtherNoncashIncomeExpense"
+ },
+ {
+  "cells": [
+   "Changes in working capital items:",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInOperatingCapitalAbstract"
+ },
+ {
+  "cells": [
+   "Accounts receivable",
+   "231.0",
+   "10.0",
+   "(161.0)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInReceivables"
+ },
+ {
+  "cells": [
+   "Inventories, prepaid expenses and other current assets",
+   "(140.0)",
+   "71.0",
+   "17.0"
+  ],
+  "concept": "mcd:IncreaseDecreaseInInventoriesPrepaidExpensesAndOtherCurrentAssets"
+ },
+ {
+  "cells": [
+   "Accounts payable",
+   "100.0",
+   "(10.0)",
+   "50.0"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInAccountsPayable"
+ },
+ {
+  "cells": [
+   "Income taxes",
+   "(239.0)",
+   "(292.0)",
+   "(220.0)"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInAccruedIncomeTaxesPayable"
+ },
+ {
+  "cells": [
+   "Other accrued liabilities",
+   "154.0",
+   "(217.0)",
+   "206.0"
+  ],
+  "concept": "us-gaap:IncreaseDecreaseInOtherAccruedLiabilities"
+ },
+ {
+  "cells": [
+   "Cash provided by operations",
+   "10,551.0",
+   "9,447.0",
+   "9,612.0"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+ },
+ {
+  "cells": [
+   "Investing activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Capital expenditures",
+   "(3,365.0)",
+   "(2,775.0)",
+   "(2,357.0)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment"
+ },
+ {
+  "cells": [
+   "Purchases of restaurant businesses",
+   "(354.0)",
+   "(669.0)",
+   "(441.0)"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireOtherProductiveAssets"
+ },
+ {
+  "cells": [
+   "Payments to Acquire Equity Method Investments",
+   "0.0",
+   "1,837.0",
+   "0.0"
+  ],
+  "concept": "us-gaap:PaymentsToAcquireEquityMethodInvestments"
+ },
+ {
+  "cells": [
+   "Sales of restaurant and other businesses",
+   "346.0",
+   "311.0",
+   "195.0"
+  ],
+  "concept": "us-gaap:ProceedsFromSaleOfOtherProductiveAssets"
+ },
+ {
+  "cells": [
+   "Sales of property",
+   "130.0",
+   "122.0",
+   "95.0"
+  ],
+  "concept": "us-gaap:ProceedsFromSaleOfPropertyPlantAndEquipment"
+ },
+ {
+  "cells": [
+   "Other",
+   "(579.0)",
+   "(498.0)",
+   "(676.0)"
+  ],
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities"
+ },
+ {
+  "cells": [
+   "Cash used for investing activities",
+   "(3,822.0)",
+   "(5,346.0)",
+   "(3,185.0)"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInInvestingActivities"
+ },
+ {
+  "cells": [
+   "Financing activities",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivitiesAbstract"
+ },
+ {
+  "cells": [
+   "Net short-term borrowings",
+   "6.0",
+   "326.0",
+   "213.0"
+  ],
+  "concept": "us-gaap:ProceedsFromRepaymentsOfShortTermDebt"
+ },
+ {
+  "cells": [
+   "Long-term financing issuances",
+   "4,724.0",
+   "2,380.0",
+   "5,221.0"
+  ],
+  "concept": "us-gaap:ProceedsFromIssuanceOfLongTermDebt"
+ },
+ {
+  "cells": [
+   "Long-term financing repayments",
+   "(4,802.0)",
+   "(2,777.0)",
+   "(2,441.0)"
+  ],
+  "concept": "us-gaap:RepaymentsOfLongTermDebt"
+ },
+ {
+  "cells": [
+   "Treasury stock purchases",
+   "(2,056.0)",
+   "(2,824.0)",
+   "(3,054.0)"
+  ],
+  "concept": "us-gaap:PaymentsForRepurchaseOfCommonStock"
+ },
+ {
+  "cells": [
+   "Common stock dividends",
+   "(5,115.0)",
+   "(4,870.0)",
+   "(4,533.0)"
+  ],
+  "concept": "us-gaap:PaymentsOfDividendsCommonStock"
+ },
+ {
+  "cells": [
+   "Proceeds from stock option exercises",
+   "285.0",
+   "328.0",
+   "260.0"
+  ],
+  "concept": "us-gaap:ProceedsFromStockOptionsExercised"
+ },
+ {
+  "cells": [
+   "Other",
+   "(167.0)",
+   "(56.0)",
+   "(40.0)"
+  ],
+  "concept": "us-gaap:ProceedsFromPaymentsForOtherFinancingActivities"
+ },
+ {
+  "cells": [
+   "Cash used for financing activities",
+   "(7,125.0)",
+   "(7,495.0)",
+   "(4,374.0)"
+  ],
+  "concept": "us-gaap:NetCashProvidedByUsedInFinancingActivities"
+ },
+ {
+  "cells": [
+   "Effect of exchange rates on cash and equivalents",
+   "86.0",
+   "(101.0)",
+   "(58.0)"
+  ],
+  "concept": "us-gaap:EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Cash and equivalents increase (decrease)",
+   "(311.0)",
+   "(3,494.0)",
+   "1,996.0"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
+ },
+ {
+  "cells": [
+   "Cash and equivalents at beginning of year",
+   "1,085.0",
+   "4,579.0",
+   "2,584.0"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Cash and equivalents at end of year",
+   "774.0",
+   "1,085.0",
+   "4,579.0"
+  ],
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+ },
+ {
+  "cells": [
+   "Supplemental cash flow disclosures",
+   "",
+   "",
+   ""
+  ],
+  "concept": "us-gaap:SupplementalCashFlowInformationAbstract"
+ },
+ {
+  "cells": [
+   "Interest Paid",
+   "$ 1,555.0",
+   "$ 1,523.0",
+   "$ 1,287.0"
+  ],
+  "concept": "us-gaap:InterestPaidNet"
+ }
+]

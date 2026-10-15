@@ -70,4 +70,16 @@ public interface VectorDocumentRepository extends JpaRepository<VectorDocument, 
             + "  LIMIT 1) "
             + "ORDER BY v.id", nativeQuery = true)
     List<VectorDocument> findLatest10KBusinessParents(@Param("ticker") String ticker);
+
+    /**
+     * 列出知识库已入库的公司：每行是 {ticker, company}，company 为入库时记录的 SEC 公司名。
+     *
+     * <p>只扫父块，行数约为全部切片的十分之一。</p>
+     */
+    @Query(value = "SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(v.metadata, '$.ticker')), "
+            + "JSON_UNQUOTE(JSON_EXTRACT(v.metadata, '$.company')) "
+            + "FROM vector_documents v "
+            + "WHERE JSON_UNQUOTE(JSON_EXTRACT(v.metadata, '$.is_parent')) = 'true' "
+            + "AND JSON_EXTRACT(v.metadata, '$.ticker') IS NOT NULL", nativeQuery = true)
+    List<Object[]> findIndexedCompanies();
 }

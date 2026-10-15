@@ -13,7 +13,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -61,9 +61,10 @@ public class CapabilityGateway {
         Map<String, Object> safeArguments = arguments == null ? Map.of() : Map.copyOf(arguments);
         observer.started(descriptor, context);
         long startNanos = System.nanoTime();
-        CompletableFuture<String> future;
+        // FutureTask 的 cancel(true) 会中断提供方线程；CompletableFuture 的 cancel 不会。
+        FutureTask<String> future;
         try {
-            future = CompletableFuture.supplyAsync(() -> ToolCallContext.withRunExecution(context.runExecution(),
+            future = new FutureTask<>(() -> ToolCallContext.withRunExecution(context.runExecution(),
                     () -> ToolCallContext.withRunDeadline(context.runDeadline(), () -> {
             // 异步线程没有原请求的 ThreadLocal，因此显式补齐 Tool AOP 所需的最小链路上下文。
             ToolCallContext.set(
@@ -84,7 +85,8 @@ public class CapabilityGateway {
             } finally {
                 ToolCallContext.clear();
             }
-        })), agentTaskExecutor);
+        })));
+            agentTaskExecutor.execute(future);
         } catch (java.util.concurrent.RejectedExecutionException error) {
             CapabilityException rejected = new CapabilityException(CapabilityException.Reason.CAPACITY_EXCEEDED,
                     "Capability execution capacity is full: " + capabilityId, error);
@@ -128,6 +130,8 @@ public class CapabilityGateway {
             observer.failed(descriptor, context, safeArguments, capabilityError, elapsedMs(startNanos));
             throw capabilityError;
         } catch (InterruptedException error) {
+            // 调用方被取消时，正在执行的提供方调用也要一起停止。
+            future.cancel(true);
             Thread.currentThread().interrupt();
             CapabilityException capabilityError = new CapabilityException(
                     CapabilityException.Reason.FAILED,

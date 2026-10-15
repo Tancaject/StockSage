@@ -29,8 +29,9 @@ public record SecFinancialsResponse(
         String requestedPeriod, Integer requestedYears, String input, String resolvedCode, String source, String routeReason
 ) {
     public enum Status { SUCCESS, EMPTY, UNSUPPORTED, ERROR }
-    private static final Set<String> METRICS = Set.of("Revenue", "NetIncome", "TotalAssets", "TotalLiabilities",
-            "StockholdersEquity", "OperatingIncome", "EPS", "OperatingCashFlow", "TotalDebt");
+    private static final Set<String> METRICS = Set.of("Revenue", "NetIncome", "ConsolidatedNetIncome", "TotalAssets", "TotalLiabilities",
+            "StockholdersEquity", "OperatingIncome", "EPS", "OperatingCashFlow", "TotalDebt",
+            "CapitalExpenditure", "Cash", "DilutedShares", "NetInterestIncome", "CreditLossProvision");
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT)
             .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
@@ -43,7 +44,7 @@ public record SecFinancialsResponse(
 
     public SecFinancialsResponse {
         if (schemaVersion != 1 || status == null || !"SEC_EDGAR".equals(provider) || !"US".equals(market)
-                || !"annual".equals(period) || !"DATE".equals(timeKind)) {
+                || !Set.of("annual", "quarterly").contains(period) || !"DATE".equals(timeKind)) {
             throw new IllegalArgumentException("Invalid SEC financials contract");
         }
         Instant.parse(fetchedAt);
@@ -52,8 +53,9 @@ public record SecFinancialsResponse(
                 || (requestedYears != null && (requestedYears < 1 || requestedYears > 10))) {
             throw new IllegalArgumentException("Invalid SEC financial report request scope");
         }
-        if ("quarterly".equals(requestedPeriod) && (status == Status.SUCCESS || status == Status.EMPTY)) {
-            throw new IllegalArgumentException("Annual SEC facts cannot satisfy a quarterly request");
+        if (requestedPeriod != null && !requestedPeriod.equals(period)
+                && (status == Status.SUCCESS || status == Status.EMPTY)) {
+            throw new IllegalArgumentException("SEC facts must match the requested annual or quarterly period");
         }
         metrics = Collections.unmodifiableMap(new LinkedHashMap<>(metrics));
         if (!METRICS.containsAll(metrics.keySet()) || metricCount != metrics.size()
@@ -67,11 +69,14 @@ public record SecFinancialsResponse(
             }
             String sourceUrl = "https://data.sec.gov/api/xbrl/companyfacts/CIK" + cik + ".json";
             String latest = null;
+            boolean quarterly = "quarterly".equals(period);
             for (Metric metric : metrics.values()) {
-                if (requestedYears != null && metric.data().stream().map(Fact::end).distinct().count() > requestedYears) {
+                long limit = requestedYears == null ? Long.MAX_VALUE : (long) requestedYears * (quarterly ? 4 : 1);
+                if (metric.data().stream().map(Fact::end).distinct().count() > limit) {
                     throw new IllegalArgumentException("SEC facts exceed the requested number of periods");
                 }
                 for (Fact fact : metric.data()) {
+                    if (fact.quarterly() != quarterly) throw new IllegalArgumentException("SEC fact form does not match period");
                     if (!sourceUrl.equals(fact.sourceUrl())) throw new IllegalArgumentException("SEC fact source does not match company CIK");
                     if (latest == null || fact.end().compareTo(latest) > 0) latest = fact.end();
                 }
@@ -120,7 +125,7 @@ public record SecFinancialsResponse(
     public record Metric(String concept, String unit, List<Fact> data) {
         public Metric {
             if (concept == null || !concept.matches("us-gaap:[A-Za-z][A-Za-z0-9]*")
-                    || unit == null || !Set.of("USD", "USD/shares").contains(unit)) {
+                    || unit == null || !Set.of("USD", "USD/shares", "shares").contains(unit)) {
                 throw new IllegalArgumentException("Invalid SEC concept or unit");
             }
             data = List.copyOf(data);
@@ -136,7 +141,7 @@ public record SecFinancialsResponse(
                        @JsonProperty("source_url") String sourceUrl) {
         public Fact {
             if (value == null || periodType == null || !Set.of("instant", "duration").contains(periodType)
-                    || form == null || !Set.of("10-K", "10-K/A").contains(form) || accn == null) {
+                    || form == null || !Set.of("10-K", "10-K/A", "10-Q", "10-Q/A").contains(form) || accn == null) {
                 throw new IllegalArgumentException("Invalid SEC financial fact");
             }
             LocalDate endDate = LocalDate.parse(end);
@@ -145,8 +150,16 @@ public record SecFinancialsResponse(
                 if (start != null) throw new IllegalArgumentException("Instant SEC fact cannot carry a duration start");
             } else {
                 long days = ChronoUnit.DAYS.between(LocalDate.parse(start), endDate);
-                if (days < 335 || days > 395) throw new IllegalArgumentException("SEC fact is not an annual duration");
+                boolean quarterlyForm = form.startsWith("10-Q");
+                if (quarterlyForm ? days < 80 || days > 100 : days < 335 || days > 395) {
+                    throw new IllegalArgumentException("SEC fact duration does not match its 10-K/10-Q form");
+                }
             }
+        }
+
+        /** 10-Q 单季事实；10-K 为年度事实。 */
+        public boolean quarterly() {
+            return form.startsWith("10-Q");
         }
     }
 }

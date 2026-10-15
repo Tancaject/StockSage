@@ -206,8 +206,8 @@ public class ChatService {
         String resolvedQuery = intentRecognition.decision().resolvedQuery().isBlank()
                 ? request.getMessage()
                 : intentRecognition.decision().resolvedQuery();
-        String parameterClarification = coordinator.planRecognized(intentRecognition, request.getMessage(), 0)
-                .readRequest().clarification();
+        String parameterClarification = coordinator.inspectRequest(intentRecognition, request.getMessage())
+                .clarification();
         boolean needsIntentClarification = intentRecognition.decision().needsClarification()
                 || !parameterClarification.isBlank();
         String canonicalTicker = tickerResolutionService.resolveExplicitTicker(resolvedQuery);
@@ -230,9 +230,15 @@ public class ChatService {
         boolean needsKnowledgeRetrieval = !needsIntentClarification
                 && (intentRecognition.decision().targetRoute() == PlanRoute.DIRECT
                 || intentRecognition.decision().targetRoute() == PlanRoute.FUNDAMENTALS);
+        List<String> fanOutTargets = needsIntentClarification
+                ? List.of() : coordinator.fanOutTargets(intentRecognition, request.getMessage());
         List<Document> retrievedDocs = !needsKnowledgeRetrieval
                 ? List.of()
-                : safeRetrieve(resolvedQuery, canonicalTicker, traceId, retrievalStart);
+                : safeRetrieve(resolvedQuery, canonicalTicker, fanOutTargets, traceId, retrievalStart);
+        Set<String> retrievedTickers = retrievedDocs.stream()
+                .map(doc -> String.valueOf(doc.getMetadata().getOrDefault("ticker", "")).toUpperCase(Locale.ROOT))
+                .filter(ticker -> !ticker.isBlank())
+                .collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
         long retrievalDuration = System.currentTimeMillis() - retrievalStart;
         if (!retrievedDocs.isEmpty()) {
             String sources = buildRagTraceSources(retrievedDocs);
@@ -242,6 +248,10 @@ public class ChatService {
                     .action("Knowledge Retrieval")
                     .actionInput(request.getMessage())
                     .observation(sources)
+                    .attributes(Map.of("kind", "knowledge-retrieval", "requestedTargets", fanOutTargets,
+                            "retrieved", retrievedDocs.stream().map(doc -> Map.of(
+                                    "ticker", String.valueOf(doc.getMetadata().getOrDefault("ticker", "")),
+                                    "filingType", String.valueOf(doc.getMetadata().getOrDefault("filing_type", "")))).toList()))
                     .durationMs(retrievalDuration)
                     .tokenCount(0)
                     .build());
@@ -274,6 +284,17 @@ public class ChatService {
                 .tokenCount(0)
                 .attributes(routeAttributes)
                 .build());
+        if (executionPlan.route() == PlanRoute.MARKET || executionPlan.route() == PlanRoute.FUNDAMENTALS
+                || executionPlan.route() == PlanRoute.NEWS) {
+            // 执行、Trace 与前端读同一份最终计划。
+            traceService.addStep(traceId, AgentStep.builder()
+                    .action("Plan")
+                    .observation("计划来源：" + executionPlan.ordinaryPlan().source()
+                            + (executionPlan.ordinaryPlan().multiTarget()
+                            ? "；对比标的：" + String.join("、", executionPlan.ordinaryPlan().targets()) : ""))
+                    .attributes(executionPlan.ordinaryPlan().attributes())
+                    .build());
+        }
 
         ChatStreamSession stream = new ChatStreamSession(traceId, conversationId, startTime,
                 streamHeartbeatSeconds, objectMapper, traceService, traceEventRelay,
@@ -327,6 +348,7 @@ public class ChatService {
                     ? new ToolPrefetchService.PreparedToolContext(
                             "", parameterClarification.isBlank() ? buildIntentClarificationQuestion(routingDecision) : parameterClarification, null, traceId,
                             !parameterClarification.isBlank() || routingDecision.reasonCodes().contains(Coordinator.MULTI_TARGET_UNSUPPORTED)
+                                    || routingDecision.reasonCodes().contains(Coordinator.MULTI_TARGET_PARAMETERS_DIFFER)
                                     || routingDecision.reasonCodes().contains(Coordinator.TARGET_REWRITE_MISMATCH)
                                     ? "BLOCKED"
                                     : null)
@@ -337,7 +359,8 @@ public class ChatService {
                             conversationId,
                             request.getUserId(),
                             selectedModel,
-                            request.getSubmissionId(), methodRequest
+                            request.getSubmissionId(), methodRequest, retrievedTickers,
+                            request.getEvaluationMode()
                     );
             stream.relayPrepared(preparedToolContext.eventTraceId(),
                     preparedToolContext.submittedTaskId() != null);
@@ -759,9 +782,13 @@ public class ChatService {
      */
     private List<Document> safeRetrieve(String query,
                                         String canonicalTicker,
+                                        List<String> fanOutTargets,
                                         String traceId,
                                         long retrievalStart) {
         try {
+            if (fanOutTargets.size() >= 2) {
+                return ragService.retrieveForTickers(query, fanOutTargets);
+            }
             return canonicalTicker == null || canonicalTicker.isBlank()
                     ? ragService.retrieve(query)
                     : ragService.retrieveForTicker(query, canonicalTicker);
@@ -835,6 +862,9 @@ public class ChatService {
 
     /** 低置信或冲突时直接返回一个可回答的澄清问题，不再调用工具或第二个模型。 */
     private String buildIntentClarificationQuestion(RoutingDecisionMetadata decision) {
+        if (decision != null && decision.reasonCodes().contains(Coordinator.MULTI_TARGET_PARAMETERS_DIFFER)) {
+            return "这次对比的几个标的要求了不同的期间、粒度或年报/季报口径。请为所有标的指定同一种取数要求后再对比。";
+        }
         if (decision != null && decision.reasonCodes().contains(Coordinator.TARGET_REWRITE_MISMATCH)) {
             return "识别结果中的股票与本轮明确指定的标的不一致，已停止检索和取证。请重新发送股票代码及查询要求。";
         }

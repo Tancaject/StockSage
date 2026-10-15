@@ -1,0 +1,53 @@
+Consolidated Statement of Cash Flow for the Years Ended December 31 - USD ($) $ in Millions | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Cash flow from operating activities: |  |  | 
+Profit of consolidated and affiliated companies | $ 8,882 | $ 10,788 | $ 10,332
+Adjustments to reconcile profit to net cash provided by operating activities: |  |  | 
+Depreciation and amortization | 2,262 | 2,153 | 2,144
+Actuarial (gain) loss on pension and postretirement benefits | (294) | (154) | (97)
+Provision (benefit) for deferred income taxes | 465 | (621) | (592)
+(Gain) loss on divestiture | 30 | 164 | 572
+Other | 742 | 564 | 375
+Changes in assets and liabilities, net of acquisitions and divestitures: |  |  | 
+Receivables – trade and other | (2,138) | (160) | (437)
+Inventories | (1,477) | (414) | (364)
+Accounts payable | 1,179 | (282) | (754)
+Accrued expenses | 438 | 191 | 796
+Accrued wages, salaries and employee benefits | 187 | (363) | 486
+Customer advances | 1,933 | 370 | 80
+Other assets – net | (176) | (97) | (95)
+Other liabilities – net | (294) | (104) | 439
+Net cash provided by (used for) operating activities | 11,739 | 12,035 | 12,885
+Cash flow from investing activities: |  |  | 
+Capital expenditures – excluding equipment leased to others | (2,821) | (1,988) | (1,597)
+Expenditures for equipment leased to others | (1,465) | (1,227) | (1,495)
+Proceeds from disposals of leased assets and property, plant and equipment | 708 | 722 | 781
+Additions to finance receivables | (15,329) | (15,409) | (15,161)
+Collections of finance receivables | 13,515 | 13,608 | 14,034
+Proceeds from sale of finance receivables | 71 | 83 | 63
+Investments and acquisitions (net of cash acquired) | (47) | (34) | (75)
+Proceeds from sale of businesses and investments (net of cash sold) | 22 | (61) | (4)
+Proceeds from maturities and sale of securities | 2,494 | 3,155 | 1,891
+Investments in securities | (1,930) | (1,495) | (4,405)
+Other – net | 75 | 193 | 97
+Net cash provided by (used for) investing activities | (4,707) | (2,453) | (5,871)
+Cash flow from financing activities: |  |  | 
+Dividends paid | (2,749) | (2,646) | (2,563)
+Common stock issued, and other stock compensation transactions, net | (16) | 20 | 12
+Payments to purchase common stock | (5,190) | (7,697) | (4,975)
+Excise tax paid on purchases of common stock | (73) | (40) | 0
+Short-term borrowings – net (original maturities three months or less) | 1,106 | (168) | (1,345)
+Other – net | (1) | (1) | 0
+Net cash provided by (used for) financing activities | (3,899) | (9,565) | (6,932)
+Effect of exchange rate changes on cash | (43) | (106) | (110)
+Increase (decrease) in cash, cash equivalents and restricted cash | 3,090 | (89) | (28)
+Cash, cash equivalents and restricted cash at beginning of period | 6,896 | 6,985 | 7,013
+Cash, cash equivalents and restricted cash at end of period | 9,986 | 6,896 | 6,985
+Machinery, Power & Energy |  |  | 
+Cash flow from financing activities: |  |  | 
+Proceeds from debt issued (original maturities greater than three months): | 1,976 | 0 | 0
+Payments on debt (original maturities greater than three months): | (51) | (1,032) | (106)
+Financial Products |  |  | 
+Cash flow from financing activities: |  |  | 
+Proceeds from debt issued (original maturities greater than three months): | 9,129 | 10,283 | 8,257
+Payments on debt (original maturities greater than three months): | $ (8,030) | $ (8,284) | $ (6,212)

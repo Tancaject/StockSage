@@ -1,0 +1,25 @@
+Consolidated Statement of Income - USD ($) $ in Millions | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Revenues and Other Income |  |  | 
+Sales and other operating revenues | $ 184,432 | $ 193,414 | $ 196,913
+Income (loss) from equity affiliates | 3,000 | 4,596 | 5,131
+Other income (loss) | 1,599 | 4,782 | (1,095)
+Total Revenues and Other Income | 189,031 | 202,792 | 200,949
+Costs and Other Deductions |  |  | 
+Purchased crude oil and products | 108,214 | 119,206 | 119,196
+Operating expenses | 28,005 | 27,464 | 24,887
+Selling, general and administrative expenses | 5,126 | 4,834 | 4,141
+Exploration expenses | 1,051 | 995 | 914
+Depreciation, depletion and amortization | 20,132 | 17,282 | 17,326
+Taxes other than on income | 5,230 | 4,716 | 4,220
+Interest and debt expense | 1,217 | 594 | 469
+Other components of net periodic benefit costs | 313 | 195 | 212
+Total Costs and Other Deductions | 169,288 | 175,286 | 171,365
+Income (Loss) Before Income Tax Expense | 19,743 | 27,506 | 29,584
+Income Tax Expense (Benefit) | 7,258 | 9,757 | 8,173
+Net Income (Loss) | 12,485 | 17,749 | 21,411
+Less: Net income (loss) attributable to noncontrolling interests | 186 | 88 | 42
+Net Income (Loss) Attributable to Chevron Corporation | $ 12,299 | $ 17,661 | $ 21,369
+Net Income (Loss) Attributable to Chevron Corporation |  |  | 
+Basic (in dollars per share) | $ 6.65 | $ 9.76 | $ 11.41
+Diluted (in dollars per share) | $ 6.63 | $ 9.72 | $ 11.36

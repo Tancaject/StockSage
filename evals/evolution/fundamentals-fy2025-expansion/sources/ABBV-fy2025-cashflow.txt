@@ -1,0 +1,49 @@
+Consolidated Statements of Cash Flows - USD ($) $ in Millions | 12 Months Ended
+Dec. 31, 2025 | Dec. 31, 2024 | Dec. 31, 2023
+Cash flows from operating activities |  |  | 
+Net earnings | $ 4,233 | $ 4,286 | $ 4,873
+Adjustments to reconcile net earnings to net cash from operating activities: |  |  | 
+Depreciation | 762 | 764 | 752
+Amortization of intangible assets | 7,377 | 7,622 | 7,946
+Deferred income taxes | (492) | (1,449) | (2,889)
+Change in fair value of contingent consideration liabilities | 6,495 | 3,771 | 5,128
+Payments of contingent consideration liabilities | (2,865) | (1,995) | (870)
+Stock-based compensation | 955 | 911 | 747
+Acquired IPR&D and milestones | 5,016 | 2,757 | 778
+Non-cash litigation reserve adjustments, net of cash payments | (933) | 508 | (443)
+Impairment of intangible assets | 847 | 4,476 | 4,229
+Other, net | (3) | (63) | (225)
+Changes in operating assets and liabilities, net of acquisitions: |  |  | 
+Accounts receivable | (1,490) | 207 | 66
+Inventories | (234) | (319) | (417)
+Prepaid expenses and other assets | (827) | 361 | (188)
+Accounts payable and other liabilities | 951 | 177 | 3,840
+Income tax assets and liabilities, net | (762) | (3,208) | (488)
+Cash flows from operating activities | 19,030 | 18,806 | 22,839
+Cash flows from investing activities |  |  | 
+Acquisition of businesses, net of cash acquired | (204) | (17,493) | 0
+Other acquisitions and investments, net of cash acquired | (5,237) | (3,024) | (1,223)
+Acquisitions of property and equipment | (1,214) | (974) | (777)
+Purchases of investment securities | (35) | (73) | (77)
+Sales and maturities of investment securities | 76 | 555 | 55
+Other, net | (29) | 189 | 13
+Cash flows from investing activities | (6,643) | (20,820) | (2,009)
+Cash flows from financing activities |  |  | 
+Net change in commercial paper borrowings with original maturities of three months or less | 499 | 0 | 0
+Proceeds from Short-Term Debt | 4,798 | 5,008 | 0
+Repayments of Other Short-Term Debt | (2,798) | (5,008) | 0
+Proceeds from issuance of long-term debt | 3,994 | 16,963 | 
+Repayments of long-term debt and finance lease obligations | (6,797) | (9,613) | (4,149)
+Debt issuance costs | (23) | (99) | (38)
+Dividends paid | (11,657) | (11,025) | (10,539)
+Purchases of treasury stock | (980) | (1,708) | (1,972)
+Proceeds from the exercise of stock options | 172 | 214 | 180
+Payments of contingent consideration liabilities | 0 | 0 | (752)
+Other, net | 68 | 57 | 48
+Cash flows from financing activities | (12,724) | (5,211) | (17,222)
+Effect of exchange rate changes on cash and equivalents | 42 | (65) | 5
+Net change in cash and equivalents | (295) | (7,290) | 3,613
+Cash and equivalents, beginning of year | 5,524 | 12,814 | 9,201
+Cash and equivalents, end of year | 5,229 | 5,524 | 12,814
+Other supplemental information |  |  | 
+Interest paid, net of portion capitalized | $ 3,002 | $ 2,811 | $ 2,469

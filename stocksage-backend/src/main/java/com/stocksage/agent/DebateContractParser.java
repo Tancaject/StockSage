@@ -89,6 +89,17 @@ public class DebateContractParser {
      * @throws DebateContractException 合同、证据或反驳链校验失败
      */
     public DebateTurn parse(String content, int round, Side side, AnalysisState state) {
+        return parseTurn(content, round, side, state).turn();
+    }
+
+    /**
+     * 解析一轮发言，并返回对反驳引用所做的修复。
+     *
+     * <p>证据引用未通过校验、或反驳引用指向本方/未知/重复 pointId 时，只删除该条引用；删除后没有有效引用的论点整条舍弃。
+     * 保留下来的引用都逐字存在于可用证据、反驳都指向真实存在的对方论点；舍弃后论点数不足下限时仍失败关闭。
+     * 结构、证据和其余校验保持严格。</p>
+     */
+    public ParsedTurn parseTurn(String content, int round, Side side, AnalysisState state) {
         require(round >= 1, ErrorCode.INVALID_ROUND, "round");
         require(side != null, ErrorCode.SIDE_REQUIRED, "side");
         require(state != null, ErrorCode.STATE_REQUIRED, "state");
@@ -113,12 +124,27 @@ public class DebateContractParser {
         Map<String, Side> priorPointSides = priorPointSides(state, round);
 
         List<DebatePoint> points = new ArrayList<>(pointsNode.size());
+        List<String> repairs = new ArrayList<>();
         for (int index = 0; index < pointsNode.size(); index++) {
-            points.add(parsePoint(
-                    pointsNode.get(index), index, round, side,
-                    usableEvidenceIds, evidenceContentById, priorPointSides));
+            DebatePoint point;
+            try {
+                point = parsePoint(
+                        pointsNode.get(index), index, round, side,
+                        usableEvidenceIds, evidenceContentById, priorPointSides, repairs);
+            } catch (DebateContractException error) {
+                // 单个论点缺少必填文本或文本超长时，与无效引用一样只舍弃该论点；剩余论点数不足时下方仍会失败。
+                if (error.code() != ErrorCode.FIELD_REQUIRED && error.code() != ErrorCode.FIELD_TOO_LONG) throw error;
+                repairs.add(error.getMessage() + "，整条舍弃");
+                point = null;
+            }
+            if (point != null) points.add(point);
         }
-        return new DebateTurn(round, side, points);
+        require(points.size() >= minimumPoints, ErrorCode.INVALID_POINT_COUNT, "points");
+        return new ParsedTurn(new DebateTurn(round, side, points), List.copyOf(repairs));
+    }
+
+    /** 一轮发言的解析结果，以及对反驳引用所做的修复说明（只用于 Trace）。 */
+    public record ParsedTurn(DebateTurn turn, List<String> repairs) {
     }
 
     private DebatePoint parsePoint(
@@ -128,7 +154,8 @@ public class DebateContractParser {
             Side side,
             Set<String> usableEvidenceIds,
             Map<String, String> evidenceContentById,
-            Map<String, Side> priorPointSides
+            Map<String, Side> priorPointSides,
+            List<String> repairs
     ) {
         String location = "points[" + index + "]";
         require(node != null && node.isObject(), ErrorCode.INVALID_SCHEMA, location);
@@ -151,9 +178,17 @@ public class DebateContractParser {
 
         List<EvidenceRef> evidenceRefs = parseEvidenceRefs(
                 node.get("evidenceRefs"), location,
-                usableEvidenceIds, evidenceContentById);
+                usableEvidenceIds, evidenceContentById, repairs);
+        if (evidenceRefs.isEmpty()) {
+            repairs.add(location + " 没有通过校验的证据引用，整条舍弃");
+            return null;
+        }
         List<String> respondsToPointIds = parseResponseIds(
-                node.get("respondsToPointIds"), location, round, side, priorPointSides);
+                node.get("respondsToPointIds"), location, round, side, priorPointSides, repairs);
+        if (round > 1 && respondsToPointIds.isEmpty()) {
+            repairs.add(location + " 没有有效的对方论点引用，整条舍弃");
+            return null;
+        }
 
         String pointId = stablePointId(
                 round, side, index, type, claim, horizon, evidenceRefs, respondsToPointIds);
@@ -174,7 +209,8 @@ public class DebateContractParser {
             JsonNode node,
             String pointLocation,
             Set<String> usableEvidenceIds,
-            Map<String, String> evidenceContentById
+            Map<String, String> evidenceContentById,
+            List<String> repairs
     ) {
         require(node != null && node.isArray(), ErrorCode.INVALID_SCHEMA,
                 pointLocation + ".evidenceRefs");
@@ -190,21 +226,23 @@ public class DebateContractParser {
             requireOnlyFields(refNode, EVIDENCE_REF_FIELDS, location);
 
             String evidenceId = requiredText(refNode, "evidenceId", 128, location);
-            String excerpt = requiredText(refNode, "excerpt", MAX_EXCERPT_LENGTH, location);
-            require(usableEvidenceIds.contains(evidenceId),
-                    ErrorCode.EVIDENCE_ID_UNUSABLE, location + ".evidenceId");
-
+            // 摘录超长与摘录不匹配同属单条引用问题，只删除该引用，不让整轮辩论失败。
+            String excerpt = requiredText(refNode, "excerpt", Integer.MAX_VALUE, location);
+            // 只删除未通过校验的那条引用：保留下来的引用必须是可用证据中逐字存在的原文。
             String snapshotContent = evidenceContentById.get(evidenceId);
-            require(snapshotContent != null, ErrorCode.EVIDENCE_SEGMENT_MISSING,
-                    location + ".evidenceId");
             String normalizedExcerpt = normalizeForMatch(excerpt);
-            require(normalizedExcerpt.length() >= MIN_NORMALIZED_EXCERPT_LENGTH,
-                    ErrorCode.EVIDENCE_EXCERPT_TOO_SHORT, location + ".excerpt");
-            require(normalizeForMatch(snapshotContent).contains(normalizedExcerpt),
-                    ErrorCode.EVIDENCE_EXCERPT_MISMATCH, location + ".excerpt");
-
             String pairKey = evidenceId + "\n" + normalizedExcerpt;
-            require(uniquePairs.add(pairKey), ErrorCode.DUPLICATE_EVIDENCE_REF, location);
+            String problem = excerpt.length() > MAX_EXCERPT_LENGTH ? ErrorCode.FIELD_TOO_LONG.name()
+                    : !usableEvidenceIds.contains(evidenceId) ? ErrorCode.EVIDENCE_ID_UNUSABLE.name()
+                    : snapshotContent == null ? ErrorCode.EVIDENCE_SEGMENT_MISSING.name()
+                    : normalizedExcerpt.length() < MIN_NORMALIZED_EXCERPT_LENGTH ? ErrorCode.EVIDENCE_EXCERPT_TOO_SHORT.name()
+                    : !normalizeForMatch(snapshotContent).contains(normalizedExcerpt) ? ErrorCode.EVIDENCE_EXCERPT_MISMATCH.name()
+                    : uniquePairs.contains(pairKey) ? ErrorCode.DUPLICATE_EVIDENCE_REF.name() : null;
+            if (problem != null) {
+                repairs.add(location + " " + problem + "，已删除该证据引用");
+                continue;
+            }
+            uniquePairs.add(pairKey);
             refs.add(new EvidenceRef(evidenceId, excerpt));
         }
         return List.copyOf(refs);
@@ -215,16 +253,20 @@ public class DebateContractParser {
             String pointLocation,
             int round,
             Side side,
-            Map<String, Side> priorPointSides
+            Map<String, Side> priorPointSides,
+            List<String> repairs
     ) {
         String location = pointLocation + ".respondsToPointIds";
-        require(node != null && node.isArray(), ErrorCode.INVALID_SCHEMA, location);
+        // 开局轮没有可回应的论点，部分模型会省略该字段或写 null，按空数组处理；后续轮次为空时整条舍弃。
+        if (node == null || node.isNull()) {
+            return List.of();
+        }
+        require(node.isArray(), ErrorCode.INVALID_SCHEMA, location);
         require(node.size() <= MAX_RESPONSE_REFS, ErrorCode.FIELD_TOO_LONG, location);
         if (round == 1) {
             require(node.size() == 0, ErrorCode.RESPONSES_NOT_ALLOWED, location);
             return List.of();
         }
-        require(node.size() > 0, ErrorCode.RESPONSES_REQUIRED, location);
 
         LinkedHashSet<String> responseIds = new LinkedHashSet<>();
         for (int index = 0; index < node.size(); index++) {
@@ -232,15 +274,17 @@ public class DebateContractParser {
             require(value != null && value.isTextual(), ErrorCode.INVALID_SCHEMA,
                     location + "[" + index + "]");
             String pointId = value.textValue().strip();
-            require(!pointId.isBlank() && pointId.length() <= 128,
-                    ErrorCode.INVALID_RESPONSE_POINT, location + "[" + index + "]");
             Side referencedSide = priorPointSides.get(pointId);
-            require(referencedSide != null, ErrorCode.RESPONSE_POINT_UNKNOWN,
-                    location + "[" + index + "]");
-            require(referencedSide != side, ErrorCode.RESPONSE_POINT_NOT_OPPONENT,
-                    location + "[" + index + "]");
-            require(responseIds.add(pointId), ErrorCode.DUPLICATE_RESPONSE_POINT,
-                    location + "[" + index + "]");
+            // 只删除无效引用本身：保留下来的引用必须指向真实存在的对方论点。
+            String problem = pointId.isBlank() || pointId.length() > 128 ? ErrorCode.INVALID_RESPONSE_POINT.name()
+                    : referencedSide == null ? ErrorCode.RESPONSE_POINT_UNKNOWN.name()
+                    : referencedSide == side ? ErrorCode.RESPONSE_POINT_NOT_OPPONENT.name()
+                    : responseIds.contains(pointId) ? ErrorCode.DUPLICATE_RESPONSE_POINT.name() : null;
+            if (problem != null) {
+                repairs.add(location + "[" + index + "] " + problem + "，已删除该引用");
+                continue;
+            }
+            responseIds.add(pointId);
         }
         return List.copyOf(responseIds);
     }
