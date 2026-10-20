@@ -326,11 +326,8 @@ public class ResearchDebateService {
             chatStreamEmitter.emit(traceId, conversationId, "observation",
                     "从报告断点恢复：正在执行既定的一次重新综合并重新验收。");
         }
-        Mono<SynthesisResult> synthesis = executionGuard == null
-                ? researchManager.synthesizeStreamingResult(
-                        workingState, verdict, traceId, conversationId, chatStreamEmitter)
-                : researchManager.synthesizeStreamingResult(
-                        workingState, verdict, traceId, conversationId, chatStreamEmitter, guard);
+        Mono<SynthesisResult> synthesis = researchManager.synthesizeStreamingResult(
+                workingState, verdict, traceId, conversationId, chatStreamEmitter, guard);
         SynthesisResult synthesisResult = awaitModelStage(
                 synthesis,
                 "manager-synthesis",
@@ -368,11 +365,8 @@ public class ResearchDebateService {
             checkpointHarnessState(harnessCheckpointer, workingState);
             chatStreamEmitter.emit(traceId, conversationId, "observation",
                     "报告结构或证据引用未通过校验，正在重新综合一次。");
-            Mono<SynthesisResult> repair = executionGuard == null
-                    ? researchManager.synthesizeStreamingResult(
-                            workingState, verdict, traceId, conversationId, chatStreamEmitter)
-                    : researchManager.synthesizeStreamingResult(
-                            workingState, verdict, traceId, conversationId, chatStreamEmitter, guard);
+            Mono<SynthesisResult> repair = researchManager.synthesizeStreamingResult(
+                    workingState, verdict, traceId, conversationId, chatStreamEmitter, guard);
             synthesisResult = awaitModelStage(
                     repair,
                     "manager-repair",
@@ -1117,11 +1111,6 @@ public class ResearchDebateService {
                 .append(" | respondsTo=").append(point.respondsToPointIds())
                 .append('\n'));
         return builder.toString().strip();
-    }
-
-    /** @return 文本非空且非纯空白 */
-    private boolean isPresent(String value) {
-        return value != null && !value.isBlank();
     }
 
     /**

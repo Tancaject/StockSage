@@ -11,6 +11,8 @@ from pydantic import (
     field_validator, model_validator,
 )
 
+from app.contract_dates import business_date
+
 SearchType = Literal["web", "news"]
 SearchDepth = Literal["basic", "advanced"]
 TimeLimit = Literal["d", "w", "m", "y"]
@@ -62,13 +64,7 @@ class SearchResult(BaseModel):
     @field_validator("publishedDate", mode="before")
     @classmethod
     def require_date(cls, value):
-        if value is None or type(value) is Date:
-            return value
-        if isinstance(value, str):
-            parsed = Date.fromisoformat(value)
-            if parsed.isoformat() == value:
-                return parsed
-        raise ValueError("Search publication dates must be YYYY-MM-DD")
+        return business_date(value, "Search publication dates must be YYYY-MM-DD")
 
     @model_validator(mode="after")
     def validate_publication(self):

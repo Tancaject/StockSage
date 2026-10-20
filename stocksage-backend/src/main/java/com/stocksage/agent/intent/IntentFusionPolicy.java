@@ -2,7 +2,6 @@ package com.stocksage.agent.intent;
 
 import com.stocksage.agent.PlanRoute;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
@@ -138,10 +137,6 @@ public final class IntentFusionPolicy {
                 representative.fineIntent(), representative.intentGroup(), executableRoute, topScore,
                 time, depth, entities, resolvedQuery, sourceScores, needsClarification, reasons
         );
-    }
-
-    public IntentDecision fuse(IntentRecognitionRequest request, IntentSignal... signals) {
-        return fuse(request, signals == null ? List.of() : java.util.Arrays.asList(signals));
     }
 
     static EnumMap<IntentSignalSource, IntentSignal> bestBySource(List<IntentSignal> signals) {

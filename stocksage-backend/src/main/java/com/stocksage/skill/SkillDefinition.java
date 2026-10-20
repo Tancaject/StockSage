@@ -54,7 +54,7 @@ public record SkillDefinition(
      * Skill 级执行预算。
      *
      * @param allowedRiskLevels 该流程允许引用的能力风险等级
-     * @param maxCapabilityCalls 单次执行的最大能力调用数，包含 fallback
+     * @param maxCapabilityCalls 单次执行的最大能力调用数
      * @param maxDurationSeconds 单次 Skill 的总截止时间
      */
     public record SkillPolicy(
@@ -72,14 +72,12 @@ public record SkillDefinition(
      *
      * @param type 步骤类别
      * @param capability 主能力 ID，仅 CAPABILITY 步骤使用
-     * @param required 主能力及其 fallback 都失败时是否终止 Skill
-     * @param fallbackCapability 主能力不可用时的本地降级能力
+     * @param required 主能力失败时是否终止 Skill
      */
     public record SkillStep(
             StepType type,
             String capability,
-            boolean required,
-            String fallbackCapability
+            boolean required
     ) {
     }
 

@@ -63,8 +63,10 @@ public record ReadRequest(String period, String bar, String reportPeriod, int re
                     || (reportPeriod.equals("annual") && count > 10)) {
                 return invalid("财报查询参数不支持。请指定年度或季度，以及最多 10 年或 40 个季度。");
             }
-            if (text.matches("(?s).*20[0-9]{2}[-/年].*") || text.contains("去年") || text.contains("上周") || text.contains("上个月")
-                    || "true".equals(values.get("unsupportedTimeRange"))) {
+            boolean yearLevelReport = fiscalYearReport(route, text);
+            if (!yearLevelReport && (text.matches("(?s).*20[0-9]{2}[-/年].*") || text.contains("去年")
+                    || "true".equals(values.get("unsupportedTimeRange")))
+                    || text.contains("上周") || text.contains("上个月")) {
                 return invalid("当前取数支持相对最近范围，尚不能保证指定历史起止区间。请改用“最近一周”等范围。");
             }
             boolean barsOnly = route == PlanRoute.MARKET
@@ -74,6 +76,16 @@ public record ReadRequest(String period, String bar, String reportPeriod, int re
         } catch (IllegalArgumentException error) {
             return invalid("无法解析本次取数的周期或数量，请明确范围和粒度，例如“最近一周的小时线”。");
         }
+    }
+
+    /**
+     * 财报问题里的年份（2025年、FY2025、去年）指报告期，年报取数默认覆盖最近 5 个财年，不按“指定历史区间”拦截；
+     * 精确到月或日的日期仍拦截。
+     */
+    private static boolean fiscalYearReport(PlanRoute route, String text) {
+        return route == PlanRoute.FUNDAMENTALS
+                && !text.matches("(?s).*20[0-9]{2}\\s*[-/.]\\s*[0-9]{1,2}.*")
+                && !text.matches("(?s).*20[0-9]{2}\\s*年\\s*[0-9一二三四五六七八九十]{1,3}\\s*月.*");
     }
 
     /**

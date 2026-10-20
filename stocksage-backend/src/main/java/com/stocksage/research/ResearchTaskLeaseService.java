@@ -27,7 +27,7 @@ public class ResearchTaskLeaseService {
     private static final String KEY_PREFIX = "lock:research-task:";
     /** 生产心跳间隔上限。 */
     private static final long MAX_HEARTBEAT_INTERVAL_MILLIS = Duration.ofSeconds(60).toMillis();
-    /** 极短测试租约的最小心跳间隔。 */
+    /** 极短租约的最小心跳间隔。 */
     private static final long MIN_HEARTBEAT_INTERVAL_MILLIS = 100;
     /** 仅在键不存在时写入 owner token 和 TTL，并返回当前 owner。 */
     private static final DefaultRedisScript<String> ACQUIRE_SCRIPT = new DefaultRedisScript<>("""
@@ -169,7 +169,7 @@ public class ResearchTaskLeaseService {
     /**
      * 返回明显短于 TTL 的安全续约节奏。
      *
-     * <p>生产长租约保持不超过 60 秒；演示和测试短租约按 TTL 三分之一续约。</p>
+     * <p>生产长租约保持不超过 60 秒；演示用短租约按 TTL 三分之一续约。</p>
      *
      * @return 建议心跳间隔
      */

@@ -67,36 +67,28 @@ public class DocIndexRepository {
     }
 
     /**
-     * 根据来源路径或逻辑 sourceId 查询当前索引快照。
+     * 查找已过期且仍有切片的临时知识来源，供维护任务清理向量和元数据。
      *
-     * @param filePath 文件路径或逻辑来源 ID，也是表主键
-     * @return 当前索引快照；来源尚未入库时为空
-     */
-    public Optional<DocIndexEntry> findByFilePath(String filePath) {
-        List<DocIndexEntry> rows = jdbcTemplate.query(
-                "SELECT file_path, file_hash, chunk_ids, source_type, ingested_at, expires_at FROM doc_index WHERE file_path = ?",
-                rowMapper,
-                filePath
-        );
-        return rows.stream().findFirst();
-    }
-
-    /**
-     * 查找已过期的临时知识来源，供维护任务清理向量和元数据。
+     * <p>切片已清空的过期标记由 reconcileVectors 重试向量删除后移除，这里不再逐行加锁。</p>
      *
      * @param now 过期判断基准时间，不能为空
-     * @return expiresAt 不晚于基准时间的索引快照
+     * @return expiresAt 不晚于基准时间且 chunkIds 非空的索引快照
      */
     public List<DocIndexEntry> findExpired(LocalDateTime now) {
         return jdbcTemplate.query(
                 """
                         SELECT file_path, file_hash, chunk_ids, source_type, ingested_at, expires_at
                         FROM doc_index
-                        WHERE expires_at IS NOT NULL AND expires_at <= ?
+                        WHERE expires_at IS NOT NULL AND expires_at <= ? AND JSON_LENGTH(chunk_ids) > 0
                         """,
                 rowMapper,
                 Timestamp.valueOf(now)
         );
+    }
+
+    /** 删除来源索引行；调用方必须已持有该行锁且确认其向量和切片都已清理。 */
+    public void deleteByFilePath(String sourceId) {
+        jdbcTemplate.update("DELETE FROM doc_index WHERE file_path = ?", sourceId);
     }
 
     /**
@@ -126,15 +118,6 @@ public class DocIndexRepository {
                 Timestamp.valueOf(entry.ingestedAt()),
                 entry.expiresAt() == null ? null : Timestamp.valueOf(entry.expiresAt())
         );
-    }
-
-    /**
-     * 删除来源索引记录；调用方负责先清理对应切片。
-     *
-     * @param filePath 要删除的文件路径或逻辑来源 ID
-     */
-    public void deleteByFilePath(String filePath) {
-        jdbcTemplate.update("DELETE FROM doc_index WHERE file_path = ?", filePath);
     }
 
     /**

@@ -52,3 +52,6 @@ progress.md
 feature_list.json
 docs/archive/local/
 /target/
+
+# 本地知识库 PDF（体积大且含版权内容），只保留在本机，ingest.sh 仍从这里读取
+stocksage-backend/docs/reports/*.pdf

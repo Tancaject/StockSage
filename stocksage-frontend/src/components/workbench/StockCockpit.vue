@@ -133,6 +133,7 @@
 import { ref, computed } from 'vue'
 import { DataAnalysis, Document, Refresh, Star, StarFilled, Tickets, TrendCharts, WarningFilled } from '@element-plus/icons-vue'
 import KLineChart from '../KLineChart.vue'
+import { formatDate } from '../../lib/workbench.js'
 import PanelSkeleton from '../common/PanelSkeleton.vue'
 import PanelEmpty from '../common/PanelEmpty.vue'
 
@@ -169,13 +170,6 @@ function submitEvent() {
     eventText: eventText.value,
     eventSource: eventSource.value || undefined,
   })
-}
-
-function formatDate(value) {
-  if (!value) return '--'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return String(value)
-  return date.toLocaleString()
 }
 
 function formatPrice(val) {

@@ -1,5 +1,6 @@
 package com.stocksage.agent;
 
+import com.stocksage.util.Hashing;
 import com.stocksage.model.dto.ModelInvocationContext;
 import com.stocksage.research.ModelInvocationStore;
 import com.stocksage.exception.ResearchBudgetExceededException;
@@ -17,8 +18,6 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -114,12 +113,7 @@ public final class ModelInvocationAdvisor implements CallAdvisor, StreamAdvisor 
         // SDK defaults and provider message framing are resolved after this advisor.
         values.put("optionsScope", "CHAT_CLIENT_REQUEST_OPTIONS");
         values.put("totalOutputTokenCeilingStatus", "UNVERIFIED");
-        try {
-            values.put("promptSha256", HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
-                    .digest(text.toString().getBytes(StandardCharsets.UTF_8))));
-        } catch (java.security.NoSuchAlgorithmException impossible) {
-            throw new IllegalStateException(impossible);
-        }
+        values.put("promptSha256", Hashing.sha256Hex(text.toString()));
         var options = request.prompt().getOptions();
         if (options != null) {
             if (options.getModel() != null) values.put("requestedModel", options.getModel());

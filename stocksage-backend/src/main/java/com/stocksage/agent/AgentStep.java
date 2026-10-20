@@ -17,7 +17,7 @@ import java.util.Map;
  *   - observation:  工具返回的结果
  *
  * <p>{@link com.stocksage.trace.TraceService} 为步骤编号并存入 {@code agent_traces.steps} JSON 数组，
- * Phoenix 可选地镜像同一信息，前端再渲染为执行时间线。该 DTO 只保存有界摘要；
+ * 前端再渲染为执行时间线。该 DTO 只保存有界摘要；
  * 调用方不应把完整 prompt、敏感参数或超大工具结果放入其中。</p>
  */
 @Data

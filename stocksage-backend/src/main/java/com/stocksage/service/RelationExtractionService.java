@@ -96,16 +96,6 @@ public class RelationExtractionService {
     }
 
     /**
-     * 为 ticker 抽取并刷新关系图谱，不回调进度。
-     *
-     * @param ticker 美股 ticker
-     * @return 抽取摘要或缺少 10-K 的错误载荷
-     */
-    public Map<String, Object> extractForTicker(String ticker) {
-        return extractForTicker(ticker, null);
-    }
-
-    /**
      * 为指定 ticker 抽取并刷新公司关系图谱。
      *
      * @param ticker 美股 ticker

@@ -27,7 +27,7 @@ public enum DataRequirement {
     FILING_TEXT(Pattern.compile("风险因素|risk factor|管理层讨论|md&a|(?<![a-z0-9])10-?[kq](?![a-z0-9])|披露|disclos"),
             Set.of()),
     NEWS(Pattern.compile("新闻|消息|事件|最新动态|headline|(?<![a-z])news(?![a-z])"),
-            Set.of("searchNews", "webSearch", "local.news.searchNews", "local.news.webSearch", "mcp.news.search"));
+            Set.of("searchNews", "webSearch", "local.news.searchNews", "local.news.webSearch"));
 
     private final Pattern mention;
     private final Set<String> tools;

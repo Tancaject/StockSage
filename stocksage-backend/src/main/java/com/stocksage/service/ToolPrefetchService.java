@@ -11,7 +11,6 @@ import com.stocksage.research.ResearchSubmissionService;
 import com.stocksage.evidence.adapter.EvidenceEnvelopeMapper;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.Coordinator;
 import com.stocksage.agent.ModelCompletion;
@@ -133,37 +132,9 @@ public class ToolPrefetchService {
      * @param conversationId 会话 ID，可用于回看标的上下文
      * @param userId 当前用户 ID，用于配额与任务隔离
      * @param selectedModel 当前选定模型，供同步降级流水线使用
-     * @return 待注入的上下文、可选直答以及可能创建的任务信息
-     */
-    public PreparedToolContext prefetch(
-            ExecutionPlan executionPlan,
-            String userQuery,
-            String traceId,
-            Long conversationId,
-            String userId,
-            Coordinator.SelectedModel selectedModel
-    ) {
-        return prefetch(executionPlan, userQuery, traceId, conversationId, userId, selectedModel, null);
-    }
-
-    public PreparedToolContext prefetch(
-            ExecutionPlan executionPlan, String userQuery, String traceId, Long conversationId,
-            String userId, Coordinator.SelectedModel selectedModel, String submissionId
-    ) {
-        return prefetch(executionPlan, userQuery, traceId, conversationId, userId, selectedModel, submissionId, null);
-    }
-
-    public PreparedToolContext prefetch(
-            ExecutionPlan executionPlan, String userQuery, String traceId, Long conversationId,
-            String userId, Coordinator.SelectedModel selectedModel, String submissionId, FundamentalsRuntimeIdentity.Request methodRequest
-    ) {
-        return prefetch(executionPlan, userQuery, traceId, conversationId, userId, selectedModel, submissionId,
-                methodRequest, Set.of(), null);
-    }
-
-    /**
      * @param retrievedTickers 本轮知识库实际召回了正文的标的，用于判断"财报原文"需求是否满足
      * @param evaluationMode 评测专用的请求级模式（已由控制器按管理员令牌校验），普通请求为 null
+     * @return 待注入的上下文、可选直答以及可能创建的任务信息
      */
     public PreparedToolContext prefetch(
             ExecutionPlan executionPlan, String userQuery, String traceId, Long conversationId,
@@ -318,7 +289,7 @@ public class ToolPrefetchService {
             var observed = methodObservation.get();
             evidenceAttributes.put("analystUsage", observed == null ? Map.of("usageSource", "NO_DATA") : observed.responseMetadata());
             if (observed != null) {
-                // 完整分析师输入只写入本地 MySQL Trace（Phoenix 不导出该步骤属性），失败池据此构建可回放的回归题。
+                // 完整分析师输入只写入本地 MySQL Trace，失败池据此构建可回放的回归题。
                 evidenceAttributes.put("analystQuery", userQuery);
                 evidenceAttributes.put("analystContext", analystContext);
                 evidenceAttributes.put("analystInvocation", Map.of("kind", "model-invocation", "scope", "fundamentals-analysis",
@@ -817,14 +788,8 @@ public class ToolPrefetchService {
                     sourceEvidenceContext, analystSection, List.of());
         }
         public PreparedToolContext(String context, String directAnswer, Long submittedTaskId,
-                                   String eventTraceId, String taskOutcome, List<String> citationIds,
-                                   String sourceEvidenceContext) {
-            this(context, directAnswer, submittedTaskId, eventTraceId, taskOutcome, citationIds,
-                    sourceEvidenceContext, null);
-        }
-        public PreparedToolContext(String context, String directAnswer, Long submittedTaskId,
                                    String eventTraceId, String taskOutcome, List<String> citationIds) {
-            this(context, directAnswer, submittedTaskId, eventTraceId, taskOutcome, citationIds, "");
+            this(context, directAnswer, submittedTaskId, eventTraceId, taskOutcome, citationIds, "", null);
         }
 
         public PreparedToolContext(String context, String directAnswer, Long submittedTaskId,
@@ -850,14 +815,6 @@ public class ToolPrefetchService {
             boolean everyTargetCited = requiredCitationGroups.stream()
                     .allMatch(group -> group.stream().anyMatch(citedIds::contains));
             return cited && everyTargetCited ? taskOutcome : "DEGRADED";
-        }
-        public PreparedToolContext(
-                String context,
-                String directAnswer,
-                Long submittedTaskId,
-                String eventTraceId
-        ) {
-            this(context, directAnswer, submittedTaskId, eventTraceId, null);
         }
 
         /** 空预取结果。 */

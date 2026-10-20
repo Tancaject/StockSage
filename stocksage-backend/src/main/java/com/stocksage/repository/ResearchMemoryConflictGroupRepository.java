@@ -23,12 +23,6 @@ import java.util.Optional;
 public interface ResearchMemoryConflictGroupRepository
         extends JpaRepository<ResearchMemoryConflictGroup, Long> {
 
-    /** 按租户和冲突键读取组级真相，不获取写锁。 */
-    Optional<ResearchMemoryConflictGroup> findByUserIdAndConflictKey(
-            String userId,
-            String conflictKey
-    );
-
     /** 批量读取向量候选涉及的组级真相，避免检索路径逐组查询。 */
     List<ResearchMemoryConflictGroup> findByUserIdAndConflictKeyIn(
             String userId,

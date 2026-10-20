@@ -11,10 +11,10 @@ from app.research_budget import check_budget
 
 from fastapi import APIRouter, Query
 from app.sec_financials import SecFinancialsResponse, normalize_sec_financials
-from app.services.edgar_service import EdgarService
+from app.services.edgar_service import edgar_service
 
 router = APIRouter()
-edgar = EdgarService()
+edgar = edgar_service
 
 
 @router.get("/filings")

@@ -39,3 +39,9 @@ def calculate_technical_indicators(
         result["MACD"] = round(macd.iloc[-1], 4)
 
     return {name: float(value) if isfinite(value) else None for name, value in result.items()}
+
+
+def kline_technical_indicators(rows: list[dict], indicators: Collection[str]) -> dict[str, Any]:
+    """从 K 线记录的 close 字段计算指标；非数值收盘价按缺失处理。"""
+    close = pd.to_numeric(pd.DataFrame(rows)["close"], errors="coerce")
+    return calculate_technical_indicators(close, indicators)

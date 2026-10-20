@@ -1,17 +1,14 @@
 package com.stocksage.config;
 
+import com.stocksage.util.Hashing;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Currency;
-import java.util.HexFormat;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -107,12 +104,7 @@ public record ModelPricingProperties(String providerFingerprint, String version,
         if (provider == null || !provider.isObject()
                 || !"API_CONSTRUCTION".equals(provider.path("scope").asText())
                 || "UNKNOWN".equals(provider.path("status").asText())) return null;
-        try {
-            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
-                    .digest(canonical(provider).toString().getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException impossible) {
-            throw new IllegalStateException("JVM does not support SHA-256", impossible);
-        }
+        return Hashing.sha256Hex(canonical(provider).toString());
     }
 
     private static JsonNode canonical(JsonNode value) {

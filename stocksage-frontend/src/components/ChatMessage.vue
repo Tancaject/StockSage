@@ -187,6 +187,7 @@ import { ArrowRight, DocumentCopy, EditPen, RefreshRight, TrendCharts, UserFille
 import { getTrace, submitAnswerFeedback } from '../api/chat.js'
 import { markdownToPlainText, normalizeMarkdownEmphasis } from '../lib/markdown.js'
 import {
+  TASK_STAGE_LABELS,
   buildAssistantEvidenceSummary,
   buildResearchTimeline,
   formatTaskOutcome,
@@ -256,15 +257,7 @@ const taskStatusLabel = computed(() => ({
   FAILED: '失败',
   CANCELLED: '已取消',
 }[String(task.value?.status || '').toUpperCase()] || '处理中'))
-const taskStageLabel = computed(() => ({
-  CREATED: '已创建',
-  DATA_PREFETCH: '读取研究数据',
-  AGENT_DEBATE: '多空辩论',
-  REPORT_SYNTHESIS: '综合研究结论',
-  REPORT_PERSIST: '保存报告',
-  COMPLETE: '完成',
-  FAILED: '失败',
-}[String(task.value?.stage || '').toUpperCase()] || String(task.value?.stage || '准备中').replaceAll('_', ' ')))
+const taskStageLabel = computed(() => (TASK_STAGE_LABELS[String(task.value?.stage || '').toUpperCase()] || String(task.value?.stage || '准备中').replaceAll('_', ' ')))
 const taskTone = computed(() => {
   const status = String(task.value?.status || '').toUpperCase()
   if (status === 'FAILED') return 'danger'

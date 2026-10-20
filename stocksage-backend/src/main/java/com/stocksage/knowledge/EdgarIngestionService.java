@@ -6,7 +6,6 @@ import com.stocksage.exception.ResearchBudgetExceededException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.client.DataServiceClient;
-import com.stocksage.rag.ContextualEnricher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
@@ -55,8 +54,6 @@ public class EdgarIngestionService {
     private final KnowledgeIngestionService ingestionService;
     /** 解析 data-service 响应 JSON。 */
     private final ObjectMapper objectMapper;
-    /** 可选为父块或子块生成上下文 gist。 */
-    private final ContextualEnricher contextualEnricher;
 
     /** 可配置父切片大小。 */
     @Value("${stocksage.rag.edgar.parent-chunk-size:3000}")
@@ -78,10 +75,6 @@ public class EdgarIngestionService {
     @Value("${stocksage.rag.edgar.chunking-version:edgar-v4-contextual-gist-child-vector}")
     private String chunkingVersion = DEFAULT_CHUNKING_VERSION;
 
-    /** contextual gist 由每个 parent 共享还是每个 child 单独生成。 */
-    @Value("${stocksage.rag.contextual.granularity:child}")
-    private String contextualGranularity = "child";
-
     /** Current ingestion defaults; historical documents retain their own provenance. */
     public Map<String, Object> runtimeConfiguration() {
         Map<String, Object> settings = new LinkedHashMap<>();
@@ -93,8 +86,6 @@ public class EdgarIngestionService {
         settings.put("childOverlap", Math.max(0, Math.min(childChunkOverlap, Math.max(1, childChunkSize) / 2)));
         settings.put("smallTailRatio", SMALL_TAIL_RATIO);
         settings.put("maxMergedChunkRatio", MAX_MERGED_CHUNK_RATIO);
-        settings.put("contextualGranularity", "parent".equalsIgnoreCase(contextualGranularity) ? "parent" : "child");
-        settings.put("contextual", contextualEnricher.runtimeConfiguration());
         return Map.copyOf(settings);
     }
 
@@ -238,24 +229,8 @@ public class EdgarIngestionService {
                 // 2. 生成子级切片（精细检索用）
                 List<String> childChunks = splitIntoChunks(parentText, childChunkSize, childChunkOverlap);
 
-                // Contextual Retrieval：parent 粒度时整个父块只生成一次 gist，由其子块共享
-                String parentGist = null;
-                boolean parentGranularity = "parent".equalsIgnoreCase(contextualGranularity);
-                if (contextualEnricher.isEnabled() && parentGranularity) {
-                    // 调用 ContextualEnricher 为整个父块生成一次 gist，供其全部子块复用。
-                    parentGist = contextualEnricher.generateGist(
-                            parentText, parentText, "parent",
-                            ticker, companyName, filingType, filingDate, sectionName);
-                }
-
                 for (int j = 0; j < childChunks.size(); j++) {
                     ToolCallContext.checkRunDeadline();
-                    String contextualGist = parentGist;
-                    if (contextualEnricher.isEnabled() && !parentGranularity) {
-                        contextualGist = contextualEnricher.generateGist(
-                                parentText, childChunks.get(j), "child",
-                                ticker, companyName, filingType, filingDate, sectionName);
-                    }
 
                     Map<String, Object> childMeta = new LinkedHashMap<>();
                     childMeta.put("ticker", ticker.toUpperCase());
@@ -271,13 +246,7 @@ public class EdgarIngestionService {
                     childMeta.put("chunk_size", childChunkSize);
                     childMeta.put("chunk_overlap", childChunkOverlap);
                     childMeta.put("chunking_version", normalizeChunkingVersion());
-                    childMeta.put("embedding_context",
-                            contextualGist == null || contextualGist.isBlank()
-                                    ? "company_filing_section"
-                                    : "company_filing_section_context");
-                    if (contextualGist != null && !contextualGist.isBlank()) {
-                        childMeta.put("contextual_gist", contextualGist);
-                    }
+                    childMeta.put("embedding_context", "company_filing_section");
 
                     allChunks.add(new Document(
                             buildChildEmbeddingText(
@@ -287,8 +256,7 @@ public class EdgarIngestionService {
                                     filingType,
                                     filingDate,
                                     accession,
-                                    sectionName,
-                                    contextualGist
+                                    sectionName
                             ),
                             childMeta
                     ));
@@ -350,8 +318,8 @@ public class EdgarIngestionService {
                 "maxMergedChunkRatio=" + MAX_MERGED_CHUNK_RATIO,
                 "htmlParser=structured-markdown-like",
                 "childEmbeddingText=company-filing-section-prefixed",
-                "contextual=" + (contextualEnricher.isEnabled()
-                        ? contextualGranularity.toLowerCase() : "off"),
+                // 历史契约字段：情境 gist 已移除，保留关闭态取值以免已入库财报全部重新嵌入。
+                "contextual=off",
                 "parentIndex=mysql",
                 "childIndex=milvus"
         ));
@@ -368,10 +336,9 @@ public class EdgarIngestionService {
      * 为子级切片构造带公司、公告和章节信息的 embedding 文本。
      *
      * <p>这些前缀能让短切片在向量空间中保留公司身份和财报上下文，降低跨公司误召回。
-     * 启用 Contextual Retrieval 时再追加一行 LLM 情境说明（Context:），
      * 向量与 Lucene BM25 两条检索腿共用该文本。</p>
      *
-     * @return 带公司、公告、章节和可选 gist 前缀的嵌入正文
+     * @return 带公司、公告和章节前缀的嵌入正文
      */
     private String buildChildEmbeddingText(
             String childText,
@@ -380,8 +347,7 @@ public class EdgarIngestionService {
             String filingType,
             String filingDate,
             String accession,
-            String sectionName,
-            String contextualGist) {
+            String sectionName) {
         StringBuilder builder = new StringBuilder();
         builder.append("Company: ")
                 .append(companyName == null || companyName.isBlank() ? ticker.toUpperCase() : companyName)
@@ -394,9 +360,6 @@ public class EdgarIngestionService {
             builder.append("Accession: ").append(accession).append("\n");
         }
         builder.append("Section: ").append(sectionName).append("\n");
-        if (contextualGist != null && !contextualGist.isBlank()) {
-            builder.append("Context: ").append(contextualGist.trim()).append("\n");
-        }
         builder.append("\n");
         builder.append(childText == null ? "" : childText.trim());
         return builder.toString().trim();

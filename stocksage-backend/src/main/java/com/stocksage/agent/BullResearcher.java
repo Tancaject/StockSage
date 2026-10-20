@@ -50,10 +50,7 @@ public class BullResearcher {
      * @return 本轮看多论据的流式 token
      */
     public Flux<String> argue(AnalysisState state, int round) {
-        String prompt = round <= OPENING_ROUND
-                ? renderOpeningPrompt(state)
-                : renderRebuttalPrompt(state, round);
-        var request = chatClient.prompt().user(prompt);
+        var request = chatClient.prompt().user(renderPrompt(state, round, Side.BULL));
         if (state.getModelInvocationContext() != null) {
             request.advisors(a -> a.param(ModelInvocationAdvisor.CONTEXT_KEY, state.getModelInvocationContext()));
         }
@@ -61,47 +58,52 @@ public class BullResearcher {
     }
 
     /**
-     * 开局陈述模板：第 1 轮还没有对方观点可反驳，要求模型摆出最强的看多基线。
+     * 按发言方渲染本轮提示词。多空双方模板只在角色、关注点、示例结论和对方标签上不同，共用同一结构。
+     *
+     * <p>Round 1 是开局陈述：还没有对方观点可反驳，要求模型摆出本方最强基线。
+     * Round 2+ 是反驳模板：强制模型先逐条回应对方最强观点再展开新论据，杜绝平行独白。</p>
      */
-    private String renderOpeningPrompt(AnalysisState state) {
-        return ResearchPrompts.evidenceBlock(state) + """
-                %s
-                辩论轮次：1（开局陈述）
+    static String renderPrompt(AnalysisState state, int round, Side side) {
+        boolean bull = side == Side.BULL;
+        String role = bull
+                ? ResearchPrompts.researcherRole("Bull Researcher", "构建看多论据，强调增长、护城河、估值上修和催化剂。")
+                : ResearchPrompts.researcherRole("Bear Researcher", "构建看空论据，强调估值压力、竞争、周期、财务和执行风险。");
+        if (round <= OPENING_ROUND) {
+            return ResearchPrompts.evidenceBlock(state) + """
+                    %s
+                    辩论轮次：1（开局陈述）
 
-                请按以下两段顺序输出：
-                第一段用简体中文简要概括本轮立场，不得使用大括号。
-                第二段输出严格 JSON 代码块，除此之外不要再输出文字：
-                ```json
-                {
-                  "points": [
+                    请按以下两段顺序输出：
+                    第一段用简体中文简要概括本轮立场，不得使用大括号。
+                    第二段输出严格 JSON 代码块，除此之外不要再输出文字：
+                    ```json
                     {
-                      "type": "THESIS",
-                      "claim": "可被证伪的看多结论",
-                      "horizon": "SHORT_TERM 或 MEDIUM_TERM 或 LONG_TERM 或 UNSPECIFIED",
-                      "evidenceRefs": [
-                        {"evidenceId": "快照中的真实 evidenceId", "excerpt": "该 evidenceId 内容中的连续原文摘录"}
-                      ],
-                      "reasoning": "证据如何支持结论",
-                      "assumption": "结论成立所需假设",
-                      "invalidationCondition": "使结论失效的可观察条件",
-                      "respondsToPointIds": []
+                      "points": [
+                        {
+                          "type": "THESIS",
+                          "claim": "%s",
+                          "horizon": "SHORT_TERM 或 MEDIUM_TERM 或 LONG_TERM 或 UNSPECIFIED",
+                          "evidenceRefs": [
+                            {"evidenceId": "快照中的真实 evidenceId", "excerpt": "该 evidenceId 内容中的连续原文摘录"}
+                          ],
+                          "reasoning": "证据如何支持结论",
+                          "assumption": "结论成立所需假设",
+                          "invalidationCondition": "使结论失效的可观察条件",
+                          "respondsToPointIds": []
+                        }
+                      ]
                     }
-                  ]
-                }
-                ```
+                    ```
 
-                硬性要求：
-                - points 必须有 3-5 条，type 全部为 THESIS；不要自行生成 pointId，后端会分配。
-                - 每条至少绑定一个可用 evidenceId，excerpt 必须逐字来自该 ID 对应的 content，且至少 12 个字符；不得跨证据拼接或补写数字。
-                - assumption 和 invalidationCondition 不得为空；证据不足的观点不要输出。
-                """.formatted(
-                ResearchPrompts.roleSection(ResearchPrompts.researcherRole("Bull Researcher", "构建看多论据，强调增长、护城河、估值上修和催化剂。")));
-    }
-
-    /**
-     * 反驳模板：Round 2+ 强制模型先逐条回应对方最强观点再展开新论据，杜绝平行独白。
-     */
-    private String renderRebuttalPrompt(AnalysisState state, int round) {
+                    硬性要求：
+                    - points 必须有 3-5 条，type 全部为 THESIS；不要自行生成 pointId，后端会分配。
+                    - 每条至少绑定一个可用 evidenceId，excerpt 必须逐字来自该 ID 对应的 content，且至少 12 个字符；不得跨证据拼接或补写数字。
+                    - assumption 和 invalidationCondition 不得为空；证据不足的观点不要输出。
+                    """.formatted(
+                    ResearchPrompts.roleSection(role),
+                    bull ? "可被证伪的看多结论" : "可被证伪的看空结论或风险");
+        }
+        String opponentLabel = bull ? "空头" : "多头";
         return ResearchPrompts.evidenceBlock(state) + """
                 %s
                 辩论轮次：%d
@@ -109,7 +111,7 @@ public class BullResearcher {
                 === 完整辩论历史（按时间顺序）===
                 %s
 
-                === 可回应的空头论点（respondsToPointIds 只能从此清单逐字复制，不得使用本方 pointId）===
+                === 可回应的%s论点（respondsToPointIds 只能从此清单逐字复制，不得使用本方 pointId）===
                 %s
 
                 请按以下两段顺序输出：
@@ -120,7 +122,7 @@ public class BullResearcher {
                   "points": [
                     {
                       "type": "REBUTTAL",
-                      "claim": "对指定空头论点的回应结论",
+                      "claim": "对指定%s论点的回应结论",
                       "horizon": "SHORT_TERM 或 MEDIUM_TERM 或 LONG_TERM 或 UNSPECIFIED",
                       "evidenceRefs": [
                         {"evidenceId": "快照中的真实 evidenceId", "excerpt": "该 evidenceId 内容中的连续原文摘录"}
@@ -128,7 +130,7 @@ public class BullResearcher {
                       "reasoning": "承认、部分承认或反驳的依据",
                       "assumption": "回应成立所需假设",
                       "invalidationCondition": "使回应失效的条件",
-                      "respondsToPointIds": ["历史中真实存在的空头 pointId"]
+                      "respondsToPointIds": ["历史中真实存在的%s pointId"]
                     }
                   ]
                 }
@@ -140,18 +142,15 @@ public class BullResearcher {
                 - 每条至少绑定一个可用 evidenceId，excerpt 必须逐字来自该 ID 对应的 content，且至少 12 个字符。
                 - 无法用证据反驳时可以承认对方，但仍需明确说明本方假设如何被削弱。
                 """.formatted(
-                ResearchPrompts.roleSection(ResearchPrompts.researcherRole("Bull Researcher", "构建看多论据，强调增长、护城河、估值上修和催化剂。")),
+                ResearchPrompts.roleSection(role),
                 round,
                 renderDebateHistory(state.getDebateTurns(), 6000),
-                renderOpponentPoints(state.getDebateTurns(), Side.BEAR));
+                opponentLabel,
+                renderOpponentPoints(state.getDebateTurns(), bull ? Side.BEAR : Side.BULL),
+                opponentLabel,
+                opponentLabel);
     }
 
-    /**
-     * 把结构化辩论流水拼成带稳定 pointId 的可读上下文。
-     *
-     * <p>整体长度受 {@code maxLength} 限制，超出时丢弃最早的发言并提示已截断，
-     * 优先保留最新交锋——对当前轮次反驳价值最大。</p>
-     */
     /**
      * 列出对方全部论点的 pointId 与结论摘要。历史中双方长 ID 交错排列，模型容易把本方 ID 当成回应对象；
      * 单独给出可回应清单，让 respondsToPointIds 只需从这里复制。
@@ -172,6 +171,12 @@ public class BullResearcher {
         return builder.isEmpty() ? "（暂无）" : builder.toString();
     }
 
+    /**
+     * 把结构化辩论流水拼成带稳定 pointId 的可读上下文。
+     *
+     * <p>整体长度受 {@code maxLength} 限制，超出时丢弃最早的发言并提示已截断，
+     * 优先保留最新交锋——对当前轮次反驳价值最大。</p>
+     */
     static String renderDebateHistory(List<DebateTurn> turns, int maxLength) {
         if (turns == null || turns.isEmpty()) {
             return "（暂无）";
@@ -208,13 +213,6 @@ public class BullResearcher {
             builder.insert(0, entry);
         }
         return builder.toString().trim();
-    }
-
-    /**
-     * 将空值转换为空字符串，避免提示词中出现 {@code null}。
-     */
-    private static String safe(String value) {
-        return value == null ? "" : value;
     }
 
 }

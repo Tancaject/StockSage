@@ -78,12 +78,9 @@ public class DeepResearchPipeline {
     /** 收集/恢复确定性证据并执行首次 Harness 闸门。 */
     private final DeepEvidenceCollector evidenceCollector;
 
-    /** 评测专用：证据门禁通过后即结束，不进入辩论和报告；默认关闭。 */
-    @org.springframework.beans.factory.annotation.Value("${stocksage.research.eval.evidence-only:false}")
-    private boolean evidenceOnly;
     /** 证据摘要上限；按每字 3 字节计不超过 messages.content（TEXT, 64KB）。 */
     private static final int EVIDENCE_DIGEST_MAX_CHARS = 18000;
-    /** 在证据门禁通过后最多执行一次有界问题相关补证。 */
+    /** 在证据门禁通过后执行有界取证循环补证。 */
     private final DeepEvidenceReplanService evidenceReplanService;
     /** 把结构化报告或证据不足状态渲染为用户 Markdown。 */
     private final ReportMarkdownRenderer reportRenderer;
@@ -234,7 +231,7 @@ public class DeepResearchPipeline {
                             runningTask, lease, payload, text, null, resultKind, ownershipLost);
                     return;
                 }
-                if (evidenceOnly || payload.evidenceOnly()) {
+                if (payload.evidenceOnly()) {
                     // 评测专用：证据阶段完成后结束，不调用辩论、Manager 和报告模型。
                     finishWithText(runningTask, lease, payload,
                             evidenceCollector.evidenceDigest(workingState, EVIDENCE_DIGEST_MAX_CHARS), null,
@@ -513,7 +510,7 @@ public class DeepResearchPipeline {
         }
         return switch (resultKind) {
             case FULL_REPORT -> "COMPLETED";
-            // EVIDENCE_ONLY 只在评测开关下出现，没有报告，不能算 COMPLETED。
+            // EVIDENCE_ONLY 只在评测请求下出现，没有报告，不能算 COMPLETED。
             case INSUFFICIENT_EVIDENCE, OFFLINE_FALLBACK, EVIDENCE_ONLY -> "DEGRADED";
             case POLICY_BLOCKED -> "BLOCKED";
         };
@@ -783,7 +780,7 @@ public class DeepResearchPipeline {
                         context.toString().trim(), answer, null, traceId,
                         taskOutcome(runningTask));
             }
-            if (evidenceOnly || parsePayload(task).evidenceOnly()) {
+            if (parsePayload(task).evidenceOnly()) {
                 // 评测专用：与后台路径一致，证据阶段完成后结束。
                 completeInlineTaskForOwner(
                         runningTask, acquired, ownershipLost, null, ResearchTask.ResultKind.EVIDENCE_ONLY);
@@ -1619,8 +1616,7 @@ public class DeepResearchPipeline {
                 .equals(snapshot.policyVersion())
                 || snapshot.recoveryActions().stream().anyMatch(action ->
                 action != RecoveryAction.RETRY_FUNDAMENTALS
-                        && action != RecoveryAction.RETRY_MARKET
-                        && action != RecoveryAction.RETRY_NEWS)) {
+                        && action != RecoveryAction.RETRY_MARKET)) {
             return reevaluated;
         }
         HarnessDecision durablePlan = new HarnessDecision(

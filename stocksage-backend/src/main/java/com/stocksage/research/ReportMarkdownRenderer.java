@@ -8,7 +8,6 @@ import com.stocksage.model.entity.ResearchTask;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -16,7 +15,7 @@ import java.util.Locale;
  * 投研报告的 Markdown 渲染器。
  *
  * <p>把结构化 {@link InvestmentReport} 和研究状态转换成面向用户的报告草稿文本。
- * 全部是无副作用的纯文本函数，从 ChatService 拆出以便独立测试。</p>
+ * 全部是无副作用的纯文本函数，从 ChatService 拆出。</p>
  */
 @Component
 public class ReportMarkdownRenderer {
@@ -263,7 +262,6 @@ public class ReportMarkdownRenderer {
                 .replace("getFinancialMetrics", "财务指标")
                 .replace("getTechnicalIndicators", "技术指标")
                 .replace("getIbkrHistoricalBars", "IBKR历史行情")
-                .replace("getIbkrRealtimeQuote", "IBKR报价")
                 .replace("getSectorPerformance", "板块行情")
                 .replace("getStockNews", "股票新闻")
                 .replace("searchNews", "新闻搜索")

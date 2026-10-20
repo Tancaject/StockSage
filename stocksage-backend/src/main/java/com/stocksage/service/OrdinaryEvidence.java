@@ -38,10 +38,6 @@ final class OrdinaryEvidence {
     /** 本实例可写入回答上下文的字符预算。 */
     private final int contextBudget;
 
-    OrdinaryEvidence(String ticker, ReadRequest request, ObjectMapper mapper, EvidenceEnvelopeMapper evidenceEnvelopeMapper) {
-        this(ticker, request, mapper, evidenceEnvelopeMapper, TimeSensitivity.UNSPECIFIED);
-    }
-
     OrdinaryEvidence(String ticker, ReadRequest request, ObjectMapper mapper, EvidenceEnvelopeMapper evidenceEnvelopeMapper,
                      TimeSensitivity timeSensitivity) {
         this(ticker, request, mapper, evidenceEnvelopeMapper, timeSensitivity,

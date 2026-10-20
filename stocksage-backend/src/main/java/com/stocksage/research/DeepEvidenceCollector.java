@@ -26,7 +26,6 @@ import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
 import com.stocksage.evidence.EvidenceModels.EvidenceEnvelope;
 import com.stocksage.evidence.EvidenceModels.EvidenceStatus;
 import com.stocksage.harness.HarnessModels.HarnessDecision;
-import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.HarnessPhase;
 import com.stocksage.harness.HarnessModels.HarnessSnapshot;
 import com.stocksage.harness.HarnessModels.RecoveryAction;
@@ -125,10 +124,6 @@ public class DeepEvidenceCollector {
     @Value("${stocksage.chat.tool-prefetch.per-tool-timeout-seconds:8}")
     private long toolPrefetchPerToolTimeoutSeconds;
 
-    /** 是否允许证据路径自动触发 EDGAR 摄取。 */
-    @Value("${stocksage.chat.auto-edgar-ingest.enabled:false}")
-    private boolean autoEdgarIngestEnabled;
-
     /**
      * 为深度研究流程收集确定性基本面、市场和新闻快照。
      *
@@ -138,23 +133,6 @@ public class DeepEvidenceCollector {
      * @param conversationId 会话 ID，用于进度事件
      * @return 上下文、AnalysisState、EvidenceLedger 和首次 Harness 决定
      */
-    public EvidenceCollection collect(
-            String primaryTicker,
-            String userQuery,
-            String traceId,
-            Long conversationId) {
-        return collect(primaryTicker, userQuery, traceId, conversationId, TimeSensitivity.UNSPECIFIED);
-    }
-
-    public EvidenceCollection collect(
-            String primaryTicker,
-            String userQuery,
-            String traceId,
-            Long conversationId,
-            TimeSensitivity timeSensitivity) {
-        return collect(primaryTicker, userQuery, traceId, conversationId, timeSensitivity, null);
-    }
-
     public EvidenceCollection collect(
             String primaryTicker,
             String userQuery,
@@ -261,24 +239,6 @@ public class DeepEvidenceCollector {
     }
 
     /**
-     * 只重新收集完成策略明确允许恢复的证据维度。
-     *
-     * @param existing 现有证据集合
-     * @param recoveryActions 策略返回的恢复动作
-     * @param traceId 研究 trace ID
-     * @param conversationId 会话 ID
-     * @return 替换目标维度后的证据集合
-     */
-    public EvidenceCollection recover(
-            EvidenceCollection existing,
-            List<RecoveryAction> recoveryActions,
-            String traceId,
-            Long conversationId
-    ) {
-        return recover(existing, recoveryActions, Map.of(), traceId, conversationId);
-    }
-
-    /**
      * 在保留 durable checkpoint 尝试次数的前提下执行证据恢复。
      *
      * @param existing 现有证据集合
@@ -288,16 +248,6 @@ public class DeepEvidenceCollector {
      * @param conversationId 会话 ID
      * @return 恢复后重新经过 Harness 判断的证据集合
      */
-    public EvidenceCollection recover(
-            EvidenceCollection existing,
-            List<RecoveryAction> recoveryActions,
-            Map<RecoveryAction, Integer> previousAttempts,
-            String traceId,
-            Long conversationId
-    ) {
-        return recover(existing, recoveryActions, previousAttempts, traceId, conversationId, null);
-    }
-
     public EvidenceCollection recover(
             EvidenceCollection existing,
             List<RecoveryAction> recoveryActions,
@@ -344,16 +294,6 @@ public class DeepEvidenceCollector {
             marketOk = market.hasUsableData();
             emitProgress(traceId, conversationId, "observation",
                     "Market evidence recovery completed.");
-        }
-        if (recoveryActions.contains(RecoveryAction.RETRY_NEWS)) {
-            attempts.merge(RecoveryAction.RETRY_NEWS, 1, Integer::sum);
-            EvidenceSnapshot news = buildNewsSnapshot(ticker, state.getQuery(), state.getTimeSensitivity(),
-                    userId, traceId, conversationId);
-            state.setNewsReport(news.text());
-            replaceDimension(merged, EvidenceDimension.NEWS, news.evidence());
-            newsOk = news.hasUsableData();
-            emitProgress(traceId, conversationId, "observation",
-                    "News evidence recovery completed.");
         }
 
         EvidenceLedger ledger = new EvidenceLedger(existing.evidenceLedger().target(), merged);
@@ -447,74 +387,9 @@ public class DeepEvidenceCollector {
     }
 
     /**
-     * 把一次已授权的聚焦新闻搜索追加到现有快照，并重新执行当前 Evidence Gate。
-     *
-     * <p>不可引用、跨标的或重复结果不会进入报告和 Ledger；基础 NEWS 证据永远不被替换。</p>
-     */
-    EvidenceCollection appendFocusedNews(
-            EvidenceCollection existing,
-            CapabilityResult result,
-            String traceId
-    ) {
-        if (existing == null || result == null || existing.state() == null) {
-            return existing;
-        }
-        AnalysisState state = existing.state();
-        EvidenceLedger current = existing.evidenceLedger();
-        // 单步补证只允许加入一项；服务恢复和直接调用均不能累积更多聚焦正文。
-        if (current == null || current.evidence().stream()
-                .anyMatch(item -> result.capabilityId().equals(item.capabilityId()))) {
-            return existing;
-        }
-        String ticker = state.getPrimaryTicker() == null ? "" : state.getPrimaryTicker().strip();
-        String content = result.content() == null ? "" : result.content();
-        ToolObservation observation = new ToolObservation(
-                content,
-                capabilityEvidenceStatus(content),
-                Instant.now()
-        );
-        EvidenceEnvelope envelope = evidenceEnvelopeMapper.map(
-                EvidenceDimension.NEWS,
-                ticker,
-                result.capabilityId(),
-                observation.text(), observation.status(), observation.observedAt(),
-                true
-        );
-        if (!envelope.hasUsableData()
-                || !envelope.hasProvenance()
-                || !envelope.approvedReadOnly()
-                || current == null
-                || !current.target().isResolved()
-                || !current.target().canonicalKey().equals(envelope.targetKey())
-                || current.evidenceIds().contains(envelope.evidenceId())) {
-            return existing;
-        }
-
-        List<EvidenceEnvelope> merged = new ArrayList<>(current.evidence());
-        merged.add(envelope);
-        EvidenceLedger ledger = new EvidenceLedger(current.target(), merged);
-        StringBuilder news = new StringBuilder(state.getNewsReport() == null ? "" : state.getNewsReport());
-        appendEvidenceSnapshotItem(
-                news,
-                "focusedNewsSearch",
-                envelope,
-                content,
-                3500,
-                state.getTimeSensitivity()
-        );
-        state.setEvidenceLedger(ledger);
-        state.setNewsReport(news.toString().strip());
-
-        Map<RecoveryAction, Integer> recoveryAttempts = state.getHarnessSnapshot() == null
-                ? Map.of()
-                : state.getHarnessSnapshot().recoveryAttempts();
-        return reevaluateEvidence(state, recoveryAttempts, traceId);
-    }
-
-    /**
      * 把取证循环中一次已授权的能力结果追加到快照，并重新执行当前 Evidence Gate。
      *
-     * <p>与 {@link #appendFocusedNews} 的区别：循环可以多次追加，也可以追加非新闻维度。不可用、无来源、
+     * <p>循环可以多次追加，也可以追加非新闻维度。不可用、无来源、
      * 跨标的、与已有证据载荷相同，或超出该维度快照预算的结果都不入账；基础证据永远不被替换。</p>
      *
      * @param evidenceCapabilityId 写入证据的能力名；结构化工具沿用基础取证的工具名，复用同一套解析
@@ -642,16 +517,6 @@ public class DeepEvidenceCollector {
                     "searchCompanyReports", "searchCompanyReports", companyReports, 3000, timeSensitivity);
         }
 
-        if (sec) {
-            if (autoEdgarIngestEnabled) {
-                ToolObservation ingestion = runPrefetchTool("Fundamentals Agent/ingestCompanyFilings",
-                        () -> fundamentalsTools.ingestCompanyFilings(ticker, "10-K", 1));
-                captureSnapshotEvidence(
-                        report, evidence, EvidenceDimension.FUNDAMENTALS, ticker,
-                        "ingestCompanyFilings", "ingestCompanyFilings(10-K x1)",
-                        ingestion, 2000, false, timeSensitivity);
-            }
-        }
         return new EvidenceSnapshot(report.toString().trim(), hasData, evidence);
     }
 
@@ -845,27 +710,9 @@ public class DeepEvidenceCollector {
             int maxLength,
             TimeSensitivity timeSensitivity
     ) {
-        captureSnapshotEvidence(
-                report, evidence, dimension, ticker, capabilityId, displayName,
-                observation, maxLength, true, timeSensitivity);
-    }
-
-    /** 支持显式标记非只读能力的证据快照重载。 */
-    private void captureSnapshotEvidence(
-            StringBuilder report,
-            List<EvidenceEnvelope> evidence,
-            EvidenceDimension dimension,
-            String ticker,
-            String capabilityId,
-            String displayName,
-            ToolObservation observation,
-            int maxLength,
-            boolean approvedReadOnly,
-            TimeSensitivity timeSensitivity
-    ) {
         EvidenceEnvelope envelope = evidenceEnvelopeMapper.map(
                 dimension, ticker, capabilityId, observation.text(), observation.status(),
-                observation.observedAt(), approvedReadOnly);
+                observation.observedAt(), true);
         evidence.add(envelope);
         appendEvidenceSnapshotItem(report, displayName, envelope, observation.text(), maxLength, timeSensitivity);
     }

@@ -221,9 +221,8 @@ public class ChatService {
             canonicalTicker = tickerResolutionService.resolveExplicitTicker(tickerCandidates.get(0));
         }
 
-        // 3. 注册按链路隔离的事件通道。@Tool 方法开始或完成时，
-        // 工具调用切面会向该通道写入事件。
-        ToolCallContext.register(traceId, conversationId, request.getMessage());
+        // 3. 工具上下文改在订阅后的 answerStream 内注册：请求线程的同步阶段不调用 @Tool，
+        // 这样请求线程不会残留 ThreadLocal，流建立前抛异常也不会遗留活跃上下文。
 
         // 4. 使用已经消歧的独立问题检索知识库；检索失败不阻断对话体验。
         long retrievalStart = System.currentTimeMillis();
@@ -331,6 +330,8 @@ public class ChatService {
                         .build()));
 
         Flux<String> answerStream = Flux.defer(() -> {
+            // 注册按链路隔离的事件通道。@Tool 方法开始或完成时，工具调用切面会向该通道写入事件。
+            ToolCallContext.register(traceId, conversationId, request.getMessage());
             ToolCallContext.set(traceId, conversationId, resolvedQuery);
 
             // 5. 在发送最终回答提示词前执行确定性预取。
@@ -485,7 +486,8 @@ public class ChatService {
                                 conversationId, traceId, fullResponse.length());
                     }
                     stream.finishForeground();
-                }));
+                })
+                .transform(ChatService::clearToolContextAfterSubscribe));
         }).onErrorResume(error -> {
             stream.preparationFailed();
             if (stream.tryRecordTerminal()) {
@@ -500,10 +502,26 @@ public class ChatService {
                     .traceId(traceId)
                     .conversationId(conversationId)
                     .build()));
-        }).subscribeOn(Schedulers.boundedElastic());
+        }).transform(ChatService::clearToolContextAfterSubscribe)
+                // 取消可能发生在回答流订阅前；后台任务的上下文由 finishRelay 在事件流结束时注销。
+                .doFinally(signalType -> {
+                    if (!stream.hasBackgroundTask()) ToolCallContext.unregister(traceId);
+                })
+                .subscribeOn(Schedulers.boundedElastic());
 
         return Flux.concat(conversationStarted, routeDecisionStarted, executionPlanStarted, retrievalObservation,
                 stream.mergeWith(answerStream));
+    }
+
+    /** 订阅期间同步设置的工具上下文在订阅返回后于同一线程清理，避免池化线程残留到下一次请求。 */
+    private static <T> Flux<T> clearToolContextAfterSubscribe(Flux<T> source) {
+        return Flux.from(subscriber -> {
+            try {
+                source.subscribe(subscriber);
+            } finally {
+                ToolCallContext.clear();
+            }
+        });
     }
 
     private static String chatFailureMessage(Throwable error) {
@@ -895,10 +913,6 @@ public class ChatService {
                 .sum();
         int responseChars = response != null ? response.length() : 0;
         return (promptChars + responseChars) / 2;
-    }
-
-    private org.springframework.ai.chat.messages.Message toAiMessage(Message message) {
-        return toAiMessage(message.getRole(), message.getContent());
     }
 
     private org.springframework.ai.chat.messages.Message toAiMessage(String role, String content) {

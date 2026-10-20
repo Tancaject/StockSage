@@ -92,24 +92,6 @@ public record RoutingDecisionMetadata(
                 needsClarification, reasonCodes, List.of());
     }
 
-    /** 保留原有十字段构造方式，避免已有 Trace/测试调用在迁移期失效。 */
-    public RoutingDecisionMetadata(
-            RoutingDecisionSource decisionSource,
-            String rawRoute,
-            PlanRoute route,
-            String intentSummary,
-            String rationale,
-            double confidence,
-            List<String> matchedSignals,
-            int ragHitCount,
-            String fallbackReason,
-            long durationMs
-    ) {
-        this(decisionSource, rawRoute, route, intentSummary, rationale, confidence,
-                matchedSignals, ragHitCount, fallbackReason, durationMs,
-                "", "", "", "", Map.of(), Map.of(), false, List.of());
-    }
-
     /** @return 是否由确定性兜底产生 */
     public boolean fallback() {
         return decisionSource == RoutingDecisionSource.DETERMINISTIC_FALLBACK;
@@ -121,7 +103,7 @@ public record RoutingDecisionMetadata(
     }
 
     /**
-     * 转为 AgentStep/Phoenix 可安全持久化的属性 Map。
+     * 转为 AgentStep 可安全持久化的属性 Map。
      *
      * @return 不可变、有界属性
      */

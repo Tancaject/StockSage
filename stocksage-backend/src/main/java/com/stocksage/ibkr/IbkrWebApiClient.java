@@ -56,16 +56,6 @@ public class IbkrWebApiClient {
     }
 
     /**
-     * 对固定路径发起 GET 请求并解析 JSON。
-     *
-     * @param path 以 Gateway baseUrl 为基准的 API 路径
-     * @return 解析后的 JSON 节点
-     */
-    public JsonNode get(String path) {
-        return exchange(webClient.get().uri(path).retrieve().bodyToMono(String.class));
-    }
-
-    /**
      * 对需要动态查询参数的 URI 发起 GET 请求并解析 JSON。
      *
      * @param uriFunction WebClient URI 构建函数

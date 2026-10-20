@@ -22,9 +22,8 @@ import socket
 from threading import Event, RLock, Thread
 
 import baostock as bs
-import pandas as pd
 
-from app.services.technical_indicators import calculate_technical_indicators
+from app.services.technical_indicators import kline_technical_indicators
 
 
 BAOSTOCK_LOCK = RLock()
@@ -268,18 +267,14 @@ class BaostockService:
                 adjustflag="2",
             )
 
-            # baostock 返回的是迭代器，需要逐行读取
-            rows = []
-            while (rs.error_code == "0") and budget_call(rs.next):
-                rows.append(rs.get_row_data())
+            rows = _drain(rs)
             fields = rs.fields
 
-        df = pd.DataFrame(rows, columns=fields) if rows else pd.DataFrame()
         return {
             "code": code,
             "period": period,
-            "count": len(df),
-            "data": df.to_dict(orient="records"),
+            "count": len(rows),
+            "data": [dict(zip(fields, row)) for row in rows],
         }
 
     def get_financial_metrics(self, code: str) -> dict:
@@ -291,26 +286,19 @@ class BaostockService:
         if login_error:
             return {"code": code, "metrics": {}, **login_error}
 
-        year = datetime.now().year
-        quarter = (datetime.now().month - 1) // 3
-        if quarter == 0:
-            quarter = 4
-            year -= 1
+        year, quarter = _latest_complete_quarter()
 
         with _request_lock():
             rs = budget_call(bs.query_profit_data, code=code, year=year, quarter=quarter)
-            rows = []
-            while (rs.error_code == "0") and budget_call(rs.next):
-                rows.append(rs.get_row_data())
+            rows = _drain(rs)
             fields = rs.fields
 
         if not rows:
             return {"code": code, "metrics": {}, "message": "No data available"}
 
-        df = pd.DataFrame(rows, columns=fields)
         return {
             "code": code,
-            "metrics": df.iloc[0].to_dict() if len(df) > 0 else {},
+            "metrics": dict(zip(fields, rows[0])),
         }
 
     def get_financial_reports(self, code: str, period: str = "annual", years: int = 5) -> dict:
@@ -378,34 +366,23 @@ class BaostockService:
         if not kline["data"]:
             return {"code": code, "indicators": {}, "message": "No kline data"}
 
-        df = pd.DataFrame(kline["data"])
-        df["close"] = pd.to_numeric(df["close"], errors="coerce")
-        result = calculate_technical_indicators(df["close"], indicators)
-
+        result = kline_technical_indicators(kline["data"], indicators)
         return {"code": code, "indicators": result}
 
     def _query_financial_table(self, query_func, code: str, year: int, quarter: int) -> dict:
-        """调用 BaoStock 财报表函数，并把 ResultSet 转成字典列表。"""
+        """调用 BaoStock 财报表函数，返回首行字段字典。"""
         rs = budget_call(query_func, code=code, year=year, quarter=quarter)
-        rows = []
-        while (rs.error_code == "0") and budget_call(rs.next):
-            rows.append(rs.get_row_data())
+        rows = _drain(rs)
         if rs.error_code != "0":
             return {"error": rs.error_msg}
         if not rows:
             return {}
-        df = pd.DataFrame(rows, columns=rs.fields)
-        return df.iloc[0].to_dict() if len(df) > 0 else {}
+        return dict(zip(rs.fields, rows[0]))
 
     @staticmethod
     def _financial_periods(annual: bool, years: int) -> list[tuple[int, int]]:
         """生成需要查询的财报年份和季度序列。"""
-        now = datetime.now()
-        current_year = now.year
-        latest_quarter = (now.month - 1) // 3
-        if latest_quarter == 0:
-            latest_quarter = 4
-            current_year -= 1
+        current_year, latest_quarter = _latest_complete_quarter()
 
         if annual:
             return [(current_year - offset, 4) for offset in range(years)]
@@ -494,9 +471,7 @@ class BaostockService:
                     start_date=start_date, end_date=end_date,
                     frequency="d",
                 )
-                rows = []
-                while (rs.error_code == "0") and budget_call(rs.next):
-                    rows.append(rs.get_row_data())
+                rows = _drain(rs)
             if rows:
                 latest = rows[-1]
                 previous = rows[-2] if len(rows) > 1 else None
@@ -518,6 +493,23 @@ class BaostockService:
                 }
 
         return {"date": end_date, "lookbackDays": 30, "indices": overview}
+
+
+def _drain(rs) -> list[list[str]]:
+    """BaoStock ResultSet 是迭代器，需在持锁期间逐行读完。"""
+    rows = []
+    while (rs.error_code == "0") and budget_call(rs.next):
+        rows.append(rs.get_row_data())
+    return rows
+
+
+def _latest_complete_quarter() -> tuple[int, int]:
+    """返回当前日期之前最近一个已结束季度的 (年份, 季度)。"""
+    now = datetime.now()
+    year, quarter = now.year, (now.month - 1) // 3
+    if quarter == 0:
+        return year - 1, 4
+    return year, quarter
 
 
 def _resolve_sector_mapping(sector: str) -> dict | None:

@@ -74,7 +74,6 @@ class PdfParser:
 
                 block_text = ""
                 max_size = 0.0
-                is_bold = False
 
                 for line in block.get("lines", []):
                     line_text = ""
@@ -86,9 +85,6 @@ class PdfParser:
                             )
                         line_text += span["text"]
                         max_size = max(max_size, span.get("size", 0))
-                        font = span.get("font", "").lower()
-                        if "bold" in font or "black" in font or "heavy" in font:
-                            is_bold = True
                     block_text += line_text.strip() + "\n"
 
                 text = block_text.strip()
@@ -97,7 +93,6 @@ class PdfParser:
                         "text": text,
                         "page": page_num + 1,
                         "font_size": max_size,
-                        "is_bold": is_bold,
                     })
         return blocks
 

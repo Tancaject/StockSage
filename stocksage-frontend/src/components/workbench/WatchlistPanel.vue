@@ -89,7 +89,6 @@ const emit = defineEmits(['select', 'remove', 'update:items'])
 
 // 拖拽排序逻辑
 const dragIndex = ref(null)
-const isDragging = ref(false)
 
 const handleDragStart = (index, event) => {
   if (event.target.closest('.remove-btn')) {
@@ -100,11 +99,6 @@ const handleDragStart = (index, event) => {
   dragIndex.value = index
   event.dataTransfer.effectAllowed = 'move'
   event.dataTransfer.setData('text/plain', filteredItems.value[index].ticker)
-  
-  // 延迟设置 isDragging，以使浏览器生成的拖动镜像保持原样而非半透明占位
-  setTimeout(() => {
-    isDragging.value = true
-  }, 0)
 }
 
 const handleDragEnter = (targetIndex, event) => {
@@ -128,7 +122,6 @@ const handleDragEnter = (targetIndex, event) => {
 
 const handleDragEnd = () => {
   dragIndex.value = null
-  isDragging.value = false
 }
 
 const activeMarketTab = ref('all')

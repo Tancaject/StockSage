@@ -31,7 +31,8 @@ public record SecFinancialsResponse(
     public enum Status { SUCCESS, EMPTY, UNSUPPORTED, ERROR }
     private static final Set<String> METRICS = Set.of("Revenue", "NetIncome", "ConsolidatedNetIncome", "TotalAssets", "TotalLiabilities",
             "StockholdersEquity", "OperatingIncome", "EPS", "OperatingCashFlow", "TotalDebt",
-            "CapitalExpenditure", "Cash", "DilutedShares", "NetInterestIncome", "CreditLossProvision");
+            "CapitalExpenditure", "LeasedEquipmentExpenditure", "PretaxIncome", "SalesRevenue",
+            "ContinuingOperationsNetIncome", "ContinuingOperationsCashFlow", "GainOnDispositions", "Cash", "DilutedShares", "NetInterestIncome", "CreditLossProvision");
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT)
             .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);

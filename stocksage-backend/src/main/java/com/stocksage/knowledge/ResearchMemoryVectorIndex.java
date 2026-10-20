@@ -1,5 +1,6 @@
 package com.stocksage.knowledge;
 
+import com.stocksage.util.Hashing;
 import com.stocksage.model.entity.ResearchMemoryEntry;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.IndexType;
@@ -12,9 +13,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -180,13 +178,7 @@ public class ResearchMemoryVectorIndex {
 
     /** 对用户 ID 做 SHA-256，避免把原始账号标识写入向量元数据。 */
     static String tenantKey(String userId) {
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256")
-                    .digest((userId == null ? "" : userId.trim()).getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(digest);
-        } catch (Exception error) {
-            throw new IllegalStateException("SHA256_UNAVAILABLE", error);
-        }
+        return Hashing.sha256Hex(userId == null ? "" : userId.trim());
     }
 
     /**

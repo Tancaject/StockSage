@@ -61,9 +61,6 @@ public class SkillValidator {
                 throw new IllegalStateException("Skill step type is missing: " + skill.id());
             }
             validateCapability(skill, step.capability());
-            if (step.fallbackCapability() != null && !step.fallbackCapability().isBlank()) {
-                validateCapability(skill, step.fallbackCapability());
-            }
         }
         if (skill.steps().size() > skill.policy().maxCapabilityCalls()) {
             throw new IllegalStateException("Skill has more capability steps than its call limit: " + skill.id());

@@ -4,7 +4,6 @@ import com.stocksage.agent.PlanRoute;
 
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -47,24 +46,5 @@ public record IntentSignal(
         resolvedQuery = IntentBounds.text(resolvedQuery, IntentBounds.MAX_RESOLVED_QUERY_CHARS);
         rationale = IntentBounds.text(rationale, IntentBounds.MAX_RATIONALE_CHARS);
         reasonCodes = IntentBounds.reasonCodes(reasonCodes);
-    }
-
-    /** @return 原始字符串本身是否是合法的五选一路由名 */
-    public boolean rawRouteValid() {
-        if (rawRoute.isBlank()) {
-            return false;
-        }
-        try {
-            PlanRoute.valueOf(rawRoute.trim().toUpperCase(Locale.ROOT));
-            return true;
-        } catch (IllegalArgumentException ignored) {
-            return false;
-        }
-    }
-
-    /** @return 合法原始路由是否与最终可执行路由一致 */
-    public boolean rawRouteMatchesTarget() {
-        return rawRouteValid()
-                && PlanRoute.valueOf(rawRoute.trim().toUpperCase(Locale.ROOT)) == targetRoute;
     }
 }

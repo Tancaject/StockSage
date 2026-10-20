@@ -22,7 +22,7 @@ import java.util.concurrent.TimeoutException;
  * 普通编排、研究补证和 Skill 能力调用的统一执行网关。
  *
  * <p>上游应用编排只提交能力 ID、参数和授权上下文；本类依次完成注册表解析、策略授权、
- * 异步限时执行、UTF-8 结果限长以及 Trace/指标记录，再把本地工具或 MCP 的差异隐藏在适配器后。
+ * 异步限时执行、UTF-8 结果限长以及 Trace/指标记录，再把各本地工具的差异隐藏在适配器后。
  * 任何未知、越权或超时调用都会以 {@link CapabilityException} 失败关闭。</p>
  */
 @Component
@@ -33,7 +33,7 @@ public class CapabilityGateway {
     private final CapabilityRegistry registry;
     /** 在真正访问提供方前执行风险、allowlist 和截止时间校验。 */
     private final CapabilityPolicy policy;
-    /** 统一记录本地与 MCP 调用的实时事件、持久化步骤和指标。 */
+    /** 统一记录能力调用的实时事件、持久化步骤和指标。 */
     private final CapabilityInvocationObserver observer;
     /** 承载可能阻塞的提供方调用，使调用方线程可以施加硬超时。 */
     private final AsyncTaskExecutor agentTaskExecutor;
@@ -52,7 +52,7 @@ public class CapabilityGateway {
     public CapabilityResult invoke(String capabilityId,
                                    Map<String, Object> arguments,
                                    CapabilityInvocationContext context) {
-        // 先解析本地清单并授权；远端 MCP 元数据永远不能绕过这两道服务器侧边界。
+        // 先解析本地清单并授权；任何调用都不能绕过这两道服务器侧边界。
         CapabilityRegistry.RegisteredCapability registered = registry.require(capabilityId);
         CapabilityDescriptor descriptor = registered.descriptor();
         if (context.runDeadline() != null) context.runDeadline().remainingMillis();

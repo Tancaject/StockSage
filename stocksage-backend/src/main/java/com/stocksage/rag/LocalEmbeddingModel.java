@@ -72,33 +72,6 @@ public class LocalEmbeddingModel implements EmbeddingModel {
         return Map.copyOf(configuration);
     }
 
-    /**
-     * 使用默认 1024 维初始化本地向量模型。
-     *
-     * @param baseUrl Ollama 服务地址
-     * @param model 向量模型名称
-     * @param timeout 单次请求超时
-     */
-    public LocalEmbeddingModel(String baseUrl, String model, Duration timeout) {
-        this(baseUrl, model, timeout, 1024);
-    }
-
-    /**
-     * 初始化 Ollama 向量模型客户端。
-     *
-     * @param baseUrl Ollama 服务地址
-     * @param model 向量模型名称
-     * @param timeout 单次请求超时时间
-     * @param dimension 与向量库一致的配置维度
-     */
-    public LocalEmbeddingModel(String baseUrl, String model, Duration timeout, int dimension) {
-        this(baseUrl, model, timeout, dimension, 2);
-    }
-
-    public LocalEmbeddingModel(String baseUrl, String model, Duration timeout, int dimension, int maxConcurrentCalls) {
-        this(baseUrl, model, timeout, dimension, maxConcurrentCalls, null, ModelTokenBudgetProperties.disabled());
-    }
-
     public LocalEmbeddingModel(String baseUrl, String model, Duration timeout, int dimension, int maxConcurrentCalls,
                                ModelInvocationStore invocations, ModelTokenBudgetProperties tokenBudget) {
         if (maxConcurrentCalls <= 0) throw new IllegalArgumentException("Embedding concurrency must be positive");

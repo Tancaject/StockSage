@@ -428,6 +428,12 @@ public class EvidencePresenter {
             case "OperatingIncome" -> "营业利润";
             case "OperatingCashFlow" -> "经营现金流";
             case "CapitalExpenditure" -> "资本开支";
+            case "LeasedEquipmentExpenditure" -> "出租设备支出";
+            case "PretaxIncome" -> "税前利润";
+            case "SalesRevenue" -> "销售收入（客户合同，不含其他收益）";
+            case "ContinuingOperationsNetIncome" -> "持续经营净利润（含少数股东）";
+            case "ContinuingOperationsCashFlow" -> "持续经营业务经营现金流";
+            case "GainOnDispositions" -> "资产处置净收益";
             case "TotalAssets" -> "总资产";
             case "TotalLiabilities" -> "总负债";
             case "StockholdersEquity" -> "股东权益";

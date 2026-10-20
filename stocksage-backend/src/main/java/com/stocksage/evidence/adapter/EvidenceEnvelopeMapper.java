@@ -1,5 +1,6 @@
 package com.stocksage.evidence.adapter;
 
+import com.stocksage.util.Hashing;
 import com.stocksage.service.TickerResolutionService;
 import com.stocksage.service.KLinePayloadMapper;
 
@@ -20,8 +21,6 @@ import com.stocksage.evidence.EvidenceModels.EvidenceStatus;
 import com.stocksage.evidence.EvidenceModels.TargetIdentity;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,7 +30,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -713,14 +711,7 @@ public class EvidenceEnvelopeMapper {
     }
 
     private String sha256(String value) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] bytes = digest.digest((value == null ? "" : value)
-                    .getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(bytes);
-        } catch (NoSuchAlgorithmException error) {
-            throw new IllegalStateException("SHA-256 is unavailable", error);
-        }
+        return Hashing.sha256Hex(value == null ? "" : value);
     }
 
     private record PayloadFacts(String target, EvidenceStatus status, EvidenceProvenance provenance, EvidenceTiming timing) {

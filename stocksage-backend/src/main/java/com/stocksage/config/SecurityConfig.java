@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.model.dto.ErrorResponse;
 import com.stocksage.repository.UserAccountRepository;
 import com.stocksage.security.AuthenticatedUser;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;

@@ -1,5 +1,6 @@
 package com.stocksage.conversation;
 
+import com.stocksage.util.Hashing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.Coordinator;
@@ -15,13 +16,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,9 +113,8 @@ public class OrdinaryAnswerReplayService {
             return row;
         }).toList();
         try {
-            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
-                    .digest(objectMapper.writeValueAsString(rendered).getBytes(StandardCharsets.UTF_8)));
-        } catch (JsonProcessingException | NoSuchAlgorithmException error) {
+            return Hashing.sha256Hex(objectMapper.writeValueAsString(rendered));
+        } catch (JsonProcessingException error) {
             throw new IllegalStateException("普通回答回放无法计算输入指纹，请检查服务配置后重试。", error);
         }
     }

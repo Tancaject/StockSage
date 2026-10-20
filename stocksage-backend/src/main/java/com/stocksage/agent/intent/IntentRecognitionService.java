@@ -43,12 +43,6 @@ public class IntentRecognitionService {
                 new PatternIntentMatcher(), new NgramIntentMatcher(), new IntentFusionPolicy());
     }
 
-    /** 供 Coordinator 兼容构造器和纯单元测试使用，不触发 embedding。 */
-    public IntentRecognitionService(ChatClient routingChatClient, ObjectMapper objectMapper) {
-        this(routingChatClient, objectMapper, null,
-                new PatternIntentMatcher(), new NgramIntentMatcher(), new IntentFusionPolicy());
-    }
-
     IntentRecognitionService(
             ChatClient routingChatClient,
             ObjectMapper objectMapper,
@@ -156,9 +150,9 @@ public class IntentRecognitionService {
 
         PlanRoute route = parsedRoute.get();
         FineIntent fineIntent = enumValue(FineIntent.class, text(root, "fineIntent", ""))
-                .orElseGet(() -> fineIntent(route));
+                .orElseGet(() -> FineIntent.forRoute(route));
         IntentGroup group = enumValue(IntentGroup.class, text(root, "intentGroup", ""))
-                .orElseGet(() -> intentGroup(route));
+                .orElseGet(() -> IntentGroup.forRoute(route));
         TimeSensitivity time = enumValue(TimeSensitivity.class, text(root, "timeSensitivity", ""))
                 .orElse(TimeSensitivity.UNSPECIFIED);
         AnalysisDepth depth = enumValue(AnalysisDepth.class, text(root, "analysisDepth", ""))
@@ -227,26 +221,6 @@ public class IntentRecognitionService {
         } catch (IllegalArgumentException ignored) {
             return Optional.empty();
         }
-    }
-
-    private FineIntent fineIntent(PlanRoute route) {
-        return switch (route) {
-            case DIRECT -> FineIntent.KNOWLEDGE_EXPLANATION;
-            case MARKET -> FineIntent.MARKET_DATA;
-            case FUNDAMENTALS -> FineIntent.FUNDAMENTALS;
-            case NEWS -> FineIntent.NEWS_EVENT;
-            case DEEP -> FineIntent.DEEP_RESEARCH;
-        };
-    }
-
-    private IntentGroup intentGroup(PlanRoute route) {
-        return switch (route) {
-            case DIRECT -> IntentGroup.KNOWLEDGE;
-            case MARKET -> IntentGroup.MARKET;
-            case FUNDAMENTALS -> IntentGroup.FUNDAMENTALS;
-            case NEWS -> IntentGroup.NEWS;
-            case DEEP -> IntentGroup.RESEARCH;
-        };
     }
 
     /** 只验证 LLM 自己输出的三个分类字段一致，不替它重新选择 targetRoute。 */

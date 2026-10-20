@@ -190,7 +190,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { getReportReviewActions } from '../../lib/workbench.js'
+import { formatDate, getReportReviewActions, reviewStatusClass as statusClass } from '../../lib/workbench.js'
 
 const props = defineProps({
   detail: {
@@ -282,16 +282,6 @@ function submitReview(action) {
     comment: reviewComment,
     expectedLockVersion: summary.value.lockVersion,
   })
-}
-
-function formatDate(value) {
-  if (!value) return '--'
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString()
-}
-
-function statusClass(status) {
-  return String(status || 'unknown').trim().toLowerCase().replaceAll('_', '-')
 }
 </script>
 

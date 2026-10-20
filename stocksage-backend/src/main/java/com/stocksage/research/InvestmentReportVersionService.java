@@ -1,5 +1,6 @@
 package com.stocksage.research;
 
+import com.stocksage.util.Hashing;
 import com.stocksage.knowledge.ResearchMemoryService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,9 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Comparator;
@@ -140,7 +138,7 @@ public class InvestmentReportVersionService {
                     ));
         }
         appendSortedList(canonical, "citations", state == null ? null : state.getCitations());
-        return sha256(canonical.toString());
+        return Hashing.sha256Hex(canonical.toString());
     }
 
     /**
@@ -158,7 +156,7 @@ public class InvestmentReportVersionService {
         appendField(canonical, "timeSensitivity", state == null || state.getTimeSensitivity() == null
                 ? "UNSPECIFIED" : state.getTimeSensitivity().name());
         appendField(canonical, "dataSnapshotHash", dataHash);
-        return sha256(canonical.toString());
+        return Hashing.sha256Hex(canonical.toString());
     }
 
     /**
@@ -740,21 +738,6 @@ public class InvestmentReportVersionService {
         builder.append('\n');
     }
 
-    /** 生成 UTF-8 文本的十六进制 SHA-256。 */
-    private String sha256(String value) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashed = digest.digest(value.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hex = new StringBuilder(hashed.length * 2);
-            for (byte b : hashed) {
-                hex.append(String.format("%02x", b));
-            }
-            return hex.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 digest is unavailable", e);
-        }
-    }
-
     /** 归一化报告查询和唯一键中的 ticker。 */
     private String normalizeTicker(String value) {
         String normalized = blankToDefault(value, "")
@@ -817,20 +800,6 @@ public class InvestmentReportVersionService {
             List<String> citations,
             List<InvestmentReportReviewSummary> reviewHistory
     ) {
-        /**
-         * 构造不含报告正文和审核历史的兼容详情。
-         *
-         * @param summary 列表摘要及版本元数据
-         * @param evidenceItems 证据表条目
-         * @param citations 来源引用
-         */
-        public ReportDetail(
-                InvestmentReportVersionSummary summary,
-                List<InvestmentReport.EvidenceItem> evidenceItems,
-                List<String> citations
-        ) {
-            this(summary, null, evidenceItems, citations, List.of());
-        }
     }
 
     /** 把可空列表转换为防御性只读副本。 */

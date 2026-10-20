@@ -8,13 +8,12 @@ import java.util.Map;
 /**
  * 把现有 {@link NewsTools#searchNews(String, int)} 暴露为统一能力的本地适配器。
  *
- * <p>上游 Skill 可把它作为 MCP 新闻搜索的 fallback；调用仍经过 CapabilityGateway 的授权、
- * 超时和观测。该适配器只做参数校验与范围收敛，不改变新闻工具的数据源逻辑。</p>
+ * <p>调用经过 CapabilityGateway 的授权、超时和观测。该适配器只做参数校验与范围收敛，不改变新闻工具的数据源逻辑。</p>
  */
 @Component
 public class LocalNewsSearchCapabilityAdapter implements CapabilityAdapter {
 
-    /** 与能力 YAML 和 Skill fallback 引用一致的稳定 ID。 */
+    /** 与能力 YAML 和 Skill 引用一致的稳定 ID。 */
     public static final String ID = "local.news.searchNews";
 
     /** 复用项目既有新闻工具，避免维护第二套本地搜索实现。 */

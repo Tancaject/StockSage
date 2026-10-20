@@ -151,7 +151,7 @@ public class DataServiceClient {
             int status = e.getStatusCode().value();
             return KLineResponse.failure(code, period, "DATA_SERVICE_HTTP_" + status,
                     "K-line data-service returned HTTP " + status + "; check request parameters or service availability.",
-                    status == 429 || status >= 500);
+                    httpRetryable(status));
         } catch (org.springframework.core.codec.DecodingException e) {
             rethrowBudgetFailure(e);
             return KLineResponse.failure(code, period, "INVALID_DATA_SERVICE_RESPONSE",
@@ -159,10 +159,7 @@ public class DataServiceClient {
         } catch (Exception e) {
             rethrowBudgetFailure(e);
             log.warn("K-line data-service request failed: {}", rootMessage(e));
-            Throwable cause = e;
-            while (cause.getCause() != null && cause.getCause() != cause) cause = cause.getCause();
-            Boolean retryable = cause instanceof java.util.concurrent.TimeoutException
-                    || cause instanceof java.net.ConnectException ? Boolean.TRUE : null;
+            Boolean retryable = transportRetryable(e);
             return KLineResponse.failure(code, period, "DATA_SERVICE_UNAVAILABLE",
                     "K-line data-service request failed; check service connectivity and retry.", retryable);
         }
@@ -221,7 +218,7 @@ public class DataServiceClient {
      * @return 多期财报 JSON
      */
     public String getFinancialReports(String code, String period, int years) {
-        String json = cached("financial-report:v4", new String[]{code, period, String.valueOf(years)}, TTL_FINANCIAL_REPORT,
+        String json = cached("financial-report:v6", new String[]{code, period, String.valueOf(years)}, TTL_FINANCIAL_REPORT,
                 () -> fetchFinancialReport(code, period, years));
         return validateFinancialReport(json, period, years);
     }
@@ -237,13 +234,10 @@ public class DataServiceClient {
             int status = error.getStatusCode().value();
             return financialReportError("DATA_SERVICE_HTTP_" + status,
                     "Financial report data-service returned HTTP " + status + "; check the request or service availability.",
-                    status == 429 || status >= 500, period, years);
+                    httpRetryable(status), period, years);
         } catch (Exception error) {
             rethrowBudgetFailure(error);
-            Throwable cause = error;
-            while (cause.getCause() != null && cause.getCause() != cause) cause = cause.getCause();
-            Boolean retryable = cause instanceof java.util.concurrent.TimeoutException
-                    || cause instanceof java.net.ConnectException ? Boolean.TRUE : null;
+            Boolean retryable = transportRetryable(error);
             log.warn("Financial report data-service request failed: {}", rootMessage(error));
             return financialReportError("DATA_SERVICE_UNAVAILABLE",
                     "Financial report data-service request failed; check service connectivity and retry.", retryable, period, years);
@@ -332,12 +326,6 @@ public class DataServiceClient {
                 () -> get("/api/stock/sector?sector={sector}", sector));
     }
 
-    /** @return 主要指数和市场状态等概览 JSON。 */
-    public String getMarketOverview() {
-        return cached("market", new String[]{"overview"}, TTL_MARKET,
-                () -> get("/api/stock/market-overview"));
-    }
-
     // ===== 网页搜索 =====
 
     /**
@@ -352,18 +340,6 @@ public class DataServiceClient {
     }
 
     /**
-     * 执行网页搜索，可选时间范围过滤（默认 basic 检索深度）。
-     *
-     * @param query 搜索词
-     * @param maxResults 最大结果数
-     * @param timeLimit 时间范围 d/w/m/y；非法值按不限制处理
-     * @return 搜索结果或熔断降级 JSON
-     */
-    public String webSearch(String query, int maxResults, String timeLimit) {
-        return webSearch(query, maxResults, timeLimit, false);
-    }
-
-    /**
      * 执行网页搜索，可选时间范围过滤与检索深度。
      *
      * @param timeLimit 时间范围（d/w/m/y），null 或非法值表示不限制时间。
@@ -372,45 +348,7 @@ public class DataServiceClient {
      * @return 搜索结果或熔断降级 JSON
      */
     public String webSearch(String query, int maxResults, String timeLimit, boolean advanced) {
-        if (query == null || query.isBlank() || maxResults < 1 || maxResults > 20) {
-            return invalidSearchRequest("Web search requires a non-empty query and maxResults between 1 and 20.");
-        }
-        String tl = normalizeTimeLimit(timeLimit);
-        String depth = advanced ? "advanced" : "basic";
-        SearchRequest request = new SearchRequest(query, "web", tl, depth, maxResults, null);
-        String json = cached("web-search:v1",
-                new String[]{query, String.valueOf(maxResults), tl == null ? "" : tl, depth}, TTL_SEARCH,
-                () -> tl == null
-                        ? searchWithCircuitBreaker(request, "/api/search/web?q={q}&max_results={max}&depth={d}",
-                                query, maxResults, depth)
-                        : searchWithCircuitBreaker(
-                                request,
-                                "/api/search/web?q={q}&max_results={max}&timelimit={tl}&depth={d}",
-                                query, maxResults, tl, depth));
-        return validateSearch(json, request).toJson();
-    }
-
-    /**
-     * 执行财经新闻搜索，并由熔断器保护上游限流（默认 basic 检索深度）。
-     *
-     * @param query 搜索词
-     * @param maxResults 最大结果数
-     * @return 财经新闻结果或熔断降级 JSON
-     */
-    public String newsSearch(String query, int maxResults) {
-        return newsSearch(query, maxResults, null, false);
-    }
-
-    /**
-     * 执行财经新闻搜索，可选时间范围过滤（默认 basic 检索深度）。
-     *
-     * @param query 搜索词
-     * @param maxResults 最大结果数
-     * @param timeLimit 时间范围 d/w/m；非法值按不限制处理
-     * @return 财经新闻结果或熔断降级 JSON
-     */
-    public String newsSearch(String query, int maxResults, String timeLimit) {
-        return newsSearch(query, maxResults, timeLimit, false);
+        return search("web", "Web", query, maxResults, timeLimit, advanced);
     }
 
     /**
@@ -421,20 +359,27 @@ public class DataServiceClient {
      * @return 财经新闻结果或熔断降级 JSON
      */
     public String newsSearch(String query, int maxResults, String timeLimit, boolean advanced) {
+        return search("news", "News", query, maxResults, timeLimit, advanced);
+    }
+
+    /** 网页与新闻搜索共用的校验、缓存和熔断流程；searchType 同时决定端点路径和缓存类别。 */
+    private String search(String searchType, String label, String query, int maxResults,
+                          String timeLimit, boolean advanced) {
         if (query == null || query.isBlank() || maxResults < 1 || maxResults > 20) {
-            return invalidSearchRequest("News search requires a non-empty query and maxResults between 1 and 20.");
+            return invalidSearchRequest(label + " search requires a non-empty query and maxResults between 1 and 20.");
         }
         String tl = normalizeTimeLimit(timeLimit);
         String depth = advanced ? "advanced" : "basic";
-        SearchRequest request = new SearchRequest(query, "news", tl, depth, maxResults, null);
-        String json = cached("news-search:v1",
+        SearchRequest request = new SearchRequest(query, searchType, tl, depth, maxResults, null);
+        String path = "/api/search/" + searchType;
+        String json = cached(searchType + "-search:v1",
                 new String[]{query, String.valueOf(maxResults), tl == null ? "" : tl, depth}, TTL_SEARCH,
                 () -> tl == null
-                        ? searchWithCircuitBreaker(request, "/api/search/news?q={q}&max_results={max}&depth={d}",
+                        ? searchWithCircuitBreaker(request, path + "?q={q}&max_results={max}&depth={d}",
                                 query, maxResults, depth)
                         : searchWithCircuitBreaker(
                                 request,
-                                "/api/search/news?q={q}&max_results={max}&timelimit={tl}&depth={d}",
+                                path + "?q={q}&max_results={max}&timelimit={tl}&depth={d}",
                                 query, maxResults, tl, depth));
         return validateSearch(json, request).toJson();
     }
@@ -498,7 +443,7 @@ public class DataServiceClient {
      * @return 校验后的 SEC 年度公司事实；失败时为明确的 ERROR 状态
      */
     public SecFinancialsResponse getEdgarXbrl(String ticker) {
-        String json = cached("edgar-xbrl:v3", new String[]{ticker}, TTL_EDGAR_XBRL,
+        String json = cached("edgar-xbrl:v5", new String[]{ticker}, TTL_EDGAR_XBRL,
                 () -> objectMapper.valueToTree(fetchEdgarXbrl(ticker)).toString());
         try {
             return SecFinancialsResponse.fromJson(objectMapper.reader()
@@ -521,14 +466,11 @@ public class DataServiceClient {
                 int status = error.getStatusCode().value();
                 return SecFinancialsResponse.failure(ticker, "DATA_SERVICE_HTTP_" + status,
                         "SEC financials data-service returned HTTP " + status + "; check the ticker or service availability.",
-                        status == 429 || status >= 500);
+                        httpRetryable(status));
             } catch (Exception error) {
                 rethrowBudgetFailure(error);
                 if (attempt < MAX_RETRIES) continue;
-                Throwable cause = error;
-                while (cause.getCause() != null && cause.getCause() != cause) cause = cause.getCause();
-                Boolean retryable = cause instanceof java.util.concurrent.TimeoutException
-                        || cause instanceof java.net.ConnectException ? Boolean.TRUE : null;
+                Boolean retryable = transportRetryable(error);
                 log.warn("SEC financials data-service request failed: {}", rootMessage(error));
                 return SecFinancialsResponse.failure(ticker, "DATA_SERVICE_UNAVAILABLE",
                         "SEC financials data-service request failed; check service connectivity and retry.", retryable);
@@ -620,13 +562,10 @@ public class DataServiceClient {
                 int status = error.getStatusCode().value();
                 failure = request.failure("DATA_SERVICE_HTTP_" + status,
                         "Search data-service returned HTTP " + status + "; check the request or service availability.",
-                        status == 429 || status >= 500);
+                        httpRetryable(status));
             } catch (Exception error) {
                 rethrowBudgetFailure(error);
-                Throwable cause = error;
-                while (cause.getCause() != null && cause.getCause() != cause) cause = cause.getCause();
-                Boolean retryable = cause instanceof java.util.concurrent.TimeoutException
-                        || cause instanceof java.net.ConnectException ? Boolean.TRUE : null;
+                Boolean retryable = transportRetryable(error);
                 failure = request.failure("DATA_SERVICE_UNAVAILABLE",
                         "Search data-service request failed; check service connectivity and retry.", retryable);
             }
@@ -800,6 +739,19 @@ public class DataServiceClient {
     /**
      * 读取异常链最底层的错误消息。
      */
+    /** 429 和 5xx 视为可重试的 HTTP 失败。 */
+    private static boolean httpRetryable(int status) {
+        return status == 429 || status >= 500;
+    }
+
+    /** 根因是超时或连接失败时标记为可重试；其他传输失败的可重试性未知。 */
+    private static Boolean transportRetryable(Throwable error) {
+        Throwable cause = error;
+        while (cause.getCause() != null && cause.getCause() != cause) cause = cause.getCause();
+        return cause instanceof java.util.concurrent.TimeoutException
+                || cause instanceof java.net.ConnectException ? Boolean.TRUE : null;
+    }
+
     private String rootMessage(Throwable error) {
         Throwable current = error;
         while (current.getCause() != null) {

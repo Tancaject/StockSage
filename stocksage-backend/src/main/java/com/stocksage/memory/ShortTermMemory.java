@@ -1,7 +1,5 @@
 package com.stocksage.memory;
 
-import com.stocksage.model.dto.MemoryCompressionResult;
-import com.stocksage.model.dto.MemoryContextDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -61,25 +59,6 @@ public class ShortTermMemory {
     }
 
     /**
-     * 返回某个会话当前短期记忆快照。
-     *
-     * <p>该方法主要供调试接口使用，会同时返回消息列表、数量、窗口上限和 TTL 配置。</p>
-     *
-     * @param conversationId 会话 ID
-     * @return 消息列表及当前窗口配置
-     */
-    public MemoryContextDTO getContextSnapshot(Long conversationId) {
-        List<String> messages = getContext(conversationId);
-        return MemoryContextDTO.builder()
-                .conversationId(conversationId)
-                .messages(messages)
-                .messageCount(messages.size())
-                .maxContextMessages(maxContextMessages)
-                .ttlHours(ttlHours)
-                .build();
-    }
-
-    /**
      * 读取 Redis 中某个会话的可注入上下文列表。
      *
      * @param conversationId 会话 ID
@@ -103,9 +82,8 @@ public class ShortTermMemory {
      * @param conversationId 会话 ID
      * @param role 消息角色
      * @param content 消息正文
-     * @return 写入后的短期记忆快照
      */
-    public MemoryContextDTO addMessage(Long conversationId, String role, String content) {
+    public void addMessage(Long conversationId, String role, String content) {
         try {
             String value = normalizeRole(role) + ": " + content.trim();
             String key = key(conversationId);
@@ -113,10 +91,8 @@ public class ShortTermMemory {
             refreshTtl(key);
             compressIfNeeded(conversationId);
             markRedisAvailable();
-            return getContextSnapshot(conversationId);
         } catch (Exception e) {
             warnRedisUnavailable("append", conversationId, e);
-            return emptySnapshot(conversationId);
         }
     }
 
@@ -124,19 +100,12 @@ public class ShortTermMemory {
      * 当 Redis 列表超过配置的提示词窗口时压缩较早轮次，并原样保留最近消息。
      *
      * @param conversationId 会话 ID
-     * @return 是否压缩以及压缩前后的消息数量
      */
-    public MemoryCompressionResult compressIfNeeded(Long conversationId) {
+    public void compressIfNeeded(Long conversationId) {
         List<String> messages = getContext(conversationId);
         int beforeCount = messages.size();
         if (beforeCount <= maxContextMessages) {
-            return MemoryCompressionResult.builder()
-                    .conversationId(conversationId)
-                    .compressed(false)
-                    .beforeCount(beforeCount)
-                    .afterCount(beforeCount)
-                    .maxContextMessages(maxContextMessages)
-                    .build();
+            return;
         }
 
         int keepRecent = Math.max(4, maxContextMessages / 2);
@@ -151,14 +120,6 @@ public class ShortTermMemory {
         replaceContext(conversationId, compacted);
         log.debug("Compressed short-term memory for conversationId={} from {} to {} messages",
                 conversationId, beforeCount, compacted.size());
-
-        return MemoryCompressionResult.builder()
-                .conversationId(conversationId)
-                .compressed(true)
-                .beforeCount(beforeCount)
-                .afterCount(compacted.size())
-                .maxContextMessages(maxContextMessages)
-                .build();
     }
 
     /**
@@ -279,17 +240,6 @@ public class ShortTermMemory {
     /** 刷新短期记忆 key 的过期时间。 */
     private void refreshTtl(String key) {
         stringRedisTemplate.expire(key, Duration.ofHours(ttlHours));
-    }
-
-    /** Redis 降级时返回与正常接口同结构的空快照。 */
-    private MemoryContextDTO emptySnapshot(Long conversationId) {
-        return MemoryContextDTO.builder()
-                .conversationId(conversationId)
-                .messages(List.of())
-                .messageCount(0)
-                .maxContextMessages(maxContextMessages)
-                .ttlHours(ttlHours)
-                .build();
     }
 
     /** 在一段连续故障中只记录第一次 Redis 不可用警告。 */

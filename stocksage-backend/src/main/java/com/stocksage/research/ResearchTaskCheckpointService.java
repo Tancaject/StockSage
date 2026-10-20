@@ -177,18 +177,6 @@ public class ResearchTaskCheckpointService {
     }
 
     /**
-     * 仅由当前 owner 删除未完成任务检查点。
-     *
-     * @param taskId 任务 ID
-     * @param leaseToken 当前 owner token
-     */
-    @Transactional
-    public void deleteForTask(Long taskId, String leaseToken) {
-        requireOwnership(taskId, leaseToken);
-        repository.deleteByTaskId(taskId);
-    }
-
-    /**
      * 删除成功任务的检查点；先锁定 SUCCEEDED 任务，拒绝提前清理。
      *
      * @param taskId 已完成任务 ID
@@ -199,36 +187,6 @@ public class ResearchTaskCheckpointService {
             throw new CheckpointCleanupRejectedException(taskId);
         }
         repository.deleteByTaskId(taskId);
-    }
-
-    /**
-     * 将分析状态序列化为新的检查点实体，主要供同包测试验证映射。
-     *
-     * @param taskId 任务 ID
-     * @param state 当前分析状态
-     * @param stage 已完成阶段
-     * @param roundsCompleted 已完成辩论轮数
-     * @param plannedRounds 当前授权到的轮次上界
-     * @return 尚未持久化的检查点实体
-     */
-    ResearchTaskCheckpoint toEntity(
-            Long taskId,
-            AnalysisState state,
-            ResearchTask.Stage stage,
-            int roundsCompleted,
-            int plannedRounds
-    ) {
-        ResearchTaskCheckpoint entity = new ResearchTaskCheckpoint();
-        entity.setTaskId(taskId);
-        entity.setStageCompleted(stage);
-        entity.setDebateRoundsCompleted(roundsCompleted);
-        entity.setPlannedRounds(plannedRounds);
-        try {
-            entity.setPayloadJson(serialize(state));
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Unable to serialize research task checkpoint", e);
-        }
-        return entity;
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.stocksage.research;
 
+import com.stocksage.util.Hashing;
 import com.stocksage.agent.AgentStep;
 import com.stocksage.agent.DeepEvidenceLoopModel;
 import com.stocksage.capability.CapabilityException;
@@ -36,11 +37,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -486,12 +484,7 @@ public class DeepEvidenceLoopService {
         private String effectKey(int round, int index, DeepEvidenceToolMenu.Call call) {
             String material = taskId + "|" + POLICY_VERSION + "|" + round + "|" + index + "|"
                     + call.capabilityId() + "|" + new TreeMap<>(call.arguments());
-            try {
-                return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
-                        .digest(material.getBytes(StandardCharsets.UTF_8)));
-            } catch (java.security.NoSuchAlgorithmException impossible) {
-                throw new IllegalStateException(impossible);
-            }
+            return Hashing.sha256Hex(material);
         }
 
         /** 每种工具结果写入哪个证据维度；结构化工具沿用基础取证的工具名以复用同一套解析。 */

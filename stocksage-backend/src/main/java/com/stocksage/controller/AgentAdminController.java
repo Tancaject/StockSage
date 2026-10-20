@@ -54,7 +54,7 @@ public class AgentAdminController {
     }
 
     /**
-     * 获取能力、工具执行、端到端耗时与 MCP 状态。
+     * 获取能力、工具执行与端到端耗时。
      *
      * @return 脱敏后的 Agent 运行快照
      */
@@ -65,7 +65,7 @@ public class AgentAdminController {
 
     /**
      * 评测成绩单记录的运行配置身份：各角色客户端默认值（模型、输出上限、思考设置、系统提示词哈希）、
-     * 模型分档、对话供应商（只记主机名和路径哈希）和 DEEP 补证/取证循环配置。不含密钥。
+     * 模型分档、对话供应商（只记主机名和路径哈希）和 DEEP 取证循环配置。不含密钥。
      */
     @GetMapping("/model-config")
     public java.util.Map<String, Object> modelConfig() {

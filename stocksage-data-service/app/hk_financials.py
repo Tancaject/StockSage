@@ -11,6 +11,7 @@ from pydantic import (
     ValidationError, field_serializer, field_validator, model_validator,
 )
 
+from app.contract_dates import business_date
 from app.sec_financials import FinancialReportPeriod
 from app.services.market_resolver import StockRoute, route_metadata
 
@@ -36,13 +37,7 @@ class FinancialRow(BaseModel):
     @field_validator("REPORT_DATE", "START_DATE", "STD_REPORT_DATE", mode="before")
     @classmethod
     def require_business_date(cls, value):
-        if value is None or type(value) is Date:
-            return value
-        if isinstance(value, str):
-            parsed = Date.fromisoformat(value)
-            if parsed.isoformat() == value:
-                return parsed
-        raise ValueError("HK financial dates must be YYYY-MM-DD business dates")
+        return business_date(value, "HK financial dates must be YYYY-MM-DD business dates")
 
     @field_validator("*", mode="before")
     @classmethod

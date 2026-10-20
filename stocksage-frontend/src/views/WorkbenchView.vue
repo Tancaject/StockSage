@@ -119,7 +119,6 @@
           v-model:items="watchlist"
           :selected="selectedTicker"
           @select="selectedTicker = $event"
-          @add="handleWatchlistAdd"
           @remove="handleWatchlistRemove"
           class="terminal-left-column"
         />
@@ -144,7 +143,7 @@
                   :latest-report="cockpit.latestReport"
                   :report-versions="reportVersionRows"
                   :focus-options="focusOptions"
-                  :focus-option-labels="focusOptionLabels"
+                  :focus-option-labels="FOCUS_LABELS"
                   :focus-areas="selectedFocusAreas"
                   @update:focus-areas="selectedFocusAreas = $event"
                   @open-report="handleOpenReport"
@@ -351,10 +350,13 @@ import {
   buildResearchPrompt,
   buildWatchlistFromProfile,
   buildTickerSuggestions,
+  FOCUS_LABELS,
+  formatDate,
   markHealthCheck,
   normalizeInvestmentReportDetail,
   normalizeCockpit,
   normalizeTicker,
+  reviewStatusClass,
   summarizeHealthChecks,
   summarizeReportVersions,
 } from '../lib/workbench.js'
@@ -393,14 +395,6 @@ const activeTab = ref('research')
 const selectedTicker = ref('NVDA')
 const watchlist = ref(loadWatchlist())
 const focusOptions = ['valuation', 'growth', 'risks', 'recent filings', 'news', 'technical setup']
-const focusOptionLabels = {
-  valuation: '估值',
-  growth: '增长',
-  risks: '风险',
-  'recent filings': '最新披露',
-  news: '新闻',
-  'technical setup': '技术形态',
-}
 const selectedFocusAreas = ref(['valuation', 'risks', 'recent filings'])
 const reportTicker = ref('NVDA')
 const healthLoading = ref(false)
@@ -832,7 +826,6 @@ async function loadStockCockpit({ silent = false } = {}) {
       chartStatus: 'DEGRADED',
       chartMessage: '行情数据暂时不可用，请稍后重试。',
       taskTimeline: [],
-      evidencePreview: [],
     }
   } finally {
     if (requestId === cockpitRequestId && !silent) {
@@ -917,17 +910,6 @@ async function handleReportReview({ status, comment, expectedLockVersion }) {
   } finally {
     reportReviewSaving.value = false
   }
-}
-
-function reviewStatusClass(status) {
-  return String(status || 'unknown').trim().toLowerCase().replaceAll('_', '-')
-}
-
-function formatDate(value) {
-  if (!value) return '--'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return String(value)
-  return date.toLocaleString()
 }
 
 function loadWatchlist() {
@@ -1102,8 +1084,7 @@ function handleSearchSelect(raw) {
 .rail-button,
 .quiet-button,
 .primary-button,
-.action-strip button,
-.file-button {
+.action-strip button {
   min-height: 32px;
   display: inline-flex;
   align-items: center;
@@ -1241,16 +1222,6 @@ function handleSearchSelect(raw) {
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.eyebrow,
-.panel-kicker {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
 .workbench-topbar h1,
 .panel h2 {
   margin: 3px 0 0;
@@ -1269,8 +1240,7 @@ function handleSearchSelect(raw) {
 }
 
 .quiet-button,
-.primary-button,
-.file-button {
+.primary-button {
   padding: 0 12px;
 }
 
@@ -1286,14 +1256,12 @@ function handleSearchSelect(raw) {
   border-color: var(--border-strong);
 }
 
-.primary-button,
-.file-button {
+.primary-button {
   background: var(--accent);
   color: #fff;
 }
 
-.primary-button:hover:not(:disabled),
-.file-button:hover {
+.primary-button:hover:not(:disabled) {
   background: var(--accent-dark);
 }
 
@@ -1778,18 +1746,6 @@ function handleSearchSelect(raw) {
   text-transform: none;
 }
 
-.file-button {
-  position: relative;
-  overflow: hidden;
-}
-
-.file-button input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
 .score-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1841,19 +1797,10 @@ function handleSearchSelect(raw) {
   text-transform: uppercase;
 }
 
-.gate-list,
-.case-list {
+.gate-list {
   display: grid;
   gap: 7px;
   margin-top: 14px;
-}
-
-.metric-section {
-  margin-top: 16px;
-}
-
-.gate-list.compact {
-  margin-top: 8px;
 }
 
 .insight-grid {
@@ -1889,8 +1836,7 @@ function handleSearchSelect(raw) {
   background: var(--accent-soft);
 }
 
-.gate-row,
-.case-row {
+.gate-row {
   min-height: 44px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1908,39 +1854,6 @@ function handleSearchSelect(raw) {
   text-transform: none;
 }
 
-.gate-row.missing {
-  opacity: 0.72;
-}
-
-.case-row {
-  grid-template-columns: minmax(0, 1fr) auto auto;
-}
-
-.case-row p,
-.context-list {
-  grid-column: 1 / -1;
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-.context-list {
-  padding-left: 18px;
-}
-
-.case-row strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.case-row span,
-.case-row small {
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 700;
-}
 
 /* ==========================================================================
    彭博终端风格三栏式宽屏布局 (Bloomberg Terminal Style)
@@ -1981,10 +1894,6 @@ function handleSearchSelect(raw) {
   gap: 12px;
 }
 
-.terminal-right-stack :deep(.news-panel) {
-  flex: 1 0 280px;
-}
-
 .task-monitor-panel {
   flex: 0 0 auto;
   padding: 14px;
@@ -2011,33 +1920,6 @@ function handleSearchSelect(raw) {
   box-shadow: var(--shadow-soft);
   padding: 16px;
   margin-bottom: 16px;
-}
-
-.smart-lens-tabs :deep(.el-tabs__header) {
-  margin: 0 0 16px 0;
-}
-
-.smart-lens-tabs :deep(.el-tabs__nav-wrap::after) {
-  height: 1px;
-  background-color: var(--border-soft);
-}
-
-.smart-lens-tabs :deep(.el-tabs__item) {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-secondary);
-  height: 38px;
-  line-height: 38px;
-  padding: 0 16px;
-}
-
-.smart-lens-tabs :deep(.el-tabs__item.is-active) {
-  color: var(--accent);
-}
-
-.smart-lens-tabs :deep(.el-tabs__active-bar) {
-  background-color: var(--accent);
-  height: 2px;
 }
 
 .topology-tab-panel {
@@ -2114,8 +1996,7 @@ function handleSearchSelect(raw) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .watch-row,
-  .case-row {
+  .watch-row {
     grid-template-columns: 1fr;
   }
 

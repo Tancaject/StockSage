@@ -16,7 +16,7 @@ import java.time.Duration;
 import java.util.Map;
 
 /**
- * 为本地和 MCP 能力生成一致的执行观测。
+ * 为本地能力生成一致的执行观测。
  *
  * <p>{@link CapabilityGateway} 在调用前后通知本组件；组件把简短 action/observation 写入
  * {@link TraceEventStore} 供 SSE 实时展示，把结构化步骤交给 {@link TraceService} 持久化，
@@ -43,9 +43,7 @@ public class CapabilityInvocationObserver {
      * @param context 当前调用链路上下文
      */
     public void started(CapabilityDescriptor descriptor, CapabilityInvocationContext context) {
-        String providerLabel = descriptor.providerType() == CapabilityDescriptor.ProviderType.MCP
-                ? "外部 MCP" : "本地";
-        emit(context, "action", providerLabel + "能力: " + descriptor.id());
+        emit(context, "action", "本地能力: " + descriptor.id());
     }
 
     /**

@@ -106,7 +106,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Document, Refresh } from '@element-plus/icons-vue'
-import { buildLatestBriefDigest } from '../../lib/workbench.js'
+import { buildLatestBriefDigest, formatDate } from '../../lib/workbench.js'
 
 const props = defineProps({
   ticker: {
@@ -161,13 +161,6 @@ function handleFocusChange(area, checked) {
     if (idx !== -1) current.splice(idx, 1)
   }
   emit('update:focusAreas', current)
-}
-
-function formatDate(value) {
-  if (!value) return '--'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return String(value)
-  return date.toLocaleString()
 }
 </script>
 

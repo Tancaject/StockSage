@@ -14,17 +14,19 @@ from contextvars import copy_context
 import concurrent.futures
 import importlib
 import re
+from math import isfinite
 
 import httpx
 import pandas as pd
 
-from app.services.technical_indicators import calculate_technical_indicators
+from app.services.technical_indicators import kline_technical_indicators
 
 
 # akshare 目录函数（stock_hk_spot / stock_info_*_name_code 等）内部用 requests 拉大表，
 # 且不带任何超时；上游网络异常时会无限期挂起，远超 Java 客户端 10s 预算。
 # 这里限制调用方等待时长；底层 SDK 线程无法强制取消，不能保证其退出时间。
 _CATALOG_TIMEOUT_SECONDS = 12.0
+_HK_INDICATOR_TIMEOUT_SECONDS = 8.0
 _catalog_executor = concurrent.futures.ThreadPoolExecutor(
     max_workers=4, thread_name_prefix="akshare-catalog")
 
@@ -52,39 +54,24 @@ class AkshareService:
         "公司", "股票", "港股", "美股", "a股", "财报", "年报", "季报",
     }
 
+    # 东方财富中文列名 → K 线契约字段；字典顺序即输出列顺序。
+    _HK_KLINE_COLUMNS = {
+        "日期": "date", "开盘": "open", "最高": "high", "最低": "low", "收盘": "close",
+        "成交量": "volume", "成交额": "amount", "涨跌幅": "pctChg", "涨跌额": "change",
+        "换手率": "turnoverRate",
+    }
+    _A_SHARE_KLINE_COLUMNS = {
+        "日期": "date", "股票代码": "code", "开盘": "open", "最高": "high", "最低": "low",
+        "收盘": "close", "成交量": "volume", "成交额": "amount", "振幅": "amplitude",
+        "涨跌幅": "pctChg", "涨跌额": "change", "换手率": "turnoverRate",
+    }
+
     def get_hk_kline(self, symbol: str, period: str, days: int) -> dict:
         """通过 AKShare 东方财富端点获取港股日线、周线或月线。"""
-        ak = self._ak()
         code = self._hk_code(symbol)
-        period_map = {"daily": "daily", "weekly": "weekly", "monthly": "monthly"}
-        ak_period = period_map.get(period, "daily")
-
-        end = datetime.now()
-        start = end - timedelta(days=days)
-        df = budget_call(ak.stock_hk_hist,
-            symbol=code,
-            period=ak_period,
-            start_date=start.strftime("%Y%m%d"),
-            end_date=end.strftime("%Y%m%d"),
-            adjust="qfq",
-        )
-        if df is None or df.empty:
+        records = self._fetch_kline(self._ak().stock_hk_hist, code, period, days, self._HK_KLINE_COLUMNS)
+        if records is None:
             return {"symbol": code, "count": 0, "data": [], "message": "No HK data found from AKShare"}
-
-        df = df.rename(columns={
-            "日期": "Date",
-            "开盘": "Open",
-            "最高": "High",
-            "最低": "Low",
-            "收盘": "Close",
-            "成交量": "Volume",
-            "成交额": "Amount",
-            "涨跌幅": "PctChange",
-            "涨跌额": "Change",
-            "换手率": "TurnoverRate",
-        })
-        columns = [col for col in ["Date", "Open", "High", "Low", "Close", "Volume", "Amount", "PctChange", "Change", "TurnoverRate"] if col in df.columns]
-        records = df[columns].tail(max(1, days)).to_dict(orient="records")
         return {
             "symbol": code,
             "period": period,
@@ -95,22 +82,9 @@ class AkshareService:
 
     def get_a_share_kline(self, symbol: str, period: str, days: int) -> dict:
         """Fetch A-share OHLCV bars through AKShare's Eastmoney-backed endpoint."""
-        ak = self._ak()
         code = self._a_share_code(symbol)
-        request_days = max(1, int(days or 30))
-        period_map = {"daily": "daily", "weekly": "weekly", "monthly": "monthly"}
-        ak_period = period_map.get(period, "daily")
-
-        end = datetime.now()
-        start = end - timedelta(days=request_days)
-        df = budget_call(ak.stock_zh_a_hist,
-            symbol=code,
-            period=ak_period,
-            start_date=start.strftime("%Y%m%d"),
-            end_date=end.strftime("%Y%m%d"),
-            adjust="qfq",
-        )
-        if df is None or df.empty:
+        records = self._fetch_kline(self._ak().stock_zh_a_hist, code, period, days, self._A_SHARE_KLINE_COLUMNS)
+        if records is None:
             return {
                 "code": symbol,
                 "symbol": code,
@@ -121,31 +95,7 @@ class AkshareService:
                 "message": "No A-share data found from AKShare",
             }
 
-        df = df.rename(columns={
-            "\u65e5\u671f": "date",
-            "\u80a1\u7968\u4ee3\u7801": "code",
-            "\u5f00\u76d8": "open",
-            "\u6536\u76d8": "close",
-            "\u6700\u9ad8": "high",
-            "\u6700\u4f4e": "low",
-            "\u6210\u4ea4\u91cf": "volume",
-            "\u6210\u4ea4\u989d": "amount",
-            "\u632f\u5e45": "amplitude",
-            "\u6da8\u8dcc\u5e45": "pctChg",
-            "\u6da8\u8dcc\u989d": "change",
-            "\u6362\u624b\u7387": "turnoverRate",
-        })
-        columns = [
-            col for col in [
-                "date", "code", "open", "high", "low", "close", "volume", "amount",
-                "amplitude", "pctChg", "change", "turnoverRate",
-            ]
-            if col in df.columns
-        ]
-        records = [
-            {str(k): self._json_value(v) for k, v in row.items()}
-            for row in df[columns].tail(request_days).to_dict(orient="records")
-        ]
+        records = [{str(k): self._json_value(v) for k, v in row.items()} for row in records]
         return {
             "code": symbol,
             "symbol": code,
@@ -156,78 +106,67 @@ class AkshareService:
         }
 
     def get_hk_stock_info(self, symbol: str) -> dict:
-        """通过轻量东方财富 suggest API 获取港股基础字段。
+        """港股名称取自轻量东方财富 suggest API，估值与盈利指标取自东方财富港股 F10 主要指标。
 
         这里避免拉取完整 AKShare 港股表：stock_hk_spot_em 和 stock_hk_spot
         都可能阻塞过久，在对话预取期间触发 Java 工具超时。
         """
         code = self._hk_code(symbol)
         row = self._hk_suggest_row(code)
-        if not row:
-            return {
-                "symbol": code,
-                "currency": "HKD",
-                "exchange": "HKEX",
-                "provider": "eastmoney_suggest",
-                "message": "No lightweight HK metadata found",
-            }
+        indicators, indicator_error = {}, None
+        try:
+            indicators = self._hk_main_indicators(code)
+        except Exception as e:
+            check_budget(e)
+            indicator_error = str(e)
 
-        return {
+        payload = {
             "symbol": code,
             "name": row.get("shortName") or row.get("longName"),
             "shortName": row.get("shortName"),
             "longName": row.get("longName"),
-            "price": None,
-            "change": None,
-            "pctChange": None,
-            "open": None,
-            "high": None,
-            "low": None,
-            "prevClose": None,
-            "volume": None,
-            "amount": None,
-            "pe": None,
-            "marketCap": None,
+            **indicators,
             "currency": "HKD",
             "exchange": "HKEX",
-            "provider": row.get("provider") or "eastmoney_suggest",
-            "message": "Lightweight HK metadata returned; use K-line or financial-report endpoints for richer data.",
-            "raw": row,
+            "provider": "eastmoney_f10" if indicators else (row.get("provider") or "eastmoney_suggest"),
         }
+        if indicators:
+            payload["notes"] = ("pe/pb are TTM; marketCap/hkMarketCap in HKD; roe/roa/netMargin (%) are as reported "
+                                "for the latest reporting period and may be interim, not annualized.")
+        elif indicator_error:
+            payload["message"] = f"HK valuation indicators unavailable: {indicator_error}"
+        else:
+            payload["message"] = "No HK valuation indicators found from Eastmoney F10"
+        return payload
+
+    # 东方财富港股 F10 主要指标列 → /financial 字段；缺失或非有限值保持 None。
+    _HK_MAIN_INDICATOR_COLUMNS = {
+        "市盈率": "pe", "市净率": "pb", "总市值(港元)": "marketCap", "港股市值(港元)": "hkMarketCap",
+        "股东权益回报率(%)": "roe", "总资产回报率(%)": "roa", "销售净利率(%)": "netMargin",
+        "股息率TTM(%)": "dividendYieldTtm",
+    }
+
+    def _hk_main_indicators(self, code: str) -> dict:
+        # 该 AKShare 函数内部 requests 不带超时，需限制等待时长。
+        df = _call_with_timeout(
+            lambda: self._ak().stock_hk_financial_indicator_em(symbol=code),
+            _HK_INDICATOR_TIMEOUT_SECONDS, "HK main indicators")
+        if df is None or df.empty:
+            return {}
+        first = df.iloc[0]
+        values = {}
+        for column, field in self._HK_MAIN_INDICATOR_COLUMNS.items():
+            value = self._json_value(first.get(column)) if column in first.index else None
+            values[field] = (value if isinstance(value, (int, float)) and not isinstance(value, bool) and isfinite(value)
+                            else None)
+        return values if any(value is not None for value in values.values()) else {}
 
     def search_hk_symbols(self, query: str, max_results: int = 10) -> dict:
         """从 AKShare 港股目录按代码或名称搜索港股符号。"""
-        q = (query or "").strip().lower()
-        if not q:
-            return {"query": query, "count": 0, "results": []}
-
-        try:
-            df = self._hk_search_catalog()
-        except Exception as e:
-            check_budget(e)
-            return {"query": query, "count": 0, "results": [], "error": str(e)}
-
-        results: list[dict] = []
-        query_compact = self._compact_text(query)
-        code_query = q.replace(".hk", "").replace("hk:", "").replace("hk", "").lstrip("0")
-        for _, row in df.iterrows():
-            code = str(row.get("代码", "")).zfill(5)
-            chinese_name = str(row.get("中文名称", row.get("名称", "")))
-            english_name = str(row.get("英文名称", ""))
-            score = self._match_score(query_compact, code_query, code, chinese_name, english_name)
-            if score > 0:
-                results.append({
-                    "symbol": f"{code}.HK",
-                    "shortName": chinese_name,
-                    "longName": chinese_name,
-                    "englishName": english_name,
-                    "exchange": "HKEX",
-                    "quoteType": "EQUITY",
-                    "score": score,
-                    "provider": "akshare_stock_hk_spot",
-                })
-        results.sort(key=lambda item: item.get("score", 0), reverse=True)
-        return {"query": query, "count": len(results[:max_results]), "results": results[:max_results]}
+        return self._search_catalog(
+            query, max_results, self._hk_search_catalog, "akshare_stock_hk_spot",
+            lambda q: q.replace(".hk", "").replace("hk:", "").replace("hk", "").lstrip("0"),
+        )
 
     def search_symbols(self, query: str, max_results: int = 10) -> dict:
         """通过东方财富公开 suggest API 搜索 A 股、港股和美股候选。"""
@@ -273,38 +212,30 @@ class AkshareService:
 
     def search_a_symbols(self, query: str, max_results: int = 10) -> dict:
         """从 AKShare 交易所代码表按代码或名称搜索 A 股符号。"""
+        return self._search_catalog(
+            query, max_results, self._a_share_catalog, "akshare_a_share_code_table",
+            lambda q: re.sub(r"\D", "", q),
+        )
+
+    def _search_catalog(self, query: str, max_results: int, load_catalog, provider: str, code_query_of) -> dict:
+        """按代码或名称给目录条目打分，同分保持目录顺序。"""
         q = (query or "").strip().lower()
         if not q:
             return {"query": query, "count": 0, "results": []}
 
         try:
-            df = self._a_share_catalog()
+            entries = load_catalog()
         except Exception as e:
             check_budget(e)
             return {"query": query, "count": 0, "results": [], "error": str(e)}
 
         results: list[dict] = []
         query_compact = self._compact_text(query)
-        code_query = re.sub(r"\D", "", q)
-        for _, row in df.iterrows():
-            code = str(row.get("code", ""))
-            short_name = str(row.get("shortName", ""))
-            long_name = str(row.get("longName", ""))
-            company_name = str(row.get("companyName", ""))
-            score = self._match_score(query_compact, code_query, code, short_name, long_name, company_name)
+        code_query = code_query_of(q)
+        for code, compact_names, item in entries:
+            score = self._match_score(query_compact, code_query, code, compact_names)
             if score > 0:
-                exchange = row.get("exchange", "")
-                prefix = {"SH": "sh", "SZ": "sz", "BJ": "bj"}.get(exchange, "")
-                results.append({
-                    "symbol": f"{prefix}.{code}" if prefix else code,
-                    "shortName": short_name,
-                    "longName": long_name or company_name,
-                    "companyName": company_name,
-                    "exchange": exchange,
-                    "quoteType": "EQUITY",
-                    "score": score,
-                    "provider": "akshare_a_share_code_table",
-                })
+                results.append({**item, "score": score, "provider": provider})
         results.sort(key=lambda item: item.get("score", 0), reverse=True)
         return {"query": query, "count": len(results[:max_results]), "results": results[:max_results]}
 
@@ -360,13 +291,7 @@ class AkshareService:
         if not kline["data"]:
             return {"symbol": self._hk_code(symbol), "indicators": {}, "message": "No HK kline data"}
 
-        df = pd.DataFrame(kline["data"])
-        df["Close"] = pd.to_numeric(df["Close"], errors="coerce")
-        result = calculate_technical_indicators(
-            df["Close"],
-            indicators,
-        )
-
+        result = kline_technical_indicators(kline["data"], indicators)
         return {"symbol": self._hk_code(symbol), "indicators": result, "provider": "akshare"}
 
     def get_a_share_technical_indicators(self, symbol: str, indicators: list[str]) -> dict:
@@ -381,13 +306,7 @@ class AkshareService:
                 "message": "No A-share kline data",
             }
 
-        df = pd.DataFrame(kline["data"])
-        df["close"] = pd.to_numeric(df["close"], errors="coerce")
-        result = calculate_technical_indicators(
-            df["close"],
-            indicators,
-        )
-
+        result = kline_technical_indicators(kline["data"], indicators)
         return {"code": symbol, "symbol": code, "indicators": result, "provider": "akshare"}
 
     def _ak(self):
@@ -395,6 +314,25 @@ class AkshareService:
             return importlib.import_module("akshare")
         except ImportError as e:
             raise RuntimeError("AKShare is not installed. Run: pip install -r requirements.txt") from e
+
+    @staticmethod
+    def _fetch_kline(fetch, code: str, period: str, days: int, columns: dict[str, str]) -> list[dict] | None:
+        """取前复权 K 线并改用契约字段名，保留最近 days 行；无数据时返回 None。"""
+        request_days = max(1, int(days or 30))
+        end = datetime.now()
+        start = end - timedelta(days=request_days)
+        df = budget_call(fetch,
+            symbol=code,
+            period=period if period in {"daily", "weekly", "monthly"} else "daily",
+            start_date=start.strftime("%Y%m%d"),
+            end_date=end.strftime("%Y%m%d"),
+            adjust="qfq",
+        )
+        if df is None or df.empty:
+            return None
+        df = df.rename(columns=columns)
+        selected = [col for col in columns.values() if col in df.columns]
+        return df[selected].tail(request_days).to_dict(orient="records")
 
     @staticmethod
     def _hk_code(symbol: str) -> str:
@@ -422,9 +360,23 @@ class AkshareService:
 
     def _load_hk_search_catalog(self):
         df = budget_call(self._ak().stock_hk_spot)
-        if "中文名称" in df.columns:
-            return df
-        return df.rename(columns={"名称": "中文名称"})
+        if "中文名称" not in df.columns:
+            df = df.rename(columns={"名称": "中文名称"})
+        # 目录随 lru_cache 常驻，逐行字符串与紧凑名称只在加载时算一次。
+        entries = []
+        for row in df.to_dict(orient="records"):
+            code = str(row.get("代码", "")).zfill(5)
+            chinese_name = str(row.get("中文名称", row.get("名称", "")))
+            english_name = str(row.get("英文名称", ""))
+            entries.append((code, self._compact_names(chinese_name, english_name), {
+                "symbol": f"{code}.HK",
+                "shortName": chinese_name,
+                "longName": chinese_name,
+                "englishName": english_name,
+                "exchange": "HKEX",
+                "quoteType": "EQUITY",
+            }))
+        return entries
 
     @lru_cache(maxsize=1)
     def _a_share_catalog(self):
@@ -479,7 +431,23 @@ class AkshareService:
             if column not in catalog.columns:
                 catalog[column] = ""
         catalog["code"] = catalog["code"].astype(str).str.zfill(6)
-        return catalog[columns]
+        entries = []
+        for row in catalog[columns].to_dict(orient="records"):
+            code = str(row.get("code", ""))
+            short_name = str(row.get("shortName", ""))
+            long_name = str(row.get("longName", ""))
+            company_name = str(row.get("companyName", ""))
+            exchange = row.get("exchange", "")
+            prefix = {"SH": "sh", "SZ": "sz", "BJ": "bj"}.get(exchange, "")
+            entries.append((code, self._compact_names(short_name, long_name, company_name), {
+                "symbol": f"{prefix}.{code}" if prefix else code,
+                "shortName": short_name,
+                "longName": long_name or company_name,
+                "companyName": company_name,
+                "exchange": exchange,
+                "quoteType": "EQUITY",
+            }))
+        return entries
 
     def _eastmoney_item(self, row: dict, matched_term: str) -> dict | None:
         code = str(row.get("Code") or row.get("UnifiedCode") or "").strip()
@@ -606,14 +574,17 @@ class AkshareService:
     def _compact_text(value: str) -> str:
         return re.sub(r"[\s\-_·　]+", "", str(value or "")).lower()
 
-    def _match_score(self, query_compact: str, code_query: str, code: str, *names: str) -> int:
+    def _compact_names(self, *names: str) -> tuple[str, ...]:
+        return tuple(self._compact_text(name) for name in names)
+
+    @staticmethod
+    def _match_score(query_compact: str, code_query: str, code: str, compact_names: tuple[str, ...]) -> int:
         code_compact = str(code or "").lstrip("0").lower()
         if code_query and (code_query == code_compact or code_query == str(code).lower()):
             return 100
 
         best = 0
-        for name in names:
-            name_compact = self._compact_text(name)
+        for name_compact in compact_names:
             if not name_compact or name_compact == "nan":
                 continue
             if query_compact == name_compact:

@@ -66,9 +66,9 @@ public class ModelInvocationStore {
             if (!Integer.valueOf(1).equals(snapshots)) {
                 throw new InvocationRejectedException("Model invocation evidence snapshot does not belong to this run/attempt");
             }
-        } else if ((!"contextual-gist".equals(role) && !embedding) || context.inputSha256() == null
+        } else if (!embedding || context.inputSha256() == null
                 || !context.inputSha256().matches("[0-9a-f]{64}")) {
-            throw new InvocationRejectedException("Pre-evidence model invocation requires gist or embedding role and input SHA-256");
+            throw new InvocationRejectedException("Pre-evidence model invocation requires embedding role and input SHA-256");
         }
         Map<String, Object> capturedRequest = new LinkedHashMap<>(request);
         if (context.evidenceSnapshotId() == null) capturedRequest.put("inputAttribution",

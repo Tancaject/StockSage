@@ -17,16 +17,6 @@ public enum PlanRoute {
     DEEP;
 
     /**
-     * 把文本收敛到已知路由，未知值安全回到 DIRECT。
-     *
-     * @param route 模型或历史调用给出的路由文本
-     * @return 后端可执行的有限路由
-     */
-    public static PlanRoute normalize(String route) {
-        return parse(route).orElse(DIRECT);
-    }
-
-    /**
      * 严格解析路由；用于区分模型真的选择 DIRECT，还是输出了非法路由后被安全归一化。
      *
      * @param route 待解析文本

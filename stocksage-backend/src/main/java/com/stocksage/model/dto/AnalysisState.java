@@ -1,6 +1,7 @@
 package com.stocksage.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stocksage.agent.intent.TimeSensitivity;
 import com.stocksage.evidence.EvidenceLedger;
 import com.stocksage.harness.HarnessModels.HarnessSnapshot;
@@ -27,6 +28,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+// 旧 checkpoint 可能带已移除的 evidenceReplanState 等字段，反序列化时忽略。
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AnalysisState {
 
     /** 当前执行权只在内存中传递；恢复时重新绑定，不能从 checkpoint 复用旧租约。 */
@@ -99,9 +102,6 @@ public class AnalysisState {
     /** 报告修复输入与 PLANNED 同步落盘，确保接管继续消费同一份有界验收反馈。 */
     private ReportRepairFeedback reportRepairFeedback;
 
-    /** 问题相关补证的单步计划和执行结果；旧 checkpoint 缺失该字段时保持未开始。 */
-    private EvidenceReplanState evidenceReplanState;
-
     /** 取证循环（ReAct）的逐步状态；旧 checkpoint 缺失该字段时视为未开始。 */
     private EvidenceLoopState evidenceLoopState;
 
@@ -162,45 +162,6 @@ public class AnalysisState {
             String observation
     ) {
         public EvidenceLoopCall {
-            addedEvidenceIds = addedEvidenceIds == null ? List.of() : List.copyOf(addedEvidenceIds);
-        }
-    }
-
-    /** 单步补证只允许一个服务端映射的只读动作。 */
-    public enum EvidenceReplanAction {
-        FOCUSED_NEWS_SEARCH
-    }
-
-    /** 持久化生命周期；不存在状态即尚未开始。 */
-    public enum EvidenceReplanStatus {
-        SKIPPED,
-        PLANNED,
-        REVALIDATED
-    }
-
-    /**
-     * 崩溃接管时恢复 exact action，而不是重新请求模型。
-     *
-     * @param policyVersion 单步补证契约版本
-     * @param status 当前持久化生命周期
-     * @param action 服务端批准的动作；SKIPPED 时可为空
-     * @param normalizedQuery 服务端规范化后的查询；不保存原始模型输出
-     * @param reasonCode 可展示的有限原因码
-     * @param effectKey 服务端生成的逻辑副作用键
-     * @param addedEvidenceIds 最终新增的可用证据 ID
-     * @param stopReason 执行或停止结果
-     */
-    public record EvidenceReplanState(
-            int policyVersion,
-            EvidenceReplanStatus status,
-            EvidenceReplanAction action,
-            String normalizedQuery,
-            String reasonCode,
-            String effectKey,
-            List<String> addedEvidenceIds,
-            String stopReason
-    ) {
-        public EvidenceReplanState {
             addedEvidenceIds = addedEvidenceIds == null ? List.of() : List.copyOf(addedEvidenceIds);
         }
     }

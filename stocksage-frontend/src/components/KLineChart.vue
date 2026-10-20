@@ -253,29 +253,35 @@ const MAX_ZOOM_SCALE = 8
 const intradayRaw = ref(null)
 const intradayLoading = ref(false)
 const intradayError = ref('')
+let intradayRequestId = 0
 
 async function loadIntraday() {
   const symbol = chartSymbol.value
   if (!symbol || intradayRaw.value || intradayLoading.value) return
+  const requestId = ++intradayRequestId
   intradayLoading.value = true
   intradayError.value = ''
   try {
     const data = await fetchStockIntraday(symbol)
+    if (requestId !== intradayRequestId) return
     if (data?.error) {
       intradayError.value = data.message || '日内数据不可用'
     } else {
       intradayRaw.value = data
     }
   } catch {
+    if (requestId !== intradayRequestId) return
     intradayError.value = '日内数据加载失败'
   } finally {
-    intradayLoading.value = false
+    if (requestId === intradayRequestId) intradayLoading.value = false
   }
 }
 
 watch(() => props.chart?.symbol, () => {
+  intradayRequestId += 1
   intradayRaw.value = null
   intradayError.value = ''
+  intradayLoading.value = false
   resetZoom()
 })
 
@@ -720,14 +726,8 @@ function formatDate(value) {
     const timestamp = timestampFromKLineDate(text)
     if (Number.isFinite(timestamp)) return timeFromTimestamp(timestamp)
   }
-  if (/^\d{13}$/.test(text)) {
-    if (isIntraday.value) return timeFromTimestamp(Number(text))
-    return dateFromTimestamp(Number(text), false)
-  }
-  if (/^\d{10}$/.test(text)) {
-    if (isIntraday.value) return timeFromTimestamp(Number(text) * 1000)
-    return dateFromTimestamp(Number(text) * 1000, false)
-  }
+  if (/^\d{13}$/.test(text)) return dateFromTimestamp(Number(text), false)
+  if (/^\d{10}$/.test(text)) return dateFromTimestamp(Number(text) * 1000, false)
   if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(5, 10)
   if (/^\d{8}$/.test(text)) return `${text.slice(4, 6)}-${text.slice(6, 8)}`
   return text.length > 10 ? text.slice(0, 10) : text || '--'
@@ -747,16 +747,8 @@ function formatFullDate(value) {
     const timestamp = timestampFromKLineDate(text)
     if (Number.isFinite(timestamp)) return dateTimeFromTimestamp(timestamp)
   }
-  if (/^\d{13}$/.test(text)) {
-    const d = new Date(Number(text))
-    if (isIntraday.value) return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`
-    return dateFromTimestamp(Number(text), true)
-  }
-  if (/^\d{10}$/.test(text)) {
-    const d = new Date(Number(text) * 1000)
-    if (isIntraday.value) return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`
-    return dateFromTimestamp(Number(text) * 1000, true)
-  }
+  if (/^\d{13}$/.test(text)) return dateFromTimestamp(Number(text), true)
+  if (/^\d{10}$/.test(text)) return dateFromTimestamp(Number(text) * 1000, true)
   if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10)
   if (/^\d{8}$/.test(text)) return `${text.slice(0, 4)}-${text.slice(4, 6)}-${text.slice(6, 8)}`
   return text || '--'

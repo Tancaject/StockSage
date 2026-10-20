@@ -39,10 +39,4 @@ public class IbkrProperties {
     /** 应用启动后首次保活延迟，单位毫秒。 */
     private long keepaliveInitialDelayMs = 15000;
 
-    /** 默认账户 ID；为空时由服务从账户列表中选择第一项。 */
-    private String defaultAccountId = "";
-
-    /** 市场快照字段列表，使用 IBKR Client Portal 的字段编号。 */
-    private String snapshotFields = "31,55,70,71,73,84,86,87,88,6509,7059,7295,7633,7635";
-
 }

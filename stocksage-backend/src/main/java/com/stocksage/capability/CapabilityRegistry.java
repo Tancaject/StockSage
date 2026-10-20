@@ -30,7 +30,7 @@ public class CapabilityRegistry {
     /**
      * 校验并组装所有清单与适配器；发现不一致时失败启动。
      *
-     * @param adapters Spring 扫描到的本地/MCP 能力适配器
+     * @param adapters Spring 扫描到的本地能力适配器
      */
     public CapabilityRegistry(List<CapabilityAdapter> adapters) {
         Map<String, CapabilityAdapter> adapterById = new LinkedHashMap<>();

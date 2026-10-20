@@ -14,15 +14,13 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 /**
  * 只读的 IBKR Client Portal Web API 服务。
  *
- * <p>工具层通过本服务查询认证、账户、持仓、报价和历史 K 线；本服务再调用
+ * <p>工具层通过本服务查询认证状态和历史 K 线；本服务再调用
  * {@link IbkrWebApiClient} 访问本地 Gateway，并统一处理配置开关、熔断与错误 JSON。</p>
  *
  * <p>边界：刻意不包含下单、撤单或改单调用，Gateway 登录和双重验证也必须由用户完成。</p>
@@ -31,7 +29,7 @@ import java.util.concurrent.TimeoutException;
 @Service
 public class IbkrReadOnlyService {
 
-    /** IBKR 开关、端点、超时和快照字段配置。 */
+    /** IBKR 开关、端点和超时配置。 */
     private final IbkrProperties properties;
     /** 执行本地 Client Portal Gateway HTTP 请求。 */
     private final IbkrWebApiClient client;
@@ -88,113 +86,6 @@ public class IbkrReadOnlyService {
     }
 
     /**
-     * 读取当前登录用户可见的投资组合账户列表。
-     *
-     * @return 带 provider、endpoint 和 timestamp 的账户 JSON
-     */
-    public String getPortfolioAccounts() {
-        return execute("portfolioAccounts", this::portfolioAccounts);
-    }
-
-    /**
-     * 读取账户摘要；未传账户时按配置或账户列表自动选择。
-     *
-     * @param accountId 可选账户 ID
-     * @return 带来源元数据的账户摘要 JSON
-     */
-    public String getAccountSummary(String accountId) {
-        return execute("accountSummary", () -> {
-            JsonNode accounts = rawPortfolioAccounts();
-            String resolvedAccountId = resolveAccountId(accountId, accounts);
-            // 调用 Gateway 的账户摘要端点；账户选择顺序由 resolveAccountId 统一控制。
-            JsonNode summary = client.get(uriBuilder -> uriBuilder
-                    .path("/portfolio/{accountId}/summary")
-                    .build(resolvedAccountId));
-            return withMetadata(summary, Map.of(
-                    "provider", "IBKR_WEB_API",
-                    "accountId", resolvedAccountId,
-                    "endpoint", "/portfolio/{accountId}/summary"
-            ));
-        });
-    }
-
-    /**
-     * 读取账户持仓；仅返回 IBKR 提供的只读持仓数据。
-     *
-     * @param accountId 可选账户 ID
-     * @return 带来源元数据的持仓 JSON
-     */
-    public String getPositions(String accountId) {
-        return execute("positions", () -> {
-            JsonNode accounts = rawPortfolioAccounts();
-            String resolvedAccountId = resolveAccountId(accountId, accounts);
-            JsonNode positions = client.get(uriBuilder -> uriBuilder
-                    .path("/portfolio/{accountId}/positions/0")
-                    .build(resolvedAccountId));
-            return withMetadata(positions, Map.of(
-                    "provider", "IBKR_WEB_API",
-                    "accountId", resolvedAccountId,
-                    "endpoint", "/portfolio/{accountId}/positions/0"
-            ));
-        });
-    }
-
-    /**
-     * 获取股票实时或延迟报价，并附带订阅可用性提示。
-     *
-     * @param code 用户输入的美股或港股代码
-     * @return 归一化报价 JSON；不支持、未登录或熔断时返回错误 JSON
-     */
-    public String getRealtimeQuote(String code) {
-        return execute("realtimeQuote", () -> {
-            IbkrInstrument instrument = instrumentResolver.resolve(code);
-            if (!instrument.supported()) {
-                return errorPayload(instrument.input(), instrument.message());
-            }
-
-            // 先调用 secdef/search 取得 conid，后续快照端点只接受该 IBKR 合约 ID。
-            JsonNode contract = resolveContract(instrument);
-            String conid = text(contract, "conid");
-            if (conid.isBlank()) {
-                return errorPayload(code, "IBKR did not return a conid for " + instrument.symbol());
-            }
-
-            // IBKR 要求先初始化 brokerage accounts，再请求行情订阅快照。
-            client.get("/iserver/accounts");
-            JsonNode snapshot = null;
-            JsonNode firstQuote = objectMapper.createObjectNode();
-            for (int attempt = 0; attempt < 3; attempt++) {
-                snapshot = marketDataSnapshot(conid);
-                firstQuote = firstArrayItem(snapshot);
-                if (!isMissingPrice(firstQuote)) {
-                    break;
-                }
-                // IBKR 行情快照首次请求可能只触发订阅，稍后才返回价格字段。
-                sleepQuietly(1000);
-            }
-
-            ObjectNode result = objectMapper.createObjectNode();
-            result.put("provider", "IBKR_WEB_API");
-            result.put("input", instrument.input());
-            result.put("market", instrument.market());
-            result.put("symbol", instrument.symbol());
-            result.put("exchange", instrument.exchange());
-            result.put("currency", instrument.currency());
-            result.put("conid", conid);
-            result.put("timestamp", Instant.now().toString());
-            result.put("availability", text(firstQuote, "6509"));
-            result.put("lastPrice", text(firstQuote, "31"));
-            result.put("bid", text(firstQuote, "84"));
-            result.put("ask", text(firstQuote, "86"));
-            result.put("volume", text(firstQuote, "87"));
-            result.put("rawAvailabilityHint", availabilityHint(text(firstQuote, "6509")));
-            result.set("contract", contract);
-            result.set("raw", snapshot == null ? objectMapper.createArrayNode() : snapshot);
-            return result;
-        });
-    }
-
-    /**
      * 获取历史 K 线数据；period 和 bar 为空时使用保守默认值。
      *
      * @param code 用户输入的美股或港股代码
@@ -245,50 +136,6 @@ public class IbkrReadOnlyService {
     }
 
     /**
-     * 为账户列表响应追加统一元数据。
-     *
-     * @return 可直接序列化的账户响应节点
-     */
-    private JsonNode portfolioAccounts() {
-        return withMetadata(rawPortfolioAccounts(), Map.of(
-                "provider", "IBKR_WEB_API",
-                "endpoint", "/portfolio/accounts"
-        ));
-    }
-
-    /**
-     * 调用原始账户端点，不做错误包装，由外层 execute 统一处理。
-     *
-     * @return Gateway 原始账户数组或对象
-     */
-    private JsonNode rawPortfolioAccounts() {
-        return client.get("/portfolio/accounts");
-    }
-
-    /**
-     * 按“显式参数 -> 默认配置 -> 第一个可见账户”的顺序解析账户 ID。
-     *
-     * @param accountId 调用方显式账户 ID
-     * @param accounts Gateway 返回的可见账户树
-     * @return 最终账户 ID
-     */
-    private String resolveAccountId(String accountId, JsonNode accounts) {
-        if (accountId != null && !accountId.isBlank()) {
-            return accountId.trim();
-        }
-        if (properties.getDefaultAccountId() != null && !properties.getDefaultAccountId().isBlank()) {
-            return properties.getDefaultAccountId().trim();
-        }
-
-        // 用户没有指定账户时，使用可见账户列表中的第一个账户，保持只读工具易用。
-        String resolved = findFirstAccountId(accounts);
-        if (resolved.isBlank()) {
-            throw new IllegalStateException("No IBKR portfolio account was found. Log in to Client Portal Gateway first.");
-        }
-        return resolved;
-    }
-
-    /**
      * 搜索并选择 IBKR 合约定义，返回包含 conid 的合约节点。
      *
      * @param instrument 已归一化标的
@@ -335,35 +182,6 @@ public class IbkrReadOnlyService {
         }
 
         return matches.get(0);
-    }
-
-    /**
-     * 请求 IBKR 市场快照端点，字段集合由配置控制。
-     *
-     * @param conid IBKR 合约 ID
-     * @return Gateway 快照数组
-     */
-    private JsonNode marketDataSnapshot(String conid) {
-        return client.get(uriBuilder -> uriBuilder
-                .path("/iserver/marketdata/snapshot")
-                .queryParam("conids", conid)
-                .queryParam("fields", properties.getSnapshotFields())
-                .build());
-    }
-
-    /**
-     * 为第三方原始响应包一层统一元数据，便于模型判断来源和时间。
-     *
-     * @param payload Gateway 原始数据
-     * @param metadata 来源、账户或合约等稳定元数据
-     * @return 包含 timestamp、metadata 和 data 的对象
-     */
-    private JsonNode withMetadata(JsonNode payload, Map<String, String> metadata) {
-        ObjectNode result = objectMapper.createObjectNode();
-        result.put("timestamp", Instant.now().toString());
-        metadata.forEach(result::put);
-        result.set("data", payload);
-        return result;
     }
 
     /**
@@ -526,79 +344,6 @@ public class IbkrReadOnlyService {
         }
     }
 
-    /** 递归遍历不同 Gateway 版本的账户响应结构，查找第一个账户 ID。 */
-    private String findFirstAccountId(JsonNode node) {
-        if (node == null || node.isMissingNode() || node.isNull()) {
-            return "";
-        }
-
-        if (node.isArray()) {
-            for (JsonNode item : node) {
-                String found = findAccountIdInObject(item);
-                if (!found.isBlank()) {
-                    return found;
-                }
-            }
-        }
-
-        if (node.isObject()) {
-            String found = findAccountIdInObject(node);
-            if (!found.isBlank()) {
-                return found;
-            }
-            Iterator<JsonNode> children = node.elements();
-            while (children.hasNext()) {
-                found = findFirstAccountId(children.next());
-                if (!found.isBlank()) {
-                    return found;
-                }
-            }
-        }
-
-        return "";
-    }
-
-    /** 按多个兼容字段名从单个对象中读取账户 ID。 */
-    private String findAccountIdInObject(JsonNode node) {
-        for (String field : new String[]{"accountId", "account_id", "acctId", "id"}) {
-            String value = text(node, field);
-            if (!value.isBlank()) {
-                return value;
-            }
-        }
-        return "";
-    }
-
-    /** 将 IBKR 字段 6509 映射为模型易理解的行情可用性。 */
-    private String availabilityHint(String availability) {
-        if (availability == null || availability.isBlank()) {
-            return "UNKNOWN";
-        }
-        if (availability.contains("R")) {
-            return "REALTIME";
-        }
-        if (availability.contains("D")) {
-            return "DELAYED";
-        }
-        if (availability.contains("N")) {
-            return "NO_SUBSCRIPTION";
-        }
-        return "UNKNOWN";
-    }
-
-    /** 判断快照是否尚未返回 last/bid/ask 任一价格。 */
-    private boolean isMissingPrice(JsonNode quote) {
-        return text(quote, "31").isBlank() && text(quote, "84").isBlank() && text(quote, "86").isBlank();
-    }
-
-    /** 读取快照数组第一项；缺失时返回空对象，简化调用方判空。 */
-    private JsonNode firstArrayItem(JsonNode node) {
-        if (node != null && node.isArray() && node.size() > 0) {
-            return node.get(0);
-        }
-        return objectMapper.createObjectNode();
-    }
-
     /** 容错读取 JSON 文本字段。 */
     private String text(JsonNode node, String field) {
         if (node == null || !node.has(field) || node.get(field).isNull()) {
@@ -610,16 +355,6 @@ public class IbkrReadOnlyService {
     /** 将 null 或空白文本替换为给定默认值。 */
     private String defaultIfBlank(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value.trim();
-    }
-
-    /** 等待行情订阅生效；中断时恢复线程中断标记。 */
-    private void sleepQuietly(long millis) {
-        try {
-            Thread.sleep(ToolCallContext.remainingMillis(millis));
-            ToolCallContext.remainingMillis(Long.MAX_VALUE);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 
     /** 允许 execute 统一包装任意返回 JSON 节点的 Gateway 调用。 */

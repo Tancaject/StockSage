@@ -1,5 +1,6 @@
 package com.stocksage.agent;
 
+import com.stocksage.util.Hashing;
 import com.stocksage.evidence.EvidenceLedger;
 import com.stocksage.evidence.EvidenceFreshness;
 import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
@@ -19,9 +20,6 @@ import com.stocksage.model.dto.DebateModels.PointType;
 import com.stocksage.model.dto.DebateModels.Side;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -30,7 +28,6 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -72,16 +69,6 @@ public class DebateDecisionPolicy {
             AssessmentReasonCode.DUPLICATE
     );
 
-    /** @return 当前确定性裁决策略 ID */
-    public String policyId() {
-        return POLICY_ID;
-    }
-
-    /** @return 当前确定性裁决策略版本 */
-    public int policyVersion() {
-        return POLICY_VERSION;
-    }
-
     /**
      * 对当前证据元数据和完整结构化辩论生成顺序无关的稳定 SHA-256。
      *
@@ -113,7 +100,7 @@ public class DebateDecisionPolicy {
                 .sorted(Comparator.comparingInt(DebateTurn::round)
                         .thenComparing(turn -> turn.side().name()))
                 .forEach(turn -> appendTurn(canonical, turn));
-        return sha256(canonical.toString());
+        return Hashing.sha256Hex(canonical.toString());
     }
 
     /**
@@ -140,11 +127,6 @@ public class DebateDecisionPolicy {
     /** 检查 AnalysisState 自身保存的 verdict。 */
     public boolean isCurrentVerdict(AnalysisState state) {
         return state != null && isCurrentVerdict(state, state.getDebateVerdict());
-    }
-
-    /** 参数顺序兼容面向 verdict 的调用点。 */
-    public boolean isCurrentVerdict(DebateVerdict verdict, AnalysisState state) {
-        return isCurrentVerdict(state, verdict);
     }
 
     /** 使用 AnalysisState 中已经保存的 Manager 评分计算裁决。 */
@@ -319,7 +301,7 @@ public class DebateDecisionPolicy {
     }
 
     /** 与 Manager 的匿名 A/B 排列规则保持一致，防止 checkpoint 篡改位置映射。 */
-    private boolean expectedPositionAIsBull(String inputHash) {
+    static boolean expectedPositionAIsBull(String inputHash) {
         if (inputHash == null || inputHash.isBlank()) {
             return true;
         }
@@ -653,15 +635,6 @@ public class DebateDecisionPolicy {
     private void append(StringBuilder canonical, Object value) {
         String normalized = value == null ? "" : value.toString();
         canonical.append(normalized.length()).append(':').append(normalized).append('|');
-    }
-
-    private String sha256(String value) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return HexFormat.of().formatHex(digest.digest(value.getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException error) {
-            throw new IllegalStateException("SHA-256 is unavailable", error);
-        }
     }
 
     private double roundTwoDecimals(double value) {

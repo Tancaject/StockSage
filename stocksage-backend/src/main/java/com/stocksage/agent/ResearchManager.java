@@ -14,7 +14,6 @@ import com.stocksage.harness.HarnessModels.HarnessPhase;
 import com.stocksage.harness.HarnessModels.RecoveryLifecycle;
 import com.stocksage.harness.HarnessModels.ReportRepairFeedback;
 import com.stocksage.harness.HarnessModels.SynthesisResult;
-import com.stocksage.model.dto.AnalysisHorizon;
 import com.stocksage.model.dto.AnalysisState;
 import com.stocksage.model.dto.DebateModels;
 import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
@@ -132,16 +131,6 @@ public class ResearchManager {
     ) {
     }
 
-    /** 使用默认执行权检查器判断是否需要下一轮反驳。 */
-    public Mono<DebateContinuationDecision> decideDebateContinuation(
-            AnalysisState state,
-            int completedRound,
-            int maxRounds
-    ) {
-        return decideDebateContinuation(
-                state, completedRound, maxRounds, NO_OP_EXECUTION_GUARD);
-    }
-
     /**
      * 基于当前完整辩论逐轮判断 CONTINUE/STOP；空输出、未知动作和额外字段均失败关闭。
      */
@@ -171,11 +160,6 @@ public class ResearchManager {
                 }));
     }
 
-    /** 使用默认执行权检查器，对匿名结构化论点逐项评分。 */
-    public Mono<ManagerAssessment> scoreDebate(AnalysisState state, String inputHash) {
-        return scoreDebate(state, inputHash, NO_OP_EXECUTION_GUARD);
-    }
-
     /**
      * 对全部第一轮根论点逐项评分，不输出胜方、总分或 recommendation。
      *
@@ -188,7 +172,7 @@ public class ResearchManager {
             Runnable executionGuard
     ) {
         Runnable guard = executionGuard == null ? NO_OP_EXECUTION_GUARD : executionGuard;
-        boolean positionAIsBull = positionAIsBull(inputHash);
+        boolean positionAIsBull = DebateDecisionPolicy.expectedPositionAIsBull(inputHash);
         StringBuilder buffer = new StringBuilder();
         var request = scoringChatClient.prompt().user(buildScoringPrompt(state, positionAIsBull));
         if (state.getModelInvocationContext() != null) {
@@ -207,22 +191,6 @@ public class ResearchManager {
                     return parseAssessmentResult(
                             buffer.toString(), state, inputHash, positionAIsBull);
                 }));
-    }
-
-    /**
-     * 流式综合并返回报告解析状态，使用默认无操作执行权检查器。
-     *
-     * @return 供 Harness 直接验收的异步综合结果
-     */
-    public Mono<SynthesisResult> synthesizeStreamingResult(
-            AnalysisState state,
-            DebateVerdict verdict,
-            String traceId,
-            Long conversationId,
-            ChatStreamEmitter emitter
-    ) {
-        return synthesizeStreamingResult(
-                state, verdict, traceId, conversationId, emitter, NO_OP_EXECUTION_GUARD);
     }
 
     /**
@@ -667,14 +635,6 @@ public class ResearchManager {
         return false;
     }
 
-    private boolean positionAIsBull(String inputHash) {
-        if (inputHash == null || inputHash.isBlank()) {
-            return true;
-        }
-        int value = Character.digit(inputHash.charAt(inputHash.length() - 1), 16);
-        return value < 0 || value % 2 == 0;
-    }
-
     /**
      * 构造 Research Manager 提示词。
      *
@@ -1033,7 +993,7 @@ public class ResearchManager {
             }
             for (DebatePoint point : turn.points()) {
                 if (point.type() == PointType.THESIS) {
-                    appendScoringPoint(roots, point, true);
+                    appendPoint(roots, point, 600, 180, 420, 240);
                 }
             }
         }
@@ -1054,7 +1014,7 @@ public class ResearchManager {
                     continue;
                 }
                 StringBuilder candidate = new StringBuilder();
-                appendScoringPoint(candidate, point, false);
+                appendPoint(candidate, point, 360, 120, 260, 160);
                 if (roots.length() + rebuttals.length() + candidate.length() > maxLength) {
                     rebuttals.append("...[older rebuttals omitted]\n");
                     return roots.append(rebuttals).toString();
@@ -1065,16 +1025,15 @@ public class ResearchManager {
         return roots.append(rebuttals).toString();
     }
 
-    /** 评分上下文的有界论点表示；根论点保留全部字段，反驳采用更紧凑预算。 */
-    private void appendScoringPoint(
+    /** 有界论点表示；评分根论点保留更多字段预算，反驳更紧凑，报告综合不截断。 */
+    private void appendPoint(
             StringBuilder builder,
             DebatePoint point,
-            boolean root
+            int claimLimit,
+            int excerptLimit,
+            int reasoningLimit,
+            int boundaryLimit
     ) {
-        int claimLimit = root ? 600 : 360;
-        int excerptLimit = root ? 180 : 120;
-        int reasoningLimit = root ? 420 : 260;
-        int boundaryLimit = root ? 240 : 160;
         builder.append('[').append(point.pointId()).append("] ")
                 .append(point.type()).append(" | claim=")
                 .append(truncate(point.claim(), claimLimit))
@@ -1105,25 +1064,10 @@ public class ResearchManager {
             builder.append("Round ").append(turn.round()).append(' ')
                     .append(turn.side()).append('\n');
             for (DebatePoint point : turn.points()) {
-                appendPoint(builder, point);
+                appendPoint(builder, point, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
             }
         }
         return truncate(builder.toString(), maxLength);
-    }
-
-    private void appendPoint(StringBuilder builder, DebatePoint point) {
-        builder.append('[').append(point.pointId()).append("] ")
-                .append(point.type()).append(" | claim=").append(point.claim())
-                .append(" | horizon=").append(point.horizon()).append('\n');
-        point.evidenceRefs().forEach(ref -> builder.append("  evidenceId=")
-                .append(ref.evidenceId()).append(" | excerpt=").append(ref.excerpt()).append('\n'));
-        if (!point.respondsToPointIds().isEmpty()) {
-            builder.append("  respondsTo=")
-                    .append(String.join(",", point.respondsToPointIds())).append('\n');
-        }
-        builder.append("  reasoning=").append(point.reasoning())
-                .append(" | assumption=").append(point.assumption())
-                .append(" | invalidation=").append(point.invalidationCondition()).append('\n');
     }
 
     /** 把 Java 裁决和逐论点评分压缩成报告阶段的只读输入。 */

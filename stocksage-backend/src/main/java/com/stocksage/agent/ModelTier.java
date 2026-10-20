@@ -1,7 +1,5 @@
 package com.stocksage.agent;
 
-import java.util.Locale;
-
 /**
  * 最终回答模型的能力层级。
  *
@@ -12,24 +10,6 @@ public enum ModelTier {
     FAST,
     STANDARD,
     STRONG;
-
-    /**
-     * 从模型或配置文本解析层级，失败时返回调用方给定的兜底值。
-     *
-     * @param value 待解析文本
-     * @param fallback 空值或未知值的安全兜底
-     * @return 白名单层级或 fallback
-     */
-    public static ModelTier from(String value, ModelTier fallback) {
-        if (value == null || value.isBlank()) {
-            return fallback;
-        }
-        try {
-            return ModelTier.valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException ignored) {
-            return fallback;
-        }
-    }
 
     /**
      * 返回两个层级中能力更强的一个。

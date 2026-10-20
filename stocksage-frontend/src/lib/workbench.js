@@ -1,4 +1,4 @@
-import { buildAssistantEvidenceSummary } from './researchUi.js'
+import { TASK_STAGE_LABELS, buildAssistantEvidenceSummary } from './researchUi.js'
 import { buildChartProvenance } from './chart.js'
 
 export const DEFAULT_FOCUS_AREAS = [
@@ -8,7 +8,7 @@ export const DEFAULT_FOCUS_AREAS = [
   'recent filings',
 ]
 
-const FOCUS_LABELS = {
+export const FOCUS_LABELS = {
   valuation: '估值',
   growth: '增长',
   risks: '风险',
@@ -30,19 +30,6 @@ const TASK_STATUS_LABELS = {
   SUCCEEDED: '已完成',
   FAILED: '失败',
   CANCELLED: '已取消',
-}
-
-const TASK_STAGE_LABELS = {
-  CREATED: '已创建',
-  ROUTING: '选择研究路径',
-  RAG_RETRIEVAL: '检索证据',
-  TOOL_PREFETCH: '读取数据',
-  AGENT_DEBATE: '多空辩论',
-  REPORT_SYNTHESIS: '综合研究结论',
-  REPORT_DRAFT: '生成报告',
-  REPORT_PERSIST: '保存报告',
-  COMPLETE: '完成',
-  FAILED: '失败',
 }
 
 const TASK_RESULT_LABELS = {
@@ -489,10 +476,6 @@ export function normalizeCockpit(payload = {}) {
     ? payload.chart
     : null
   const latestReport = summarizeCockpitReport(payload?.latestReport)
-  const evidencePreview = summarizeEvidencePreview(
-    payload?.evidencePreview,
-    latestReport?.citations || payload?.latestReport?.citations || []
-  )
   const chartStatus = String(payload?.chartStatus || (chart ? 'READY' : 'DEGRADED')).toUpperCase()
   const ticker = normalizeTicker(payload?.ticker) || 'STOCK'
   
@@ -548,7 +531,6 @@ export function normalizeCockpit(payload = {}) {
     chartMessage: payload?.chartMessage || (chart ? 'K 线数据已加载' : '暂无 K 线数据'),
     latestReport,
     taskTimeline: summarizeTaskTimeline(payload?.taskTimeline),
-    evidencePreview,
     generatedAt: payload?.generatedAt || '',
     quote,
   }
@@ -611,27 +593,6 @@ export function summarizeTaskTimeline(items = []) {
   })
 }
 
-export function summarizeEvidencePreview(items = [], citations = []) {
-  const evidenceRows = (Array.isArray(items) ? items : [])
-    .filter(item => item?.evidence || item?.dimension || item?.source)
-    .map(item => ({
-      dimension: item.dimension || 'Evidence',
-      evidence: item.evidence || 'No evidence text was provided.',
-      implication: item.implication || '',
-      source: item.source || 'report',
-    }))
-  if (evidenceRows.length) return evidenceRows
-
-  return (Array.isArray(citations) ? citations : [])
-    .filter(Boolean)
-    .map(citation => ({
-      dimension: 'Citation',
-      evidence: String(citation),
-      implication: 'Report citation carried forward from the latest persisted version.',
-      source: 'report',
-    }))
-}
-
 function taskTone(status) {
   if (status === 'SUCCEEDED') return 'positive'
   if (status === 'FAILED') return 'danger'
@@ -649,6 +610,17 @@ function chartTone(status) {
 export function shortHash(value) {
   const text = String(value || '').trim()
   return text ? text.slice(0, 12) : '--'
+}
+
+export function formatDate(value) {
+  if (!value) return '--'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return String(value)
+  return date.toLocaleString()
+}
+
+export function reviewStatusClass(status) {
+  return String(status || 'unknown').trim().toLowerCase().replaceAll('_', '-')
 }
 
 export function formatModelLabel(modelTier, modelName) {
@@ -702,285 +674,6 @@ function buildReportProvenance(messages) {
     '',
     ...rows,
     '',
-  ]
-}
-
-export function summarizeRagEval(result) {
-  const averages = result?.averages || {}
-  const evaluation = result?.gate_evaluation?.schema_version === 'rag_gates_v1'
-    ? result.gate_evaluation : null
-  const ragasMetrics = Object.entries(averages)
-    .filter(([metric]) => metric.startsWith('ragas_'))
-    .map(([metric, value]) => ({
-      metric,
-      label: readableMetricLabel(metric),
-      value: numberOrNull(value),
-      status: numberOrNull(value) === null ? 'missing' : 'unrated',
-    }))
-  const gateRows = (evaluation?.gates || []).map(gate => ({
-    metric: gate.metric,
-    label: gate.label || readableMetricLabel(gate.metric),
-    value: numberOrNull(gate.value),
-    target: { operator: gate.operator, threshold: gate.threshold },
-    required: gate.required,
-    status: gate.status,
-  }))
-  gateRows.push(...Object.entries(averages)
-    .filter(([metric]) => !metric.startsWith('ragas_') && !gateRows.some(row => row.metric === metric))
-    .map(([metric, value]) => ({
-      metric,
-      label: readableMetricLabel(metric),
-      value: numberOrNull(value),
-      target: null,
-      status: numberOrNull(value) === null ? 'missing' : 'unrated',
-    })))
-  const failedMetrics = gateRows.filter(row => row.status === 'fail')
-  const worstCases = [...(result?.cases || [])]
-    .map(item => ({
-      id: item.id,
-      category: item.category || 'uncategorized',
-      score: caseQualityScore(item.metrics || {}),
-      metrics: item.metrics || {},
-      question: item.question || item.user_input || '',
-      answer: item.answer || item.response || '',
-      expectedAnswer: item.expected_answer || item.reference_answer || item.reference || '',
-      contexts: extractCaseContexts(item),
-      citations: Array.isArray(item.citations) ? item.citations : [],
-    }))
-    .sort((a, b) => a.score - b.score)
-    .slice(0, 5)
-
-  return {
-    createdAt: result?.created_at || result?.createdAt || '',
-    caseCount: Number(result?.case_count || result?.caseCount || 0),
-    averages,
-    ragasMetrics,
-    gates: gateRows,
-    failedMetrics,
-    worstCases,
-    status: evaluation?.status || 'unrated',
-  }
-}
-
-export function summarizeAgentEval(result) {
-  const planner = result?.planner || {}
-  const gateRows = (result?.gates || []).map(gate => ({
-    metric: gate.metric,
-    label: readableMetricLabel(gate.metric),
-    value: numberOrNull(gate.value),
-    target: {
-      operator: gate.operator,
-      threshold: gate.threshold,
-    },
-    status: gate.status === 'passed' ? 'pass' : gate.status === 'failed' ? 'fail' : 'missing',
-  }))
-  const failedCases = (planner.results || [])
-    .filter(item => item.passed === false)
-    .map(item => ({
-      id: item.id,
-      category: `${item.expectedRoute || '--'} → ${item.actualRoute || '--'}`,
-      score: item.passed ? 1 : 0,
-      question: item.intentSummary || '',
-      answer: item.plannedActions?.join(', ') || '',
-      expectedAnswer: [
-        ...(item.missingRequiredActions || []).map(action => `missing ${action}`),
-        ...(item.matchedForbiddenActions || []).map(action => `forbidden ${action}`),
-        ...(item.rationale ? [`reason ${item.rationale}`] : []),
-      ].join(', '),
-      contexts: [],
-      citations: [],
-    }))
-    .slice(0, 20)
-
-  return {
-    kind: 'agent',
-    createdAt: result?.generated_at || '',
-    caseCount: Number(planner.total_cases || 0),
-    averages: {
-      route_accuracy: planner.route_accuracy,
-      required_action_recall: planner.required_action_recall,
-    },
-    ragasMetrics: [
-      { metric: 'route_macro_f1', value: numberOrNull(planner.macro_f1) },
-      ...Object.entries(planner.per_route || {}).map(([route, metrics]) => ({
-        metric: `route_${route.toLowerCase()}_f1`,
-        value: numberOrNull(metrics?.f1),
-      })),
-    ],
-    gates: gateRows,
-    failedMetrics: gateRows.filter(row => row.status === 'fail'),
-    worstCases: failedCases,
-    status: { passed: 'pass', failed: 'fail' }[result?.status] || 'missing',
-    optionalSections: {
-      rag: result?.rag?.status || 'not_run',
-      trace: result?.trace?.status || 'not_run',
-      endToEnd: result?.end_to_end?.status || 'not_run',
-      baseline: result?.baseline_delta?.status || 'not_run',
-    },
-    recommendations: Array.isArray(result?.recommendations) ? result.recommendations : [],
-  }
-}
-
-export function summarizeEvalResult(result) {
-  return result?.schema_version === 'agent_eval_v1'
-    ? summarizeAgentEval(result)
-    : { ...summarizeRagEval(result), kind: 'rag' }
-}
-
-const CANONICAL_QUALITY_METRICS = [
-  {
-    id: 'task_success_rate',
-    label: 'Task Success / pass@1',
-    requiredEvidenceKind: 'GOLDEN_SET',
-    requirement: '需要逐任务 outcome verifier，Trace success 不能替代。',
-  },
-  {
-    id: 'tool_call_f1',
-    label: 'Tool Call F1',
-    requiredEvidenceKind: 'GOLDEN_SET',
-    requirement: '需要 expected tool calls 与实际 Trace 工具调用。',
-  },
-  {
-    id: 'recall_at_k',
-    label: 'Recall@K',
-    requiredEvidenceKind: 'GOLDEN_SET',
-    requirement: '需要基于 doc/chunk qrels 的完整相关集合。',
-  },
-  {
-    id: 'ndcg_at_k',
-    label: 'nDCG@K',
-    requiredEvidenceKind: 'GOLDEN_SET',
-    requirement: '需要带 relevance grade 的 qrels。',
-  },
-  {
-    id: 'faithfulness',
-    label: 'Faithfulness',
-    requiredEvidenceKind: 'SAMPLED',
-    ragasAliases: ['ragas_faithfulness'],
-    requirement: '需要带上下文的 RAGAS / LLM-as-Judge 样本。',
-  },
-  {
-    id: 'answer_relevancy',
-    label: 'Answer Relevancy',
-    requiredEvidenceKind: 'SAMPLED',
-    ragasAliases: ['ragas_answer_relevancy', 'ragas_response_relevancy'],
-    requirement: '需要 RAGAS Answer Relevancy 样本。',
-  },
-]
-
-/**
- * 归一化六项经典离线质量指标。只有显式 quality 契约或真实 RAGAS 字段能进入指标卡；
- * 旧 context_recall / ndcg 仍保留在诊断区，不能冒充基于 qrels 的 Recall@K / nDCG@K。
- */
-export function summarizeCanonicalQualityMetrics(result) {
-  const quality = result?.quality || {}
-  const explicitMetrics = quality.metrics || {}
-  const averages = result?.averages || {}
-
-  return CANONICAL_QUALITY_METRICS.map(definition => {
-    const rawMetric = explicitMetrics[definition.id]
-    const explicit = rawMetric && typeof rawMetric === 'object' && !Array.isArray(rawMetric)
-      ? rawMetric : {}
-    const rawValue = numberOrNull(explicit.value)
-    let sampleCount = numberOrNull(explicit.sample_count ?? explicit.sampleCount)
-    const suppliedEvidenceKind = explicit.evidence_kind || explicit.evidenceKind || quality.evidence_kind
-      || quality.evidenceKind || ''
-    let evidenceKind = suppliedEvidenceKind
-    let evaluatorVersion = explicit.evaluator_version || explicit.evaluatorVersion
-      || quality.evaluator_version || quality.evaluatorVersion || ''
-    let generatedAt = explicit.generated_at || explicit.generatedAt
-      || quality.generated_at || quality.generatedAt || result?.created_at || result?.generated_at || ''
-    let datasetVersion = explicit.dataset_version || explicit.datasetVersion
-      || quality.dataset_version || quality.datasetVersion || ''
-    let judgeModel = ''
-    const missingFields = []
-    if (rawMetric !== undefined && explicit !== rawMetric) missingFields.push('object metric')
-    if (explicit === rawMetric) {
-      if (rawValue === null || rawValue < 0 || rawValue > 1) missingFields.push('value 0..1')
-      if (!Number.isInteger(sampleCount) || sampleCount <= 0) missingFields.push('sample_count')
-      if (!['GOLDEN_SET', 'SAMPLED'].includes(suppliedEvidenceKind)) missingFields.push('evidence_kind')
-      if (!datasetVersion) missingFields.push('dataset_version')
-      if (!evaluatorVersion) missingFields.push('evaluator_version')
-      if (!generatedAt) missingFields.push('generated_at')
-      if (['recall_at_k', 'ndcg_at_k'].includes(definition.id)
-          && (!Number.isInteger(numberOrNull(explicit.k)) || numberOrNull(explicit.k) <= 0)) {
-        missingFields.push('k')
-      }
-    }
-    let value = explicit === rawMetric && missingFields.length === 0 ? rawValue : null
-    let requirement = missingFields.length
-      ? `quality.metrics.${definition.id} 无效或缺少：${missingFields.join(', ')}`
-      : definition.requirement
-
-    if (value === null && definition.ragasAliases) {
-      const alias = definition.ragasAliases.find(key => numberOrNull(averages[key]) !== null)
-      const evaluatedCases = alias && Array.isArray(result?.cases)
-        ? result.cases.filter(item => numberOrNull(item?.metrics?.[alias]) !== null).length
-        : 0
-      const ragas = result?.ragas || {}
-      const ragasMetrics = Array.isArray(ragas.metrics) ? ragas.metrics : []
-      const ragasEvidenceKind = ragas.evidence_kind || ''
-      const ragasEvaluatorVersion = ragas.evaluator_version || ragas.package_version || ''
-      if (alias && ragasMetrics.includes(alias) && evaluatedCases > 0
-          && ['GOLDEN_SET', 'SAMPLED'].includes(ragasEvidenceKind)
-          && ragasEvaluatorVersion && ragas.dataset_sha256
-          && ragas.judge_model && ragas.created_at) {
-        value = numberOrNull(averages[alias])
-        sampleCount = evaluatedCases
-        evidenceKind = ragasEvidenceKind
-        evaluatorVersion = ragasEvaluatorVersion
-        judgeModel = ragas.judge_model
-        generatedAt = ragas.created_at
-        datasetVersion = ragas.dataset_sha256
-      }
-    }
-
-    return {
-      id: definition.id,
-      label: definition.label,
-      value,
-      status: value === null ? 'NO_DATA' : 'OBSERVED',
-      evidenceKind,
-      requiredEvidenceKind: definition.requiredEvidenceKind,
-      sampleCount,
-      k: numberOrNull(explicit.k),
-      datasetVersion,
-      evaluatorVersion,
-      judgeModel,
-      generatedAt,
-      requirement,
-    }
-  })
-}
-
-/** 归一化受 Admin Token 保护的两项当前进程 LIVE 指标。 */
-export function summarizeRuntimeMetrics(runtime) {
-  const tool = runtime?.toolExecution || {}
-  const e2e = runtime?.agentE2e || {}
-  const window = runtime?.window || {}
-  return [
-    {
-      id: 'tool_execution_success_rate',
-      label: 'Tool Execution Success Rate',
-      format: 'rate',
-      value: numberOrNull(tool.successRate),
-      status: tool.status || 'NO_DATA',
-      evidenceKind: tool.evidenceKind || 'LIVE',
-      sampleCount: numberOrNull(tool.attempts),
-      scope: tool.scope || 'TRACE_LINKED_EXECUTIONS',
-      window,
-    },
-    {
-      id: 'agent_e2e_p95',
-      label: 'Agent E2E P95',
-      format: 'duration',
-      value: numberOrNull(e2e.p95DurationMs),
-      status: e2e.status || 'NO_DATA',
-      evidenceKind: e2e.evidenceKind || 'LIVE',
-      sampleCount: numberOrNull(e2e.sampleCount),
-      scope: e2e.scope || 'SUCCESSFUL_TRACES',
-      window: e2e.window || window,
-    },
   ]
 }
 
@@ -1164,50 +857,4 @@ function normalizeList(value, fallback = []) {
   const list = Array.isArray(value) ? value : String(value || '').split(',')
   const normalized = list.map(item => String(item || '').trim()).filter(Boolean)
   return normalized.length > 0 ? normalized : fallback
-}
-
-function numberOrNull(value) {
-  if (value === null || value === undefined || value === '') return null
-  const number = Number(value)
-  return Number.isFinite(number) ? number : null
-}
-
-function caseQualityScore(metrics) {
-  const values = [
-    metrics.context_recall,
-    metrics.context_precision,
-    metrics.mrr,
-    metrics.ndcg,
-    metrics.citation_precision,
-    metrics.no_answer_accuracy,
-  ]
-    .map(numberOrNull)
-    .filter(value => value !== null)
-  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0
-}
-
-function extractCaseContexts(item) {
-  const retrieval = item?.retrieval || {}
-  const candidates = [
-    item.contexts,
-    item.retrieved_contexts,
-    retrieval.final_contexts,
-    retrieval.finalContexts,
-    retrieval.contexts,
-  ]
-  const contexts = candidates.find(value => Array.isArray(value)) || []
-  return contexts.slice(0, 5).map((context, index) => ({
-    rank: context.rank ?? index + 1,
-    ticker: context.ticker || context.symbol || '',
-    section: context.section || context.section_name || '',
-    filingType: context.filing_type || context.filingType || '',
-    filingDate: context.filing_date || context.filingDate || '',
-    content: String(context.content || context.text || '').slice(0, 420),
-  }))
-}
-
-function readableMetricLabel(metric) {
-  return String(metric || '')
-    .replace(/^ragas_/, 'RAGAS ')
-    .replace(/_/g, ' ')
 }

@@ -8,8 +8,9 @@ import java.util.function.Supplier;
 /**
  * 当前对话流的工具调用上下文。
  *
- * ThreadLocal 负责普通的同步工具调用路径。活跃上下文注册表为演示应用提供受限兜底：
- * 当工具调用发生在工作线程上，且当前只有一条活跃对话流时，AOP 层仍能找到上下文。
+ * ThreadLocal 负责普通的同步工具调用路径。活跃上下文注册表只为 DEEP 取证线程提供受限兜底：
+ * 线程显式携带了某个研究运行的 {@link RunExecution} 时，按该运行的 traceId 找回对应对话流的上下文，
+ * 绝不会把调用挂到其他用户或其他链路上。
  */
 public final class ToolCallContext {
 
@@ -203,16 +204,17 @@ public final class ToolCallContext {
     /**
      * 解析当前可用上下文。
      *
-     * <p>优先使用 ThreadLocal；如果当前只有一条活跃对话流，则允许作为兜底返回，
-     * 让工具调用发生在线程切换后仍能被追踪到。</p>
+     * <p>优先使用 ThreadLocal；DEEP 取证线程只设置了 RunExecution，此时仅按该运行自己的 traceId
+     * 查活跃表，不再使用“唯一活跃上下文”兜底，避免池化线程把工具调用挂到别人的链路。</p>
      */
     private static Context currentContext() {
         Context context = CURRENT.get();
         if (context != null) {
             return context;
         }
-        if (ACTIVE_CONTEXTS.size() == 1) {
-            return ACTIVE_CONTEXTS.values().iterator().next();
+        RunExecution execution = RUN_EXECUTION.get();
+        if (execution != null && execution.traceId() != null) {
+            return ACTIVE_CONTEXTS.get(execution.traceId());
         }
         return null;
     }

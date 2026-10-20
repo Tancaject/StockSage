@@ -10,6 +10,7 @@ from pydantic import (
     StrictStr, ValidationError, field_serializer, field_validator, model_validator,
 )
 
+from app.contract_dates import business_date
 from app.sec_financials import FinancialReportPeriod
 from app.services.market_resolver import StockRoute, route_metadata
 
@@ -27,13 +28,7 @@ class FinancialRow(BaseModel):
     @field_validator("pubDate", "statDate", mode="before")
     @classmethod
     def require_business_date(cls, value):
-        if type(value) is Date:
-            return value
-        if isinstance(value, str):
-            parsed = Date.fromisoformat(value)
-            if parsed.isoformat() == value:
-                return parsed
-        raise ValueError("BaoStock dates must be YYYY-MM-DD business dates")
+        return business_date(value, "BaoStock dates must be YYYY-MM-DD business dates", allow_none=False)
 
     @field_validator("*", mode="before")
     @classmethod

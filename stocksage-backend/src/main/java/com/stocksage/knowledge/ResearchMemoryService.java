@@ -263,12 +263,6 @@ public class ResearchMemoryService {
                 .forEach(this::indexOne);
     }
 
-    /** 兼容旧调用方；未提供意图元数据时使用 STANDARD/UNSPECIFIED 对应的默认数量。 */
-    public RetrievalResult retrieve(String userId, String ticker, String query, String traceId) {
-        return retrieve(new ResearchMemoryQuery(
-                userId, ticker, query, traceId, null, null));
-    }
-
     /**
      * 以“30 条初始候选 -> MySQL 真源 -> 冲突赢家 -> 衰减 -> 12 -> 4/6/8”检索研究记忆。
      *
@@ -319,10 +313,9 @@ public class ResearchMemoryService {
                             (left, right) -> left,
                             LinkedHashMap::new));
             boolean includeConflictWarning = conflictGate.unresolvedGroupCount() > 0;
-            PromptResult prompt = properties.isInject()
+            String prompt = properties.isInject()
                     ? buildPrompt(selected, rankedById, qualifications, includeConflictWarning)
-                    : PromptResult.empty();
-            boolean injected = !prompt.text().isBlank();
+                    : "";
 
             traceRetrieval(
                     query,
@@ -332,14 +325,9 @@ public class ResearchMemoryService {
                     conflictGate.unresolvedGroupCount(),
                     ranked,
                     qualifications,
-                    prompt.text().length(),
+                    prompt.length(),
                     elapsedMs(startedAt));
-            if (selected.isEmpty() && !injected) {
-                return RetrievalResult.empty();
-            }
-            int visibleHitCount = properties.isInject()
-                    ? prompt.includedCount() : selected.size();
-            return new RetrievalResult(prompt.text(), visibleHitCount, injected);
+            return new RetrievalResult(prompt);
         } catch (Exception error) {
             log.warn("Research memory retrieval failed. errorType={}",
                     error.getClass().getSimpleName());
@@ -911,14 +899,14 @@ public class ResearchMemoryService {
     }
 
     /** 在总预算内为每条最终记忆动态分配空间，避免选中后又静默丢弃。 */
-    private PromptResult buildPrompt(
+    private String buildPrompt(
             List<ResearchMemoryEntry> entries,
             Map<Long, ResearchMemoryRanker.ScoredMemory> rankedById,
             Map<Long, MemoryQualification> qualifications,
             boolean includeConflictWarning
     ) {
         if ((entries == null || entries.isEmpty()) && !includeConflictWarning) {
-            return PromptResult.empty();
+            return "";
         }
         StringBuilder prompt = new StringBuilder("""
                 以下内容是历史生成结论，不是原始来源事实或用户确认事实，只能用于回顾历史判断、变化和未解决问题。审核通过也不使其成为当前事实；不得计入当前证据充分性或用 [M] 代替当前来源引用。若与当前 RAG 或工具数据冲突，以当前证据为准。报告生成时间不代表底层证据业务时点。
@@ -934,7 +922,7 @@ public class ResearchMemoryService {
             if (remainingEntries <= 0) {
                 break;
             }
-            // 为每条记录前的换行预留一个字符，确保 includedCount 只统计完整写入的记录。
+            // 为每条记录前的换行预留一个字符，确保记录编号只统计完整写入的记录。
             int distributableBudget = remainingBudget - remainingEntries;
             if (distributableBudget < 100) {
                 break;
@@ -948,8 +936,7 @@ public class ResearchMemoryService {
             prompt.append('\n').append(row);
             included++;
         }
-        String text = prompt.toString().trim();
-        return new PromptResult(text, included);
+        return prompt.toString().trim();
     }
 
     /** 先保留结构化元数据和来源，再用剩余预算压缩正文。 */
@@ -1132,29 +1119,15 @@ public class ResearchMemoryService {
         }
     }
 
-    /** 实际生成的 Prompt 及其中完整容纳的记忆条数。 */
-    private record PromptResult(String text, int includedCount) {
-        private PromptResult {
-            text = text == null ? "" : text;
-            includedCount = Math.max(0, includedCount);
-        }
-
-        private static PromptResult empty() {
-            return new PromptResult("", 0);
-        }
-    }
-
     /**
      * 一次研究记忆检索结果。
      *
-     * @param promptContext 可注入提示词的历史背景
-     * @param hitCount 通过数据库真源校验的命中数
-     * @param injected 是否按配置实际提供了上下文
+     * @param promptContext 可注入提示词的历史背景；未命中或未注入时为空
      */
-    public record RetrievalResult(String promptContext, int hitCount, boolean injected) {
+    public record RetrievalResult(String promptContext) {
         /** @return 未命中、未注入提示词的空检索结果 */
         public static RetrievalResult empty() {
-            return new RetrievalResult("", 0, false);
+            return new RetrievalResult("");
         }
     }
 }

@@ -221,10 +221,10 @@ public class AiConfig {
     private double modelRoutingTemperature;
 
     /** 普通模型调用允许生成的最大 token 数。 */
-    @Value("${stocksage.chat.model-routing.max-output-tokens:${STOCKSAGE_CHAT_MAX_OUTPUT_TOKENS:4096}}")
+    @Value("${stocksage.chat.model-routing.max-output-tokens:${STOCKSAGE_CHAT_MAX_OUTPUT_TOKENS:24576}}")
     private int modelRoutingMaxOutputTokens;
 
-    @Value("${stocksage.chat.model-routing.standard-thinking-budget:32768}")
+    @Value("${stocksage.chat.model-routing.standard-thinking-budget:8192}")
     private int standardThinkingBudget;
 
     /** Coordinator 路由调用的低温度设置，用于减少分类漂移。 */
@@ -274,26 +274,6 @@ public class AiConfig {
                         4. 中英混合即可，优先保留原问题中的专有名词。
                         5. 不新增问题中没有的公司、ticker、期间或事实；无法确定指代时保留原有指代，不猜测补全。
                 """);
-    }
-
-    /**
-     * 创建 Contextual Retrieval 的 gist 生成客户端。
-     *
-     * <p>入库阶段为每个切片生成一句情境说明，调用量大、单次任务简单，
-     * 因此固定走 FAST 档模型，并用系统提示词约束输出格式与事实边界。</p>
-     *
-     * @param builder Spring AI 提供的基础客户端构建器
-     * @return 为文档切片生成检索 gist 的客户端
-     */
-    @Bean("contextualGistChatClient")
-    public ChatClient contextualGistChatClient(ChatClient.Builder builder) {
-        return attributedClient(builder, "contextual-gist", chatOptions(fastModel), """
-                        你是 StockSage 的切片情境标注器，为 SEC 财报切片生成检索用的情境说明。
-                        规则：
-                        1. 只输出一句中文，不解释、不换行、不加引号或标号。
-                        2. 说明这段文字在该财报中讨论什么主题、属于哪个论点或指标脉络。
-                        3. 不得复述原文句子，不得编造数字或事实；上下文没有的信息不要写。
-                        """);
     }
 
     private ChatClient attributedClient(ChatClient.Builder builder, String role,
@@ -365,14 +345,6 @@ public class AiConfig {
     }
 
     /**
-     * 创建 Coordinator 规划客户端。
-     *
-     * <p>该客户端只做意图分类和分层调度，输出严格 JSON，让 ChatService 能把模型规划转换成确定性动作。</p>
-     *
-     * @param builder Spring AI 提供的基础客户端构建器
-     * @return 只负责路由决策的低温度客户端
-     */
-    /**
      * 普通路线规划客户端：以固定计划为起点，为本题选择取数步骤和参数，输出严格 JSON。
      * 标的、分析师、模型档位和步数上限由服务端固定，模型只能在给定菜单内选择。
      */
@@ -401,6 +373,14 @@ public class AiConfig {
                 .build();
     }
 
+    /**
+     * 创建 Coordinator 规划客户端。
+     *
+     * <p>该客户端只做意图分类和分层调度，输出严格 JSON，让 ChatService 能把模型规划转换成确定性动作。</p>
+     *
+     * @param builder Spring AI 提供的基础客户端构建器
+     * @return 只负责路由决策的低温度客户端
+     */
     @Bean("coordinatorChatClient")
     public ChatClient coordinatorChatClient(ChatClient.Builder builder) {
         return builder.clone()

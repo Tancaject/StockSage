@@ -18,13 +18,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 对话和工具执行的持久化链路写入器。
  *
- * <p>每次对话请求对应一条链路记录。步骤会以 JSON 形式追加，供前端渲染推理和工具时间线；
- * 如果配置了 Phoenix 追踪，同一批事件也会同步镜像到 Phoenix。</p>
+ * <p>每次对话请求对应一条链路记录。步骤会以 JSON 形式追加，供前端渲染推理和工具时间线。</p>
  */
 @Slf4j
 @Service
@@ -35,19 +33,14 @@ public class TraceService {
     private static final TypeReference<List<AgentStep>> STEP_LIST_TYPE = new TypeReference<>() {
     };
 
-    /** 按链路维度加锁，避免并发追加步骤时丢失数据。 */
-    private final ConcurrentHashMap<String, Object> traceLocks = new ConcurrentHashMap<>();
-
     /** MySQL 链路实体仓库，是追踪详情和最终状态的持久化真相。 */
     private final AgentTraceRepository agentTraceRepository;
     /** 在 AgentStep 列表与 JSON 字段之间转换。 */
     private final ObjectMapper objectMapper;
-    /** 可选地把同一生命周期镜像到 Phoenix/OpenTelemetry。 */
-    private final PhoenixTraceService phoenixTraceService;
     /**
      * 开始一条新的智能体执行链路。
      *
-     * <p>该方法会先在数据库创建 running 状态的追踪记录，再同步通知 PhoenixTraceService 开始外部 span。</p>
+     * <p>该方法会在数据库创建 running 状态的追踪记录。</p>
      */
     @Transactional
     public String startTrace(String userId, Long conversationId, String userQuery) {
@@ -65,9 +58,7 @@ public class TraceService {
         trace.setSteps("[]");
         trace.setCreatedAt(LocalDateTime.now());
 
-        // 数据库先落 running 记录，再启动可选 Phoenix span；外部观测不是持久化真相。
         agentTraceRepository.save(trace);
-        phoenixTraceService.startTrace(traceId, userId, conversationId, userQuery);
         log.debug("Trace started, traceId={}, userId={}, conversationId={}", traceId, userId, conversationId);
         return traceId;
     }
@@ -75,23 +66,20 @@ public class TraceService {
     /**
      * 追加一个有序步骤。
      *
-     * <p>多个工作线程可能上报同一条链路的步骤，因此按 traceId 串行化写入，避免覆盖更新。</p>
+     * <p>多个工作线程（也可能跨实例）上报同一条链路的步骤，因此用数据库行锁串行化写入，
+     * 锁持有到事务提交，避免读到旧快照后覆盖更新。</p>
      */
     @Transactional
     public void addStep(String traceId, AgentStep step) {
-        Object lock = traceLocks.computeIfAbsent(traceId, k -> new Object());
-        synchronized (lock) {
-            AgentTrace trace = findTrace(traceId);
-            List<AgentStep> steps = readSteps(trace);
-            step.setIndex(steps.size());
-            steps.add(step);
+        AgentTrace trace = findTraceForUpdate(traceId);
+        List<AgentStep> steps = readSteps(trace);
+        step.setIndex(steps.size());
+        steps.add(step);
 
-            trace.setSteps(writeSteps(traceId, steps));
-            trace.setTotalSteps(steps.size());
-            // 在同一 traceId 锁内完成读-改-写，避免并行工具/辩论步骤相互覆盖。
-            agentTraceRepository.save(trace);
-            phoenixTraceService.addStep(traceId, step);
-        }
+        trace.setSteps(writeSteps(traceId, steps));
+        trace.setTotalSteps(steps.size());
+        // 在同一行锁内完成读-改-写，避免并行工具/辩论步骤相互覆盖。
+        agentTraceRepository.save(trace);
     }
 
     /**
@@ -109,7 +97,8 @@ public class TraceService {
                          int totalTokens,
                          long durationMs,
                          String taskOutcome) {
-        AgentTrace trace = findTrace(traceId);
+        // 终态写入会整行保存（含 steps），同样需要行锁，避免覆盖并发追加的步骤。
+        AgentTrace trace = findTraceForUpdate(traceId);
         long traceElapsedMs = Duration.between(trace.getCreatedAt(), LocalDateTime.now()).toMillis();
         // DEEP 的调用方耗时从 worker 启动计算；持久化 Trace 起点更早，包含排队时间。
         long endToEndDurationMs = Math.max(Math.max(0, durationMs), traceElapsedMs);
@@ -121,8 +110,6 @@ public class TraceService {
             trace.setTaskOutcome(taskOutcome.trim());
         }
         agentTraceRepository.save(trace);
-        phoenixTraceService.endTrace(traceId, status, totalTokens, endToEndDurationMs);
-        traceLocks.remove(traceId);
         log.debug("Trace ended, traceId={}, status={}, durationMs={}", traceId, status, endToEndDurationMs);
     }
 
@@ -156,6 +143,12 @@ public class TraceService {
      */
     private AgentTrace findTrace(String traceId) {
         return agentTraceRepository.findById(traceId)
+                .orElseThrow(() -> new IllegalArgumentException("Trace not found: " + traceId));
+    }
+
+    /** 以 SELECT ... FOR UPDATE 读取追踪实体；必须在写事务内调用。 */
+    private AgentTrace findTraceForUpdate(String traceId) {
+        return agentTraceRepository.findByTraceIdForUpdate(traceId)
                 .orElseThrow(() -> new IllegalArgumentException("Trace not found: " + traceId));
     }
 

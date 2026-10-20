@@ -57,39 +57,6 @@ public record ExecutionPlan(
         this(route, taskType, thought, actions, observation, modelTier, routingDecision, resolvedQuery, readRequest, null);
     }
 
-    public ExecutionPlan(PlanRoute route, String taskType, String thought, List<PlanAction> actions,
-                         String observation, ModelTier modelTier, RoutingDecisionMetadata routingDecision,
-                         String resolvedQuery) {
-        this(route, taskType, thought, actions, observation, modelTier, routingDecision, resolvedQuery, null, null);
-    }
-
-    /** 保留不传内部消歧问题的七字段调用形式。 */
-    public ExecutionPlan(PlanRoute route,
-                         String taskType,
-                         String thought,
-                         List<PlanAction> actions,
-                         String observation,
-                         ModelTier modelTier,
-                         RoutingDecisionMetadata routingDecision) {
-        this(route, taskType, thought, actions, observation, modelTier, routingDecision, "");
-    }
-    /** 保留显式路由与模型层级、但不传路由诊断元数据的调用形式。 */
-    public ExecutionPlan(PlanRoute route,
-                         String taskType,
-                         String thought,
-                         List<PlanAction> actions,
-                         String observation,
-                         ModelTier modelTier) {
-        this(route, taskType, thought, actions, observation, modelTier, null, "");
-    }
-
-    /**
-     * 动作的历史标签字符串列表，供追踪面板与回归比对使用。
-     */
-    public List<String> actionLabels() {
-        return actions == null ? List.of() : actions.stream().map(PlanAction::label).toList();
-    }
-
     /** 历史计划和未知诊断值保留未知时间要求，不从问题或模型报告重新推断。 */
     public TimeSensitivity timeSensitivity() {
         if (routingDecision == null || routingDecision.timeSensitivity() == null) {

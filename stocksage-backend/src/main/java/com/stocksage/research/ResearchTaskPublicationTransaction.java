@@ -25,27 +25,6 @@ public class ResearchTaskPublicationTransaction {
     }
 
     /**
-     * 在单事务内执行并返回发布结果。
-     *
-     * @param publication 必须原子提交的数据库回调
-     * @return 回调结果
-     */
-    @Transactional
-    public <T> T execute(Supplier<T> publication) {
-        return Objects.requireNonNull(publication, "publication").get();
-    }
-
-    /**
-     * 在单事务内执行无返回值发布回调。
-     *
-     * @param publication 必须原子提交的数据库回调
-     */
-    @Transactional
-    public void execute(Runnable publication) {
-        Objects.requireNonNull(publication, "publication").run();
-    }
-
-    /**
      * 在稳定的数据库互斥锁下执行同一用户的报告、消息和任务发布。
      *
      * <p>回调开始前锁定用户行，只串行同一用户的发布，避免报告快照去重和 ticker 版本号分配

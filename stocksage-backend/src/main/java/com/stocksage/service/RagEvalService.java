@@ -7,7 +7,6 @@ import com.stocksage.model.dto.RagEvalResponse;
 import com.stocksage.model.dto.RagEvalRetrievalDetails;
 import com.stocksage.rag.RagRetrievalEvaluation;
 import com.stocksage.rag.RagService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.annotation.Qualifier;

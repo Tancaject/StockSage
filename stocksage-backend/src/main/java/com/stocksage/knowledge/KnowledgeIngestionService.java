@@ -1,5 +1,6 @@
 package com.stocksage.knowledge;
 
+import com.stocksage.util.Hashing;
 import com.stocksage.tool.ToolCallContext;
 import com.stocksage.exception.ResearchBudgetExceededException;
 
@@ -28,12 +29,9 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -85,19 +83,8 @@ public class KnowledgeIngestionService {
         this.vectorDocumentRepository = vectorDocumentRepository;
         this.objectMapper = objectMapper;
         this.eventPublisher = eventPublisher;
-        this.cleanupTransaction = transactionManager == null ? null : new TransactionTemplate(transactionManager);
-        if (cleanupTransaction != null) {
-            cleanupTransaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        }
-    }
-
-    /** 保留无 Spring 容器单元测试使用的构造入口。 */
-    public KnowledgeIngestionService(
-            VectorStore vectorStore,
-            DocIndexRepository docIndexRepository,
-            VectorDocumentRepository vectorDocumentRepository,
-            ObjectMapper objectMapper) {
-        this(vectorStore, docIndexRepository, vectorDocumentRepository, objectMapper, null, null);
+        this.cleanupTransaction = new TransactionTemplate(transactionManager);
+        cleanupTransaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     /** 可选语义去重的向量相似度阈值。 */
@@ -105,30 +92,15 @@ public class KnowledgeIngestionService {
     private double dedupSimilarityThreshold;
 
     /**
-     * 摄取单段文本，并默认开启语义去重。
+     * 摄取单段文本。
+     *
+     * <p>空文本会直接返回零切片结果；非空文本会包装成一个 Document 后进入统一摄取路径。</p>
      *
      * @param sourceId 来源稳定 ID
      * @param content 正文
      * @param metadata 检索元数据
      * @param sourceType 来源类型
      * @param ttl 临时来源有效期；null 表示永久
-     * @return 摄取、跳过和重复计数
-     */
-    @Transactional
-    public KnowledgeIngestionResult ingestText(
-            String sourceId,
-            String content,
-            Map<String, Object> metadata,
-            String sourceType,
-            Duration ttl) {
-        return ingestText(sourceId, content, metadata, sourceType, ttl, true);
-    }
-
-    /**
-     * 摄取单段文本。
-     *
-     * <p>空文本会直接返回零切片结果；非空文本会包装成一个 Document 后进入统一摄取路径。</p>
-     *
      * @param semanticDedupEnabled 是否调用向量相似搜索去重
      * @return 摄取结果
      */
@@ -361,10 +333,14 @@ public class KnowledgeIngestionService {
 
     private void cleanupSourceVectors(String sourceId) {
         try {
-            Runnable cleanup = () -> docIndexRepository.lockByFilePath(sourceId)
-                    .ifPresent(this::removeUncommittedVectors);
-            if (cleanupTransaction == null) cleanup.run();
-            else cleanupTransaction.executeWithoutResult(status -> cleanup.run());
+            Runnable cleanup = () -> docIndexRepository.lockByFilePath(sourceId).ifPresent(entry -> {
+                removeUncommittedVectors(entry);
+                // 过期来源的切片已清空且向量删除成功后，清理标记已无用，删除索引行避免无限增长。
+                if (entry.chunkIds().isEmpty() && entry.isExpired(LocalDateTime.now())) {
+                    docIndexRepository.deleteByFilePath(sourceId);
+                }
+            });
+            cleanupTransaction.executeWithoutResult(status -> cleanup.run());
         } catch (RuntimeException failure) {
             // 来源及其当前版本已持久化，下次摄取或维护会重试同一清理，不能谎报提交失败。
             log.warn("RAG vector cleanup pending for source={}; scheduled maintenance will retry", sourceId, failure);
@@ -382,9 +358,6 @@ public class KnowledgeIngestionService {
      * 发布不可变的 BM25 变更快照；监听器只会在当前事务提交后应用。
      */
     private void publishBm25Update(List<String> deletedChunkIds, List<VectorDocument> upsertedRows) {
-        if (eventPublisher == null) {
-            return;
-        }
         List<String> deletedIds = deletedChunkIds == null ? List.of() : deletedChunkIds;
         List<IndexedDocument> upserts = upsertedRows == null
                 ? List.of()
@@ -503,13 +476,7 @@ public class KnowledgeIngestionService {
      * @return 64 位十六进制摘要
      */
     public static String sha256(String value) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] bytes = digest.digest((value == null ? "" : value).getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(bytes);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to calculate SHA-256", e);
-        }
+        return Hashing.sha256Hex(value == null ? "" : value);
     }
 
     /**

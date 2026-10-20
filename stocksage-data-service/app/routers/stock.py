@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 from app.sec_financials import FinancialReportPeriod, normalize_sec_financials
 from app.services.akshare_service import AkshareService
 from app.services.baostock_service import BaostockService
-from app.services.edgar_service import EdgarService
+from app.services.edgar_service import edgar_service
 from app.services.search_service import SearchService
 from app.services.market_resolver import (
     A_SHARE,
@@ -36,7 +36,7 @@ from app.services.market_resolver import (
 router = APIRouter()
 bao = BaostockService()       # A 股数据（兼容）
 ak_svc = AkshareService()     # 港股免费数据源
-edgar = EdgarService()        # 美股 SEC 财报 / XBRL 数据源
+edgar = edgar_service        # 美股 SEC 财报 / XBRL 数据源
 search_svc = SearchService()  # Tavily / DDG 新闻检索，供股票新闻端点复用
 
 _MERGEABLE_CANDIDATE_FIELDS = (

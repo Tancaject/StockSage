@@ -101,7 +101,7 @@ public class ResearchTask {
         /** 完成策略主动阻止发布不满足门禁的结论。 */
         POLICY_BLOCKED,
 
-        /** 评测专用：证据门禁通过后即结束，不进入辩论和报告（stocksage.research.eval.evidence-only）。 */
+        /** 评测专用：证据门禁通过后即结束，不进入辩论和报告（请求级 evaluationMode=EVIDENCE_ONLY）。 */
         EVIDENCE_ONLY
     }
 

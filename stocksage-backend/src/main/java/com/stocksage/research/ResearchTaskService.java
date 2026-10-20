@@ -1,5 +1,6 @@
 package com.stocksage.research;
 
+import com.stocksage.util.Hashing;
 import com.stocksage.service.ToolPrefetchService;
 import com.stocksage.config.ModelTokenBudgetProperties;
 
@@ -16,12 +17,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HexFormat;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -136,7 +133,7 @@ public class ResearchTaskService {
         if (submissionId == null || !submissionId.matches("[A-Za-z0-9_-]{1,80}")) {
             throw new IllegalArgumentException("invalid research submissionId");
         }
-        return "deep-run:" + sha256(normalizeText(userId) + "|" + submissionId);
+        return "deep-run:" + Hashing.sha256Hex(normalizeText(userId) + "|" + submissionId);
     }
 
     private String requestFingerprint(ResearchTask task) {
@@ -153,7 +150,7 @@ public class ResearchTaskService {
 
     /** 业务问题分组跨会话保持稳定；上下文差异由每次运行的载荷与执行清单解释。 */
     public String buildRequestFingerprint(String userId, String ticker, String query) {
-        return "deep-request:" + sha256(String.join("|", normalizeText(userId), normalizeTicker(ticker),
+        return "deep-request:" + Hashing.sha256Hex(String.join("|", normalizeText(userId), normalizeTicker(ticker),
                 normalizeText(query).toLowerCase(Locale.ROOT).replaceAll("\\s+", " ")));
     }
 
@@ -498,25 +495,6 @@ public class ResearchTaskService {
     }
 
     /**
-     * 以默认结果类型完成当前 owner 的任务。
-     *
-     * @param task 当前任务
-     * @param leaseToken 当前 owner token
-     * @param resultReportVersionId 报告版本 ID；null 表示证据不足
-     */
-    @Transactional
-    public void markSucceededForOwner(ResearchTask task, String leaseToken, Long resultReportVersionId) {
-        markSucceededForOwner(
-                task,
-                leaseToken,
-                resultReportVersionId,
-                resultReportVersionId == null
-                        ? ResearchTask.ResultKind.INSUFFICIENT_EVIDENCE
-                        : ResearchTask.ResultKind.FULL_REPORT
-        );
-    }
-
-    /**
      * 以显式结果类型将当前 owner 的任务原子置为 SUCCEEDED/COMPLETE。
      *
      * @param task 当前任务
@@ -650,15 +628,6 @@ public class ResearchTaskService {
     }
 
     /**
-     * 构造不含会话维度的 DEEP 提交幂等键。
-     *
-     * @return SHA-256 派生的稳定键
-     */
-    public String buildSubmissionKey(String userId, String ticker, String userQuery) {
-        return buildSubmissionKey(userId, ticker, userQuery, null);
-    }
-
-    /**
      * 由用户、会话、ticker 和归一化问题构造 DEEP 提交幂等键。
      *
      * @param userId 用户 ID
@@ -676,7 +645,7 @@ public class ResearchTaskService {
         String normalizedQuery = normalizeText(userQuery)
                 .toLowerCase(Locale.ROOT)
                 .replaceAll("\\s+", " ");
-        return "deep-submit:" + sha256(String.join("|",
+        return "deep-submit:" + Hashing.sha256Hex(String.join("|",
                 normalizeText(userId),
                 conversationId == null ? "no-conversation" : conversationId.toString(),
                 normalizeTicker(ticker),
@@ -701,18 +670,10 @@ public class ResearchTaskService {
      * @param query 用户问题
      * @param traceId 链路 ID
      * @param conversationId 可选会话 ID
+     * @param timeSensitivity 时间敏感度
+     * @param evaluationMode 评测专用的请求级模式；只在评测时写入载荷，普通任务载荷保持不变
      * @return JSON 载荷
      */
-    public String buildSubmissionPayload(String ticker, String query, String traceId, Long conversationId) {
-        return buildSubmissionPayload(ticker, query, traceId, conversationId, TimeSensitivity.UNSPECIFIED);
-    }
-
-    public String buildSubmissionPayload(String ticker, String query, String traceId, Long conversationId,
-                                         TimeSensitivity timeSensitivity) {
-        return buildSubmissionPayload(ticker, query, traceId, conversationId, timeSensitivity, null);
-    }
-
-    /** @param evaluationMode 评测专用的请求级模式；只在评测时写入载荷，普通任务载荷保持不变 */
     public String buildSubmissionPayload(String ticker, String query, String traceId, Long conversationId,
                                          TimeSensitivity timeSensitivity, String evaluationMode) {
         Map<String, Object> payload = new LinkedHashMap<>();
@@ -814,16 +775,6 @@ public class ResearchTaskService {
     /** null 安全去除首尾空白。 */
     private String normalizeText(String value) {
         return value == null ? "" : value.trim();
-    }
-
-    /** 生成 UTF-8 文本的十六进制 SHA-256。 */
-    private String sha256(String value) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return HexFormat.of().formatHex(digest.digest(value.getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 digest is unavailable", e);
-        }
     }
 
     /** 无后缀截断数据库错误文本。 */

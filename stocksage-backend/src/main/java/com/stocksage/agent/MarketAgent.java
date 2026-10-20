@@ -25,17 +25,6 @@ public class MarketAgent {
         this.chatClient = chatClient;
     }
 
-    /**
-     * 生成市场/技术面分析报告。
-     *
-     * @param query 用户原始问题
-     * @param context 预取层整理的股票身份和市场工具观察上下文
-     * @return 市场分析师输出的结构化文本报告
-     */
-    public String analyze(String query, String context) {
-        return analyzeObserved(query, context).content();
-    }
-
     public ModelCompletion.Output analyzeObserved(String query, String context) {
         return ModelCompletion.output(chatClient.prompt()
                 .user("""

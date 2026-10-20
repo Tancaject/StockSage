@@ -1,4 +1,4 @@
-"""SEC 年度事实的 HTTP 契约，保留会计期间、单位和公告版本来源。"""
+"""SEC 年度/单季事实的 HTTP 契约，保留会计期间、单位和公告版本来源。"""
 
 from datetime import date as Date, datetime, timezone
 from typing import Literal
@@ -9,14 +9,16 @@ from pydantic import (
     StrictStr, ValidationError, field_validator, model_validator,
 )
 
+from app.contract_dates import business_date
 from app.services.market_resolver import StockRoute, route_metadata
 
 FinancialReportPeriod = Literal["annual", "quarterly"]
 
 SecMetricName = Literal[
     "Revenue", "NetIncome", "ConsolidatedNetIncome", "TotalAssets", "TotalLiabilities", "StockholdersEquity",
-    "OperatingIncome", "EPS", "OperatingCashFlow", "TotalDebt",
-    "CapitalExpenditure", "Cash", "DilutedShares", "NetInterestIncome", "CreditLossProvision",
+    "OperatingIncome", "PretaxIncome", "EPS", "OperatingCashFlow", "TotalDebt",
+    "SalesRevenue", "ContinuingOperationsNetIncome", "ContinuingOperationsCashFlow", "GainOnDispositions",
+    "CapitalExpenditure", "LeasedEquipmentExpenditure", "Cash", "DilutedShares", "NetInterestIncome", "CreditLossProvision",
 ]
 
 
@@ -39,13 +41,7 @@ class SecFact(BaseModel):
     @field_validator("start", "end", "filed", mode="before")
     @classmethod
     def require_business_date(cls, value):
-        if value is None or type(value) is Date:
-            return value
-        if isinstance(value, str):
-            parsed = Date.fromisoformat(value)
-            if parsed.isoformat() == value:
-                return parsed
-        raise ValueError("SEC fact dates must be YYYY-MM-DD business dates")
+        return business_date(value, "SEC fact dates must be YYYY-MM-DD business dates")
 
     @model_validator(mode="after")
     def validate_period(self):

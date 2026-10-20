@@ -165,10 +165,6 @@ public class KeywordSearchService {
         }
     }
 
-    public List<Document> search(String query, int topK) {
-        return search(query, topK, null);
-    }
-
     /**
      * 执行 Lucene BM25 检索，并复用向量路径的 ticker 过滤边界。
      *

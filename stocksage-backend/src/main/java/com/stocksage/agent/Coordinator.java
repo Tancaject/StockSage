@@ -1,6 +1,5 @@
 package com.stocksage.agent;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.config.ThinkingModels;
 import com.stocksage.agent.intent.AnalysisDepth;
 import com.stocksage.agent.intent.FineIntent;
@@ -80,10 +79,10 @@ public class Coordinator {
     private double modelRoutingTemperature;
 
     /** 最终回答正文的 token 上限；Max 的思考预算单独设置。 */
-    @Value("${stocksage.chat.model-routing.max-output-tokens:${STOCKSAGE_CHAT_MAX_OUTPUT_TOKENS:4096}}")
+    @Value("${stocksage.chat.model-routing.max-output-tokens:${STOCKSAGE_CHAT_MAX_OUTPUT_TOKENS:24576}}")
     private int modelRoutingMaxOutputTokens;
 
-    @Value("${stocksage.chat.model-routing.standard-thinking-budget:32768}")
+    @Value("${stocksage.chat.model-routing.standard-thinking-budget:8192}")
     private int standardThinkingBudget;
 
     /** 是否把 2～4 个明确标的的普通路线请求按标的扇出执行；关闭时多标的仍要求澄清。 */
@@ -116,28 +115,6 @@ public class Coordinator {
         this.responseChatClient = responseChatClient;
         this.tickerResolutionService = tickerResolutionService;
         this.routePlanCatalog = routePlanCatalog;
-    }
-
-    /**
-     * 保留旧测试/小工具的构造形式；它仍走同一 IntentRecognitionService，只禁用 embedding I/O。
-     */
-    public Coordinator(@Qualifier("coordinatorChatClient") ChatClient routingChatClient,
-                       @Qualifier("chatClient") ChatClient responseChatClient,
-                       ObjectMapper objectMapper,
-                       TickerResolutionService tickerResolutionService) {
-        this(new IntentRecognitionService(routingChatClient, objectMapper), responseChatClient,
-                tickerResolutionService, new RoutePlanCatalog());
-    }
-
-    /**
-     * 请求意图决定并生成执行计划；局部来源失败由融合层 abstain，只有决定对象缺失时才走规则兜底。
-     *
-     * @param userQuery 用户原始问题
-     * @param ragHitCount 知识库命中数
-     * @return 服务器拥有动作列表和模型层级的执行计划
-     */
-    public ExecutionPlan plan(String userQuery, int ragHitCount) {
-        return plan(userQuery, ragHitCount, List.of());
     }
 
     /**
@@ -221,13 +198,6 @@ public class Coordinator {
         return fallbackPlan(userQuery, ragHitCount, "EXPLICIT_DETERMINISTIC", System.nanoTime());
     }
 
-    /**
-     * 按能力层级和输入模态流式输出最终回答。
-     */
-    public Flux<String> streamAnswer(List<Message> promptMessages, boolean usePreparedContextOnly, ModelTier modelTier, boolean useVisionModel) {
-        return streamAnswer(promptMessages, usePreparedContextOnly, modelTier, useVisionModel, null);
-    }
-
     /** 选择和实际调用共用同一配置描述，避免已批准条件与发送选项各自维护。 */
     public Map<String, Object> finalAnswerInvocation(SelectedModel selected) {
         Map<String, Object> invocation = new LinkedHashMap<>();
@@ -249,13 +219,7 @@ public class Coordinator {
         return Map.copyOf(invocation);
     }
 
-    /** 观察单次最终回答的实际请求配置和供应商 usage；usage 是整次调用快照，不能按 chunk 累加。 */
-    public Flux<String> streamAnswer(List<Message> promptMessages, boolean usePreparedContextOnly,
-                                     ModelTier modelTier, boolean useVisionModel,
-                                     Consumer<Map<String, Object>> observer) {
-        return streamAnswer(promptMessages, usePreparedContextOnly, modelTier, useVisionModel, observer, completion -> {});
-    }
-
+    /** 按能力层级和输入模态流式输出最终回答；观察实际请求配置和供应商 usage，usage 是整次调用快照，不能按 chunk 累加。 */
     public Flux<String> streamAnswer(List<Message> promptMessages, boolean usePreparedContextOnly,
                                      ModelTier modelTier, boolean useVisionModel,
                                      Consumer<Map<String, Object>> observer, Consumer<ModelCompletion> completionConsumer) {
@@ -275,10 +239,7 @@ public class Coordinator {
                 options.model(modelName).temperature(((Number) invocation.get("temperature")).doubleValue())
                         .maxTokens(((Number) invocation.get("maxOutputTokens")).intValue());
             }
-            if (invocation.containsKey("enableThinking")) {
-                options.extraBody(Map.of("enable_thinking", invocation.get("enableThinking"),
-                        "thinking_budget", invocation.get("thinkingBudget")));
-            } else if (invocation.containsKey("thinkingBudget")) {
+            if (invocation.containsKey("thinkingBudget")) {
                 options.extraBody(Map.of("thinking_budget", invocation.get("thinkingBudget")));
             }
             observeFinalAnswer(observer, invocation);
@@ -432,7 +393,6 @@ public class Coordinator {
         String intentSummary = fineIntentLabel(decision.fineIntent());
         String thought = "Coordinator 路由：理解为「" + intentSummary
                 + "」，直接选择「" + taskType + "」；" + recognition.rationale();
-        String observation = buildPlanObservation(route, modelTier, actions);
         Map<String, Double> sourceScores = new LinkedHashMap<>();
         decision.sourceScores().forEach((source, score) -> sourceScores.put(source.name(), score));
         List<String> matchedSignals = sourceScores.entrySet().stream()
@@ -490,7 +450,7 @@ public class Coordinator {
             }
         }
         actions = ordinaryPlan.actions();
-        observation = buildPlanObservation(route, modelTier, actions);
+        String observation = buildPlanObservation(route, modelTier, actions);
         return new ExecutionPlan(
                 route, taskType, thought, actions, observation, modelTier, routingDecision, resolvedQuery, explicit,
                 ordinaryPlan);
@@ -548,10 +508,8 @@ public class Coordinator {
                 || containsAny(lower, "k线", "行情", "技术指标", "price", "股价")
                 || (!conceptQuestion && containsAny(lower, "pe", "pb", "roe"))) {
             route = PlanRoute.MARKET;
-        } else if (ragHitCount > 0 || conceptQuestion) {
-            route = PlanRoute.DIRECT;
         } else {
-            // 没有任何可靠领域信号时留在 DIRECT，绝不凭缺省值触发新闻工具链。
+            // 知识库命中、概念问题或没有任何可靠领域信号时都留在 DIRECT，绝不凭缺省值触发新闻工具链。
             route = PlanRoute.DIRECT;
         }
 
@@ -560,7 +518,6 @@ public class Coordinator {
         String taskType = planSpec.taskType();
         String thought = "Coordinator 路由：识别为「" + taskType + "」；使用规则兜底完成分流。";
         ModelTier modelTier = planSpec.modelTier();
-        String observation = buildPlanObservation(route, modelTier, actions);
         List<String> matchedSignals = new java.util.ArrayList<>();
         matchedSignals.add(route.name().toLowerCase(Locale.ROOT) + "-rule");
         if (ragHitCount > 0) {
@@ -578,7 +535,7 @@ public class Coordinator {
                 fallbackReason,
                 elapsedMillis(startedNanos),
                 fallbackFineIntent(route, query).name(),
-                fallbackIntentGroup(route).name(),
+                IntentGroup.forRoute(route).name(),
                 fallbackTimeSensitivity(query).name(),
                 (route == PlanRoute.DEEP ? AnalysisDepth.DEEP : AnalysisDepth.STANDARD).name(),
                 Map.of(),
@@ -704,16 +661,6 @@ public class Coordinator {
             case FUNDAMENTALS -> FineIntent.FUNDAMENTALS;
             case NEWS -> FineIntent.NEWS_EVENT;
             case DEEP -> FineIntent.DEEP_RESEARCH;
-        };
-    }
-
-    private IntentGroup fallbackIntentGroup(PlanRoute route) {
-        return switch (route) {
-            case DIRECT -> IntentGroup.KNOWLEDGE;
-            case MARKET -> IntentGroup.MARKET;
-            case FUNDAMENTALS -> IntentGroup.FUNDAMENTALS;
-            case NEWS -> IntentGroup.NEWS;
-            case DEEP -> IntentGroup.RESEARCH;
         };
     }
 

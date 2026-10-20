@@ -55,8 +55,8 @@ public class EmbeddingIntentMatcher {
         this.executor = executor;
         this.enabled = enabled;
         this.timeoutMs = Math.max(1L, timeoutMs);
-        this.minSimilarity = clamp(minSimilarity);
-        this.minMargin = clamp(minMargin);
+        this.minSimilarity = IntentBounds.confidence(minSimilarity);
+        this.minMargin = IntentBounds.confidence(minMargin);
     }
 
     /** 在调用 LLM 前启动匹配，使本地向量计算与模型分类并行。 */
@@ -98,11 +98,6 @@ public class EmbeddingIntentMatcher {
         }
     }
 
-    /** 便于独立调用和单测的同步外观，仍受相同 deadline 约束。 */
-    public Optional<IntentSignal> match(IntentRecognitionRequest request) {
-        return finishMatch(beginMatch(request));
-    }
-
     private Optional<IntentSignal> matchNow(IntentRecognitionRequest request) {
         EmbeddingModel model = modelProvider.getIfAvailable();
         if (model == null) {
@@ -130,9 +125,9 @@ public class EmbeddingIntentMatcher {
             return Optional.empty();
         }
 
-        FineIntent fineIntent = fineIntent(best.route());
-        IntentGroup group = intentGroup(best.route());
-        double confidence = clamp(best.score());
+        FineIntent fineIntent = FineIntent.forRoute(best.route());
+        IntentGroup group = IntentGroup.forRoute(best.route());
+        double confidence = IntentBounds.confidence(best.score());
         return Optional.of(new IntentSignal(
                 fineIntent,
                 group,
@@ -220,26 +215,6 @@ public class EmbeddingIntentMatcher {
         return dot / Math.sqrt(leftNorm * rightNorm);
     }
 
-    private FineIntent fineIntent(PlanRoute route) {
-        return switch (route) {
-            case DIRECT -> FineIntent.KNOWLEDGE_EXPLANATION;
-            case MARKET -> FineIntent.MARKET_DATA;
-            case FUNDAMENTALS -> FineIntent.FUNDAMENTALS;
-            case NEWS -> FineIntent.NEWS_EVENT;
-            case DEEP -> FineIntent.DEEP_RESEARCH;
-        };
-    }
-
-    private IntentGroup intentGroup(PlanRoute route) {
-        return switch (route) {
-            case DIRECT -> IntentGroup.KNOWLEDGE;
-            case MARKET -> IntentGroup.MARKET;
-            case FUNDAMENTALS -> IntentGroup.FUNDAMENTALS;
-            case NEWS -> IntentGroup.NEWS;
-            case DEEP -> IntentGroup.RESEARCH;
-        };
-    }
-
     private TimeSensitivity timeSensitivity(String query) {
         String lower = query == null ? "" : query.toLowerCase(java.util.Locale.ROOT);
         if (lower.matches(".*(?:实时|现在|当前|right now|real-time|current price).*$")) {
@@ -249,13 +224,6 @@ public class EmbeddingIntentMatcher {
             return TimeSensitivity.RECENT;
         }
         return TimeSensitivity.UNSPECIFIED;
-    }
-
-    private static double clamp(double value) {
-        if (!Double.isFinite(value)) {
-            return 0.0;
-        }
-        return Math.max(0.0, Math.min(1.0, value));
     }
 
     public record MatchHandle(CompletableFuture<Optional<IntentSignal>> future, long deadlineNanos) {

@@ -22,7 +22,7 @@ public class MarketTools {
 
     /** A 股/港股行情与跨市场代码解析的统一 Python 服务客户端。 */
     private final DataServiceClient dataServiceClient;
-    /** 美股和具备权限的港股只读账户/行情入口，明确不提供交易方法。 */
+    /** 美股和具备权限的港股只读历史行情入口，明确不提供交易方法。 */
     private final IbkrReadOnlyService ibkrReadOnlyService;
     private final ObjectMapper objectMapper;
 
@@ -93,26 +93,6 @@ public class MarketTools {
     public String getSectorPerformance(
             @ToolParam(description = "板块名称，如 白酒、新能源、半导体") String sector) {
         return dataServiceClient.getSectorPerformance(sector);
-    }
-
-    /**
-     * 获取大盘行情概览。
-     */
-    @Tool(description = "获取今日大盘行情概览：上证、深证、创业板指数及涨跌统计")
-    public String getMarketOverview() {
-        return dataServiceClient.getMarketOverview();
-    }
-
-    /**
-     * 获取 IBKR 实时或延迟报价。
-     *
-     * <p>响应中会标明 REALTIME、DELAYED 或 NO_SUBSCRIPTION，模型需要如实告诉用户数据权限状态。</p>
-     */
-    @Tool(description = "通过 IBKR Web API 获取美股实时或延迟报价；港股仅在 IBKR 账户具备相应权限时使用。只读工具；返回值会标明 REALTIME/DELAYED/NO_SUBSCRIPTION")
-    public String getIbkrRealtimeQuote(
-            @ToolParam(description = "美股代码，如 AAPL、TSLA、NVDA；港股如 0700.HK/00700 也可尝试，但免费港股优先用普通股票数据工具；A股继续使用普通股票数据工具") String code) {
-        // 只读服务会把 REALTIME/DELAYED/NO_SUBSCRIPTION 状态保留在响应中。
-        return ibkrReadOnlyService.getRealtimeQuote(code);
     }
 
     /**

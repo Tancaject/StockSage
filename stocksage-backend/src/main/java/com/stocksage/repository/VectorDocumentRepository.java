@@ -2,6 +2,7 @@ package com.stocksage.repository;
 
 import com.stocksage.model.entity.VectorDocument;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -18,14 +19,6 @@ import java.util.Optional;
 public interface VectorDocumentRepository extends JpaRepository<VectorDocument, Long> {
 
     /**
-     * 判断某个文档名是否已有切片记录，供回归种子等简单去重路径使用。
-     *
-     * @param docName 原始文档名称
-     * @return 至少存在一个同名切片时为 true
-     */
-    boolean existsByDocName(String docName);
-
-    /**
      * 根据向量库返回的 ID 找回 MySQL 中的文本切片和元数据。
      *
      * @param vectorId 向量存储中的稳定 ID
@@ -39,11 +32,14 @@ public interface VectorDocumentRepository extends JpaRepository<VectorDocument, 
     /**
      * 批量删除指定向量 ID 的文本镜像。
      *
-     * <p>调用方在事务中将其与向量库和 {@code doc_index} 清理配套执行。</p>
+     * <p>调用方在事务中将其与向量库和 {@code doc_index} 清理配套执行。
+     * 单条批量 DELETE，不逐行加载实体，因此不会触发实体生命周期回调。</p>
      *
      * @param vectorIds 要删除的向量 ID 集合
      */
-    void deleteByVectorIdIn(Collection<String> vectorIds);
+    @Modifying
+    @Query("delete from VectorDocument v where v.vectorId in :vectorIds")
+    void deleteByVectorIdIn(@Param("vectorIds") Collection<String> vectorIds);
 
     /**
      * 读取某 ticker 最新一份 10-K 的“Item 1. Business”父级切片。

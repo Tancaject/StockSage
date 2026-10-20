@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import ChatView from '../views/ChatView.vue'
 import WorkbenchView from '../views/WorkbenchView.vue'
-import EvalDesk from '../views/EvalDesk.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import { getCurrentUser } from '../api/auth.js'
@@ -12,7 +11,6 @@ const routes = [
   { path: '/register', name: 'Register', component: RegisterView, meta: { public: true } },
   { path: '/', name: 'Chat', component: ChatView },
   { path: '/workbench', name: 'Workbench', component: WorkbenchView },
-  { path: '/eval', name: 'Eval', component: EvalDesk },
   { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
 

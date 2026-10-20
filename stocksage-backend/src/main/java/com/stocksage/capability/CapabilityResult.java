@@ -3,7 +3,7 @@ package com.stocksage.capability;
 /**
  * Gateway 返回给 Skill 的统一能力结果。
  *
- * <p>无论下游是本地 {@code @Tool} 还是 MCP，Skill 都只读取此契约；原始内容已按能力清单限长。</p>
+ * <p>Skill 只读取此契约，不直接接触下游 {@code @Tool}；原始内容已按能力清单限长。</p>
  *
  * @param capabilityId 稳定能力 ID
  * @param providerId 实际提供结果的提供方

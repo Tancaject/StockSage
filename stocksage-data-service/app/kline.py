@@ -35,13 +35,6 @@ class KLinePoint(BaseModel):
         if not isinstance(value, dict):
             return value
         row = dict(value)
-        for source, target in {
-            "Date": "date", "Open": "open", "High": "high", "Low": "low",
-            "Close": "close", "Volume": "volume", "Amount": "amount",
-            "Change": "change", "PctChange": "pctChg", "TurnoverRate": "turnoverRate",
-        }.items():
-            if source in row:
-                row.setdefault(target, row.pop(source))
         for key, item in row.items():
             if isinstance(item, Number) and not isinstance(item, bool) and not isfinite(item):
                 row[key] = None

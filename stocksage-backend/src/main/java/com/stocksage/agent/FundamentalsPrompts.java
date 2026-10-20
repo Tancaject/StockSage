@@ -38,7 +38,7 @@ public final class FundamentalsPrompts {
         return TASK.formatted(query, context == null ? "" : context);
     }
 
-    static String read(Resource resource) {
+    public static String read(Resource resource) {
         try (var input = resource.getInputStream()) {
             // Java text blocks use LF even when a Windows checkout uses CRLF.
             String text = StandardCharsets.UTF_8.newDecoder().decode(ByteBuffer.wrap(input.readAllBytes()))

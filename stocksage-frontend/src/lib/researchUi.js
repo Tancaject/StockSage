@@ -21,7 +21,17 @@ const CALLED_TOOL_LABELS = {
   检索知识库: '检索知识库',
 }
 
-const KNOWN_SYMBOLS = ['META', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'NFLX', 'AMD']
+// 与后端 ResearchTask.Stage 实际写入的阶段保持一致
+export const TASK_STAGE_LABELS = {
+  CREATED: '已创建',
+  DATA_PREFETCH: '读取研究数据',
+  AGENT_DEBATE: '多空辩论',
+  REPORT_SYNTHESIS: '综合研究结论',
+  REPORT_PERSIST: '保存报告',
+  COMPLETE: '完成',
+  FAILED: '失败',
+}
+
 const TASK_OUTCOME_LABELS = {
   COMPLETED: '已完成',
   DEGRADED: '降级完成',
@@ -458,8 +468,8 @@ function summarizeDataStage(actions, observations) {
 }
 
 function inferDataCategory(item) {
-  const action = summarizeToolAction(item.content)
-  const text = `${item.label || ''} ${action.label || ''} ${item.content || ''}`
+  const actionLabel = summarizeToolLabel(item.content)
+  const text = `${item.label || ''} ${actionLabel || ''} ${item.content || ''}`
 
   if (/SEC|filing|company\s*reports?|financial\s*reports?|10-[KQ]|财报|年报/i.test(text)) return 'SEC 财报'
   if (/financial|财务指标|结构化财务/i.test(text)) return '财务指标'
@@ -485,21 +495,13 @@ function compactStageDetail(content, maxLength = 88) {
   return `${text.slice(0, maxLength - 1).trimEnd()}…`
 }
 
-function summarizeToolAction(content) {
+function summarizeToolLabel(content) {
   const calledTool = summarizeCalledTool(content)
-  if (calledTool) {
-    return { label: calledTool.label, detail: '' }
-  }
+  if (calledTool) return calledTool.label
 
-  const parsed = parseToolCall(content)
-  if (!parsed) {
-    return { label: '读取数据', detail: content }
-  }
-
-  return {
-    label: TOOL_LABELS[parsed.name] || readableToolName(parsed.name),
-    detail: formatToolDetail(parsed),
-  }
+  const name = parseToolName(content)
+  if (!name) return '读取数据'
+  return TOOL_LABELS[name] || readableToolName(name)
 }
 
 function summarizeCalledTool(content) {
@@ -509,123 +511,9 @@ function summarizeCalledTool(content) {
   return { label: CALLED_TOOL_LABELS[rawLabel] || rawLabel }
 }
 
-function parseToolCall(content) {
+function parseToolName(content) {
   const match = String(content || '').match(/^([A-Za-z_$][\w$]*)\s*[:：]\s*(.*)$/s)
-  if (!match) return null
-
-  const name = match[1]
-  const rawArgs = match[2].trim()
-  const args = parseJsonArgs(rawArgs)
-
-  return {
-    name,
-    rawArgs,
-    args,
-    structured: Array.isArray(args),
-  }
-}
-
-function parseJsonArgs(rawArgs) {
-  if (!rawArgs || !/^[\[{]/.test(rawArgs)) return null
-  try {
-    const parsed = JSON.parse(rawArgs)
-    return Array.isArray(parsed) ? parsed : [parsed]
-  } catch {
-    return null
-  }
-}
-
-function formatToolDetail(tool) {
-  if (!tool.structured) {
-    return cleanRawToolDetail(tool.rawArgs) || '按当前问题读取数据'
-  }
-
-  const args = tool.args || []
-  const symbol = inferSymbol(args, tool.rawArgs)
-  const parts = []
-  if (symbol) parts.push(symbol)
-
-  if (tool.name === 'getStockKLine') {
-    const period = formatPeriod(args[1])
-    const count = formatCount(args[2])
-    if (period) parts.push(period)
-    if (count) parts.push(count)
-  } else if (tool.name === 'getTechnicalIndicators') {
-    parts.push(...formatIndicators(args[1]))
-  } else if (tool.name === 'getStockNews') {
-    const count = formatCount(args[1] ?? args[2])
-    if (count) parts.push(count)
-  }
-
-  if (parts.length > 0) return parts.join(' · ')
-  return safeArgSummary(args) || '按当前问题读取数据'
-}
-
-function inferSymbol(args, rawArgs) {
-  for (const arg of args || []) {
-    const compact = normalizeTicker(arg)
-    if (isLikelyTicker(compact)) return compact
-  }
-
-  const text = String(rawArgs || '')
-  for (const symbol of KNOWN_SYMBOLS) {
-    const pattern = new RegExp(`(^|[^A-Za-z])${symbol}([^A-Za-z]|$)`, 'i')
-    if (pattern.test(text)) return symbol
-  }
-
-  return ''
-}
-
-function isLikelyTicker(value) {
-  const text = String(value || '').toUpperCase()
-  if (!/^[A-Z]{1,6}([.-][A-Z]{1,3})?$/.test(text)) return false
-  return !['DAILY', 'DAY', 'WEEKLY', 'WEEK', 'MONTHLY', 'MONTH'].includes(text)
-}
-
-function formatPeriod(value) {
-  const period = String(value || '').trim().toLowerCase()
-  return {
-    daily: '日线',
-    day: '日线',
-    '1d': '日线',
-    weekly: '周线',
-    week: '周线',
-    '1w': '周线',
-    monthly: '月线',
-    month: '月线',
-    '1m': '月线',
-  }[period] || ''
-}
-
-function formatCount(value) {
-  const count = Number(value)
-  if (!Number.isFinite(count) || count <= 0) return ''
-  return `${Math.round(count)} 条`
-}
-
-function formatIndicators(value) {
-  if (Array.isArray(value)) {
-    return value.map(item => String(item || '').trim()).filter(Boolean)
-  }
-  return String(value || '')
-    .split(/[,\s/，、]+/)
-    .map(item => item.trim())
-    .filter(Boolean)
-}
-
-function safeArgSummary(args) {
-  return (args || [])
-    .map(value => String(value ?? '').trim())
-    .filter(value => value && value.length <= 32 && !/\s{2,}/.test(value))
-    .slice(0, 3)
-    .join(' · ')
-}
-
-function cleanRawToolDetail(value) {
-  return String(value || '')
-    .replace(/^\[|\]$/g, '')
-    .replace(/^["']|["']$/g, '')
-    .trim()
+  return match ? match[1] : null
 }
 
 function normalizeObservationDetail(content) {
@@ -644,13 +532,6 @@ function textFrom(value) {
   if (value === null || value === undefined) return ''
   if (typeof value === 'string') return markdownToPlainText(value)
   return JSON.stringify(value, null, 2)
-}
-
-function normalizeTicker(value) {
-  return String(value || '')
-    .trim()
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, '')
 }
 
 function shortTraceId(traceId) {

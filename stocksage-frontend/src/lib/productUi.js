@@ -4,12 +4,8 @@ const PRIMARY_NAV_ITEMS = Object.freeze([
 ])
 
 const REPORT_SURFACE_LABELS = Object.freeze({
-  aiReport: 'AI 研究报告',
   aiReportLibrary: 'AI 研究报告库',
   conversationExport: '对话导出',
-  memoDraft: '投资备忘录',
-  memoPreview: '备忘录预览',
-  downloadMemoAction: '下载备忘录',
 })
 
 export function buildPrimaryNavItems(activePath = '/') {

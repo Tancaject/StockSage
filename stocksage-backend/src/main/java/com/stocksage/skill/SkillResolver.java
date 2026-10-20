@@ -22,7 +22,7 @@ public class SkillResolver {
     private final String defaultNewsSkill;
 
     public SkillResolver(SkillRegistry registry,
-                         @Value("${stocksage.skills.defaults.news:latest-news-mcp}") String defaultNewsSkill) {
+                         @Value("${stocksage.skills.defaults.news:local-latest-news}") String defaultNewsSkill) {
         this.registry = registry;
         this.defaultNewsSkill = defaultNewsSkill;
     }

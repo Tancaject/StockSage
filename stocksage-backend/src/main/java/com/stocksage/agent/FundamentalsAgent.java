@@ -69,11 +69,6 @@ public class FundamentalsAgent {
         return invoke(query, context, pinned).content();
     }
 
-    /** 回放只选择启动时已登记的方法；不会建立研究任务或持久化调用记录。 */
-    public Analysis analyzeObserved(String query, String context, String bundleId) {
-        return invoke(query, context, methods.require(bundleId));
-    }
-
     /** Ordinary calls retain their approved selection; the profile-gated evaluator may supply a registered experiment. */
     public Analysis analyzeObserved(String query, String context, AgentPolicyBundle bundle) {
         return invoke(query, context, bundle);

@@ -1,5 +1,7 @@
 package com.stocksage.agent.intent;
 
+import com.stocksage.agent.PlanRoute;
+
 /**
  * 用户想完成的细粒度投研任务。
  *
@@ -15,5 +17,16 @@ public enum FineIntent {
     COMPARISON,
     PORTFOLIO_DIAGNOSIS,
     DEEP_RESEARCH,
-    UNKNOWN
+    UNKNOWN;
+
+    /** 识别来源未给出细粒度意图时，按可执行路由给出默认意图。 */
+    public static FineIntent forRoute(PlanRoute route) {
+        return switch (route) {
+            case DIRECT -> KNOWLEDGE_EXPLANATION;
+            case MARKET -> MARKET_DATA;
+            case FUNDAMENTALS -> FUNDAMENTALS;
+            case NEWS -> NEWS_EVENT;
+            case DEEP -> DEEP_RESEARCH;
+        };
+    }
 }

@@ -7,11 +7,10 @@ import java.util.Objects;
  * 一项可执行能力的版本库受控策略描述。
  *
  * <p>{@link CapabilityRegistry} 从 YAML 清单加载该记录，并与同 ID 的
- * {@link CapabilityAdapter} 绑定。远端 MCP 返回的元数据不能自行创建能力；只有本地描述和适配器
- * 同时存在时才可执行，从而避免把远端新出现的工具自动暴露给 Agent。</p>
+ * {@link CapabilityAdapter} 绑定；只有本地描述和适配器同时存在时才可执行。</p>
  *
  * @param id Skill 使用的稳定能力 ID
- * @param providerType 本地或 MCP 提供方类型
+ * @param providerType 提供方类型
  * @param providerId 可观测性中使用的提供方标识
  * @param nativeName 提供方原生工具名
  * @param riskLevel 能力风险等级，供策略授权
@@ -52,8 +51,7 @@ public record CapabilityDescriptor(
 
     /** 能力的接入方式；不代表风险等级。 */
     public enum ProviderType {
-        LOCAL,
-        MCP
+        LOCAL
     }
 
     /** 能力可能产生的副作用等级；V1 只允许只读类别。 */

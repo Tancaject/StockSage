@@ -1,13 +1,10 @@
 package com.stocksage.agent;
 
+import com.stocksage.util.Hashing;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
-import java.util.HexFormat;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -18,8 +15,8 @@ import java.util.TreeSet;
 public class AgentRuntimeConfiguration {
 
     private static final Set<String> ROLES = Set.of(
-            "fundamentals", "market", "news", "bull", "bear", "manager", "scoring", "continuation", "replan", "evidence-loop",
-            "query-rewrite", "contextual-gist");
+            "fundamentals", "market", "news", "bull", "bear", "manager", "scoring", "continuation", "evidence-loop",
+            "query-rewrite");
     private final Map<String, Object> clients = new TreeMap<>();
     private Map<String, Object> chatProvider;
     private Map<String, Object> deepseekProvider;
@@ -53,7 +50,7 @@ public class AgentRuntimeConfiguration {
             // Paths may contain tenant identifiers; only their fingerprint leaves the construction boundary.
             return Map.of("scheme", uri.getScheme() == null ? "" : uri.getScheme(),
                     "host", uri.getHost() == null ? "" : uri.getHost(), "port", uri.getPort(),
-                    "pathSha256", sha256(uri.getRawPath() == null ? "" : uri.getRawPath()));
+                    "pathSha256", Hashing.sha256Hex(uri.getRawPath() == null ? "" : uri.getRawPath()));
         } catch (java.net.URISyntaxException | NullPointerException invalid) {
             // URI parser exceptions contain the original input, which can contain credentials.
             throw new IllegalArgumentException("Provider endpoint identity cannot be parsed");
@@ -74,7 +71,7 @@ public class AgentRuntimeConfiguration {
             if (extra.get("enable_thinking") instanceof Boolean enabled) defaults.put("enableThinking", enabled);
             if (extra.get("thinking_budget") instanceof Number budget) defaults.put("thinkingBudget", budget);
         }
-        defaults.put("systemPromptHash", sha256(systemPrompt));
+        defaults.put("systemPromptHash", Hashing.sha256Hex(systemPrompt));
         defaults.put("unknownProviderRevision", true);
         clients.put(role, Collections.unmodifiableMap(defaults));
     }
@@ -88,12 +85,4 @@ public class AgentRuntimeConfiguration {
         return Collections.unmodifiableMap(new TreeMap<>(clients));
     }
 
-    private static String sha256(String value) {
-        try {
-            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
-                    .digest(value.getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException impossible) {
-            throw new IllegalStateException("JVM does not support SHA-256", impossible);
-        }
-    }
 }

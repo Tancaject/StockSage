@@ -292,6 +292,9 @@ const POLL_MS = 15000
 const MAX_POLLS = 40
 let pollTimer = null
 let pollCount = 0
+// 换 ticker / 卸载时自增，旧请求的响应据此丢弃
+let relationRequestId = 0
+let unmounted = false
 
 const center = computed(() => graph.value?.center || { ticker: props.ticker, label: props.ticker })
 const isEmpty = computed(() => !graph.value || graph.value.empty)
@@ -476,6 +479,7 @@ function stopPolling() {
 
 function startPolling() {
   stopPolling()
+  if (unmounted) return
   extracting.value = true
   pollTimer = setInterval(() => {
     pollCount += 1
@@ -490,7 +494,9 @@ function startPolling() {
 }
 
 async function load({ silent = false } = {}) {
+  const requestId = relationRequestId
   const symbol = String(props.ticker || '').trim()
+  const isCurrent = () => !unmounted && requestId === relationRequestId
   if (!symbol) return
   if (!silent) {
     loading.value = true
@@ -500,6 +506,7 @@ async function load({ silent = false } = {}) {
   }
   try {
     const data = await fetchStockRelations(symbol)
+    if (!isCurrent()) return
     graph.value = data
     const hasNodes = (data.nodes || []).length > 0
     if (hasNodes) {
@@ -520,31 +527,36 @@ async function load({ silent = false } = {}) {
       extracting.value = false
     }
   } catch (err) {
-    if (!silent) {
+    if (!silent && isCurrent()) {
       error.value = err.message || '读取关系图谱失败'
       graph.value = null
     }
   } finally {
-    if (!silent) loading.value = false
+    if (!silent && isCurrent()) loading.value = false
   }
 }
 
 async function generate() {
   const symbol = String(props.ticker || '').trim()
   if (!symbol) return
+  const requestId = relationRequestId
+  const isCurrent = () => !unmounted && requestId === relationRequestId
   attempted.value = true
   error.value = ''
   try {
     await refreshStockRelations(symbol)
+    if (!isCurrent()) return
     startPolling()
     load({ silent: true })
   } catch (err) {
+    if (!isCurrent()) return
     error.value = err.message || '触发抽取失败'
     extracting.value = false
   }
 }
 
 function resetAndLoad() {
+  relationRequestId += 1
   stopPolling()
   extracting.value = false
   attempted.value = false
@@ -556,7 +568,11 @@ function resetAndLoad() {
 
 onMounted(() => load())
 watch(() => props.ticker, resetAndLoad)
-onBeforeUnmount(stopPolling)
+onBeforeUnmount(() => {
+  unmounted = true
+  relationRequestId += 1
+  stopPolling()
+})
 </script>
 
 <style scoped>

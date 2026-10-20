@@ -1,7 +1,6 @@
 package com.stocksage.agent;
 
-import com.stocksage.research.DeepEvidenceCollector;
-
+import com.stocksage.util.Hashing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,13 +15,9 @@ import com.stocksage.model.dto.DebateModels.PointType;
 import com.stocksage.model.dto.DebateModels.Side;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -76,20 +71,6 @@ public class DebateContractParser {
     /** @param objectMapper 项目统一 JSON 解析器 */
     public DebateContractParser(ObjectMapper objectMapper) {
         this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper");
-    }
-
-    /**
-     * 严格解析单方单轮辩论。
-     *
-     * @param content 可含自然语言摘要，但首个左花括号到最后一个右花括号必须构成唯一 JSON 对象
-     * @param round 从 1 开始的轮次
-     * @param side 本次发言方
-     * @param state 当前证据账本、有界快照和已完成历史
-     * @return 只含服务端生成 pointId 的不可变结构化轮次
-     * @throws DebateContractException 合同、证据或反驳链校验失败
-     */
-    public DebateTurn parse(String content, int round, Side side, AnalysisState state) {
-        return parseTurn(content, round, side, state).turn();
     }
 
     /**
@@ -443,13 +424,7 @@ public class DebateContractParser {
                 horizon.name(),
                 evidenceIds,
                 responseIds);
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return "pt-" + HexFormat.of().formatHex(
-                    digest.digest(canonical.getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException error) {
-            throw new IllegalStateException("SHA-256 is unavailable", error);
-        }
+        return "pt-" + Hashing.sha256Hex(canonical);
     }
 
     private String normalizeForMatch(String value) {
@@ -495,7 +470,6 @@ public class DebateContractParser {
         EVIDENCE_EXCERPT_TOO_SHORT,
         EVIDENCE_EXCERPT_MISMATCH,
         DUPLICATE_EVIDENCE_REF,
-        RESPONSES_REQUIRED,
         RESPONSES_NOT_ALLOWED,
         INVALID_RESPONSE_POINT,
         RESPONSE_POINT_UNKNOWN,
@@ -510,28 +484,14 @@ public class DebateContractParser {
     public static final class DebateContractException extends IllegalArgumentException {
 
         private final ErrorCode code;
-        private final String location;
 
         private DebateContractException(ErrorCode code, String location, Throwable cause) {
             super(code.name() + " at " + location, cause);
             this.code = code;
-            this.location = location;
         }
 
         public ErrorCode code() {
             return code;
-        }
-
-        public ErrorCode getCode() {
-            return code;
-        }
-
-        public String location() {
-            return location;
-        }
-
-        public String getLocation() {
-            return location;
         }
     }
 }

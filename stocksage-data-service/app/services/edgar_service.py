@@ -13,9 +13,9 @@ from app.research_budget import check_budget, bounded_timeout, budget_call
 import re
 import time
 import logging
+import threading
 from datetime import date
 from math import isfinite
-from typing import Optional
 from urllib.parse import urlparse
 
 import httpx
@@ -33,6 +33,8 @@ _HEADERS = {
 _REQUEST_DELAY = 0.15
 
 _CIK_CACHE: dict[str, str] = {}
+# 只缓存成功取到的 SIC；查询失败不入缓存，下次仍会重试。
+_SIC_CACHE: dict[str, str] = {}
 _ALLOWED_SEC_HOSTS = {"sec.gov", "www.sec.gov", "data.sec.gov"}
 
 
@@ -43,14 +45,17 @@ class EdgarService:
         """初始化共享 HTTP 客户端，复用连接并统一请求头。"""
         self._client = httpx.Client(headers=_HEADERS, timeout=30, follow_redirects=False)
         self._last_request_time = 0.0
+        # 同步路由跑在线程池里并发调用，检查-休眠-更新必须串行，否则多个线程会同时放行。
+        self._throttle_lock = threading.Lock()
 
     def _throttle(self):
         """遵守 SEC 限流要求。"""
-        elapsed = time.time() - self._last_request_time
-        if elapsed < _REQUEST_DELAY:
-            time.sleep(bounded_timeout(_REQUEST_DELAY - elapsed))
-        check_budget()
-        self._last_request_time = time.time()
+        with self._throttle_lock:
+            elapsed = time.monotonic() - self._last_request_time
+            if elapsed < _REQUEST_DELAY:
+                time.sleep(bounded_timeout(_REQUEST_DELAY - elapsed))
+            check_budget()
+            self._last_request_time = time.monotonic()
 
     def _get(self, url: str) -> httpx.Response:
         """执行带限流和 URL 校验的 SEC GET 请求。"""
@@ -218,9 +223,8 @@ class EdgarService:
         将公告 HTML 转换成类 Markdown 文本，并尽量避开表格噪声。
 
         保留标题、列表标记和段落边界，有助于下游切片保留局部上下文。
-        这里刻意比完整 HTML 到 Markdown 转换更轻量。
+        这里刻意比完整 HTML 到 Markdown 转换更轻量。调用方需先执行 _remove_noisy_elements。
         """
-        self._remove_noisy_elements(soup)
         for br in soup.find_all("br"):
             br.replace_with("\n")
 
@@ -484,6 +488,21 @@ class EdgarService:
         "NetIncome": [
             "us-gaap:NetIncomeLoss",
         ],
+        # 客户合同销售收入（如 CVX“销售及其他经营收入”），不含其他收益；和营收相同时不输出。
+        "SalesRevenue": [
+            "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+        ],
+        # 持续经营口径（如 HON 剥离业务后）；和全口径相同时不输出。
+        "ContinuingOperationsNetIncome": [
+            "us-gaap:IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest",
+        ],
+        "ContinuingOperationsCashFlow": [
+            "us-gaap:NetCashProvidedByUsedInOperatingActivitiesContinuingOperations",
+        ],
+        # 利润表单列的资产处置净收益（如 BA），用于剔除一次性收益后的营业利润。
+        "GainOnDispositions": [
+            "us-gaap:GainLossOnDispositionOfAssets",
+        ],
         # 现金流量表起点的合并净利润（含少数股东权益）；和归母净利润相同时不输出。
         "ConsolidatedNetIncome": [
             "us-gaap:ProfitLoss",
@@ -499,6 +518,11 @@ class EdgarService:
         ],
         "OperatingIncome": [
             "us-gaap:OperatingIncomeLoss",
+        ],
+        # 能源、制药等不列营业利润的公司，盈利能力问题常按税前利润口径。
+        "PretaxIncome": [
+            "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+            "us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments",
         ],
         "EPS": [
             "us-gaap:EarningsPerShareDiluted",
@@ -516,6 +540,10 @@ class EdgarService:
             "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
             "us-gaap:PaymentsToAcquireProductiveAssets",
             "us-gaap:PaymentsToAcquireOtherPropertyPlantAndEquipment",
+        ],
+        # 出租设备支出单独列示（如 CAT），是否并入资本开支由分析方法决定。
+        "LeasedEquipmentExpenditure": [
+            "us-gaap:PaymentsToAcquireEquipmentOnLease",
         ],
         "Cash": [
             "us-gaap:CashAndCashEquivalentsAtCarryingValue",
@@ -542,7 +570,7 @@ class EdgarService:
         """
         从 XBRL companyfacts API 获取结构化财务数据。
 
-        返回按实际 start/end 排列的年度指标；filing_fiscal_year 只表示公告标签。
+        返回按实际 start/end 排列的年度（或单季）指标；filing_fiscal_year 只表示公告标签。
         period="quarterly" 时只取 10-Q 中约 90 天的单季事实：10-Q 不含第四财季，这里不做年报减三季的推算。
         """
         quarterly = period == "quarterly"
@@ -566,7 +594,7 @@ class EdgarService:
             for concept in concepts:
                 units = facts.get(concept.split(":")[-1], {}).get("units", {})
                 for entries in units.values():
-                    annual_ends.update(row["end"] for row in self._filter_annual(entries, quarterly=quarterly))
+                    annual_ends.update(row["end"] for row in self._filter_periods(entries, quarterly=quarterly))
 
         metrics = {}
         for label, concept_keys in concept_table.items():
@@ -579,7 +607,7 @@ class EdgarService:
                 for unit_key in ["USD", "USD/shares", "shares"]:
                     if unit_key not in units_data:
                         continue
-                    annual = self._filter_annual(
+                    annual = self._filter_periods(
                         units_data[unit_key],
                         instant=label in self._INSTANT_METRICS,
                         annual_ends=annual_ends,
@@ -599,9 +627,13 @@ class EdgarService:
             if best:
                 metrics[label] = best
 
-        consolidated, parent = metrics.get("ConsolidatedNetIncome"), metrics.get("NetIncome")
-        if consolidated and parent and consolidated["data"][-1]["value"] == parent["data"][-1]["value"]:
-            del metrics["ConsolidatedNetIncome"]
+        # 细分口径与基础指标最新值相同时只保留基础指标，避免重复行。
+        for variant, base in (("ConsolidatedNetIncome", "NetIncome"), ("SalesRevenue", "Revenue"),
+                              ("ContinuingOperationsNetIncome", "ConsolidatedNetIncome"),
+                              ("ContinuingOperationsNetIncome", "NetIncome"),
+                              ("ContinuingOperationsCashFlow", "OperatingCashFlow")):
+            if variant in metrics and base in metrics                     and metrics[variant]["data"][-1]["value"] == metrics[base]["data"][-1]["value"]:
+                del metrics[variant]
 
         if metrics:
             newest = max(date.fromisoformat(metric["data"][-1]["end"]) for metric in metrics.values())
@@ -620,18 +652,21 @@ class EdgarService:
 
     def _is_bank(self, cik: str) -> bool:
         """SEC submissions 的 SIC 6020-6039 为商业银行和储蓄机构；取不到时按一般公司处理。"""
-        try:
-            sic = str(self._get(f"https://data.sec.gov/submissions/CIK{cik}.json").json().get("sic") or "")
-        except httpx.HTTPError:
-            return False
+        sic = _SIC_CACHE.get(cik)
+        if sic is None:
+            try:
+                sic = str(self._get(f"https://data.sec.gov/submissions/CIK{cik}.json").json().get("sic") or "")
+            except httpx.HTTPError:
+                return False
+            _SIC_CACHE[cik] = sic
         return sic.isdigit() and 6020 <= int(sic) <= 6039
 
     @staticmethod
-    def _filter_annual(
+    def _filter_periods(
         entries: list[dict], *, instant: bool = False, annual_ends: set[str] | None = None,
         quarterly: bool = False,
     ) -> list[dict]:
-        """按实际期间取最新年度事实；公告 fy 保留为来源，不猜测事实的 fiscal_year。"""
+        """按实际期间取最新年度（quarterly 时为 10-Q 单季）事实；公告 fy 保留为来源，不猜测事实的 fiscal_year。"""
         annual = {}
         for e in entries:
             if e.get("form") not in ({"10-Q", "10-Q/A"} if quarterly else {"10-K", "10-K/A"}):
@@ -674,3 +709,7 @@ class EdgarService:
             if len({row["value"] for row in latest}) == 1:
                 result.append(latest[0])
         return sorted(result, key=lambda row: (row["end"], row["start"] or ""))
+
+
+# 全服务共享一个实例，SEC 限流节奏才对所有路由生效。
+edgar_service = EdgarService()

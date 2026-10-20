@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Table(name = "agent_traces")
 public class AgentTrace {
 
-    /** 全局唯一链路 ID，也是 SSE 事件、助手消息和外部 Phoenix span 的关联键。 */
+    /** 全局唯一链路 ID，也是 SSE 事件和助手消息的关联键。 */
     @Id
     @Column(length = 64)
     private String traceId;

@@ -4,7 +4,6 @@ import com.stocksage.identity.RequestIdentity;
 import com.stocksage.exception.ResourceNotFoundException;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.repository.ResearchTaskRepository;
-import com.stocksage.trace.TraceEventRelay;
 import com.stocksage.research.ResearchTaskObservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

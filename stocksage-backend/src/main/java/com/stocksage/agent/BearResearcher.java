@@ -19,9 +19,6 @@ import reactor.core.publisher.Flux;
 @Service
 public class BearResearcher {
 
-    /** Round 1 是开局陈述，不强制反驳；Round 2+ 必须先逐条回应对方再展开新论据。 */
-    private static final int OPENING_ROUND = 1;
-
     /** 仅用于空头论证的无工具 ChatClient。 */
     private final ChatClient chatClient;
 
@@ -45,107 +42,11 @@ public class BearResearcher {
      * @return 本轮看空论据和风险提示的流式 token
      */
     public Flux<String> argue(AnalysisState state, int round) {
-        String prompt = round <= OPENING_ROUND
-                ? renderOpeningPrompt(state)
-                : renderRebuttalPrompt(state, round);
-        var request = chatClient.prompt().user(prompt);
+        var request = chatClient.prompt().user(BullResearcher.renderPrompt(state, round, Side.BEAR));
         if (state.getModelInvocationContext() != null) {
             request.advisors(a -> a.param(ModelInvocationAdvisor.CONTEXT_KEY, state.getModelInvocationContext()));
         }
         return request.stream().content();
-    }
-
-    /**
-     * 开局陈述模板：第 1 轮空头先摆出最强的风险与估值压力基线。
-     */
-    private String renderOpeningPrompt(AnalysisState state) {
-        return ResearchPrompts.evidenceBlock(state) + """
-                %s
-                辩论轮次：1（开局陈述）
-
-                请按以下两段顺序输出：
-                第一段用简体中文简要概括本轮立场，不得使用大括号。
-                第二段输出严格 JSON 代码块，除此之外不要再输出文字：
-                ```json
-                {
-                  "points": [
-                    {
-                      "type": "THESIS",
-                      "claim": "可被证伪的看空结论或风险",
-                      "horizon": "SHORT_TERM 或 MEDIUM_TERM 或 LONG_TERM 或 UNSPECIFIED",
-                      "evidenceRefs": [
-                        {"evidenceId": "快照中的真实 evidenceId", "excerpt": "该 evidenceId 内容中的连续原文摘录"}
-                      ],
-                      "reasoning": "证据如何支持结论",
-                      "assumption": "结论成立所需假设",
-                      "invalidationCondition": "使结论失效的可观察条件",
-                      "respondsToPointIds": []
-                    }
-                  ]
-                }
-                ```
-
-                硬性要求：
-                - points 必须有 3-5 条，type 全部为 THESIS；不要自行生成 pointId，后端会分配。
-                - 每条至少绑定一个可用 evidenceId，excerpt 必须逐字来自该 ID 对应的 content，且至少 12 个字符；不得跨证据拼接或补写数字。
-                - assumption 和 invalidationCondition 不得为空；证据不足的观点不要输出。
-                """.formatted(
-                ResearchPrompts.roleSection(ResearchPrompts.researcherRole("Bear Researcher", "构建看空论据，强调估值压力、竞争、周期、财务和执行风险。")));
-    }
-
-    /**
-     * 反驳模板：Round 2+ 强制模型先逐条回应对方最强观点再展开新论据，杜绝平行独白。
-     */
-    private String renderRebuttalPrompt(AnalysisState state, int round) {
-        return ResearchPrompts.evidenceBlock(state) + """
-                %s
-                辩论轮次：%d
-
-                === 完整辩论历史（按时间顺序）===
-                %s
-
-                === 可回应的多头论点（respondsToPointIds 只能从此清单逐字复制，不得使用本方 pointId）===
-                %s
-
-                请按以下两段顺序输出：
-                第一段用简体中文简要概括本轮回应，不得使用大括号。
-                第二段输出严格 JSON 代码块，除此之外不要再输出文字：
-                ```json
-                {
-                  "points": [
-                    {
-                      "type": "REBUTTAL",
-                      "claim": "对指定多头论点的回应结论",
-                      "horizon": "SHORT_TERM 或 MEDIUM_TERM 或 LONG_TERM 或 UNSPECIFIED",
-                      "evidenceRefs": [
-                        {"evidenceId": "快照中的真实 evidenceId", "excerpt": "该 evidenceId 内容中的连续原文摘录"}
-                      ],
-                      "reasoning": "承认、部分承认或反驳的依据",
-                      "assumption": "回应成立所需假设",
-                      "invalidationCondition": "使回应失效的条件",
-                      "respondsToPointIds": ["历史中真实存在的多头 pointId"]
-                    }
-                  ]
-                }
-                ```
-
-                硬性要求：
-                - points 必须有 2-3 条，type 全部为 REBUTTAL；每条必须回应至少一个对方 pointId。
-                - 不得新增独立主论点，不得回应本方 pointId，不要自行生成 pointId。
-                - 每条至少绑定一个可用 evidenceId，excerpt 必须逐字来自该 ID 对应的 content，且至少 12 个字符。
-                - 无法用证据反驳时可以承认对方，但仍需明确说明本方假设如何被削弱。
-                """.formatted(
-                ResearchPrompts.roleSection(ResearchPrompts.researcherRole("Bear Researcher", "构建看空论据，强调估值压力、竞争、周期、财务和执行风险。")),
-                round,
-                BullResearcher.renderDebateHistory(state.getDebateTurns(), 6000),
-                BullResearcher.renderOpponentPoints(state.getDebateTurns(), Side.BULL));
-    }
-
-    /**
-     * 将空值转换为空字符串，避免提示词中出现 {@code null}。
-     */
-    private String safe(String value) {
-        return value == null ? "" : value;
     }
 
 }

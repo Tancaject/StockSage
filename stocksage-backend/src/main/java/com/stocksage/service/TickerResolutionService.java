@@ -120,16 +120,6 @@ public class TickerResolutionService {
     private final ObjectMapper objectMapper;
 
     /**
-     * 从用户问题中解析主 ticker。
-     *
-     * @param query 当前用户问题
-     * @return 解析出的 ticker；无法判断时为空字符串
-     */
-    public String resolvePrimaryTicker(String query) {
-        return resolvePrimaryTicker(query, null);
-    }
-
-    /**
      * 结合会话短期记忆解析主 ticker。
      *
      * @param query 当前用户问题

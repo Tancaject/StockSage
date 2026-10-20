@@ -1,5 +1,6 @@
 package com.stocksage.research;
 
+import com.stocksage.util.Hashing;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.stocksage.model.dto.AnalysisState;
@@ -10,8 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.MessageDigest;
-import java.util.HexFormat;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -52,8 +51,7 @@ public class ResearchEvidenceSnapshotService {
             payload.put("citations", state.getCitations());
             String json = objectMapper.writer().with(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
                     .writeValueAsString(payload);
-            String hash = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
-                    .digest(json.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+            String hash = Hashing.sha256Hex(json);
             var existing = jdbc.queryForList("""
                     SELECT id FROM research_evidence_snapshots
                     WHERE run_id = ? AND attempt = ? AND payload_hash = ?

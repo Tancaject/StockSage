@@ -22,7 +22,6 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <spring-ai-alibaba.version>1.1.2.1</spring-ai-alibaba.version>
         <spring-ai.version>1.1.5</spring-ai.version>
-        <opentelemetry.version>1.46.0</opentelemetry.version>
         <lucene.version>9.12.3</lucene.version>
     </properties>
 
@@ -83,12 +82,6 @@
             <artifactId>spring-ai-client-chat</artifactId>
         </dependency>
 
-        <!-- ===== Spring AI MCP Client (kept on the existing Spring AI 1.1.5 line) ===== -->
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-mcp-client</artifactId>
-        </dependency>
-
         <!-- ===== Spring AI - OpenAI-compatible client (DashScope compatible-mode chat) ===== -->
         <!-- qwen3.6 系列只在百炼 OpenAI 兼容接口上提供，因此 chat 走该客户端。 -->
         <dependency>
@@ -107,12 +100,6 @@
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-vector-store-milvus</artifactId>
-        </dependency>
-
-        <!-- ===== Spring AI - Document Readers (PDF/DOCX/HTML via Apache Tika) ===== -->
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-tika-document-reader</artifactId>
         </dependency>
 
         <!-- ===== Standard BM25 lexical retrieval (Java 17 compatible) ===== -->
@@ -164,23 +151,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-        </dependency>
-
-        <!-- ===== Observability (Phoenix / OpenTelemetry) ===== -->
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-api</artifactId>
-            <version>${opentelemetry.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-sdk</artifactId>
-            <version>${opentelemetry.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-otlp</artifactId>
-            <version>${opentelemetry.version}</version>
         </dependency>
 
     </dependencies>

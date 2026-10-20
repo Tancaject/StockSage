@@ -33,24 +33,12 @@ public class LongTermMemoryProperties {
     @DecimalMax("1.0")
     private double minWeight = 0.25;
 
-    public double getHoldingsHalfLifeDays() {
-        return holdingsHalfLifeDays;
-    }
-
     public void setHoldingsHalfLifeDays(double holdingsHalfLifeDays) {
         this.holdingsHalfLifeDays = holdingsHalfLifeDays;
     }
 
-    public double getRiskHalfLifeDays() {
-        return riskHalfLifeDays;
-    }
-
     public void setRiskHalfLifeDays(double riskHalfLifeDays) {
         this.riskHalfLifeDays = riskHalfLifeDays;
-    }
-
-    public double getSummaryHalfLifeDays() {
-        return summaryHalfLifeDays;
     }
 
     public void setSummaryHalfLifeDays(double summaryHalfLifeDays) {

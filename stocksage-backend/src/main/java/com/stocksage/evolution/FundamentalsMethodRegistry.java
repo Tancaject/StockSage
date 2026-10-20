@@ -27,6 +27,8 @@ public final class FundamentalsMethodRegistry {
     private final Rollout rollout;
     private final Set<String> rolloutAccounts;
     private final Set<String> withdrawn = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    /** 方法 skill：按问题主题标签追加到所选方法之后，见 resources/skills/methods。 */
+    private final java.util.List<MethodSkill> skills;
 
     public FundamentalsMethodRegistry(
             @Value("${stocksage.evolution.fundamentals.approved-artifact:}") String artifact,
@@ -34,7 +36,9 @@ public final class FundamentalsMethodRegistry {
             @Value("${stocksage.evolution.fundamentals.revoked-bundle-ids:}") String revoked,
             @Value("${stocksage.evolution.control-directory:}") String controlDirectory,
             @Value("${stocksage.evolution.fundamentals.rollout:OFF}") Rollout rollout,
-            @Value("${stocksage.evolution.fundamentals.rollout-accounts:}") String rolloutAccounts) {
+            @Value("${stocksage.evolution.fundamentals.rollout-accounts:}") String rolloutAccounts,
+            @Value("${stocksage.fundamentals.skills.enabled:true}") boolean skillsEnabled) {
+        this.skills = skillsEnabled ? loadSkills() : java.util.List.of();
         this.active = AgentPolicyBundle.baseline();
         this.staged = artifact.isBlank() ? null : ApprovedMethodArtifact.load(Path.of(artifact), pinnedHash, split(revoked));
         this.controlDirectory = controlDirectory.isBlank() ? null : Path.of(controlDirectory);
@@ -69,7 +73,19 @@ public final class FundamentalsMethodRegistry {
                             Set<String> capabilities, Map<String, String> conditions) {
         String reason = selectionReason(userId, taskTags, evidenceTags, capabilities, conditions);
         AgentPolicyBundle selected = "APPROVED_SCOPE".equals(reason) ? staged.bundle() : active;
+        var matched = skills.stream().filter(skill -> skill.taskTags().stream().anyMatch(taskTags::contains)).toList();
+        if (!matched.isEmpty()) {
+            String method = selected.method() + matched.stream().map(MethodSkill::section).collect(Collectors.joining());
+            String id = selected.bundleId() + matched.stream().map(skill -> "-" + skill.id() + "-v" + skill.version())
+                    .collect(Collectors.joining());
+            if (method.length() <= AgentPolicyBundle.MAX_METHOD_CHARS && id.length() <= 80) {
+                selected = AgentPolicyBundle.create(id, selected.bundleId(), method);
+            } else {
+                matched = java.util.List.of();
+            }
+        }
         Map<String, Object> attributes = new java.util.LinkedHashMap<>();
+        attributes.put("skills", matched.stream().map(skill -> skill.id() + "@" + skill.version()).toList());
         attributes.put("reason", reason);
         attributes.put("rollout", rollout.name());
         attributes.put("selectedBundleId", selected.bundleId());
@@ -120,4 +136,45 @@ public final class FundamentalsMethodRegistry {
     }
 
     public record Selection(AgentPolicyBundle bundle, Map<String, Object> attributes) {}
+
+    /** 一个方法 skill：头部为 id、version、name、taskTags（逗号分隔，命中任一即加载），{@code ---} 之后是方法正文。 */
+    record MethodSkill(String id, int version, String name, Set<String> taskTags, String body) {
+        String section() {
+            return "\n\n【专项方法：" + name + "（" + id + " v" + version + "）】\n" + body;
+        }
+    }
+
+    private static java.util.List<MethodSkill> loadSkills() {
+        try {
+            var resources = new org.springframework.core.io.support.PathMatchingResourcePatternResolver()
+                    .getResources("classpath*:skills/methods/*.md");
+            var loaded = new java.util.TreeMap<String, MethodSkill>();
+            for (var resource : resources) {
+                MethodSkill skill = parseSkill(com.stocksage.agent.FundamentalsPrompts.read(resource), resource.getDescription());
+                if (loaded.put(skill.id(), skill) != null) throw new IllegalStateException("方法 skill ID 重复：" + skill.id());
+            }
+            return java.util.List.copyOf(loaded.values());
+        } catch (IOException failure) {
+            throw new IllegalStateException("无法读取方法 skill 目录 skills/methods", failure);
+        }
+    }
+
+    static MethodSkill parseSkill(String text, String source) {
+        int split = text.indexOf("\n---\n");
+        if (split < 0) throw new IllegalStateException("方法 skill 缺少 --- 分隔行：" + source);
+        Map<String, String> header = new java.util.HashMap<>();
+        for (String line : text.substring(0, split).split("\n")) {
+            int colon = line.indexOf(':');
+            if (colon > 0) header.put(line.substring(0, colon).trim(), line.substring(colon + 1).trim());
+        }
+        String id = header.getOrDefault("id", "");
+        String body = text.substring(split + 5).strip();
+        Set<String> tags = split(header.getOrDefault("taskTags", ""));
+        if (!id.matches("[a-z0-9][a-z0-9-]{0,39}") || !header.getOrDefault("version", "").matches("[1-9][0-9]{0,2}")
+                || header.getOrDefault("name", "").isBlank() || body.isEmpty() || body.length() > 800 || tags.isEmpty()
+                || !ApprovedMethodArtifact.TAG_CATALOG.taskTags().containsAll(tags)) {
+            throw new IllegalStateException("方法 skill 头部或正文无效（id、version、name、taskTags 须在标签目录内，正文 1-800 字）：" + source);
+        }
+        return new MethodSkill(id, Integer.parseInt(header.get("version")), header.get("name"), tags, body);
+    }
 }

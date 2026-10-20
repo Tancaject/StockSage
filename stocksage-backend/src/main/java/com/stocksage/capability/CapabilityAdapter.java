@@ -6,7 +6,7 @@ import java.util.Map;
  * 把不同能力提供方统一成 StockSage 可执行的本地接口。
  *
  * <p>{@link CapabilityRegistry} 在启动时把适配器与仓库内的能力清单绑定，
- * {@link CapabilityGateway} 再通过本接口调用本地工具或 MCP 工具。适配器只负责协议转换，
+ * {@link CapabilityGateway} 再通过本接口调用本地工具。适配器只负责协议转换，
  * 不负责授权、超时和结果限长，这些边界统一由 Gateway 执行。</p>
  */
 public interface CapabilityAdapter {
