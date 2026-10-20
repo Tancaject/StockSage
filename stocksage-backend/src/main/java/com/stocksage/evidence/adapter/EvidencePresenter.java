@@ -291,7 +291,23 @@ public class EvidencePresenter {
                 .map(SecFinancialsResponse.Fact::accn).distinct().sorted(Comparator.reverseOrder()).toList();
         text.append("来源：SEC companyfacts，CIK ").append(response.cik()).append("；共 ").append(accessions.size())
                 .append(" 份申报，最近：").append(String.join(", ", accessions.subList(0, Math.min(3, accessions.size()))));
+        appendBalanceSheet(text, payload);
         return Optional.of(text.toString().strip());
+    }
+
+    /** 最新 10-K 资产负债表原表：保留 companyfacts 没有的公司自定义科目和分部列示，最多 80 行。 */
+    private void appendBalanceSheet(StringBuilder text, String payload) {
+        try {
+            JsonNode sheet = objectMapper.readTree(payload).path("balanceSheet");
+            JsonNode lines = sheet.path("lines");
+            if (!lines.isArray() || lines.isEmpty()) return;
+            text.append("\n\n资产负债表原表（10-K ").append(sheet.path("accession").asText())
+                    .append("，申报日 ").append(sheet.path("filed").asText()).append("，单位见首行）：\n");
+            for (int i = 0; i < Math.min(80, lines.size()); i++) text.append(lines.get(i).asText()).append('\n');
+            text.append("来源：").append(sheet.path("source_url").asText());
+        } catch (Exception malformed) {
+            // 原表只是补充证据，解析失败时保留紧凑表。
+        }
     }
 
     private static void appendRatio(StringBuilder text, String name, Map<String, SecFinancialsResponse.Fact> numerator,
@@ -434,10 +450,18 @@ public class EvidencePresenter {
             case "ContinuingOperationsNetIncome" -> "持续经营净利润（含少数股东）";
             case "ContinuingOperationsCashFlow" -> "持续经营业务经营现金流";
             case "GainOnDispositions" -> "资产处置净收益";
+            case "CurrentAssets" -> "流动资产";
+            case "CurrentLiabilities" -> "流动负债";
+            case "ShortTermBorrowings" -> "短期借款";
+            case "CommercialPaper" -> "商业票据";
+            case "DebtCurrent" -> "一年内到期债务（含短期借款）";
+            case "LongTermDebtCurrent" -> "一年内到期长期债务";
+            case "LongTermDebtNoncurrent" -> "长期债务（非流动部分）";
+            case "LongTermDebtAndFinanceLeases" -> "长期债务及融资租赁负债";
             case "TotalAssets" -> "总资产";
             case "TotalLiabilities" -> "总负债";
             case "StockholdersEquity" -> "股东权益";
-            case "TotalDebt" -> "长期债务";
+            case "TotalDebt" -> "长期债务（LongTermDebt，是否含一年内到期部分以公司列示为准）";
             case "Cash" -> "现金及等价物";
             case "EPS" -> "稀释每股收益";
             case "DilutedShares" -> "稀释加权股数";

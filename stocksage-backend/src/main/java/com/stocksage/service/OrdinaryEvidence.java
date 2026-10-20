@@ -249,7 +249,7 @@ final class OrdinaryEvidence {
         if (root.has("schemaVersion") && "SEC_EDGAR".equals(root.path("provider").asText())) {
             // 优先用多年度紧凑财务表：全部指标和年度都放得下；原写法逐条保留 JSON，超长时后面的指标（如经营现金流）会被整项丢掉。
             var table = new com.stocksage.evidence.adapter.EvidencePresenter(mapper).present("getFinancialReports", root.toString());
-            if (table.isPresent() && table.get().length() <= 2200) return table.get();
+            if (table.isPresent() && table.get().length() <= 6000) return table.get();
             // 一条财务数值必须连同单位、概念、期间和来源保留；不能只留下指标计数。
             ObjectNode metrics = selected.putObject("metrics");
             var sourceMetrics = root.path("metrics").fields();

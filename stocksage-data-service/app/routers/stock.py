@@ -483,8 +483,12 @@ def get_financial_report(
             check_budget(e)
             return normalize_sec_financials(None, route.api_code, error=e, requested_period=period,
                                            requested_years=years, route=route)
-        return normalize_sec_financials(payload, route.api_code, requested_period=period,
-                                       requested_years=years, route=route)
+        result = normalize_sec_financials(payload, route.api_code, requested_period=period,
+                                          requested_years=years, route=route)
+        if period == "annual" and result["status"] == "SUCCESS":
+            # 资产负债表原表补充 companyfacts 缺的公司自定义科目和分部列示（如 CVX 现金、CAT 分部债务）。
+            result["balanceSheet"] = edgar.get_balance_sheet(route.api_code)
+        return result
     else:
         try:
             payload = ak_svc.get_hk_financial_reports(route.api_code, period, years)

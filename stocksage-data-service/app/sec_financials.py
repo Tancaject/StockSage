@@ -18,7 +18,9 @@ SecMetricName = Literal[
     "Revenue", "NetIncome", "ConsolidatedNetIncome", "TotalAssets", "TotalLiabilities", "StockholdersEquity",
     "OperatingIncome", "PretaxIncome", "EPS", "OperatingCashFlow", "TotalDebt",
     "SalesRevenue", "ContinuingOperationsNetIncome", "ContinuingOperationsCashFlow", "GainOnDispositions",
-    "CapitalExpenditure", "LeasedEquipmentExpenditure", "Cash", "DilutedShares", "NetInterestIncome", "CreditLossProvision",
+    "CapitalExpenditure", "LeasedEquipmentExpenditure", "CurrentAssets", "CurrentLiabilities",
+    "ShortTermBorrowings", "CommercialPaper", "DebtCurrent", "LongTermDebtCurrent", "LongTermDebtNoncurrent",
+    "LongTermDebtAndFinanceLeases", "Cash", "DilutedShares", "NetInterestIncome", "CreditLossProvision",
 ]
 
 
@@ -67,6 +69,14 @@ class SecMetric(BaseModel):
     data: list[SecFact] = Field(min_length=1)
 
 
+class SecBalanceSheet(BaseModel):
+    """最新 10-K 资产负债表渲染页的原表行（“科目 | 本期末 | 上期末”），单位见首行表头。"""
+    accession: StrictStr
+    filed: StrictStr
+    source_url: StrictStr
+    lines: list[StrictStr]
+
+
 class SecFinancialsResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -93,6 +103,7 @@ class SecFinancialsResponse(BaseModel):
     resolvedCode: StrictStr | None = None
     source: StrictStr | None = None
     routeReason: StrictStr | None = None
+    balanceSheet: SecBalanceSheet | None = None
 
     @model_validator(mode="after")
     def validate_consistency(self):

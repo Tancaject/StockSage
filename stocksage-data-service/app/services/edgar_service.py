@@ -14,6 +14,8 @@ import re
 import time
 import logging
 import threading
+from html.parser import HTMLParser
+from xml.etree import ElementTree
 from datetime import date
 from math import isfinite
 from urllib.parse import urlparse
@@ -35,6 +37,7 @@ _REQUEST_DELAY = 0.15
 _CIK_CACHE: dict[str, str] = {}
 # 只缓存成功取到的 SIC；查询失败不入缓存，下次仍会重试。
 _SIC_CACHE: dict[str, str] = {}
+_BALANCE_SHEET_CACHE: dict[str, dict] = {}
 _ALLOWED_SEC_HOSTS = {"sec.gov", "www.sec.gov", "data.sec.gov"}
 
 
@@ -552,8 +555,19 @@ class EdgarService:
         "DilutedShares": [
             "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
         ],
+        # 流动性与有息债务分项：各公司列示方式不同，原样分列，由分析方法按问题口径加总。
+        "CurrentAssets": ["us-gaap:AssetsCurrent"],
+        "CurrentLiabilities": ["us-gaap:LiabilitiesCurrent"],
+        "ShortTermBorrowings": ["us-gaap:ShortTermBorrowings"],
+        "CommercialPaper": ["us-gaap:CommercialPaper"],
+        "DebtCurrent": ["us-gaap:DebtCurrent"],
+        "LongTermDebtCurrent": ["us-gaap:LongTermDebtCurrent"],
+        "LongTermDebtNoncurrent": ["us-gaap:LongTermDebtNoncurrent"],
+        "LongTermDebtAndFinanceLeases": ["us-gaap:LongTermDebtAndCapitalLeaseObligations"],
     }
-    _INSTANT_METRICS = {"TotalAssets", "TotalLiabilities", "StockholdersEquity", "TotalDebt", "Cash"}
+    _INSTANT_METRICS = {"TotalAssets", "TotalLiabilities", "StockholdersEquity", "TotalDebt", "Cash",
+                        "CurrentAssets", "CurrentLiabilities", "ShortTermBorrowings", "CommercialPaper",
+                        "DebtCurrent", "LongTermDebtCurrent", "LongTermDebtNoncurrent", "LongTermDebtAndFinanceLeases"}
     # 银行（SIC 6020-6039）的经营现金流和资本开支没有分析意义，换成净利息收入和信贷损失拨备。
     _BANK_DROPPED = {"OperatingCashFlow", "CapitalExpenditure"}
     _BANK_CONCEPTS = {
@@ -631,7 +645,8 @@ class EdgarService:
         for variant, base in (("ConsolidatedNetIncome", "NetIncome"), ("SalesRevenue", "Revenue"),
                               ("ContinuingOperationsNetIncome", "ConsolidatedNetIncome"),
                               ("ContinuingOperationsNetIncome", "NetIncome"),
-                              ("ContinuingOperationsCashFlow", "OperatingCashFlow")):
+                              ("ContinuingOperationsCashFlow", "OperatingCashFlow"),
+                              ("LongTermDebtNoncurrent", "TotalDebt"), ("LongTermDebtCurrent", "DebtCurrent")):
             if variant in metrics and base in metrics                     and metrics[variant]["data"][-1]["value"] == metrics[base]["data"][-1]["value"]:
                 del metrics[variant]
 
@@ -649,6 +664,35 @@ class EdgarService:
             "metric_count": len(metrics),
             "metrics": metrics,
         }
+
+    _BALANCE_SHEET_TITLE = re.compile(r"balance sheet|financial position|financial condition", re.IGNORECASE)
+
+    def get_balance_sheet(self, ticker: str) -> dict | None:
+        """最新 10-K 资产负债表原表（R 渲染页逐行），保留公司自定义科目和分部列示；取不到时返回 None。"""
+        cik = self._resolve_cik(ticker)
+        try:
+            recent = self._get(f"https://data.sec.gov/submissions/CIK{cik}.json").json()["filings"]["recent"]
+            index = next(i for i, form in enumerate(recent["form"]) if form == "10-K")
+            accession = recent["accessionNumber"][index]
+            cached = _BALANCE_SHEET_CACHE.get(accession)
+            if cached is not None:
+                return cached
+            base = f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/{accession.replace('-', '')}"
+            summary = ElementTree.fromstring(self._get(f"{base}/FilingSummary.xml").content)
+            page = next(report.findtext("HtmlFileName") for report in summary.iter("Report")
+                        if report.findtext("MenuCategory") == "Statements"
+                        and self._BALANCE_SHEET_TITLE.search(report.findtext("ShortName") or "")
+                        and "parenthetical" not in (report.findtext("ShortName") or "").lower())
+            parser = _ReportTable()
+            parser.feed(self._get(f"{base}/{page}").text)
+        except (httpx.HTTPError, KeyError, StopIteration, ElementTree.ParseError, ValueError):
+            return None
+        if len(parser.rows) < 5:
+            return None
+        sheet = {"accession": accession, "filed": recent["filingDate"][index], "source_url": f"{base}/{page}",
+                 "lines": [" | ".join(row) for row in parser.rows]}
+        _BALANCE_SHEET_CACHE[accession] = sheet
+        return sheet
 
     def _is_bank(self, cik: str) -> bool:
         """SEC submissions 的 SIC 6020-6039 为商业银行和储蓄机构；取不到时按一般公司处理。"""
@@ -712,4 +756,53 @@ class EdgarService:
 
 
 # 全服务共享一个实例，SEC 限流节奏才对所有路由生效。
+
+class _ReportTable(HTMLParser):
+    """读取 SEC 财报渲染页（R*.htm）的 report 表格行；跳过脚注嵌套表和其后的概念定义表。"""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.rows: list[list[str]] = []
+        self.row: list[str] | None = None
+        self.cell: list[str] | None = None
+        self.depth = 0
+        self.done = False
+
+    def handle_starttag(self, tag, attrs):
+        if self.done:
+            return
+        if tag == "table":
+            self.depth += 1
+            if self.depth == 1 and "report" not in (dict(attrs).get("class") or "").split():
+                self.depth, self.done = 0, bool(self.rows)
+            return
+        if self.depth != 1:
+            return
+        if tag == "tr":
+            self.row = []
+        elif tag in ("td", "th") and self.row is not None:
+            self.cell = []
+        elif tag == "br" and self.cell is not None:
+            self.cell.append(" ")
+
+    def handle_endtag(self, tag):
+        if self.done:
+            return
+        if tag == "table":
+            self.depth -= 1
+            self.done = self.depth == 0 and bool(self.rows)
+        if self.depth != 1:
+            return
+        if tag in ("td", "th") and self.cell is not None and self.row is not None:
+            self.row.append(re.sub(r"\s+", " ", "".join(self.cell)).strip())
+            self.cell = None
+        elif tag == "tr" and self.row is not None:
+            if any(self.row):
+                self.rows.append(self.row)
+            self.row = None
+
+    def handle_data(self, data):
+        if self.cell is not None and self.depth == 1 and not self.done:
+            self.cell.append(data)
+
 edgar_service = EdgarService()

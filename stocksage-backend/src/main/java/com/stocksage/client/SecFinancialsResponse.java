@@ -26,13 +26,16 @@ public record SecFinancialsResponse(
         String fetchedAt, String asOf, String ticker, @JsonProperty("company_name") String companyName, String cik,
         @JsonProperty("metric_count") int metricCount, Map<String, Metric> metrics,
         boolean error, String errorCode, String message, Boolean retryable,
-        String requestedPeriod, Integer requestedYears, String input, String resolvedCode, String source, String routeReason
+        String requestedPeriod, Integer requestedYears, String input, String resolvedCode, String source, String routeReason,
+        BalanceSheet balanceSheet
 ) {
     public enum Status { SUCCESS, EMPTY, UNSUPPORTED, ERROR }
     private static final Set<String> METRICS = Set.of("Revenue", "NetIncome", "ConsolidatedNetIncome", "TotalAssets", "TotalLiabilities",
             "StockholdersEquity", "OperatingIncome", "EPS", "OperatingCashFlow", "TotalDebt",
             "CapitalExpenditure", "LeasedEquipmentExpenditure", "PretaxIncome", "SalesRevenue",
-            "ContinuingOperationsNetIncome", "ContinuingOperationsCashFlow", "GainOnDispositions", "Cash", "DilutedShares", "NetInterestIncome", "CreditLossProvision");
+            "ContinuingOperationsNetIncome", "ContinuingOperationsCashFlow", "GainOnDispositions",
+            "CurrentAssets", "CurrentLiabilities", "ShortTermBorrowings", "CommercialPaper", "DebtCurrent",
+            "LongTermDebtCurrent", "LongTermDebtNoncurrent", "LongTermDebtAndFinanceLeases", "Cash", "DilutedShares", "NetInterestIncome", "CreditLossProvision");
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT)
             .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
@@ -119,7 +122,19 @@ public record SecFinancialsResponse(
 
     public static SecFinancialsResponse failure(String ticker, String errorCode, String message, Boolean retryable) {
         return new SecFinancialsResponse(1, Status.ERROR, "SEC_EDGAR", "US", "annual", "DATE", Instant.now().toString(),
-                null, ticker, null, null, 0, Map.of(), true, errorCode, message, retryable, null, null, null, null, null, null);
+                null, ticker, null, null, 0, Map.of(), true, errorCode, message, retryable, null, null, null, null, null, null, null);
+    }
+
+    /** 最新 10-K 资产负债表渲染页原表行，补充 companyfacts 缺的自定义科目和分部列示。 */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record BalanceSheet(String accession, String filed, @JsonProperty("source_url") String sourceUrl, List<String> lines) {
+        public BalanceSheet {
+            if (accession == null || !accession.matches("[0-9]{10}-[0-9]{2}-[0-9]{6}") || lines == null || lines.isEmpty()
+                    || lines.size() > 200 || sourceUrl == null || !sourceUrl.startsWith("https://www.sec.gov/Archives/edgar/data/")) {
+                throw new IllegalArgumentException("Invalid SEC balance sheet");
+            }
+            lines = List.copyOf(lines);
+        }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
