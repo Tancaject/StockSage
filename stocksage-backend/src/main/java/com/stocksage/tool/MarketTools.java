@@ -2,6 +2,8 @@ package com.stocksage.tool;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.client.DataServiceClient;
+import com.stocksage.client.TechnicalIndicatorsResponse;
+import com.stocksage.ibkr.IbkrHistoricalResponse;
 import com.stocksage.ibkr.IbkrReadOnlyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,15 +77,50 @@ public class MarketTools {
     }
 
     /**
-     * 计算 A 股或港股技术指标。
+     * 计算日线技术指标。
      *
      * <p>指标计算由数据服务完成，后端只暴露模型可调用的稳定工具入口。</p>
      */
-    @Tool(description = "计算 A 股/港股的技术分析指标，如 MA、MACD、RSI、KDJ 等。A 股走 BaoStock，港股走 AKShare；美股请先用 IBKR 获取 K 线")
+    @Tool(description = "计算日线 MA、MACD、RSI；不支持分钟、小时或周线指标及 KDJ。美股用 IBKR 最近一年日线，保留源行情时间、实际样本数和缺口，样本不足不会补造数值；A 股/港股沿用数据服务")
     public String getTechnicalIndicators(
-            @ToolParam(description = "股票代码或名称，如 sh.600519、0700.HK、腾讯、贵州茅台；美股请用 IBKR 工具") String code,
+            @ToolParam(description = "股票代码或名称，如 AAPL、sh.600519、0700.HK、腾讯、贵州茅台") String code,
             @ToolParam(description = "需要的指标列表，逗号分隔，如 MA,MACD,RSI") String indicators) {
+        String resolved = dataServiceClient.resolveStock(code);
+        String market;
+        String symbol;
+        try {
+            var route = objectMapper.readTree(resolved);
+            if (route.path("error").asBoolean(false)) return resolved;
+            market = route.path("market").asText();
+            symbol = route.path("resolvedCode").asText();
+        } catch (Exception invalid) {
+            return TechnicalIndicatorsResponse.failure(code, "1y", "1d", TechnicalIndicatorsResponse.Status.ERROR,
+                    "INVALID_STOCK_RESOLUTION", "股票解析响应无效；请检查数据服务或使用明确股票代码。").toJson();
+        }
+        if ("US".equals(market)) {
+            return calculateTechnicalIndicators(getIbkrHistoricalBars(symbol, "1y", "1d"), indicators);
+        }
         return dataServiceClient.getTechnicalIndicators(code, indicators);
+    }
+
+    /** 普通取证和 DEEP 共用已有行情，不为同一批日线再次请求 IBKR。 */
+    public String calculateTechnicalIndicators(String historyJson, String indicators) {
+        IbkrHistoricalResponse history;
+        try {
+            history = IbkrHistoricalResponse.fromJson(objectMapper.readTree(historyJson));
+        } catch (Exception invalid) {
+            return TechnicalIndicatorsResponse.failure(null, null, null, TechnicalIndicatorsResponse.Status.ERROR,
+                    "INVALID_SOURCE_HISTORY", "已有 IBKR 日线响应无效，无法计算技术指标；请检查源行情。").toJson();
+        }
+        if (!"1d".equals(history.bar())) {
+            return TechnicalIndicatorsResponse.failure(history.symbol(), history.period(), history.bar(),
+                    TechnicalIndicatorsResponse.Status.UNSUPPORTED, "INDICATOR_GRANULARITY_UNSUPPORTED",
+                    "技术指标只支持日线；请将指标请求改为日线。").toJson();
+        }
+        if (history.status() != IbkrHistoricalResponse.Status.SUCCESS) {
+            return TechnicalIndicatorsResponse.sourceFailure(history).toJson();
+        }
+        return dataServiceClient.calculateTechnicalIndicators(history, indicators);
     }
 
     /**

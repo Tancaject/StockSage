@@ -16,23 +16,15 @@ from pathlib import Path
 
 from eval_http import StockSageClient, LiveEvalError
 from eval_common import capture_answer
+from eval_observations import REQUIREMENT_TOOLS, observe_case, summarize_cases
+from eval_risk_checks import assess_risks, regression_checks
+from numeric_traceability import check as numeric_check
 
 HERE = Path(__file__).resolve().parent
 
-# 冻结需求标签的满足条件，与后端 DataRequirement 一致；在 runner 侧独立计算，
-# 使 FIXED 与 DYNAMIC 共用同一分母，不受规划器运行时补充的需求影响。
-REQUIREMENT_TOOLS = {
-    "PRICE_HISTORY": {"getStockKLine", "getIbkrHistoricalBars"},
-    "VALUATION": {"getFinancialMetrics", "getStructuredFinancials"},
-    "TECHNICAL": {"getTechnicalIndicators"},
-    "FINANCIAL_STATEMENTS": {"getFinancialReports", "getStructuredFinancials"},
-    "NEWS": {"searchNews", "webSearch", "local.news.searchNews", "local.news.webSearch", "mcp.news.search"},
-}
-
-
 def requirement_met(requirement: str, observations: list[dict], filing_retrieved: bool) -> bool:
-    if requirement == "FILING_TEXT":
-        return filing_retrieved
+    if requirement == "FILING_TEXT" and filing_retrieved:
+        return True
     for row in observations:
         if row.get("tool") not in REQUIREMENT_TOOLS.get(requirement, set()):
             continue
@@ -115,9 +107,23 @@ def assess(case: dict, events: list[dict], trace: dict) -> dict:
             ticker = str(case.get("targets_single", "")).upper()
             coverage[requirement] = {ticker or "single": requirement_met(
                 requirement, evidence.get("observations", []), bool(retrieved) if not ticker else ticker in retrieved)}
+    if case.get("require_requirements") and coverage:
+        checks["requirements"] = all(met for targets in coverage.values() for met in targets.values())
     target_citations = {target: bool(cited & {row["id"] for row in item.get("observations", [])})
                         for target, item in by_target.items()}
-    return {"id": case["id"], "passed": all(checks.values()), "checks": checks,
+    regression = regression_checks(case, trace)
+    # None means the check could not be decided from this trace; it is recorded, never counted as a pass or a failure.
+    checks.update({name: value for name, value in regression.items() if value is not None})
+    undetermined = sorted(name for name, value in regression.items() if value is None)
+    risk = assess_risks(case, trace, answer)
+    context = next((item for item in reversed(attrs) if item.get("kind") == "answer-context"
+                    and item.get("scope") == "final-answer"), {})
+    numeric = numeric_check(answer, context.get("evidenceContext", "") if context.get("evidenceCaptureComplete") is True else "")
+    if risk["status"] in {"PASS", "FAIL"}:
+        checks["risk_redlines"] = risk["status"] == "PASS"
+    return {"id": case["id"], "passed": all(checks.values()) and not undetermined, "checks": checks,
+            "checks_no_data": undetermined, "risk_checks": risk,
+            "numeric_traceability": numeric,
             "raw_route": route.get("rawRoute"), "final_route": route.get("route"),
             "models": [{key: event.get(key) for key in ("modelName", "modelTier")}
                        for event in events if event.get("type") == "model"],
@@ -171,12 +177,15 @@ def main() -> int:
             _, trace = client.json_request("GET", "/api/trace/" + meta["traceId"])
             result = assess(case, events, trace)
             result["latency_ms"] = latency_ms
+            result["model_capture_scope"] = "MAIN_REQUEST_CHAT_EXCLUDES_BACKGROUND_AND_EMBEDDING"
+            result["observations"] = observe_case(result)
             report["cases"].append(result)
         report["status"] = "PASS" if all(case["passed"] for case in report["cases"]) else "FAIL"
     except (LiveEvalError, ValueError, KeyError, TypeError) as error:
         report["status"] = "BLOCKED"
         report["error"] = str(error)
     report["completed_count"] = len(report["cases"])
+    report["observations_summary"] = summarize_cases(report["cases"])
     # Incomplete execution cannot be represented as a passing full-set score.
     report["execution_contract_pass_rate"] = (
         sum(case["passed"] for case in report["cases"]) / len(cases)

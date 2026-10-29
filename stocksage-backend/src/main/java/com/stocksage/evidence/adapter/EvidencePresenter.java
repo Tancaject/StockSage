@@ -2,6 +2,7 @@ package com.stocksage.evidence.adapter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.client.HkFinancialsResponse;
 import com.stocksage.client.KLineResponse;
 import com.stocksage.client.SecFinancialsResponse;
 import com.stocksage.ibkr.IbkrHistoricalResponse;
@@ -24,7 +25,7 @@ import java.util.TreeMap;
 /**
  * 把结构化工具结果改写成给模型读的紧凑正文。
  *
- * <p>只做确定性计算和排版：行情给出最新优先的摘要和最近 20 个收盘价，SEC 财务给出多年度表。
+ * <p>只做确定性计算和排版：行情给出最新优先的摘要和最近 20 个收盘价，SEC 和港股财务给出多期表。
  * 证据账本的元数据、哈希和时效仍按原始结果计算；辩论引用的逐字摘录对应这里输出的正文。
  * 无法识别或解析失败时返回空，调用方保留原始结果。</p>
  */
@@ -102,8 +103,8 @@ public class EvidencePresenter {
             if (capabilityId.contains("getIbkrHistoricalBars") || capabilityId.contains("getStockKLine")) {
                 return marketSummary(payload);
             }
-            if (capabilityId.contains("getFinancialReports")) {
-                return secFinancialTable(payload);
+            if (capabilityId.contains("getFinancialReports") || capabilityId.contains("getHistoricalFinancials")) {
+                return secFinancialTable(payload).or(() -> hkFinancialTable(payload));
             }
             if (capabilityId.startsWith("getStockNews")) {
                 return headlines(payload);
@@ -111,10 +112,36 @@ public class EvidencePresenter {
             if (capabilityId.contains("local.filing.searchText")) {
                 return filingPassages(payload);
             }
+            if (capabilityId.contains("readDisclosure")) {
+                return disclosureBlocks(payload);
+            }
         } catch (RuntimeException unreadable) {
             return Optional.empty();
         }
         return Optional.empty();
+    }
+
+    public Optional<String> disclosureBlocks(String payload) {
+        JsonNode root = read(payload);
+        if (root == null || !"OFFICIAL_DISCLOSURE".equals(root.path("provider").asText())) return Optional.empty();
+        String source = root.path("selectedSource").path("documentUrl").asText(root.path("documentUrl").asText(""));
+        int other = root.path("otherSourceCount").asInt(-1);
+        StringBuilder text = new StringBuilder("公告展开；otherSourceCount: ").append(other < 0 ? "未知" : other)
+                .append("；selectedSource: ").append(source).append('\n')
+                .append("状态：").append(root.path("status").asText()).append("；仅展开上述来源，其他来源未读取。\n");
+        if (root.has("message")) text.append(root.path("message").asText()).append('\n');
+        text.append("documentHash: ").append(root.path("documentHash").asText("未知"))
+                .append("；offset: ").append(root.path("offset").asInt()).append("；nextOffset: ")
+                .append(root.path("nextOffset").isNumber() ? root.path("nextOffset").asText() : "无")
+                .append("；truncated: ").append(root.path("truncated").asBoolean()).append('\n');
+        for (JsonNode block : root.path("blocks")) {
+            text.append('[').append(block.path("id").asText()).append("] ").append(block.path("section").asText())
+                    .append(" / ").append(block.path("kind").asText());
+            if (block.hasNonNull("pageStart")) text.append(" / 页 ").append(block.path("pageStart").asInt());
+            if (block.path("partial").asBoolean()) text.append("（本块仅部分原文）");
+            text.append('\n').append(block.path("text").asText()).append("\n\n");
+        }
+        return Optional.of(text.toString().strip());
     }
 
     /** 行情摘要：最新收盘、各期涨跌、区间高低、波动率、均线，以及最近 20 个收盘价。 */
@@ -208,12 +235,10 @@ public class EvidencePresenter {
         return Optional.of(text.toString().strip());
     }
 
-    /** 10-K/10-Q 检索结果：每段标出章节和申报日期，按段截短，使全部段落都能放进预算。 */
+    /** 10-K/10-Q 检索结果：窗口已在检索适配器按命中位置截取，这里只补章节和申报日期。 */
     public Optional<String> filingPassages(String payload) {
         JsonNode root = read(payload);
         if (root == null || !root.path("results").isArray() || root.path("results").isEmpty()) return Optional.empty();
-        int count = root.path("results").size();
-        int perPassage = Math.max(300, 3200 / count);
         StringBuilder text = new StringBuilder();
         text.append(root.path("ticker").asText("")).append(" ").append(root.path("form").asText(""))
                 .append(" 原文检索（主题：").append(root.path("topic").asText("")).append("）\n");
@@ -223,7 +248,7 @@ public class EvidencePresenter {
             text.append('[').append(index++).append("] ").append(result.path("section").asText("未知章节"))
                     .append("（").append(result.path("filingType").asText("")).append("，")
                     .append(result.path("filingDate").asText("")).append("）\n")
-                    .append(body.length() > perPassage ? body.substring(0, perPassage) + "…" : body).append('\n');
+                    .append(body).append('\n');
         }
         return Optional.of(text.toString().strip());
     }
@@ -242,7 +267,7 @@ public class EvidencePresenter {
         return Optional.of(text.toString().strip());
     }
 
-    /** SEC 年度财务：每项指标一行，按财年列出，派生利润率和自由现金流；来源只写一次。 */
+    /** SEC 财务：每项指标一行，按实际期末列出；累计差额就近标明两份来源，供截断后的证据核对。 */
     public Optional<String> secFinancialTable(String payload) {
         JsonNode root = read(payload);
         if (root == null || !"SEC_EDGAR".equals(root.path("provider").asText())) return Optional.empty();
@@ -270,29 +295,158 @@ public class EvidencePresenter {
         boolean quarterly = "quarterly".equals(response.period());
         text.append(response.companyName() == null ? response.ticker() : response.companyName())
                 .append(quarterly
-                        ? " 单季财务（SEC 10-Q XBRL，只含第一至第三财季，经营现金流等累计口径不在内；金额单位：百万美元，股数单位：百万股；列为季度期末）\n"
+                        ? " 单季财务（SEC 10-Q XBRL，只含第一至第三财季；现金流优先用披露单季值，标注累计差额的数值由同财年累计数相减；金额单位：百万美元，股数单位：百万股；列为季度期末）\n"
                         : " 年度财务（SEC 10-K XBRL，金额单位：百万美元，股数单位：百万股，EPS 单位：美元/股；列为财年期末）\n");
+        if (response.requestedAsOf() != null) {
+            text.append("申报信息截止日：").append(response.requestedAsOf())
+                    .append("；仅含当日及此前已申报且今天仍可取得的事实，非完整历史档案。\n");
+        }
         text.append("指标 | ").append(String.join(" | ", ends)).append('\n');
+        appendRatio(text, "营业利润率", byMetric.get("OperatingIncome"), byMetric.get("Revenue"), ends);
+        appendRatio(text, "净利率", byMetric.get("NetIncome"), byMetric.get("Revenue"), ends);
+        appendCashMetrics(text, response, ends);
         for (Map.Entry<String, Map<String, SecFinancialsResponse.Fact>> entry : byMetric.entrySet()) {
             String unit = response.metrics().get(entry.getKey()).unit();
             List<String> cells = new ArrayList<>();
             for (String end : ends) {
                 SecFinancialsResponse.Fact fact = entry.getValue().get(end);
-                cells.add(fact == null ? "—" : amount(fact.value(), unit));
+                if (fact == null) {
+                    cells.add("—");
+                } else if (fact.derivation() == null) {
+                    cells.add(amount(fact.value(), unit));
+                } else {
+                    var current = fact.derivation().current();
+                    var previous = fact.derivation().previous();
+                    cells.add(amount(fact.value(), unit) + "（累计差额 "
+                            + current.value().divide(MILLION).stripTrailingZeros().toPlainString()
+                            + "−" + previous.value().divide(MILLION).stripTrailingZeros().toPlainString() + "；本期 " + current.accn()
+                            + "；前期 " + previous.accn() + "）");
+                }
             }
             text.append(label(entry.getKey())).append(" | ").append(String.join(" | ", cells)).append('\n');
         }
-        appendRatio(text, "营业利润率", byMetric.get("OperatingIncome"), byMetric.get("Revenue"), ends);
-        appendRatio(text, "净利率", byMetric.get("NetIncome"), byMetric.get("Revenue"), ends);
-        appendFreeCashFlow(text, byMetric.get("OperatingCashFlow"), byMetric.get("CapitalExpenditure"), ends);
 
         appendSplitCaveat(text, byMetric.get("DilutedShares"), ends);
         List<String> accessions = byMetric.values().stream().flatMap(facts -> facts.values().stream())
                 .map(SecFinancialsResponse.Fact::accn).distinct().sorted(Comparator.reverseOrder()).toList();
         text.append("来源：SEC companyfacts，CIK ").append(response.cik()).append("；共 ").append(accessions.size())
                 .append(" 份申报，最近：").append(String.join(", ", accessions.subList(0, Math.min(3, accessions.size()))));
-        appendBalanceSheet(text, payload);
+        if (response.requestedAsOf() == null) {
+            appendRevenueBreakdown(text, response.revenueBreakdown());
+            appendBalanceSheet(text, payload);
+        }
         return Optional.of(text.toString().strip());
+    }
+
+    /** 港股紧凑表中资产负债表和现金流量表列出的报告期数；请求更多期时调用方须标为删减。 */
+    public static final int HK_SNAPSHOT_STATEMENT_PERIODS = 2;
+
+    /**
+     * 港股三张表：每个科目一行，按报告期列出（利润表最近 5 期，资产负债表和现金流量表最近 2 期），金额换算为百万。
+     * 原样逐行 JSON 太长，截断后会只剩几行资产负债表、利润表和现金流被清空。不合契约时返回空，由调用方退回原压缩。
+     */
+    public Optional<String> hkFinancialTable(String payload) {
+        JsonNode root = read(payload);
+        if (root == null || !"HK".equals(root.path("market").asText()) || !root.has("statements")) return Optional.empty();
+        HkFinancialsResponse response;
+        try {
+            response = HkFinancialsResponse.fromJson(root);
+        } catch (RuntimeException invalid) {
+            return Optional.empty();
+        }
+        StringBuilder text = new StringBuilder();
+        String name = response.statements().all().stream().flatMap(table -> table.data().stream())
+                .map(HkFinancialsResponse.StatementRow::securityNameAbbr).filter(n -> n != null && !n.isBlank())
+                .findFirst().orElse(response.resolvedCode());
+        // 供应商的 CURRENCY 不可靠（报表币种为人民币的公司也标 HKD），不写币种。
+        text.append(name).append(" 港股").append("annual".equals(response.period()) ? "年度" : "报告期")
+                .append("财务（AKShare 东方财富口径；金额单位：百万，币种以公司报告为准；列为报告期末；资产负债表和现金流量表只列最近 ")
+                .append(HK_SNAPSHOT_STATEMENT_PERIODS).append(" 期）");
+        appendHkStatement(text, "利润表", response.statements().incomeStatement().data(), 5);
+        appendHkStatement(text, "资产负债表", response.statements().balanceSheet().data(), HK_SNAPSHOT_STATEMENT_PERIODS);
+        appendHkStatement(text, "现金流量表", response.statements().cashFlow().data(), HK_SNAPSHOT_STATEMENT_PERIODS);
+        return Optional.of(text.toString().strip());
+    }
+
+    private static void appendHkStatement(StringBuilder text, String title, List<HkFinancialsResponse.StatementRow> rows,
+                                          int periods) {
+        List<String> dates = rows.stream().map(HkFinancialsResponse.StatementRow::reportDate).distinct()
+                .sorted(Comparator.reverseOrder()).limit(periods).sorted().toList();
+        if (dates.isEmpty()) {
+            text.append("\n\n").append(title).append("：无数据");
+            return;
+        }
+        Map<String, Map<String, BigDecimal>> items = new LinkedHashMap<>();
+        for (HkFinancialsResponse.StatementRow row : rows) {
+            if (row.amount() != null && dates.contains(row.reportDate())) {
+                items.computeIfAbsent(row.itemName(), key -> new TreeMap<>()).put(row.reportDate(), row.amount());
+            }
+        }
+        text.append("\n\n").append(title).append("\n科目 | ").append(String.join(" | ", dates)).append('\n');
+        // 每股科目是原值，不按百万换算。
+        items.forEach((item, values) -> text.append(item).append(" | ").append(String.join(" | ", dates.stream()
+                .map(date -> !values.containsKey(date) ? "—"
+                        : item.startsWith("每股") ? values.get(date).setScale(2, RoundingMode.HALF_UP).toPlainString()
+                        : amount(values.get(date), "")).toList())).append('\n'));
+    }
+
+    private static final int BREAKDOWN_MEMBERS = 8;
+    private static final Map<String, String> BREAKDOWN_UNAVAILABLE = Map.of(
+            "NO_XBRL_INSTANCE", "该申报没有 XBRL 实例文件",
+            "FETCH_FAILED", "读取 SEC 申报文件失败",
+            "NO_DIMENSIONAL_FACTS", "申报中没有按分部、地区或产品标注的营收事实",
+            "NO_RECONCILED_BREAKDOWN", "有拆分事实，但各项加总与合并数对不上，未展示");
+
+    /**
+     * 最新一期申报的分部、地区、产品拆分：每项一行、按期末列出金额和占当期合计的比例。
+     * 比例是确定性派生值，辩论引用规则不允许模型自己补算数字，所以直接写进证据。
+     * 取不到时写明原因，避免模型把"未取得"当成"公司未披露"。
+     */
+    private static void appendRevenueBreakdown(StringBuilder text, SecFinancialsResponse.RevenueBreakdown breakdown) {
+        if (breakdown == null) {
+            text.append("\n\n营收拆分：未取得（读取失败）");
+            return;
+        }
+        if (!"AVAILABLE".equals(breakdown.status())) {
+            text.append("\n\n营收拆分：未取得（").append(BREAKDOWN_UNAVAILABLE.getOrDefault(breakdown.reason(), breakdown.reason()))
+                    .append("；").append(breakdown.form()).append(" ").append(breakdown.accession()).append("）");
+            return;
+        }
+        text.append("\n\n营收拆分（SEC ").append(breakdown.form()).append(" XBRL 实例，").append(breakdown.accession())
+                .append("；金额单位：百万美元，括号内为占当期合计比例；地区口径以财报附注为准）");
+        for (SecFinancialsResponse.BreakdownTable table : breakdown.tables()) {
+            List<SecFinancialsResponse.BreakdownPeriod> periods = table.periods();
+            SecFinancialsResponse.BreakdownPeriod latest = periods.get(periods.size() - 1);
+            List<String> names = latest.members().stream().map(SecFinancialsResponse.BreakdownMember::name).toList();
+            List<String> shown = names.subList(0, Math.min(BREAKDOWN_MEMBERS, names.size()));
+            text.append("\n按").append(switch (table.axis()) {
+                case "segment" -> "业务分部";
+                case "geography" -> "地区";
+                default -> "产品/服务";
+            }).append("·").append("Revenue".equals(table.metric()) ? "营收" : "营业利润").append(" | ")
+                    .append(String.join(" | ", periods.stream().map(SecFinancialsResponse.BreakdownPeriod::end).toList()));
+            for (String name : shown) {
+                text.append('\n').append(name).append(" | ").append(String.join(" | ", periods.stream()
+                        .map(period -> period.members().stream().filter(member -> member.name().equals(name)).findFirst()
+                                .map(member -> breakdownCell(member.value(), period.total())).orElse("—"))
+                        .toList()));
+            }
+            if (names.size() > shown.size()) {
+                text.append("\n其余 ").append(names.size() - shown.size()).append(" 项合计 | ").append(String.join(" | ",
+                        periods.stream().map(period -> breakdownCell(period.members().stream()
+                                .filter(member -> !shown.contains(member.name()))
+                                .map(SecFinancialsResponse.BreakdownMember::value)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add), period.total())).toList()));
+            }
+            text.append("\n合计 | ").append(String.join(" | ", periods.stream()
+                    .map(period -> amount(period.total(), "USD")).toList()));
+        }
+        text.append("\n来源：").append(breakdown.sourceUrl());
+    }
+
+    private static String breakdownCell(BigDecimal value, BigDecimal total) {
+        return amount(value, "USD") + "（" + String.format(Locale.ROOT, "%.1f%%",
+                value.doubleValue() / total.doubleValue() * 100) + "）";
     }
 
     /** 最新 10-K 资产负债表原表：保留 companyfacts 没有的公司自定义科目和分部列示，最多 80 行。 */
@@ -329,23 +483,96 @@ public class EvidencePresenter {
         if (any) text.append(name).append("（计算） | ").append(String.join(" | ", cells)).append('\n');
     }
 
-    private static void appendFreeCashFlow(StringBuilder text, Map<String, SecFinancialsResponse.Fact> operating,
-                                           Map<String, SecFinancialsResponse.Fact> capex, List<String> ends) {
-        if (operating == null || capex == null) return;
-        List<String> cells = new ArrayList<>();
+    private static void appendCashMetrics(StringBuilder text, SecFinancialsResponse response, List<String> ends) {
+        appendCashConversion(text, response, "经营现金流/净利润", "OperatingCashFlow",
+                "ConsolidatedNetIncome", "NetIncome", ends);
+        if (response.metrics().containsKey("ConsolidatedNetIncome")) {
+            appendCashConversion(text, response, "经营现金流/归母净利润", "OperatingCashFlow", "NetIncome", null, ends);
+        }
+        appendCashConversion(text, response, "持续经营现金流/持续经营净利润", "ContinuingOperationsCashFlow",
+                "ContinuingOperationsNetIncome", null, ends);
+        List<String> spending = new ArrayList<>(), ratios = new ArrayList<>(), freeCash = new ArrayList<>();
         boolean any = false;
         for (String end : ends) {
-            SecFinancialsResponse.Fact cash = operating.get(end);
-            SecFinancialsResponse.Fact spend = capex.get(end);
-            if (cash == null || spend == null) {
-                cells.add("—");
+            var cash = moneyFact(response, "OperatingCashFlow", end);
+            BigDecimal capex = capitalExpenditure(response, cash);
+            if (capex == null) {
+                spending.add("—"); ratios.add("—"); freeCash.add("—");
             } else {
-                // XBRL 资本开支是正数的支出金额。
-                cells.add(amount(cash.value().subtract(spend.value().abs()), "USD"));
+                boolean split = splitCapitalExpenditure(response);
+                String basis = split && !samePeriod(cash, moneyFact(response, "LeasedEquipmentExpenditure", end))
+                        ? "（仅已披露项，可能低估）" : split ? "（含出租设备支出）" : "";
+                spending.add(cashAmount(capex) + basis);
+                ratios.add(cash.value().signum() <= 0 ? "不适用（经营现金流≤0）"
+                        : capex.multiply(BigDecimal.valueOf(100)).divide(cash.value(), 2, RoundingMode.HALF_UP) + "%" + basis);
+                freeCash.add(cashAmount(cash.value().subtract(capex)) + (basis.contains("低估") ? "（资本开支不完整）" : ""));
                 any = true;
             }
         }
-        if (any) text.append("自由现金流（经营现金流−资本开支，计算） | ").append(String.join(" | ", cells)).append('\n');
+        if (any) {
+            text.append("资本开支毛额（计算；支出取绝对值） | ").append(String.join(" | ", spending)).append('\n');
+            text.append("资本开支/经营现金流（计算） | ").append(String.join(" | ", ratios)).append('\n');
+            text.append("简化自由现金流（经营现金流−资本开支毛额，计算） | ").append(String.join(" | ", freeCash)).append('\n');
+        }
+    }
+
+    private static void appendCashConversion(StringBuilder text, SecFinancialsResponse response, String name,
+                                             String cashMetric, String incomeMetric, String fallbackMetric, List<String> ends) {
+        List<String> cells = new ArrayList<>();
+        boolean any = false;
+        for (String end : ends) {
+            var cash = moneyFact(response, cashMetric, end);
+            var income = moneyFact(response, incomeMetric, end);
+            String basis = label(incomeMetric);
+            if (income == null && fallbackMetric != null) {
+                income = moneyFact(response, fallbackMetric, end);
+                basis = label(fallbackMetric) + "，缺合并口径";
+            }
+            if (!samePeriod(cash, income)) {
+                cells.add("—");
+                continue;
+            }
+            boolean unsuitable = income.value().signum() <= 0
+                    || income.value().abs().multiply(BigDecimal.valueOf(20)).compareTo(cash.value().abs()) < 0;
+            cells.add((unsuitable ? "不适用；差额 " + cashAmount(cash.value().subtract(income.value()))
+                    : cash.value().divide(income.value(), 2, RoundingMode.HALF_UP) + " 倍")
+                    + "（" + basis + "）");
+            any = true;
+        }
+        if (any) text.append(name).append("（计算；净利润≤0或绝对值不足经营现金流绝对值5%时，改报现金流−净利润差额） | ")
+                .append(String.join(" | ", cells)).append('\n');
+    }
+
+    private static boolean samePeriod(SecFinancialsResponse.Fact left, SecFinancialsResponse.Fact right) {
+        return left != null && right != null && "duration".equals(left.periodType())
+                && "duration".equals(right.periodType()) && left.start().equals(right.start()) && left.end().equals(right.end());
+    }
+
+    private static SecFinancialsResponse.Fact moneyFact(SecFinancialsResponse response, String metric, String end) {
+        var values = response.metrics().get(metric);
+        if (values == null || !"USD".equals(values.unit())) return null;
+        return values.data().stream().filter(fact -> fact.end().equals(end))
+                .max(Comparator.comparing(SecFinancialsResponse.Fact::filed)).orElse(null);
+    }
+
+    private static boolean splitCapitalExpenditure(SecFinancialsResponse response) {
+        var metric = response.metrics().get("CapitalExpenditure");
+        return metric != null && "us-gaap:PaymentsToAcquireOtherPropertyPlantAndEquipment".equals(metric.concept());
+    }
+
+    private static BigDecimal capitalExpenditure(SecFinancialsResponse response, SecFinancialsResponse.Fact cash) {
+        if (cash == null) return null;
+        var spend = moneyFact(response, "CapitalExpenditure", cash.end());
+        if (!samePeriod(cash, spend)) return null;
+        BigDecimal total = spend.value().abs();
+        var leased = moneyFact(response, "LeasedEquipmentExpenditure", cash.end());
+        // Other PP&E 不含单列的出租设备；总 PP&E/ProductiveAssets 不再重复加它。
+        if (splitCapitalExpenditure(response) && samePeriod(cash, leased)) total = total.add(leased.value().abs());
+        return total;
+    }
+
+    private static String cashAmount(BigDecimal value) {
+        return value.divide(MILLION, 2, RoundingMode.HALF_UP).toPlainString();
     }
 
     /** 相邻财年股数变化超过 3 倍时多半是拆股；XBRL 是申报原值，早期每股数据未必复权。 */
@@ -393,8 +620,8 @@ public class EvidencePresenter {
             Double eps = latest(sec, "EPS", end);
             Double shares = latest(sec, "DilutedShares", end);
             Double revenue = latest(sec, "Revenue", end);
-            Double operatingCash = latest(sec, "OperatingCashFlow", end);
-            Double capex = latest(sec, "CapitalExpenditure", end);
+            var operatingCash = moneyFact(sec, "OperatingCashFlow", end);
+            BigDecimal capex = capitalExpenditure(sec, operatingCash);
 
             StringBuilder text = new StringBuilder();
             text.append("估值计算（口径：").append(closeDate).append(" 收盘 ").append(price(close))
@@ -412,8 +639,11 @@ public class EvidencePresenter {
                         .append(" 十亿美元");
                 if (revenue != null && revenue > 0) text.append("；市销率 ").append(multiple(cap / revenue));
                 if (operatingCash != null && capex != null) {
-                    text.append("；自由现金流收益率 ").append(String.format(Locale.ROOT, "%.1f%%",
-                            (operatingCash - Math.abs(capex)) / cap * 100));
+                    text.append("；简化自由现金流收益率 ").append(String.format(Locale.ROOT, "%.1f%%",
+                            operatingCash.value().subtract(capex).doubleValue() / cap * 100));
+                    if (splitCapitalExpenditure(sec) && !samePeriod(operatingCash, moneyFact(sec, "LeasedEquipmentExpenditure", end))) {
+                        text.append("（资本开支仅含已披露项，可能低估）");
+                    }
                 }
                 text.append('\n');
             }

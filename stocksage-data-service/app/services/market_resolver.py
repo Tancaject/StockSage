@@ -316,7 +316,10 @@ def _candidate_inputs(raw: str) -> list[str]:
     for match in re.finditer(r"(?<!\d)(\d{6})(?!\d)", text):
         add(match.group(1))
 
-    for match in re.finditer(r"(?<!\d)(\d{1,5})(?!\d)", text):
+    # 年份、期间和数量（2025年、2025 年、FY2025、FY 2025、3个季度、5%）不是港股代码。
+    for match in re.finditer(r"(?<![\dA-Za-z])(\d{1,5})(?![\d.]|\s*[年月日号季度个%％])", text):
+        if re.search(r"(?:FY|财年)\s*$", text[:match.start()], re.IGNORECASE):
+            continue
         add(match.group(1))
 
     for match in re.finditer(r"\b[A-Z][A-Z0-9.-]{0,9}\b", text):

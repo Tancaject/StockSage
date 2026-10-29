@@ -1,7 +1,7 @@
 package com.stocksage.capability;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.service.CompanyRelationService;
+import com.stocksage.relation.CompanyRelationService;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;

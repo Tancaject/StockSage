@@ -1,0 +1,33 @@
+{
+  "id": "portfolio-analysis",
+  "version": 1,
+  "displayName": "组合风险与情景",
+  "enabled": true,
+  "routes": [
+    "DEEP"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 1,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "analyzePortfolio",
+      "required": true,
+      "arguments": {
+        "inputJson": "$input.inputJson"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "inputJson": "{\"asOf\": \"2026-10-01\", \"positions\": [{\"symbol\": \"EXAMPLE\", \"currency\": \"USD\", \"quantity\": 2, \"price\": 100, \"kind\": \"SECURITY\"}, {\"symbol\": \"USD\", \"currency\": \"USD\", \"quantity\": 100, \"price\": 1, \"kind\": \"CASH\"}], \"scenarios\": [{\"name\": \"演示下跌10%\", \"returns\": {\"EXAMPLE\": -0.1}}]}"
+  },
+  "method": "使用用户提供的持仓和价格表，逐币种查看净/总敞口、集中度与情景损益。不同币种不直接相加；缺价格、缺情景收益和短样本相关性必须保留缺口。"
+}

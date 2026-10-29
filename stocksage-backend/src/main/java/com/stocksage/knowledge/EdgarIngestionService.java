@@ -215,6 +215,7 @@ public class EdgarIngestionService {
                 parentMeta.put("filing_type", filingType);
                 parentMeta.put("filing_date", filingDate);
                 parentMeta.put("accession", accession);
+                parentMeta.put("document_url", documentUrl);
                 parentMeta.put("section", sectionName);
                 parentMeta.put("chunk_of_section", i);
                 parentMeta.put("source", "sec_edgar");
@@ -238,6 +239,7 @@ public class EdgarIngestionService {
                     childMeta.put("filing_type", filingType);
                     childMeta.put("filing_date", filingDate);
                     childMeta.put("accession", accession);
+                    childMeta.put("document_url", documentUrl);
                     childMeta.put("section", sectionName);
                     childMeta.put("source", "sec_edgar");
                     childMeta.put("is_parent", false);

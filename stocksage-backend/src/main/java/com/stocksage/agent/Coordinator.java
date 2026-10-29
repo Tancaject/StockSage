@@ -1,6 +1,5 @@
 package com.stocksage.agent;
 
-import com.stocksage.config.ThinkingModels;
 import com.stocksage.agent.intent.AnalysisDepth;
 import com.stocksage.agent.intent.FineIntent;
 import com.stocksage.agent.intent.IntentDecision;
@@ -10,12 +9,16 @@ import com.stocksage.agent.intent.IntentRecognitionResult;
 import com.stocksage.agent.intent.IntentRecognitionService;
 import com.stocksage.agent.intent.IntentSignalSource;
 import com.stocksage.agent.intent.TimeSensitivity;
-import com.stocksage.service.TickerResolutionService;
+import com.stocksage.agent.ordinary.DataRequirement;
+import com.stocksage.agent.ordinary.OrdinaryPlan;
+import com.stocksage.agent.ordinary.OrdinaryPlanner;
+import com.stocksage.agent.ordinary.ReadRequest;
+import com.stocksage.agent.runtime.AgentRuntimeConfiguration;
+import com.stocksage.agent.runtime.ModelCompletion;
+import com.stocksage.config.ThinkingModels;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.metadata.EmptyUsage;
-import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -57,6 +60,7 @@ public class Coordinator {
     private final TickerResolutionService tickerResolutionService;
     /** 唯一的 route -> actions/taskType/modelTier 后端目录。 */
     private final RoutePlanCatalog routePlanCatalog;
+    private final AgentRuntimeConfiguration runtimeConfiguration;
 
     /** FAST 层级映射的后端白名单模型名。 */
     @Value("${stocksage.chat.model-routing.fast-model:qwen3.8-flash}")
@@ -78,7 +82,7 @@ public class Coordinator {
     @Value("${stocksage.chat.model-routing.temperature:${STOCKSAGE_CHAT_TEMPERATURE:0.7}}")
     private double modelRoutingTemperature;
 
-    /** 最终回答正文的 token 上限；Max 的思考预算单独设置。 */
+    /** 路由前的输出上限；实际供应商上限由同一参数转换得到。 */
     @Value("${stocksage.chat.model-routing.max-output-tokens:${STOCKSAGE_CHAT_MAX_OUTPUT_TOKENS:24576}}")
     private int modelRoutingMaxOutputTokens;
 
@@ -110,11 +114,13 @@ public class Coordinator {
     public Coordinator(IntentRecognitionService intentRecognitionService,
                        @Qualifier("chatClient") ChatClient responseChatClient,
                        TickerResolutionService tickerResolutionService,
-                       RoutePlanCatalog routePlanCatalog) {
+                       RoutePlanCatalog routePlanCatalog,
+                       AgentRuntimeConfiguration runtimeConfiguration) {
         this.intentRecognitionService = intentRecognitionService;
         this.responseChatClient = responseChatClient;
         this.tickerResolutionService = tickerResolutionService;
         this.routePlanCatalog = routePlanCatalog;
+        this.runtimeConfiguration = runtimeConfiguration;
     }
 
     /**
@@ -200,23 +206,38 @@ public class Coordinator {
 
     /** 选择和实际调用共用同一配置描述，避免已批准条件与发送选项各自维护。 */
     public Map<String, Object> finalAnswerInvocation(SelectedModel selected) {
+        OpenAiChatOptions options = finalAnswerOptions(selected);
         Map<String, Object> invocation = new LinkedHashMap<>();
         invocation.put("kind", "model-invocation");
         invocation.put("schemaVersion", 1);
         invocation.put("scope", "final-answer");
         invocation.put("modelTier", selected.tier().name());
-        invocation.put("modelName", selected.modelName() == null ? "CLIENT_DEFAULT" : selected.modelName());
+        invocation.put("modelName", options.getModel() == null ? "CLIENT_DEFAULT" : options.getModel());
         if (selected.modelName() != null) {
-            invocation.put("temperature", modelRoutingTemperature);
-            invocation.put("maxOutputTokens", modelRoutingMaxOutputTokens);
-            invocation.put("configurationSource", "REQUEST_OPTIONS");
-            if (ThinkingModels.thinksByDefault(selected.modelName())) {
-                invocation.put("thinkingBudget", standardThinkingBudget);
+            invocation.put("temperature", options.getTemperature());
+            invocation.put("maxOutputTokens", options.getMaxTokens());
+            invocation.put("configurationSource", "PROVIDER_ROUTED_REQUEST_OPTIONS");
+            if (options.getReasoningEffort() != null) invocation.put("reasoningEffort", options.getReasoningEffort());
+            var extra = options.getExtraBody();
+            if (extra != null) {
+                if (extra.get("thinking_budget") instanceof Number budget) invocation.put("thinkingBudget", budget);
+                if (extra.get("thinking") instanceof Map<?, ?> thinking) {
+                    invocation.put("thinkingType", thinking.get("type"));
+                    invocation.put("reasoningTokenLimitStatus", "NO_SEPARATE_LIMIT");
+                }
             }
         } else {
             invocation.put("configurationSource", "CLIENT_DEFAULT");
         }
         return Map.copyOf(invocation);
+    }
+
+    private OpenAiChatOptions finalAnswerOptions(SelectedModel selected) {
+        var options = OpenAiChatOptions.builder().streamUsage(true);
+        if (selected.modelName() != null) {
+            options.model(selected.modelName()).temperature(modelRoutingTemperature).maxTokens(modelRoutingMaxOutputTokens);
+        }
+        return runtimeConfiguration.effectiveOptions(ThinkingModels.capThinking(options.build(), standardThinkingBudget));
     }
 
     /** 按能力层级和输入模态流式输出最终回答；观察实际请求配置和供应商 usage，usage 是整次调用快照，不能按 chunk 累加。 */
@@ -233,46 +254,36 @@ public class Coordinator {
                 effectiveTier, modelName, usePreparedContextOnly);
 
         return Flux.defer(() -> {
-            var options = OpenAiChatOptions.builder().streamUsage(true);
-            Map<String, Object> invocation = finalAnswerInvocation(selectedModel);
-            if (modelName != null) {
-                options.model(modelName).temperature(((Number) invocation.get("temperature")).doubleValue())
-                        .maxTokens(((Number) invocation.get("maxOutputTokens")).intValue());
-            }
-            if (invocation.containsKey("thinkingBudget")) {
-                options.extraBody(Map.of("thinking_budget", invocation.get("thinkingBudget")));
-            }
-            observeFinalAnswer(observer, invocation);
+            OpenAiChatOptions options = finalAnswerOptions(selectedModel);
+            Map<String, Object> invocation = new LinkedHashMap<>(finalAnswerInvocation(selectedModel));
+            String invocationId = java.util.UUID.randomUUID().toString();
+            invocation.put("invocationId", invocationId);
+            invocation.put("callCountSemantics", "CLIENT_INVOCATION");
+            observeFinalAnswer(observer, Map.copyOf(invocation));
             AtomicBoolean usageReported = new AtomicBoolean();
             AtomicReference<Map<String, Object>> latestUsage = new AtomicReference<>();
             AtomicReference<String> finishReason = new AtomicReference<>("");
+            AtomicReference<String> invocationStatus = new AtomicReference<>("SUCCEEDED");
+            long invocationStarted = System.nanoTime();
             StringBuilder responseText = new StringBuilder();
             Runnable reportUsage = () -> {
                 if (usageReported.compareAndSet(false, true)) {
-                    Map<String, Object> usage = latestUsage.get();
-                    observeFinalAnswer(observer, usage != null ? usage : Map.of("kind", "model-usage", "schemaVersion", 1,
-                            "scope", "final-answer", "usageSource", "NO_DATA",
-                            "usageSemantics", "INVOCATION_SNAPSHOT"));
+                    Map<String, Object> usage = new LinkedHashMap<>(latestUsage.get() == null
+                            ? ModelCompletion.usage(null) : latestUsage.get());
+                    usage.putAll(Map.of("kind", "model-usage", "schemaVersion", 1, "scope", "final-answer",
+                            "invocationId", invocationId, "status", invocationStatus.get(),
+                            "durationMs", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - invocationStarted)));
+                    observeFinalAnswer(observer, Map.copyOf(usage));
                 }
             };
-            return responseChatClient.prompt().messages(promptMessages).options(options.build())
+            return responseChatClient.prompt().messages(promptMessages).options(options)
                     .stream().chatResponse()
                     .doOnNext(response -> {
                         String reason = ModelCompletion.finishReason(response);
                         if (reason != null && !reason.isBlank()) finishReason.set(reason);
-                        Usage usage = response.getMetadata().getUsage();
-                        if (usage == null || usage instanceof EmptyUsage) return;
-                        Map<String, Object> event = new LinkedHashMap<>();
-                        event.put("kind", "model-usage");
-                        event.put("schemaVersion", 1);
-                        event.put("scope", "final-answer");
-                        event.put("usageSource", "PROVIDER");
-                        event.put("usageSemantics", "INVOCATION_SNAPSHOT");
-                        if (usage.getPromptTokens() != null) event.put("inputTokens", usage.getPromptTokens());
-                        if (usage.getCompletionTokens() != null) event.put("outputTokens", usage.getCompletionTokens());
-                        if (usage.getTotalTokens() != null) event.put("totalTokens", usage.getTotalTokens());
-                        String providerModel = response.getMetadata().getModel();
-                        if (providerModel != null && !providerModel.isBlank()) event.put("providerModelName", providerModel);
+                        Map<String, Object> event = new LinkedHashMap<>(ModelCompletion.usage(response));
+                        if ("NO_DATA".equals(event.get("usageSource"))) return;
+                        if (event.containsKey("actualModel")) event.put("providerModelName", event.get("actualModel"));
                         // Streaming usage is cumulative; publish the last snapshot once at termination.
                         latestUsage.set(Map.copyOf(event));
                     })
@@ -284,25 +295,32 @@ public class Coordinator {
                     .concatWith(Flux.defer(() -> {
                         ModelCompletion completion = ModelCompletion.assess(finishReason.get(), responseText.toString());
                         completionConsumer.accept(completion);
-                        observeFinalAnswer(observer, completion.attributes("final-answer"));
+                        Map<String, Object> attributes = new LinkedHashMap<>(completion.attributes("final-answer"));
+                        attributes.put("invocationId", invocationId);
+                        observeFinalAnswer(observer, Map.copyOf(attributes));
                         return completion.complete() ? Flux.empty()
                                 : Flux.error(new ModelCompletion.IncompleteOutputException(completion));
                     }))
                     .doOnError(error -> {
+                        invocationStatus.set("FAILED");
                         if (!(error instanceof ModelCompletion.IncompleteOutputException)) {
                             ModelCompletion completion = new ModelCompletion(ModelCompletion.Status.FAILED, finishReason.get());
                             completionConsumer.accept(completion);
-                            observeFinalAnswer(observer, completion.attributes("final-answer"));
+                            Map<String, Object> attributes = new LinkedHashMap<>(completion.attributes("final-answer"));
+                            attributes.put("invocationId", invocationId);
+                            observeFinalAnswer(observer, Map.copyOf(attributes));
                         }
                     })
                     .doOnTerminate(reportUsage)
                     .doOnCancel(() -> {
+                        invocationStatus.set("CANCELLED");
                         reportUsage.run();
                         ModelCompletion completion = new ModelCompletion(ModelCompletion.Status.FAILED, finishReason.get());
                         completionConsumer.accept(completion);
                         Map<String, Object> cancelled = new LinkedHashMap<>(
                                 completion.attributes("final-answer"));
                         cancelled.put("termination", "CANCELLED");
+                        cancelled.put("invocationId", invocationId);
                         observeFinalAnswer(observer, Map.copyOf(cancelled));
                     });
         });
@@ -575,7 +593,8 @@ public class Coordinator {
                         current.entities(), "[ticker=" + explicitTicker + "] " + resolvedQuery, current.sourceScores(),
                         current.needsClarification(), current.reasonCodes());
                 return new IntentRecognitionResult(bound, recognition.rawRoute(), recognition.rawRouteValid(),
-                        recognition.rationale(), recognition.signals(), recognition.degradationReason(), recognition.durationMs());
+                        recognition.rationale(), recognition.signals(), recognition.degradationReason(), recognition.durationMs(),
+                        recognition.modelObservation());
             }
         }
         java.util.ArrayList<String> reasonCodes = new java.util.ArrayList<>(current.reasonCodes());
@@ -604,7 +623,8 @@ public class Coordinator {
                         : targetChanged ? "改写标的与用户明确指定的股票不一致，已停止取证。" : "当前执行链一次只支持一个明确标的。",
                 recognition.signals(),
                 recognition.degradationReason(),
-                recognition.durationMs()
+                recognition.durationMs(),
+                recognition.modelObservation()
         );
     }
 

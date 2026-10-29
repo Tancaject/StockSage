@@ -34,7 +34,7 @@
 | 持久化 Trace | `TraceService`、MySQL `AgentTrace` | 已实现 |
 | 实时 Trace | Redis Stream、`TraceEventRelay`、SSE 回放 | 已实现 |
 | 外部观测平台 | Phoenix + OpenTelemetry OTLP | 可选，默认关闭 |
-| MCP、Skill | Capability Gateway、NEWS walking skeleton | 部分实现 |
+| MCP、Skill | Capability Gateway、NEWS 取证与显式研究 Skill（见[实现边界](../research-tools.md)） | 部分实现 |
 | GraphRAG、Agentic RAG | 没有完整生产链路 | 不要声称已实现 |
 | 模型训练、微调 | 使用现成模型 | 不属于项目重点 |
 
@@ -714,7 +714,7 @@ Capability 调用和后台任务还通过 Micrometer 记录 Counter、Timer、�
 | Trace / SSE | 展示 Agent 执行过程 | 回答可观测性和断线恢复 |
 | ResearchTask | 承载长时间多 Agent 任务 | 回答恢复、幂等和多实例 |
 | Capability / Skill | 约束和组合工具 | 作为扩展设计 |
-| MCP | 接入受信任远程工具 | 当前只做 NEWS walking skeleton |
+| MCP | 接入受信任远程工具 | 接入与工具边界见[实现说明](../research-tools.md) |
 
 MCP、Skill 简洁区分：
 
@@ -757,7 +757,7 @@ MCP、Skill 简洁区分：
 - RAG 使用混合召回、RRF 和 Rerank；
 - Bull/Bear 基于统一证据快照；
 - MySQL 是持久化事实源，Redis 加速短期状态和事件；
-- MCP/Skill 当前是 NEWS walking skeleton。
+- MCP/Skill 的执行范围和数据边界见[实现说明](../research-tools.md)。
 
 ---
 
@@ -1191,7 +1191,7 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 - `stocksage-backend/src/main/java/com/stocksage/rag/ContextualEnricher.java`
 - `stocksage-backend/src/main/java/com/stocksage/knowledge/KnowledgeIngestionService.java`
 - `stocksage-backend/src/main/java/com/stocksage/knowledge/EdgarIngestionService.java`
-- `stocksage-backend/src/main/java/com/stocksage/service/RagEvalService.java`
+- `stocksage-backend/src/main/java/com/stocksage/eval/RagEvalService.java`
 - `RAG_EVALUATION.md`
 - `evals/`
 
@@ -1200,21 +1200,21 @@ StockSage 的定位是“LLM 决策 + 确定性执行”的混合架构。
 - `stocksage-backend/src/main/java/com/stocksage/agent/Coordinator.java`
 - `stocksage-backend/src/main/java/com/stocksage/agent/ExecutionPlan.java`
 - `stocksage-backend/src/main/java/com/stocksage/config/AgentConfig.java`
-- `stocksage-backend/src/main/java/com/stocksage/service/ToolPrefetchService.java`
-- `stocksage-backend/src/main/java/com/stocksage/research/DeepEvidenceCollector.java`
-- `stocksage-backend/src/main/java/com/stocksage/research/ResearchDebateService.java`
-- `stocksage-backend/src/main/java/com/stocksage/agent/BullResearcher.java`
-- `stocksage-backend/src/main/java/com/stocksage/agent/BearResearcher.java`
-- `stocksage-backend/src/main/java/com/stocksage/agent/ResearchManager.java`
-- `stocksage-backend/src/main/java/com/stocksage/research/DeepResearchPipeline.java`
+- `stocksage-backend/src/main/java/com/stocksage/agent/ordinary/ToolPrefetchService.java`
+- `stocksage-backend/src/main/java/com/stocksage/research/deep/DeepEvidenceCollector.java`
+- `stocksage-backend/src/main/java/com/stocksage/debate/ResearchDebateService.java`
+- `stocksage-backend/src/main/java/com/stocksage/debate/BullResearcher.java`
+- `stocksage-backend/src/main/java/com/stocksage/debate/BearResearcher.java`
+- `stocksage-backend/src/main/java/com/stocksage/debate/ResearchManager.java`
+- `stocksage-backend/src/main/java/com/stocksage/research/deep/DeepResearchPipeline.java`
 
 ### Eval 与 Trace
 
 - `stocksage-backend/src/main/java/com/stocksage/controller/RagEvalController.java`
-- `stocksage-backend/src/main/java/com/stocksage/service/RagEvalService.java`
+- `stocksage-backend/src/main/java/com/stocksage/eval/RagEvalService.java`
 - `stocksage-backend/src/main/java/com/stocksage/rag/RagRetrievalEvaluation.java`
 - `stocksage-backend/src/main/java/com/stocksage/rag/RagRegressionService.java`
-- `stocksage-backend/src/main/java/com/stocksage/service/PlannerEvalService.java`
+- `stocksage-backend/src/main/java/com/stocksage/eval/PlannerEvalService.java`
 - `stocksage-backend/src/main/java/com/stocksage/trace/TraceService.java`
 - `stocksage-backend/src/main/java/com/stocksage/trace/TraceEventStore.java`
 - `stocksage-backend/src/main/java/com/stocksage/trace/TraceEventRelay.java`

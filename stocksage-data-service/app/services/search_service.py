@@ -4,6 +4,7 @@ from app.research_budget import check_budget, bounded_timeout
 
 from datetime import datetime, timezone
 import logging
+import re
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -30,6 +31,38 @@ def _normalize_timelimit(value: Optional[str], allowed: set) -> Optional[str]:
         return None
     normalized = value.strip().lower()
     return normalized if normalized in allowed else None
+
+
+# 抓取正文里夹带的整行网页导航、分享按钮和页脚；只删整行完全匹配的噪声，不改动正文句子。
+_NAV_LINES = {
+    "手机版", "安卓版", "苹果端", "博客版", "登录", "注册", "返回", "关闭", "返回顶部", "复制链接", "复制链接;)",
+    "QQ好友", "QQ空间", "微博", "微信好友", "分享", "投稿", "纠错", "线索爆料", "意见反馈", "评论", "举报",
+    "文章内容举报", "APP下载", "榜单 招聘", "热点推荐", "好物推荐", "图片信息", "相关推荐", "猜你喜欢",
+    "图片描述:", "图片描述：", "图片格式:", "图片格式：", "图片尺寸:", "图片尺寸：", "上传时间:", "上传时间：",
+}
+_FOOTER_MARKERS = ("All Rights Reserved", "ICP备", "公网安备", "当前位置：首页")
+_LINK_DEBRIS = re.compile(r"^(?:\[\]\(\s*)+")
+_SYMBOLS_ONLY = re.compile(r"^[\W_]*$")
+
+
+def _clean_snippet(text: str) -> str:
+    """去掉整行导航、页脚、空链接残留和重复段落；清完为空时保留原文。"""
+    if not text:
+        return text
+    kept, seen = [], set()
+    for raw in text.splitlines():
+        line = _LINK_DEBRIS.sub("", raw.strip()).strip()
+        bare = line.lstrip("#").strip()
+        if not bare or _SYMBOLS_ONLY.match(bare) or bare in _NAV_LINES \
+                or any(marker in bare for marker in _FOOTER_MARKERS):
+            continue
+        if len(bare) >= 20:
+            if bare in seen:
+                continue
+            seen.add(bare)
+        kept.append(line)
+    cleaned = "\n".join(kept)
+    return cleaned if cleaned else text
 
 
 def _domain_of(url: str) -> str:
@@ -143,7 +176,7 @@ class SearchService:
             url = row.get("url" if provider == "tavily" or news else "href")
             result = {
                 "title": row.get("title"), "link": url,
-                "snippet": row.get("content" if provider == "tavily" else "body"),
+                "snippet": _clean_snippet(row.get("content" if provider == "tavily" else "body")),
                 "date": row.get("published_date" if provider == "tavily" else "date") if provider == "tavily" or news else "",
                 "source": row.get("source") if provider == "ddg" and news else _domain_of(url),
             }

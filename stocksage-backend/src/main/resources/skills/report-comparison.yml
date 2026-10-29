@@ -1,0 +1,37 @@
+{
+  "id": "report-comparison",
+  "version": 1,
+  "displayName": "研究报告变化",
+  "enabled": true,
+  "routes": [
+    "DEEP"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 1,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "compareResearchReports",
+      "required": true,
+      "arguments": {
+        "olderReportId": "$input.olderReportId",
+        "newerReportId": "$input.newerReportId",
+        "asOf": "$input.asOf"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "olderReportId": 0,
+    "newerReportId": 0,
+    "asOf": ""
+  },
+  "method": "区分评级变化、论点文本变化和证据变化；同文换ID不算新事实，生成结论不能代替公司披露。"
+}

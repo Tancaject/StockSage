@@ -1,0 +1,33 @@
+{
+  "id": "etf-lookthrough",
+  "version": 1,
+  "displayName": "ETF穿透与重叠",
+  "enabled": true,
+  "routes": [
+    "DEEP"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 1,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "lookThroughEtfs",
+      "required": true,
+      "arguments": {
+        "inputJson": "$input.inputJson"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "inputJson": "{\"asOf\": \"2026-10-01\", \"positions\": [{\"symbol\": \"ETF1\", \"currency\": \"USD\", \"marketValue\": 100, \"isEtf\": true}, {\"symbol\": \"EXAMPLE\", \"currency\": \"USD\", \"marketValue\": 100, \"isEtf\": false}], \"funds\": [{\"symbol\": \"ETF1\", \"asOf\": \"2026-09-30\", \"holdings\": [{\"symbol\": \"EXAMPLE\", \"weight\": 0.4}]}]}"
+  },
+  "method": "区分直接和穿透敞口，注明每只基金成分权重日期和未覆盖比例。只做一层穿透，未列成分不能按零计，也不能当作当前完整持仓。"
+}

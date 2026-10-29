@@ -1,0 +1,39 @@
+{
+  "id": "financial-checkup",
+  "version": 1,
+  "displayName": "财务体检",
+  "enabled": true,
+  "routes": [
+    "FUNDAMENTALS"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 1,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "getFinancialDiagnostics",
+      "required": true,
+      "arguments": {
+        "ticker": "$input.ticker",
+        "period": "$input.period",
+        "years": "$input.years",
+        "asOf": "$input.asOf"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "ticker": "NVDA",
+    "period": "annual",
+    "years": 5,
+    "asOf": ""
+  },
+  "method": "先检查可比口径与缺口，再解释增长、现金转化和净债务。每个结论引用计算公式、期间和原始来源；亏损、负现金流、缺值不得解释为正常倍数。"
+}

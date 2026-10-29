@@ -1,6 +1,6 @@
 package com.stocksage.capability;
 
-import com.stocksage.service.TickerResolutionService;
+import com.stocksage.agent.TickerResolutionService;
 import com.stocksage.tool.MarketTools;
 import org.springframework.stereotype.Component;
 

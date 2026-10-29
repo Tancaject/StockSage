@@ -17,8 +17,8 @@ import java.util.Set;
  * 按模型名分流对话请求：DeepSeek 官方模型名（及其别名）走 DeepSeek 官方 API，其余模型（路由用的 qwen3.8-flash、
  * 看图模型、百炼上托管的其他 deepseek 版本等）留在百炼。
  *
- * <p>上层（角色客户端、调用记录、令牌预算校验）统一使用百炼的参数写法 {@code enable_thinking}/{@code thinking_budget}；
- * 转发到官方 API 前在这里换成官方写法：{@code thinking: {type}} 和 {@code reasoning_effort}。官方没有思考 token 上限，
+ * <p>角色客户端、调用记录和转发共用这里的参数转换：官方 API 使用 {@code thinking: {type}} 和 {@code reasoning_effort}。
+ * 官方没有独立的思考 token 上限，
  * 而 max_tokens 包含思考内容，所以开思考的请求把输出上限提高到单独配置的值，避免思考挤掉正文。
  * 模型名按别名映射（如 deepseek-v4-pro-0813 → deepseek-v4-pro）。</p>
  */
@@ -69,12 +69,20 @@ public class ProviderRoutingChatModel implements ChatModel {
 
     Prompt translate(Prompt prompt) {
         OpenAiChatOptions options = prompt.getOptions() instanceof OpenAiChatOptions openAi
-                ? openAi.copy()
+                ? openAi
                 : ModelOptionsUtils.copyToTarget(prompt.getOptions(), ChatOptions.class, OpenAiChatOptions.class);
+        return new Prompt(prompt.getInstructions(), effectiveOptions(options));
+    }
+
+    public OpenAiChatOptions effectiveOptions(OpenAiChatOptions requested) {
+        if (requested == null || !routedModels.contains(requested.getModel())) return requested;
+        OpenAiChatOptions options = requested.copy();
         options.setModel(modelAliases.getOrDefault(options.getModel(), options.getModel()));
         Map<String, Object> extra = new HashMap<>(options.getExtraBody() == null ? Map.of() : options.getExtraBody());
-        // DeepSeek 默认开思考；只有明确 enable_thinking=false（如取证循环）才关闭。
-        boolean thinking = !Boolean.FALSE.equals(extra.remove("enable_thinking"));
+        // 已归一化的客户端选项再次经过路由时，保留取证循环的关闭设置。
+        Object enableThinking = extra.remove("enable_thinking");
+        boolean thinking = enableThinking != null ? !Boolean.FALSE.equals(enableThinking)
+                : !(extra.get("thinking") instanceof Map<?, ?> setting && "disabled".equals(setting.get("type")));
         extra.remove("thinking_budget");
         extra.put("thinking", Map.of("type", thinking ? "enabled" : "disabled"));
         options.setExtraBody(extra);
@@ -85,6 +93,6 @@ public class ProviderRoutingChatModel implements ChatModel {
                 options.setMaxTokens(thinkingMaxTokens);
             }
         }
-        return new Prompt(prompt.getInstructions(), options);
+        return options;
     }
 }

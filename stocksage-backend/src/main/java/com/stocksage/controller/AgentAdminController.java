@@ -1,9 +1,11 @@
 package com.stocksage.controller;
 
-import com.stocksage.agent.AgentRuntimeConfiguration;
-import com.stocksage.research.DeepEvidenceReplanService;
-import com.stocksage.research.ResearchEvidenceSnapshotService;
-import com.stocksage.service.AgentAdminService;
+import com.stocksage.agent.runtime.AgentRuntimeConfiguration;
+import com.stocksage.agent.runtime.ModelInvocationStore;
+import com.stocksage.research.deep.DeepEvidenceReplanService;
+import com.stocksage.research.deep.ResearchEvidenceSnapshotService;
+import com.stocksage.skill.AgentAdminService;
+import com.stocksage.trace.TraceReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -29,6 +32,8 @@ public class AgentAdminController {
     private final AgentRuntimeConfiguration runtimeConfiguration;
     private final DeepEvidenceReplanService replanService;
     private final ResearchEvidenceSnapshotService evidenceSnapshotService;
+    private final TraceReviewService traceReviewService;
+    private final ModelInvocationStore modelInvocationStore;
 
     @Value("${stocksage.chat.model-routing.fast-model:}")
     private String fastModel;
@@ -63,6 +68,19 @@ public class AgentAdminController {
         return agentAdminService.runtime();
     }
 
+    /** 持久化 Trace 的只读分页导出，供跨重启统计与真实回答抽样。 */
+    @GetMapping("/traces")
+    public TraceReviewService.Page traces(@RequestParam String from, @RequestParam String to,
+                                         @RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "100") int size) {
+        return traceReviewService.export(from, to, page, size);
+    }
+
+    @GetMapping("/research-tasks/{taskId}/model-invocations")
+    public java.util.List<ModelInvocationStore.Invocation> modelInvocations(@PathVariable Long taskId) {
+        return modelInvocationStore.forTask(taskId);
+    }
+
     /**
      * 评测成绩单记录的运行配置身份：各角色客户端默认值（模型、输出上限、思考设置、系统提示词哈希）、
      * 模型分档、对话供应商（只记主机名和路径哈希）和 DEEP 取证循环配置。不含密钥。
@@ -73,7 +91,8 @@ public class AgentAdminController {
                 "clients", runtimeConfiguration.snapshot(),
                 "chatProvider", runtimeConfiguration.chatProviderSnapshot(),
                 "modelRouting", java.util.Map.of("fast", fastModel, "standard", standardModel, "strong", strongModel,
-                        "vision", visionModel, "maxOutputTokens", maxOutputTokens, "thinkingBudget", thinkingBudget),
+                        "vision", visionModel, "maxOutputTokens", maxOutputTokens, "thinkingBudget", thinkingBudget,
+                        "scope", "CONFIGURED_BEFORE_PROVIDER_ROUTING"),
                 "deepEvidence", replanService.runtimeConfiguration());
     }
 

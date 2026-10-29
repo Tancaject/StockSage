@@ -256,6 +256,10 @@ stocksage.research-memory.compensation-initial-delay-ms=60000
 - 删除多模式分支后，单链路的 Service、Ranker、Resolver 定向测试 `29/29` 通过。
 - live Milvus 的 Recall、nDCG、P95、物理清理与全量 RAG 非回退门禁尚未执行；当前启用
   不代表这些生产指标已经通过，它们仍是后续验收项。
+- **2026-10-22 更正**：Spring AI Milvus 返回的 `entry_id` 元数据是 Double（如 `15.0`），原
+  `Long.valueOf` 解析失败后丢弃候选，因此 8/23 启用至 10/22 修复前，研究记忆检索实际从未注入。
+  定向测试用 Long 元数据，未覆盖真实 SDK 类型。修复与证据见
+  [memory-20261022 验收记录](../../evals/results/memory-20261022/README.md#review-修复2026-10-22-下午)。
 
 ## 9. 明确不做
 

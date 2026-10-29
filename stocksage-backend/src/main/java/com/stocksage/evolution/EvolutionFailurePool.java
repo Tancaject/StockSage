@@ -28,8 +28,11 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class EvolutionFailurePool {
 
-    /** 普通 FUNDAMENTALS 回答的这些结果会自动入池。 */
-    private static final Set<String> FAILED_OUTCOMES = Set.of("BLOCKED", "DEGRADED", "FAILED");
+    /**
+     * 普通 FUNDAMENTALS 回答的这些结果会自动入池。DEGRADED 不入池：它只表示证据层不完整（时效未确认、
+     * 证据删减等），与答案对错无关；答案错误由用户反馈和评测的金标核验发现。
+     */
+    private static final Set<String> FAILED_OUTCOMES = Set.of("BLOCKED", "FAILED");
 
     private final EvolutionFailureCaseRepository repository;
     private final TraceService traceService;

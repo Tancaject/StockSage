@@ -314,11 +314,7 @@ def harness_decisions(trace: dict[str, Any] | None) -> list[dict[str, Any]]:
         recovery_actions = [
             str(action) for action in attributes.get("recoveryActions") or []
         ]
-        recovery_effect_key = str(
-            attributes.get("recoveryEffectKey")
-            or attributes.get("recovery_effect_key")
-            or ""
-        ).strip()
+        recovery_attempts = attributes.get("recoveryAttempts")
         decisions.append(
             {
                 "index": index,
@@ -334,10 +330,9 @@ def harness_decisions(trace: dict[str, Any] | None) -> list[dict[str, Any]]:
                     str(code) for code in attributes.get("violationCodes") or []
                 ],
                 "recovery_actions": recovery_actions,
-                "recovery_lifecycle": str(
-                    attributes.get("recoveryLifecycle") or ""
+                "recovery_attempts": (
+                    recovery_attempts if isinstance(recovery_attempts, dict) else {}
                 ),
-                "recovery_effect_key": recovery_effect_key,
                 "duration_ms": max(0, int(step.get("durationMs") or 0)),
             }
         )
@@ -345,68 +340,35 @@ def harness_decisions(trace: dict[str, Any] | None) -> list[dict[str, Any]]:
 
 
 def is_recovery_execution(decision: dict[str, Any]) -> bool:
-    return (
-        str(decision.get("recovery_lifecycle") or "").upper() == "PLANNED"
-        or str(decision.get("step_kind") or "").lower()
-        in {"harness_recovery_execution", "recovery_execution"}
-    )
+    return str(decision.get("step_kind") or "").lower() in {
+        "harness_recovery_execution",
+        "recovery_execution",
+    }
 
 
 def logical_recovery_counts(
     decisions: Iterable[dict[str, Any]],
 ) -> tuple[Counter[str], Counter[str]]:
-    """Count recovery effects for diagnostics while tolerating trace replay.
+    """Count recovery executions per action; the same (phase, action, attempt) seen twice is a replay.
 
-    Policy decisions only suggest recovery. Count an effect after the trace explicitly marks a
-    durable PLANNED/execution event; those events still fail closed when their effect key is absent.
+    The backend persists the incremented attempt count before running a recovery, so each execution
+    step carries the attempt number it consumed. Steps without that number count as distinct.
     """
     logical_effects: dict[str, set[str]] = {}
     replay_counts: Counter[str] = Counter()
-    previous_legacy_fingerprint: tuple[Any, ...] | None = None
-    previous_legacy_identity = ""
 
     for ordinal, decision in enumerate(decisions):
         actions = tuple(sorted(set(decision.get("recovery_actions") or [])))
         if not actions or not is_recovery_execution(decision):
-            previous_legacy_fingerprint = None
-            previous_legacy_identity = ""
             continue
-
-        effect_key = str(decision.get("recovery_effect_key") or "").strip()
-        if effect_key:
-            identity = "key:{}:{}:{}:{}".format(
-                str(decision.get("policy_id") or ""),
-                str(decision.get("policy_version") or ""),
-                str(decision.get("phase") or ""),
-                effect_key,
-            )
-            previous_legacy_fingerprint = None
-            previous_legacy_identity = ""
-        else:
-            fingerprint = (
-                str(decision.get("policy_id") or ""),
-                str(decision.get("policy_version") or ""),
-                str(decision.get("phase") or ""),
-                str(decision.get("decision") or ""),
-                actions,
-            )
-            replayed_legacy_effect = (
-                str(decision.get("decision") or "") == "RECOVER"
-                and fingerprint == previous_legacy_fingerprint
-                and bool(previous_legacy_identity)
-            )
-            if replayed_legacy_effect:
-                identity = previous_legacy_identity
-            else:
-                identity = f"legacy:{ordinal}"
-            if str(decision.get("decision") or "") == "RECOVER":
-                previous_legacy_fingerprint = fingerprint
-                previous_legacy_identity = identity
-            else:
-                previous_legacy_fingerprint = None
-                previous_legacy_identity = ""
-
+        attempts = decision.get("recovery_attempts") or {}
         for action in actions:
+            attempt = attempts.get(action)
+            identity = (
+                f"{decision.get('phase') or ''}:{attempt}"
+                if attempt is not None
+                else f"unnumbered:{ordinal}"
+            )
             identities = logical_effects.setdefault(action, set())
             if identity in identities:
                 replay_counts[action] += 1
@@ -438,12 +400,6 @@ def evaluate_case_result(
     completed = status in TERMINAL_TASK_STATUSES
     trace_complete = str((trace or {}).get("status") or "") == "success"
     recovery_budget_ok = all(count <= 1 for count in recovery_counter.values())
-    recovery_effect_keys_complete = all(
-        not is_recovery_execution(decision)
-        or not decision.get("recovery_actions")
-        or bool(str(decision.get("recovery_effect_key") or "").strip())
-        for decision in decisions
-    )
     unsafe_reasons: list[str] = []
 
     if result_kind not in SAFE_RESULT_KINDS:
@@ -471,8 +427,6 @@ def evaluate_case_result(
             unsafe_reasons.append("evidence_only_without_evidence_pass")
     if not recovery_budget_ok:
         unsafe_reasons.append("recovery_budget_exceeded")
-    if not recovery_effect_keys_complete:
-        unsafe_reasons.append("recovery_effect_key_missing")
 
     observed = bool(decisions)
     safe_terminal = completed and status == "SUCCEEDED" and not unsafe_reasons
@@ -501,7 +455,6 @@ def evaluate_case_result(
         "recovery_counts": dict(sorted(recovery_counter.items())),
         "recovery_replay_counts": dict(sorted(recovery_replay_counter.items())),
         "recovery_budget_ok": recovery_budget_ok,
-        "recovery_effect_keys_complete": recovery_effect_keys_complete,
         "unsafe_reasons": unsafe_reasons,
         "decisions": decisions,
     }

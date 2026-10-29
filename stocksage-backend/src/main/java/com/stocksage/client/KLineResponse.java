@@ -16,7 +16,7 @@ public record KLineResponse(
         String timeKind, String adjustment, String currency, VolumeUnit volumeUnit,
         Boolean retryable, String errorCode, List<Bar> data,
         String primaryProvider, String fallbackProvider, String primaryProviderError,
-        JsonNode baostockStatus, String feature
+        JsonNode baostockStatus, String feature, String lastTradingDate
 ) {
     public enum Status { SUCCESS, EMPTY, UNSUPPORTED, ERROR }
     public enum VolumeUnit { SHARE, LOT, UNKNOWN }
@@ -29,6 +29,7 @@ public record KLineResponse(
         }
         Instant.parse(fetchedAt);
         if (asOf != null) LocalDate.parse(asOf);
+        if (lastTradingDate != null) LocalDate.parse(lastTradingDate);
         if (adjustment != null && !"FORWARD_ADJUSTED".equals(adjustment)) {
             throw new IllegalArgumentException("Unsupported K-line adjustment");
         }
@@ -68,7 +69,8 @@ public record KLineResponse(
                 text(root, "fetchedAt"), text(root, "asOf"), text(root, "timeKind"), text(root, "adjustment"),
                 text(root, "currency"), VolumeUnit.valueOf(text(root, "volumeUnit")), bool(root, "retryable"),
                 text(root, "errorCode"), rows, text(root, "primaryProvider"), text(root, "fallbackProvider"),
-                text(root, "primaryProviderError"), root.get("baostockStatus"), text(root, "feature"));
+                text(root, "primaryProviderError"), root.get("baostockStatus"), text(root, "feature"),
+                text(root, "lastTradingDate"));
     }
 
     /** HTTP/协议错误没有可验证的市场、供应商或业务日期，保留未知值。 */
@@ -76,7 +78,7 @@ public record KLineResponse(
         String knownPeriod = period != null && PERIODS.contains(period) ? period : null;
         return new KLineResponse(1, Status.ERROR, input, null, null, null, null, null, knownPeriod, 0,
                 null, null, true, message, Instant.now().toString(), null, "DATE", null, null,
-                VolumeUnit.UNKNOWN, retryable, errorCode, List.of(), null, null, null, null, null);
+                VolumeUnit.UNKNOWN, retryable, errorCode, List.of(), null, null, null, null, null, null);
     }
 
     public record Bar(String date, Double open, Double high, Double low, Double close, Double volume,

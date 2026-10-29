@@ -172,10 +172,10 @@ StockSage 的执行方式分三档：
 
 | 内容 | 位置 |
 |---|---|
-| 数据需求和满足条件 | `agent/DataRequirement` |
-| 计划和步骤 | `agent/OrdinaryPlan`、`agent/PlanStep`；`ExecutionPlan.ordinaryPlan`（`actions` 由它派生） |
+| 数据需求和满足条件 | `agent/ordinary/DataRequirement` |
+| 计划和步骤 | `agent/ordinary/OrdinaryPlan`、`agent/ordinary/PlanStep`；`ExecutionPlan.ordinaryPlan`（`actions` 由它派生） |
 | 请求检查和计划生成拆分 | `Coordinator.inspectRequest`、`Coordinator.fanOutTargets`；多标的准入在 `multiTargetReason` |
-| 动态规划器 | `agent/OrdinaryPlanner`，模型客户端是 `ordinaryPlannerChatClient` |
+| 动态规划器 | `agent/ordinary/OrdinaryPlanner`，模型客户端是 `ordinaryPlannerChatClient` |
 | 执行 | `ToolPrefetchService.fetch`（只返回原始结果）、`prefetchMultiTarget` |
 | 执行器 | `AsyncConfig.ordinaryFanoutExecutor` |
 | 开关 | `stocksage.agent.ordinary.*`（见 `application.properties`） |

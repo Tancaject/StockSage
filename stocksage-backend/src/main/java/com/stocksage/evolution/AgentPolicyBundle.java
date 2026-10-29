@@ -1,6 +1,6 @@
 package com.stocksage.evolution;
 
-import com.stocksage.agent.FundamentalsPrompts;
+import com.stocksage.agent.analyst.FundamentalsPrompts;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

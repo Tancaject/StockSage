@@ -1,7 +1,6 @@
 # StockSage MCP 与 Skill 模块设计
 
-> 状态：NEWS 确定性 Capability Skill 和 F4 脱敏运行状态已实现；真实 Streamable HTTP server 验收待完成
-> 最后复核：2026-09-03
+> 早期架构设计与历史记录。当前工具、Skill 执行方式及边界以[研究工具与 Skill](../research-tools.md)为准；本文的规划和历史覆盖不代表当前在线验证结果。
 > 适用仓库：`D:\programming\StockSage`
 
 ## 1. 结论
@@ -25,7 +24,7 @@ Agent 解决“如何分析服务器已经取得的证据”
 
 这与 StockSage 当前结构兼容。现有 `Coordinator + ExecutionPlan + PlanAction + AgentConfig + @Tool` 已经具有固定的 skill-like 能力分区；新设计应把它们抽象成可声明、可审计的工作流，而不是推翻重写。
 
-### 1.1 当前实现状态（2026-09-03）
+### 1.1 历史实现记录（2026-09-03）
 
 已落地：
 
@@ -330,41 +329,9 @@ V1 Skill 是受版本控制的声明式工作流。它可以引用：
 - 动态执行 JavaScript/Python。
 - 自己创建线程、连接数据库或访问文件系统。
 
-### 7.2 SkillDefinition
+### 7.2 SkillDefinition 与 SkillStep
 
-建议字段：
-
-```java
-public record SkillDefinition(
-        String id,
-        int version,
-        String displayName,
-        boolean enabled,
-        Set<PlanRoute> routes,
-        ExecutionMode executionMode,
-        ModelTier minimumModelTier,
-        SkillPolicy policy,
-        List<SkillStep> steps,
-        List<String> fallbackSkillIds
-) {}
-```
-
-当前执行模式只有 `INLINE_DETERMINISTIC`。DEEP 继续由 `ResearchTask` 管线承载，不伪装成尚未实现的 Skill 模式。
-
-### 7.3 Typed SkillStep
-
-当前形态：
-
-```java
-public record SkillStep(
-        StepType type,
-        String capability,
-        boolean required,
-        String fallbackCapability
-) {}
-```
-
-`StepType` 当前只有 `CAPABILITY`。Agent、DEEP 提交和最终回答仍由现有 Java 路由契约负责，不在 YAML 中重复声明。
+结构以[SkillDefinition.java](../../stocksage-backend/src/main/java/com/stocksage/skill/SkillDefinition.java)为唯一来源。NEWS 的 `CAPABILITY` 与工作台的 `TOOL` 步骤分别执行，单份清单不能混用；输入绑定、方法说明及显式执行 API 见[研究工具与 Skill](../research-tools.md)。DEEP 仍由既有 `ResearchTask` 管线承载。
 
 ### 7.4 示例 Skill
 
@@ -893,7 +860,7 @@ stocksage-backend/src/main/java/com/stocksage/capability/*
 stocksage-backend/src/main/java/com/stocksage/mcp/*
 stocksage-backend/src/main/java/com/stocksage/skill/*
 stocksage-backend/src/main/java/com/stocksage/conversation/ChatService.java
-stocksage-backend/src/main/java/com/stocksage/service/ToolPrefetchService.java
+stocksage-backend/src/main/java/com/stocksage/agent/ordinary/ToolPrefetchService.java
 stocksage-backend/src/main/java/com/stocksage/tool/ToolCallAspect.java
 stocksage-backend/src/test/java/com/stocksage/capability/*
 stocksage-backend/src/test/java/com/stocksage/mcp/*

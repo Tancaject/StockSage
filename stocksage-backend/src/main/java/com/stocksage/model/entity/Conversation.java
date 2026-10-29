@@ -1,16 +1,19 @@
 package com.stocksage.model.entity;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.hibernate.annotations.DynamicUpdate;
 import java.time.LocalDateTime;
 
 /**
  * 归属于当前会话用户的持久化对话线程。
  *
- * <p>消息表保存实际对话内容；该行保存侧边栏使用的会话标题和排序时间。</p>
+ * <p>消息表保存完整对话；该行保存会话标题、排序时间和覆盖较早消息的滚动摘要。</p>
  */
 @Data
 @Entity
+@DynamicUpdate
 @Table(name = "conversations")
 public class Conversation {
 
@@ -30,6 +33,14 @@ public class Conversation {
     /** 侧边栏展示标题，通常由首条用户问题或摘要生成。 */
     @Column(length = 128)
     private String title;
+
+    @JsonIgnore
+    @Column(name = "memory_summary", columnDefinition = "TEXT")
+    private String memorySummary;
+
+    @JsonIgnore
+    @Column(name = "memory_summary_through_message_id")
+    private Long memorySummaryThroughMessageId;
 
     /** 会话创建时间。 */
     private LocalDateTime createdAt;

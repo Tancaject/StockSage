@@ -1,4 +1,13 @@
 capabilities:
+  - id: local.filing.readDisclosure
+    providerType: LOCAL
+    providerId: local
+    nativeName: readDisclosure
+    riskLevel: READ_ONLY
+    timeoutMs: 60000
+    maxResultBytes: 131072
+    enabled: true
+
   # DEEP 取证循环的工具菜单（docs/architecture/deep-react-plan.md M1）。标的由服务端填入，模型不能指定。
   - id: local.filing.searchText
     providerType: LOCAL

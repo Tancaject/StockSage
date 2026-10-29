@@ -1,0 +1,37 @@
+{
+  "id": "watchlist-changes",
+  "version": 1,
+  "displayName": "自选股研究变化",
+  "enabled": true,
+  "routes": [
+    "DEEP"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 1,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "getWatchlistResearchChanges",
+      "required": true,
+      "arguments": {
+        "since": "$input.since",
+        "asOf": "$input.asOf",
+        "limit": "$input.limit"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "since": "2026-10-01T00:00:00Z",
+    "asOf": "",
+    "limit": 20
+  },
+  "method": "按当前自选列表整理时间区间内新报告及论点变化。没有名单增删历史时，不还原历史成分，也不将报告变化当作实时行情变化。"
+}

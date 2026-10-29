@@ -9,8 +9,9 @@ SEC EDGAR API 路由。
 
 from app.research_budget import check_budget
 
-from fastapi import APIRouter, Query
-from app.sec_financials import SecFinancialsResponse, normalize_sec_financials
+from datetime import date
+from fastapi import APIRouter, Query, HTTPException
+from app.sec_financials import FinancialReportPeriod, SecFinancialsResponse, normalize_sec_financials
 from app.services.edgar_service import edgar_service
 
 router = APIRouter()
@@ -46,12 +47,26 @@ def get_filing_content(
 
 @router.get("/xbrl", response_model=SecFinancialsResponse)
 def get_xbrl(
-    ticker: str = Query(..., min_length=1, description="美股代码，例如 AAPL；当前仅提供年度 XBRL 事实"),
+    ticker: str = Query(..., min_length=1, description="美股代码，例如 AAPL"),
+    period: FinancialReportPeriod = Query("annual"),
+    years: int | None = Query(None, ge=1, le=10),
+    as_of: str | None = Query(None, alias="asOf", pattern=r"^\d{4}-\d{2}-\d{2}$", description="仅采用此日及此前已申报的事实"),
+    financial_extras: bool = Query(False, alias="financialExtras", description="附加库存、成本和期末普通股数；不改变默认科目"),
 ):
-    """获取具有期间、单位和公告来源的年度 XBRL 财务事实。"""
+    """获取具有期间、单位、申报版本及可选信息截止日的 XBRL 财务事实。"""
+    if as_of is not None:
+        try:
+            cutoff = date.fromisoformat(as_of)
+            if cutoff > date.today():
+                raise ValueError("future cutoff")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="asOf 必须是有效的 YYYY-MM-DD 日期，且不能晚于今天。")
+    effective_years = years if years is not None else (10 if period == "quarterly" else None)
     try:
-        payload = edgar.get_xbrl(ticker)
+        payload = edgar.get_xbrl(ticker, period, as_of=as_of, financial_extras=financial_extras)
     except Exception as e:
         check_budget(e)
-        return normalize_sec_financials(None, ticker, error=e)
-    return normalize_sec_financials(payload, ticker)
+        return normalize_sec_financials(None, ticker, error=e, requested_period=period if effective_years else None,
+                                        requested_years=effective_years, requested_as_of=as_of)
+    return normalize_sec_financials(payload, ticker, requested_period=period if effective_years else None,
+                                    requested_years=effective_years, requested_as_of=as_of)

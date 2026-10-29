@@ -1,7 +1,7 @@
 package com.stocksage.config;
 
+import com.stocksage.agent.runtime.ModelInvocationStore;
 import com.stocksage.rag.LocalEmbeddingModel;
-import com.stocksage.research.ModelInvocationStore;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

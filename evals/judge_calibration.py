@@ -22,6 +22,28 @@ COMPARISON_POLICY = {
 }
 
 
+def planned_attempts(report: dict, cases: list[dict]) -> list[tuple[str, int]]:
+    """Older reports repeat every case; sampled rejudging records the exact attempt plan."""
+    repeats = report.get("repeats")
+    if type(repeats) is not int or repeats < 1:
+        raise ValueError("Diagnostic repeats must be a positive integer")
+    ids = {row["id"] for row in cases}
+    plan = report.get("planned_attempts")
+    if plan is None:
+        return [(row["id"], repeat) for row in cases for repeat in range(1, repeats + 1)]
+    if not isinstance(plan, list) or not plan:
+        raise ValueError("planned_attempts must be a nonempty list")
+    result = []
+    for row in plan:
+        if (not isinstance(row, dict) or row.get("id") not in ids or type(row.get("repeat")) is not int
+                or not 1 <= row["repeat"] <= repeats):
+            raise ValueError("Unknown or out-of-range planned review attempt")
+        result.append((row["id"], row["repeat"]))
+    if len(set(result)) != len(result) or any((key, 1) not in result for key in ids):
+        raise ValueError("Review plans must be unique and include the first attempt for every case")
+    return result
+
+
 def _validate(dataset: list[dict], report: dict) -> tuple[list[dict], dict]:
     if (not isinstance(report, dict) or report.get("schema") != "ordinary_judge_diagnostic_v2"
             or report.get("origin") != "AI" or report.get("diagnostic_only") is not True
@@ -47,12 +69,16 @@ def _validate(dataset: list[dict], report: dict) -> tuple[list[dict], dict]:
             raise ValueError("Pilot question, answer and evidence must be strings")
         review = case.get("label_review")
         if (case.get("rubric_sha256") != rubric["sha256"] or not isinstance(review, dict)
-                or review.get("status") != "AI_CROSS_CHECKED" or review.get("rubric_sha256") != rubric["sha256"]):
+                or review.get("status") not in {"AI_CROSS_CHECKED", "HUMAN_CONFIRMED"}
+                or review.get("rubric_sha256") != rubric["sha256"]):
             raise ValueError("Pilot labels are unreviewed, disputed or use another rubric: " + key)
         reviewers = review.get("reviewers")
         if (not isinstance(reviewers, list) or any(not isinstance(name, str) or not name.strip() for name in reviewers)
-                or len({name.strip() for name in reviewers}) < 2):
-            raise ValueError("Pilot labels need two distinct AI review roles: " + key)
+                or len({name.strip() for name in reviewers}) < (1 if review["status"] == "HUMAN_CONFIRMED" else 2)):
+            raise ValueError("Labels need one human reviewer or two distinct AI review roles: " + key)
+        if review["status"] == "HUMAN_CONFIRMED" and (
+                case.get("label_origin") != "HUMAN" or not str(review.get("reviewed_at") or "").strip()):
+            raise ValueError("Human-confirmed labels need HUMAN origin and reviewed_at: " + key)
         labels = case.get("expected_dimensions")
         if not isinstance(labels, dict) or set(labels) != set(DIMENSIONS):
             raise ValueError("Pilot labels must contain all current ordinary-answer dimensions")
@@ -73,7 +99,7 @@ def _validate(dataset: list[dict], report: dict) -> tuple[list[dict], dict]:
     selected = [case for case in dataset if case["split"] == report["split"]]
     if not selected:
         raise ValueError("The selected split has no dataset rows")
-    selected_ids = {case["id"] for case in selected}
+    attempts = set(planned_attempts(report, selected))
     if not isinstance(report.get("reviews"), list):
         raise ValueError("Diagnostic reviews must be a list")
     indexed = {}
@@ -81,8 +107,8 @@ def _validate(dataset: list[dict], report: dict) -> tuple[list[dict], dict]:
         if not isinstance(review, dict):
             raise ValueError("Diagnostic review must be an object")
         key, repeat = review.get("id"), review.get("repeat")
-        if (not isinstance(key, str) or key not in selected_ids or type(repeat) is not int
-                or not 1 <= repeat <= report["repeats"] or (key, repeat) in indexed):
+        if (not isinstance(key, str) or type(repeat) is not int
+                or (key, repeat) not in attempts or (key, repeat) in indexed):
             raise ValueError("Unknown, duplicate or out-of-range diagnostic attempt")
         indexed[key, repeat] = review
     return selected, indexed
@@ -133,6 +159,9 @@ def _metrics(rows: list[dict]) -> dict:
         "count": total, "known_label_count": known_labels, "expected_no_data_count": total - known_labels,
         "technical_valid_count": len(valid), "technical_invalid_count": total - len(valid),
         "technical_valid_rate": len(valid) / total if total else None,
+        "technical_invalid_rate": (total - len(valid)) / total if total else None,
+        "no_data_rate": sum(row["actual"] == "NO_DATA" for row in valid) / total if total else None,
+        "not_applicable_rate": sum(row["actual"] == "NOT_APPLICABLE" for row in valid) / total if total else None,
         "known_judgment_count": len(semantic), "known_judgment_coverage": len(semantic) / known_labels if known_labels else None,
         "semantic_comparison_count": len(semantic), "semantic_agreement_count": semantic_exact,
         "semantic_error_count": len(semantic) - semantic_exact,
@@ -173,16 +202,19 @@ def _cost(reviews: list[dict]) -> dict:
 
 def calibrate(dataset: list[dict], report: dict) -> dict:
     selected, indexed = _validate(dataset, report)
-    observations = [{"id": case["id"], "repeat": repeat, **_assessment(case, indexed.get((case["id"], repeat)))}
-                    for case in selected for repeat in range(1, report["repeats"] + 1)]
+    cases = {case["id"]: case for case in selected}
+    observations = [{"id": key, "repeat": repeat, **_assessment(cases[key], indexed.get((key, repeat)))}
+                    for key, repeat in planned_attempts(report, selected)]
     consistent, eligible = 0, 0
     for case in selected:
         rows = [row for row in observations if row["id"] == case["id"]]
-        if report["repeats"] > 1 and all(row["valid"] for row in rows):
+        if len(rows) > 1 and all(row["valid"] for row in rows):
             eligible += 1
             consistent += len({tuple(row["dimensions"][name]["actual"] for name in DIMENSIONS) for row in rows}) == 1
     return {"schema": "judge_calibration_v2", "diagnostic_only": True, "release_eligible": False,
             "dataset_sha256": report["dataset_sha256"], "rubric": ordinary_rubric(),
+            "planned_attempts": [{"id": key, "repeat": repeat} for key, repeat in planned_attempts(report, selected)],
+            "human_calibrated_sample_count": sum(case["label_review"]["status"] == "HUMAN_CONFIRMED" for case in selected),
             "judge": report.get("judge"), "split": report["split"], "repeats": report["repeats"],
             "sample_count": len(selected), "attempt_count": len(observations), "recorded_attempt_count": len(indexed),
             "label_origins": sorted({str(case.get("label_origin", "UNSPECIFIED")) for case in selected}),
@@ -221,9 +253,12 @@ def _weighted_kappa(pairs: list[tuple[int, int]], k: int = 3) -> float | None:
 
 def calibrate_facets(dataset: list[dict], report: dict) -> dict:
     """Agreement of DEEP facet scores with labelled rows. Invalid judgments count against coverage, not agreement."""
-    from deep_facet_quality import input_hash
-    if report.get("schema") != "deep_facet_judge_v1" or report.get("input_kind") != "pilot":
+    from deep_facet_quality import assess_facets, deep_rubric, input_hash, summarize
+    if report.get("schema") not in {"deep_facet_judge_v1", "deep_facet_judge_v2"} or report.get("input_kind") != "pilot":
         raise ValueError("Expected a deep facet judge report on a labelled pilot")
+    binary = report["schema"] == "deep_facet_judge_v2"
+    if binary and report.get("rubric") != deep_rubric():
+        raise ValueError("DEEP binary rubric differs; preserve old reports and review labels under v2")
     if report.get("dataset_sha256") != json_hash(dataset):
         raise ValueError("Judge report does not match the full labelled dataset")
     selected = [row for row in dataset if row.get("split") == report.get("split")]
@@ -234,25 +269,58 @@ def calibrate_facets(dataset: list[dict], report: dict) -> dict:
         if (not isinstance(labels, dict) or set(labels) != {facet["id"] for facet in row["facets"]}
                 or any(type(label.get("score")) is not int or label["score"] not in (0, 1, 2) for label in labels.values())):
             raise ValueError("Each pilot row needs a 0/1/2 label for every facet: " + str(row.get("id")))
-    reviews = {(row["id"], row["repeat"]): row for row in report.get("reviews", [])}
-    pairs, invalid, disagreements = [], 0, []
-    for row in selected:
-        for repeat in range(1, report["repeats"] + 1):
-            review = reviews.get((row["id"], repeat)) or {}
-            bound = review.get("input_sha256") == input_hash(row)
-            for facet, label in row["expected_facets"].items():
-                actual = ((review.get("facets") or {}).get(facet) or {}).get("score") if bound else None
-                if actual is None:
-                    invalid += 1
-                    continue
-                pairs.append((label["score"], actual))
-                if actual != label["score"]:
-                    disagreements.append({"id": row["id"], "repeat": repeat, "facet": facet, "expected": label["score"],
-                                          "actual": actual, "judge_reason": review["facets"][facet].get("reason")})
+        if binary:
+            if row.get("rubric_sha256") != deep_rubric()["sha256"]:
+                raise ValueError("DEEP v2 pilot labels must bind the binary rubric: " + row["id"])
+            review = row.get("label_review") or {}
+            human = review.get("status") == "HUMAN_CONFIRMED"
+            reviewers = review.get("reviewers")
+            if (review.get("status") not in {"HUMAN_CONFIRMED", "AI_CROSS_CHECKED"}
+                    or review.get("rubric_sha256") != row["rubric_sha256"]
+                    or not isinstance(reviewers, list)
+                    or any(not isinstance(name, str) or not name.strip() for name in reviewers)
+                    or len(set(reviewers)) < (1 if human else 2)
+                    or (human and (row.get("label_origin") != "HUMAN" or not review.get("reviewed_at")))):
+                raise ValueError("DEEP v2 labels require a completed human or AI cross-review: " + row["id"])
+            for label in labels.values():
+                relevant, direct = label.get("relevant_evidence"), label.get("direct_support")
+                if (type(relevant) is not bool or type(direct) is not bool or (direct and not relevant)
+                        or label["score"] != int(relevant) + int(direct)
+                        or not isinstance(label.get("reason"), str) or not label["reason"].strip()):
+                    raise ValueError("DEEP v2 labels need consistent binary judgments and score: " + row["id"])
+    attempts = planned_attempts(report, selected)
+    reviews = {}
+    for review in report.get("reviews", []):
+        key = (review["id"], review["repeat"])
+        if key not in attempts or key in reviews:
+            raise ValueError("Unknown, duplicate or out-of-range facet review attempt")
+        reviews[key] = review
+    cases = {row["id"]: row for row in selected}
+    pairs, invalid, disagreements, checked_reviews = [], 0, [], []
+    for key, repeat in attempts:
+        row = cases[key]
+        review = reviews.get((key, repeat)) or {}
+        errors = list(review.get("errors") or [])
+        if review.get("input_sha256") != input_hash(row):
+            errors.append("INPUT_BINDING_MISMATCH")
+        checked = assess_facets(row, review.get("facets") or {}, errors, binary=binary)
+        checked_reviews.append({"id": key, "repeat": repeat, "input_sha256": input_hash(row), **checked})
+        for facet, label in row["expected_facets"].items():
+            actual = checked["facets"][facet]["score"]
+            if actual is None:
+                invalid += 1
+                continue
+            pairs.append((label["score"], actual))
+            if actual != label["score"]:
+                disagreements.append({"id": key, "repeat": repeat, "facet": facet, "expected": label["score"],
+                                      "actual": actual, "judge_reason": checked["facets"][facet].get("reason")})
     total = len(pairs) + invalid
     uncovered = [pair for pair in pairs if pair[0] == 0]
     covered = [pair for pair in pairs if pair[0] >= 1]
-    return {"schema": "deep_facet_calibration_v1", "split": report["split"], "repeats": report["repeats"],
+    return {"schema": "deep_facet_calibration_v2" if binary else "deep_facet_calibration_v1",
+            "diagnostic_only": True, "release_eligible": False, "rubric": report.get("rubric"),
+            "summary": summarize(checked_reviews), "cost": _cost(report.get("reviews", [])),
+            "split": report["split"], "repeats": report["repeats"],
             "judge": report.get("judge"), "sample_count": len(selected),
             "label_origins": sorted({str(row.get("label_origin", "UNSPECIFIED")) for row in selected}),
             "facet_judgments": total, "technical_invalid_rate": invalid / total if total else None,
@@ -270,7 +338,7 @@ def calibrate_facets(dataset: list[dict], report: dict) -> dict:
 
 def compare_reports(dataset: list[dict], baseline: dict, candidate: dict) -> dict:
     before, after = calibrate(dataset, baseline), calibrate(dataset, candidate)
-    for field in ("dataset_sha256", "rubric", "split", "repeats"):
+    for field in ("dataset_sha256", "rubric", "split", "repeats", "planned_attempts"):
         if before[field] != after[field]:
             raise ValueError("Judge comparisons require identical " + field)
     for field in ("config", "tools_sha256", "runner_sha256"):
@@ -334,7 +402,7 @@ def main() -> int:
     try:
         dataset = [json.loads(line) for line in Path(args.dataset).read_text(encoding="utf-8-sig").splitlines() if line.strip()]
         report = json.loads(Path(args.report).read_text(encoding="utf-8-sig"))
-        if report.get("schema") == "deep_facet_judge_v1":
+        if report.get("schema") in {"deep_facet_judge_v1", "deep_facet_judge_v2"}:
             result = calibrate_facets(dataset, report)
         else:
             result = compare_reports(dataset, json.loads(Path(args.baseline).read_text(encoding="utf-8-sig")), report) if args.baseline else calibrate(dataset, report)

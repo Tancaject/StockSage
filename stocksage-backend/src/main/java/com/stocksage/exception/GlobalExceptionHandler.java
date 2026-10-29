@@ -1,6 +1,5 @@
 package com.stocksage.exception;
 
-import com.stocksage.model.dto.ErrorResponse;
 import java.io.IOException;
 import java.util.Locale;
 import lombok.extern.slf4j.Slf4j;

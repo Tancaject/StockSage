@@ -8,9 +8,9 @@ StockSage 是一个本地可运行的 AI 股票研究工作台，采用“模型
 
 - **上下文意图识别与多 Agent 研究**：结合最近 3 轮对话、LLM、Embedding 与高精度规则，直接选择受控的五类研究路由；MARKET、FUNDAMENTALS、NEWS 路线由后端先确定性取证，再交给无工具领域 Agent 归纳。DEEP 模式要求 Bull/Bear 提交绑定 Evidence ID 的结构化论点；每轮并行完成后，Research Manager 严格判断 `CONTINUE` 或 `STOP`，自适应决定是否继续，服务端只保留 5 轮硬上限，不设置默认轮数或非法输出 fallback。随后由 Manager 匿名逐论点评分、Java 策略锁定评级，再解释裁决并接受运行时 Harness 验收。
 - **可溯源 RAG**：SEC EDGAR 财报经过 Parent-Child 分块、Milvus 向量与 Lucene 标准 BM25 混合检索、RRF 融合和 rerank 后，为回答提供编号引用。SQL 镜像决定可引用的正文与版本；来源替换、失败清理和历史数据处理见[发布契约](docs/reviews/2026-09-14-code-audit.md#rag-来源发布与清理)。
-- **受控 Skill 与工具**：Skill 当前只接受 `INLINE_DETERMINISTIC` 的 `CAPABILITY` 步骤，按后端 allowlist、预算和 fallback 执行，不承载 Agent、最终回答或后台任务；模型不能调用写入知识库的工具。
+- **受控 Skill 与工具**：NEWS 通过 `CAPABILITY` 步骤取证，工作台按注册清单执行只读 `TOOL` 步骤；两类均使用 `INLINE_DETERMINISTIC`，不编排 Agent 或后台任务。工具范围、参数绑定和数据边界见[研究工具与 Skill](docs/research-tools.md)；模型不能调用写入知识库的工具。
 - **后台研究任务**：Redis Stream、MySQL checkpoint 与 SSE 回放支持后台执行、断线恢复和进度追踪；证据不足时返回 `NOT_RATED`。
-- **投研工作台**：提供自选股、K 线、单标的与事件研究、报告版本/审核，以及 IBKR 只读持仓诊断；多标的对比在真实执行器完成前明确标记为未开放。
+- **投研工作台**：提供自选股、K 线、单标的与事件研究、报告版本/审核，以及[用户提供表的组合计算、ETF 穿透和条件筛选](docs/portfolio-calculations.md)；「工具 / Skill」展示当前可执行目录、参数与结果。
 - **质量评估**：Trace 分开记录技术状态和业务 Task Outcome，并提供检索评估、RAGAS、Agent golden set 与可选 Phoenix trace；普通路线的参数传递、证据验收、上下文预算及真实 API 评估见[执行说明](docs/architecture/ordinary-agent-execution.md)。缺少标签时 Task Success 和 Tool Call F1 显示 `NO_DATA`，不按 0 或 PASS 处理。
 
 ## 架构

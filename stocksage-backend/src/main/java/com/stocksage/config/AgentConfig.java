@@ -1,9 +1,9 @@
 package com.stocksage.config;
 
-import com.stocksage.agent.AgentRuntimeConfiguration;
-import com.stocksage.agent.FundamentalsPrompts;
-import com.stocksage.agent.ModelInvocationAdvisor;
-import com.stocksage.research.ModelInvocationStore;
+import com.stocksage.agent.analyst.FundamentalsPrompts;
+import com.stocksage.agent.runtime.AgentRuntimeConfiguration;
+import com.stocksage.agent.runtime.ModelInvocationAdvisor;
+import com.stocksage.agent.runtime.ModelInvocationStore;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,12 +48,16 @@ public class AgentConfig {
     @Value("${stocksage.chat.model-routing.manager-score-temperature:0.0}")
     private double managerScoreTemperature;
 
-    /** 单次 Agent 回答正文的 token 上限；Max 的思考预算单独设置。 */
+    /** 路由前的输出上限；供应商包含思考时按供应商规则转换。 */
     @Value("${stocksage.chat.model-routing.max-output-tokens:${STOCKSAGE_CHAT_MAX_OUTPUT_TOKENS:24576}}")
     private int modelRoutingMaxOutputTokens;
 
     @Value("${stocksage.chat.model-routing.standard-thinking-budget:8192}")
     private int standardThinkingBudget;
+
+    /** 辩论 Bull/Bear 与评分的思考强度覆盖（none/low/high/max），留空沿用全局；只对 DeepSeek 官方路由生效，供对比评测使用。 */
+    @Value("${stocksage.agent.debate.reasoning-effort:}")
+    private String debateReasoningEffort;
 
     /**
      * 创建基本面分析师客户端。
@@ -167,7 +171,7 @@ public class AgentConfig {
      */
     @Bean("researchManagerChatClient")
     public ChatClient researchManagerChatClient(ChatClient.Builder builder) {
-        return roleClient(builder, "manager", chatOptions(strongModel), com.stocksage.agent.ResearchPrompts.SHARED_SYSTEM);
+        return roleClient(builder, "manager", chatOptions(strongModel), com.stocksage.debate.ResearchPrompts.SHARED_SYSTEM);
     }
 
     /**
@@ -178,13 +182,14 @@ public class AgentConfig {
      */
     @Bean("researchManagerScoringChatClient")
     public ChatClient researchManagerScoringChatClient(ChatClient.Builder builder) {
-        return roleClient(builder, "scoring", chatOptions(strongModel, managerScoreTemperature), com.stocksage.agent.ResearchPrompts.SHARED_SYSTEM);
+        return roleClient(builder, "scoring", withDebateEffort(chatOptions(strongModel, managerScoreTemperature)),
+                com.stocksage.debate.ResearchPrompts.SHARED_SYSTEM);
     }
 
     /** 创建 Research Manager 的逐轮续停决策客户端。 */
     @Bean("researchManagerContinuationChatClient")
     public ChatClient researchManagerContinuationChatClient(ChatClient.Builder builder) {
-        return roleClient(builder, "continuation", chatOptions(strongModel, managerScoreTemperature, decisionMaxTokens(strongModel)), com.stocksage.agent.ResearchPrompts.SHARED_SYSTEM);
+        return roleClient(builder, "continuation", chatOptions(strongModel, managerScoreTemperature, decisionMaxTokens(strongModel)), com.stocksage.debate.ResearchPrompts.SHARED_SYSTEM);
     }
 
     /** 创建 DEEP 取证循环客户端；工具定义和请求选项由 DeepEvidenceLoopModel 逐次给出。 */
@@ -215,13 +220,21 @@ public class AgentConfig {
     private ChatClient researcherClient(ChatClient.Builder builder, String roleId) {
         // 角色要求在用户消息里给出（ResearchPrompts.researcherRole），系统提示词与其他研究角色共用，
         // 让同一次研究的各次调用共享同一段前缀。
-        return roleClient(builder, roleId, chatOptions(strongModel), com.stocksage.agent.ResearchPrompts.SHARED_SYSTEM);
+        return roleClient(builder, roleId, withDebateEffort(chatOptions(strongModel)), com.stocksage.debate.ResearchPrompts.SHARED_SYSTEM);
+    }
+
+    private OpenAiChatOptions withDebateEffort(OpenAiChatOptions options) {
+        if (debateReasoningEffort != null && !debateReasoningEffort.isBlank()) {
+            options.setReasoningEffort(debateReasoningEffort.strip());
+        }
+        return options;
     }
 
     private ChatClient roleClient(ChatClient.Builder builder, String role,
                                   OpenAiChatOptions options, String systemPrompt) {
+        options = runtimeConfiguration.effectiveOptions(options);
         ChatClient client = builder.clone().defaultOptions(options).defaultSystem(systemPrompt)
-                .defaultAdvisors(new ModelInvocationAdvisor(role, invocationStore)).build();
+                .defaultAdvisors(new ModelInvocationAdvisor(role, invocationStore, runtimeConfiguration)).build();
         runtimeConfiguration.recordClientDefaults(role, options, systemPrompt);
         return client;
     }

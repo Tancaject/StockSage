@@ -1,7 +1,7 @@
 package com.stocksage.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.model.dto.ErrorResponse;
+import com.stocksage.exception.ErrorResponse;
 import com.stocksage.repository.UserAccountRepository;
 import com.stocksage.security.AuthenticatedUser;
 import jakarta.servlet.http.HttpServletResponse;

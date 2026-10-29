@@ -11,15 +11,18 @@
 
 from app.research_budget import check_budget
 
+import logging
 from dataclasses import dataclass, field
 
 from fastapi import APIRouter, Query
 from app.kline import KLinePeriod, KLineResponse, normalize_kline
+from app.technical import TechnicalCalculationRequest, calculate_supplied_technical
 from app.a_share_financials import normalize_a_share_financials
 from app.hk_financials import normalize_hk_financials
 from app.search_results import SearchResponse
-from datetime import datetime, timezone
-from app.sec_financials import FinancialReportPeriod, normalize_sec_financials
+from datetime import date, datetime, timezone
+from zoneinfo import ZoneInfo
+from app.sec_financials import FinancialReportPeriod, SecRevenueBreakdown, normalize_sec_financials
 from app.services.akshare_service import AkshareService
 from app.services.baostock_service import BaostockService
 from app.services.edgar_service import edgar_service
@@ -33,6 +36,7 @@ from app.services.market_resolver import (
     search_stock_routes,
 )
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 bao = BaostockService()       # A 股数据（兼容）
 ak_svc = AkshareService()     # 港股免费数据源
@@ -328,6 +332,9 @@ def get_kline(
             check_budget(error)
             payload = _provider_error("baostock", "kline", error)
             payload["retryable"] = True if isinstance(error, TimeoutError) else None
+        if period == "daily":
+            # 交易日历让后端按真实交易日判断日线是否最新，长假后不会误判过时。
+            payload["lastTradingDate"] = _a_share_last_trading_date()
         return normalize_kline(payload, route, period, "akshare")
     elif route.market == HK:
         try:
@@ -459,10 +466,63 @@ def get_financial(
     return _with_route(_financial_by_route(route), route)
 
 
+def _latest_filings(result: dict) -> dict | None:
+    """最新 10-K/10-Q 申报日期；取不到时为 None，后端退回按披露期限估算时效。"""
+    try:
+        latest = edgar.latest_filing_dates(result["cik"])
+        return {form: date.fromisoformat(filed).isoformat() for form, filed in latest.items()}
+    except Exception as e:
+        check_budget(e)
+        logger.warning("SEC latest filings unavailable: ticker=%s, error=%s", result["ticker"], type(e).__name__)
+        return None
+
+
+# A 股交易日历一天取一次；日历由交易所提前公布，当天不会变。
+_A_SHARE_CALENDAR: dict[str, list] = {}
+_A_SHARE_DATA_READY = 18
+
+
+def _a_share_last_trading_date() -> str | None:
+    """
+    已经可以取到日线的最近交易日：今天是交易日且已过 18 点（备用源 baostock 收盘后数小时才更新）时为今天，
+    否则为今天之前的最近交易日。取不到日历时返回 None，后端退回"2 个工作日"的近似。
+    """
+    now = datetime.now(ZoneInfo("Asia/Shanghai"))
+    today = now.date()
+    try:
+        dates = _A_SHARE_CALENDAR.get(today.isoformat())
+        if dates is None:
+            frame = ak_svc.trade_calendar()
+            dates = sorted({value if isinstance(value, date) else date.fromisoformat(str(value)[:10])
+                            for value in frame["trade_date"]})
+            _A_SHARE_CALENDAR.clear()
+            _A_SHARE_CALENDAR[today.isoformat()] = dates
+    except Exception as e:
+        check_budget(e)
+        logger.warning("A-share trade calendar unavailable: %s", type(e).__name__)
+        return None
+    candidates = [d for d in dates if d < today or (d == today and now.hour >= _A_SHARE_DATA_READY)]
+    return candidates[-1].isoformat() if candidates else None
+
+
+def _revenue_breakdown(result: dict) -> dict | None:
+    """最新一期申报（年度取 10-K，单季取 10-Q）的分部、地区、产品拆分；失败只影响这一项。"""
+    revenue = result["metrics"]["Revenue"]
+    latest = max(revenue["data"], key=lambda fact: (fact["end"], fact["filed"]))
+    try:
+        breakdown = edgar.get_revenue_breakdown(result["cik"], latest["accn"], latest["form"], revenue["concept"])
+        return SecRevenueBreakdown.model_validate(breakdown).model_dump(mode="json")
+    except Exception as e:
+        check_budget(e)
+        logger.warning("SEC revenue breakdown unavailable: ticker=%s, accession=%s, error=%s",
+                       result["ticker"], latest["accn"], type(e).__name__)
+        return None
+
+
 @router.get("/financial-report")
 def get_financial_report(
     code: str = Query(..., description="Stock code/name, e.g. sh.600519, 0700.HK, AAPL"),
-    period: FinancialReportPeriod = Query("annual", description="annual or quarterly; SEC supports annual only; HK quarterly selects reported periods, not standalone quarters"),
+    period: FinancialReportPeriod = Query("annual", description="annual or quarterly; SEC Q1-Q3 cash flows may be derived from aligned year-to-date differences; HK quarterly selects reported periods, not standalone quarters"),
     years: int = Query(5, ge=1, le=10, description="Annual period limit; for quarterly, up to years * 4 reported periods, without guaranteed calendar-year coverage"),
 ):
     """通过自动市场路由获取结构化财务报表。"""
@@ -488,6 +548,10 @@ def get_financial_report(
         if period == "annual" and result["status"] == "SUCCESS":
             # 资产负债表原表补充 companyfacts 缺的公司自定义科目和分部列示（如 CVX 现金、CAT 分部债务）。
             result["balanceSheet"] = edgar.get_balance_sheet(route.api_code)
+        if result["status"] == "SUCCESS" and "Revenue" in result["metrics"]:
+            result["revenueBreakdown"] = _revenue_breakdown(result)
+        if result["status"] == "SUCCESS":
+            result["latestFilings"] = _latest_filings(result)
         return result
     else:
         try:
@@ -496,6 +560,12 @@ def get_financial_report(
             check_budget(e)
             return normalize_hk_financials(None, route, period, years, error=e)
         return normalize_hk_financials(payload, route, period, years)
+
+
+@router.post("/technical/calculate")
+def calculate_technical(request: TechnicalCalculationRequest):
+    """仅计算提交的美股 IBKR 日线，不在 Python 中另取美股行情。"""
+    return calculate_supplied_technical(request)
 
 
 @router.get("/technical")

@@ -1,6 +1,6 @@
 package com.stocksage.model.entity;
 
-import com.stocksage.model.dto.AnalysisHorizon;
+import com.stocksage.research.deep.AnalysisHorizon;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

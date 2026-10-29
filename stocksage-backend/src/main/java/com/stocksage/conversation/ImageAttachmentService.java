@@ -1,6 +1,5 @@
 package com.stocksage.conversation;
 
-import com.stocksage.model.dto.ChatRequest;
 import org.springframework.ai.content.Media;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

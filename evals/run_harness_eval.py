@@ -1,4 +1,4 @@
-"""Run the DEEP completion golden set against the production Java policy."""
+"""Run completion golden cases and freshness checks against the production Java policies."""
 
 from __future__ import annotations
 
@@ -295,7 +295,7 @@ def run_production_policy(
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="编译并调用生产 DEEP 完成策略，评测固定用例；不启动服务或调用模型。"
+        description="编译并调用普通与 DEEP 生产完成策略和时效规则，评测固定用例；不启动服务或调用模型。"
     )
     parser.add_argument("--cases", type=Path, default=DEFAULT_CASES)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)

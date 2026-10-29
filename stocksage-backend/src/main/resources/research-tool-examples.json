@@ -1,0 +1,147 @@
+{
+  "getCompanyEvents": {
+    "ticker": "NVDA",
+    "fromDate": "",
+    "toDate": "",
+    "limit": 5
+  },
+  "findEarningsMaterials": {
+    "ticker": "NVDA",
+    "limit": 5,
+    "materialType": "guidance"
+  },
+  "compareEarningsExpectations": {
+    "inputJson": "{\"asOf\": \"2026-10-28T00:00:00Z\", \"actual\": {\"metric\": \"revenue\", \"period\": \"2026Q2\", \"basis\": \"GAAP\", \"unit\": \"million\", \"currency\": \"USD\", \"value\": 110, \"sourceUrl\": \"https://www.sec.gov/Archives/edgar/data/1/2/actual-example.htm\", \"publishedAt\": \"2026-08-01T12:00:00Z\"}, \"guidance\": {\"metric\": \"revenue\", \"period\": \"2026Q2\", \"basis\": \"GAAP\", \"unit\": \"million\", \"currency\": \"USD\", \"low\": 90, \"high\": 100, \"sourceUrl\": \"https://www.sec.gov/Archives/edgar/data/1/1/guidance-example.htm\", \"publishedAt\": \"2026-05-01T12:00:00Z\"}, \"consensus\": {\"metric\": \"revenue\", \"period\": \"2026Q2\", \"basis\": \"GAAP\", \"unit\": \"million\", \"currency\": \"USD\", \"value\": 105, \"sourceUrl\": \"https://example.org/consensus-example\", \"publishedAt\": \"2026-07-31T12:00:00Z\"}}"
+  },
+  "lookThroughEtfs": {
+    "inputJson": "{\"asOf\": \"2026-10-01\", \"positions\": [{\"symbol\": \"ETF1\", \"currency\": \"USD\", \"marketValue\": 100, \"isEtf\": true}, {\"symbol\": \"EXAMPLE\", \"currency\": \"USD\", \"marketValue\": 100, \"isEtf\": false}], \"funds\": [{\"symbol\": \"ETF1\", \"asOf\": \"2026-09-30\", \"holdings\": [{\"symbol\": \"EXAMPLE\", \"weight\": 0.4}]}]}"
+  },
+  "getEventWindowReturns": {
+    "code": "NVDA",
+    "benchmarkCode": "SPY",
+    "eventAt": "2026-10-01T12:00:00-04:00",
+    "beforeBars": 5,
+    "afterBars": 5,
+    "period": "1y"
+  },
+  "screenStocks": {
+    "inputJson": "{\"asOf\": \"2026-10-01\", \"universe\": [\"EXAMPLE\", \"MISSING\"], \"rows\": [{\"symbol\": \"EXAMPLE\", \"asOf\": \"2026-10-01\", \"metrics\": {\"PE\": 15}}], \"rules\": [{\"metric\": \"PE\", \"operator\": \"LT\", \"value\": 20}]}"
+  },
+  "compareDisclosures": {
+    "olderUrl": "",
+    "newerUrl": "",
+    "filingType": "10-K",
+    "section": "",
+    "maxChanges": 20
+  },
+  "getFinancialDiagnostics": {
+    "ticker": "NVDA",
+    "period": "annual",
+    "years": 5,
+    "asOf": ""
+  },
+  "getHistoricalFinancials": {
+    "ticker": "NVDA",
+    "period": "annual",
+    "years": 5,
+    "asOf": "2026-10-01"
+  },
+  "listResearchHistory": {
+    "ticker": "NVDA",
+    "asOf": "",
+    "limit": 20
+  },
+  "getMacroSeries": {
+    "seriesId": "DGS10",
+    "startDate": "2026-09-01",
+    "endDate": "2026-10-01",
+    "asOf": ""
+  },
+  "getMarketRisk": {
+    "code": "NVDA",
+    "benchmarkCode": "SPY",
+    "period": "1y"
+  },
+  "analyzeOptionImpliedMove": {
+    "chainJson": "{\"symbol\": \"EXAMPLE\", \"currency\": \"USD\", \"asOf\": \"2026-10-01T20:00:00Z\", \"underlyingPrice\": 100, \"underlyingAsOf\": \"2026-10-01T20:00:00Z\", \"expiry\": \"2026-10-30T20:00:00Z\", \"sourceUrl\": \"https://example.com/synthetic-chain\", \"quotes\": [{\"right\": \"CALL\", \"strike\": 100, \"bid\": 4, \"ask\": 6, \"volume\": 10, \"openInterest\": 20}, {\"right\": \"PUT\", \"strike\": 100, \"bid\": 3, \"ask\": 5, \"volume\": 10, \"openInterest\": 20}]}"
+  },
+  "compareCompanyFinancials": {
+    "tickerA": "NVDA",
+    "tickerB": "AMD",
+    "period": "annual",
+    "years": 3,
+    "asOf": ""
+  },
+  "analyzePortfolio": {
+    "inputJson": "{\"asOf\": \"2026-10-01\", \"positions\": [{\"symbol\": \"EXAMPLE\", \"currency\": \"USD\", \"quantity\": 2, \"price\": 100, \"kind\": \"SECURITY\"}, {\"symbol\": \"USD\", \"currency\": \"USD\", \"quantity\": 100, \"price\": 1, \"kind\": \"CASH\"}], \"scenarios\": [{\"name\": \"演示下跌10%\", \"returns\": {\"EXAMPLE\": -0.1}}]}"
+  },
+  "compareResearchReports": {
+    "olderReportId": 0,
+    "newerReportId": 0,
+    "asOf": ""
+  },
+  "getSemiconductorOperatingMetrics": {
+    "ticker": "NVDA",
+    "period": "annual",
+    "years": 5,
+    "asOf": ""
+  },
+  "readDisclosure": {
+    "url": "",
+    "filingType": "DISCLOSURE",
+    "section": "",
+    "tablesOnly": false,
+    "offset": 0,
+    "maxChars": 12000
+  },
+  "reviewInvestmentThesis": {
+    "reportId": 0,
+    "newSnapshotId": "",
+    "asOf": ""
+  },
+  "calculateValuationScenarios": {
+    "input": {
+      "currency": "USD",
+      "eps": 5,
+      "dilutedShares": 1000000,
+      "equityFreeCashFlow": 6000000,
+      "scenarios": [
+        {
+          "name": "演示：请替换假设",
+          "peMultiple": 20,
+          "fcfYield": 0.05
+        }
+      ]
+    }
+  },
+  "getWatchlistResearchChanges": {
+    "since": "2026-10-01T00:00:00Z",
+    "asOf": "",
+    "limit": 20
+  },
+  "analyzeCorporateActions": {
+    "actionsJson": "{\"symbol\": \"EXAMPLE\", \"asOf\": \"2026-10-01T20:00:00Z\", \"actions\": [{\"type\": \"SPLIT\", \"announcedAt\": \"2026-09-01T00:00:00Z\", \"effectiveDate\": \"2026-11-01\", \"newShares\": 4, \"oldShares\": 1, \"sourceUrl\": \"https://example.com/synthetic-split\"}, {\"type\": \"CASH_DIVIDEND\", \"announcedAt\": \"2026-09-02T00:00:00Z\", \"effectiveDate\": \"2026-09-20\", \"amountPerShare\": 1, \"currency\": \"USD\", \"sourceUrl\": \"https://example.com/synthetic-dividend\"}]}"
+  },
+  "getSecuritySnapshot": {
+    "code": "NVDA",
+    "period": "quarterly"
+  },
+  "getCorporateActionDisclosures": {
+    "code": "NVDA",
+    "count": 5
+  },
+  "readResearchReport": {
+    "reportId": 0,
+    "asOf": ""
+  },
+  "readResearchSnapshot": {
+    "snapshotId": "",
+    "asOf": ""
+  },
+  "readEarningsMaterial": {
+    "documentUrl": "",
+    "filingType": "DISCLOSURE",
+    "offset": 0,
+    "maxChars": 12000
+  }
+}

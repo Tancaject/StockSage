@@ -63,7 +63,7 @@ public class FundamentalsTools {
     @Tool(description = "获取 A 股、港股、美股的结构化财务数据。A 股返回 BaoStock 盈利、营运、成长、偿债、现金流和杜邦六类财务摘要；港股返回 AKShare 三张财务表及指标，各表保留实际报告日期、原始数值与可用或失败状态；美股走 SEC EDGAR XBRL。港股 quarterly 返回披露报告期，不保证独立季度或单季口径；美股 quarterly 为 10-Q 单季事实，不含第四财季。适合查询营收、净利润、资产负债和现金流")
     public String getFinancialReports(
             @ToolParam(description = "股票代码或名称，可传完整问题；如 贵州茅台、sh.600519、腾讯、0700.HK、00700、AAPL") String code,
-            @ToolParam(description = "annual 或 quarterly；港股 quarterly 对应披露报告期，不代表单季口径；美股 quarterly 为 10-Q 单季，不含第四财季") String period,
+            @ToolParam(description = "annual 或 quarterly；港股 quarterly 对应披露报告期，不代表单季口径；美股 quarterly 为 10-Q 单季，不含第四财季；现金流可由同财年累计差额计算并保留两期来源") String period,
             @ToolParam(description = "返回最近几年，建议 3-5") int years) {
         // DataServiceClient 再按解析出的市场路由到 BaoStock、AKShare 或 SEC。
         return dataServiceClient.getFinancialReports(code, period, years);

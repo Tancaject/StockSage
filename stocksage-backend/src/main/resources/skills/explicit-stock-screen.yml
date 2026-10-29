@@ -1,0 +1,33 @@
+{
+  "id": "explicit-stock-screen",
+  "version": 1,
+  "displayName": "显式股票池筛选",
+  "enabled": true,
+  "routes": [
+    "DEEP"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 1,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "screenStocks",
+      "required": true,
+      "arguments": {
+        "inputJson": "$input.inputJson"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "inputJson": "{\"asOf\": \"2026-10-01\", \"universe\": [\"EXAMPLE\", \"MISSING\"], \"rows\": [{\"symbol\": \"EXAMPLE\", \"asOf\": \"2026-10-01\", \"metrics\": {\"PE\": 15}}], \"rules\": [{\"metric\": \"PE\", \"operator\": \"LT\", \"value\": 20}]}"
+  },
+  "method": "只对用户指定股票池和规则执行筛选；缺失指标返回UNKNOWN，不能当成FAIL，也不能默认为0。保留逐项规则与数据时点。"
+}

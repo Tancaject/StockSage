@@ -12,8 +12,9 @@ public record EvidenceTiming(int schemaVersion, Instant fetchedAt, Market market
         }
     }
 
+    /** expectedLatestDate：交易所日历给出的、已能取到日线的最近交易日；没有日历的市场为 null。 */
     public record Market(String market, String bar, String timeKind, LocalDate latestDate,
-                         Instant latestInstant, Boolean delayed) {
+                         Instant latestInstant, Boolean delayed, LocalDate expectedLatestDate) {
         public Market {
             if (!("DATE".equals(timeKind) || "INSTANT".equals(timeKind))
                     || ("DATE".equals(timeKind) && latestInstant != null)
@@ -23,7 +24,12 @@ public record EvidenceTiming(int schemaVersion, Instant fetchedAt, Market market
         }
     }
 
-    public record Financial(String period, LocalDate latestPeriodEnd, LocalDate latestDisclosureDate) { }
+    /**
+     * market 决定没有申报索引时按哪种披露节奏估算；latestFiledReport 是申报索引中同类报告最新一份的申报日期，
+     * 有它时可直接核对"是否已拿到最新报告"。财报原文摘录没有报告期末，latestPeriodEnd 为 null。
+     */
+    public record Financial(String period, LocalDate latestPeriodEnd, LocalDate latestDisclosureDate,
+                            String market, LocalDate latestFiledReport) { }
 
     /** 两种发布时间精度分别聚合；未知日期的结果仍计入 unknownCount。 */
     public record Search(String requestedWindow, String effectiveWindow, Integer requestedDays,

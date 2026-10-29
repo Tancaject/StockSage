@@ -1,0 +1,41 @@
+{
+  "id": "filing-changes",
+  "version": 1,
+  "displayName": "披露变化解读",
+  "enabled": true,
+  "routes": [
+    "DEEP"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 1,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "compareDisclosures",
+      "required": true,
+      "arguments": {
+        "olderUrl": "$input.olderUrl",
+        "newerUrl": "$input.newerUrl",
+        "filingType": "$input.filingType",
+        "section": "$input.section",
+        "maxChanges": "$input.maxChanges"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "olderUrl": "",
+    "newerUrl": "",
+    "filingType": "10-K",
+    "section": "",
+    "maxChanges": 20
+  },
+  "method": "核对两份文档公司、日期和章节，再查看原文增删。段落移动和排版变化不等于业务变化；截断或缺失章节时不得宣称没有变化。"
+}

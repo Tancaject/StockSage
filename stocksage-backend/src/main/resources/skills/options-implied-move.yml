@@ -1,0 +1,33 @@
+{
+  "id": "options-implied-move",
+  "version": 1,
+  "displayName": "期权隐含波动范围",
+  "enabled": true,
+  "routes": [
+    "DEEP"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 1,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "analyzeOptionImpliedMove",
+      "required": true,
+      "arguments": {
+        "chainJson": "$input.chainJson"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "chainJson": "{\"symbol\": \"EXAMPLE\", \"currency\": \"USD\", \"asOf\": \"2026-10-01T20:00:00Z\", \"underlyingPrice\": 100, \"underlyingAsOf\": \"2026-10-01T20:00:00Z\", \"expiry\": \"2026-10-30T20:00:00Z\", \"sourceUrl\": \"https://example.com/synthetic-chain\", \"quotes\": [{\"right\": \"CALL\", \"strike\": 100, \"bid\": 4, \"ask\": 6, \"volume\": 10, \"openInterest\": 20}, {\"right\": \"PUT\", \"strike\": 100, \"bid\": 3, \"ask\": 5, \"volume\": 10, \"openInterest\": 20}]}"
+  },
+  "method": "核查同一标的、到期、报价时点与流动性；ATM跨式中间价只构成估计区间，不是保证、胜率或正态标准差。不生成交易指令。"
+}

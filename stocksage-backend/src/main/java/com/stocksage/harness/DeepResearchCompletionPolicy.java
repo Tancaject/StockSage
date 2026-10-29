@@ -2,21 +2,20 @@ package com.stocksage.harness;
 
 import com.stocksage.evidence.EvidenceLedger;
 
-import com.stocksage.agent.DebateDecisionPolicy;
+import com.stocksage.debate.DebateModels.ArgumentAssessment;
+import com.stocksage.debate.DebateModels.DebateVerdict;
+import com.stocksage.debate.DebateModels.LeadingSide;
 import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
+import com.stocksage.evidence.EvidenceModels.TargetResolutionStatus;
 import com.stocksage.harness.HarnessModels.HarnessDecision;
 import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.HarnessViolation;
 import com.stocksage.harness.HarnessModels.RecoveryAction;
 import com.stocksage.harness.HarnessModels.RunContext;
 import com.stocksage.harness.HarnessModels.SynthesisResult;
-import com.stocksage.evidence.EvidenceModels.TargetResolutionStatus;
 import com.stocksage.harness.HarnessModels.ViolationCode;
-import com.stocksage.model.dto.AnalysisHorizon;
-import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
-import com.stocksage.model.dto.DebateModels.DebateVerdict;
-import com.stocksage.model.dto.DebateModels.LeadingSide;
-import com.stocksage.model.dto.InvestmentReport;
+import com.stocksage.research.deep.AnalysisHorizon;
+import com.stocksage.research.report.InvestmentReport;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
     /** 持久化到 Trace/checkpoint 的稳定策略 ID。 */
     public static final String POLICY_ID = "deep-equity-v1";
     /** 当前规则版本；规则语义变化时递增，用于拒绝陈旧报告权威。 */
-    public static final int POLICY_VERSION = 6;
+    public static final int POLICY_VERSION = 9;
 
     @Override
     public String policyId() {
@@ -183,20 +182,6 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
                 violations.add(new HarnessViolation(
                         ViolationCode.DEBATE_DECISION_INSUFFICIENT, null));
             }
-            if (!DebateDecisionPolicy.POLICY_ID.equals(decisionAudit.policyId())
-                    || decisionAudit.version() != DebateDecisionPolicy.POLICY_VERSION) {
-                violations.add(new HarnessViolation(
-                        ViolationCode.REPORT_DECISION_POLICY_MISMATCH, null));
-            }
-            if (report.getDataSnapshotHash() == null
-                    || report.getDataSnapshotHash().isBlank()
-                    || decisionAudit.dataSnapshotHash() == null
-                    || decisionAudit.dataSnapshotHash().isBlank()
-                    || !Objects.equals(
-                            report.getDataSnapshotHash(), decisionAudit.dataSnapshotHash())) {
-                violations.add(new HarnessViolation(
-                        ViolationCode.REPORT_DECISION_SNAPSHOT_MISMATCH, null));
-            }
             if (!Objects.equals(report.getRecommendation(), decisionAudit.recommendation())
                     || report.getAnalysisHorizon() != decisionAudit.analysisHorizon()) {
                 violations.add(new HarnessViolation(
@@ -252,9 +237,7 @@ public class DeepResearchCompletionPolicy implements ResearchCompletionPolicy {
             Set<String> usableEvidenceIds
     ) {
         List<ArgumentAssessment> assessments = decisionAudit.assessments();
-        if (assessments == null || assessments.size() < 6
-                || decisionAudit.inputHash() == null
-                || decisionAudit.inputHash().isBlank()) {
+        if (assessments == null || assessments.size() < 6) {
             return true;
         }
         Set<String> uniquePointIds = new java.util.LinkedHashSet<>();

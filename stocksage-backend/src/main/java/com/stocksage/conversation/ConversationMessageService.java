@@ -92,6 +92,11 @@ public class ConversationMessageService {
             int turnStartIndex = findLastUserTurnStart(history);
             if (turnStartIndex >= 0) {
                 Message firstMessageToDelete = history.get(turnStartIndex);
+                if (conversation.getMemorySummaryThroughMessageId() != null
+                        && conversation.getMemorySummaryThroughMessageId() >= firstMessageToDelete.getId()) {
+                    conversation.setMemorySummary(null);
+                    conversation.setMemorySummaryThroughMessageId(null);
+                }
                 messageRepository.deleteByConversationIdAndIdGreaterThanEqual(
                         conversationId, firstMessageToDelete.getId());
                 remainingHistory = List.copyOf(history.subList(0, turnStartIndex));

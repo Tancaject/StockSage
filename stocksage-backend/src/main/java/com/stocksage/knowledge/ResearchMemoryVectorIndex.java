@@ -13,6 +13,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -159,8 +160,8 @@ public class ResearchMemoryVectorIndex {
     private Long parseEntryId(Document document) {
         Object value = document.getMetadata().get("entry_id");
         try {
-            return value == null ? null : Long.valueOf(String.valueOf(value));
-        } catch (NumberFormatException ignored) {
+            return value == null ? null : new BigDecimal(String.valueOf(value)).longValueExact();
+        } catch (NumberFormatException | ArithmeticException ignored) {
             return null;
         }
     }

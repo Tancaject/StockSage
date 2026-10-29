@@ -20,21 +20,6 @@ import java.util.Optional;
  */
 public interface ResearchTaskRepository extends JpaRepository<ResearchTask, Long> {
 
-    @Query(value = "SELECT model_configuration_json FROM research_tasks WHERE id = :id", nativeQuery = true)
-    String readModelConfiguration(@Param("id") Long id);
-
-    @Query(value = "SELECT attempts FROM research_tasks WHERE id = :id", nativeQuery = true)
-    Integer readAttempts(@Param("id") Long id);
-
-    @Modifying
-    @Query(value = """
-            UPDATE research_tasks SET model_configuration_json = :configuration
-             WHERE id = :id AND status = 'RUNNING' AND lease_token = :leaseToken
-               AND model_configuration_json IS NULL AND attempts <= 1
-            """, nativeQuery = true)
-    int freezeModelConfigurationForOwner(@Param("id") Long id,
-            @Param("leaseToken") String leaseToken, @Param("configuration") String configuration);
-
     /**
      * 按全局唯一提交键查找任务，用于重复提交复用同一真相行。
      *

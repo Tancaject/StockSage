@@ -7,16 +7,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-/** 长期画像事实的分类型遗忘参数。 */
+/** 风险偏好和画像摘要的遗忘参数；持仓只接受显式撤销。 */
 @Validated
 @Component
 @ConfigurationProperties(prefix = "stocksage.memory.long-term")
 public class LongTermMemoryProperties {
-
-    /** 持仓变化较快，默认 30 天衰减到一半。 */
-    @DecimalMin("1.0")
-    @DecimalMax("3650.0")
-    private double holdingsHalfLifeDays = 30.0;
 
     /** 风险偏好相对稳定，默认 180 天衰减到一半。 */
     @DecimalMin("1.0")
@@ -28,14 +23,10 @@ public class LongTermMemoryProperties {
     @DecimalMax("3650.0")
     private double summaryHalfLifeDays = 90.0;
 
-    /** 权重低于该值的事实不再进入用户画像和 Prompt。 */
+    /** 权重低于该值的风险偏好和摘要不再进入用户画像和 Prompt。 */
     @DecimalMin("0.0")
     @DecimalMax("1.0")
     private double minWeight = 0.25;
-
-    public void setHoldingsHalfLifeDays(double holdingsHalfLifeDays) {
-        this.holdingsHalfLifeDays = holdingsHalfLifeDays;
-    }
 
     public void setRiskHalfLifeDays(double riskHalfLifeDays) {
         this.riskHalfLifeDays = riskHalfLifeDays;
@@ -56,7 +47,7 @@ public class LongTermMemoryProperties {
     /** 返回指定事实类型的半衰期。 */
     public double halfLifeDays(UserMemoryFact.FactType factType) {
         return switch (factType) {
-            case HOLDING -> holdingsHalfLifeDays;
+            case HOLDING -> Double.POSITIVE_INFINITY;
             case RISK_PREFERENCE -> riskHalfLifeDays;
             case PROFILE_SUMMARY -> summaryHalfLifeDays;
         };

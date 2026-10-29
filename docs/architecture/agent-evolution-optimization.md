@@ -15,7 +15,7 @@
 | 学习来源 | [reflection](../../evals/evolution_reflection.py) 读取执行片段和外部核查，按原因分流；仅方法错误进入候选 | 完成任务不会自动触发学习；成功程序没有正式入口。不能把成功或模糊措辞伪标成错误。 |
 | 经验维护 | [registry](../../evals/evolution_experiences.py) 已有来源、条件、反例、父版本、冲突与撤回 | 这些机制可以复用。旧经验合并多个问题，难以分辨具体有效步骤。 |
 | 经验应用 | [候选编译](../../evals/evolution_candidates.py) 将一条经验编译为完整方法；[在线选择器](../../stocksage-backend/src/main/java/com/stocksage/evolution/FundamentalsMethodRegistry.java) 在 baseline 与一份 staged 包之间选择 | Python 的 select_approved() 尚未接在线调用。V1 有意固定完整包，未实现按研究子任务选择多条经验。 |
-| 适用条件 | [OrdinaryEvidence](../../stocksage-backend/src/main/java/com/stocksage/service/OrdinaryEvidence.java) 产生 fundamentals、报表期间、period-comparison 和合格证据标签 | 没有增长、现金流、流动性等子任务标签；自然语言 applicabilityBoundary 本身不执行语义判断。 |
+| 适用条件 | [OrdinaryEvidence](../../stocksage-backend/src/main/java/com/stocksage/agent/ordinary/OrdinaryEvidence.java) 产生 fundamentals、报表期间、period-comparison 和合格证据标签 | 没有增长、现金流、流动性等子任务标签；自然语言 applicabilityBoundary 本身不执行语义判断。 |
 | 使用反馈 | 普通请求在 Trace 的 `methodSelection` 中记录选用原因、灰度模式与推导标签；v1 的 observation 工具已归档到 [archive](../../evals/archive/evolution-v1-governance/README.md) | 还没有从生产反馈自动采集失败并送回经验修订流程（P2）。 |
 | 效果验证 | [两阶段回放](../../stocksage-backend/src/main/java/com/stocksage/evolution/EvolutionReplayService.java) 执行清单指定的包 | 它绕过普通请求选择。指定方法是否有效，与在线能否正确选用，需要分别验证。 |
 

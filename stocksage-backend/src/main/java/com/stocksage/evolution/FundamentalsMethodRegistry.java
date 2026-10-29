@@ -150,7 +150,7 @@ public final class FundamentalsMethodRegistry {
                     .getResources("classpath*:skills/methods/*.md");
             var loaded = new java.util.TreeMap<String, MethodSkill>();
             for (var resource : resources) {
-                MethodSkill skill = parseSkill(com.stocksage.agent.FundamentalsPrompts.read(resource), resource.getDescription());
+                MethodSkill skill = parseSkill(com.stocksage.agent.analyst.FundamentalsPrompts.read(resource), resource.getDescription());
                 if (loaded.put(skill.id(), skill) != null) throw new IllegalStateException("方法 skill ID 重复：" + skill.id());
             }
             return java.util.List.copyOf(loaded.values());

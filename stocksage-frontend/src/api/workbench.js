@@ -2,6 +2,17 @@ import { BASE_URL, apiFetch, getJson, requestJson } from './http.js'
 
 const PROBE_TIMEOUT_MS = 8000
 
+export async function calculatePortfolio(mode, input) {
+  const endpoints = { analysis: 'analysis', etf: 'etf-lookthrough', screen: 'screen' }
+  const endpoint = endpoints[mode]
+  if (!endpoint) throw new Error('请选择组合分析、ETF 穿透或条件筛选。')
+  return requestJson(`${BASE_URL}/workbench/portfolio/${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  })
+}
+
 export async function runWorkbenchHealthChecks() {
   const [backend, profile, cockpit] = await Promise.all([
     probe(`${BASE_URL}/chat/conversations`),
@@ -71,24 +82,11 @@ export async function fetchStockCockpit({ ticker, period = 'daily', days = 120 }
   return getJson(`${BASE_URL}/workbench/stocks/${tickerSegment}/cockpit?${params.toString()}`)
 }
 
-export async function fetchStockRelations(ticker) {
-  const tickerSegment = requiredTicker(ticker)
-  return getJson(`${BASE_URL}/workbench/stocks/${tickerSegment}/relations`)
-}
-
 export async function fetchStockNews(ticker, days = 7) {
   const tickerSegment = requiredTicker(ticker)
   const params = new URLSearchParams()
   params.set('days', String(days))
   return getJson(`${BASE_URL}/workbench/stocks/${tickerSegment}/news?${params.toString()}`)
-}
-
-export async function refreshStockRelations(ticker) {
-  const tickerSegment = requiredTicker(ticker)
-  return requestJson(
-    `${BASE_URL}/workbench/stocks/${tickerSegment}/relations/refresh`,
-    { method: 'POST' },
-  )
 }
 
 export async function fetchStockIntraday(ticker) {

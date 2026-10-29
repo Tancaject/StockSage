@@ -1,6 +1,7 @@
 package com.stocksage.agent.intent;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 意图融合结果及其有限诊断信息。
@@ -15,7 +16,8 @@ public record IntentRecognitionResult(
         String rationale,
         List<IntentSignal> signals,
         String degradationReason,
-        long durationMs
+        long durationMs,
+        Map<String, Object> modelObservation
 ) {
     public IntentRecognitionResult {
         rawRoute = IntentBounds.text(rawRoute, IntentBounds.MAX_RAW_ROUTE_CHARS);
@@ -25,6 +27,12 @@ public record IntentRecognitionResult(
                 .toUpperCase(java.util.Locale.ROOT)
                 .replace(' ', '_');
         durationMs = Math.max(0L, durationMs);
+        modelObservation = modelObservation == null ? Map.of() : Map.copyOf(modelObservation);
+    }
+
+    public IntentRecognitionResult(IntentDecision decision, String rawRoute, boolean rawRouteValid,
+                                   String rationale, List<IntentSignal> signals, String degradationReason, long durationMs) {
+        this(decision, rawRoute, rawRouteValid, rationale, signals, degradationReason, durationMs, Map.of());
     }
 
     /** @return 是否至少有一个真实识别信号，而不是空输入的默认决定 */

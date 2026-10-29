@@ -1,0 +1,49 @@
+{
+  "id": "earnings-preview",
+  "version": 1,
+  "displayName": "财报前资料准备",
+  "enabled": true,
+  "routes": [
+    "DEEP"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 2,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "getCompanyEvents",
+      "required": true,
+      "arguments": {
+        "ticker": "$input.ticker",
+        "fromDate": "$input.fromDate",
+        "toDate": "$input.toDate",
+        "limit": "$input.limit"
+      }
+    },
+    {
+      "type": "TOOL",
+      "capability": "findEarningsMaterials",
+      "required": false,
+      "arguments": {
+        "ticker": "$input.ticker",
+        "limit": "$input.limit",
+        "materialType": "guidance"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "ticker": "NVDA",
+    "fromDate": "",
+    "toDate": "",
+    "limit": 5
+  },
+  "method": "SEC已披露事件仅是历史披露清单，不是未来财报日历。展开指引原文后记录指标、期间、口径与发布时间；资料发现列表的摘要不能充当一致预期。"
+}

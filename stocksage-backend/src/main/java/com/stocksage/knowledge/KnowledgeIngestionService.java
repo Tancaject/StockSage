@@ -1,17 +1,16 @@
 package com.stocksage.knowledge;
 
-import com.stocksage.util.Hashing;
-import com.stocksage.tool.ToolCallContext;
 import com.stocksage.exception.ResearchBudgetExceededException;
+import com.stocksage.tool.ToolCallContext;
+import com.stocksage.util.Hashing;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.model.dto.KnowledgeIngestionResult;
 import com.stocksage.model.entity.VectorDocument;
-import com.stocksage.rag.Bm25IndexUpdate;
 import com.stocksage.rag.Bm25IndexUpdate.IndexedDocument;
-import com.stocksage.repository.DocIndexRepository;
+import com.stocksage.rag.Bm25IndexUpdate;
 import com.stocksage.repository.DocIndexRepository.DocIndexEntry;
+import com.stocksage.repository.DocIndexRepository;
 import com.stocksage.repository.VectorDocumentRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;

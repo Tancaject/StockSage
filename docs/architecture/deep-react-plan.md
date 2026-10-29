@@ -237,7 +237,7 @@
 - 之前的问题：配置 `stocksage.research.token-budget` 后，`ModelInvocationStore` 会以 "Unbounded" 为由拒绝所有带 extraBody 或 tools 的调用。而现在每次 DEEP 调用都带 thinking_budget，取证循环还带 tools，所以一开启预算，DEEP 就全部失败。
 - 改动：新增 `ModelTokenBudgetProperties.requireBoundedChatRequest`，只放行能被"输入+输出+思考"上限覆盖的选项：
   - n 只能为 1；
-  - extraBody 只允许 `enable_thinking` 和 `thinking_budget`；thinking_budget 不超过思考上限；max_tokens（百炼口径包含思考）不超过输出上限加思考上限；
+  - 校验供应商路由后的请求选项，`max_tokens` 不超过输出上限加思考上限；extraBody 允许百炼的 `enable_thinking` / `thinking_budget` 和 DeepSeek 的 `thinking`，具体语义见[调用记录](research-execution-boundaries.md)；
   - 带 tools 时必须 `internalToolExecutionEnabled=false`。
   - 缺少标志的旧记录一律按"存在"处理，因此仍会被拒绝。
 - `ModelInvocationAdvisor` 额外记录 extraBody 的键名（不记录值）和 `internalToolExecutionEnabled`。

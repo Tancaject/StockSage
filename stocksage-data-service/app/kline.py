@@ -85,6 +85,8 @@ class KLineResponse(BaseModel):
     primaryProviderError: str | None = None
     feature: str | None = None
     baostockStatus: dict[str, Any] | None = None
+    # A 股日线：已能取到日线的最近交易日（交易所日历）；其他市场或周期不提供。
+    lastTradingDate: Date | None = None
 
     @model_validator(mode="after")
     def validate_consistency(self):

@@ -1,8 +1,8 @@
 package com.stocksage.controller;
 
 import com.stocksage.identity.RequestIdentity;
-import com.stocksage.model.dto.UserProfileDTO;
-import com.stocksage.service.UserService;
+import com.stocksage.memory.UserProfileDTO;
+import com.stocksage.memory.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

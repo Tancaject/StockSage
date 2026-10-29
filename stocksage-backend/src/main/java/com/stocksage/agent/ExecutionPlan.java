@@ -1,6 +1,8 @@
 package com.stocksage.agent;
 
 import com.stocksage.agent.intent.TimeSensitivity;
+import com.stocksage.agent.ordinary.OrdinaryPlan;
+import com.stocksage.agent.ordinary.ReadRequest;
 
 import java.util.List;
 

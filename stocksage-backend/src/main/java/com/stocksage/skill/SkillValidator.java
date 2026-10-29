@@ -26,9 +26,11 @@ public class SkillValidator {
 
     /** 用于确认清单中每个能力引用都已本地注册。 */
     private final CapabilityRegistry capabilityRegistry;
+    private final com.stocksage.tool.ResearchToolCatalog researchTools;
 
-    public SkillValidator(CapabilityRegistry capabilityRegistry) {
+    public SkillValidator(CapabilityRegistry capabilityRegistry, com.stocksage.tool.ResearchToolCatalog researchTools) {
         this.capabilityRegistry = capabilityRegistry;
+        this.researchTools = researchTools;
     }
 
     /**
@@ -55,12 +57,22 @@ public class SkillValidator {
         if (!V1_RISKS.containsAll(skill.policy().allowedRiskLevels())) {
             throw new IllegalStateException("Skill requests a forbidden risk level: " + skill.id());
         }
+        if (skill.steps().stream().map(SkillDefinition.SkillStep::type).distinct().count() > 1)
+            throw new IllegalStateException("Skill cannot mix conversation capabilities and explicit tools: " + skill.id());
 
         for (SkillDefinition.SkillStep step : skill.steps()) {
             if (step.type() == null) {
                 throw new IllegalStateException("Skill step type is missing: " + skill.id());
             }
-            validateCapability(skill, step.capability());
+            if (step.type() == SkillDefinition.StepType.TOOL) {
+                researchTools.require(step.capability());
+                if (!skill.policy().allowedRiskLevels().contains(CapabilityDescriptor.RiskLevel.READ_ONLY))
+                    throw new IllegalStateException("Research tools require READ_ONLY policy: " + skill.id());
+                for (Object binding : step.arguments().values()) {
+                    if (binding instanceof String text && text.startsWith("$input.") && !skill.inputs().containsKey(text.substring(7)))
+                        throw new IllegalStateException("Skill binding refers to an undeclared input: " + skill.id());
+                }
+            } else validateCapability(skill, step.capability());
         }
         if (skill.steps().size() > skill.policy().maxCapabilityCalls()) {
             throw new IllegalStateException("Skill has more capability steps than its call limit: " + skill.id());

@@ -151,55 +151,23 @@ public record RunSnapshot(
 只有第二条 route 进入稳定 Shadow 后，才抽取共享 `ResearchRunSpec/RunSnapshot`，避免为
 假想需求建立万能上下文对象。
 
-### 0.5 恢复是持久化 effect，而不是一个计数器
+### 0.5 恢复：执行前先把计数落盘
 
-恢复动作必须具有稳定 effect key：
+2026-10-21 简化：去掉 `PLANNED/REVALIDATED` 生命周期、稳定 effect key 和跨阶段挂起恢复，只保留计数。
 
-```text
-runId + policyId + policyVersion + recoveryAction + attempt
-```
+- 执行恢复动作前，把该动作的 `recoveryAttempts` 加一，连同当前 `RECOVER` 决策 owner-fenced 落盘，再调用工具或模型。
+- 快照 `outcome == RECOVER` 且带恢复动作，就表示“修复已批准、新结果未写回”；结果写回后快照换成新的决策。
+- 证据阶段：崩溃接管时次数已用掉，按当前 Policy 重跑 Evidence Gate，预算耗尽只能 `DEGRADE/BLOCK`，不会再重试一次（至多一次）。
+- 报告阶段：接管看到待修复快照时继续执行这同一次重综合，不再计数；旧 checkpoint 未计入时补成 1。
+- `RECOVER/BLOCK` 绝不能进入 Debate。旧 checkpoint 里的 `recoveryLifecycle`、`recoveryEffectKey`、`suspendedRecovery` 字段读取时忽略。
 
-生命周期：
-
-```text
-PLANNED → STARTED → EFFECT_RECORDED → REVALIDATED
-```
-
-这是完整的逻辑生命周期。H0 当前所有恢复 effect 都是只读调用，而且
-`DeepEvidenceCollector.recover()` 在一次进程内调用中完成“调用、Ledger 替换和 Policy
-重新验收”，因此先只持久化两个有行为差异的边界：
-
-```text
-PLANNED → REVALIDATED
-```
-
-`PLANNED` 之后任何不确定崩溃窗口都用同一 effect key at-least-once 重放；
-`REVALIDATED` 才允许进入下一阶段。`STARTED/EFFECT_RECORDED` 暂作为 Trace 语义保留，
-只有出现非只读恢复、长时间异步 provider job，或必须区分“调用完成但尚未验收”的真实
-运维需求时才升级为持久化状态，避免当前多写两次数据库却不增加安全性。
-
-不变量：
-
-- `PLANNED` 必须在产生外部调用前 owner-fenced 落盘。
-- 接管者看到非 `REVALIDATED` 恢复时，必须恢复该动作并重新执行 Evidence Gate；
-  不能因为“存在 checkpoint”就直接进入 Debate。
-- 外部 provider 通常只能保证 at-least-once；通过稳定 effect key、结果哈希和 Ledger
-  去重做到“逻辑上只应用一次”。
-- `RECOVER/BLOCK` 绝不能进入 Debate；恢复预算耗尽后只能 `DEGRADE/BLOCK`。
-- 旧 checkpoint 缺少恢复状态时可读取；如果无法证明上次 RECOVER 已重新验收，
-  必须 fail-safe 地重新验收或降级，不能假设成功。
-
-Live Eval 按稳定 effect key 计算“逻辑恢复次数”，并单独保留物理 replay 次数；相同 key
-的 at-least-once 重放不能误报为恢复预算越界，不同 key 仍必须计为两次。旧 Trace 尚无
-effect key 时，可以折叠相邻、同 policy/version/phase/action 且均为 `RECOVER` 的完全
-同构记录，供运维诊断 replay 次数；但这种推断没有发布可信性，只要出现无 key 的
-`recoveryActions`，release gate 就必须 fail-closed。H0 已把稳定 effect key 写入当前
-DEEP Trace；真实 live case 只有观测到该 key 并满足逻辑恢复预算时才允许通过。H1 只在
-其他 route 接入时统一这套 Trace 契约，不重新定义 DEEP 的已验证语义。
+Live Eval 按每个 `harness_recovery_execution` 步骤携带的 `recoveryAttempts` 计数：同一阶段、同一动作、同一次数重复出现记为 replay，不同次数计为两次恢复；单动作超过一次即预算越界。
 
 ### 0.6 约束分级
 
 Harness 只保留少而精的规则，按风险分成四级：
+
+DEEP 取证结束时按 `declare_facets` 的维度核对 `finish_evidence.coverage`：自报已覆盖的项需要引用账本中可用的完整 evidence ID。缺失、未提交或无法核对的项作为信息缺口随 `AnalysisState` 保存，传入 Bull/Bear/Manager 公共证据提示，并合入报告 `unknowns`。这项检查只核对自报与引用，不验证证据实质支持；不因格式或缺引用新增阻断、恢复动作。
 
 | 级别 | 用途 | 例子 | 失败行为 |
 |---|---|---|---|
@@ -685,7 +653,7 @@ RETURN_SAFE_REFUSAL
 
 不能把非 `VALID` 结果静默包装为有效 `HOLD`。
 
-报告需要修复时，字段问题和失败片段与既有 `PLANNED` 状态一同保存；违规码仍由 `HarnessSnapshot` 保存。Manager 的唯一一次重综合读取这些反馈，保持原裁决、证据及验收要求。接管继续使用已保存的反馈；旧 checkpoint 没有新增字段时只使用其实际保存的违规码。失败片段按不可信数据处理，不作为新指令或新证据。
+报告需要修复时，字段问题和失败片段与待修复快照一同保存；违规码仍由 `HarnessSnapshot` 保存。Manager 的唯一一次重综合读取这些反馈，保持原裁决、证据及验收要求。接管继续使用已保存的反馈；旧 checkpoint 没有新增字段时只使用其实际保存的违规码。失败片段按不可信数据处理，不作为新指令或新证据。
 
 ### 5.5 HarnessSnapshot
 
@@ -697,9 +665,7 @@ public record HarnessSnapshot(
         HarnessOutcome lastOutcome,
         List<ViolationCode> violations,
         Map<RecoveryAction, Integer> recoveryAttempts,
-        RecoveryLifecycle recoveryLifecycle,
-        List<RecoveryAction> recoveryActions,
-        String recoveryEffectKey
+        List<RecoveryAction> recoveryActions
 ) {
 }
 ```
@@ -707,12 +673,8 @@ public record HarnessSnapshot(
 要求：
 
 - 跟随 `AnalysisState` 序列化到现有 checkpoint JSON。
-- 执行恢复动作前先严格持久化已完成 recovery count、稳定 effect key、动作集合和
-  `PLANNED` 状态；pending effect 本身预留本次预算。
-- Evidence 重新验收期间必须挂起并保留已有 Report recovery；跨阶段恢复结束后合并
-  两阶段 attempt，任何 takeover 都不能重置预算或丢失 effect key。
-- H0 的只读恢复完成并重新通过 Gate 后推进到 `REVALIDATED`；四阶段逻辑生命周期的
-  中间状态按 0.5 的升级条件渐进引入。
+- 执行恢复动作前先持久化已加一的 recovery count、动作集合和 `RECOVER` 决策；该计数即本次预算。
+- 各动作计数放在同一张表里，证据阶段重新验收不会重置报告修复的计数。
 - owner-fenced 保存失败时停止当前 attempt，不能仅记录日志后继续。
 - takeover 后恢复次数不归零，并从非终态 `pendingRecovery` 推导下一步；所有非空
   checkpoint 必须先按当前 Policy 重跑 Evidence Gate，当前 PASS 必须重算证据 hash，
@@ -964,8 +926,7 @@ phase
 decision
 violationCodes
 recoveryActions
-recoveryAttempt
-recoveryEffectKey
+recoveryAttempts
 durationMs
 ```
 
@@ -1014,8 +975,8 @@ stocksage-backend/src/main/java/com/stocksage/evidence/
 修改：
 
 ```text
-stocksage-backend/src/main/java/com/stocksage/model/dto/AnalysisState.java
-stocksage-backend/src/main/java/com/stocksage/research/DeepEvidenceCollector.java
+stocksage-backend/src/main/java/com/stocksage/research/deep/AnalysisState.java
+stocksage-backend/src/main/java/com/stocksage/research/deep/DeepEvidenceCollector.java
 ```
 
 任务：
@@ -1044,10 +1005,10 @@ G0 验证（2026-07-24）：
 修改：
 
 ```text
-stocksage-backend/src/main/java/com/stocksage/research/DeepResearchPipeline.java
-stocksage-backend/src/main/java/com/stocksage/service/ToolPrefetchService.java
-stocksage-backend/src/main/java/com/stocksage/research/DeepEvidenceCollector.java
-stocksage-backend/src/main/java/com/stocksage/research/ReportMarkdownRenderer.java
+stocksage-backend/src/main/java/com/stocksage/research/deep/DeepResearchPipeline.java
+stocksage-backend/src/main/java/com/stocksage/agent/ordinary/ToolPrefetchService.java
+stocksage-backend/src/main/java/com/stocksage/research/deep/DeepEvidenceCollector.java
+stocksage-backend/src/main/java/com/stocksage/research/report/ReportMarkdownRenderer.java
 ```
 
 任务：
@@ -1072,11 +1033,11 @@ stocksage-backend/src/main/java/com/stocksage/research/ReportMarkdownRenderer.ja
 修改：
 
 ```text
-stocksage-backend/src/main/java/com/stocksage/agent/ResearchManager.java
-stocksage-backend/src/main/java/com/stocksage/research/ResearchDebateService.java
-stocksage-backend/src/main/java/com/stocksage/model/dto/InvestmentReport.java
-stocksage-backend/src/main/java/com/stocksage/research/DeepResearchPipeline.java
-stocksage-backend/src/main/java/com/stocksage/research/ReportMarkdownRenderer.java
+stocksage-backend/src/main/java/com/stocksage/debate/ResearchManager.java
+stocksage-backend/src/main/java/com/stocksage/debate/ResearchDebateService.java
+stocksage-backend/src/main/java/com/stocksage/research/report/InvestmentReport.java
+stocksage-backend/src/main/java/com/stocksage/research/deep/DeepResearchPipeline.java
+stocksage-backend/src/main/java/com/stocksage/research/report/ReportMarkdownRenderer.java
 ```
 
 任务：
@@ -1106,10 +1067,10 @@ stocksage-backend/src/main/java/com/stocksage/research/ReportMarkdownRenderer.ja
 ```text
 stocksage-backend/src/main/resources/db/migration/V5__research_task_result_kind.sql
 stocksage-backend/src/main/java/com/stocksage/model/entity/ResearchTask.java
-stocksage-backend/src/main/java/com/stocksage/research/ResearchTaskCheckpointService.java
-stocksage-backend/src/main/java/com/stocksage/research/InvestmentReportVersionService.java
+stocksage-backend/src/main/java/com/stocksage/research/task/ResearchTaskCheckpointService.java
+stocksage-backend/src/main/java/com/stocksage/research/report/InvestmentReportVersionService.java
 stocksage-backend/src/main/java/com/stocksage/knowledge/ResearchMemoryService.java
-stocksage-backend/src/main/java/com/stocksage/service/OfflineDemoSampleService.java
+stocksage-backend/src/main/java/com/stocksage/workbench/OfflineDemoSampleService.java
 ```
 
 任务：
@@ -1325,9 +1286,7 @@ case count 至少 60、coverage status 为 `pass`、数据集 hash 非空、完�
 - `INSUFFICIENT_EVIDENCE` 只接受 Evidence 自身 `DEGRADE/BLOCK`，或
   `EVIDENCE=PASS` 后 Report `DEGRADE/BLOCK`；报告门缺失或 PASS 时不能伪装成证据不足。
 - 其他降级或阻断 ResultKind 必须与相应 Harness decision 一致。
-- 同一逻辑恢复 effect 不得超过一次；相同 effect key 的物理 replay 单独计数。
-- 只要 Trace 中的 `recoveryActions` 缺少稳定 effect key，该 case 就 fail-closed；
-  keyless 折叠结果只保留作诊断。
+- 同一动作的恢复不得超过一次；同一阶段、同一次数的重复执行步骤单独记为 replay。
 - 结果只保留脱敏元数据，不保存最终回答、证据正文或凭据。
 
 Agent Eval 的 `live_completion` 分区仅在 engine/schema 正确、完成率与安全终态率均为

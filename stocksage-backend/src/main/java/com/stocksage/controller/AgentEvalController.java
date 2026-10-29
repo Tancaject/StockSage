@@ -1,9 +1,9 @@
 package com.stocksage.controller;
 
-import com.stocksage.model.dto.PlannerEvalRequest;
-import com.stocksage.model.dto.PlannerEvalResponse;
-import com.stocksage.service.PlannerEvalService;
 import com.stocksage.conversation.OrdinaryAnswerReplayService;
+import com.stocksage.eval.PlannerEvalModels.PlannerEvalRequest;
+import com.stocksage.eval.PlannerEvalModels.PlannerEvalResponse;
+import com.stocksage.eval.PlannerEvalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

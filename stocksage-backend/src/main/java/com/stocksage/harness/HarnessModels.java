@@ -3,8 +3,10 @@ package com.stocksage.harness;
 import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stocksage.agent.intent.TimeSensitivity;
-import com.stocksage.model.dto.InvestmentReport;
+import com.stocksage.agent.ordinary.OrdinaryPlan;
+import com.stocksage.research.report.InvestmentReport;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -48,6 +50,8 @@ public final class HarnessModels {
         NEWS_MISSING,
         RAG_MISSING,
         PROVENANCE_MISSING,
+        DATA_REQUIREMENT_UNMET,
+        EVIDENCE_CONTEXT_INCOMPLETE,
         EVIDENCE_TIME_REQUIREMENT_UNMET,
         UNAPPROVED_CAPABILITY,
         REPORT_PARSE_INVALID,
@@ -57,8 +61,6 @@ public final class HarnessModels {
         DEBATE_ASSESSMENT_INVALID,
         DEBATE_DECISION_INSUFFICIENT,
         REPORT_DECISION_AUDIT_MISSING,
-        REPORT_DECISION_POLICY_MISMATCH,
-        REPORT_DECISION_SNAPSHOT_MISMATCH,
         REPORT_DECISION_OUTPUT_MISMATCH,
         REPORT_DECISION_EVIDENCE_REFERENCE_UNUSABLE,
         REPORT_EVIDENCE_REFERENCE_MISSING,
@@ -77,18 +79,6 @@ public final class HarnessModels {
         RETURN_SAFE_REFUSAL
     }
 
-    /**
-     * 有限恢复副作用的持久化生命周期。
-     *
-     * <p>{@link #PLANNED} 必须先于只读工具副作用写入；接管者看到它时继续同一逻辑副作用并重跑证据验收。
-     * {@link #REVALIDATED} 表示副作用后的账本或报告已重新评估。</p>
-     */
-    public enum RecoveryLifecycle {
-        NONE,
-        PLANNED,
-        REVALIDATED
-    }
-
     /** Research Manager 输出的解析/结构校验状态。 */
     public enum ParseStatus {
         VALID,
@@ -98,17 +88,30 @@ public final class HarnessModels {
         MODEL_FAILURE
     }
 
+    /** 普通路线已确认的需求、实际交付给模型的证据状态和本轮财报正文召回事实。 */
+    public record OrdinaryEvidenceContext(
+            OrdinaryPlan plan,
+            List<Map<String, Object>> observations,
+            boolean filingTextRetrieved
+    ) {
+        public OrdinaryEvidenceContext {
+            observations = List.copyOf(observations);
+        }
+    }
+
     /**
      * 一次策略评估的工作流与恢复预算上下文。
      *
      * @param workflow 路由/工作流名称
      * @param recoveryAttempts 各恢复动作已执行次数
      * @param timeSensitivity 本次请求的时间要求；旧记录缺失时保持 UNSPECIFIED
+     * @param ordinaryEvidence 普通路线验收事实；DEEP 不使用
      */
     public record RunContext(
             String workflow,
             Map<RecoveryAction, Integer> recoveryAttempts,
-            TimeSensitivity timeSensitivity
+            TimeSensitivity timeSensitivity,
+            OrdinaryEvidenceContext ordinaryEvidence
     ) {
         public RunContext {
             workflow = safe(workflow);
@@ -126,6 +129,10 @@ public final class HarnessModels {
 
         public RunContext(String workflow, Map<RecoveryAction, Integer> recoveryAttempts) {
             this(workflow, recoveryAttempts, TimeSensitivity.UNSPECIFIED);
+        }
+
+        public RunContext(String workflow, Map<RecoveryAction, Integer> recoveryAttempts, TimeSensitivity timeSensitivity) {
+            this(workflow, recoveryAttempts, timeSensitivity, null);
         }
 
         /** @return 未使用任何恢复预算的 DEEP 上下文 */
@@ -183,52 +190,13 @@ public final class HarnessModels {
     }
 
     /**
-     * 被另一阶段恢复暂时让位的恢复上下文。
-     *
-     * <p>例如报告修复已经 PLANNED 时，证据阶段又需要一次有限重试；把被挂起上下文一并持久化，
-     * 可防止进程崩溃后重置已预留的 Manager 修复预算。</p>
-     */
-    public record SuspendedRecovery(
-            HarnessPhase phase,
-            HarnessOutcome outcome,
-            List<ViolationCode> violations,
-            RecoveryLifecycle recoveryLifecycle,
-            List<RecoveryAction> recoveryActions,
-            String recoveryEffectKey
-    ) {
-        public SuspendedRecovery {
-            phase = phase == null ? HarnessPhase.REPORT : phase;
-            outcome = outcome == null ? HarnessOutcome.BLOCK : outcome;
-            violations = violations == null ? List.of() : List.copyOf(violations);
-            recoveryLifecycle = recoveryLifecycle == null
-                    ? RecoveryLifecycle.NONE
-                    : recoveryLifecycle;
-            recoveryActions = recoveryActions == null ? List.of() : List.copyOf(recoveryActions);
-            recoveryEffectKey = safe(recoveryEffectKey);
-        }
-
-        /** @return 从现有快照复制的挂起恢复；输入为空时返回 {@code null} */
-        public static SuspendedRecovery from(HarnessSnapshot snapshot) {
-            if (snapshot == null) {
-                return null;
-            }
-            return new SuspendedRecovery(
-                    snapshot.phase(),
-                    snapshot.outcome(),
-                    snapshot.violations(),
-                    snapshot.recoveryLifecycle(),
-                    snapshot.recoveryActions(),
-                    snapshot.recoveryEffectKey()
-            );
-        }
-    }
-
-    /**
      * 在任何恢复副作用之前写入的持久化策略状态。
      *
      * <p>快照只包含有限决策元数据；原始 prompt 和工具 payload 不进入 checkpoint。
-     * {@code recoveryEffectKey} 让接管者识别同一个逻辑副作用，避免重复消耗恢复预算。</p>
+     * 恢复前先把计数加一再落盘，接管者据此判断预算是否已用掉；{@code outcome == RECOVER}
+     * 表示该阶段的修复已批准但新结果尚未写回。旧 checkpoint 中的生命周期、副作用键等字段直接忽略。</p>
      */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record HarnessSnapshot(
             String policyId,
             String policyVersion,
@@ -236,10 +204,7 @@ public final class HarnessModels {
             HarnessOutcome outcome,
             List<ViolationCode> violations,
             Map<RecoveryAction, Integer> recoveryAttempts,
-            RecoveryLifecycle recoveryLifecycle,
-            List<RecoveryAction> recoveryActions,
-            String recoveryEffectKey,
-            SuspendedRecovery suspendedRecovery
+            List<RecoveryAction> recoveryActions
     ) {
         public HarnessSnapshot {
             policyId = safe(policyId);
@@ -256,14 +221,10 @@ public final class HarnessModels {
                 });
             }
             recoveryAttempts = Map.copyOf(bounded);
-            recoveryLifecycle = recoveryLifecycle == null
-                    ? inferRecoveryLifecycle(outcome, recoveryAttempts)
-                    : recoveryLifecycle;
             recoveryActions = recoveryActions == null ? List.of() : List.copyOf(recoveryActions);
-            recoveryEffectKey = safe(recoveryEffectKey);
         }
 
-        /** 根据普通策略决策生成不带显式副作用键的快照。 */
+        /** 根据策略决策和（已含本次恢复的）计数生成快照。 */
         public static HarnessSnapshot from(
                 String policyId,
                 String policyVersion,
@@ -281,84 +242,16 @@ public final class HarnessModels {
                     safeDecision.outcome(),
                     safeDecision.violations().stream().map(HarnessViolation::code).toList(),
                     recoveryAttempts,
-                    inferRecoveryLifecycle(safeDecision.outcome(), recoveryAttempts),
-                    safeDecision.recoveryActions(),
-                    "",
-                    null
+                    safeDecision.recoveryActions()
             );
         }
 
-        /** 生成当前阶段的恢复快照，不挂起其他阶段。 */
-        public static HarnessSnapshot recovery(
-                String policyId,
-                String policyVersion,
-                HarnessPhase phase,
-                HarnessDecision decision,
-                Map<RecoveryAction, Integer> recoveryAttempts,
-                RecoveryLifecycle recoveryLifecycle,
-                List<RecoveryAction> recoveryActions,
-                String recoveryEffectKey
-        ) {
-            return recovery(
-                    policyId,
-                    policyVersion,
-                    phase,
-                    decision,
-                    recoveryAttempts,
-                    recoveryLifecycle,
-                    recoveryActions,
-                    recoveryEffectKey,
-                    null
-            );
-        }
-
-        /** 生成完整恢复快照，并可携带被暂时挂起的另一阶段恢复。 */
-        public static HarnessSnapshot recovery(
-                String policyId,
-                String policyVersion,
-                HarnessPhase phase,
-                HarnessDecision decision,
-                Map<RecoveryAction, Integer> recoveryAttempts,
-                RecoveryLifecycle recoveryLifecycle,
-                List<RecoveryAction> recoveryActions,
-                String recoveryEffectKey,
-                SuspendedRecovery suspendedRecovery
-        ) {
-            HarnessDecision safeDecision = decision == null
-                    ? new HarnessDecision(HarnessOutcome.BLOCK, List.of(), List.of())
-                    : decision;
-            return new HarnessSnapshot(
-                    policyId,
-                    policyVersion,
-                    phase,
-                    safeDecision.outcome(),
-                    safeDecision.violations().stream().map(HarnessViolation::code).toList(),
-                    recoveryAttempts,
-                    recoveryLifecycle,
-                    recoveryActions,
-                    recoveryEffectKey,
-                    suspendedRecovery
-            );
-        }
-
-        /** @return 是否存在尚待执行/重验的证据阶段恢复 */
+        /** @return 该阶段是否有已批准、尚未写回结果的修复 */
         @JsonIgnore
-        public boolean hasPendingEvidenceRecovery() {
-            return phase == HarnessPhase.EVIDENCE
+        public boolean hasPendingRecovery(HarnessPhase target) {
+            return phase == target
                     && outcome == HarnessOutcome.RECOVER
-                    && recoveryLifecycle == RecoveryLifecycle.PLANNED;
-        }
-
-        private static RecoveryLifecycle inferRecoveryLifecycle(
-                HarnessOutcome outcome,
-                Map<RecoveryAction, Integer> recoveryAttempts
-        ) {
-            if (outcome == HarnessOutcome.RECOVER) {
-                return RecoveryLifecycle.PLANNED;
-            }
-            return recoveryAttempts == null || recoveryAttempts.isEmpty()
-                    ? RecoveryLifecycle.NONE
-                    : RecoveryLifecycle.REVALIDATED;
+                    && !recoveryActions.isEmpty();
         }
     }
 
@@ -387,7 +280,7 @@ public final class HarnessModels {
         }
     }
 
-    /** 与 PLANNED 一起持久化的一次修复输入；违规码沿用 HarnessSnapshot，不保存报告全文。 */
+    /** 与待修复快照一起持久化的一次修复输入；违规码沿用 HarnessSnapshot，不保存报告全文。 */
     public record ReportRepairFeedback(
             ParseStatus parseStatus,
             List<String> validationIssues,

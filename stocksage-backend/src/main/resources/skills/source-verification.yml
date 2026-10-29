@@ -1,0 +1,43 @@
+{
+  "id": "source-verification",
+  "version": 1,
+  "displayName": "公告原文核查",
+  "enabled": true,
+  "routes": [
+    "DEEP"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 1,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "readDisclosure",
+      "required": true,
+      "arguments": {
+        "url": "$input.url",
+        "filingType": "$input.filingType",
+        "section": "$input.section",
+        "tablesOnly": "$input.tablesOnly",
+        "offset": "$input.offset",
+        "maxChars": "$input.maxChars"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "url": "",
+    "filingType": "DISCLOSURE",
+    "section": "",
+    "tablesOnly": false,
+    "offset": 0,
+    "maxChars": 12000
+  },
+  "method": "按块ID、章节、页码和原文URL核对主张；nextOffset非空表示尚未读完。扫描PDF无文本或未检测到表格均不能当作没有披露。"
+}

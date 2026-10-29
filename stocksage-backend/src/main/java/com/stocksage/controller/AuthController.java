@@ -1,8 +1,8 @@
 package com.stocksage.controller;
 
+import com.stocksage.identity.AuthService;
 import com.stocksage.model.entity.User;
 import com.stocksage.security.AuthenticatedUser;
-import com.stocksage.identity.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;

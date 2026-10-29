@@ -128,18 +128,6 @@ export function buildEventImpactPrompt({ ticker, eventText, eventSource = '' } =
   ].join('\n')
 }
 
-export function buildPortfolioDiagnosisPrompt(accountId = '') {
-  const account = String(accountId || '').trim()
-  return [
-    'Run an IBKR read-only portfolio diagnosis.',
-    account ? `Account: ${account}` : 'Account: use the default IBKR account if available.',
-    'Use only read-only IBKR tools: authentication status, accounts, account summary, positions, quotes, and historical bars.',
-    'Summarize concentration, single-stock risk, sector or theme exposure, market-sensitive holdings, and filing/news events to monitor.',
-    'Do not place, cancel, modify, stage, or suggest executable orders. Do not call or invent trading APIs.',
-    'Finish with watch items and questions for the user. This is not investment advice.',
-  ].join('\n')
-}
-
 export function buildWatchlistFromProfile(profile = {}, fallbackTickers = ['NVDA', 'AAPL', 'MSFT', 'AMZN', 'META']) {
   const watch = normalizeList(profile.watchList).map(normalizeTicker).filter(Boolean)
   const holdings = normalizeList(profile.holdings).map(normalizeTicker).filter(Boolean)

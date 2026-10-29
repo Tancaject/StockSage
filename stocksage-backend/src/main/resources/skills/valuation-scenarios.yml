@@ -1,0 +1,45 @@
+{
+  "id": "valuation-scenarios",
+  "version": 1,
+  "displayName": "估值情景",
+  "enabled": true,
+  "routes": [
+    "FUNDAMENTALS"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 1,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "calculateValuationScenarios",
+      "required": true,
+      "arguments": {
+        "input": "$input.input"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "input": {
+      "currency": "USD",
+      "eps": 5,
+      "dilutedShares": 1000000,
+      "equityFreeCashFlow": 6000000,
+      "scenarios": [
+        {
+          "name": "演示：请替换假设",
+          "peMultiple": 20,
+          "fcfYield": 0.05
+        }
+      ]
+    }
+  },
+  "method": "输入是用户假设，不是市场事实。分别列示EPS×PE和股权自由现金流/股数/收益率；禁止将现金流口径混为企业价值，给出假设敏感性，不把情景价写成预测。"
+}

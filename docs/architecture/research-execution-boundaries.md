@@ -1,6 +1,6 @@
 # 研究入口与模块边界
 
-研究仍运行在同一个 Java 应用内。阶段编排由 [`DeepResearchPipeline`](../../stocksage-backend/src/main/java/com/stocksage/research/DeepResearchPipeline.java) 拥有；工具预取、聊天传输和 worker 各自适配入口，不复制研究状态机。
+研究仍运行在同一个 Java 应用内。阶段编排由 [`DeepResearchPipeline`](../../stocksage-backend/src/main/java/com/stocksage/research/deep/DeepResearchPipeline.java) 拥有；工具预取、聊天传输和 worker 各自适配入口，不复制研究状态机。
 
 ## 同步与后台入口
 
@@ -16,7 +16,7 @@
 
 一次主动研究对应一条 `ResearchTask`，其 `id` 同时是运行身份。聊天与工作台通过 `submissionId` 区分主动提交：同一次网络重发沿用该值，重新生成或再次研究使用新值。前端 `streamChat` 为没有此值的请求对象生成 UUID；重用该对象会保留身份，新对象得到新身份。后端将其与登录用户绑定生成提交键，不能跨用户复用。
 
-已有提交在 `ChatService` 创建会话、写消息或识别意图之前回读。观察入口 [`ResearchTaskObservationService`](../../stocksage-backend/src/main/java/com/stocksage/research/ResearchTaskObservationService.java) 共用于聊天重发与任务 SSE，返回原会话、Trace 和任务身份；历史过程事件缺失时仍从数据库读取终态。重发不重置已结束任务，也不受新任务配额限制。若两个请求同时首次到达，数据库提交键唯一约束裁决一个研究运行；这不是对入库前意图识别和聊天预处理的全链路 exactly-once 承诺。
+已有提交在 `ChatService` 创建会话、写消息或识别意图之前回读。观察入口 [`ResearchTaskObservationService`](../../stocksage-backend/src/main/java/com/stocksage/research/task/ResearchTaskObservationService.java) 共用于聊天重发与任务 SSE，返回原会话、Trace 和任务身份；历史过程事件缺失时仍从数据库读取终态。重发不重置已结束任务，也不受新任务配额限制。若两个请求同时首次到达，数据库提交键唯一约束裁决一个研究运行；这不是对入库前意图识别和聊天预处理的全链路 exactly-once 承诺。
 
 - `requestFingerprint` 将相同用户、标的与归一化问题跨会话分组，允许多条运行。它不代替提交幂等键，也不证明不同运行的上下文、数据或模型相同。
 - 新提交创建新任务，`previousTaskId` 记录创建时可见的最近同组任务；并发主动运行可有同一前驱，不把它解释为严格串行链。旧任务的载荷、结果引用、状态和未清理快照不被新运行覆盖。
@@ -31,7 +31,7 @@
 
 ### 执行入口
 
-[`ResearchSubmissionService`](../../stocksage-backend/src/main/java/com/stocksage/research/ResearchSubmissionService.java) 负责提交去重、配额检查、入队与已有运行观察。只有队列明确不可用时才调用 `runInlineFallback`；它准备已解析标的的展示上下文，但不续租、保存研究 checkpoint 或更新研究阶段。该入口返回 `SubmissionResult`，不依赖聊天预取类型；`ToolPrefetchService` 仅把结果映射为聊天使用的 `PreparedToolContext`。
+[`ResearchSubmissionService`](../../stocksage-backend/src/main/java/com/stocksage/research/task/ResearchSubmissionService.java) 负责提交去重、配额检查、入队与已有运行观察。只有队列明确不可用时才调用 `runInlineFallback`；它准备已解析标的的展示上下文，但不续租、保存研究 checkpoint 或更新研究阶段。该入口返回 `SubmissionResult`，不依赖聊天预取类型；`ToolPrefetchService` 仅把结果映射为聊天使用的 `PreparedToolContext`。
 
 | 契约 | 后台 `runFullPipeline` | 同步 `runInlineFallback` |
 |---|---|---|
@@ -79,7 +79,7 @@ SQL 中的 ID 关联分为聚合内关系和历史来源关系。删除聚合只
 |---|---|---|
 | 会话 → 消息 | [`ConversationMessageService`](../../stocksage-backend/src/main/java/com/stocksage/conversation/ConversationMessageService.java) 校验会话归属，同事务先删消息再删会话；重生成只裁剪最后一个用户轮次起的消息 | 消息属于会话。删除会话不删除研究任务、报告、Trace 或研究记忆；这些记录中的原会话 ID 可作为历史来源保留 |
 | 会话 → Redis 短期记忆 | [`ChatService.deleteConversation`](../../stocksage-backend/src/main/java/com/stocksage/conversation/ChatService.java) 在 SQL 删除返回后清理 Redis | 这是跨存储顺序执行，不是原子删除，也不是账号数据物理擦除承诺 |
-| 运行 → checkpoint | [`ResearchTaskCheckpointService`](../../stocksage-backend/src/main/java/com/stocksage/research/ResearchTaskCheckpointService.java) 通过当前 owner 或锁定成功任务授权清理 | checkpoint 是可回收的恢复状态；删除它不删除运行历史、模型调用和独立证据快照 |
+| 运行 → checkpoint | [`ResearchTaskCheckpointService`](../../stocksage-backend/src/main/java/com/stocksage/research/task/ResearchTaskCheckpointService.java) 通过当前 owner 或锁定成功任务授权清理 | checkpoint 是可回收的恢复状态；删除它不删除运行历史、模型调用和独立证据快照 |
 | 报告 → 生产运行、证据快照；调用 → 运行、attempt、快照 | research 拥有发布和不可变归因，具体规则见[独立证据快照](#独立证据快照)及[报告生产者](#报告生产者) | 属于历史来源关系。报告复用保留原生产者；不能从消费者会话删除或 checkpoint 清理推导历史记录应级联删除 |
 | 报告 → 研究记忆 | [`ResearchMemoryService`](../../stocksage-backend/src/main/java/com/stocksage/knowledge/ResearchMemoryService.java) 校验用户、处理负向审核撤回 | 撤回与物理删除不同；SQL 资格决定可用性，向量删除完成情况不能由撤回成功推断。资格规则见[记忆契约](research-memory-decay-conflict-plan.md) |
 | RAG 来源 → SQL 分块 → Milvus/Lucene | [`KnowledgeIngestionService`](../../stocksage-backend/src/main/java/com/stocksage/knowledge/KnowledgeIngestionService.java) 持有来源锁，发布 SQL 当前版本，提交后更新/清理索引；过期来源保留空来源行作为清理标记 | SQL 是正文与版本真源，派生索引可重建。物理向量清理可重试，不因清理失败撤销已提交来源；详见[来源发布与清理](../reviews/2026-09-14-code-audit.md#rag-来源发布与清理) |
@@ -99,7 +99,7 @@ SQL 中的 ID 关联分为聚合内关系和历史来源关系。删除聚合只
 
 ## Checkpoint 格式与恢复契约
 
-[`ResearchTaskCheckpointService`](../../stocksage-backend/src/main/java/com/stocksage/research/ResearchTaskCheckpointService.java) 统一写入 `{"schemaVersion":1,"state":{...}}`。外层版本描述持久化格式，独立于 state 内的 Harness、补证和评级策略版本；升级策略不会自动改变存储版本。
+[`ResearchTaskCheckpointService`](../../stocksage-backend/src/main/java/com/stocksage/research/task/ResearchTaskCheckpointService.java) 统一写入 `{"schemaVersion":1,"state":{...}}`。外层版本描述持久化格式，独立于 state 内的 Harness、补证和评级策略版本；升级策略不会自动改变存储版本。
 
 - 历史没有外层版本的裸 `AnalysisState` 是 v0：直接读取，下一次正常 owner-fenced 保存时写为 v1，阶段、轮次和执行决定沿用原记录；不批量改写历史载荷。
 - v1 必须有对象类型的 `state`；未知版本、非法版本值、损坏 JSON 或残缺封装均拒绝恢复。只有数据库没有记录才按无断点开始。
@@ -130,21 +130,9 @@ SQL 中的 ID 关联分为聚合内关系和历史来源关系。删除聚合只
 
 ## 运行执行配置
 
-[`AgentRuntimeConfiguration`](../../stocksage-backend/src/main/java/com/stocksage/agent/AgentRuntimeConfiguration.java) 从九个研究角色以及查询改写、入库 gist 两个客户端构建时使用的同一 options 和 system 字符串记录模型、temperature、maxTokens 与系统 Prompt SHA-256。快照明确标为 `CLIENT_DEFAULTS`，提供商实际模型修订未知；它不代表动态 Prompt、调用级覆盖参数、历史文档生成身份或响应 usage。
+[`AgentRuntimeConfiguration`](../../stocksage-backend/src/main/java/com/stocksage/agent/runtime/AgentRuntimeConfiguration.java) 从九个研究角色以及查询改写、入库 gist 两个客户端构建时使用的同一 options 和 system 字符串记录模型、temperature、maxTokens 与系统 Prompt SHA-256。快照明确标为 `CLIENT_DEFAULTS`，提供商实际模型修订未知；它不代表动态 Prompt、调用级覆盖参数、历史文档生成身份或响应 usage。
 
-V13 为任务增加独立的 `model_configuration_json` 列。两个研究入口取得 owner 后、读取 checkpoint 或采集证据前，通过 [`ResearchRunManifestService`](../../stocksage-backend/src/main/java/com/stocksage/research/ResearchRunManifestService.java) 冻结或校验版本化快照。事务复用任务行锁，原生 SQL 仅允许当前 owner 首次写入；JPA 不写此列，避免旧实体覆盖。成功清理 checkpoint 不会删除这份配置。
-
-清单 schemaVersion=6、scope=`EXECUTION_CONFIGURATION`。除角色默认配置外，包含完成/评级策略 ID、版本及类资源 SHA-256，实际绑定的能力目录（按 ID 排序），RagService 检索参数、重排默认参数和调用上限，以及补证开关、归一后的搜索数量与超时。清单同时冻结下述费率卡配置，未配置也明确留存。策略哈希只代表对应打包类资源，不代表其全部依赖、完整部署制品或 JVM 插桩后的字节。RAG 参数只描述配置，不证明某次重排成功。旧 v1/v2/v3/v4/v5 缺少新增归因字段，因此保留原文并拒绝恢复，不自动填入当前值。
-
-`chatProvider` 来自实际 `OpenAiApi` 构造边界：AiConfig 沿用框架的连接参数解析、headers、HTTP builders 和错误处理器，在实例构造成功后记录同一份 base URL 与 completions path 的脱敏身份；默认 ChatModel 的其余自动配置保持由框架负责。scope=`API_CONSTRUCTION`，协议/主机/端口明文、路径仅存 SHA-256，不记录 userinfo、query、fragment、headers 或凭据。身份缺失拒绝开始/恢复，已记录身份变化拒绝复用原清单；不把排除字段、DNS、代理、重定向或网关背后的模型权重宣称为已追踪。
-
-RAG 快照还包括 QueryRewriter 的开关/长度上限和 KeywordSearchService 的 BM25 参数/索引契约版本。注入的 LocalEmbeddingModel 直接提供其模型别名、维度和超时；其它 embedding 实现仅记录实现类型和 `UNKNOWN`，不通过试请求探测、不将环境配置冒充 Bean 实际值。EDGAR 分块快照按实际 splitter 边界归一大小和重叠，记录版本、gist 开关/长度与粒度，scope=`CURRENT_INGESTION_DEFAULTS`；它不能证明已检索历史文档使用了这套配置，历史来源仍需文档自身元数据支持。
-
-- 重试按 JSON 结构校验原配置，不覆盖清单。配置变化、未知格式和事务提交失败都停止执行；保留快照，沿用 owner-fenced 失败终态，禁止发布离线替代报告。
-- 已有尝试但没有清单的历史任务不能补造历史配置。接管后尝试次数大于 1 时拒绝冻结，需检查原记录或主动发起新研究。完成任务的历史归因仍未知。
-- 发布时应先排空旧 worker；新字段迁移不允许旧 worker 绕过配置冻结继续执行。H2 检查不证明真实 MySQL 迁移或混合版本部署已通过。
-
-当前 DEEP 路由不检索 RAG 文档，也不读取研究记忆；清单的 consumption 分别记录 `NOT_USED`。上述 RAG/入库配置属于运行配置目录，不能当作本次研究消费过历史文档的证据。DEEP 实际数据来源来自财务、行情和新闻证据账本。
+V13 的 `model_configuration_json` 列曾用于在运行开始时冻结整份执行配置、接管时配置变化即拒绝续跑（`ResearchRunManifestService`）。2026-10-21 已删除该机制：单人开发环境里运行中改配置的风险由开发者自担，列保留但新任务不再写入；模型调用计价按当前费率卡和当前对话供应商。截止时间、调用上限和 token 预算的冻结不受影响（见下文）。
 
 `RuntimeArtifactIdentity` 在启动时从 StockSageApplication 的代码来源取样，不读取 Git HEAD。文件部署使用整个来源文件 SHA-256（`CODE_SOURCE_FILE`）；开发目录使用按相对路径排序的 class 文件树 SHA-256（`CODE_SOURCE_CLASS_TREE`），并记录 Java runtime 版本。后者不包含外部 classpath 依赖和配置文件，前者只覆盖该文件实际包含的字节；两者都不证明 JVM 插桩后的内存字节。来源无法读取时记录 UNKNOWN，研究入口拒绝开始或恢复。运行期间替换制品/热改 class 不在此启动快照保证内，部署应使用不可变制品并重启进程。
 
@@ -236,6 +224,20 @@ Spring JDK 请求将超时固化到单个请求，并在超时时取消等待响
 
 自定义 factory builder、之后覆盖工厂的 RestClient 定制和直接绕过 Boot 的客户端不在这个保证内；不会静默替换这些 transport。供应商远端计算、计费、数据库等待与提交不受本地 HTTP 取消证明。这里也不承诺调度和请求启动零耗时的毫秒级绝对终止。
 
+## 辩论调度、重试与停轮
+
+`ResearchDebateService` 每轮并行生成 Bull/Bear，配置上限 `stocksage.agent.debate.max-rounds` 默认 8（不再写死 5）。每轮定稿后按顺序决定是否继续：
+
+1. 到达上限：停止（`HARD_LIMIT`）。
+2. 按争点判断。每个第一轮根论点及沿 respondsTo 链指向它的反驳构成一个争点，后端确定性统计其状态：交锋停在本轮为 `OPEN`；连续两轮仍在往来但没有为该争点带来新证据为 `STALLED`；其余按最后发言方分为 `CONCEDED`（持方被驳后未回应）、`HELD`（持方回应后对方未再驳）、`DEADLOCK`、`UNCHALLENGED`。没有 `OPEN` 争点时直接停止，不调用续停模型（`NO_OPEN_CRUX`）。
+3. 否则续停模型先给出现在停止时的倾向（`provisionalLeaning`，不参与裁决），再把每个 `OPEN` 争点标为 `CAN_FLIP`（可能改变倾向且下一轮能用现有证据推进）、`NEEDS_EXTERNAL`（取决于现有证据之外的信息）或 `NO_IMPACT`；存在 `CAN_FLIP` 才继续（`MODEL`）。续停调用失败时第 1 轮后继续、之后停止（`FALLBACK`）。
+
+续停判断进行时下一轮 Bull/Bear 已推测启动，推理面板推送先被截住；判断继续则放出，判断停止则取消订阅，模型调用记为 `CANCELLED`。
+
+失败处理：Bull/Bear、续停、评分、报告综合遇到供应商临时错误（流中断、5xx、429、连接/读超时）各重发一次，重试计入调用额度并写新调用记录，推理面板换分组（`-r2`）。Bull/Bear 契约不合格时只让不合格的一方带校验问题重新生成一次；评分结构校验不合格时带问题清单修正一次；修正后仍不合格才按原规则失败关闭。预算、容量、执行权丢失和阶段硬超时不重试。
+
+提示词中的论点用短编号（`BULL-2.1`；匿名评分用 `A-2.1`），解析时映射回 pointId，存储与 Trace 仍是原 ID。第 2 轮起提示双方仍未引用的可用证据。每轮的争点状态与影响、倾向、新证据数、续停来源、推测执行结果、重试与修正次数写在 `debate-round` Trace 步骤属性里；`scoring-mode=COMPARE` 时另记录按位置拆分评分的 `scoring-comparison`，不参与裁决。运行额度按 8 轮估算为 52 次调用、45 分钟。
+
 ## DEEP 模型调用事实
 
 `ModelInvocationContext` 显式携带 run、attempt、owner token、原任务 Trace、证据快照 ID 和运行截止时间；绑定在当前 `AnalysisState` 上但不序列化到 checkpoint，不进入数据/上下文哈希。恢复时重新绑定当前执行者，Bull/Bear 并行调用不通过线程局部变量传递身份。调用开始还会验证快照属于相同 run/attempt，不能引用其它运行的数据。
@@ -246,7 +248,7 @@ V14 的 `research_model_invocations` 按调用 UUID 留存事实。`ModelInvocat
 
 `ModelInvocationAdvisor` 从真实 ChatClient 请求与响应提取信息，接在 Bull、Bear、评分、续停、综合及补证调用上。流式请求启用提供商 usage 返回；最终记录最近一次提供商用量快照，不能把累计快照逐块求和。没有用量时标为 `NO_DATA`，不填零；调用状态区分 `SUCCEEDED`、`FAILED`、`CANCELLED`，仅表示模型调用结束方式，不代表研究业务验收。实际响应模型名是提供商返回值，仍不保证固定权重修订。
 
-请求记录包含按相同文本范围统计的 UTF-8 字节数和消息数，`inputTokenCountStatus=NOT_COUNTED`。输出控制记录 `maxTokens`、可用的 `maxCompletionTokens`、`n`、`reasoningEffort` 及白名单内的 `enable_thinking`、`thinking_budget`；任意 extraBody 内容不落库，仅记录是否存在。`optionsScope=CHAT_CLIENT_REQUEST_OPTIONS` 表示 SDK 合并模型默认值前的范围，`totalOutputTokenCeilingStatus=UNVERIFIED` 不将这些值声称为完整供应商 token 上限。
+请求记录包含按相同文本范围统计的 UTF-8 字节数和消息数，`inputTokenCountStatus=NOT_COUNTED`。输出控制通过与实际转发相同的转换记录 `maxTokens`、可用的 `maxCompletionTokens`、`n`、`reasoningEffort`，以及白名单内的思考开关／预算；任意 extraBody 内容不落库。`optionsScope=PROVIDER_ROUTED_REQUEST_OPTIONS` 表示供应商路由后的请求选项，SDK 消息封装仍在范围之外。DeepSeek 官方使用 `thinkingType` 和 `reasoningEffort`，`reasoningTokenLimitStatus=NO_SEPARATE_LIMIT` 表示思考长度没有独立上限，预算只校验包含思考与正文的 `maxTokens`；参数语义见[DeepSeek 官方 API](https://api-docs.deepseek.com/api/create-chat-completion/)。`totalOutputTokenCeilingStatus=UNVERIFIED` 不把配置值当作供应商已验证的实际保证。
 
 Qwen 的回答限制与包含思考的输出限制有不同语义，且支持范围因模型而异，见[官方兼容 API 参数](https://help.aliyun.com/zh/model-studio/qwen-api-via-openai-chat-completions)。整窗预留使用绑定部署、模型和有效期的输入／回答／思考上限合同，不把文本字节数或费率适用范围当作准确 token 数。
 
@@ -292,6 +294,6 @@ V16 在报告版本上保存首次创建者的 producer_run_id、producer_attemp
 | `rates[请求模型名].output-per-million` | 每百万输出 token 的非负十进制名义费率 |
 | `rates[请求模型名].max-input-tokens` | 这组固定费率适用的最大输入长度，必须大于零 |
 
-调用开始时核对运行冻结的费率卡，再按提供方指纹、请求模型和当时有效期选择并保存 `request_json.priceSnapshot`。调用结束只读取该快照，用提供商返回的 input/output token 和 BigDecimal 计算 `(input × inputRate + output × outputRate) / 1,000,000`，将结果与调用终态一同保存。查询不读取当前费率重算历史，迟到终态不能覆盖已记录估算。
+调用开始时按当前费率卡、提供方指纹、请求模型和当时有效期选择并保存 `request_json.priceSnapshot`。调用结束只读取该快照，用提供商返回的 input/output token 和 BigDecimal 计算 `(input × inputRate + output × outputRate) / 1,000,000`，将结果与调用终态一同保存。查询不读取当前费率重算历史，迟到终态不能覆盖已记录估算。
 
 金额始终标记 `CONFIGURED_FLAT_RATE_ESTIMATE`，按请求型号计价，不能称供应商实际账单。取消/失败只能得到部分估算；缺 token、缺卡、型号/来源/有效期不匹配或超出输入适用上限时不填金额并保留原因。只有提供商明确返回零用量或配置了真实零费率时，估算才可以为零。此公式不模拟阶梯价格、缓存折扣、批处理优惠、税费或服务商额外计费；有这些条件时仍是固定名义费率估算，不能用来宣称最终扣款或硬金额上限。重启更换费率卡后，旧运行保留原清单并拒绝继续执行，新的主动研究使用新卡。

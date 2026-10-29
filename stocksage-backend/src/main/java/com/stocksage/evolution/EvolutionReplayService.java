@@ -2,17 +2,17 @@ package com.stocksage.evolution;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.agent.AgentRuntimeConfiguration;
-import com.stocksage.agent.FundamentalsAgent;
-import com.stocksage.agent.FundamentalsPrompts;
 import com.stocksage.agent.ModelTier;
-import com.stocksage.agent.ModelCompletion;
 import com.stocksage.agent.PlanAction;
-import com.stocksage.conversation.ChatPromptAssembler;
-import com.stocksage.conversation.OrdinaryAnswerReplayService;
-import com.stocksage.conversation.OrdinaryAnswerReplayService.PromptMessage;
-import com.stocksage.service.ToolPrefetchService;
+import com.stocksage.agent.analyst.FundamentalsAgent;
+import com.stocksage.agent.analyst.FundamentalsPrompts;
+import com.stocksage.agent.ordinary.ToolPrefetchService;
+import com.stocksage.agent.runtime.AgentRuntimeConfiguration;
+import com.stocksage.agent.runtime.ModelCompletion;
 import com.stocksage.config.RuntimeArtifactIdentity;
+import com.stocksage.conversation.ChatPromptAssembler;
+import com.stocksage.conversation.OrdinaryAnswerReplayService.PromptMessage;
+import com.stocksage.conversation.OrdinaryAnswerReplayService;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
@@ -67,7 +67,7 @@ public class EvolutionReplayService {
                                   @Value("${stocksage.evolution.eval.case-file:}") String caseFile,
                                   @Value("${stocksage.evolution.eval.bundle-file:}") String bundleFile,
                                   @Value("${stocksage.agent.prefetch.timeout-seconds:120}") long timeoutSeconds,
-                                  @Value("${stocksage.chat.prompt.max-text-chars:24000}") int promptMaxChars) {
+                                  @Value("${stocksage.chat.prompt.max-text-chars:60000}") int promptMaxChars) {
         this.analyst = analyst;
         this.methods = methods;
         this.runtime = runtime;

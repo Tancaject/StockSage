@@ -5,6 +5,7 @@ import com.stocksage.util.JsonText;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.PlanRoute;
+import com.stocksage.agent.runtime.ModelCompletion;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,8 +75,9 @@ public class IntentRecognitionService {
         boolean rawRouteValid = false;
         String rationale = "";
         String degradationReason = "";
+        Map<String, Object> modelObservation = new LinkedHashMap<>();
         try {
-            ParsedLlm parsed = parseLlm(callLlm(safeRequest), safeRequest);
+            ParsedLlm parsed = parseLlm(callLlm(safeRequest, modelObservation), safeRequest);
             rawRoute = parsed.rawRoute();
             rawRouteValid = parsed.decisionValid();
             rationale = parsed.rationale();
@@ -108,7 +110,7 @@ public class IntentRecognitionService {
         }
         return new IntentRecognitionResult(
                 decision, rawRoute, rawRouteValid, rationale, signals, degradationReason,
-                TimeUnit.NANOSECONDS.toMillis(Math.max(0L, System.nanoTime() - startedNanos)));
+                TimeUnit.NANOSECONDS.toMillis(Math.max(0L, System.nanoTime() - startedNanos)), modelObservation);
     }
 
     String buildPrompt(IntentRecognitionRequest request) {
@@ -132,11 +134,26 @@ public class IntentRecognitionService {
         );
     }
 
-    private String callLlm(IntentRecognitionRequest request) {
+    private String callLlm(IntentRecognitionRequest request, Map<String, Object> observation) {
         if (routingChatClient == null) {
             throw new IllegalStateException("routing client unavailable");
         }
-        return routingChatClient.prompt().user(buildPrompt(request)).call().content();
+        observation.putAll(Map.of("kind", "model-invocation", "scope", "routing",
+                "invocationId", java.util.UUID.randomUUID().toString(), "status", "FAILED",
+                "callCountSemantics", "CLIENT_INVOCATION"));
+        observation.putAll(ModelCompletion.usage(null));
+        long started = System.nanoTime();
+        try {
+            var response = routingChatClient.prompt().user(buildPrompt(request)).call().chatResponse();
+            observation.putAll(ModelCompletion.usage(response));
+            observation.put("status", "SUCCEEDED");
+            return ModelCompletion.output(response).content();
+        } catch (RuntimeException error) {
+            observation.put("errorType", error.getClass().getSimpleName());
+            throw error;
+        } finally {
+            observation.put("durationMs", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started));
+        }
     }
 
     private ParsedLlm parseLlm(String content, IntentRecognitionRequest request) throws Exception {

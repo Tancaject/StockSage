@@ -28,6 +28,18 @@ IBKR 的历史响应由 [IbkrHistoricalResponse](../../stocksage-backend/src/mai
 
 原始 OHLC 与成交量不做隐式二次缩放；因子随数据保留。`mktDataDelay` 的官方说明是处理历史请求的延迟，不能直接当作报价延迟分钟数，`mdAvailability` 也保留原码供解释。依据：[IBKR 历史行情字段说明](https://ibkrcampus.com/docs/web-api/v1/endpoints/market-data/historical-market-data)和[OHLC 接口示例](https://www.interactivebrokers.com/docs/web-api/api-reference/trading/trading-market-data/get-md-history)。
 
+## 美股日线技术指标
+
+`POST /api/stock/technical/calculate` 接收后端已取得的 IBKR history 和 `MA`、`RSI`、`MACD` 指标列表，只计算、不请求行情。输入边界与计算见 [technical.py](../../stocksage-data-service/app/technical.py)，Java 消费契约见 [TechnicalIndicatorsResponse](../../stocksage-backend/src/main/java/com/stocksage/client/TechnicalIndicatorsResponse.java)。A/H 股仍使用现有技术指标 GET。
+
+计算前核对源状态、时间、条数与有限的正收盘价，拒绝重复时间戳，再按时间升序计算；不删坏价格、不再次应用价格因子。`period` 保留真实行情窗口，`bar` 只支持 `1d`。响应的 `asOf`、`fetchedAt`、延迟资格、币种和复权状态来自同一份源行情，`firstBarAt/count` 表示实际参与计算的范围；最后一条日线可能尚未收盘。
+
+MA5/10/20/60 使用对应条数的简单均值；RSI14 使用涨跌额的 14 期简单滚动均值，至少需要 15 个收盘价；MACD 使用 pandas `ewm` 默认的 `adjust=True`，EMA12/26、DEA9，柱值为 `2 × (DIF − DEA)`，至少需要 26 个收盘价。这些门槛不代表指数均值已收敛，MACD 数值仍受历史起点影响。样本不足的字段为 `null`，`unavailable` 保留具体原因；横盘 RSI 的 0/0 留空，不改成 50。KDJ、布林带及非日线指标不在此接口范围。
+
+`SUCCESS` 表示本次请求的指标都有数值，`PARTIAL` 表示部分指标留有缺口，`EMPTY` 表示没有可用指标；调用或输入失败使用 `ERROR/UNSUPPORTED`。普通回答可引用 PARTIAL 中的有效数值，但缺口不会被认定为技术需求已完整满足。
+
+独立两参 `getTechnicalIndicators` 工具对美股使用最近一年日线；普通取证使用对应步骤的实际窗口，同一执行批次存在匹配 K 线步骤时直接派生，备用步骤只与本批步骤配对；DEEP 从已有一年日线派生。纯计算 POST 不使用股票代码级缓存，避免把不同源行情的结果混在一起。
+
 ## 演进边界
 
 Python `/api/stock/kline` 负责 A 股和港股，美股请求明确返回不支持并指向现有只读 IBKR 能力。IBKR 的时间戳、权限、合约和延迟语义属于其适配边界，不能拿 Python 的日线约定覆盖它。

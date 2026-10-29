@@ -136,6 +136,66 @@ public class IbkrReadOnlyService {
     }
 
     /**
+     * 报价快照保留供应商的可用性标记和更新时间；不把更新时间当成成交时间。
+     * accounts 请求是 IBKR snapshot 的前置初始化，响应不进入工具结果。
+     */
+    public String getMarketSnapshot(String code) {
+        return execute("marketSnapshot", () -> {
+            IbkrInstrument instrument = instrumentResolver.resolve(code);
+            if (!instrument.supported()) {
+                return errorPayload(code, instrument.message()).put("errorCode", "UNSUPPORTED_SYMBOL").put("retryable", false);
+            }
+            JsonNode contract = resolveContract(instrument);
+            String conid = text(contract, "conid");
+            if (conid.isBlank() || !instrument.symbol().equalsIgnoreCase(text(contract, "symbol"))) {
+                return errorPayload(code, "IBKR did not return an exact symbol match; resolve the security before retrying.")
+                        .put("errorCode", "IBKR_CONTRACT_NOT_FOUND").put("retryable", false);
+            }
+            JsonNode session = client.get(uri -> uri.path("/iserver/accounts").build());
+            if (session.hasNonNull("error")) {
+                return errorPayload(code, "IBKR could not initialize market data; check the Gateway login and market data permissions.")
+                        .put("errorCode", "IBKR_SESSION_REQUIRED").put("retryable", true);
+            }
+            JsonNode response = client.get(uri -> uri.path("/iserver/marketdata/snapshot")
+                    .queryParam("conids", conid).queryParam("fields", "31,84,86,55,6509").build());
+            JsonNode row = null;
+            if (response.isArray()) for (JsonNode candidate : response) {
+                if (conid.equals(text(candidate, "conid"))) { row = candidate; break; }
+            }
+            if (row == null) {
+                return errorPayload(code, "IBKR returned no matching quote; check the contract and market data permissions, then retry.")
+                        .put("errorCode", "IBKR_QUOTE_UNAVAILABLE").put("retryable", true);
+            }
+            ObjectNode result = objectMapper.createObjectNode();
+            result.put("provider", "IBKR_WEB_API").put("input", code).put("symbol", instrument.symbol())
+                    .put("market", instrument.market()).put("conid", conid).put("exchange", instrument.exchange())
+                    .put("fetchedAt", Instant.now().toString()).put("error", false);
+            result.put("currency", text(contract, "currency").isBlank() ? "UNKNOWN" : text(contract, "currency"));
+            result.put("availabilityCode", text(row, "6509"));
+            result.putNull("delayed");
+            result.put("timeKind", "GATEWAY_UPDATE_TIME");
+            if (row.path("_updated").isIntegralNumber()) {
+                result.put("asOf", Instant.ofEpochMilli(row.get("_updated").longValue()).toString());
+            } else result.putNull("asOf");
+            for (String[] field : new String[][]{{"31", "last"}, {"84", "bid"}, {"86", "ask"}}) {
+                String raw = text(row, field[0]);
+                result.put(field[1] + "Raw", raw);
+                // IBKR may prefix stale or indicative values; retain them but do not coerce them into a current quote.
+                if (raw.matches("[0-9]+(?:\\.[0-9]+)?") && new java.math.BigDecimal(raw).signum() > 0) {
+                    result.put(field[1], new java.math.BigDecimal(raw));
+                } else result.putNull(field[1]);
+            }
+            boolean available = result.hasNonNull("last") || result.hasNonNull("bid") || result.hasNonNull("ask");
+            result.put("status", available ? "SUCCESS" : "EMPTY");
+            result.put("message", available
+                    ? "Gateway update time is not trade time. Availability is supplied unchanged; realtime entitlement is not inferred."
+                    : "IBKR snapshot preflight returned no numeric quote. Retry after subscription initialization or check market data permissions.");
+            result.put("retryable", !available);
+            return result;
+        });
+    }
+
+    /**
      * 搜索并选择 IBKR 合约定义，返回包含 conid 的合约节点。
      *
      * @param instrument 已归一化标的

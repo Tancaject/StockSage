@@ -1,24 +1,25 @@
 package com.stocksage.evidence.adapter;
 
+import com.stocksage.agent.TickerResolutionService;
 import com.stocksage.util.Hashing;
-import com.stocksage.service.TickerResolutionService;
-import com.stocksage.service.KLinePayloadMapper;
+import com.stocksage.workbench.KLinePayloadMapper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.client.DataServicePayloads;
-import com.stocksage.client.KLineResponse;
-import com.stocksage.client.SecFinancialsResponse;
 import com.stocksage.client.AShareFinancialsResponse;
+import com.stocksage.client.DataServicePayloads;
 import com.stocksage.client.HkFinancialsResponse;
+import com.stocksage.client.KLineResponse;
 import com.stocksage.client.SearchResponse;
+import com.stocksage.client.SecFinancialsResponse;
+import com.stocksage.client.TechnicalIndicatorsResponse;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.stocksage.ibkr.IbkrHistoricalResponse;
-import com.stocksage.evidence.EvidenceTiming;
 import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
 import com.stocksage.evidence.EvidenceModels.EvidenceEnvelope;
 import com.stocksage.evidence.EvidenceModels.EvidenceStatus;
 import com.stocksage.evidence.EvidenceModels.TargetIdentity;
+import com.stocksage.evidence.EvidenceTiming;
+import com.stocksage.ibkr.IbkrHistoricalResponse;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -115,7 +116,8 @@ public class EvidenceEnvelopeMapper {
                         default -> throw new IllegalArgumentException("Unsupported K-line period");
                     };
                     EvidenceTiming timing = new EvidenceTiming(1, Instant.parse(response.fetchedAt()),
-                            new EvidenceTiming.Market(response.market(), bar, "DATE", dateOrNull(response.asOf()), null, null), null, null);
+                            new EvidenceTiming.Market(response.market(), bar, "DATE", dateOrNull(response.asOf()), null, null,
+                                    dateOrNull(response.lastTradingDate())), null, null);
                     EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
                             ? new EvidenceProvenance(stableProviderRef(response.provider(), capabilityId, response.resolvedCode()),
                                     response.provider(), parseBusinessInstant(response.asOf())) : EvidenceProvenance.empty();
@@ -129,9 +131,23 @@ public class EvidenceEnvelopeMapper {
                     if (status == EvidenceStatus.FAILED) return PayloadFacts.empty(target, status);
                     Instant asOf = response.asOf() == null ? null : Instant.parse(response.asOf());
                     EvidenceTiming timing = new EvidenceTiming(1, Instant.parse(response.fetchedAt()),
-                            new EvidenceTiming.Market(response.market(), response.bar(), "INSTANT", null, asOf, response.delayed()), null, null);
+                            new EvidenceTiming.Market(response.market(), response.bar(), "INSTANT", null, asOf, response.delayed(), null), null, null);
                     EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
                             ? new EvidenceProvenance(ibkrHistoryRef(root, target), response.provider(), asOf) : EvidenceProvenance.empty();
+                    return new PayloadFacts(target, status, provenance, timing);
+                }
+                if ("getTechnicalIndicators".equals(name)) {
+                    TechnicalIndicatorsResponse response = TechnicalIndicatorsResponse.fromJson(root);
+                    target = normalizedTarget(response.symbol(), requested);
+                    EvidenceStatus status = contractStatus(response.status());
+                    if (status == EvidenceStatus.FAILED) return PayloadFacts.empty(target, status);
+                    Instant asOf = response.asOf() == null ? null : Instant.parse(response.asOf());
+                    EvidenceTiming timing = new EvidenceTiming(1, Instant.parse(response.fetchedAt()),
+                            new EvidenceTiming.Market(response.market(), response.bar(), "INSTANT", null,
+                                    asOf, response.delayed(), null), null, null);
+                    EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
+                            ? new EvidenceProvenance(ibkrHistoryRef(root, target), response.provider(), asOf)
+                            : EvidenceProvenance.empty();
                     return new PayloadFacts(target, status, provenance, timing);
                 }
                 if ("getStructuredFinancials".equals(name)
@@ -143,8 +159,11 @@ public class EvidenceEnvelopeMapper {
                     var facts = response.metrics().values().stream().flatMap(metric -> metric.data().stream()).toList();
                     LocalDate latestEnd = facts.stream().map(fact -> LocalDate.parse(fact.end())).max(LocalDate::compareTo).orElse(null);
                     LocalDate latestFiled = facts.stream().map(fact -> LocalDate.parse(fact.filed())).max(LocalDate::compareTo).orElse(null);
+                    // 申报索引中同类报告（年度取 10-K，单季取 10-Q）最新一份的申报日期，用来核对是否已拿到最新报告。
+                    LocalDate latestFiledReport = response.latestFilings() == null ? null
+                            : dateOrNull(response.latestFilings().get("quarterly".equals(response.period()) ? "10-Q" : "10-K"));
                     EvidenceTiming timing = new EvidenceTiming(1, Instant.parse(response.fetchedAt()), null,
-                            new EvidenceTiming.Financial(response.period(), latestEnd, latestFiled), null);
+                            new EvidenceTiming.Financial(response.period(), latestEnd, latestFiled, "US", latestFiledReport), null);
                     // 申报日期决定事实修订版本，财务事实的业务期间仍取 asOf。
                     EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
                             ? new EvidenceProvenance(secCompanyFactsUrl(response.cik()), response.provider(),
@@ -162,7 +181,7 @@ public class EvidenceEnvelopeMapper {
                     LocalDate latestEnd = rows.stream().map(row -> LocalDate.parse(row.statDate())).max(LocalDate::compareTo).orElse(null);
                     LocalDate latestPublished = rows.stream().map(row -> LocalDate.parse(row.pubDate())).max(LocalDate::compareTo).orElse(null);
                     EvidenceTiming timing = new EvidenceTiming(1, Instant.parse(response.fetchedAt()), null,
-                            new EvidenceTiming.Financial(response.period(), latestEnd, latestPublished), null);
+                            new EvidenceTiming.Financial(response.period(), latestEnd, latestPublished, "A_SHARE", null), null);
                     EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
                             ? new EvidenceProvenance(stableProviderRef(response.provider(), capabilityId, response.code()),
                                     response.provider(), parseBusinessInstant(response.asOf())) : EvidenceProvenance.empty();
@@ -175,10 +194,45 @@ public class EvidenceEnvelopeMapper {
                     if (status == EvidenceStatus.FAILED) return PayloadFacts.empty(target, status);
                     // 港股契约的 asOf 是有数值行的 REPORT_DATE，上游未提供明确披露日期。
                     EvidenceTiming timing = new EvidenceTiming(1, Instant.parse(response.fetchedAt()), null,
-                            new EvidenceTiming.Financial(response.period(), dateOrNull(response.asOf()), null), null);
+                            new EvidenceTiming.Financial(response.period(), dateOrNull(response.asOf()), null, "HK", null), null);
                     EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
                             ? new EvidenceProvenance(stableProviderRef(response.provider(), capabilityId, response.resolvedCode()),
                                     response.provider(), parseBusinessInstant(response.asOf())) : EvidenceProvenance.empty();
+                    return new PayloadFacts(target, status, provenance, timing);
+                }
+                if ("OFFICIAL_DISCLOSURE".equals(root.path("provider").asText())) {
+                    target = normalizedTarget(root.path("ticker").asText(""), requested);
+                    EvidenceStatus status = switch (root.path("status").asText()) {
+                        case "SUCCESS" -> root.path("blocks").isArray() && !root.path("blocks").isEmpty()
+                                ? EvidenceStatus.AVAILABLE : EvidenceStatus.EMPTY;
+                        case "EMPTY", "AMBIGUOUS_SECTION" -> EvidenceStatus.EMPTY;
+                        default -> EvidenceStatus.FAILED;
+                    };
+                    EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
+                            ? new EvidenceProvenance(root.path("documentUrl").asText(""), "OFFICIAL_DISCLOSURE", null)
+                            : EvidenceProvenance.empty();
+                    // Reading an exact historical source does not establish the report period or its freshness.
+                    return new PayloadFacts(target, status, provenance, null);
+                }
+                if ("getFilingText".equals(name)) {
+                    // SEC 申报原文摘录：报告期末决定时效，申报日记为披露日；没有报告期末时时效保持未确认。
+                    target = normalizedTarget(root.path("ticker").asText(""), requested);
+                    EvidenceStatus status = switch (root.path("status").asText("")) {
+                        case "SUCCESS" -> EvidenceStatus.AVAILABLE;
+                        case "EMPTY" -> EvidenceStatus.EMPTY;
+                        default -> EvidenceStatus.FAILED;
+                    };
+                    if (status == EvidenceStatus.FAILED) return PayloadFacts.empty(target, status);
+                    String reportDate = root.hasNonNull("reportDate") ? root.get("reportDate").asText() : null;
+                    String filingDate = root.hasNonNull("filingDate") ? root.get("filingDate").asText() : null;
+                    String period = "10-Q".equals(root.path("filingType").asText()) ? "quarterly" : "annual";
+                    EvidenceTiming timing = new EvidenceTiming(1, Instant.parse(root.path("fetchedAt").asText()), null,
+                            // 这条路径读取的就是申报索引中最新一份申报，申报日期即最新报告日期。
+                            new EvidenceTiming.Financial(period, dateOrNull(reportDate), dateOrNull(filingDate),
+                                    "US", dateOrNull(filingDate)), null);
+                    EvidenceProvenance provenance = status == EvidenceStatus.AVAILABLE
+                            ? new EvidenceProvenance(root.path("documentUrl").asText(""), "SEC_EDGAR", parseBusinessInstant(reportDate))
+                            : EvidenceProvenance.empty();
                     return new PayloadFacts(target, status, provenance, timing);
                 }
                 if (root.has("searchType") && isSearchEvidence(capabilityId)) {
@@ -213,9 +267,38 @@ public class EvidenceEnvelopeMapper {
             target = structuredEvidenceTarget(requested, root);
             EvidenceStatus status = inspectUnversionedStatus(name, root);
             EvidenceProvenance provenance = extractProvenance(capabilityId, target, root);
-            return new PayloadFacts(target, status, provenance, null);
+            return new PayloadFacts(target, status, provenance, filingSearchTiming(root));
         } catch (Exception invalid) {
             return PayloadFacts.empty(target, EvidenceStatus.FAILED);
+        }
+    }
+
+    /**
+     * 知识库财报原文检索：最新一段的申报日期为披露日，检索时附带的申报索引最新日期为最新报告日期。
+     * 摘录没有报告期末；缺抓取时间或申报日期时不构造时间事实，时效保持未确认。
+     */
+    private static EvidenceTiming filingSearchTiming(JsonNode root) {
+        if (!"STOCKSAGE_KB_SEC_FILING".equals(root.path("provider").asText()) || !root.path("fetchedAt").isTextual()) {
+            return null;
+        }
+        LocalDate latestPassage = null;
+        for (JsonNode row : root.path("results")) {
+            LocalDate filed = lenientDate(row.path("filingDate").asText(null));
+            if (filed != null && (latestPassage == null || filed.isAfter(latestPassage))) latestPassage = filed;
+        }
+        if (latestPassage == null) return null;
+        String period = "10-Q".equals(root.path("form").asText()) ? "quarterly" : "annual";
+        return new EvidenceTiming(1, Instant.parse(root.path("fetchedAt").asText()), null,
+                new EvidenceTiming.Financial(period, null, latestPassage, "US",
+                        lenientDate(root.path("latestFiling").path("filingDate").asText(null))), null);
+    }
+
+    /** 时间事实只是补充；格式不对时当作未知，不能让整条检索证据判为失败。 */
+    private static LocalDate lenientDate(String value) {
+        try {
+            return value == null || value.isBlank() ? null : LocalDate.parse(value);
+        } catch (java.time.format.DateTimeParseException invalid) {
+            return null;
         }
     }
 
@@ -458,7 +541,8 @@ public class EvidenceEnvelopeMapper {
                 else statements.set(name, summary);
                 summary.putArray("data");
             }
-            if (selected.toString().length() > maxChars) return "{\"contextReduced\":true}";
+            if (selected.toString().length() > maxChars) return OMITTED_CONTEXT;
+            boolean hasRows = false;
             for (String name : List.of("balanceSheet", "incomeStatement", "cashFlow", "indicators")) {
                 JsonNode source = name.equals("indicators") ? root.path(name) : root.path("statements").path(name);
                 ObjectNode target = (ObjectNode) (name.equals("indicators") ? selected.path(name) : statements.path(name));
@@ -477,9 +561,10 @@ public class EvidenceEnvelopeMapper {
                 for (JsonNode row : ordered) {
                     rows.add(row);
                     if (selected.toString().length() > maxChars) rows.remove(rows.size() - 1);
+                    else hasRows = true;
                 }
             }
-            return selected.toString();
+            return hasRows ? selected.toString() : OMITTED_CONTEXT;
         } catch (Exception error) {
             // 校验失败的工具正文沿用原有不可引用状态，不将它改写成成功财务数据。
             return payload;

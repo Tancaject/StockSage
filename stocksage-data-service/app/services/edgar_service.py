@@ -16,7 +16,9 @@ import logging
 import threading
 from html.parser import HTMLParser
 from xml.etree import ElementTree
-from datetime import date
+from datetime import date, timedelta
+from decimal import Decimal
+from itertools import combinations
 from math import isfinite
 from urllib.parse import urlparse
 
@@ -38,6 +40,10 @@ _CIK_CACHE: dict[str, str] = {}
 # 只缓存成功取到的 SIC；查询失败不入缓存，下次仍会重试。
 _SIC_CACHE: dict[str, str] = {}
 _BALANCE_SHEET_CACHE: dict[str, dict] = {}
+_BREAKDOWN_CACHE: dict[str, dict] = {}
+# 最新申报日期缓存一小时：新申报当天即可被发现，又不会每次请求都打 SEC submissions。
+_LATEST_FILINGS_CACHE: dict[str, tuple[float, dict]] = {}
+_LATEST_FILINGS_TTL = 3600
 _ALLOWED_SEC_HOSTS = {"sec.gov", "www.sec.gov", "data.sec.gov"}
 
 
@@ -120,6 +126,7 @@ class EdgarService:
         dates = recent.get("filingDate", [])
         accessions = recent.get("accessionNumber", [])
         primary_docs = recent.get("primaryDocument", [])
+        report_dates = recent.get("reportDate", [])
 
         filings = []
         for i, form in enumerate(forms):
@@ -135,6 +142,8 @@ class EdgarService:
                     "accession_number": accessions[i],
                     "document_url": doc_url,
                     "primary_document": primary_docs[i],
+                    # 报告期末（SEC submissions 的 reportDate）；缺失时为 None，调用方不能用申报日代替。
+                    "report_date": report_dates[i] if i < len(report_dates) and report_dates[i] else None,
                 })
 
         return {
@@ -565,7 +574,12 @@ class EdgarService:
         "LongTermDebtNoncurrent": ["us-gaap:LongTermDebtNoncurrent"],
         "LongTermDebtAndFinanceLeases": ["us-gaap:LongTermDebtAndCapitalLeaseObligations"],
     }
-    _INSTANT_METRICS = {"TotalAssets", "TotalLiabilities", "StockholdersEquity", "TotalDebt", "Cash",
+    _FINANCIAL_EXTRAS = {
+        "Inventory": ["us-gaap:InventoryNet"],
+        "CostOfRevenue": ["us-gaap:CostOfRevenue", "us-gaap:CostOfGoodsAndServicesSold"],
+        "CommonSharesOutstanding": ["us-gaap:CommonStockSharesOutstanding"],
+    }
+    _INSTANT_METRICS = {"TotalAssets", "TotalLiabilities", "StockholdersEquity", "TotalDebt", "Cash", "Inventory", "CommonSharesOutstanding",
                         "CurrentAssets", "CurrentLiabilities", "ShortTermBorrowings", "CommercialPaper",
                         "DebtCurrent", "LongTermDebtCurrent", "LongTermDebtNoncurrent", "LongTermDebtAndFinanceLeases"}
     # 银行（SIC 6020-6039）的经营现金流和资本开支没有分析意义，换成净利息收入和信贷损失拨备。
@@ -579,14 +593,20 @@ class EdgarService:
     }
     # 最新期末比公司最新期末早一年以上的指标，说明公司已改用其它概念，展示出来会被当成当前数据。
     _STALE_METRIC_DAYS = 400
+    _CUMULATIVE_FLOW_METRICS = {"OperatingCashFlow", "ContinuingOperationsCashFlow", "CapitalExpenditure",
+                                "LeasedEquipmentExpenditure", "ConsolidatedNetIncome", "ContinuingOperationsNetIncome"}
 
-    def get_xbrl(self, ticker: str, period: str = "annual") -> dict:
+    def get_xbrl(self, ticker: str, period: str = "annual", *, as_of: str | None = None,
+                 financial_extras: bool = False) -> dict:
         """
         从 XBRL companyfacts API 获取结构化财务数据。
 
         返回按实际 start/end 排列的年度（或单季）指标；filing_fiscal_year 只表示公告标签。
-        period="quarterly" 时只取 10-Q 中约 90 天的单季事实：10-Q 不含第四财季，这里不做年报减三季的推算。
+        quarterly 优先用披露的单季值，现金流可用同财年累计差额还原 Q2/Q3；不推算 Q4。
         """
+        cutoff = date.fromisoformat(as_of) if as_of else None
+        if cutoff is not None and cutoff > date.today():
+            raise ValueError("SEC information cutoff cannot be in the future")
         quarterly = period == "quarterly"
         cik = self._resolve_cik(ticker)
         url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
@@ -595,7 +615,17 @@ class EdgarService:
         company_name = data.get("entityName", ticker)
         facts = data.get("facts", {}).get("us-gaap", {})
         concept_table = dict(self._XBRL_CONCEPTS)
-        if self._is_bank(cik):
+        if financial_extras:
+            concept_table.update(self._FINANCIAL_EXTRAS)
+        if cutoff is not None:
+            # 在选最新版本/概念和还原季度之前裁剪，避免后来的修订改变历史答案。
+            facts = {name: {**definition, "units": {
+                unit: [entry for entry in entries if self._known_by(entry, cutoff)]
+                for unit, entries in definition.get("units", {}).items()}}
+                for name, definition in facts.items()}
+            # 当前 SIC 不代表历史分类；历史查询保留截止日前可取得的金融事实，不使用今天的银行分类删科目。
+            concept_table.update(self._BANK_CONCEPTS)
+        elif self._is_bank(cik):
             for label in self._BANK_DROPPED:
                 concept_table.pop(label, None)
             concept_table.update(self._BANK_CONCEPTS)
@@ -621,7 +651,8 @@ class EdgarService:
                 for unit_key in ["USD", "USD/shares", "shares"]:
                     if unit_key not in units_data:
                         continue
-                    annual = self._filter_periods(
+                    annual = self._quarterly_flows(units_data[unit_key], concept, unit_key, url) \
+                        if quarterly and label in self._CUMULATIVE_FLOW_METRICS and unit_key == "USD" else self._filter_periods(
                         units_data[unit_key],
                         instant=label in self._INSTANT_METRICS,
                         annual_ends=annual_ends,
@@ -641,11 +672,8 @@ class EdgarService:
             if best:
                 metrics[label] = best
 
-        # 细分口径与基础指标最新值相同时只保留基础指标，避免重复行。
-        for variant, base in (("ConsolidatedNetIncome", "NetIncome"), ("SalesRevenue", "Revenue"),
-                              ("ContinuingOperationsNetIncome", "ConsolidatedNetIncome"),
-                              ("ContinuingOperationsNetIncome", "NetIncome"),
-                              ("ContinuingOperationsCashFlow", "OperatingCashFlow"),
+        # 现金转化需保留整套口径，不能因最新一期相同就抹掉历史差异或持续经营的一侧。
+        for variant, base in (("SalesRevenue", "Revenue"),
                               ("LongTermDebtNoncurrent", "TotalDebt"), ("LongTermDebtCurrent", "DebtCurrent")):
             if variant in metrics and base in metrics                     and metrics[variant]["data"][-1]["value"] == metrics[base]["data"][-1]["value"]:
                 del metrics[variant]
@@ -664,6 +692,13 @@ class EdgarService:
             "metric_count": len(metrics),
             "metrics": metrics,
         }
+
+    @staticmethod
+    def _known_by(entry: dict, cutoff: date) -> bool:
+        try:
+            return date.fromisoformat(entry["filed"]) <= cutoff
+        except (KeyError, ValueError, TypeError):
+            return False
 
     _BALANCE_SHEET_TITLE = re.compile(r"balance sheet|financial position|financial condition", re.IGNORECASE)
 
@@ -694,6 +729,152 @@ class EdgarService:
         _BALANCE_SHEET_CACHE[accession] = sheet
         return sheet
 
+    # companyfacts 只有不带维度的合并数；分部、地区、产品拆分只在每份申报自带的 XBRL 实例里。
+    _BREAKDOWN_AXES = {
+        "StatementBusinessSegmentsAxis": "segment",
+        "StatementGeographicalAxis": "geography",
+        "ProductOrServiceAxis": "product",
+    }
+    _BREAKDOWN_TOLERANCE = 0.005
+
+    def get_revenue_breakdown(self, cik: str, accession: str, form: str, revenue_concept: str) -> dict:
+        """
+        从申报的 XBRL 实例提取单一维度的营收和分部营业利润拆分。
+
+        只用单一维度的事实，同一期间各项加总须等于合并数（容差 0.5%），否则该期不用；
+        取不到时返回 UNAVAILABLE 和原因，调用方据此说明"未取得"，而不是让模型以为公司没有披露。
+        """
+        quarterly = form.startswith("10-Q")
+        key = f"{accession}|{revenue_concept}"
+        cached = _BREAKDOWN_CACHE.get(key)
+        if cached is not None:
+            return cached
+        base = f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/{accession.replace('-', '')}"
+        unavailable = {"accession": accession, "form": form, "source_url": base, "status": "UNAVAILABLE", "tables": []}
+        try:
+            files = [item["name"] for item in self._get(f"{base}/index.json").json()["directory"]["item"]]
+            instance = next((name for name in files if name.endswith("_htm.xml")), None)
+            if instance is None:
+                return {**unavailable, "reason": "NO_XBRL_INSTANCE"}
+            root = ElementTree.fromstring(self._get(f"{base}/{instance}").content)
+        except (httpx.HTTPError, KeyError, TypeError, ValueError, ElementTree.ParseError):
+            return {**unavailable, "reason": "FETCH_FAILED"}
+
+        contexts = {}
+        for context in root.iter("{http://www.xbrl.org/2003/instance}context"):
+            members = [(m.get("dimension", ""), (m.text or "").strip())
+                       for m in context.iter("{http://xbrl.org/2006/xbrldi}explicitMember")]
+            if context.find(".//{http://xbrl.org/2006/xbrldi}typedMember") is not None:
+                continue
+            start = context.findtext(".//{http://www.xbrl.org/2003/instance}startDate")
+            end = context.findtext(".//{http://www.xbrl.org/2003/instance}endDate")
+            if not start or not end:
+                continue
+            days = (date.fromisoformat(end.strip()) - date.fromisoformat(start.strip())).days
+            if not (80 <= days <= 100 if quarterly else 335 <= days <= 395):
+                continue
+            contexts[context.get("id")] = (members, start.strip(), end.strip())
+
+        concepts = {revenue_concept.split(":")[-1]: "Revenue", "OperatingIncomeLoss": "OperatingIncome"}
+        totals: dict[tuple, float] = {}
+        parts: dict[tuple, dict[str, float]] = {}
+        for element in root:
+            name = element.tag.rsplit("}", 1)[-1]
+            context = contexts.get(element.get("contextRef"))
+            if name not in concepts or context is None or "us-gaap" not in element.tag or not element.get("unitRef"):
+                continue
+            try:
+                value = float((element.text or "").strip())
+            except ValueError:
+                continue
+            members, start, end = context
+            metric = concepts[name]
+            # 分部事实常再挂一个"经营分部"限定维度（ConsolidationItemsAxis），它不改变拆分口径；
+            # 只有这个限定维度的事实是经营分部合计（未含未分摊项），不能当合并数。
+            qualified = [m for m in members if not (m[0].endswith("ConsolidationItemsAxis")
+                                                    and m[1].endswith("OperatingSegmentsMember"))]
+            if members and not qualified:
+                continue
+            members = qualified
+            if not members:
+                totals[(metric, start, end)] = value
+                continue
+            if len(members) != 1:
+                continue
+            axis = self._BREAKDOWN_AXES.get(members[0][0].split(":")[-1])
+            if axis is not None:
+                parts.setdefault((metric, axis, start, end), {})[members[0][1]] = value
+
+        tables = {}
+        for (metric, axis, start, end), members in parts.items():
+            total = totals.get((metric, start, end))
+            if total is None or total == 0:
+                continue
+            members = self._drop_nested_members(members, total)
+            if len(members) < 2 or abs(sum(members.values()) - total) > self._BREAKDOWN_TOLERANCE * abs(total):
+                continue
+            tables.setdefault((metric, axis), []).append({
+                "start": start, "end": end, "total": total,
+                "members": [{"name": self._member_label(member), "value": value}
+                            for member, value in sorted(members.items(), key=lambda item: -item[1])],
+            })
+        result_tables = []
+        for (metric, axis), periods in sorted(tables.items(), key=lambda item: (item[0][0] != "Revenue", item[0][1])):
+            periods.sort(key=lambda period: period["end"])
+            result_tables.append({"metric": metric, "axis": axis, "periods": periods[-(2 if quarterly else 3):]})
+        result = {**unavailable, "source_url": f"{base}/{instance}"}
+        if result_tables:
+            result.update(status="AVAILABLE", tables=result_tables)
+        else:
+            result["reason"] = "NO_RECONCILED_BREAKDOWN" if parts else "NO_DIMENSIONAL_FACTS"
+        _BREAKDOWN_CACHE[key] = result
+        return result
+
+    def _drop_nested_members(self, members: dict[str, float], total: float) -> dict[str, float]:
+        """
+        同一维度常混着两套口径：父项和子项（如数据中心及其计算、网络），或并列的两种分类
+        （如 MSFT 的产品/服务与十条产品线）。加总超出合并数时先去掉合计等于某一项的子项组；
+        仍对不上就取加总等于合并数、成员最多的那一组。
+        """
+        tolerance = self._BREAKDOWN_TOLERANCE * abs(total)
+        if abs(sum(members.values()) - total) <= tolerance or len(members) > 14:
+            return members
+        names = list(members)
+        for size in range(2, 5):
+            for children in combinations(names, size):
+                child_sum = sum(members[name] for name in children)
+                remaining = {name: value for name, value in members.items() if name not in children}
+                if any(abs(value - child_sum) <= tolerance for value in remaining.values()) \
+                        and abs(sum(remaining.values()) - total) <= tolerance:
+                    return remaining
+        for size in range(len(names) - 1, 1, -1):
+            for subset in combinations(names, size):
+                if abs(sum(members[name] for name in subset) - total) <= tolerance:
+                    return {name: members[name] for name in subset}
+        return members
+
+    @staticmethod
+    def _member_label(member: str) -> str:
+        """XBRL 成员名转可读文本：country:TW 保留国家代码，ChinaIncludingHongKongMember 拆成单词。"""
+        prefix, _, local = member.rpartition(":")
+        if prefix == "country":
+            return local
+        local = re.sub(r"Member$", "", local)
+        return re.sub(r"(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", " ", local).strip() or member
+
+    def latest_filing_dates(self, cik: str) -> dict[str, str]:
+        """SEC submissions 中最新一份 10-K 和 10-Q（不含修订版）的申报日期，供时效判断核对"是否已拿到最新报告"。"""
+        cached = _LATEST_FILINGS_CACHE.get(cik)
+        if cached is not None and time.monotonic() - cached[0] < _LATEST_FILINGS_TTL:
+            return cached[1]
+        recent = self._get(f"https://data.sec.gov/submissions/CIK{cik}.json").json()["filings"]["recent"]
+        latest: dict[str, str] = {}
+        for form, filed in zip(recent["form"], recent["filingDate"]):
+            if form in ("10-K", "10-Q") and (form not in latest or filed > latest[form]):
+                latest[form] = filed
+        _LATEST_FILINGS_CACHE[cik] = (time.monotonic(), latest)
+        return latest
+
     def _is_bank(self, cik: str) -> bool:
         """SEC submissions 的 SIC 6020-6039 为商业银行和储蓄机构；取不到时按一般公司处理。"""
         sic = _SIC_CACHE.get(cik)
@@ -706,11 +887,84 @@ class EdgarService:
         return sic.isdigit() and 6020 <= int(sic) <= 6039
 
     @staticmethod
+    def _quarterly_flows(entries: list[dict], concept: str, unit: str, source_url: str) -> list[dict]:
+        """同科目、单位和财年起点的累计差额；保留两份来源，不跨过缺失或冲突版本。"""
+        direct = EdgarService._filter_periods(entries, quarterly=True)
+        groups: dict[tuple[str, str], list[dict]] = {}
+        for entry in entries:
+            value = entry.get("val")
+            if entry.get("form") not in {"10-Q", "10-Q/A"} or isinstance(value, bool) \
+                    or not isinstance(value, (int, float)) or not isfinite(value) or not entry.get("accn"):
+                continue
+            try:
+                start, end, filed = (date.fromisoformat(entry[key]) for key in ("start", "end", "filed"))
+            except (KeyError, TypeError, ValueError):
+                continue
+            days = (end - start).days
+            if filed < end or not (80 <= days <= 100 or 160 <= days <= 200 or 240 <= days <= 300):
+                continue
+            groups.setdefault((start.isoformat(), end.isoformat()), []).append(entry)
+
+        direct_periods = {key for key in groups if 80 <= (date.fromisoformat(key[1]) - date.fromisoformat(key[0])).days <= 100}
+        derived = []
+        for (start, end), versions in groups.items():
+            duration = (date.fromisoformat(end) - date.fromisoformat(start)).days
+            if duration <= 100:
+                continue
+            newest = max((item["filed"], item["accn"]) for item in versions)
+            current_versions = [item for item in versions if (item["filed"], item["accn"]) == newest]
+            if len({item["val"] for item in current_versions}) != 1:
+                continue
+            current = current_versions[0]
+            previous_periods = []
+            for (prior_start, prior_end), candidates in groups.items():
+                prior_days = (date.fromisoformat(prior_end) - date.fromisoformat(prior_start)).days
+                quarter_start = date.fromisoformat(prior_end) + timedelta(days=1)
+                quarter_days = (date.fromisoformat(end) - quarter_start).days
+                eligible = [item for item in candidates if item["filed"] <= current["filed"]]
+                if prior_start == start and 80 <= quarter_days <= 100 and eligible \
+                        and (80 <= prior_days <= 100 if duration <= 200 else 160 <= prior_days <= 200):
+                    previous_periods.append((quarter_start, eligible))
+            if len(previous_periods) != 1:
+                continue
+            quarter_start, candidates = previous_periods[0]
+            if (quarter_start.isoformat(), end) in direct_periods:
+                continue
+            same_filing = [item for item in candidates if item["accn"] == current["accn"] and item["filed"] == current["filed"]]
+            selected = same_filing or candidates
+            previous_version = max((item["filed"], item["accn"]) for item in selected)
+            previous_values = [item for item in selected if (item["filed"], item["accn"]) == previous_version]
+            if len({item["val"] for item in previous_values}) != 1:
+                continue
+            # 比较列或修订申报改写过累计数时，跨申报相减无法确认口径一致。
+            if not same_filing and (len({item["val"] for item in versions}) > 1
+                                    or len({item["val"] for item in candidates}) > 1):
+                continue
+            previous = previous_values[0]
+            difference = Decimal(str(current["val"])) - Decimal(str(previous["val"]))
+            value = int(difference) if difference == difference.to_integral_value() else float(difference)
+            if not isfinite(value) or Decimal(str(value)) != difference:
+                continue
+            sources = {name: {"concept": concept, "unit": unit, "value": item["val"],
+                              **{key: item[key] for key in ("start", "end", "filed", "form", "accn")},
+                              "source_url": source_url}
+                       for name, item in (("current", current), ("previous", previous))}
+            derived.append({"value": value, "start": quarter_start.isoformat(), "end": end,
+                            "period_type": "duration", "filed": current["filed"], "form": current["form"],
+                            "accn": current["accn"], "fp": current.get("fp"), "frame": None,
+                            "fiscal_year": None, "filing_fiscal_year": current.get("fy"), "source_url": source_url,
+                            "derivation": {"method": "YTD_DIFFERENCE", **sources}})
+        for fact in direct:
+            fact["source_url"] = source_url
+        return sorted(direct + derived, key=lambda row: (row["end"], row["start"] or ""))
+
+    @staticmethod
     def _filter_periods(
         entries: list[dict], *, instant: bool = False, annual_ends: set[str] | None = None,
-        quarterly: bool = False,
+        quarterly: bool = False, as_of: str | None = None,
     ) -> list[dict]:
         """按实际期间取最新年度（quarterly 时为 10-Q 单季）事实；公告 fy 保留为来源，不猜测事实的 fiscal_year。"""
+        cutoff = date.fromisoformat(as_of) if as_of else None
         annual = {}
         for e in entries:
             if e.get("form") not in ({"10-Q", "10-Q/A"} if quarterly else {"10-K", "10-K/A"}):
@@ -732,7 +986,7 @@ class EdgarService:
             elif start is None or not ((80 <= (end - start).days <= 100) if quarterly
                                        else (335 <= (end - start).days <= 395)):
                 continue
-            if filed < end:
+            if filed < end or cutoff is not None and filed > cutoff:
                 continue
             key = (start.isoformat() if start else None, end.isoformat())
             row = {

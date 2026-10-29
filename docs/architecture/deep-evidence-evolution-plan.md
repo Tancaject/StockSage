@@ -31,7 +31,7 @@ FUNDAMENTALS 同样进化，但它卡在学习信号上，需要主动构造难�
 | 部件 | 共用内容 | FUNDAMENTALS | DEEP 取证 |
 |---|---|---|---|
 | 经验记录 | 适用条件、做法、限制、来源、版本、状态；注册表；校验器（禁止公司名、ticker、数字） | | |
-| 失败来源 | `evolution_failure_cases` 加 `target` 字段，统一分诊 | 用户反馈、BLOCKED/DEGRADED、难题集复现 | 维度缺口、Harness 缺口 |
+| 失败来源 | `evolution_failure_cases` 加 `target` 字段，统一分诊 | 用户反馈、BLOCKED/FAILED、难题集复现 | 维度缺口、Harness 缺口 |
 | 反思生成 | 按主题批量生成，同义合并，已有经验优先修订 | | |
 | 验收 | dev/holdout 配对对照，判定规则预先写定，允许"无改善" | | |
 | 上线 | 批准包 + sha256，OFF/ALLOWLIST/ALL，Trace 记录选用 | | |

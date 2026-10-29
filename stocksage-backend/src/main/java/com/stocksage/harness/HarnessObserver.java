@@ -2,7 +2,7 @@ package com.stocksage.harness;
 
 import com.stocksage.evidence.EvidenceLedger;
 
-import com.stocksage.agent.AgentStep;
+import com.stocksage.agent.runtime.AgentStep;
 import com.stocksage.harness.HarnessModels.HarnessDecision;
 import com.stocksage.harness.HarnessModels.HarnessPhase;
 import com.stocksage.harness.HarnessModels.HarnessViolation;

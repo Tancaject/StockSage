@@ -1,0 +1,37 @@
+{
+  "id": "thesis-review",
+  "version": 1,
+  "displayName": "投资逻辑复查",
+  "enabled": true,
+  "routes": [
+    "DEEP"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 1,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "reviewInvestmentThesis",
+      "required": true,
+      "arguments": {
+        "reportId": "$input.reportId",
+        "newSnapshotId": "$input.newSnapshotId",
+        "asOf": "$input.asOf"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "reportId": 0,
+    "newSnapshotId": "",
+    "asOf": ""
+  },
+  "method": "逐条对照旧论点和新证据。输出支持、反证、未覆盖及待核验项；旧报告是历史判断，工具返回的REQUIRES_VERIFICATION不能改写为已验证。"
+}

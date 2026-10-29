@@ -1,13 +1,13 @@
 package com.stocksage.controller;
 
 import com.stocksage.identity.RequestIdentity;
-import com.stocksage.model.dto.WorkbenchCockpitResponse;
-import com.stocksage.model.dto.WorkbenchStockSuggestion;
-import com.stocksage.service.CompanyRelationService;
-import com.stocksage.service.RelationExtractionJobs;
-import com.stocksage.service.StockNewsService;
-import com.stocksage.service.WorkbenchCockpitService;
-import com.stocksage.service.WorkbenchStockSearchService;
+import com.stocksage.relation.CompanyRelationService;
+import com.stocksage.relation.RelationExtractionJobs;
+import com.stocksage.workbench.StockNewsService;
+import com.stocksage.workbench.WorkbenchCockpitResponse;
+import com.stocksage.workbench.WorkbenchCockpitService;
+import com.stocksage.workbench.WorkbenchStockSearchService;
+import com.stocksage.workbench.WorkbenchStockSuggestion;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

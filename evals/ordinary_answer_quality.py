@@ -155,6 +155,44 @@ def assess_diagnostic_dimensions(item: dict, ratings: dict, global_errors: list[
             "errors": list(global_errors), "dimensions": dimensions}
 
 
+def summarize_diagnostics(reviews: list[dict]) -> dict:
+    """Keep legitimate abstentions separate from invalid reviews, including in repeated judgments."""
+    dimensions = {}
+    for name in DIMENSIONS:
+        rows = [(review, (review.get("dimensions") or {}).get(name) or {}) for review in reviews]
+        valid = [(review, row) for review, row in rows
+                 if row.get("status") in STATUS_DEFINITIONS and not row.get("errors")]
+        by_case = {}
+        for review, row in valid:
+            by_case.setdefault((review["id"], review.get("input_sha256")), []).append(row["status"])
+        repeated = [values for values in by_case.values() if len(values) > 1]
+        counts = {status: sum(row["status"] == status for _, row in valid) for status in STATUS_DEFINITIONS}
+        total = len(rows)
+        dimensions[name] = {"count": total, "technical_valid_count": len(valid),
+                            "technical_invalid_count": total - len(valid),
+                            "technical_invalid_rate": (total - len(valid)) / total if total else None,
+                            "status_counts": counts,
+                            "no_data_rate": counts["NO_DATA"] / total if total else None,
+                            "not_applicable_rate": counts["NOT_APPLICABLE"] / total if total else None,
+                            "repeat_eligible_case_count": len(repeated),
+                            "repeat_consistent_case_count": sum(len(set(values)) == 1 for values in repeated),
+                            "repeat_consistency_rate": sum(len(set(values)) == 1 for values in repeated) / len(repeated) if repeated else None}
+    repeated_cases = {}
+    for review in reviews:
+        repeated_cases.setdefault((review["id"], review.get("input_sha256")), []).append(review)
+    eligible = [rows for rows in repeated_cases.values() if len(rows) > 1 and all(
+        all((row.get("dimensions") or {}).get(name, {}).get("status") in STATUS_DEFINITIONS
+            and not (row.get("dimensions") or {}).get(name, {}).get("errors") for name in DIMENSIONS)
+        for row in rows)]
+    consistent = sum(len({tuple(row["dimensions"][name]["status"] for name in DIMENSIONS) for row in rows}) == 1
+                     for rows in eligible)
+    return {"review_count": len(reviews), "diagnostic_only": True, "dimensions": dimensions,
+            "repeat_eligible_case_count": len(eligible), "repeat_consistent_case_count": consistent,
+            "repeat_consistency_rate": consistent / len(eligible) if eligible else None,
+            "rate_denominator": "all review attempts; valid NO_DATA excludes technical failures",
+            "repeat_scope": "at least two valid judgments of the same input; inspect excluded technical failures separately"}
+
+
 def unique_cases(report: dict) -> dict[str, dict]:
     cases = report.get("cases", [])
     result = {case["id"]: case for case in cases}

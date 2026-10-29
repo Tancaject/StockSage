@@ -3,8 +3,8 @@ package com.stocksage.client;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.stocksage.cache.ToolResultCache;
 import com.stocksage.exception.ResearchBudgetExceededException;
+import com.stocksage.ibkr.IbkrHistoricalResponse;
 import com.stocksage.tool.ToolCallContext;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -130,7 +130,7 @@ public class DataServiceClient {
      * @return Python K 线 v1 契约；HTTP 或协议错误以 ERROR 状态返回
      */
     public KLineResponse getKLine(String code, String period, int days) {
-        String json = cached("kline:v1", new String[]{code, period, String.valueOf(days)}, TTL_KLINE,
+        String json = cached("kline:v2", new String[]{code, period, String.valueOf(days)}, TTL_KLINE,
                 () -> objectMapper.valueToTree(fetchKLine(code, period, days)).toString());
         try {
             return KLineResponse.fromJson(objectMapper.readTree(json));
@@ -218,7 +218,7 @@ public class DataServiceClient {
      * @return 多期财报 JSON
      */
     public String getFinancialReports(String code, String period, int years) {
-        String json = cached("financial-report:v9", new String[]{code, period, String.valueOf(years)}, TTL_FINANCIAL_REPORT,
+        String json = cached("financial-report:v13", new String[]{code, period, String.valueOf(years)}, TTL_FINANCIAL_REPORT,
                 () -> fetchFinancialReport(code, period, years));
         return validateFinancialReport(json, period, years);
     }
@@ -296,6 +296,41 @@ public class DataServiceClient {
     public String getTechnicalIndicators(String code, String indicators) {
         return cached("technical", new String[]{code, indicators}, TTL_TECHNICAL,
                 () -> getOnce("/api/stock/technical?code={code}&indicators={indicators}", code, indicators));
+    }
+
+    /** 计算本次已取得的日线；不使用只按股票代码缓存的技术指标 GET。 */
+    public String calculateTechnicalIndicators(IbkrHistoricalResponse history, String indicators) {
+        var requested = java.util.Arrays.stream((indicators == null ? "" : indicators).split(","))
+                .map(value -> value.strip().toUpperCase(java.util.Locale.ROOT)).distinct().toList();
+        JsonNode payload;
+        try {
+            payload = request(webClient.post().uri("/api/stock/technical/calculate")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(java.util.Map.of("history", history, "indicators", requested)), timeout, JsonNode.class);
+        } catch (WebClientResponseException error) {
+            rethrowBudgetFailure(error);
+            int status = error.getStatusCode().value();
+            return TechnicalIndicatorsResponse.failure(history.symbol(), history.period(), history.bar(),
+                    TechnicalIndicatorsResponse.Status.ERROR, "DATA_SERVICE_HTTP_" + status,
+                    "技术指标计算接口返回 HTTP " + status + "；请检查输入或数据服务。", httpRetryable(status)).toJson();
+        } catch (Exception error) {
+            rethrowBudgetFailure(error);
+            return TechnicalIndicatorsResponse.failure(history.symbol(), history.period(), history.bar(),
+                    TechnicalIndicatorsResponse.Status.ERROR, "DATA_SERVICE_UNAVAILABLE",
+                    "无法调用技术指标计算接口；请检查数据服务连接后重试。", transportRetryable(error)).toJson();
+        }
+        try {
+            TechnicalIndicatorsResponse response = TechnicalIndicatorsResponse.fromJson(payload);
+            if (!response.matchesSource(history) || !response.requestedIndicators().equals(requested)) {
+                throw new IllegalArgumentException("Technical response differs from supplied history or indicators");
+            }
+            return response.toJson();
+        } catch (RuntimeException invalid) {
+            rethrowBudgetFailure(invalid);
+            return TechnicalIndicatorsResponse.failure(history.symbol(), history.period(), history.bar(),
+                    TechnicalIndicatorsResponse.Status.ERROR, "INVALID_DATA_SERVICE_RESPONSE",
+                    "技术指标响应与提交的行情或计算契约不一致；请检查数据服务版本和响应字段。", false).toJson();
+        }
     }
 
     /**
@@ -436,6 +471,16 @@ public class DataServiceClient {
                 documentUrl, filingType);
     }
 
+    public String readDisclosure(java.util.Map<String, Object> body) {
+        return request(webClient.post().uri("/api/document/disclosure/read")
+                .contentType(MediaType.APPLICATION_JSON).bodyValue(body), edgarTimeout, String.class);
+    }
+
+    public String compareDisclosures(java.util.Map<String, Object> body) {
+        return request(webClient.post().uri("/api/document/disclosure/compare")
+                .contentType(MediaType.APPLICATION_JSON).bodyValue(body), edgarTimeout, String.class);
+    }
+
     /**
      * 获取 SEC XBRL 结构化财务数据。
      *
@@ -443,7 +488,7 @@ public class DataServiceClient {
      * @return 校验后的 SEC 年度公司事实；失败时为明确的 ERROR 状态
      */
     public SecFinancialsResponse getEdgarXbrl(String ticker) {
-        String json = cached("edgar-xbrl:v6", new String[]{ticker}, TTL_EDGAR_XBRL,
+        String json = cached("edgar-xbrl:v7", new String[]{ticker}, TTL_EDGAR_XBRL,
                 () -> objectMapper.valueToTree(fetchEdgarXbrl(ticker)).toString());
         try {
             return SecFinancialsResponse.fromJson(objectMapper.reader()
@@ -452,6 +497,52 @@ public class DataServiceClient {
             rethrowBudgetFailure(error);
             return SecFinancialsResponse.failure(ticker, "INVALID_DATA_SERVICE_RESPONSE",
                     "SEC financials response does not match schemaVersion 1; check the data-service deployment.", false);
+        }
+    }
+
+    /** Focused 财务读取；信息截止日先于服务端择新，缓存身份包含所有请求口径。 */
+    public SecFinancialsResponse getEdgarXbrl(String ticker, String period, int years, String asOf, boolean financialExtras) {
+        String cutoff = asOf == null || asOf.isBlank() ? null : asOf.strip();
+        try {
+            if (!java.util.Set.of("annual", "quarterly").contains(period) || years < 1 || years > 10
+                    || ticker == null || !ticker.matches("(?i)[a-z]{1,6}(?:[.-][a-z])?")) {
+                throw new IllegalArgumentException("Invalid SEC ticker, period or years");
+            }
+            if (cutoff != null && java.time.LocalDate.parse(cutoff).isAfter(java.time.LocalDate.now(java.time.ZoneOffset.UTC))) {
+                throw new IllegalArgumentException("Future cutoff");
+            }
+        } catch (RuntimeException invalid) {
+            return SecFinancialsResponse.failure(ticker, "INVALID_FINANCIAL_REQUEST",
+                    "请提供已确认的美股代码、annual/quarterly、1至10年，以及不晚于今天的 YYYY-MM-DD 信息截止日。", false);
+        }
+        String json = cached("edgar-focused:v1", new String[]{ticker, period, String.valueOf(years), cutoff == null ? "" : cutoff,
+                String.valueOf(financialExtras)}, TTL_EDGAR_XBRL, () -> {
+            try {
+                return request(webClient.get().uri(builder -> {
+                    var uri = builder.path("/api/edgar/xbrl").queryParam("ticker", ticker).queryParam("period", period)
+                            .queryParam("years", years).queryParam("financialExtras", financialExtras);
+                    if (cutoff != null) uri.queryParam("asOf", cutoff);
+                    return uri.build();
+                }), financialReportTimeout, String.class);
+            } catch (Exception error) {
+                rethrowBudgetFailure(error);
+                return objectMapper.valueToTree(SecFinancialsResponse.failure(ticker, "SEC_FINANCIALS_UNAVAILABLE",
+                        "SEC 财务查询失败；请检查数据服务及 SEC 连接后重试。", transportRetryable(error))).toString();
+            }
+        });
+        try {
+            SecFinancialsResponse response = SecFinancialsResponse.fromJson(objectMapper.reader()
+                    .with(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS).readTree(json));
+            if (!response.error() && (!ticker.equalsIgnoreCase(response.ticker()) || !period.equals(response.period())
+                    || !period.equals(response.requestedPeriod()) || !Integer.valueOf(years).equals(response.requestedYears())
+                    || !java.util.Objects.equals(cutoff, response.requestedAsOf()))) {
+                throw new IllegalArgumentException("SEC response differs from the requested identity or information cutoff");
+            }
+            return response;
+        } catch (Exception invalid) {
+            rethrowBudgetFailure(invalid);
+            return SecFinancialsResponse.failure(ticker, "INVALID_DATA_SERVICE_RESPONSE",
+                    "SEC 响应与请求的公司、期间或信息截止日不一致；请检查数据服务契约。", false);
         }
     }
 

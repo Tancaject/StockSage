@@ -40,6 +40,7 @@ public class SkillResolver {
         Optional<SkillDefinition> selected = registry.find(defaultNewsSkill)
                 .filter(SkillDefinition::enabled)
                 .filter(skill -> skill.routes().contains(PlanRoute.NEWS))
+                .filter(SkillResolver::usesCapabilities)
                 .filter(skill -> supportsTier(executionPlan, skill));
         if (selected.isPresent()) {
             return selected;
@@ -52,8 +53,13 @@ public class SkillResolver {
                 .flatMap(Optional::stream)
                 .filter(SkillDefinition::enabled)
                 .filter(skill -> skill.routes().contains(PlanRoute.NEWS))
+                .filter(SkillResolver::usesCapabilities)
                 .filter(skill -> supportsTier(executionPlan, skill))
                 .findFirst();
+    }
+
+    private static boolean usesCapabilities(SkillDefinition skill) {
+        return skill.steps().stream().allMatch(step -> step.type() == SkillDefinition.StepType.CAPABILITY);
     }
 
     /** 检查计划模型层级是否达到 Skill 声明的最低要求。 */

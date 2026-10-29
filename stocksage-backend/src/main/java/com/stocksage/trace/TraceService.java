@@ -3,7 +3,7 @@ package com.stocksage.trace;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.agent.AgentStep;
+import com.stocksage.agent.runtime.AgentStep;
 import com.stocksage.model.entity.AgentTrace;
 import com.stocksage.repository.AgentTraceRepository;
 import lombok.RequiredArgsConstructor;

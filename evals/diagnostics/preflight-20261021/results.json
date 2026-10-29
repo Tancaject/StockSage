@@ -1,0 +1,212 @@
+{
+  "schema": "preflight_local_http_check_v1",
+  "status": "PASS",
+  "external_requests": 0,
+  "helper_sha256": "68dff1fe9ed3cbd8cb68d389355920a83819faee9b45c5e7a9acacc2b0c9a8ac",
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/ollama/api/embed",
+      "params": {},
+      "body": {
+        "model": "fixture-embedding",
+        "input": "probe"
+      },
+      "authorization_present": false
+    },
+    {
+      "method": "GET",
+      "path": "/data/health",
+      "params": {},
+      "body": null,
+      "authorization_present": false
+    },
+    {
+      "method": "GET",
+      "path": "/data/api/stock/financial",
+      "params": {
+        "code": [
+          "sh.600519"
+        ]
+      },
+      "body": null,
+      "authorization_present": false
+    },
+    {
+      "method": "GET",
+      "path": "/data/api/stock/financial-report",
+      "params": {
+        "code": [
+          "0700.HK"
+        ],
+        "period": [
+          "annual"
+        ],
+        "years": [
+          "1"
+        ]
+      },
+      "body": null,
+      "authorization_present": false
+    },
+    {
+      "method": "POST",
+      "path": "/ibkr/v1/api/iserver/auth/status",
+      "params": {},
+      "body": {},
+      "authorization_present": false
+    },
+    {
+      "method": "GET",
+      "path": "/data/api/edgar/filings",
+      "params": {
+        "ticker": [
+          "AAPL"
+        ],
+        "type": [
+          "10-K"
+        ],
+        "count": [
+          "1"
+        ]
+      },
+      "body": null,
+      "authorization_present": false
+    },
+    {
+      "method": "GET",
+      "path": "/deepseek/models",
+      "params": {},
+      "body": null,
+      "authorization_present": true
+    },
+    {
+      "method": "GET",
+      "path": "/bailian/v1/models",
+      "params": {},
+      "body": null,
+      "authorization_present": true
+    },
+    {
+      "method": "GET",
+      "path": "/data/api/search/web",
+      "params": {},
+      "body": null,
+      "authorization_present": false
+    },
+    {
+      "method": "GET",
+      "path": "/invalid",
+      "params": {},
+      "body": null,
+      "authorization_present": false
+    },
+    {
+      "method": "GET",
+      "path": "/missing",
+      "params": {},
+      "body": null,
+      "authorization_present": false
+    }
+  ],
+  "result": {
+    "schema": "eval_preflight_v1",
+    "scope": "EVALUATOR_ENDPOINTS",
+    "providers": {
+      "tavily": {
+        "provider": "tavily",
+        "status": "SKIPPED",
+        "reason": "SEARCH_CREDIT_PROBE_NOT_REQUESTED"
+      },
+      "data_service": {
+        "provider": "data_service",
+        "scope": "PROCESS_HEALTH_ONLY",
+        "checked_at": "2026-10-21T02:07:17.431069+00:00",
+        "http_status": 200,
+        "status": "AVAILABLE",
+        "reason": "HEALTH_OK",
+        "latency_ms": 16
+      },
+      "ollama": {
+        "provider": "ollama",
+        "scope": "LOCAL_EMBEDDING",
+        "checked_at": "2026-10-21T02:07:17.431069+00:00",
+        "http_status": 200,
+        "status": "AVAILABLE",
+        "reason": "EMBEDDING_RETURNED",
+        "latency_ms": 0
+      },
+      "baostock": {
+        "provider": "baostock",
+        "scope": "ONE_PROFIT_TABLE",
+        "checked_at": "2026-10-21T02:07:17.432211+00:00",
+        "http_status": 200,
+        "status": "AVAILABLE",
+        "reason": "DATA_RETURNED",
+        "latency_ms": 16
+      },
+      "akshare": {
+        "provider": "akshare",
+        "scope": "ONE_YEAR_HK_FINANCIAL_REPORT",
+        "checked_at": "2026-10-21T02:07:17.432211+00:00",
+        "http_status": 200,
+        "status": "UNKNOWN",
+        "reason": "PARTIAL_DATA",
+        "latency_ms": 16
+      },
+      "sec": {
+        "provider": "sec",
+        "scope": "FILING_INDEX_ONLY",
+        "checked_at": "2026-10-21T02:07:17.432211+00:00",
+        "http_status": 200,
+        "status": "AVAILABLE",
+        "reason": "FILINGS_RETURNED",
+        "latency_ms": 16
+      },
+      "ibkr": {
+        "provider": "ibkr",
+        "scope": "BROKER_SESSION_ONLY",
+        "checked_at": "2026-10-21T02:07:17.432211+00:00",
+        "http_status": 200,
+        "status": "AVAILABLE",
+        "reason": "AUTHENTICATED",
+        "latency_ms": 16
+      },
+      "deepseek": {
+        "provider": "deepseek",
+        "scope": "MODEL_LIST_ONLY",
+        "checked_at": "2026-10-21T02:07:17.432211+00:00",
+        "http_status": 200,
+        "status": "UNKNOWN",
+        "reason": "MODEL_LIST_ONLY_GENERATION_NOT_CHECKED",
+        "latency_ms": 16
+      },
+      "bailian": {
+        "provider": "bailian",
+        "scope": "MODEL_LIST_ONLY",
+        "checked_at": "2026-10-21T02:07:17.432211+00:00",
+        "http_status": 200,
+        "status": "UNKNOWN",
+        "reason": "MODEL_LIST_ONLY_GENERATION_NOT_CHECKED",
+        "latency_ms": 531
+      }
+    },
+    "endpoints": {
+      "data_service": "http://127.0.0.1:19269/data",
+      "ollama": "http://127.0.0.1:19269/ollama",
+      "embedding_model": "fixture-embedding"
+    },
+    "configuration_source": "RUN_ARGUMENTS_AND_EVALUATOR_ENVIRONMENT",
+    "generation_checked": false,
+    "note": "These evaluator settings and environment keys are not the backend's effective configuration. Model listing does not validate generation. Probe failure alone never exempts a case from regression."
+  },
+  "search_fallback": {
+    "provider": "tavily",
+    "scope": "READ_REQUEST",
+    "checked_at": "2026-10-21T02:07:17.953908+00:00",
+    "http_status": 200,
+    "status": "UNKNOWN",
+    "reason": "SEARCH_FALLBACK_NOT_TAVILY",
+    "latency_ms": 0
+  }
+}

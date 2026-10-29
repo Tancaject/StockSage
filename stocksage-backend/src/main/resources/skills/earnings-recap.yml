@@ -1,0 +1,33 @@
+{
+  "id": "earnings-recap",
+  "version": 1,
+  "displayName": "业绩与预期比较",
+  "enabled": true,
+  "routes": [
+    "DEEP"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 1,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "compareEarningsExpectations",
+      "required": true,
+      "arguments": {
+        "inputJson": "$input.inputJson"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "inputJson": "{\"asOf\": \"2026-10-28T00:00:00Z\", \"actual\": {\"metric\": \"revenue\", \"period\": \"2026Q2\", \"basis\": \"GAAP\", \"unit\": \"million\", \"currency\": \"USD\", \"value\": 110, \"sourceUrl\": \"https://www.sec.gov/Archives/edgar/data/1/2/actual-example.htm\", \"publishedAt\": \"2026-08-01T12:00:00Z\"}, \"guidance\": {\"metric\": \"revenue\", \"period\": \"2026Q2\", \"basis\": \"GAAP\", \"unit\": \"million\", \"currency\": \"USD\", \"low\": 90, \"high\": 100, \"sourceUrl\": \"https://www.sec.gov/Archives/edgar/data/1/1/guidance-example.htm\", \"publishedAt\": \"2026-05-01T12:00:00Z\"}, \"consensus\": {\"metric\": \"revenue\", \"period\": \"2026Q2\", \"basis\": \"GAAP\", \"unit\": \"million\", \"currency\": \"USD\", \"value\": 105, \"sourceUrl\": \"https://example.org/consensus-example\", \"publishedAt\": \"2026-07-31T12:00:00Z\"}}"
+  },
+  "method": "仅比较同指标、期间、GAAP口径、单位和币种的实际值、指引和共识；预期时间必须早于实际发布时间。基准非正时只报差值；核查来源代表性后才能写超预期。"
+}

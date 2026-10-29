@@ -108,8 +108,9 @@ public record ModelTokenBudgetProperties(Long maxTokens, String providerFingerpr
      *
      * <ul>
      *   <li>n 只能为 1；</li>
-     *   <li>extraBody 只允许 enable_thinking 和 thinking_budget：思考预算不超过该模型的思考上限，
-     *       max_tokens（百炼口径包含思考）不超过输出上限加思考上限；</li>
+     *   <li>校验供应商路由后的 max_tokens，不超过输出与思考的合计预留；</li>
+     *   <li>DeepSeek 的 thinking / reasoning_effort 只控制开关与深度，不作为独立思考 token 上限；</li>
+     *   <li>百炼的 enable_thinking / thinking_budget 仍按该供应商的配置校验；</li>
      *   <li>带工具定义时必须关闭内部自动执行，保证一条调用记录只对应一次模型请求。</li>
      * </ul>
      *
@@ -119,28 +120,35 @@ public record ModelTokenBudgetProperties(Long maxTokens, String providerFingerpr
         JsonNode n = request.path("n");
         require(n.isMissingNode() || (n.isIntegralNumber() && n.canConvertToLong() && n.longValue() == 1),
                 "unbounded request: n must be 1");
+        JsonNode limit = frozen.path("models").path(model == null ? "" : model);
+        require(limit.isObject(), "model limit unavailable");
+        long reasoning = number(limit, "maxReasoningTokens");
+        JsonNode maxTokens = request.path("maxTokens");
+        require(maxTokens.isIntegralNumber() && maxTokens.canConvertToLong() && maxTokens.longValue() > 0
+                        && maxTokens.longValue() <= sum(0, number(limit, "maxOutputTokens"), reasoning),
+                "unbounded request: max tokens exceed model output and reasoning limits");
         // 未记录的标志按"存在"处理，旧记录不会被放行。
         if (request.path("extraBodyPresent").asBoolean(true)) {
-            JsonNode limit = frozen.path("models").path(model == null ? "" : model);
-            require(limit.isObject(), "model limit unavailable");
-            long reasoning = number(limit, "maxReasoningTokens");
             JsonNode keys = request.path("extraBodyKeys");
             require(keys.isArray() && !keys.isEmpty(), "unbounded request: extraBody keys unknown");
             boolean budgetKey = false;
             for (JsonNode key : keys) {
-                require(java.util.Set.of("enable_thinking", "thinking_budget").contains(key.asText()),
+                require(java.util.Set.of("enable_thinking", "thinking_budget", "thinking").contains(key.asText()),
                         "unbounded request: extraBody key not allowed");
                 budgetKey |= "thinking_budget".equals(key.asText());
+                if ("thinking".equals(key.asText())) {
+                    require(java.util.Set.of("enabled", "disabled").contains(request.path("thinkingType").asText()),
+                            "unbounded request: thinking mode unknown");
+                    JsonNode effort = request.path("reasoningEffort");
+                    require(effort.isMissingNode() || java.util.Set.of("none", "low", "high", "max").contains(effort.asText()),
+                            "unbounded request: reasoning effort unknown");
+                }
             }
             if (budgetKey) {
                 JsonNode budget = request.path("thinkingBudget");
                 require(budget.isIntegralNumber() && budget.longValue() >= 0 && budget.longValue() <= reasoning,
                         "unbounded request: thinking budget exceeds model reasoning limit");
             }
-            JsonNode maxTokens = request.path("maxTokens");
-            require(maxTokens.isIntegralNumber() && maxTokens.longValue() > 0
-                            && maxTokens.longValue() <= sum(0, number(limit, "maxOutputTokens"), reasoning),
-                    "unbounded request: max tokens exceed model output and reasoning limits");
         }
         if (request.path("toolsPresent").asBoolean(true)) {
             JsonNode internal = request.path("internalToolExecutionEnabled");

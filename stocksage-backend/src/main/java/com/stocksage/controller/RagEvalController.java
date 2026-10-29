@@ -1,8 +1,8 @@
 package com.stocksage.controller;
 
-import com.stocksage.model.dto.RagEvalRequest;
-import com.stocksage.model.dto.RagEvalResponse;
-import com.stocksage.service.RagEvalService;
+import com.stocksage.eval.RagEvalModels.RagEvalRequest;
+import com.stocksage.eval.RagEvalModels.RagEvalResponse;
+import com.stocksage.eval.RagEvalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

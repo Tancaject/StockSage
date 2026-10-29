@@ -1,10 +1,10 @@
 package com.stocksage.controller;
 
-import com.stocksage.identity.RequestIdentity;
 import com.stocksage.exception.ResourceNotFoundException;
+import com.stocksage.identity.RequestIdentity;
 import com.stocksage.model.entity.ResearchTask;
 import com.stocksage.repository.ResearchTaskRepository;
-import com.stocksage.research.ResearchTaskObservationService;
+import com.stocksage.research.task.ResearchTaskObservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

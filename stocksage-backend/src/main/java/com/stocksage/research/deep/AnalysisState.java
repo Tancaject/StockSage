@@ -1,0 +1,184 @@
+package com.stocksage.research.deep;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.stocksage.agent.intent.TimeSensitivity;
+import com.stocksage.agent.runtime.ModelInvocationContext;
+import com.stocksage.debate.DebateModels.DebateTurn;
+import com.stocksage.debate.DebateModels.DebateVerdict;
+import com.stocksage.debate.DebateModels.ManagerAssessment;
+import com.stocksage.evidence.EvidenceLedger;
+import com.stocksage.harness.HarnessModels.HarnessSnapshot;
+import com.stocksage.harness.HarnessModels.ReportRepairFeedback;
+import com.stocksage.research.report.InvestmentReport;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 深度研究管线中的可变交接对象。
+ *
+ * <p>分析师智能体填充前三份报告，多头/空头研究员追加辩论轮次，
+ * {@code ResearchManager} 写入最终 {@link InvestmentReport}。
+ * 显式保存状态可以让链路输出和兜底格式化更容易理解。</p>
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+// 旧 checkpoint 可能带已移除的 evidenceReplanState 等字段，反序列化时忽略。
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class AnalysisState {
+
+    /** 当前执行权只在内存中传递；恢复时重新绑定，不能从 checkpoint 复用旧租约。 */
+    @JsonIgnore
+    private ModelInvocationContext modelInvocationContext;
+
+    /** 用户原始研究问题，贯穿分析师、辩论和最终报告。 */
+    private String query;
+
+    /** 提交时已识别的时间要求；旧 checkpoint 缺失时保持未知。 */
+    @Builder.Default
+    private TimeSensitivity timeSensitivity = TimeSensitivity.UNSPECIFIED;
+
+    public TimeSensitivity getTimeSensitivity() {
+        return timeSensitivity == null ? TimeSensitivity.UNSPECIFIED : timeSensitivity;
+    }
+
+    /** 本轮研究的主证券代码；哈希、报告版本和工具预取都以它为标的。 */
+    private String primaryTicker;
+
+    /** 结构化证据集合的稳定哈希，用于判断数据快照是否变化。 */
+    private String dataSnapshotHash;
+
+    /** 用户问题与数据快照的联合哈希，用于严格控制报告缓存复用。 */
+    private String contextHash;
+
+    /** 基本面分析师输出的财报、公告和经营质量分析。 */
+    private String fundamentalsReport;
+
+    /** 市场分析师输出的行情、技术面、估值和账户相关观察。 */
+    private String marketReport;
+
+    /** 新闻分析师输出的近期新闻、政策和市场情绪信息。 */
+    private String newsReport;
+
+    /** 研究经理生成的最终结构化投资研究报告。 */
+    private InvestmentReport investmentReport;
+
+    /**
+     * 多空辩论的完整发言流水，按发生顺序追加。
+     *
+     * <p>每一条只保存经过后端契约校验的结构化论点。下一轮 Bull/Bear 读取这些带稳定 ID 的
+     * 论点并显式引用反驳目标，避免自由文本辩论无法核验或恢复。</p>
+     */
+    @Builder.Default
+    private List<DebateTurn> debateTurns = new ArrayList<>();
+
+    /** Research Manager 对当前结构化论点的逐项语义评分；缺失时不得直接生成评级报告。 */
+    private ManagerAssessment managerAssessment;
+
+    /** Java 确定性策略依据评分、证据和时效性计算出的锁定裁决。 */
+    private DebateVerdict debateVerdict;
+
+    /** 当前研究链路中收集到的引用或证据来源。 */
+    @Builder.Default
+    private List<String> citations = new ArrayList<>();
+
+    /**
+     * 本轮研究的结构化证据元数据账本。
+     *
+     * <p>只保存来源、状态、时间和哈希，不重复保存工具正文。默认空账本确保旧 checkpoint JSON
+     * 在缺少该字段时仍可反序列化。</p>
+     */
+    @Builder.Default
+    private EvidenceLedger evidenceLedger = EvidenceLedger.empty();
+
+    /** 最近一次持久化的完成策略决策及有界恢复计数，供任务接管后继续执行。 */
+    private HarnessSnapshot harnessSnapshot;
+
+    /** 报告修复输入与待修复快照同步落盘，确保接管继续消费同一份有界验收反馈。 */
+    private ReportRepairFeedback reportRepairFeedback;
+
+    /** 取证循环（ReAct）的逐步状态；旧 checkpoint 缺失该字段时视为未开始。 */
+    private EvidenceLoopState evidenceLoopState;
+
+    /** 模型自报的逐维度覆盖及引用检查；不代表证据已实质支持该维度。 */
+    @Builder.Default
+    private List<EvidenceFacetCoverage> evidenceFacetCoverage = new ArrayList<>();
+
+    public record EvidenceFacetCoverage(String facet, String status, List<String> evidenceIds, String reason) { }
+
+    public List<String> evidenceCoverageUnknowns() {
+        return evidenceFacetCoverage == null ? List.of() : evidenceFacetCoverage.stream()
+                .filter(item -> "MISSING".equals(item.status()))
+                .map(item -> item.facet() + "：" + item.reason())
+                .toList();
+    }
+
+    /** 取证循环的持久化生命周期。 */
+    public enum EvidenceLoopStatus {
+        RUNNING,
+        STOPPED
+    }
+
+    /** 单个工具调用的生命周期：PLANNED 记录确切调用，REVALIDATED 表示结果已入账并重跑证据门禁。 */
+    public enum EvidenceLoopCallStatus {
+        PLANNED,
+        REVALIDATED
+    }
+
+    /**
+     * 取证循环状态。接管时 STOPPED 直接返回，PLANNED 调用直接执行，都不再请求模型；
+     * 对话历史由已保存的轮次重建。
+     *
+     * @param policyVersion 循环契约版本
+     * @param status 生命周期
+     * @param rounds 已通过校验的轮次（被拒绝或主动结束的轮次不保存调用）
+     * @param toolCalls 已计入上限的工具调用数
+     * @param stagnantRounds 连续无新增证据的轮数
+     * @param stopReason 停止原因；RUNNING 时为空
+     */
+    public record EvidenceLoopState(
+            int policyVersion,
+            EvidenceLoopStatus status,
+            List<EvidenceLoopRound> rounds,
+            int toolCalls,
+            int stagnantRounds,
+            String stopReason
+    ) {
+        public EvidenceLoopState {
+            rounds = rounds == null ? List.of() : List.copyOf(rounds);
+        }
+    }
+
+    /** 一轮通过校验的工具调用。 */
+    public record EvidenceLoopRound(int round, List<EvidenceLoopCall> calls) {
+        public EvidenceLoopRound {
+            calls = calls == null ? List.of() : List.copyOf(calls);
+        }
+    }
+
+    /**
+     * 一次工具调用。保存模型给出的原始参数以便接管后重新校验，observation 是回传给模型的压缩摘要。
+     */
+    public record EvidenceLoopCall(
+            String toolCallId,
+            String toolName,
+            String argumentsJson,
+            String effectKey,
+            EvidenceLoopCallStatus status,
+            String outcome,
+            List<String> addedEvidenceIds,
+            String observation
+    ) {
+        public EvidenceLoopCall {
+            addedEvidenceIds = addedEvidenceIds == null ? List.of() : List.copyOf(addedEvidenceIds);
+        }
+    }
+
+}

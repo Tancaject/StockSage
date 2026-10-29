@@ -18,7 +18,7 @@ public final class ThinkingModels {
         return modelName != null && THINKING_BY_DEFAULT.contains(modelName.trim());
     }
 
-    /** 思考开关和深度交给模型，只用 thinking_budget 封顶，避免思考挤占正文的输出上限。 */
+    /** 百炼的思考预算；DeepSeek 官方路由会移除此参数，改用其开关与深度选项。 */
     public static OpenAiChatOptions capThinking(OpenAiChatOptions options, int thinkingBudget) {
         if (thinksByDefault(options.getModel())) {
             options.setExtraBody(Map.of("thinking_budget", thinkingBudget));

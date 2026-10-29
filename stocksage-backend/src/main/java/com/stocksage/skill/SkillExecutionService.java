@@ -7,6 +7,16 @@ import com.stocksage.capability.CapabilityInvocationContext;
 import com.stocksage.capability.CapabilityResult;
 import com.stocksage.tool.ChatStreamEmitter;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stocksage.tool.ResearchToolCatalog;
+import com.stocksage.exception.ResearchBudgetExceededException;
+import com.stocksage.exception.ResearchCapacityExceededException;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.security.concurrent.DelegatingSecurityContextCallable;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -20,7 +30,7 @@ import java.util.Set;
  *
  * <p>上游工具预取服务传入 {@link ExecutionPlan}；本类解析对应 Skill、建立能力 allowlist 与总截止时间，
  * 按清单顺序经 {@link CapabilityGateway} 执行能力，并把能力结果作为证据交给后续 Agent 综合。
- * 当前仅承接 NEWS 的确定性内联步骤，其他路由继续走既有执行路径。</p>
+ * NEWS 自动预取保持 CAPABILITY 路径；工作台显式选择的 TOOL Skill 经同一工具目录执行。</p>
  */
 @Service
 public class SkillExecutionService {
@@ -31,13 +41,88 @@ public class SkillExecutionService {
     private final CapabilityGateway capabilityGateway;
     /** 把降级原因推送到当前 SSE/Trace 流。 */
     private final ChatStreamEmitter chatStreamEmitter;
+    private final SkillRegistry skillRegistry;
+    private final ResearchToolCatalog researchTools;
+    private final ObjectMapper objectMapper;
+    private final AsyncTaskExecutor executor;
 
     public SkillExecutionService(SkillResolver skillResolver,
                                  CapabilityGateway capabilityGateway,
-                                 ChatStreamEmitter chatStreamEmitter) {
+                                 ChatStreamEmitter chatStreamEmitter,
+                                 SkillRegistry skillRegistry, ResearchToolCatalog researchTools,
+                                 ObjectMapper objectMapper, @Qualifier("agentTaskExecutor") AsyncTaskExecutor executor) {
         this.skillResolver = skillResolver;
         this.capabilityGateway = capabilityGateway;
         this.chatStreamEmitter = chatStreamEmitter;
+        this.skillRegistry = skillRegistry;
+        this.researchTools = researchTools;
+        this.objectMapper = objectMapper;
+        this.executor = executor;
+    }
+
+    /** Explicit workbench execution does not ask a model to invent inputs or source values. */
+    public Map<String, Object> executeNamed(String skillId, JsonNode input) {
+        SkillDefinition skill = skillRegistry.find(skillId).filter(SkillDefinition::enabled)
+                .orElseThrow(() -> new IllegalArgumentException("Skill 不存在或未启用：" + skillId));
+        if (skill.steps().stream().anyMatch(step -> step.type() != SkillDefinition.StepType.TOOL))
+            throw new IllegalArgumentException("此 Skill 由对话路由执行，请在对话中发起新闻研究");
+        if (input == null || !input.isObject()) throw new IllegalArgumentException("Skill 输入必须为 JSON 对象");
+        input.fieldNames().forEachRemaining(key -> {
+            if (!skill.inputs().containsKey(key)) throw new IllegalArgumentException("Skill 包含未知输入：" + key);
+        });
+        var arguments = skill.steps().stream()
+                .map(step -> ResearchToolCatalog.bind(objectMapper, step.arguments(), input)).toList();
+        Instant deadline = Instant.now().plusSeconds(skill.policy().maxDurationSeconds());
+        java.util.List<Map<String, Object>> evidence = new java.util.ArrayList<>();
+        java.util.List<String> gaps = new java.util.ArrayList<>();
+        int usableEvidence = 0;
+        for (int i = 0; i < skill.steps().size(); i++) {
+            var step = skill.steps().get(i);
+            requireCallBudget(skill, i + 1);
+            try {
+                JsonNode result = executeTool(step.capability(), arguments.get(i), deadline);
+                String status = result.path("status").asText("UNKNOWN");
+                evidence.add(Map.of("tool", step.capability(), "status", status, "content", result));
+                if (Set.of("OK", "SUCCESS", "COMPLETE", "COMPLETED", "AVAILABLE", "PARTIAL").contains(status)) usableEvidence++;
+                if (!Set.of("OK", "SUCCESS", "COMPLETE", "COMPLETED", "AVAILABLE").contains(status))
+                    gaps.add(step.capability() + ": " + status + "；请查看该步骤的 coverage/gaps/error");
+                if (step.required() && Set.of("ERROR", "FAILED", "INVALID_INPUT", "UNAVAILABLE").contains(status)) break;
+            } catch (RuntimeException error) {
+                ResearchBudgetExceededException.rethrowIfPresent(error);
+                ResearchCapacityExceededException.rethrowIfPresent(error);
+                if (Thread.currentThread().isInterrupted()) throw error;
+                if (error instanceof CapabilityException capability && Set.of(CapabilityException.Reason.DENIED,
+                        CapabilityException.Reason.CAPACITY_EXCEEDED, CapabilityException.Reason.TIMEOUT).contains(capability.reason())) throw error;
+                gaps.add(step.capability() + " 执行失败：" + error.getMessage());
+                evidence.add(Map.of("tool", step.capability(), "status", "FAILED", "content", Map.of("error", error.getMessage() == null ? "调用失败" : error.getMessage())));
+                if (step.required()) break;
+            }
+        }
+        if (evidence.size() < skill.steps().size()) gaps.add("前置步骤失败，后续步骤未执行");
+        return Map.of("skillId", skill.id(), "method", skill.method(), "status", usableEvidence == 0 ? "FAILED" : gaps.isEmpty() ? "COMPLETE" : "PARTIAL",
+                "evidence", evidence, "gaps", gaps);
+    }
+
+    public JsonNode executeTool(String name, JsonNode arguments, Instant deadline) {
+        long remaining = java.time.Duration.between(Instant.now(), deadline).toMillis();
+        if (remaining <= 0) throw new CapabilityException(CapabilityException.Reason.TIMEOUT, "研究工具执行超时，请缩小输入范围后重试");
+        var task = new FutureTask<>(new DelegatingSecurityContextCallable<>(() -> researchTools.execute(name, arguments)));
+        try {
+            executor.execute(task);
+            return task.get(remaining, TimeUnit.MILLISECONDS);
+        } catch (java.util.concurrent.TimeoutException e) {
+            task.cancel(true);
+            throw new CapabilityException(CapabilityException.Reason.TIMEOUT, "研究工具执行超时，请缩小输入范围后重试", e);
+        } catch (InterruptedException e) {
+            task.cancel(true);
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("研究工具执行已中断", e);
+        } catch (java.util.concurrent.ExecutionException e) {
+            if (e.getCause() instanceof RuntimeException cause) throw cause;
+            throw new IllegalStateException("研究工具执行失败", e.getCause());
+        } catch (org.springframework.core.task.TaskRejectedException e) {
+            throw new ResearchCapacityExceededException("research-tool", e);
+        }
     }
 
     /**

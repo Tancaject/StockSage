@@ -1,31 +1,40 @@
 package com.stocksage.harness;
 
+import com.stocksage.evidence.EvidenceFreshness;
 import com.stocksage.evidence.EvidenceLedger;
+import com.stocksage.evidence.EvidenceTiming;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.stocksage.agent.DebateDecisionPolicy;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.stocksage.agent.PlanAction;
+import com.stocksage.agent.intent.TimeSensitivity;
+import com.stocksage.agent.ordinary.DataRequirement;
+import com.stocksage.agent.ordinary.OrdinaryPlan;
+import com.stocksage.agent.ordinary.PlanStep;
+import com.stocksage.debate.DebateDecisionPolicy;
+import com.stocksage.debate.DebateModels.ArgumentAssessment;
+import com.stocksage.debate.DebateModels.AssessmentReasonCode;
+import com.stocksage.debate.DebateModels.DebateVerdict;
+import com.stocksage.debate.DebateModels.LeadingSide;
 import com.stocksage.evidence.EvidenceModels.EvidenceDimension;
 import com.stocksage.evidence.EvidenceModels.EvidenceEnvelope;
 import com.stocksage.evidence.EvidenceModels.EvidenceStatus;
+import com.stocksage.evidence.EvidenceModels.TargetIdentity;
+import com.stocksage.evidence.EvidenceModels.TargetResolutionStatus;
 import com.stocksage.harness.HarnessModels.HarnessDecision;
 import com.stocksage.harness.HarnessModels.HarnessOutcome;
 import com.stocksage.harness.HarnessModels.HarnessPhase;
+import com.stocksage.harness.HarnessModels.OrdinaryEvidenceContext;
 import com.stocksage.harness.HarnessModels.ParseStatus;
 import com.stocksage.harness.HarnessModels.RecoveryAction;
 import com.stocksage.harness.HarnessModels.RunContext;
 import com.stocksage.harness.HarnessModels.SynthesisResult;
-import com.stocksage.evidence.EvidenceModels.TargetIdentity;
-import com.stocksage.evidence.EvidenceModels.TargetResolutionStatus;
 import com.stocksage.harness.HarnessModels.ViolationCode;
-import com.stocksage.model.dto.AnalysisHorizon;
-import com.stocksage.model.dto.DebateModels.ArgumentAssessment;
-import com.stocksage.model.dto.DebateModels.AssessmentReasonCode;
-import com.stocksage.model.dto.DebateModels.DebateVerdict;
-import com.stocksage.model.dto.DebateModels.LeadingSide;
-import com.stocksage.model.dto.InvestmentReport;
+import com.stocksage.research.deep.AnalysisHorizon;
+import com.stocksage.research.report.InvestmentReport;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,6 +42,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -49,7 +59,7 @@ import java.util.regex.Pattern;
 
 
 /**
- * CLI adapter for the frozen Golden Set and the production DEEP completion policy.
+ * CLI adapter for the Golden Set and the production completion policies.
  *
  * <p>The fixture schema is deliberately strict. A case must describe a unique production-policy
  * input and the complete expected decision contract: outcome, violation codes, recovery actions,
@@ -71,8 +81,10 @@ public final class HarnessPolicyEval {
                     ViolationCode.RAG_MISSING,
                     ViolationCode.DEBATE_CONTRACT_INVALID,
                     ViolationCode.DEBATE_ASSESSMENT_INVALID,
-                    // This fixture set exercises the DEEP policy; this code belongs to ordinary routes only.
-                    ViolationCode.EVIDENCE_TIME_REQUIREMENT_UNMET
+                    // Ordinary cases cover selected regressions rather than every ordinary violation.
+                    ViolationCode.EVIDENCE_TIME_REQUIREMENT_UNMET,
+                    ViolationCode.DATA_REQUIREMENT_UNMET,
+                    ViolationCode.EVIDENCE_CONTEXT_INCOMPLETE
             ));
     private static final Set<RecoveryAction> ACTIVE_RECOVERY_ACTIONS = EnumSet.of(
             RecoveryAction.RETRY_FUNDAMENTALS,
@@ -100,6 +112,7 @@ public final class HarnessPolicyEval {
         List<GoldenCase> cases = loadCases(casesPath);
         String datasetSha256 = sha256(Files.readAllBytes(casesPath));
         DeepResearchCompletionPolicy policy = new DeepResearchCompletionPolicy();
+        OrdinaryCompletionPolicy ordinaryPolicy = new OrdinaryCompletionPolicy();
         long startedAt = System.nanoTime();
         List<Map<String, Object>> rows = new ArrayList<>();
         int outcomeMatches = 0;
@@ -110,7 +123,9 @@ public final class HarnessPolicyEval {
         int unsafePasses = 0;
 
         for (GoldenCase goldenCase : cases) {
-            HarnessDecision decision = goldenCase.evaluate(policy);
+            ResearchCompletionPolicy casePolicy = goldenCase.fixture().has("ordinary")
+                    ? ordinaryPolicy : policy;
+            HarnessDecision decision = goldenCase.evaluate(casePolicy);
             List<ViolationCode> actualViolations = decision.violations().stream()
                     .map(HarnessModels.HarnessViolation::code)
                     .toList();
@@ -137,6 +152,8 @@ public final class HarnessPolicyEval {
 
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("id", goldenCase.id());
+            row.put("policy_id", casePolicy.policyId());
+            row.put("policy_version", casePolicy.policyVersion());
             row.put("phase", goldenCase.phase().name());
             row.put("category", goldenCase.category());
             row.put("tags", goldenCase.tags());
@@ -171,6 +188,7 @@ public final class HarnessPolicyEval {
         double contractRate = rate(contractMatches, cases.size());
         double violationRate = rate(violationMatches, cases.size());
         double recoveryRate = rate(recoveryMatches, cases.size());
+        List<Map<String, Object>> freshnessRows = freshnessChecks();
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("schema_version", "harness_eval_v1");
         result.put("case_schema_version", CASE_SCHEMA_VERSION);
@@ -180,7 +198,9 @@ public final class HarnessPolicyEval {
         result.put("dataset_sha256", datasetSha256);
         result.put("status", contractRate == 1.0
                 && unsafePasses == 0
-                && coverage.unmetRequirements().isEmpty() ? "pass" : "fail");
+                && coverage.unmetRequirements().isEmpty()
+                && freshnessRows.stream().allMatch(row -> Boolean.TRUE.equals(row.get("matched")))
+                ? "pass" : "fail");
         result.put("case_count", cases.size());
         result.put("exact_accuracy", contractRate);
         result.put("decision_contract_exact_match_rate", contractRate);
@@ -195,7 +215,53 @@ public final class HarnessPolicyEval {
         result.put("coverage", coverage.asMap());
         result.put("duration_ms", (System.nanoTime() - startedAt) / 1_000_000);
         result.put("rows", rows);
+        result.put("freshness_rows", freshnessRows);
         return result;
+    }
+
+    private static List<Map<String, Object>> freshnessChecks() {
+        List<Map<String, Object>> rows = new ArrayList<>();
+        Instant weekend = Instant.parse("2026-10-25T12:00:00Z");
+        addFreshnessCheck(rows, "news_date_within_week", weekend,
+                new EvidenceTiming(1, weekend, null, null,
+                        new EvidenceTiming.Search("w", "w", 7, null, null,
+                                LocalDate.parse("2026-10-19"), LocalDate.parse("2026-10-23"), 0, 2, 0)),
+                EvidenceFreshness.Status.FRESH);
+        addFreshnessCheck(rows, "news_date_outside_week", weekend,
+                new EvidenceTiming(1, weekend, null, null,
+                        new EvidenceTiming.Search("w", "w", 7, null, null,
+                                LocalDate.parse("2026-10-17"), LocalDate.parse("2026-10-23"), 0, 2, 0)),
+                EvidenceFreshness.Status.STALE);
+        addFreshnessCheck(rows, "market_friday_on_sunday", weekend,
+                new EvidenceTiming(1, weekend,
+                        new EvidenceTiming.Market("US", "1d", "DATE", LocalDate.parse("2026-10-23"), null, null, null),
+                        null, null), EvidenceFreshness.Status.FRESH);
+        addFreshnessCheck(rows, "market_old_daily_bar", weekend,
+                new EvidenceTiming(1, weekend,
+                        new EvidenceTiming.Market("US", "1d", "DATE", LocalDate.parse("2026-10-19"), null, null, null),
+                        null, null), EvidenceFreshness.Status.STALE);
+        Instant filingAt = Instant.parse("2027-02-01T12:00:00Z");
+        EvidenceTiming.Financial annual = new EvidenceTiming.Financial("annual",
+                LocalDate.parse("2025-12-31"), LocalDate.parse("2026-02-20"), null, null);
+        addFreshnessCheck(rows, "annual_in_allowance_refetched", filingAt,
+                new EvidenceTiming(1, filingAt, null, annual, null), EvidenceFreshness.Status.FRESH);
+        addFreshnessCheck(rows, "annual_in_allowance_old_snapshot", filingAt,
+                new EvidenceTiming(1, Instant.parse("2027-01-28T12:00:00Z"), null, annual, null),
+                EvidenceFreshness.Status.UNKNOWN);
+        return rows;
+    }
+
+    private static void addFreshnessCheck(List<Map<String, Object>> rows, String id, Instant evaluatedAt,
+                                          EvidenceTiming timing, EvidenceFreshness.Status expected) {
+        EvidenceDimension dimension = timing.market() != null ? EvidenceDimension.MARKET
+                : timing.financial() != null ? EvidenceDimension.FUNDAMENTALS : EvidenceDimension.NEWS;
+        EvidenceEnvelope evidence = new EvidenceEnvelope(id, dimension, "golden.freshness", "AAPL",
+                EvidenceStatus.AVAILABLE, "fixture:" + id, "golden-provider", timing.fetchedAt(),
+                null, "fixture", true, timing);
+        EvidenceFreshness.Assessment actual = EvidenceFreshness.assess(evidence, TimeSensitivity.RECENT, evaluatedAt);
+        rows.add(Map.of("id", id, "evaluated_at", evaluatedAt.toString(),
+                "expected_status", expected.name(), "actual_status", actual.status().name(),
+                "actual_reason", actual.reason(), "matched", expected == actual.status()));
     }
 
     private List<GoldenCase> loadCases(Path path) throws IOException {
@@ -253,12 +319,22 @@ public final class HarnessPolicyEval {
     ) {
         if (phase == HarnessPhase.EVIDENCE) {
             requireAllowedFields(fixture, lineNumber, "evidence fixture",
-                    "workflow", "target_status", "target_key", "evidence", "attempts");
+                    "workflow", "target_status", "target_key", "evidence", "attempts", "ordinary");
             requiredEnum(fixture, "target_status", TargetResolutionStatus.class, lineNumber);
             requirePresent(fixture, "target_key", lineNumber);
             validateNestedEvidence(
                     requiredObjectField(fixture, "evidence", lineNumber), lineNumber);
             validateAttempts(requiredObjectField(fixture, "attempts", lineNumber), lineNumber);
+            if (fixture.has("ordinary")) {
+                JsonNode ordinary = requiredObjectField(fixture, "ordinary", lineNumber);
+                requireAllowedFields(ordinary, lineNumber, "ordinary evidence",
+                        "requirements", "fallback_actions", "observations", "filing_text_retrieved");
+                requiredEnumArray(ordinary, "requirements", DataRequirement.class, lineNumber);
+                requiredEnumArray(ordinary, "fallback_actions", PlanAction.class, lineNumber);
+                if (!ordinary.path("observations").isArray()) {
+                    throw invalid(lineNumber, "ordinary.observations must be an array");
+                }
+            }
             return;
         }
         requireAllowedFields(fixture, lineNumber, "report fixture",
@@ -480,7 +556,9 @@ public final class HarnessPolicyEval {
                         ViolationCode.RAG_MISSING.name(),
                         ViolationCode.DEBATE_CONTRACT_INVALID.name(),
                         ViolationCode.DEBATE_ASSESSMENT_INVALID.name(),
-                        ViolationCode.EVIDENCE_TIME_REQUIREMENT_UNMET.name()
+                        ViolationCode.EVIDENCE_TIME_REQUIREMENT_UNMET.name(),
+                        ViolationCode.DATA_REQUIREMENT_UNMET.name(),
+                        ViolationCode.EVIDENCE_CONTEXT_INCOMPLETE.name()
                 ),
                 List.of(
                         RecoveryAction.RETRY_NEWS.name(),
@@ -521,6 +599,22 @@ public final class HarnessPolicyEval {
                 entry.getValue().asInt()
         ));
         String workflow = textOrDefault(fixture, "workflow", "DEEP");
+        if (fixture.has("ordinary")) {
+            JsonNode ordinary = fixture.get("ordinary");
+            Set<DataRequirement> requirements = EnumSet.noneOf(DataRequirement.class);
+            ordinary.get("requirements").forEach(item ->
+                    requirements.add(DataRequirement.valueOf(item.asText())));
+            List<PlanStep> fallbackSteps = new ArrayList<>();
+            ordinary.get("fallback_actions").forEach(item ->
+                    fallbackSteps.add(new PlanStep(PlanAction.valueOf(item.asText()), null)));
+            OrdinaryPlan plan = new OrdinaryPlan(List.of(), List.of(), requirements,
+                    OrdinaryPlan.Source.DYNAMIC, Map.of(), fallbackSteps);
+            List<Map<String, Object>> observations = OBJECT_MAPPER.convertValue(
+                    ordinary.get("observations"), new TypeReference<>() {});
+            return new RunContext(workflow, attempts, TimeSensitivity.NONE,
+                    new OrdinaryEvidenceContext(plan, observations,
+                            ordinary.path("filing_text_retrieved").asBoolean(false)));
+        }
         return new RunContext(workflow, attempts);
     }
 
@@ -930,7 +1024,7 @@ public final class HarnessPolicyEval {
             ExpectedDecision expected
     ) {
 
-        private HarnessDecision evaluate(DeepResearchCompletionPolicy policy) {
+        private HarnessDecision evaluate(ResearchCompletionPolicy policy) {
             EvidenceLedger ledger = evidenceLedger(fixture, phase);
             if (phase == HarnessPhase.REPORT) {
                 return policy.afterReport(

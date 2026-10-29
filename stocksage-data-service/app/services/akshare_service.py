@@ -309,6 +309,10 @@ class AkshareService:
         result = kline_technical_indicators(kline["data"], indicators)
         return {"code": symbol, "symbol": code, "indicators": result, "provider": "akshare"}
 
+    def trade_calendar(self):
+        """A 股交易日历（新浪源，含交易所已公布的未来交易日），列 trade_date。"""
+        return budget_call(self._ak().tool_trade_date_hist_sina)
+
     def _ak(self):
         try:
             return importlib.import_module("akshare")

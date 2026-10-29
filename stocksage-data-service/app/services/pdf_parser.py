@@ -20,6 +20,47 @@ class PdfLimitError(ValueError):
 
 class PdfParser:
 
+    def disclosure_blocks(self, pdf_bytes: bytes) -> list[dict]:
+        """Read page-labelled paragraphs and detected table cells, without overlapping RAG chunks."""
+        try:
+            doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+        except fitz.FileDataError as error:
+            raise ValueError("Invalid PDF; use a readable official PDF document") from error
+        with doc:
+            if doc.needs_pass:
+                raise ValueError("Password-protected PDF cannot be read")
+            if len(doc) > MAX_PDF_PAGES:
+                raise PdfLimitError(f"PDF exceeds {MAX_PDF_PAGES} pages")
+            extracted = self._extract_blocks(doc)
+            threshold = median([block["font_size"] for block in extracted]) * 1.2 if extracted else 0
+            output, section = [], "Full Document"
+            for page_number, page in enumerate(doc, 1):
+                tables = page.find_tables().tables
+                entries = []
+                for block in extracted:
+                    if block["page"] != page_number:
+                        continue
+                    rect = fitz.Rect(block["bbox"])
+                    if any(fitz.Rect(table.bbox).contains(rect) for table in tables):
+                        continue
+                    entries.append((rect.y0, rect.x0, block, None))
+                for table in tables:
+                    rows = table.extract()
+                    if rows and any(cell and cell.strip() for row in rows for cell in row):
+                        entries.append((table.bbox[1], table.bbox[0], None, rows))
+                for _, _, block, rows in sorted(entries, key=lambda item: (item[0], item[1])):
+                    if rows is not None:
+                        output.append({"kind": "TABLE", "section": section, "rows": rows,
+                                       "text": "\n".join(" | ".join(cell or "" for cell in row) for row in rows),
+                                       "pageStart": page_number, "pageEnd": page_number})
+                    else:
+                        heading = block["font_size"] >= threshold and len(block["text"]) < 200
+                        if heading:
+                            section = block["text"].replace("\n", " ")
+                        output.append({"kind": "HEADING" if heading else "PARAGRAPH", "section": section,
+                                       "text": block["text"], "pageStart": page_number, "pageEnd": page_number})
+            return output
+
     def __init__(self, target_chunk_size: int = 3000, overlap: int = 300):
         """
         参数：
@@ -93,6 +134,7 @@ class PdfParser:
                         "text": text,
                         "page": page_num + 1,
                         "font_size": max_size,
+                        "bbox": block["bbox"],
                     })
         return blocks
 

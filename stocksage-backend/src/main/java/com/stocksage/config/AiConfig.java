@@ -1,7 +1,7 @@
 package com.stocksage.config;
 
-import com.stocksage.agent.AgentRuntimeConfiguration;
-import com.stocksage.agent.ChatConcurrencyAdvisor;
+import com.stocksage.agent.runtime.AgentRuntimeConfiguration;
+import com.stocksage.agent.runtime.ChatConcurrencyAdvisor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -138,12 +138,13 @@ public class AiConfig {
                 .retryTemplate(retryTemplate)
                 .observationRegistry(observations.getIfUnique(() -> ObservationRegistry.NOOP))
                 .build();
-        runtimeConfiguration.recordDeepSeekProvider(baseUrl, reasoningEffort, thinkingMaxTokens);
+        var router = new ProviderRoutingChatModel(bailian, deepseek, reasoningEffort, thinkingMaxTokens,
+                java.util.Map.of("deepseek-v4-pro-0813", "deepseek-v4-pro"));
+        runtimeConfiguration.recordDeepSeekProvider(baseUrl, reasoningEffort, thinkingMaxTokens, router);
         log.info("DeepSeek official models routed to {} (reasoning_effort={}, thinking max_tokens={})",
                 baseUrl, reasoningEffort, thinkingMaxTokens);
         // 官方 deepseek-v4-pro 即 DeepSeek-V4-Pro-0813（官方价格页）。
-        return new ProviderRoutingChatModel(bailian, deepseek, reasoningEffort, thinkingMaxTokens,
-                java.util.Map.of("deepseek-v4-pro-0813", "deepseek-v4-pro"));
+        return router;
     }
 
     static ExchangeFilterFunction streamTransportObservation() {

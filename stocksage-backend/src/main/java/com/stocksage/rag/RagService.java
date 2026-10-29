@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,6 +41,7 @@ public class RagService {
     private static final Pattern QUARTERLY_REPORT = Pattern.compile("(?i)(?<![A-Za-z0-9])10-?Q(?![A-Za-z0-9])|quarterly report|季报|季度报告");
     /** 多目标检索每个目标都要单独召回和重排，上限控制额外开销。 */
     private static final int MAX_TARGETS = 4;
+    public static final String MATCHED_CHILD_TEXTS = "matched_child_texts";
 
     /** Milvus 语义向量检索入口。 */
     private final VectorStore vectorStore;
@@ -413,7 +415,16 @@ public class RagService {
             boolean sameVersion = parent != null
                     && java.util.Objects.equals(parent.getMetadata().get("source_id"), doc.getMetadata().get("source_id"))
                     && java.util.Objects.equals(parent.getMetadata().get("file_hash"), doc.getMetadata().get("file_hash"));
-            expanded.add(sameVersion ? parent : doc);
+            Document context = sameVersion ? parent : doc;
+            List<String> matchedTexts = results.stream()
+                    .filter(hit -> parentId.equals(metaString(hit, "parent_vector_id")))
+                    .filter(hit -> java.util.Objects.equals(context.getMetadata().get("source_id"), hit.getMetadata().get("source_id"))
+                            && java.util.Objects.equals(context.getMetadata().get("file_hash"), hit.getMetadata().get("file_hash")))
+                    .map(Document::getText).filter(text -> text != null && !text.isBlank()).distinct().toList();
+            // 命中位置只属于本次检索，不能写回索引或共享文档。
+            Map<String, Object> metadata = new HashMap<>(context.getMetadata());
+            metadata.put(MATCHED_CHILD_TEXTS, matchedTexts);
+            expanded.add(context.mutate().metadata(metadata).build());
         }
         return expanded;
     }

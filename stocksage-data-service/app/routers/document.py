@@ -7,14 +7,71 @@
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from anyio import CapacityLimiter, fail_after, to_process
+from anyio import to_thread
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 
 from app.services.pdf_parser import PdfLimitError, PdfParser
+from app.services import disclosure_reader
+from app.research_budget import bounded_timeout, check_budget
 
 router = APIRouter()
 MAX_PDF_BYTES = 20 * 1024 * 1024
 READ_CHUNK_BYTES = 1024 * 1024
 MAX_PARSE_SECONDS = 30
 _PDF_PROCESS_LIMITER = CapacityLimiter(1)
+
+
+class DisclosureReadRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    url: StrictStr = Field(min_length=1, max_length=2000)
+    filing_type: StrictStr = Field(default="DISCLOSURE", max_length=30)
+    section: StrictStr = Field(default="", max_length=250)
+    tables_only: StrictBool = False
+    offset: StrictInt = Field(default=0, ge=0)
+    max_chars: StrictInt = Field(default=12000, ge=256, le=24000)
+
+
+class DisclosureCompareRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    older_url: StrictStr = Field(min_length=1, max_length=2000)
+    newer_url: StrictStr = Field(min_length=1, max_length=2000)
+    filing_type: StrictStr = Field(default="DISCLOSURE", max_length=30)
+    section: StrictStr = Field(default="", max_length=250)
+    max_changes: StrictInt = Field(default=20, ge=1, le=50)
+
+
+async def _read_disclosure(url: str, filing_type: str) -> dict:
+    content, content_type, final_url = await to_thread.run_sync(disclosure_reader.download, url)
+    with fail_after(bounded_timeout(MAX_PARSE_SECONDS)):
+        return await to_process.run_sync(disclosure_reader.parse_document, content, content_type, final_url, filing_type,
+                                         cancellable=True, limiter=_PDF_PROCESS_LIMITER)
+
+
+@router.post("/disclosure/read")
+async def read_disclosure(request: DisclosureReadRequest):
+    """Read an official SEC/A-share/HK disclosure by exact source, section or block ID."""
+    try:
+        document = await _read_disclosure(request.url, request.filing_type)
+        return disclosure_reader.read_result(document, request.section, request.tables_only, request.offset, request.max_chars)
+    except Exception as error:
+        check_budget(error)
+        return {"schemaVersion": 1, "status": "ERROR", "error": True, "provider": "OFFICIAL_DISCLOSURE",
+                "documentUrl": request.url, "message": f"Disclosure read failed: {type(error).__name__}: {error}"}
+
+
+@router.post("/disclosure/compare")
+async def compare_disclosures(request: DisclosureCompareRequest):
+    """Compare complete selected sections, then limit the returned additions/removals."""
+    try:
+        older = await _read_disclosure(request.older_url, request.filing_type)
+        newer = await _read_disclosure(request.newer_url, request.filing_type)
+        with fail_after(bounded_timeout(MAX_PARSE_SECONDS)):
+            return await to_process.run_sync(disclosure_reader.compare_documents, older, newer, request.section, request.max_changes,
+                                             cancellable=True, limiter=_PDF_PROCESS_LIMITER)
+    except Exception as error:
+        check_budget(error)
+        return {"schemaVersion": 1, "status": "ERROR", "error": True, "provider": "OFFICIAL_DISCLOSURE_DIFF",
+                "message": f"Disclosure comparison failed: {type(error).__name__}: {error}"}
 
 
 @router.post("/parse")

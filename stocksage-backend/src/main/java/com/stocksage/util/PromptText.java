@@ -3,11 +3,20 @@ package com.stocksage.util;
 /**
  * 提示词文本的通用处理工具。
  *
- * <p>仅负责确定性长度收敛，不做语义摘要；调用方仍应选择哪些数据值得注入提示词。</p>
+ * <p>负责长度收敛和数据区段边界，不做语义摘要。</p>
  */
 public final class PromptText {
 
     private PromptText() {
+    }
+
+    /** 只转义提示词边界词；保留正文和证据协议标记，供后续引用核对。 */
+    public static String untrustedContext(String text) {
+        String content = (text == null ? "" : text)
+                .replace("UNTRUSTED_CONTEXT", "UNTRUSTED＿CONTEXT")
+                .replace("=== 本次调用的角色要求", "＝＝＝ 本次调用的角色要求");
+        return "--- BEGIN UNTRUSTED_CONTEXT:DEEP_INPUT ---\n" + content
+                + "\n--- END UNTRUSTED_CONTEXT:DEEP_INPUT ---\n";
     }
 
     /**

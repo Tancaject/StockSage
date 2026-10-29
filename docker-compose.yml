@@ -47,6 +47,14 @@ services:
       - "11434:11434"
     volumes:
       - ollama-data:/root/.ollama
+    # bge-m3 在 CPU 上约 290 ms/块，一份 10-K 入库要 4–5 分钟；GPU 约 19 ms/块。
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     healthcheck:
       test: ["CMD", "ollama", "list"]
       interval: 10s

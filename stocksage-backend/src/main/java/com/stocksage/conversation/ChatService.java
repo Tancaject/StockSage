@@ -1,35 +1,33 @@
 package com.stocksage.conversation;
 
-import com.stocksage.exception.ResearchCapacityExceededException;
 import com.stocksage.evolution.FundamentalsRuntimeIdentity;
+import com.stocksage.exception.ResearchCapacityExceededException;
 
+import com.stocksage.agent.TickerResolutionService;
+import com.stocksage.agent.ordinary.ToolPrefetchService;
 import com.stocksage.knowledge.KnowledgeIngestionService;
 import com.stocksage.knowledge.ResearchMemoryQuery;
 import com.stocksage.knowledge.ResearchMemoryService;
-import com.stocksage.service.TickerResolutionService;
-import com.stocksage.service.ToolPrefetchService;
-import com.stocksage.research.ResearchTaskService;
-import com.stocksage.research.ResearchTaskObservationService;
+import com.stocksage.research.task.ResearchTaskObservationService;
+import com.stocksage.research.task.ResearchTaskService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.agent.AgentStep;
 import com.stocksage.agent.Coordinator;
-import com.stocksage.agent.ModelCompletion;
 import com.stocksage.agent.ExecutionPlan;
 import com.stocksage.agent.PlanRoute;
 import com.stocksage.agent.RoutingDecisionMetadata;
 import com.stocksage.agent.RoutingDecisionObserver;
 import com.stocksage.agent.intent.IntentRecognitionResult;
+import com.stocksage.agent.runtime.AgentStep;
+import com.stocksage.agent.runtime.ModelCompletion;
 import com.stocksage.memory.LongTermMemory;
 import com.stocksage.memory.ShortTermMemory;
-import com.stocksage.model.dto.ChatChunk;
-import com.stocksage.model.dto.ChatRequest;
 import com.stocksage.model.entity.Conversation;
 import com.stocksage.model.entity.Message;
 import com.stocksage.rag.RagService;
+import com.stocksage.tool.ChatStreamEmitter;
 import com.stocksage.tool.ToolCallContext;
 import com.stocksage.tool.ToolCallEventBus;
-import com.stocksage.tool.ChatStreamEmitter;
 import com.stocksage.trace.TraceEventRelay;
 import com.stocksage.trace.TraceService;
 import lombok.RequiredArgsConstructor;
@@ -180,6 +178,133 @@ public class ChatService {
                 return researchTaskObservationService.observeChat(submitted.get(), request.getUserId());
             }
         }
+        PreparedTurn turn = prepareTurn(request);
+
+        ChatStreamSession stream = new ChatStreamSession(turn.traceId(), turn.conversationId(), turn.startTime(),
+                streamHeartbeatSeconds, objectMapper, traceService, traceEventRelay,
+                chatStreamEmitter, toolCallEventBus);
+        StringBuilder fullResponse = new StringBuilder();
+        Flux<String> conversationStarted = Flux.just(stream.toJson(ChatChunk.builder()
+                .type("meta")
+                .content("")
+                .traceId(turn.traceId())
+                .conversationId(turn.conversationId())
+                .build()));
+        Flux<String> executionPlanStarted = Flux.just(stream.toJson(ChatChunk.builder()
+                .type("thought")
+                .content(turn.executionPlan().thought() + "\n" + turn.executionPlan().observation())
+                .traceId(turn.traceId())
+                .conversationId(turn.conversationId())
+                .build()));
+        Flux<String> routeDecisionStarted = turn.routingDecision() == null
+                ? Flux.empty()
+                : Flux.just(stream.toJson(ChatChunk.builder()
+                        .type("route_decision")
+                        .content(formatRouteDecision(turn.routingDecision()))
+                        .traceId(turn.traceId())
+                        .conversationId(turn.conversationId())
+                        .metadata(turn.routeAttributes())
+                        .build()));
+        Flux<String> retrievalObservation = turn.retrievedDocs().isEmpty()
+                ? Flux.empty()
+                : Flux.just(stream.toJson(ChatChunk.builder()
+                        .type("observation")
+                        .content("知识库召回 " + turn.retrievedDocs().size() + " 个候选片段，模型会结合其相关性判断是否采用。")
+                        .traceId(turn.traceId())
+                        .conversationId(turn.conversationId())
+                        .build()));
+
+        Flux<String> answerStream = Flux.defer(() -> {
+            // 注册按链路隔离的事件通道。@Tool 方法开始或完成时，工具调用切面会向该通道写入事件。
+            ToolCallContext.register(turn.traceId(), turn.conversationId(), request.getMessage());
+            ToolCallContext.set(turn.traceId(), turn.conversationId(), turn.resolvedQuery());
+
+            // 5. 在发送最终回答提示词前执行确定性预取。
+            // 两类最终回答客户端都不持有工具；DEEP 只切换到证据整理提示和更强模型层级。
+            boolean preparedContextOnly = toolPrefetchService.isDeepResearchPlan(turn.executionPlan().actions());
+            Coordinator.SelectedModel selectedModel = coordinator.selectFinalAnswerModel(turn.executionPlan().modelTier(), preparedContextOnly, turn.hasImages());
+            String pinnedUserMemory = !turn.needsIntentClarification() && turn.executionPlan().route() == PlanRoute.FUNDAMENTALS
+                    ? longTermMemory.buildPromptContext(request.getUserId()) : null;
+            FundamentalsRuntimeIdentity.Request methodRequest = turn.executionPlan().route() == PlanRoute.FUNDAMENTALS && !turn.needsIntentClarification()
+                    ? new FundamentalsRuntimeIdentity.Request(request.getMessage(), coordinator.finalAnswerInvocation(selectedModel),
+                        chatPromptAssembler.promptMaxTextChars(), !turn.hasImages() && !preparedContextOnly
+                            && selectedModel.tier() == com.stocksage.agent.ModelTier.STANDARD) : null;
+            // 澄清是硬执行闸门：不做 RAG/记忆/工具/Agent 预取，更不能提交 DEEP 后台任务。
+            // 参数与多标的问题直接回固定澄清；只是意图没识别出来时，仍不取数，但交给回答模型依据本轮可见的对话回答或澄清。
+            boolean clarificationBlocked = !turn.parameterClarification().isBlank()
+                    || turn.routingDecision().reasonCodes().contains(Coordinator.MULTI_TARGET_UNSUPPORTED)
+                    || turn.routingDecision().reasonCodes().contains(Coordinator.MULTI_TARGET_PARAMETERS_DIFFER)
+                    || turn.routingDecision().reasonCodes().contains(Coordinator.TARGET_REWRITE_MISMATCH);
+            if (turn.needsIntentClarification() && !clarificationBlocked) {
+                recordIntentClarificationDeferred(turn.traceId());
+            }
+            ToolPrefetchService.PreparedToolContext preparedToolContext = turn.needsIntentClarification()
+                    ? new ToolPrefetchService.PreparedToolContext(
+                            "", !turn.parameterClarification().isBlank() ? turn.parameterClarification()
+                                    : clarificationBlocked ? buildIntentClarificationQuestion(turn.routingDecision()) : "",
+                            null, turn.traceId(), clarificationBlocked ? "BLOCKED" : null)
+                    : toolPrefetchService.prefetch(
+                            turn.executionPlan(),
+                            turn.resolvedQuery(),
+                            turn.traceId(),
+                            turn.conversationId(),
+                            request.getUserId(),
+                            selectedModel,
+                            request.getSubmissionId(), methodRequest, turn.retrievedTickers(),
+                            request.getEvaluationMode()
+                    );
+            stream.relayPrepared(preparedToolContext.eventTraceId(),
+                    preparedToolContext.submittedTaskId() != null);
+
+            if (preparedToolContext.hasDirectAnswer()) {
+                return streamPreparedDirectAnswer(
+                        preparedToolContext.directAnswer(),
+                        request,
+                        turn.conversation(),
+                        turn.newConversation(),
+                        turn.traceId(),
+                        turn.conversationId(),
+                        turn.sourceMessageId(),
+                        turn.sourceObservedAt(),
+                        turn.startTime(),
+                        fullResponse,
+                        stream,
+                        preparedToolContext.taskOutcome()
+                );
+            }
+            return streamModelAnswer(turn, request, preparedToolContext, selectedModel,
+                    preparedContextOnly, pinnedUserMemory, fullResponse, stream);
+        }).onErrorResume(error -> {
+            stream.preparationFailed();
+            if (stream.tryRecordTerminal()) {
+                long durationMs = System.currentTimeMillis() - turn.startTime();
+                traceService.endTrace(turn.traceId(), "error", 0, durationMs);
+                log.error("Chat preparation failed, conversationId={}, traceId={}", turn.conversationId(), turn.traceId(), error);
+            }
+            stream.finishForeground();
+            return Flux.just(stream.toJson(ChatChunk.builder()
+                    .type("error")
+                    .content(chatFailureMessage(error))
+                    .traceId(turn.traceId())
+                    .conversationId(turn.conversationId())
+                    .build()));
+        }).transform(ChatService::clearToolContextAfterSubscribe)
+                // 取消可能发生在回答流订阅前；后台任务的上下文由 finishRelay 在事件流结束时注销。
+                .doFinally(signalType -> {
+                    if (!stream.hasBackgroundTask()) ToolCallContext.unregister(turn.traceId());
+                })
+                .subscribeOn(Schedulers.boundedElastic());
+
+        return Flux.concat(conversationStarted, routeDecisionStarted, executionPlanStarted, retrievalObservation,
+                stream.mergeWith(answerStream));
+    }
+
+    /**
+     * 同步准备一轮对话：持久化用户轮次、识别意图与标的、检索知识库和研究记忆，并生成执行计划和对应 Trace。
+     *
+     * <p>只做不调用 @Tool 的准备工作；工具上下文在订阅回答流后才注册。</p>
+     */
+    private PreparedTurn prepareTurn(ChatRequest request) {
         long startTime = System.currentTimeMillis();
         List<Media> imageMedia = imageAttachmentService.normalizeImageAttachments(request.getImages());
         boolean hasImages = !imageMedia.isEmpty();
@@ -272,7 +397,10 @@ public class ChatService {
         ExecutionPlan executionPlan = coordinator.planRecognized(
                 intentRecognition, request.getMessage(), retrievedDocs.size());
         RoutingDecisionMetadata routingDecision = executionPlan.routingDecision();
-        Map<String, Object> routeAttributes = buildRouteAttributes(executionPlan);
+        Map<String, Object> routeAttributes = new java.util.LinkedHashMap<>(buildRouteAttributes(executionPlan));
+        if (!intentRecognition.modelObservation().isEmpty()) {
+            routeAttributes.put("modelObservation", intentRecognition.modelObservation());
+        }
         routingDecisionObserver.record(routingDecision);
         traceService.addStep(traceId, AgentStep.builder()
                 .thought(executionPlan.thought())
@@ -294,223 +422,155 @@ public class ChatService {
                     .attributes(executionPlan.ordinaryPlan().attributes())
                     .build());
         }
+        return new PreparedTurn(startTime, imageMedia, hasImages, newConversation, conversation, conversationId,
+                traceId, sourceMessageId, sourceObservedAt, resolvedQuery, parameterClarification, needsIntentClarification,
+                retrievedDocs, retrievedTickers, researchMemory, executionPlan, routingDecision, routeAttributes);
+    }
 
-        ChatStreamSession stream = new ChatStreamSession(traceId, conversationId, startTime,
-                streamHeartbeatSeconds, objectMapper, traceService, traceEventRelay,
-                chatStreamEmitter, toolCallEventBus);
-        StringBuilder fullResponse = new StringBuilder();
-        Flux<String> conversationStarted = Flux.just(stream.toJson(ChatChunk.builder()
-                .type("meta")
-                .content("")
-                .traceId(traceId)
-                .conversationId(conversationId)
+    /** 拼装提示词并流式输出最终回答；完成、失败或取消时各自落库消息、关闭 Trace 并触发后台任务。 */
+    private Flux<String> streamModelAnswer(
+            PreparedTurn turn,
+            ChatRequest request,
+            ToolPrefetchService.PreparedToolContext preparedToolContext,
+            Coordinator.SelectedModel selectedModel,
+            boolean preparedContextOnly,
+            String pinnedUserMemory,
+            StringBuilder fullResponse,
+            ChatStreamSession stream
+    ) {
+        // 走到这里仍标记澄清的，只能是意图未识别、已放行给回答模型的分支。
+        List<org.springframework.ai.chat.messages.Message> promptMessages =
+                buildPromptMessages(request.getUserId(), turn.conversationId(), preparedToolContext,
+                        turn.retrievedDocs(), turn.researchMemory().promptContext(),
+                        pinnedUserMemory == null ? longTermMemory.buildPromptContext(request.getUserId()) : pinnedUserMemory,
+                        turn.imageMedia(), preparedContextOnly, turn.traceId(),
+                        turn.needsIntentClarification() ? INTENT_UNCERTAIN_INSTRUCTION : null);
+        Flux<String> modelStarted = Flux.just(stream.toJson(ChatChunk.builder()
+                .type("model")
+                .content(selectedModel.modelName())
+                .modelTier(selectedModel.tier().name())
+                .modelName(selectedModel.modelName())
+                .traceId(turn.traceId())
+                .conversationId(turn.conversationId())
                 .build()));
-        Flux<String> executionPlanStarted = Flux.just(stream.toJson(ChatChunk.builder()
-                .type("thought")
-                .content(executionPlan.thought() + "\n" + executionPlan.observation())
-                .traceId(traceId)
-                .conversationId(conversationId)
-                .build()));
-        Flux<String> routeDecisionStarted = routingDecision == null
-                ? Flux.empty()
-                : Flux.just(stream.toJson(ChatChunk.builder()
-                        .type("route_decision")
-                        .content(formatRouteDecision(routingDecision))
-                        .traceId(traceId)
-                        .conversationId(conversationId)
-                        .metadata(routeAttributes)
-                        .build()));
-        Flux<String> retrievalObservation = retrievedDocs.isEmpty()
-                ? Flux.empty()
-                : Flux.just(stream.toJson(ChatChunk.builder()
-                        .type("observation")
-                        .content("知识库召回 " + retrievedDocs.size() + " 个候选片段，模型会结合其相关性判断是否采用。")
-                        .traceId(traceId)
-                        .conversationId(conversationId)
-                        .build()));
+        // 调用 Coordinator 选择的无工具最终 ChatClient 流。
+        AtomicReference<ModelCompletion> answerCompletion = new AtomicReference<>(
+                new ModelCompletion(ModelCompletion.Status.UNKNOWN, ""));
+        Flux<String> responseTokens = coordinator.streamAnswer(promptMessages, preparedContextOnly,
+                selectedModel.tier(), turn.hasImages(), attributes -> recordAnswerObservation(turn.traceId(), attributes), answerCompletion::set);
 
-        Flux<String> answerStream = Flux.defer(() -> {
-            // 注册按链路隔离的事件通道。@Tool 方法开始或完成时，工具调用切面会向该通道写入事件。
-            ToolCallContext.register(traceId, conversationId, request.getMessage());
-            ToolCallContext.set(traceId, conversationId, resolvedQuery);
-
-            // 5. 在发送最终回答提示词前执行确定性预取。
-            // 两类最终回答客户端都不持有工具；DEEP 只切换到证据整理提示和更强模型层级。
-            boolean preparedContextOnly = toolPrefetchService.isDeepResearchPlan(executionPlan.actions());
-            Coordinator.SelectedModel selectedModel = coordinator.selectFinalAnswerModel(executionPlan.modelTier(), preparedContextOnly, hasImages);
-            String pinnedUserMemory = !needsIntentClarification && executionPlan.route() == PlanRoute.FUNDAMENTALS
-                    ? longTermMemory.buildPromptContext(request.getUserId()) : null;
-            FundamentalsRuntimeIdentity.Request methodRequest = executionPlan.route() == PlanRoute.FUNDAMENTALS && !needsIntentClarification
-                    ? new FundamentalsRuntimeIdentity.Request(request.getMessage(), coordinator.finalAnswerInvocation(selectedModel),
-                        chatPromptAssembler.promptMaxTextChars(), !hasImages && !preparedContextOnly
-                            && selectedModel.tier() == com.stocksage.agent.ModelTier.STANDARD) : null;
-            // 澄清是硬执行闸门：不做 RAG/记忆/工具/Agent 预取，更不能提交 DEEP 后台任务。
-            ToolPrefetchService.PreparedToolContext preparedToolContext = needsIntentClarification
-                    ? new ToolPrefetchService.PreparedToolContext(
-                            "", parameterClarification.isBlank() ? buildIntentClarificationQuestion(routingDecision) : parameterClarification, null, traceId,
-                            !parameterClarification.isBlank() || routingDecision.reasonCodes().contains(Coordinator.MULTI_TARGET_UNSUPPORTED)
-                                    || routingDecision.reasonCodes().contains(Coordinator.MULTI_TARGET_PARAMETERS_DIFFER)
-                                    || routingDecision.reasonCodes().contains(Coordinator.TARGET_REWRITE_MISMATCH)
-                                    ? "BLOCKED"
-                                    : null)
-                    : toolPrefetchService.prefetch(
-                            executionPlan,
-                            resolvedQuery,
-                            traceId,
-                            conversationId,
-                            request.getUserId(),
-                            selectedModel,
-                            request.getSubmissionId(), methodRequest, retrievedTickers,
-                            request.getEvaluationMode()
-                    );
-            stream.relayPrepared(preparedToolContext.eventTraceId(),
-                    preparedToolContext.submittedTaskId() != null);
-
-            if (preparedToolContext.hasDirectAnswer()) {
-                return streamPreparedDirectAnswer(
-                        preparedToolContext.directAnswer(),
-                        request,
-                        conversation,
-                        newConversation,
-                        traceId,
-                        conversationId,
-                        sourceMessageId,
-                        sourceObservedAt,
-                        startTime,
-                        fullResponse,
-                        stream,
-                        preparedToolContext.taskOutcome()
-                );
-            }
-            List<org.springframework.ai.chat.messages.Message> promptMessages =
-                    buildPromptMessages(request.getUserId(), conversationId, preparedToolContext,
-                            retrievedDocs, researchMemory.promptContext(),
-                            pinnedUserMemory == null ? longTermMemory.buildPromptContext(request.getUserId()) : pinnedUserMemory,
-                            imageMedia, preparedContextOnly, traceId);
-            Flux<String> modelStarted = Flux.just(stream.toJson(ChatChunk.builder()
-                    .type("model")
-                    .content(selectedModel.modelName())
-                    .modelTier(selectedModel.tier().name())
-                    .modelName(selectedModel.modelName())
-                    .traceId(traceId)
-                    .conversationId(conversationId)
-                    .build()));
-            // 调用 Coordinator 选择的无工具最终 ChatClient 流。
-            AtomicReference<ModelCompletion> answerCompletion = new AtomicReference<>(
-                    new ModelCompletion(ModelCompletion.Status.UNKNOWN, ""));
-            Flux<String> responseTokens = coordinator.streamAnswer(promptMessages, preparedContextOnly,
-                    selectedModel.tier(), hasImages, attributes -> recordAnswerObservation(traceId, attributes), answerCompletion::set);
-
-            return Flux.concat(modelStarted, responseTokens
-                .doFirst(() -> ToolCallContext.set(traceId, conversationId, resolvedQuery))
-                .map(token -> {
-                    fullResponse.append(token);
-                    return stream.toJson(ChatChunk.builder()
-                            .type("answer")
-                            .content(token)
-                            .traceId(traceId)
-                            .conversationId(conversationId)
+        return Flux.concat(modelStarted, responseTokens
+            .doFirst(() -> ToolCallContext.set(turn.traceId(), turn.conversationId(), turn.resolvedQuery()))
+            .map(token -> {
+                fullResponse.append(token);
+                return stream.toJson(ChatChunk.builder()
+                        .type("answer")
+                        .content(token)
+                        .traceId(turn.traceId())
+                        .conversationId(turn.conversationId())
+                        .build());
+            })
+            .doOnComplete(() -> {
+                long durationMs = System.currentTimeMillis() - turn.startTime();
+                if (stream.tryRecordTerminal()) {
+                    String assistantText = fullResponse.toString();
+                    Message saved = persistAssistantMessage(turn.conversationId(), request.getUserId(), assistantText, turn.traceId(), selectedModel);
+                    shortTermMemory.addMessage(turn.conversationId(), "assistant",
+                            ShortTermMemory.assistantMemoryContent(assistantText, saved.getCreatedAt()));
+                    submitBackground("memory-compress", turn.conversationId(), () -> shortTermMemory.compressIfNeeded(turn.conversationId()));
+                    maybeGenerateConversationTitle(turn.conversationId(), request.getUserId(), request.getMessage(),
+                            turn.newConversation(), turn.conversation().getOrigin());
+                    submitBackground("profile-extraction", turn.conversationId(), () -> longTermMemory.extractAndUpdate(
+                            request.getUserId(), assistantText, request.getMessage(),
+                            turn.sourceMessageId(), turn.sourceObservedAt()));
+                    int estimatedTokens = estimateTokens(promptMessages, assistantText);
+                    traceService.addStep(turn.traceId(), AgentStep.builder()
+                            .thought("Generated streamed assistant answer.")
+                            .action(null)
+                            .actionInput(null)
+                            .observation(null)
+                            .durationMs(durationMs)
+                            .tokenCount(0)
+                            .attributes(Map.of("kind", "answer-completion", "usageScope", "final-answer",
+                                    "legacyTotalTokensSource", "CHARACTER_ESTIMATE", "estimatedTotalTokens", estimatedTokens))
                             .build());
-                })
-                .doOnComplete(() -> {
-                    long durationMs = System.currentTimeMillis() - startTime;
-                    if (stream.tryRecordTerminal()) {
-                        String assistantText = fullResponse.toString();
-                        persistAssistantMessage(conversationId, request.getUserId(), assistantText, traceId, selectedModel);
-                        shortTermMemory.addMessage(conversationId, "assistant", assistantText);
-                        maybeGenerateConversationTitle(conversationId, request.getUserId(), request.getMessage(),
-                                newConversation, conversation.getOrigin());
-                        submitBackground("profile-extraction", conversationId, () -> longTermMemory.extractAndUpdate(
-                                request.getUserId(), assistantText, request.getMessage(),
-                                sourceMessageId, sourceObservedAt));
-                        int estimatedTokens = estimateTokens(promptMessages, assistantText);
-                        traceService.addStep(traceId, AgentStep.builder()
-                                .thought("Generated streamed assistant answer.")
-                                .action(null)
-                                .actionInput(null)
-                                .observation(null)
-                                .durationMs(durationMs)
-                                .tokenCount(0)
-                                .attributes(Map.of("kind", "answer-completion", "usageScope", "final-answer",
-                                        "legacyTotalTokensSource", "CHARACTER_ESTIMATE", "estimatedTotalTokens", estimatedTokens))
-                                .build());
-                        String taskOutcome = preparedToolContext.outcomeForAnswer(assistantText, answerCompletion.get());
-                        traceService.endTrace(traceId, "success", estimatedTokens, durationMs, taskOutcome);
-                        if (executionPlan.route() == PlanRoute.FUNDAMENTALS) {
-                            submitBackground("evolution-failure-capture", conversationId,
-                                    () -> failurePool.recordOrdinaryOutcome(traceId, taskOutcome));
-                        }
-                        log.info("Chat completed, conversationId={}, traceId={}, responseLength={}",
-                                conversationId, traceId, fullResponse.length());
+                    String taskOutcome = preparedToolContext.outcomeForAnswer(assistantText, answerCompletion.get());
+                    traceService.endTrace(turn.traceId(), "success", estimatedTokens, durationMs, taskOutcome);
+                    if (turn.executionPlan().route() == PlanRoute.FUNDAMENTALS) {
+                        submitBackground("evolution-failure-capture", turn.conversationId(),
+                                () -> failurePool.recordOrdinaryOutcome(turn.traceId(), taskOutcome));
                     }
-                })
-                .onErrorResume(e -> {
-                    long durationMs = System.currentTimeMillis() - startTime;
-                    if (stream.tryRecordTerminal()) {
-                        String partial = fullResponse.toString();
-                        traceService.addStep(traceId, AgentStep.builder()
-                                .thought("Streaming chat failed.")
-                                .action(null)
-                                .actionInput(null)
-                                .observation(e.getMessage())
-                                .durationMs(durationMs)
-                                .tokenCount(0)
-                                .build());
-                        traceService.endTrace(traceId, "error", 0, durationMs,
-                                preparedToolContext.outcomeForAnswer(partial, answerCompletion.get()));
-                        log.error("Streaming chat failed, conversationId={}, traceId={}", conversationId, traceId, e);
+                    log.info("Chat completed, conversationId={}, traceId={}, responseLength={}",
+                            turn.conversationId(), turn.traceId(), fullResponse.length());
+                }
+            })
+            .onErrorResume(e -> {
+                long durationMs = System.currentTimeMillis() - turn.startTime();
+                if (stream.tryRecordTerminal()) {
+                    String partial = fullResponse.toString();
+                    traceService.addStep(turn.traceId(), AgentStep.builder()
+                            .thought("Streaming chat failed.")
+                            .action(null)
+                            .actionInput(null)
+                            .observation(e.getMessage())
+                            .durationMs(durationMs)
+                            .tokenCount(0)
+                            .build());
+                    traceService.endTrace(turn.traceId(), "error", 0, durationMs,
+                            preparedToolContext.outcomeForAnswer(partial, answerCompletion.get()));
+                    log.error("Streaming chat failed, conversationId={}, traceId={}", turn.conversationId(), turn.traceId(), e);
+                }
+                return Flux.just(stream.toJson(ChatChunk.builder()
+                        .type("error")
+                        .content(chatFailureMessage(e))
+                        .traceId(turn.traceId())
+                        .conversationId(turn.conversationId())
+                        .build()));
+            })
+            .doFinally(signalType -> {
+                if (signalType == SignalType.CANCEL && stream.tryRecordTerminal()) {
+                    long durationMs = System.currentTimeMillis() - turn.startTime();
+                    if (!fullResponse.isEmpty()) {
+                        persistAssistantMessage(turn.conversationId(), request.getUserId(), fullResponse.toString(), turn.traceId(), selectedModel);
                     }
-                    return Flux.just(stream.toJson(ChatChunk.builder()
-                            .type("error")
-                            .content(chatFailureMessage(e))
-                            .traceId(traceId)
-                            .conversationId(conversationId)
-                            .build()));
-                })
-                .doFinally(signalType -> {
-                    if (signalType == SignalType.CANCEL && stream.tryRecordTerminal()) {
-                        long durationMs = System.currentTimeMillis() - startTime;
-                        if (!fullResponse.isEmpty()) {
-                            persistAssistantMessage(conversationId, request.getUserId(), fullResponse.toString(), traceId, selectedModel);
-                        }
-                        traceService.addStep(traceId, AgentStep.builder()
-                                .thought("Streaming chat was cancelled by the client.")
-                                .action(null)
-                                .actionInput(null)
-                                .observation(null)
-                                .durationMs(durationMs)
-                                .tokenCount(0)
-                                .build());
-                        traceService.endTrace(traceId, "cancelled", 0, durationMs);
-                        log.info("Chat cancelled, conversationId={}, traceId={}, responseLength={}",
-                                conversationId, traceId, fullResponse.length());
-                    }
-                    stream.finishForeground();
-                })
-                .transform(ChatService::clearToolContextAfterSubscribe));
-        }).onErrorResume(error -> {
-            stream.preparationFailed();
-            if (stream.tryRecordTerminal()) {
-                long durationMs = System.currentTimeMillis() - startTime;
-                traceService.endTrace(traceId, "error", 0, durationMs);
-                log.error("Chat preparation failed, conversationId={}, traceId={}", conversationId, traceId, error);
-            }
-            stream.finishForeground();
-            return Flux.just(stream.toJson(ChatChunk.builder()
-                    .type("error")
-                    .content(chatFailureMessage(error))
-                    .traceId(traceId)
-                    .conversationId(conversationId)
-                    .build()));
-        }).transform(ChatService::clearToolContextAfterSubscribe)
-                // 取消可能发生在回答流订阅前；后台任务的上下文由 finishRelay 在事件流结束时注销。
-                .doFinally(signalType -> {
-                    if (!stream.hasBackgroundTask()) ToolCallContext.unregister(traceId);
-                })
-                .subscribeOn(Schedulers.boundedElastic());
+                    traceService.addStep(turn.traceId(), AgentStep.builder()
+                            .thought("Streaming chat was cancelled by the client.")
+                            .action(null)
+                            .actionInput(null)
+                            .observation(null)
+                            .durationMs(durationMs)
+                            .tokenCount(0)
+                            .build());
+                    traceService.endTrace(turn.traceId(), "cancelled", 0, durationMs);
+                    log.info("Chat cancelled, conversationId={}, traceId={}, responseLength={}",
+                            turn.conversationId(), turn.traceId(), fullResponse.length());
+                }
+                stream.finishForeground();
+            })
+            .transform(ChatService::clearToolContextAfterSubscribe));
+    }
 
-        return Flux.concat(conversationStarted, routeDecisionStarted, executionPlanStarted, retrievalObservation,
-                stream.mergeWith(answerStream));
+    /** 一轮对话在同步准备阶段确定的会话、检索、记忆与执行计划。 */
+    private record PreparedTurn(
+            long startTime,
+            List<Media> imageMedia,
+            boolean hasImages,
+            boolean newConversation,
+            Conversation conversation,
+            Long conversationId,
+            String traceId,
+            Long sourceMessageId,
+            LocalDateTime sourceObservedAt,
+            String resolvedQuery,
+            String parameterClarification,
+            boolean needsIntentClarification,
+            List<Document> retrievedDocs,
+            Set<String> retrievedTickers,
+            ResearchMemoryService.RetrievalResult researchMemory,
+            ExecutionPlan executionPlan,
+            RoutingDecisionMetadata routingDecision,
+            Map<String, Object> routeAttributes
+    ) {
     }
 
     /** 订阅期间同步设置的工具上下文在订阅返回后于同一线程清理，避免池化线程残留到下一次请求。 */
@@ -556,8 +616,10 @@ public class ChatService {
                         .build()))
                 .doOnComplete(() -> {
                     if (!assistantText.isBlank()) {
-                        persistAssistantMessage(conversationId, request.getUserId(), assistantText, traceId, null);
-                        shortTermMemory.addMessage(conversationId, "assistant", assistantText);
+                        Message saved = persistAssistantMessage(conversationId, request.getUserId(), assistantText, traceId, null);
+                        shortTermMemory.addMessage(conversationId, "assistant",
+                                ShortTermMemory.assistantMemoryContent(assistantText, saved.getCreatedAt()));
+                        submitBackground("memory-compress", conversationId, () -> shortTermMemory.compressIfNeeded(conversationId));
                         maybeGenerateConversationTitle(
                                 conversationId,
                                 request.getUserId(),
@@ -639,7 +701,8 @@ public class ChatService {
      */
     public void persistAssistantReport(Long conversationId, String userId, String text, String traceId) {
         conversationMessageService.persistAssistantReport(conversationId, userId, text, traceId);
-        shortTermMemory.addMessage(conversationId, "assistant", text);
+        rebuildShortTermMemory(conversationId, conversationMessageService.listMessages(userId, conversationId));
+        submitBackground("memory-compress", conversationId, () -> shortTermMemory.compressIfNeeded(conversationId));
     }
 
     /**
@@ -666,7 +729,8 @@ public class ChatService {
             String userMemoryContext,
             List<Media> imageMedia,
             boolean preparedContextOnly,
-            String traceId
+            String traceId,
+            String turnInstruction
     ) {
         List<Message> history = conversationMessageService.listMessages(userId, conversationId);
         List<org.springframework.ai.chat.messages.Message> shortTermMessages =
@@ -674,12 +738,15 @@ public class ChatService {
         ChatPromptAssembler.Assembly assembly = chatPromptAssembler.assemble(
                 shortTermMessages, preparedToolContext, retrievedDocs, researchMemoryContext,
                 userMemoryContext, imageMedia != null && !imageMedia.isEmpty(),
-                preparedContextOnly, LocalDate.now());
+                preparedContextOnly, LocalDate.now(), turnInstruction);
         if (traceId != null) {
             recordAnswerObservation(traceId,
                     Map.of("kind", "prompt-budget", "usedChars", assembly.usedChars(),
                             "maxChars", assembly.maxChars(), "historyChars", assembly.historyChars(),
-                            "dynamicContextChars", assembly.context().length()));
+                            "dynamicContextChars", assembly.context().length(),
+                            "toolContextChars", assembly.toolContextChars(),
+                            "toolRemainingChars", assembly.toolRemainingChars(),
+                            "toolBudgetRatio", assembly.toolBudgetRatio()));
         }
         recordAnswerContext(traceId, assembly.messages(), assembly.context(), assembly.evidenceContext(),
                 assembly.hasImages(), assembly.evidenceCaptureComplete(), assembly.analystSpan());
@@ -743,7 +810,6 @@ public class ChatService {
             List<Message> history,
             List<Media> imageMedia
     ) {
-        shortTermMemory.compressIfNeeded(conversationId);
         List<String> memoryEntries = shortTermMemory.getContext(conversationId);
         String expectedCurrentEntry = history == null || history.isEmpty()
                 ? ""
@@ -753,13 +819,10 @@ public class ChatService {
                 || !expectedCurrentEntry.equals(memoryEntries.get(memoryEntries.size() - 1));
         if (currentEntryMissing && history != null && !history.isEmpty()) {
             rebuildShortTermMemory(conversationId, history);
-            shortTermMemory.compressIfNeeded(conversationId);
             memoryEntries = shortTermMemory.getContext(conversationId);
             if (memoryEntries.isEmpty()
                     || !expectedCurrentEntry.equals(memoryEntries.get(memoryEntries.size() - 1))) {
-                memoryEntries = history.stream()
-                        .map(this::toMemoryMessage)
-                        .toList();
+                memoryEntries = shortTermMemory.restoreContext(conversationId, history);
             }
         }
 
@@ -878,7 +941,32 @@ public class ChatService {
         return Map.copyOf(attributes);
     }
 
-    /** 低置信或冲突时直接返回一个可回答的澄清问题，不再调用工具或第二个模型。 */
+    /**
+     * 意图未识别时给回答模型的本轮说明：本轮没有检索也没有取数，只能依据当前可见的对话记录、摘要和画像。
+     * 这些记忆都受预算限制，找不到不等于用户没说过；需要最新数据时不能拿历史数字顶替。
+     */
+    private static final String INTENT_UNCERTAIN_INSTRUCTION = """
+            【本轮说明】本轮问题的意图没能可靠识别，这次没有获取任何行情、财务或新闻数据，也没有知识库资料。
+            - 本轮可见的对话记录、会话摘要或用户画像能回答这个问题时，直接回答；用"你之前提到"这类说法点明出处即可。
+            - 需要最新数据才能回答时，说明这次没有查询最新数据，请用户说明标的和要看的内容；对话里出现过的历史数字不能当作当前数据。
+            - 找不到相关内容时，说明"在目前能看到的对话记录里没有找到"并请用户补充；不要断言用户从未说过，也不要编造。
+            - 向用户说明时不要提及后端、检索、会话摘要、意图识别、本轮说明这些内部机制。
+            """;
+
+    /** 意图未识别、交给回答模型处理时在 Trace 留一步，便于和固定澄清区分。 */
+    private void recordIntentClarificationDeferred(String traceId) {
+        try {
+            traceService.addStep(traceId, AgentStep.builder().action("Intent Clarification")
+                    .observation("意图未能确定：不检索、不取数，交给回答模型依据本轮可见的对话记录回答或澄清。")
+                    .attributes(Map.of("kind", "intent-clarification", "mode", "ANSWER_FROM_VISIBLE_CONTEXT"))
+                    .build());
+        } catch (Exception error) {
+            log.warn("Intent clarification trace unavailable, traceId={}, errorType={}",
+                    traceId, error.getClass().getSimpleName());
+        }
+    }
+
+    /** 参数缺失或多标的结构问题时直接返回一个可回答的澄清问题，不再调用工具或第二个模型。 */
     private String buildIntentClarificationQuestion(RoutingDecisionMetadata decision) {
         if (decision != null && decision.reasonCodes().contains(Coordinator.MULTI_TARGET_PARAMETERS_DIFFER)) {
             return "这次对比的几个标的要求了不同的期间、粒度或年报/季报口径。请为所有标的指定同一种取数要求后再对比。";
@@ -919,8 +1007,11 @@ public class ChatService {
         String normalizedRole = role == null ? "" : role.toLowerCase(Locale.ROOT);
         return switch (normalizedRole) {
             case "assistant" -> new AssistantMessage(content);
-            case "system" -> new UserMessage("[UNTRUSTED_CONTEXT: CONVERSATION_SUMMARY]\n"
-                    + content.replace("[UNTRUSTED_CONTEXT:", "[context marker removed:"));
+            case "system" -> UserMessage.builder()
+                    .text("[UNTRUSTED_CONTEXT: CONVERSATION_SUMMARY]\n"
+                            + content.replace("[UNTRUSTED_CONTEXT:", "[context marker removed:"))
+                    .metadata(Map.of("conversationSummary", true))
+                    .build();
             default -> new UserMessage(content);
         };
     }
@@ -987,12 +1078,16 @@ public class ChatService {
         }
     }
 
-    /** SQL 轮次提交后再更新派生记忆，压缩可能调用模型，不能持有会话写事务。 */
+    /** SQL 轮次提交后再更新派生记忆，Redis 不参与会话写事务。 */
     private ConversationMessageService.UserTurn beginUserTurn(ChatRequest request, Long conversationId) {
         var turn = conversationMessageService.appendUserTurn(request.getUserId(), conversationId,
                 request.getMessage(), request.getConversationId() != null && Boolean.TRUE.equals(request.getReplaceLastTurn()));
-        if (turn.replaced()) rebuildShortTermMemory(conversationId, turn.remainingHistory());
-        shortTermMemory.addMessage(conversationId, "user", request.getMessage());
+        if (turn.replaced() || shortTermMemory.getContext(conversationId).isEmpty()) {
+            rebuildShortTermMemory(conversationId,
+                    conversationMessageService.listMessages(request.getUserId(), conversationId));
+        } else {
+            shortTermMemory.addMessage(conversationId, "user", request.getMessage());
+        }
         return turn;
     }
 
@@ -1000,9 +1095,7 @@ public class ChatService {
      * 根据数据库消息重建 Redis 短期记忆。
      */
     private void rebuildShortTermMemory(Long conversationId, List<Message> messages) {
-        List<String> memoryMessages = messages.stream()
-                .map(this::toMemoryMessage)
-                .toList();
+        List<String> memoryMessages = shortTermMemory.restoreContext(conversationId, messages);
         shortTermMemory.replaceWithMessages(conversationId, memoryMessages);
     }
 
@@ -1010,14 +1103,12 @@ public class ChatService {
      * 把数据库消息转换成短期记忆行。
      */
     private String toMemoryMessage(Message message) {
-        String role = message.getRole() == null ? "user" : message.getRole().trim().toLowerCase(Locale.ROOT);
-        String content = message.getContent() == null ? "" : message.getContent().trim();
-        return role + ": " + content;
+        return ShortTermMemory.toMemoryMessage(message);
     }
 
-    private void persistAssistantMessage(Long conversationId, String userId, String content,
+    private Message persistAssistantMessage(Long conversationId, String userId, String content,
                                          String traceId, Coordinator.SelectedModel selectedModel) {
-        conversationMessageService.appendAssistantMessage(conversationId, userId, content, traceId,
+        return conversationMessageService.appendAssistantMessage(conversationId, userId, content, traceId,
                 selectedModel == null ? null : selectedModel.tier().name(),
                 selectedModel == null ? null : selectedModel.modelName());
     }

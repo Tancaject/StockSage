@@ -2,7 +2,7 @@ package com.stocksage.evolution;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.stocksage.agent.AgentRuntimeConfiguration;
+import com.stocksage.agent.runtime.AgentRuntimeConfiguration;
 import com.stocksage.conversation.ChatPromptAssembler;
 
 import java.util.LinkedHashMap;

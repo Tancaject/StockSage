@@ -35,7 +35,9 @@ public record SkillDefinition(
         ModelTier minimumModelTier,
         SkillPolicy policy,
         List<SkillStep> steps,
-        List<String> fallbackSkillIds
+        List<String> fallbackSkillIds,
+        String method,
+        java.util.Map<String, Object> inputs
 ) {
 
     /** 把清单中的集合复制为不可变快照，避免启动后被外部修改。 */
@@ -43,6 +45,8 @@ public record SkillDefinition(
         routes = routes == null ? Set.of() : Set.copyOf(routes);
         steps = steps == null ? List.of() : List.copyOf(steps);
         fallbackSkillIds = fallbackSkillIds == null ? List.of() : List.copyOf(fallbackSkillIds);
+        method = method == null ? "" : method;
+        inputs = inputs == null ? java.util.Map.of() : java.util.Map.copyOf(inputs);
     }
 
     /** 当前 Skill executor 唯一支持的运行承载方式。 */
@@ -77,12 +81,16 @@ public record SkillDefinition(
     public record SkillStep(
             StepType type,
             String capability,
-            boolean required
+            boolean required,
+            java.util.Map<String, Object> arguments
     ) {
+        public SkillStep {
+            arguments = arguments == null ? java.util.Map.of() : java.util.Map.copyOf(arguments);
+        }
     }
 
     /** Skill 清单允许声明的有限步骤类型。 */
     public enum StepType {
-        CAPABILITY
+        CAPABILITY, TOOL
     }
 }

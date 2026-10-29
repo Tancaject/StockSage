@@ -150,11 +150,6 @@
                   @start-research="sendResearchPrompt"
                 />
               </el-tab-pane>
-              <el-tab-pane label="关联图谱" name="topology">
-                <div class="panel topology-tab-panel">
-                  <RelationGraph v-if="selectedTicker" :ticker="selectedTicker" />
-                </div>
-              </el-tab-pane>
             </el-tabs>
           </div>
         </div>
@@ -184,7 +179,9 @@
 
       <CompareDesk v-else-if="activeTab === 'compare'" />
 
-      <PortfolioDesk v-else-if="activeTab === 'portfolio'" @start-diagnosis="handleDiagnosis" />
+      <PortfolioDesk v-else-if="activeTab === 'portfolio'" />
+
+      <ResearchToolsDesk v-else-if="activeTab === 'tools'" />
 
       <section v-else-if="activeTab === 'reports'" class="workspace-grid report-library-grid">
         <div class="panel report-history-panel">
@@ -334,10 +331,10 @@ import { useResearchRun } from '../lib/useResearchRun.js'
 import WatchlistPanel from '../components/workbench/WatchlistPanel.vue'
 import StockCockpit from '../components/workbench/StockCockpit.vue'
 import LatestBrief from '../components/workbench/LatestBrief.vue'
-import RelationGraph from '../components/workbench/RelationGraph.vue'
 import NewsPanel from '../components/workbench/NewsPanel.vue'
 import CompareDesk from '../components/workbench/CompareDesk.vue'
 import PortfolioDesk from '../components/workbench/PortfolioDesk.vue'
+import ResearchToolsDesk from '../components/workbench/ResearchToolsDesk.vue'
 import WorkbenchRunPanel from '../components/workbench/WorkbenchRunPanel.vue'
 import ReportReviewPanel from '../components/workbench/ReportReviewPanel.vue'
 import PanelEmpty from '../components/common/PanelEmpty.vue'
@@ -346,7 +343,6 @@ import { buildPrimaryNavItems, getReportSurfaceLabels } from '../lib/productUi.j
 import {
   buildEventImpactPrompt,
   buildHealthChecks,
-  buildPortfolioDiagnosisPrompt,
   buildResearchPrompt,
   buildWatchlistFromProfile,
   buildTickerSuggestions,
@@ -419,6 +415,7 @@ let reportDetailRequestId = 0
 
 const tabs = [
   { id: 'portfolio', label: '持仓', icon: markRaw(Wallet) },
+  { id: 'tools', label: '工具 / Skill', icon: markRaw(DataAnalysis) },
   { id: 'research', label: '研究', icon: markRaw(DataAnalysis) },
   { id: 'compare', label: '比较', icon: markRaw(Switch) },
   { id: 'reports', label: '报告库', icon: markRaw(Document) },
@@ -668,16 +665,6 @@ function sendRiskPrompt() {
     title: `${selectedTicker.value} 风险证据复核`,
     ticker: selectedTicker.value,
     action: '风险复核中',
-  })
-}
-
-/** PortfolioDesk start-diagnosis handler */
-function handleDiagnosis({ accountId }) {
-  const prompt = buildPortfolioDiagnosisPrompt(accountId)
-  startWorkbenchRun(prompt, {
-    title: '只读持仓诊断',
-    ticker: selectedTicker.value,
-    action: '持仓诊断中',
   })
 }
 
@@ -1920,13 +1907,6 @@ function handleSearchSelect(raw) {
   box-shadow: var(--shadow-soft);
   padding: 16px;
   margin-bottom: 16px;
-}
-
-.topology-tab-panel {
-  border: 0;
-  box-shadow: none;
-  padding: 0;
-  background: transparent;
 }
 
 @media (max-width: 1080px) {

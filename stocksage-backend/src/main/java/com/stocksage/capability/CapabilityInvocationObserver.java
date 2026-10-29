@@ -1,8 +1,8 @@
 package com.stocksage.capability;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.agent.AgentStep;
-import com.stocksage.model.dto.ChatChunk;
+import com.stocksage.agent.runtime.AgentStep;
+import com.stocksage.conversation.ChatChunk;
 import com.stocksage.trace.TraceEventStore;
 import com.stocksage.trace.TraceService;
 import io.micrometer.core.instrument.Counter;

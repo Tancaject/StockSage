@@ -2,6 +2,10 @@ package com.stocksage.repository;
 
 import com.stocksage.model.entity.Conversation;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,4 +25,17 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
      * @return 指定来源的会话列表；没有记录时为空列表
      */
     List<Conversation> findByUserIdAndOriginOrderByUpdatedAtDesc(String userId, String origin);
+
+    /** 摘要期间若旧分支被删除或其他压缩已提交，不覆盖新的记忆。 */
+    @Modifying
+    @Transactional
+    @Query("""
+            update Conversation c set c.memorySummary = :summary, c.memorySummaryThroughMessageId = :through
+            where c.id = :id
+              and (c.memorySummaryThroughMessageId = :previous
+                   or (c.memorySummaryThroughMessageId is null and :previous is null))
+              and exists (select m.id from Message m where m.id = :through and m.conversationId = :id)
+            """)
+    int saveMemorySummary(@Param("id") Long conversationId, @Param("summary") String summary,
+                          @Param("through") Long throughMessageId, @Param("previous") Long previousMessageId);
 }

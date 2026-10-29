@@ -1,12 +1,12 @@
 package com.stocksage.controller;
 
 import com.stocksage.config.AdminApiInterceptor;
+import com.stocksage.conversation.ChatRequest;
+import com.stocksage.conversation.ChatService;
 import com.stocksage.evolution.EvolutionFailurePool;
 import com.stocksage.identity.RequestIdentity;
-import com.stocksage.model.dto.ChatRequest;
 import com.stocksage.model.entity.Conversation;
 import com.stocksage.model.entity.Message;
-import com.stocksage.conversation.ChatService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

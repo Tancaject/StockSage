@@ -1,0 +1,41 @@
+{
+  "id": "management-commitments",
+  "version": 1,
+  "displayName": "管理层表述变化",
+  "enabled": true,
+  "routes": [
+    "DEEP"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 1,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "compareDisclosures",
+      "required": true,
+      "arguments": {
+        "olderUrl": "$input.olderUrl",
+        "newerUrl": "$input.newerUrl",
+        "filingType": "$input.filingType",
+        "section": "$input.section",
+        "maxChanges": "$input.maxChanges"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "olderUrl": "",
+    "newerUrl": "",
+    "filingType": "DISCLOSURE",
+    "section": "",
+    "maxChanges": 20
+  },
+  "method": "用两份官方材料同一章节定位承诺或指引变化。保留原话和日期，区分新信息、措辞变化、目标兑现与未知；不从文本差异自动认定管理层失信。"
+}

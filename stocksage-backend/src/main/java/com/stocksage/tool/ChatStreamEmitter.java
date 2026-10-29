@@ -1,10 +1,10 @@
 package com.stocksage.tool;
 
-import com.stocksage.research.ResearchDebateService;
+import com.stocksage.debate.ResearchDebateService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.model.dto.ChatChunk;
+import com.stocksage.conversation.ChatChunk;
 import com.stocksage.trace.TraceEventStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

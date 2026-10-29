@@ -2,7 +2,6 @@ package com.stocksage.conversation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.model.dto.ChatChunk;
 import com.stocksage.tool.ChatStreamEmitter;
 import com.stocksage.tool.ToolCallContext;
 import com.stocksage.tool.ToolCallEventBus;

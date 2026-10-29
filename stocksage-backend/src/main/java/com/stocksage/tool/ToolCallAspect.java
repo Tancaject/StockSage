@@ -1,11 +1,11 @@
 package com.stocksage.tool;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stocksage.agent.AgentStep;
-import com.stocksage.model.dto.ChatChunk;
-import com.stocksage.service.KLinePayloadMapper;
+import com.stocksage.agent.runtime.AgentStep;
+import com.stocksage.conversation.ChatChunk;
 import com.stocksage.trace.TraceEventStore;
 import com.stocksage.trace.TraceService;
+import com.stocksage.workbench.KLinePayloadMapper;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;

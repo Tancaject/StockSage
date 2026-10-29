@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stocksage.agent.Coordinator;
 import com.stocksage.agent.ModelTier;
-import com.stocksage.agent.ModelCompletion;
+import com.stocksage.agent.runtime.ModelCompletion;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -33,8 +33,8 @@ public class OrdinaryAnswerReplayService {
     private final Coordinator coordinator;
     private final ObjectMapper objectMapper;
 
-    @Value("${stocksage.chat.prompt.max-text-chars:24000}")
-    private int promptMaxTextChars = 24000;
+    @Value("${stocksage.chat.prompt.max-text-chars:60000}")
+    private int promptMaxTextChars = 60000;
 
     @Value("${stocksage.agent.prefetch.timeout-seconds:120}")
     private long timeoutSeconds = 120;

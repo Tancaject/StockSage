@@ -56,16 +56,6 @@ public record ModelPricingProperties(String providerFingerprint, String version,
         }
     }
 
-    public Map<String, Object> snapshot() {
-        if (rates.isEmpty()) return Map.of("status", "UNCONFIGURED", "basis", BASIS);
-        Map<String, Object> snapshot = metadata();
-        Map<String, Object> modelRates = new TreeMap<>();
-        rates.forEach((model, rate) -> modelRates.put(model, rate.snapshot()));
-        snapshot.put("rates", Collections.unmodifiableMap(modelRates));
-        snapshot.put("status", "CONFIGURED");
-        return Collections.unmodifiableMap(snapshot);
-    }
-
     public Map<String, Object> select(JsonNode provider, String model, Instant at) {
         if (rates.isEmpty()) return unknown("PRICING_UNCONFIGURED");
         String actualProvider = providerFingerprint(provider);

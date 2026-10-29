@@ -1,0 +1,52 @@
+{
+  "id": "macro-transmission",
+  "version": 1,
+  "displayName": "宏观数据与市场联系",
+  "enabled": true,
+  "routes": [
+    "DEEP"
+  ],
+  "executionMode": "INLINE_DETERMINISTIC",
+  "minimumModelTier": "STANDARD",
+  "policy": {
+    "allowedRiskLevels": [
+      "READ_ONLY"
+    ],
+    "maxCapabilityCalls": 2,
+    "maxDurationSeconds": 120
+  },
+  "steps": [
+    {
+      "type": "TOOL",
+      "capability": "getMacroSeries",
+      "required": true,
+      "arguments": {
+        "seriesId": "$input.seriesId",
+        "startDate": "$input.startDate",
+        "endDate": "$input.endDate",
+        "asOf": "$input.asOf"
+      }
+    },
+    {
+      "type": "TOOL",
+      "capability": "getMarketRisk",
+      "required": false,
+      "arguments": {
+        "code": "$input.code",
+        "benchmarkCode": "$input.benchmarkCode",
+        "period": "$input.period"
+      }
+    }
+  ],
+  "fallbackSkillIds": [],
+  "inputs": {
+    "seriesId": "DGS10",
+    "startDate": "2026-09-01",
+    "endDate": "2026-10-01",
+    "asOf": "",
+    "code": "NVDA",
+    "benchmarkCode": "SPY",
+    "period": "1y"
+  },
+  "method": "区分FRED当前修订值与ALFRED历史时点值，注明频率、单位、缺值和观察时间。市场相关性只描述共变，不能证明宏观变量造成股价变化。"
+}
